@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/ /static/css/main.073c9b0a.css",
-    "main.js": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/ /static/js/main.feb5a629.js",
-    "static/js/787.3fe0f5ae.chunk.js": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/ /static/js/787.3fe0f5ae.chunk.js",
-    "static/media/logo.svg": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/ /static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
-    "index.html": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/ /index.html",
-    "main.073c9b0a.css.map": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/ /static/css/main.073c9b0a.css.map",
-    "main.feb5a629.js.map": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/ /static/js/main.feb5a629.js.map",
-    "787.3fe0f5ae.chunk.js.map": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/ /static/js/787.3fe0f5ae.chunk.js.map"
+    "main.css": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/css/main.073c9b0a.css",
+    "main.js": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/js/main.e21f7e3e.js",
+    "static/js/787.3fe0f5ae.chunk.js": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/js/787.3fe0f5ae.chunk.js",
+    "static/media/logo.svg": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/index.html",
+    "main.073c9b0a.css.map": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/css/main.073c9b0a.css.map",
+    "main.e21f7e3e.js.map": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/js/main.e21f7e3e.js.map",
+    "787.3fe0f5ae.chunk.js.map": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/js/787.3fe0f5ae.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.073c9b0a.css",
-    "static/js/main.feb5a629.js"
+    "static/js/main.e21f7e3e.js"
   ]
 }
