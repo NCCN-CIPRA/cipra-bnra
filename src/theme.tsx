@@ -1,10 +1,13 @@
-import { createTheme } from '@mui/material';
-import { purple } from '@mui/material/colors';
+import { createTheme } from "@mui/material";
 
 export default createTheme({
-    palette: {
-        primary: {
-            main: "#F8F8F8",
-        }
-    }
+  palette: {
+    primary: {
+      main: "rgb(0, 164, 154)",
+      light: "#F8F8F8",
+    },
+    secondary: {
+      main: "rgb(0, 164, 154)",
+    },
+  },
 });
