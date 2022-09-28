@@ -130,7 +130,7 @@ export default function AuthenticationPage() {
     if (response.status === 200) {
       const responseText = await response.text();
       const r = responseText.match(
-        /<form method="post" action="\.\/Register.*<\/form>/
+        /<form method="post" action="\.\/Register.*<\/form>/s
       );
 
       const formHtml = r && r[0];
