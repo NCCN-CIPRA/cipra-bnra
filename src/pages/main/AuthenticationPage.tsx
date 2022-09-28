@@ -264,7 +264,12 @@ export default function AuthenticationPage() {
                   value={localStorage.getItem("antiforgerytoken") || ""}
                 />
 
-                <Button type="submit" variant="contained">
+                <Button
+                  id="https://login.windows.net/de192ca2-f778-4bb0-b5f1-5cce5803789a/"
+                  name="provider"
+                  type="submit"
+                  variant="contained"
+                >
                   Login with Office 365
                 </Button>
               </form>
