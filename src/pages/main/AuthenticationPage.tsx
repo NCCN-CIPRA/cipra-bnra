@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Tabs,
   Container,
@@ -43,6 +44,8 @@ function a11yProps(index: number) {
 }
 
 export default function AuthenticationPage() {
+  const navigate = useNavigate();
+
   const [tab, setTab] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,7 +59,6 @@ export default function AuthenticationPage() {
     event: React.SyntheticEvent,
     newValue: number
   ) => {
-    console.log(document.cookie);
     if (newValue === 1) {
       fetch("https://bnra.powerappsportals.com/Account/Login/ExternalLogin", {
         method: "POST",
@@ -77,7 +79,7 @@ export default function AuthenticationPage() {
   };
 
   const handleLogin = async () => {
-    fetch("https://bnra.powerappsportals.com/SignIn", {
+    const response = await fetch("https://bnra.powerappsportals.com/SignIn", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -90,6 +92,12 @@ export default function AuthenticationPage() {
         RememberMe: String(remember),
       }),
     });
+
+    if (response.status === 200) {
+      navigate("/");
+    } else {
+      // TODO: Error
+    }
   };
 
   const handleForgotPassword = async () => {
@@ -120,7 +128,7 @@ export default function AuthenticationPage() {
       }),
     });
 
-    if (response.status === 302) {
+    if (response.status === 200) {
       setRegistering(true);
     } else {
       // TODO: Error
@@ -128,7 +136,7 @@ export default function AuthenticationPage() {
   };
 
   const handleRegister = async () => {
-    fetch(
+    const response = await fetch(
       `https://bnra.powerappsportals.com/Register?invitationCode=${inviteCode}`,
       {
         method: "POST",
@@ -138,11 +146,26 @@ export default function AuthenticationPage() {
         body: new URLSearchParams({
           __RequestVerificationToken:
             localStorage.getItem("antiforgerytoken") || "",
-          Username: email,
-          PasswordValue: password,
+          ctl00$ctl00$ContentContainer$MainContent$MainContent$EmailTextBox:
+            email,
+          ctl00$ctl00$ContentContainer$MainContent$MainContent$UserNameTextBox:
+            email,
+
+          ctl00$ctl00$ContentContainer$MainContent$MainContent$PasswordTextBox:
+            password,
+          ctl00$ctl00$ContentContainer$MainContent$MainContent$ConfirmPasswordTextBox:
+            password,
+          ctl00$ctl00$ContentContainer$MainContent$MainContent$SubmitButton:
+            "Registreren",
         }),
       }
     );
+
+    if (response.status === 200) {
+      navigate("/");
+    } else {
+      // TODO: Error
+    }
   };
 
   return (
