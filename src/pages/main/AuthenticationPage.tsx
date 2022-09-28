@@ -114,18 +114,21 @@ export default function AuthenticationPage() {
   };
 
   const handleRegisterStart = async () => {
-    const response = await fetch("https://bnra.powerappsportals.com/Register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        __RequestVerificationToken:
-          localStorage.getItem("antiforgerytoken") || "",
-        InvitationCode: inviteCode,
-        RedeemByLogin: "false",
-      }),
-    });
+    const response = await fetch(
+      "https://bnra.powerappsportals.com/Register?returnUrl=/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          __RequestVerificationToken:
+            localStorage.getItem("antiforgerytoken") || "",
+          InvitationCode: inviteCode,
+          RedeemByLogin: "false",
+        }),
+      }
+    );
 
     if (response.status === 200) {
       const responseText = await response.text();
@@ -151,10 +154,7 @@ export default function AuthenticationPage() {
       .getElementById("ConfirmPasswordTextBox")!
       .setAttribute("value", password2);
 
-    document
-      .getElementById("registration-form")!
-      .getElementsByTagName("form")[0]
-      .submit();
+    document.getElementById("SubmitButton")!.click();
   };
 
   return (
