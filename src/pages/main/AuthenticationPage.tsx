@@ -10,6 +10,8 @@ import {
   Stack,
   Button,
   CssBaseline,
+  Alert,
+  AlertTitle,
 } from "@mui/material";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
@@ -87,17 +89,26 @@ export default function AuthenticationPage() {
   };
 
   const handleForgotPassword = async () => {
-    fetch("https://bnra.powerappsportals.com/ForgotPassword", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        __RequestVerificationToken:
-          localStorage.getItem("antiforgerytoken") || "",
-        Email: email,
-      }),
-    });
+    const response = await fetch(
+      "https://bnra.powerappsportals.com/ForgotPassword",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          __RequestVerificationToken:
+            localStorage.getItem("antiforgerytoken") || "",
+          Email: email,
+        }),
+      }
+    );
+
+    if (response.status === 200) {
+      setResetPassword(false);
+    } else {
+      // TODO: Error
+    }
   };
 
   const handleRegisterStart = async () => {
@@ -204,6 +215,10 @@ export default function AuthenticationPage() {
               </>
             ) : (
               <>
+                <Alert severity="info">
+                  <AlertTitle>Password Reset Requested</AlertTitle>
+                  Please check your email to reset your password.
+                </Alert>
                 <Box
                   sx={{
                     display: "flex",
@@ -265,7 +280,7 @@ export default function AuthenticationPage() {
                 />
 
                 <Button
-                  id="https://login.windows.net/de192ca2-f778-4bb0-b5f1-5cce5803789a/"
+                  value="https://login.windows.net/de192ca2-f778-4bb0-b5f1-5cce5803789a/"
                   name="provider"
                   type="submit"
                   variant="contained"
