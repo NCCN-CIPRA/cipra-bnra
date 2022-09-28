@@ -138,7 +138,7 @@ export default function AuthenticationPage() {
 
       const formHtml =
         r &&
-        r[0].replace('action="./Register"', 'action="/Account/Login/Register"');
+        r[0].replace('action="./Register', 'action="/Account/Login/Register');
 
       setRegistrationForm(formHtml || "");
 
