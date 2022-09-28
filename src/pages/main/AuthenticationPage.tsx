@@ -154,6 +154,12 @@ export default function AuthenticationPage() {
             password,
           ctl00$ctl00$ContentContainer$MainContent$MainContent$SubmitButton:
             "Registreren",
+          __EVENTTARGET: "",
+          __EVENTARGUMENT: "",
+          __VIEWSTATE:
+            "FswsVIzb2EVuOq0qw7rclKoQXvY3hQGMrk6mymoI4oWIrk5gUdw5DGMdmzWhcVymHk%2FV5GQ10OUppZEWcYTcVWbTNsYWJEf8x%2F7hPYz1KyArPqJup%2BYMyjtnGwATUC7cmHprMX5ifrzkkMJ5xMHQxecbMD6fHCNsJ6MnofIcnmC%2F2pqVn3ZwiyuyNrTdZm3PVjbk6Si1KOy8zoxAF91gsbTENQ3AyZLs4973wgm48FAi9unYl0Nx30DePobURd2HyipCDYaFcJ4%2BGN6C%2F0y1UJhkvgj9p4IlfBYg%2FWol1sSkX95M2ck6UAj0nW8Xjk44DnCECFo0dClUyeNlOzu6kA%3D%3D",
+          __VIEWSTATEGENERATOR: "82F9452B",
+          __VIEWSTATEENCRYPTED: "",
         }),
       }
     );
