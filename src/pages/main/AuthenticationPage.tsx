@@ -59,23 +59,9 @@ export default function AuthenticationPage() {
     event: React.SyntheticEvent,
     newValue: number
   ) => {
-    if (newValue === 1) {
-      fetch("https://bnra.powerappsportals.com/Account/Login/ExternalLogin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          __RequestVerificationToken:
-            localStorage.getItem("antiforgerytoken") || "",
-          provider:
-            "https://login.windows.net/de192ca2-f778-4bb0-b5f1-5cce5803789a/",
-        }),
-      });
-    } else {
-      setResetPassword(false);
-      setTab(newValue);
-    }
+    setResetPassword(false);
+    setRegistering(false);
+    setTab(newValue);
   };
 
   const handleLogin = async () => {
@@ -205,7 +191,7 @@ export default function AuthenticationPage() {
                   />
                 </Box>
                 <Stack spacing={2} direction="row" mt={4}>
-                  <Button variant="contained" onClick={handleRegister}>
+                  <Button variant="contained" onClick={handleForgotPassword}>
                     Request Password Reset
                   </Button>
                   <Button
@@ -265,6 +251,24 @@ export default function AuthenticationPage() {
                 </Stack>
               </>
             )}
+          </TabPanel>
+          <TabPanel value={tab} index={1}>
+            <Stack spacing={2} direction="row" mt={2}>
+              <form
+                action="/Account/Login/ExternalLogin?ReturnUrl=%2F"
+                method="post"
+              >
+                <input
+                  name="__RequestVerificationToken"
+                  type="hidden"
+                  value={localStorage.getItem("antiforgerytoken") || ""}
+                />
+
+                <Button type="submit" variant="contained">
+                  Login with Office 365
+                </Button>
+              </form>
+            </Stack>
           </TabPanel>
           <TabPanel value={tab} index={2}>
             {registering ? (
