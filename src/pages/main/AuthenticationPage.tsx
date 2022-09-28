@@ -51,6 +51,7 @@ export default function AuthenticationPage() {
     event: React.SyntheticEvent,
     newValue: number
   ) => {
+    console.log(document.cookie);
     if (newValue === 1) {
       fetch("https://bnra.powerappsportals.com/Account/Login/ExternalLogin", {
         method: "POST",
@@ -87,6 +88,23 @@ export default function AuthenticationPage() {
         Username: email,
         PasswordValue: password,
         RememberMe: String(remember),
+      }),
+    });
+  };
+
+  const handleForgotPassword = async () => {
+    fetch("https://bnra.powerappsportals.com/ForgotPassword", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        __RequestVerificationToken:
+          document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("__RequestVerificationToken="))
+            ?.split("=")[1] || "",
+        Email: email,
       }),
     });
   };
