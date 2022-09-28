@@ -58,6 +58,11 @@ export default function AuthenticationPage() {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
+          __RequestVerificationToken:
+            document.cookie
+              .split("; ")
+              .find((row) => row.startsWith("__RequestVerificationToken="))
+              ?.split("=")[1] || "",
           provider:
             "https://login.windows.net/de192ca2-f778-4bb0-b5f1-5cce5803789a/",
         }),
@@ -74,6 +79,11 @@ export default function AuthenticationPage() {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
+        __RequestVerificationToken:
+          document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("__RequestVerificationToken="))
+            ?.split("=")[1] || "",
         Username: email,
         PasswordValue: password,
         RememberMe: String(remember),
