@@ -46,9 +46,11 @@ export default function AuthenticationPage() {
   const [tab, setTab] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
   const [remember, setRemember] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
   const [resetPassword, setResetPassword] = useState(false);
+  const [registering, setRegistering] = useState(false);
 
   const handleChangeTab = async (
     event: React.SyntheticEvent,
@@ -104,23 +106,43 @@ export default function AuthenticationPage() {
     });
   };
 
-  const handleRegister = async () => {
-    fetch("https://bnra.powerappsportals.com/SignIn", {
+  const handleRegisterStart = async () => {
+    const response = await fetch("https://bnra.powerappsportals.com/Register", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
         __RequestVerificationToken:
-          document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("__RequestVerificationToken="))
-            ?.split("=")[1] || "",
-        Username: email,
-        PasswordValue: password,
-        RememberMe: String(remember),
+          localStorage.getItem("antiforgerytoken") || "",
+        InvitationCode: inviteCode,
+        RedeemByLogin: "false",
       }),
     });
+
+    if (response.status === 302) {
+      setRegistering(true);
+    } else {
+      // TODO: Error
+    }
+  };
+
+  const handleRegister = async () => {
+    fetch(
+      `https://bnra.powerappsportals.com/Register?invitationCode=${inviteCode}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          __RequestVerificationToken:
+            localStorage.getItem("antiforgerytoken") || "",
+          Username: email,
+          PasswordValue: password,
+        }),
+      }
+    );
   };
 
   return (
@@ -222,27 +244,75 @@ export default function AuthenticationPage() {
             )}
           </TabPanel>
           <TabPanel value={tab} index={2}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <TextField
-                id="outlined-email-input"
-                label="Invitation Code"
-                type="invitationCode"
-                fullWidth
-                sx={{ my: 2 }}
-                value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value)}
-              />
-            </Box>
-            <Stack spacing={2} direction="row" mt={4}>
-              <Button variant="contained" onClick={handleRegister}>
-                Register
-              </Button>
-            </Stack>
+            {registering ? (
+              <>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <TextField
+                    id="outlined-email-input"
+                    label="Email"
+                    type="email"
+                    autoComplete="current-email"
+                    fullWidth
+                    sx={{ my: 2 }}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <TextField
+                    id="outlined-password-input"
+                    label="Password"
+                    type="password"
+                    autoComplete="current-password"
+                    fullWidth
+                    sx={{ my: 2 }}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <TextField
+                    id="outlined-password-input"
+                    label="Repeat Password"
+                    type="password"
+                    fullWidth
+                    sx={{ my: 2 }}
+                    value={password2}
+                    onChange={(e) => setPassword2(e.target.value)}
+                  />
+                </Box>
+                <Stack spacing={2} direction="row" mt={4}>
+                  <Button variant="contained" onClick={handleRegister}>
+                    Register
+                  </Button>
+                </Stack>
+              </>
+            ) : (
+              <>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <TextField
+                    id="outlined-email-input"
+                    label="Invitation Code"
+                    type="invitationCode"
+                    fullWidth
+                    sx={{ my: 2 }}
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value)}
+                  />
+                </Box>
+                <Stack spacing={2} direction="row" mt={4}>
+                  <Button variant="contained" onClick={handleRegisterStart}>
+                    Register
+                  </Button>
+                </Stack>
+              </>
+            )}
           </TabPanel>
         </Box>
       </Container>
