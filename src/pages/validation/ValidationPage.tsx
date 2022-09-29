@@ -56,6 +56,38 @@ export default function ValidationPage() {
     getRiskFile();
   }, []);
 
+  useEffect(() => {
+    const getValidation = async function () {
+      try {
+        setTimeout(async () => {
+          const response = await fetch(
+            `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations`,
+            {
+              method: "POST",
+              headers: {
+                Authorization:
+                  "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQwNDQzNiwibmJmIjoxNjY0NDA0NDM3LCJleHAiOjE2NjQ0MDUzMzcsImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.vOXs1pF9N8kBmZWPobhiVKkiCtep5mmGV8wCKcSU9Fj2kNkhExGPt7AuaFX1vN8IM4sD0HL9gOX2hJNDOt9bq8mTigI0fH3rnYzmwOwUHgaySAdi2j5Z7wIfHgcgBo3S--3-7T9jQ9RzBzfeRIRy3G_sgPpQ2t_J66ad7TGBBs7ZpclXnPHJcnk1SqfsIkOa4qqy2atbeope9QbxcKO8VVpXYuPcdVyG1Tk5NU5Bp_SDsKzgYrZkuj9Do4q97hIGmIiI3ZIRq2D0fuqMhpmHSlbqJTSWPHwo05reQKxyX4UE4ow5IP9XmV93NInxMuZm7UvmAMdBFCF7L0DBEmdVJQ",
+              },
+              mode: "no-cors",
+              body: new URLSearchParams({
+                __RequestVerificationToken:
+                  localStorage.getItem("antiforgerytoken") || "",
+              }),
+            }
+          );
+
+          const responseJson = await response.json();
+
+          console.log(responseJson);
+        }, 5000);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    getValidation();
+  }, []);
+
   if (!riskFile) return null;
 
   return (
