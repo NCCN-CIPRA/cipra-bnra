@@ -3,6 +3,7 @@ import { createHashRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
 import AuthenticationPage from "./pages/main/AuthenticationPage";
 import HomePage from "./pages/main/HomePage";
+import LocalAPI from "./pages/main/LocalAPI";
 import ValidationIntroPage from "./pages/validation/ValidationIntroPage";
 import ValidationPage from "./pages/validation/ValidationPage";
 
@@ -41,6 +42,12 @@ function App() {
     {
       path: "/validation/:hazard_id",
       element: <ValidationPage />,
+    },
+
+    // DEV ONLY
+    {
+      path: "/__dev/localapi",
+      element: <LocalAPI />,
     },
   ]);
 
