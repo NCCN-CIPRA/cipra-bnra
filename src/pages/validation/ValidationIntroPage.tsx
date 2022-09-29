@@ -35,11 +35,8 @@ export default function ValidationIntroPage() {
   // }, []);
 
   useEffect(() => {
-    const iframe: HTMLIFrameElement | null = document.getElementById(
-      "local-api"
-    ) as HTMLIFrameElement;
-
-    iframe.contentWindow?.postMessage(
+    // @ts-expect-error
+    window.frames.localApi.postMessage(
       {
         url: "https://bnra.powerappsportals.com/_api/cr4de_riskfileses",
         options: {
@@ -63,7 +60,10 @@ export default function ValidationIntroPage() {
 
   return (
     <>
-      <iframe id="local-api" src="https://bnra.powerappsportals.com/" />
+      <iframe
+        name="localApi"
+        src="https://bnra.powerappsportals.com/#/__dev/localapi"
+      />
       <CssBaseline />
       <TitleBar title="BNRA 2023 - 2026 Risk Identification - Validation" />
       <Container>

@@ -2,11 +2,18 @@ import { useEffect } from "react";
 
 export default function LocalAPI() {
   useEffect(() => {
-    window.onmessage = async function (e) {
+    const listener = async function (e: any) {
       const response = await fetch(e.data.url, e.data.options);
 
-      window.top?.postMessage(await response.text(), "*");
+      console.log(e.data);
+      console.log(e.source);
+
+      e.source?.postMessage(await response.text());
     };
+
+    window.addEventListener("message", listener);
+
+    return () => window.removeEventListener("message", listener);
   }, []);
 
   return <>LOCAL API</>;
