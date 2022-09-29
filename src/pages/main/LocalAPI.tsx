@@ -13,7 +13,6 @@ export default function LocalAPI() {
         parent?.postMessage(
           {
             status: response.status,
-            headers: response.headers,
             body: await response.text(),
             requestData: data.requestData,
           },
