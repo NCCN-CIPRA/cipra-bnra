@@ -28,7 +28,7 @@ root.render(
     <ThemeProvider theme={theme}>
       <App />
     </ThemeProvider>
-    {!window.location.href.match(/__dev\/localApi/) && (
+    {!window.location.href.match(/__dev\/localapi/i) && (
       <iframe
         title="localApi"
         name="localApi"
