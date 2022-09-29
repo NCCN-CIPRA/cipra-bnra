@@ -22,7 +22,7 @@ export default function TitleBar({ title }: { title: string }) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {title} HAHAH
+            {title}
           </Typography>
           <Button color="inherit" component={Link} to="/auth">
             Login

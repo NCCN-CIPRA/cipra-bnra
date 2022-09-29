@@ -12,6 +12,12 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
 import "devextreme/dist/css/dx.light.css";
+import patchFetch from "./functions/devFetch";
+
+// Override fetch in dev environment
+if (window.location.href.match(/localhost:3000/)) {
+  patchFetch();
+}
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -22,6 +28,14 @@ root.render(
     <ThemeProvider theme={theme}>
       <App />
     </ThemeProvider>
+    {!window.location.href.match(/__dev\/localApi/) && (
+      <iframe
+        title="localApi"
+        name="localApi"
+        src="https://bnra.powerappsportals.com/#/__dev/localapi"
+        style={{ display: "none" }}
+      />
+    )}
   </React.StrictMode>
 );
 
