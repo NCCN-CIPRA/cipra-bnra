@@ -34,10 +34,11 @@ export default function ValidationIntroPage() {
   //   getRiskFiles();
   // }, []);
 
-  useEffect(() => {
+  const sendMessage = function () {
+    console.log("sending");
     // @ts-expect-error
     window.frames.localApi.postMessage(
-      {
+      JSON.stringify({
         url: "https://bnra.powerappsportals.com/_api/cr4de_riskfileses",
         options: {
           headers: {
@@ -49,20 +50,18 @@ export default function ValidationIntroPage() {
             Accept: "application/json",
           },
         },
-      },
+      }),
+      // "BIEPBOEP",
       "*"
     );
-
-    window.onmessage = function (e) {
-      console.log(e);
-    };
-  }, []);
+  };
 
   return (
     <>
       <iframe
         name="localApi"
-        src="https://bnra.powerappsportals.com/#/__dev/localapi"
+        src="http://localhost:3000/#/__dev/localapi"
+        onLoad={sendMessage}
       />
       <CssBaseline />
       <TitleBar title="BNRA 2023 - 2026 Risk Identification - Validation" />
