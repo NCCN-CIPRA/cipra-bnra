@@ -4,6 +4,7 @@ export default function LocalAPI() {
   useEffect(() => {
     const listener = async function (e: any) {
       try {
+        console.log(e.data);
         const data = JSON.parse(e.data);
 
         const response = await fetch(data.url, data.options);
@@ -20,6 +21,7 @@ export default function LocalAPI() {
         );
       } catch (e) {
         // empty by design
+        console.log(e);
       }
     };
 

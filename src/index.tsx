@@ -34,6 +34,11 @@ root.render(
         name="localApi"
         src="https://bnra.powerappsportals.com/#/__dev/localapi"
         style={{ display: "none" }}
+        onLoad={() => {
+          // @ts-expect-error
+          window.fetch.loaded = true;
+          console.log("Loaded");
+        }}
       />
     )}
   </React.StrictMode>

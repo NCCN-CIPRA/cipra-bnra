@@ -23,9 +23,9 @@ export default function ValidationIntroPage() {
           }
         );
 
-        const responseJson = await response.json();
+        // const responseJson = await response.json();
 
-        setRiskFiles(responseJson.value);
+        // setRiskFiles(responseJson.value);
       } catch (e) {
         console.log(e);
       }
