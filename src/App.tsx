@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
 import AuthenticationPage from "./pages/main/AuthenticationPage";
+import DataMigrator from "./pages/main/DataMigrator";
 import HomePage from "./pages/main/HomePage";
 import LocalAPI from "./pages/main/LocalAPI";
 import ValidationIntroPage from "./pages/validation/ValidationIntroPage";
@@ -48,6 +49,10 @@ function App() {
     {
       path: "/__dev/localapi",
       element: <LocalAPI />,
+    },
+    {
+      path: "/__dev/migrate",
+      element: <DataMigrator />,
     },
   ]);
 

@@ -26,7 +26,7 @@ export default function ValidationIntroPage() {
         );
 
         const responseJson = await response.json();
-        console.log(responseJson);
+        
         setValidations(responseJson.value);
       } catch (e) {
         console.log(e);

@@ -44,14 +44,36 @@ async function devFetch(
         window.fetch.loaded ? 0 : 1000
       );
 
-      const interval = setInterval(() => {
+      const interval = setInterval(async () => {
         if (responses[requestId]) {
           clearInterval(interval);
           const response = responses[requestId];
 
           delete responses[requestId];
 
+          if (response.status === 403) {
+            const errorJson = await response.json();
+
+            if (errorJson.error && errorJson.error.code === "90040120") {
+              // Not logged in in Iframe
+              document.getElementById("loginWindow")!.style.display = "block";
+
+              const testingInterval = setInterval(async () => {
+                const testResponse = await devFetch(input, init);
+
+                if (testResponse.status !== 403) {
+                  clearInterval(testingInterval);
+                  document.getElementById("loginWindow")!.style.display = "none";
+
+
+                  return resolve(testResponse)
+                }
+              }, 5000)
+            }
+          } else {
+
           return resolve(response);
+          }
         }
       }, 500);
     });

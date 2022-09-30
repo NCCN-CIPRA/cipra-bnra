@@ -4,7 +4,8 @@ export default function LocalAPI() {
   useEffect(() => {
     const listener = async function (e: any) {
       try {
-        console.log(e.data);
+        // console.log needed to buffer data???
+        // console.log(e.data);
         const data = JSON.parse(e.data);
 
         const response = await fetch(data.url, data.options);

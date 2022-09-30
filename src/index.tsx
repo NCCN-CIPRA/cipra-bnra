@@ -29,7 +29,9 @@ root.render(
       <App />
     </ThemeProvider>
     {!window.location.href.match(/__dev\/localapi/i) && (
+      <>
       <iframe
+        id="localApi"
         title="localApi"
         name="localApi"
         src="https://bnra.powerappsportals.com/#/__dev/localapi"
@@ -39,6 +41,12 @@ root.render(
           window.fetch.loaded = true;
         }}
       />
+      <iframe
+        id="loginWindow"
+        src="https://bnra.powerappsportals.com/#/auth"
+        style={{ display: "none", position: "absolute", width: "100vw", height: "100vh", top: 0, zIndex: 1000, backgroundColor: "white" }}
+      />
+      </>
     )}
   </React.StrictMode>
 );

@@ -30,8 +30,8 @@ export default function TransferList({
 }: {
   choicesLabel: string;
   chosenLabel: string;
-  choices?: any[];
-  chosen?: any[];
+  choices: any[];
+  chosen: any[];
 }) {
   const [checked, setChecked] = React.useState<readonly number[]>([]);
   const [left, setLeft] = React.useState<readonly number[]>([0, 1, 2, 3]);
@@ -131,7 +131,7 @@ export default function TransferList({
       alignItems="center"
       sx={{ display: "flex", flexDirection: "row" }}
     >
-      {customList(choicesLabel, left)}
+      {customList(choicesLabel, choices)}
       <Box
         alignItems="center"
         sx={{ mx: 2, display: "flex", flexDirection: "column" }}
@@ -157,7 +157,7 @@ export default function TransferList({
           &lt;
         </Button>
       </Box>
-      {customList(chosenLabel, right)}
+      {customList(chosenLabel, chosen)}
     </Box>
   );
 }
