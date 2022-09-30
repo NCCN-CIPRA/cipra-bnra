@@ -40,7 +40,7 @@ function App() {
       element: <ValidationIntroPage />,
     },
     {
-      path: "/validation/:hazard_id",
+      path: "/validation/:validation_id",
       element: <ValidationPage />,
     },
 

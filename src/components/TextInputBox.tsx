@@ -1,3 +1,4 @@
+import { useRef, useEffect } from "react";
 import HtmlEditor, { Toolbar, Item } from "devextreme-react/html-editor";
 
 const sizeValues = ["8pt", "10pt", "12pt", "14pt", "18pt", "24pt", "36pt"];
@@ -13,9 +14,31 @@ const fontValues = [
 ];
 const headerValues = [false, 1, 2, 3, 4, 5];
 
-export default function TextInputBox() {
+export default function TextInputBox({
+  initialValue,
+  setValue,
+}: {
+  initialValue: string;
+  setValue: (value: string) => void;
+}) {
+  const valueRef = useRef(initialValue);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setValue(valueRef.current);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <HtmlEditor height="300px" defaultValue={""}>
+    <HtmlEditor
+      height="300px"
+      defaultValue={initialValue}
+      onValueChanged={(e) => {
+        valueRef.current = e.value;
+      }}
+    >
       <Toolbar multiline>
         <Item name="undo" />
         <Item name="redo" />

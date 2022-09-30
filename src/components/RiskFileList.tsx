@@ -9,11 +9,13 @@ import Paper from "@mui/material/Paper";
 
 export default function RiskFileList({
   riskFiles,
+  onClick,
 }: {
   riskFiles: any[] | null;
+  onClick: (riskFile: any) => Promise<void>;
 }) {
   if (!riskFiles) return null;
-
+  console.log(riskFiles);
   return (
     <>
       <Paper></Paper>
@@ -21,10 +23,7 @@ export default function RiskFileList({
         <List sx={{ width: "100%", bgcolor: "background.paper", mb: 10 }}>
           {riskFiles.map((rf) => (
             <ListItem key={rf.cr4de_id} disablePadding>
-              <ListItemButton
-                component={Link}
-                to={`/validation/${rf.cr4de_riskfilesid}`}
-              >
+              <ListItemButton onClick={(e) => onClick(rf)}>
                 <ListItemAvatar>
                   <Avatar sx={{ fontSize: 13 }}>{rf.cr4de_hazard_id}</Avatar>
                 </ListItemAvatar>

@@ -1,31 +1,33 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Container, CssBaseline, Typography } from "@mui/material";
 import RiskFileList from "../../components/RiskFileList";
 import TitleBar from "../../components/TitleBar";
 
 export default function ValidationIntroPage() {
-  const [riskFiles, setRiskFiles] = useState<any>(null);
+  const navigate = useNavigate();
+  const [validations, setValidations] = useState<any>(null);
 
   useEffect(() => {
     const getRiskFiles = async function () {
       try {
         const response = await fetch(
-          "https://bnra.powerappsportals.com/_api/cr4de_riskfileses",
+          `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations?$expand=cr4de_RiskFile`,
           {
+            method: "GET",
             headers: {
               Authorization:
-                "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQ0MDY0NywibmJmIjoxNjY0NDQwNjQ4LCJleHAiOjE2NjQ0NDE1NDgsImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.xaCkc7KJLU4UYsTaXIt4TVw0B8ymzGCgPgLLEn6BE5tzwtaxKbvQOUC-Y6P7thgWmI56FTpR4wwr-Cu2Floq5xbHcHhKvbV0Om7vnZjwUI4WEpOu-cltr101b3_3W-bmwKilXVFLP-qg9_NHEvtZNTlCf5Rt3GbYiDFl8w8zQQgwd0rDg84DD2znPdnoaQ47lC-OR7xjET5LegiBtIneFW7oezCKDlOYHx4EET66Y_vEmOmNWyCb6BcnxAVcAwpe3nwmK1ZitkqkNgpFVpoN_O-gg2lQIRzd96tVn28E6Uo_YrU96tP4cISvaGzr4L8pbFQnxn-CZi18EQ-NGYmDIg",
+                "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQzMjMxOCwibmJmIjoxNjY0NDMyMzE5LCJleHAiOjE2NjQ0MzMyMTksImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.DSkyEOprtyUJ6juSh5fp1wRUTuH29GQpvLKpGS-rAJfOO98ZQmhzCkdj4zbq3BEH_XJDEJ2wIlvuNscu1HhfV55A37im1Lt0R-Im3rikctYX4mcVRlCCQJ00NA_KUJs5EPigqBZjo7FY9o1xjVuhXo1mOTs3Ozo18inuX0i5mWcuwEQ4oUPxS__NC4ARKTKfGJ4SHcxC3cdQfCLsCfi--AKfYZh5It4YXnuLnttNkRcFDD08lFBBlVKMOprwCcXJNCvzXEbJx9l9silBz_xWYUjed2PIY0ob_ErUiAj6uvMfJDtRu9cgj0pj2EEXyugYFASI2SU9lpz5_yzgFr5c_w",
               __RequestVerificationToken:
                 localStorage.getItem("antiforgerytoken") || "",
               "Content-Type": "application/json",
-              Accept: "application/json",
             },
           }
         );
 
-        // const responseJson = await response.json();
-
-        // setRiskFiles(responseJson.value);
+        const responseJson = await response.json();
+        console.log(responseJson);
+        setValidations(responseJson.value);
       } catch (e) {
         console.log(e);
       }
@@ -75,7 +77,22 @@ export default function ValidationIntroPage() {
           </Typography>
         </Box>
 
-        <RiskFileList riskFiles={riskFiles} />
+        <RiskFileList
+          riskFiles={
+            validations && validations.map((v: any) => v.cr4de_RiskFile)
+          }
+          onClick={async (riskFile: any) => {
+            navigate(
+              `/validation/${
+                validations.find(
+                  (v: any) =>
+                    v.cr4de_RiskFile.cr4de_hazard_id ===
+                    riskFile.cr4de_hazard_id
+                ).cr4de_bnravalidationid
+              }`
+            );
+          }}
+        />
       </Container>
     </>
   );

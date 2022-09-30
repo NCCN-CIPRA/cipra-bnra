@@ -14,6 +14,7 @@ import {
   TableHead,
   Button,
 } from "@mui/material";
+import LoadingButton from "@mui/lab/LoadingButton";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
 import TitleBar from "../../components/TitleBar";
@@ -22,62 +23,63 @@ import { Link as RouterLink } from "react-router-dom";
 import TextInputBox from "../../components/TextInputBox";
 import tableToJson from "../../functions/tableToJson";
 import TransferList from "../../components/TransferList";
+import SaveIcon from "@mui/icons-material/Save";
 
 export default function ValidationPage() {
   const params = useParams();
 
+  const [validation, setValidation] = useState<any>(null);
   const [riskFile, setRiskFile] = useState<any>(null);
 
-  useEffect(() => {
-    const getRiskFile = async function () {
-      try {
-        const response = await fetch(
-          `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${params.hazard_id})`
-        );
+  const [definition, setDefinition] = useState("");
+  const [historicalEvents, setHistoricalEvents] = useState("");
+  const [parameters, setParameters] = useState("");
+  const [scenarios, setScenarios] = useState("");
+  const [causes, setCauses] = useState("");
+  const [effects, setEffects] = useState("");
+  const [catalysing, setCatalysing] = useState("");
+  const [horizon, setHorizon] = useState("");
 
-        const responseJson = await response.json();
-
-        setRiskFile({
-          ...responseJson,
-          intensity_parameters: tableToJson(
-            responseJson.cr4de_intensity_parameters
-          ),
-          scenarios: {
-            considerable: tableToJson(responseJson.cr4de_scenario_considerable),
-            major: tableToJson(responseJson.cr4de_scenario_major),
-            extreme: tableToJson(responseJson.cr4de_scenario_extreme),
-          },
-        });
-      } catch (e) {
-        console.log(e);
-      }
-    };
-
-    getRiskFile();
-  }, []);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const getValidation = async function () {
       try {
-        setTimeout(async () => {
-          const response = await fetch(
-            `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations`,
-            {
-              method: "GET",
-              headers: {
-                Authorization:
-                  "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQzMjMxOCwibmJmIjoxNjY0NDMyMzE5LCJleHAiOjE2NjQ0MzMyMTksImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.DSkyEOprtyUJ6juSh5fp1wRUTuH29GQpvLKpGS-rAJfOO98ZQmhzCkdj4zbq3BEH_XJDEJ2wIlvuNscu1HhfV55A37im1Lt0R-Im3rikctYX4mcVRlCCQJ00NA_KUJs5EPigqBZjo7FY9o1xjVuhXo1mOTs3Ozo18inuX0i5mWcuwEQ4oUPxS__NC4ARKTKfGJ4SHcxC3cdQfCLsCfi--AKfYZh5It4YXnuLnttNkRcFDD08lFBBlVKMOprwCcXJNCvzXEbJx9l9silBz_xWYUjed2PIY0ob_ErUiAj6uvMfJDtRu9cgj0pj2EEXyugYFASI2SU9lpz5_yzgFr5c_w",
-                __RequestVerificationToken:
-                  localStorage.getItem("antiforgerytoken") || "",
-                "Content-Type": "application/json",
-              },
-            }
-          );
+        const response = await fetch(
+          `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${params.validation_id})?$expand=cr4de_RiskFile`,
+          {
+            method: "GET",
+            headers: {
+              Authorization:
+                "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQzMjMxOCwibmJmIjoxNjY0NDMyMzE5LCJleHAiOjE2NjQ0MzMyMTksImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.DSkyEOprtyUJ6juSh5fp1wRUTuH29GQpvLKpGS-rAJfOO98ZQmhzCkdj4zbq3BEH_XJDEJ2wIlvuNscu1HhfV55A37im1Lt0R-Im3rikctYX4mcVRlCCQJ00NA_KUJs5EPigqBZjo7FY9o1xjVuhXo1mOTs3Ozo18inuX0i5mWcuwEQ4oUPxS__NC4ARKTKfGJ4SHcxC3cdQfCLsCfi--AKfYZh5It4YXnuLnttNkRcFDD08lFBBlVKMOprwCcXJNCvzXEbJx9l9silBz_xWYUjed2PIY0ob_ErUiAj6uvMfJDtRu9cgj0pj2EEXyugYFASI2SU9lpz5_yzgFr5c_w",
+              __RequestVerificationToken:
+                localStorage.getItem("antiforgerytoken") || "",
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-          const responseJson = await response.json();
+        const responseJson = await response.json();
+        console.log(responseJson);
+        setValidation(responseJson);
 
-          console.log(responseJson);
-        }, 500);
+        setRiskFile({
+          ...responseJson.cr4de_RiskFile,
+          intensity_parameters: tableToJson(
+            responseJson.cr4de_RiskFile.cr4de_intensity_parameters
+          ),
+          scenarios: {
+            considerable: tableToJson(
+              responseJson.cr4de_RiskFile.cr4de_scenario_considerable
+            ),
+            major: tableToJson(
+              responseJson.cr4de_RiskFile.cr4de_scenario_major
+            ),
+            extreme: tableToJson(
+              responseJson.cr4de_RiskFile.cr4de_scenario_extreme
+            ),
+          },
+        });
       } catch (e) {
         console.log(e);
       }
@@ -86,7 +88,63 @@ export default function ValidationPage() {
     getValidation();
   }, []);
 
-  if (!riskFile) return null;
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (Object.keys(fieldsToUpdate).length <= 0) return;
+
+      setSaving(true);
+
+      try {
+        await updateValidation();
+      } catch (e) {
+        // Empty by design
+      }
+
+      setSaving(false);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!validation || !riskFile) return null;
+
+  const fieldsToUpdate: any = {};
+
+  if (definition !== validation.cr4de_definition_feedback)
+    fieldsToUpdate.cr4de_definition_feedback = definition;
+  if (historicalEvents !== validation.cr4de_historical_events_feedback)
+    fieldsToUpdate.cr4de_historical_events_feedback = historicalEvents;
+  if (parameters !== validation.cr4de_intensity_parameters_feedback)
+    fieldsToUpdate.cr4de_intensity_parameters_feedback = parameters;
+  if (scenarios !== validation.cr4de_scenarios_feedback)
+    fieldsToUpdate.cr4de_scenarios_feedback = scenarios;
+  if (causes !== validation.cr4de_causes_feedback)
+    fieldsToUpdate.cr4de_causes_feedback = causes;
+  if (effects !== validation.cr4de_effects_feedback)
+    fieldsToUpdate.cr4de_effects_feedback = effects;
+  if (catalysing !== validation.cr4de_catalysing_effects_feedback)
+    fieldsToUpdate.cr4de_catalysing_effects_feedback = catalysing;
+  console.log(fieldsToUpdate);
+  const updateValidation = async () => {
+    if (!validation) return;
+
+    if (Object.keys(fieldsToUpdate).length <= 0) return;
+
+    return fetch(
+      `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${params.validation_id})`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization:
+            "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQzMjMxOCwibmJmIjoxNjY0NDMyMzE5LCJleHAiOjE2NjQ0MzMyMTksImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.DSkyEOprtyUJ6juSh5fp1wRUTuH29GQpvLKpGS-rAJfOO98ZQmhzCkdj4zbq3BEH_XJDEJ2wIlvuNscu1HhfV55A37im1Lt0R-Im3rikctYX4mcVRlCCQJ00NA_KUJs5EPigqBZjo7FY9o1xjVuhXo1mOTs3Ozo18inuX0i5mWcuwEQ4oUPxS__NC4ARKTKfGJ4SHcxC3cdQfCLsCfi--AKfYZh5It4YXnuLnttNkRcFDD08lFBBlVKMOprwCcXJNCvzXEbJx9l9silBz_xWYUjed2PIY0ob_ErUiAj6uvMfJDtRu9cgj0pj2EEXyugYFASI2SU9lpz5_yzgFr5c_w",
+          __RequestVerificationToken:
+            localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fieldsToUpdate),
+      }
+    );
+  };
 
   return (
     <>
@@ -130,7 +188,10 @@ export default function ValidationPage() {
               hazard below:
             </Typography>
 
-            <TextInputBox />
+            <TextInputBox
+              initialValue={validation.cr4de_definition_feedback}
+              setValue={setDefinition}
+            />
           </Box>
         </Paper>
 
@@ -178,7 +239,10 @@ export default function ValidationPage() {
               examples of the hazard below:
             </Typography>
 
-            <TextInputBox />
+            <TextInputBox
+              initialValue={validation.cr4de_historicalEvents_feedback}
+              setValue={setHistoricalEvents}
+            />
           </Box>
         </Paper>
 
@@ -230,7 +294,10 @@ export default function ValidationPage() {
               parameters of the hazard below:
             </Typography>
 
-            <TextInputBox />
+            <TextInputBox
+              initialValue={validation.cr4de_parameters_feedback}
+              setValue={setParameters}
+            />
           </Box>
         </Paper>
 
@@ -301,7 +368,10 @@ export default function ValidationPage() {
               of the hazard below:
             </Typography>
 
-            <TextInputBox />
+            <TextInputBox
+              initialValue={validation.cr4de_scenarios_feedback}
+              setValue={setScenarios}
+            />
           </Box>
         </Paper>
 
@@ -337,7 +407,10 @@ export default function ValidationPage() {
               of the hazard below:
             </Typography>
 
-            <TextInputBox />
+            <TextInputBox
+              initialValue={validation.cr4de_causes_feedback}
+              setValue={setCauses}
+            />
           </Box>
         </Paper>
 
@@ -374,7 +447,10 @@ export default function ValidationPage() {
               of the hazard below:
             </Typography>
 
-            <TextInputBox />
+            <TextInputBox
+              initialValue={validation.cr4de_effects_feedback}
+              setValue={setEffects}
+            />
           </Box>
         </Paper>
 
@@ -412,7 +488,10 @@ export default function ValidationPage() {
               of the hazard below:
             </Typography>
 
-            <TextInputBox />
+            <TextInputBox
+              initialValue={validation.cr4de_catalysing_feedback}
+              setValue={setCatalysing}
+            />
           </Box>
         </Paper>
       </Container>
@@ -433,9 +512,27 @@ export default function ValidationPage() {
           Exit
         </Button>
         <Box sx={{ flex: "1 1 auto" }} />
-        <Button color="secondary" sx={{ mr: 1 }}>
-          Save
-        </Button>
+        {saving && (
+          <LoadingButton
+            color="secondary"
+            sx={{ mr: 1 }}
+            loading
+            loadingPosition="start"
+            startIcon={<SaveIcon />}
+          >
+            Saving
+          </LoadingButton>
+        )}
+        {!saving && Object.keys(fieldsToUpdate).length > 0 && (
+          <Button color="secondary" sx={{ mr: 1 }} onClick={updateValidation}>
+            Save
+          </Button>
+        )}
+        {!saving && Object.keys(fieldsToUpdate).length <= 0 && (
+          <Button color="secondary" disabled sx={{ mr: 1 }}>
+            Saved
+          </Button>
+        )}
 
         <Button color="secondary">Save & Exit</Button>
       </Box>

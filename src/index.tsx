@@ -37,7 +37,6 @@ root.render(
         onLoad={() => {
           // @ts-expect-error
           window.fetch.loaded = true;
-          console.log("Loaded");
         }}
       />
     )}
