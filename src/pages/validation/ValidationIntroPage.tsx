@@ -26,7 +26,7 @@ export default function ValidationIntroPage() {
         );
 
         const responseJson = await response.json();
-        
+
         setValidations(responseJson.value);
       } catch (e) {
         console.log(e);
@@ -38,8 +38,6 @@ export default function ValidationIntroPage() {
 
   return (
     <>
-      <CssBaseline />
-      <TitleBar title="BNRA 2023 - 2026 Risk Identification - Validation" />
       <Container>
         <Box mt={5}>
           <Typography variant="body1" my={2}>

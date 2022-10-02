@@ -3,91 +3,59 @@ import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
-import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
+import { Divider, Typography } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
-function not(a: readonly number[], b: readonly number[]) {
-  return a.filter((value) => b.indexOf(value) === -1);
-}
-
-function intersection(a: readonly number[], b: readonly number[]) {
-  return a.filter((value) => b.indexOf(value) !== -1);
-}
-
-function union(a: readonly number[], b: readonly number[]) {
-  return [...a, ...not(b, a)];
-}
+type SIDE = "LEFT" | "RIGHT";
 
 export default function TransferList({
   choicesLabel,
+  choicesSubheader,
   chosenLabel,
+  chosenSubheader,
   choices,
   chosen,
 }: {
   choicesLabel: string;
+  choicesSubheader?: string;
   chosenLabel: string;
+  chosenSubheader?: string;
   choices: any[];
   chosen: any[];
 }) {
-  const [checked, setChecked] = React.useState<readonly number[]>([]);
-  const [left, setLeft] = React.useState<readonly number[]>([0, 1, 2, 3]);
-  const [right, setRight] = React.useState<readonly number[]>([4, 5, 6, 7]);
+  const [selected, setSelected] = React.useState<{
+    side: SIDE;
+    index: number;
+  } | null>(null);
 
-  const leftChecked = intersection(checked, left);
-  const rightChecked = intersection(checked, right);
-
-  const handleToggle = (value: number) => () => {
-    const currentIndex = checked.indexOf(value);
-    const newChecked = [...checked];
-
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
-
-    setChecked(newChecked);
+  const handleListItemClick = (side: SIDE, index: number) => {
+    setSelected({ side, index });
   };
 
-  const numberOfChecked = (items: readonly number[]) =>
-    intersection(checked, items).length;
-
-  const handleToggleAll = (items: readonly number[]) => () => {
-    if (numberOfChecked(items) === items.length) {
-      setChecked(not(checked, items));
-    } else {
-      setChecked(union(checked, items));
-    }
-  };
-
-  const handleCheckedRight = () => {
-    setRight(right.concat(leftChecked));
-    setLeft(not(left, leftChecked));
-    setChecked(not(checked, leftChecked));
-  };
-
-  const handleCheckedLeft = () => {
-    setLeft(left.concat(rightChecked));
-    setRight(not(right, rightChecked));
-    setChecked(not(checked, rightChecked));
-  };
-
-  const customList = (title: React.ReactNode, items: readonly number[]) => (
+  const customList = (
+    title: React.ReactNode,
+    items: readonly any[],
+    side: SIDE,
+    subheader?: string
+  ) => (
     <Card elevation={0} sx={{ border: "1px solid #eee", flex: 1, mt: 2 }}>
       <CardHeader
         sx={{ px: 2, py: 1 }}
         title={title}
         avatar={" "}
-        subheader={`${numberOfChecked(items)}/${items.length} selected`}
+        subheader={subheader || "-"}
+        subheaderTypographyProps={
+          subheader ? {} : { sx: { color: "rgba(0, 0, 0, 0)" } }
+        }
       />
       <Divider />
       <List
         sx={{
-          width: 200,
+          width: "100%",
           height: 230,
           bgcolor: "background.paper",
           overflow: "auto",
@@ -96,68 +64,92 @@ export default function TransferList({
         component="div"
         role="list"
       >
-        {items.map((value: number) => {
+        {items.map((value: any, i) => {
           const labelId = `transfer-list-all-item-${value}-label`;
 
           return (
-            <ListItem
-              key={value}
+            <ListItemButton
+              key={value.cr4de_riskfilesid}
               role="listitem"
               button
-              onClick={handleToggle(value)}
+              selected={Boolean(
+                selected && selected.side === side && selected.index === i
+              )}
+              onClick={(event) => handleListItemClick(side, i)}
             >
-              <ListItemIcon>
-                <Checkbox
-                  checked={checked.indexOf(value) !== -1}
-                  tabIndex={-1}
-                  disableRipple
-                  inputProps={{
-                    "aria-labelledby": labelId,
-                  }}
-                />
-              </ListItemIcon>
-              <ListItemText id={labelId} primary={`List item ${value + 1}`} />
-            </ListItem>
+              <ListItemIcon>{value.cr4de_hazard_id}</ListItemIcon>
+              <ListItemText id={labelId} primary={value.cr4de_title} />
+            </ListItemButton>
           );
         })}
-        <ListItem />
+        <ListItemButton />
       </List>
     </Card>
   );
 
   return (
-    <Box
-      justifyContent="center"
-      alignItems="center"
-      sx={{ display: "flex", flexDirection: "row" }}
-    >
-      {customList(choicesLabel, choices)}
+    <>
       <Box
+        justifyContent="center"
         alignItems="center"
-        sx={{ mx: 2, display: "flex", flexDirection: "column" }}
+        sx={{ display: "flex", flexDirection: "row" }}
       >
-        <Button
-          sx={{ my: 0.5 }}
-          variant="outlined"
-          size="small"
-          onClick={handleCheckedRight}
-          disabled
-          aria-label="move selected right"
+        {customList(choicesLabel, choices, "LEFT", choicesSubheader)}
+        <Box
+          alignItems="center"
+          sx={{ mx: 2, display: "flex", flexDirection: "column" }}
         >
-          &gt;
-        </Button>
-        <Button
-          sx={{ my: 0.5 }}
-          variant="outlined"
-          size="small"
-          onClick={handleCheckedLeft}
-          disabled
-          aria-label="move selected left"
-        >
-          &lt;
-        </Button>
+          <ArrowForwardIcon color="disabled" fontSize="large" />
+        </Box>
+        {customList(chosenLabel, chosen, "RIGHT", chosenSubheader)}
       </Box>
-      {customList(chosenLabel, chosen)}
-    </Box>
+      {selected && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            mt: 2,
+            p: 1,
+            border: "1px solid #eee",
+          }}
+        >
+          <Typography variant="subtitle2" mb={1}>
+            Definition of '
+            {
+              (selected.side === "LEFT" ? choices : chosen)[selected.index]
+                .cr4de_title
+            }
+            '
+          </Typography>
+          <Box
+            dangerouslySetInnerHTML={{
+              __html: (selected.side === "LEFT" ? choices : chosen)[
+                selected.index
+              ].cr4de_definition,
+            }}
+          />
+        </Box>
+      )}
+      {selected && selected.side === "RIGHT" && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            mt: 2,
+            p: 1,
+            border: "1px solid #eee",
+          }}
+        >
+          <Typography variant="subtitle2" mb={1}>
+            Reason for the causal relationship
+          </Typography>
+          <Box
+            dangerouslySetInnerHTML={{
+              __html: chosen[selected.index].reason,
+            }}
+          />
+        </Box>
+      )}
+    </>
   );
 }

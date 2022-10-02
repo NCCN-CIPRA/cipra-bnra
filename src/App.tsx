@@ -1,12 +1,18 @@
 import { useEffect } from "react";
 import { createHashRouter, RouterProvider } from "react-router-dom";
-import "./App.css";
+import AnalysisAveragerPage from "./pages/analysis/AnalysisAveragerPage";
 import AuthenticationPage from "./pages/main/AuthenticationPage";
 import DataMigrator from "./pages/main/DataMigrator";
 import HomePage from "./pages/main/HomePage";
 import LocalAPI from "./pages/main/LocalAPI";
+import CalculationPage from "./pages/analysis/CalculationPage";
+import RankingPage from "./pages/reporting/RankingPage";
 import ValidationIntroPage from "./pages/validation/ValidationIntroPage";
 import ValidationPage from "./pages/validation/ValidationPage";
+import RiskPage from "./pages/reporting/RiskPage";
+
+import "./App.css";
+import BasePage from "./pages/BasePage";
 
 function App() {
   useEffect(() => {
@@ -30,19 +36,44 @@ function App() {
   const router = createHashRouter([
     {
       path: "/",
-      element: <HomePage />,
+      element: <BasePage />,
+      children: [
+        {
+          path: "/",
+          element: <HomePage />,
+        },
+
+        {
+          path: "/validation",
+          element: <ValidationIntroPage />,
+        },
+        {
+          path: "/validation/:validation_id",
+          element: <ValidationPage />,
+        },
+
+        {
+          path: "/analysis/averager",
+          element: <AnalysisAveragerPage />,
+        },
+        {
+          path: "/analysis/calculator",
+          element: <CalculationPage />,
+        },
+
+        {
+          path: "/reporting",
+          element: <RankingPage />,
+        },
+        {
+          path: "/reporting/:risk_id",
+          element: <RiskPage />,
+        },
+      ],
     },
     {
       path: "/auth",
       element: <AuthenticationPage />,
-    },
-    {
-      path: "/validation",
-      element: <ValidationIntroPage />,
-    },
-    {
-      path: "/validation/:validation_id",
-      element: <ValidationPage />,
     },
 
     // DEV ONLY
@@ -56,7 +87,7 @@ function App() {
     },
   ]);
 
-  return <RouterProvider router={router} />;
+  return <RouterProvider router={router}></RouterProvider>;
 }
 
 export default App;
