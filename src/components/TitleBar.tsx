@@ -1,26 +1,33 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { IconButton } from "@mui/material";
+import { IconButton, Menu, MenuItem } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import useLoggedInUser from "../hooks/useLoggedInUser";
 
-export default function TitleBar({
-  title,
-  onDrawerToggle,
-}: {
-  title: string;
-  onDrawerToggle: () => void;
-}) {
+export default function TitleBar({ title, onDrawerToggle }: { title: string; onDrawerToggle: () => void }) {
+  const navigate = useNavigate();
+  const { user } = useLoggedInUser();
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar
-          position="fixed"
-          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        >
+        <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
           <Toolbar>
             <IconButton
               size="large"
@@ -35,9 +42,42 @@ export default function TitleBar({
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               {title}
             </Typography>
-            <Button color="inherit" component={Link} to="/auth">
-              Login
-            </Button>
+            {user === null && (
+              <Button color="inherit" component={Link} to="/auth">
+                Login
+              </Button>
+            )}
+            {user !== undefined && user !== null && (
+              <>
+                <Button variant="text" color="inherit" startIcon={<AccountCircleIcon />} onClick={handleMenu}>
+                  {user?.firstname} {user?.lastname}
+                </Button>
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorEl}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleClose();
+                      window.location.href = "https://bnra.powerappsportals.com/Account/Login/LogOff?returnUrl=/#/auth";
+                    }}
+                  >
+                    Log out
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
           </Toolbar>
         </AppBar>
       </Box>

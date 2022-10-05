@@ -9,20 +9,14 @@ export default function patchFetch() {
 
   window.onmessage = function (e) {
     if (e.data && e.data.requestData) {
-      responses[e.data.requestData.id] = new Response(
-        e.data.body || undefined,
-        {
-          status: e.data.status,
-        }
-      );
+      responses[e.data.requestData.id] = new Response(e.data.body || undefined, {
+        status: e.data.status,
+      });
     }
   };
 }
 
-async function devFetch(
-  input: RequestInfo | URL,
-  init?: RequestInit | undefined
-) {
+async function devFetch(input: RequestInfo | URL, init?: RequestInit | undefined) {
   // @ts-expect-error
   if (input.match(/powerappsportal/)) {
     return new Promise<Response>((resolve, reject) => {
@@ -41,7 +35,7 @@ async function devFetch(
           );
         },
         // @ts-expect-error
-        window.fetch.loaded ? 0 : 1000
+        window.fetch.loaded ? 0 : 5000
       );
 
       const interval = setInterval(async () => {
@@ -65,14 +59,12 @@ async function devFetch(
                   clearInterval(testingInterval);
                   document.getElementById("loginWindow")!.style.display = "none";
 
-
-                  return resolve(testResponse)
+                  return resolve(testResponse);
                 }
-              }, 5000)
+              }, 5000);
             }
           } else {
-
-          return resolve(response);
+            return resolve(response);
           }
         }
       }, 500);

@@ -1,4 +1,6 @@
-export default function tableToJson(tableString: string) {
+export default function tableToJson(tableString?: string) {
+  if (!tableString) return null;
+
   const rows = tableString
     .replace(/<table>/g, "")
     .replace(/<\/table>/g, "")

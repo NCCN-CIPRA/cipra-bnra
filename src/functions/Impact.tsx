@@ -24,10 +24,7 @@ export function getImpactScale(absoluteImpact: number, scalePrefix: string) {
 
   const diffs = Object.entries(scales)
     .sort((a, b) => b[1] - a[1])
-    .map((v) => [
-      v[0],
-      Math.abs(Math.log(1000 * v[1]) - Math.log(absoluteImpact)),
-    ]);
+    .map((v) => [v[0], Math.abs(Math.log(1000 * v[1]) - Math.log(absoluteImpact))]);
 
   const minDiff = diffs.reduce((min, cur) => (min[1] > cur[1] ? cur : min));
 

@@ -1,11 +1,4 @@
-import {
-  PieChart,
-  Pie,
-  ResponsiveContainer,
-  Cell,
-  Tooltip,
-  TooltipProps,
-} from "recharts";
+import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip, TooltipProps } from "recharts";
 import { Box, Typography } from "@mui/material";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
@@ -32,10 +25,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
         </p>
         <p style={{ margin: 0 }}>
           <Typography variant="caption">
-            {Math.round(
-              (payload[0]!.value! / payload[0]!.payload.total!) * 10000
-            ) / 100}
-            % of total impact
+            {Math.round((payload[0]!.value! / payload[0]!.payload.total!) * 10000) / 100}% of total impact
           </Typography>
         </p>
       </div>
@@ -47,7 +37,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
 
 export default function ImpactOriginPieChart({ riskFile }: { riskFile: any }) {
   if (!riskFile) return null;
-  console.log(riskFile.calculated);
+
   const dataGlobal = [
     {
       name: "Direct Impact",
@@ -63,50 +53,15 @@ export default function ImpactOriginPieChart({ riskFile }: { riskFile: any }) {
     },
   ];
 
-  const dataSpecific: any[] = [
-    {
-      name: "Direct Impact",
-      value: riskFile.calculated.di,
-      color: "rgba(214, 48, 49,1.0)",
-      total: riskFile.calculated.ti,
-    },
-    {
-      name: "Indirect Impact",
-      value: riskFile.calculated.ii,
-      color: "rgba(108, 92, 231,1.0)",
-      total: riskFile.calculated.ti,
-    },
-  ];
-  console.log(dataGlobal);
   return (
     <>
-      <Box sx={{ width: "100%", textAlign: "center", mb: -4 }}>
+      <Box sx={{ width: "100%", textAlign: "center" }}>
         <Typography variant="h6">Impact Origin</Typography>
       </Box>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={160}>
         <PieChart>
-          <Pie
-            data={dataGlobal}
-            dataKey="value"
-            cx="50%"
-            cy="50%"
-            outerRadius={95}
-            fill="#8884d8"
-          >
+          <Pie data={dataGlobal} dataKey="value" cx="50%" cy="50%" outerRadius={80} fill="#8884d8">
             {dataGlobal.map((d) => (
-              <Cell key={d.name} fill={d.color} />
-            ))}
-          </Pie>
-          <Pie
-            data={dataSpecific}
-            dataKey="value"
-            cx="50%"
-            cy="50%"
-            innerRadius={105}
-            outerRadius={120}
-            fill="#82ca9d"
-          >
-            {dataSpecific.map((d) => (
               <Cell key={d.name} fill={d.color} />
             ))}
           </Pie>

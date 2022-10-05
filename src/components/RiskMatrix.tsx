@@ -50,15 +50,12 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
           <Typography variant="subtitle2">Probability</Typography>
           <Typography variant="caption">
             {" "}
-            {Math.round(payload[0]?.value! * 10000) / 100}% change of occuring
-            in the next 3 years
+            {Math.round(payload[0]?.value! * 10000) / 100}% change of occuring in the next 3 years
           </Typography>
         </p>
         <p>
           <Typography variant="subtitle2">Impact</Typography>
-          <Typography variant="caption">
-            {`${getImpactScale(payload[1]?.value! / 10, "")}/5`}
-          </Typography>
+          <Typography variant="caption">{`${getImpactScale(payload[1]?.value! / 10, "")}/5`}</Typography>
         </p>
       </div>
     );

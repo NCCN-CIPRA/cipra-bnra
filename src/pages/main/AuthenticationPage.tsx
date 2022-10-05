@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
+import useAPI from "../../hooks/useAPI";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -47,6 +48,7 @@ function a11yProps(index: number) {
 
 export default function AuthenticationPage() {
   const navigate = useNavigate();
+  const api = useAPI();
 
   const [tab, setTab] = useState(0);
   const [email, setEmail] = useState("");
@@ -59,92 +61,31 @@ export default function AuthenticationPage() {
 
   const [registrationForm, setRegistrationForm] = useState("");
 
-  const handleChangeTab = async (
-    event: React.SyntheticEvent,
-    newValue: number
-  ) => {
+  const handleChangeTab = async (event: React.SyntheticEvent, newValue: number) => {
     setResetPassword(false);
     setRegistering(false);
     setTab(newValue);
   };
 
   const handleLogin = async () => {
-    const response = await fetch("https://bnra.powerappsportals.com/SignIn", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        __RequestVerificationToken:
-          localStorage.getItem("antiforgerytoken") || "",
-        Username: email,
-        PasswordValue: password,
-        RememberMe: String(remember),
-      }),
-    });
+    const result = await api.login(email, password, remember);
 
-    if (response.status === 200) {
-      navigate("/");
-    } else {
-      // TODO: Error
-    }
+    if (!result.error) navigate("/");
   };
 
   const handleForgotPassword = async () => {
-    const response = await fetch(
-      "https://bnra.powerappsportals.com/ForgotPassword",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          __RequestVerificationToken:
-            localStorage.getItem("antiforgerytoken") || "",
-          Email: email,
-        }),
-      }
-    );
+    const result = await api.requestPasswordReset(email);
 
-    if (response.status === 200) {
-      setResetPassword(false);
-    } else {
-      // TODO: Error
-    }
+    if (!result.error) setResetPassword(false);
   };
 
   const handleRegisterStart = async () => {
-    const response = await fetch(
-      "https://bnra.powerappsportals.com/Register?returnUrl=/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          __RequestVerificationToken:
-            localStorage.getItem("antiforgerytoken") || "",
-          InvitationCode: inviteCode,
-          RedeemByLogin: "false",
-        }),
-      }
-    );
+    const result = await api.requestRegistrationLink(inviteCode);
 
-    if (response.status === 200) {
-      const responseText = await response.text();
-      const r = responseText.match(
-        /<form method="post" action="\.\/Register.*<\/form>/s
-      );
-
-      const formHtml =
-        r &&
-        r[0].replace('action="./Register', 'action="/Account/Login/Register');
-
-      setRegistrationForm(formHtml || "");
+    if (!result.error && result.data) {
+      setRegistrationForm(result.data.formHtml);
 
       setRegistering(true);
-    } else {
-      // TODO: Error
     }
   };
 
@@ -152,9 +93,7 @@ export default function AuthenticationPage() {
     document.getElementById("EmailTextBox")!.setAttribute("value", email);
     document.getElementById("UserNameTextBox")!.setAttribute("value", email);
     document.getElementById("PasswordTextBox")!.setAttribute("value", password);
-    document
-      .getElementById("ConfirmPasswordTextBox")!
-      .setAttribute("value", password2);
+    document.getElementById("ConfirmPasswordTextBox")!.setAttribute("value", password2);
 
     document.getElementById("SubmitButton")!.click();
   };
@@ -165,11 +104,7 @@ export default function AuthenticationPage() {
       <Container maxWidth="md" component={Paper} sx={{ mt: 8 }}>
         <Box sx={{ width: "100%" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs
-              value={tab}
-              onChange={handleChangeTab}
-              aria-label="basic tabs example"
-            >
+            <Tabs value={tab} onChange={handleChangeTab} aria-label="basic tabs example">
               <Tab label="Log In (External Expert)" {...a11yProps(0)} />
               <Tab label="Log In (Internal NCCN)" {...a11yProps(0)} />
               <Tab label="Register" {...a11yProps(1)} />
@@ -199,10 +134,7 @@ export default function AuthenticationPage() {
                   <Button variant="contained" onClick={handleForgotPassword}>
                     Request Password Reset
                   </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={() => setResetPassword(false)}
-                  >
+                  <Button variant="outlined" onClick={() => setResetPassword(false)}>
                     Log In
                   </Button>
                 </Stack>
@@ -251,10 +183,7 @@ export default function AuthenticationPage() {
                   <Button variant="contained" onClick={handleLogin}>
                     Login
                   </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={() => setResetPassword(true)}
-                  >
+                  <Button variant="outlined" onClick={() => setResetPassword(true)}>
                     Forgot Password
                   </Button>
                 </Stack>
@@ -263,10 +192,7 @@ export default function AuthenticationPage() {
           </TabPanel>
           <TabPanel value={tab} index={1}>
             <Stack spacing={2} direction="row" mt={2}>
-              <form
-                action="/Account/Login/ExternalLogin?ReturnUrl=%2F"
-                method="post"
-              >
+              <form action="/Account/Login/ExternalLogin?ReturnUrl=/#/auth/ad" method="post">
                 <input
                   name="__RequestVerificationToken"
                   type="hidden"

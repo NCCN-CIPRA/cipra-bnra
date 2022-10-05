@@ -13,21 +13,17 @@ import RiskPage from "./pages/reporting/RiskPage";
 
 import "./App.css";
 import BasePage from "./pages/BasePage";
+import EditorIntroPage from "./pages/editor/EditorIntroPage";
+import EditorPage from "./pages/editor/EditorPage";
 
 function App() {
   useEffect(() => {
     const getAntiForgeryToken = async () => {
-      const response = await fetch(
-        `https://bnra.powerappsportals.com/_layout/tokenhtml?_=${Date.now()}`,
-        {
-          method: "GET",
-        }
-      );
+      const response = await fetch(`https://bnra.powerappsportals.com/_layout/tokenhtml?_=${Date.now()}`, {
+        method: "GET",
+      });
 
-      localStorage.setItem(
-        "antiforgerytoken",
-        await (await response.text()).split("value")[1].split('"')[1]
-      );
+      localStorage.setItem("antiforgerytoken", await (await response.text()).split("value")[1].split('"')[1]);
     };
 
     getAntiForgeryToken();
@@ -41,6 +37,15 @@ function App() {
         {
           path: "/",
           element: <HomePage />,
+        },
+
+        {
+          path: "/editor",
+          element: <EditorIntroPage />,
+        },
+        {
+          path: "/editor/:risk_file_id",
+          element: <EditorPage />,
         },
 
         {

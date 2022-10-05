@@ -1,11 +1,4 @@
-import {
-  PieChart,
-  Pie,
-  ResponsiveContainer,
-  Cell,
-  Tooltip,
-  TooltipProps,
-} from "recharts";
+import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip, TooltipProps } from "recharts";
 import { Box, Typography } from "@mui/material";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
@@ -31,10 +24,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
         </p>
         <p style={{ margin: 0 }}>
           <Typography variant="caption">
-            {Math.round(
-              (payload[0]!.value! / payload[0]!.payload.total!) * 10000
-            ) / 100}
-            % of total impact
+            {Math.round((payload[0]!.value! / payload[0]!.payload.total!) * 10000) / 100}% of total impact
           </Typography>
         </p>
       </div>
@@ -44,30 +34,20 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   return null;
 };
 
-export default function ImpactDistributionPieChart({
-  riskFile,
-}: {
-  riskFile: any;
-}) {
+export default function ImpactDistributionPieChart({ riskFile }: { riskFile: any }) {
   if (!riskFile) return null;
 
   const dataGlobal = [
     {
       name: "Human",
-      value:
-        riskFile.calculated.ti_Ha +
-        riskFile.calculated.ti_Hb +
-        riskFile.calculated.ti_Hc,
+      value: riskFile.calculated.ti_Ha + riskFile.calculated.ti_Hb + riskFile.calculated.ti_Hc,
       color: "rgba(214, 48, 49,1.0)",
       total: riskFile.calculated.ti,
     },
     {
       name: "Societal",
       value:
-        riskFile.calculated.ti_Sa +
-        riskFile.calculated.ti_Sb +
-        riskFile.calculated.ti_Sc +
-        riskFile.calculated.ti_Sd,
+        riskFile.calculated.ti_Sa + riskFile.calculated.ti_Sb + riskFile.calculated.ti_Sc + riskFile.calculated.ti_Sd,
       color: "rgba(108, 92, 231,1.0)",
       total: riskFile.calculated.ti,
     },
@@ -150,32 +130,17 @@ export default function ImpactDistributionPieChart({
 
   return (
     <>
-      <Box sx={{ width: "100%", textAlign: "center", mb: -4 }}>
+      <Box sx={{ width: "100%", textAlign: "center" }}>
         <Typography variant="h6">Impact Distribution</Typography>
       </Box>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={160}>
         <PieChart>
-          <Pie
-            data={dataGlobal}
-            dataKey="value"
-            cx="50%"
-            cy="50%"
-            outerRadius={95}
-            fill="#8884d8"
-          >
+          <Pie data={dataGlobal} dataKey="value" cx="50%" cy="50%" outerRadius={55} fill="#8884d8">
             {dataGlobal.map((d) => (
               <Cell key={d.name} fill={d.color} />
             ))}
           </Pie>
-          <Pie
-            data={dataSpecific}
-            dataKey="value"
-            cx="50%"
-            cy="50%"
-            innerRadius={105}
-            outerRadius={120}
-            fill="#82ca9d"
-          >
+          <Pie data={dataSpecific} dataKey="value" cx="50%" cy="50%" innerRadius={65} outerRadius={80} fill="#82ca9d">
             {dataSpecific.map((d) => (
               <Cell key={d.name} fill={d.color} />
             ))}

@@ -11,15 +11,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
-export default function SideDrawer({
-  open,
-  width,
-  onClose,
-}: {
-  open: boolean;
-  width: number;
-  onClose: () => void;
-}) {
+export default function SideDrawer({ open, width, onClose }: { open: boolean; width: number; onClose: () => void }) {
   return (
     <Drawer
       open={open}
@@ -37,7 +29,7 @@ export default function SideDrawer({
       <Box sx={{ overflow: "auto" }}>
         <List>
           <ListItem disablePadding>
-            <ListItemButton component={Link} to="/validation" onClick={onClose}>
+            <ListItemButton component={Link} to="/editor" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
               <ListItemText primary="Risk File Editor" />
             </ListItemButton>
@@ -75,21 +67,13 @@ export default function SideDrawer({
           </ListItem>
           <Divider />
           <ListItem disablePadding>
-            <ListItemButton
-              component={Link}
-              to="/analysis/averager"
-              onClick={onClose}
-            >
+            <ListItemButton component={Link} to="/analysis/averager" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
               <ListItemText primary="Result Averager" />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton
-              component={Link}
-              to="/analysis/calculator"
-              onClick={onClose}
-            >
+            <ListItemButton component={Link} to="/analysis/calculator" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
               <ListItemText primary="Risk Calculator" />
             </ListItemButton>

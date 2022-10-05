@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { ReactNode, useState } from "react";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import Card from "@mui/material/Card";
@@ -12,7 +12,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 type SIDE = "LEFT" | "RIGHT";
 
-export default function TransferList({
+function TransferList({
   choicesLabel,
   choicesSubheader,
   chosenLabel,
@@ -27,7 +27,7 @@ export default function TransferList({
   choices: any[];
   chosen: any[];
 }) {
-  const [selected, setSelected] = React.useState<{
+  const [selected, setSelected] = useState<{
     side: SIDE;
     index: number;
   } | null>(null);
@@ -36,21 +36,14 @@ export default function TransferList({
     setSelected({ side, index });
   };
 
-  const customList = (
-    title: React.ReactNode,
-    items: readonly any[],
-    side: SIDE,
-    subheader?: string
-  ) => (
+  const customList = (title: ReactNode, items: readonly any[], side: SIDE, subheader?: string) => (
     <Card elevation={0} sx={{ border: "1px solid #eee", flex: 1, mt: 2 }}>
       <CardHeader
         sx={{ px: 2, py: 1 }}
         title={title}
         avatar={" "}
         subheader={subheader || "-"}
-        subheaderTypographyProps={
-          subheader ? {} : { sx: { color: "rgba(0, 0, 0, 0)" } }
-        }
+        subheaderTypographyProps={subheader ? {} : { sx: { color: "rgba(0, 0, 0, 0)" } }}
       />
       <Divider />
       <List
@@ -72,9 +65,7 @@ export default function TransferList({
               key={value.cr4de_riskfilesid}
               role="listitem"
               button
-              selected={Boolean(
-                selected && selected.side === side && selected.index === i
-              )}
+              selected={Boolean(selected && selected.side === side && selected.index === i)}
               onClick={(event) => handleListItemClick(side, i)}
             >
               <ListItemIcon>{value.cr4de_hazard_id}</ListItemIcon>
@@ -89,16 +80,9 @@ export default function TransferList({
 
   return (
     <>
-      <Box
-        justifyContent="center"
-        alignItems="center"
-        sx={{ display: "flex", flexDirection: "row" }}
-      >
+      <Box justifyContent="center" alignItems="center" sx={{ display: "flex", flexDirection: "row" }}>
         {customList(choicesLabel, choices, "LEFT", choicesSubheader)}
-        <Box
-          alignItems="center"
-          sx={{ mx: 2, display: "flex", flexDirection: "column" }}
-        >
+        <Box alignItems="center" sx={{ mx: 2, display: "flex", flexDirection: "column" }}>
           <ArrowForwardIcon color="disabled" fontSize="large" />
         </Box>
         {customList(chosenLabel, chosen, "RIGHT", chosenSubheader)}
@@ -114,18 +98,11 @@ export default function TransferList({
           }}
         >
           <Typography variant="subtitle2" mb={1}>
-            Definition of '
-            {
-              (selected.side === "LEFT" ? choices : chosen)[selected.index]
-                .cr4de_title
-            }
-            '
+            Definition of '{(selected.side === "LEFT" ? choices : chosen)[selected.index].cr4de_title}'
           </Typography>
           <Box
             dangerouslySetInnerHTML={{
-              __html: (selected.side === "LEFT" ? choices : chosen)[
-                selected.index
-              ].cr4de_definition,
+              __html: (selected.side === "LEFT" ? choices : chosen)[selected.index].cr4de_definition,
             }}
           />
         </Box>
@@ -153,3 +130,5 @@ export default function TransferList({
     </>
   );
 }
+
+export default React.memo(TransferList);

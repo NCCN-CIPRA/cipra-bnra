@@ -52,10 +52,7 @@ export function getAbsoluteProbability(scaleString: string | null) {
   return -1;
 }
 
-export function getProbabilityScale(
-  absoluteProbability: number,
-  scalePrefix: string
-) {
+export function getProbabilityScale(absoluteProbability: number, scalePrefix: string) {
   let scales;
   if (scalePrefix === "DP") scales = DPScales;
   else if (scalePrefix === "CP") scales = CPScales;
@@ -66,10 +63,7 @@ export function getProbabilityScale(
 
   const diffs = Object.entries(scales)
     .sort((a, b) => b[1] - a[1])
-    .map((v) => [
-      v[0],
-      Math.abs(Math.log(v[1]) - Math.log(absoluteProbability)),
-    ]);
+    .map((v) => [v[0], Math.abs(Math.log(v[1]) - Math.log(absoluteProbability))]);
 
   const minDiff = diffs.reduce((min, cur) => (min[1] > cur[1] ? cur : min));
 
