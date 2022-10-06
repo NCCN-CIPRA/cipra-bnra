@@ -14,7 +14,15 @@ const fontValues = [
 ];
 const headerValues = [false, 1, 2, 3, 4, 5];
 
-function TextInputBox({ initialValue, setValue }: { initialValue: string; setValue: (value: string) => void }) {
+function TextInputBox({
+  initialValue,
+  setValue,
+  onBlur,
+}: {
+  initialValue: string;
+  setValue: (value: string) => void;
+  onBlur?: () => void;
+}) {
   return (
     <HtmlEditor
       height="300px"
@@ -22,6 +30,7 @@ function TextInputBox({ initialValue, setValue }: { initialValue: string; setVal
       onValueChanged={(e) => {
         setValue(e.value);
       }}
+      onFocusOut={onBlur}
     >
       <Toolbar multiline>
         <Item name="undo" />

@@ -240,7 +240,15 @@ export default function EditorPage() {
                 </Typography>
               </Box>
 
-              <HistoricalEventsTable historicalEvents={riskFile?.historicalEvents} />
+              <HistoricalEventsTable
+                historicalEvents={riskFile?.historicalEvents}
+                onChange={async (newHistoricalEvents) => {
+                  await updateRiskFile({
+                    cr4de_historical_events: HE.wrap(newHistoricalEvents),
+                  });
+                  await reloadRiskFile();
+                }}
+              />
             </Box>
           </Paper>
         )}
