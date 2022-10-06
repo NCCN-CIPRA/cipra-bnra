@@ -1,24 +1,10 @@
 import { useMemo, useState, useCallback } from "react";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
-import {
-  Box,
-  Container,
-  Typography,
-  Paper,
-  Divider,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  TableHead,
-  Button,
-  Skeleton,
-} from "@mui/material";
+import { Box, Container, Typography, Paper, Divider, Button, Skeleton } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import TextInputBox from "../../components/TextInputBox";
 import TransferList from "../../components/TransferList";
 import SaveIcon from "@mui/icons-material/Save";
-import { DVValidation } from "../../types/dataverse/DVValidation";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import * as S from "../../functions/scenarios";
@@ -62,8 +48,14 @@ const defaultBreadcrumbs: Breadcrumb[] = [
 
 export default function EditorPage() {
   const api = useAPI();
-  const params = useParams<keyof RouteParams>() as RouteParams;
+  const params = useParams() as RouteParams;
   const navigate = useNavigate();
+
+  const [definition, setDefinition] = useState<string | null>(null);
+  const [historicalEvents, setHistoricalEvents] = useState<HE.HistoricalEvent[] | null>(null);
+  const [parameters, setParameters] = useState<IP.IntensityParameter[] | null>(null);
+  const [scenarios, setScenarios] = useState<S.Scenarios | null>(null);
+  const [horizon, setHorizon] = useState<string | null>(null);
 
   const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<OtherHazard>({
     table: DataTable.RISK_FILE,
@@ -117,12 +109,6 @@ export default function EditorPage() {
       });
     },
   });
-
-  const [definition, setDefinition] = useState<string | null>(null);
-  const [historicalEvents, setHistoricalEvents] = useState<HE.HistoricalEvent[] | null>(null);
-  const [parameters, setParameters] = useState<IP.IntensityParameter[] | null>(null);
-  const [scenarios, setScenarios] = useState<S.Scenarios | null>(null);
-  const [horizon, setHorizon] = useState<string | null>(null);
 
   const updateRiskFile = useCallback(
     async (fieldsToUpdate: Partial<DVRiskFile>) => {

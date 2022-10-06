@@ -8,13 +8,13 @@ export interface DVRiskCascade<CauseType = string, EffectType = string> {
 
   cr4de_reason: string;
 
-  cr4de_c2c: string;
-  cr4de_c2m: string;
-  cr4de_c2e: string;
-  cr4de_m2c: string;
-  cr4de_m2m: string;
-  cr4de_m2e: string;
-  cr4de_e2c: string;
-  cr4de_e2m: string;
-  cr4de_e2e: string;
+  cr4de_c2c: string | null;
+  cr4de_c2m: string | null;
+  cr4de_c2e: string | null;
+  cr4de_m2c: string | null;
+  cr4de_m2m: string | null;
+  cr4de_m2e: string | null;
+  cr4de_e2c: string | null;
+  cr4de_e2m: string | null;
+  cr4de_e2e: string | null;
 }

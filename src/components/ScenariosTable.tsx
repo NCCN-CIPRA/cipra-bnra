@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Typography, Table, TableBody, TableCell, TableRow, TableHead, Skeleton } from "@mui/material";
 import { Scenarios } from "../functions/scenarios";
 
-function ScenariosTable({ scenarios }: { scenarios?: Scenarios }) {
+function ScenariosTable({ scenarios, editable = true }: { scenarios?: Scenarios; editable?: boolean }) {
   if (scenarios === undefined)
     return (
       <Box mt={3}>

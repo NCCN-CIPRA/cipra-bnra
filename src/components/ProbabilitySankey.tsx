@@ -15,7 +15,9 @@ export default function ProbabilitySankey({ riskFile }: { riskFile: any }) {
         })),
     ],
     links: [
-      { source: 1, target: 0, value: Math.round(10000 * riskFile.calculated.dp) / 100 },
+      ...(riskFile.calculated.dp > 0
+        ? [{ source: 1, target: 0, value: Math.round(10000 * riskFile.calculated.dp) / 100 }]
+        : []),
       ...riskFile.calculated.causes
         .filter((e: any, i: number) => e.ip > 0)
         .map((e: any, i: number) => ({
@@ -25,7 +27,7 @@ export default function ProbabilitySankey({ riskFile }: { riskFile: any }) {
         })),
     ],
   };
-
+  console.log(data);
   return (
     <>
       <Box sx={{ width: "100%", mb: 2 }}>

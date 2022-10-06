@@ -6,6 +6,8 @@ import { Box, Container, Typography } from "@mui/material";
 import RiskFileList from "../../components/RiskFileList";
 import { DataTable } from "../../hooks/useAPI";
 import useRecords from "../../hooks/useRecords";
+import usePageTitle from "../../hooks/usePageTitle";
+import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 
 export default function ValidationIntroPage() {
   const navigate = useNavigate();
@@ -16,6 +18,12 @@ export default function ValidationIntroPage() {
     table: DataTable.RISK_FILE,
     query: "$expand=cr4de_RiskFile",
   });
+
+  usePageTitle("BNRA 2023 - 2026 Risk Identification: Validation");
+  useBreadcrumbs([
+    { name: "BNRA 2023 - 2026", url: "/" },
+    { name: "Validation", url: "/validation" },
+  ]);
 
   return (
     <>

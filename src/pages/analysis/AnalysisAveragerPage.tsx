@@ -1,7 +1,13 @@
-import { Typography, CssBaseline, Container, Paper, Button, Stack } from "@mui/material";
-import { useEffect, useState } from "react";
-import TitleBar from "../../components/TitleBar";
-import useAPI from "../../hooks/useAPI";
+import { Typography, Container, Paper, Button, Stack } from "@mui/material";
+import { useState } from "react";
+import { DataTable } from "../../hooks/useAPI";
+import useBreadcrumbs from "../../hooks/useBreadcrumbs";
+import usePageTitle from "../../hooks/usePageTitle";
+import useRecords from "../../hooks/useRecords";
+import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
+import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
+import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 
 const getScaleValue = (scaleString: string) => {
   if (scaleString === null) return 0;
@@ -32,87 +38,20 @@ const getAverage = (fieldName: string, scalePrefix: string, record: any, analyse
 };
 
 export default function AnalysisAveragerPage() {
-  const api = useAPI();
-
-  const [riskFiles, setRiskFiles] = useState<{ [key: string]: any } | null>(null);
-  const [cascades, setCascades] = useState<any[] | null>(null);
-  const [directAnalyses, setDirectAnalyses] = useState<any[] | null>(null);
-  const [cascadeAnalyses, setCascadeAnalyses] = useState<any[] | null>(null);
+  const { data: riskFiles } = useRecords<DVRiskFile>({ table: DataTable.RISK_FILE });
+  const { data: cascades } = useRecords<DVRiskCascade>({ table: DataTable.RISK_CASCADE });
+  const { data: directAnalyses } = useRecords<DVDirectAnalysis>({ table: DataTable.DIRECT_ANALYSIS });
+  const { data: cascadeAnalyses } = useRecords<DVCascadeAnalysis>({ table: DataTable.CASCADE_ANALYSIS });
 
   const [updatedDAs, setUpdatedDAs] = useState(0);
   const [updatedCAs, setUpdatedCAs] = useState(0);
 
-  useEffect(() => {
-    const getRiskFiles = async () => {
-      const response = await fetch(`https://bnra.powerappsportals.com/_api/cr4de_riskfileses`, {
-        method: "GET",
-        headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQzMjMxOCwibmJmIjoxNjY0NDMyMzE5LCJleHAiOjE2NjQ0MzMyMTksImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.DSkyEOprtyUJ6juSh5fp1wRUTuH29GQpvLKpGS-rAJfOO98ZQmhzCkdj4zbq3BEH_XJDEJ2wIlvuNscu1HhfV55A37im1Lt0R-Im3rikctYX4mcVRlCCQJ00NA_KUJs5EPigqBZjo7FY9o1xjVuhXo1mOTs3Ozo18inuX0i5mWcuwEQ4oUPxS__NC4ARKTKfGJ4SHcxC3cdQfCLsCfi--AKfYZh5It4YXnuLnttNkRcFDD08lFBBlVKMOprwCcXJNCvzXEbJx9l9silBz_xWYUjed2PIY0ob_ErUiAj6uvMfJDtRu9cgj0pj2EEXyugYFASI2SU9lpz5_yzgFr5c_w",
-          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
-          "Content-Type": "application/json",
-        },
-      });
-
-      const responseJson = await response.json();
-
-      setRiskFiles(responseJson.value);
-    };
-    const getCascades = async () => {
-      const response = await fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades`, {
-        method: "GET",
-        headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQzMjMxOCwibmJmIjoxNjY0NDMyMzE5LCJleHAiOjE2NjQ0MzMyMTksImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.DSkyEOprtyUJ6juSh5fp1wRUTuH29GQpvLKpGS-rAJfOO98ZQmhzCkdj4zbq3BEH_XJDEJ2wIlvuNscu1HhfV55A37im1Lt0R-Im3rikctYX4mcVRlCCQJ00NA_KUJs5EPigqBZjo7FY9o1xjVuhXo1mOTs3Ozo18inuX0i5mWcuwEQ4oUPxS__NC4ARKTKfGJ4SHcxC3cdQfCLsCfi--AKfYZh5It4YXnuLnttNkRcFDD08lFBBlVKMOprwCcXJNCvzXEbJx9l9silBz_xWYUjed2PIY0ob_ErUiAj6uvMfJDtRu9cgj0pj2EEXyugYFASI2SU9lpz5_yzgFr5c_w",
-          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
-          "Content-Type": "application/json",
-        },
-      });
-
-      const responseJson = await response.json();
-
-      setCascades(responseJson.value);
-    };
-
-    const getDirectAnalyses = async () => {
-      const response = await fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises`, {
-        method: "GET",
-        headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQzMjMxOCwibmJmIjoxNjY0NDMyMzE5LCJleHAiOjE2NjQ0MzMyMTksImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.DSkyEOprtyUJ6juSh5fp1wRUTuH29GQpvLKpGS-rAJfOO98ZQmhzCkdj4zbq3BEH_XJDEJ2wIlvuNscu1HhfV55A37im1Lt0R-Im3rikctYX4mcVRlCCQJ00NA_KUJs5EPigqBZjo7FY9o1xjVuhXo1mOTs3Ozo18inuX0i5mWcuwEQ4oUPxS__NC4ARKTKfGJ4SHcxC3cdQfCLsCfi--AKfYZh5It4YXnuLnttNkRcFDD08lFBBlVKMOprwCcXJNCvzXEbJx9l9silBz_xWYUjed2PIY0ob_ErUiAj6uvMfJDtRu9cgj0pj2EEXyugYFASI2SU9lpz5_yzgFr5c_w",
-          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
-          "Content-Type": "application/json",
-          Prefer: 'odata.include-annotations="*"',
-        },
-      });
-
-      const responseJson = await response.json();
-
-      setDirectAnalyses(responseJson.value);
-    };
-
-    const getCascadeAnalyses = async () => {
-      const response = await fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises`, {
-        method: "GET",
-        headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQzMjMxOCwibmJmIjoxNjY0NDMyMzE5LCJleHAiOjE2NjQ0MzMyMTksImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.DSkyEOprtyUJ6juSh5fp1wRUTuH29GQpvLKpGS-rAJfOO98ZQmhzCkdj4zbq3BEH_XJDEJ2wIlvuNscu1HhfV55A37im1Lt0R-Im3rikctYX4mcVRlCCQJ00NA_KUJs5EPigqBZjo7FY9o1xjVuhXo1mOTs3Ozo18inuX0i5mWcuwEQ4oUPxS__NC4ARKTKfGJ4SHcxC3cdQfCLsCfi--AKfYZh5It4YXnuLnttNkRcFDD08lFBBlVKMOprwCcXJNCvzXEbJx9l9silBz_xWYUjed2PIY0ob_ErUiAj6uvMfJDtRu9cgj0pj2EEXyugYFASI2SU9lpz5_yzgFr5c_w",
-          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
-          "Content-Type": "application/json",
-          Prefer: 'odata.include-annotations="*"',
-        },
-      });
-
-      const responseJson = await response.json();
-
-      setCascadeAnalyses(responseJson.value);
-    };
-
-    getRiskFiles();
-    getCascades();
-    getDirectAnalyses();
-    getCascadeAnalyses();
-  }, []);
+  usePageTitle("BNRA 2023 - 2026 Expert Input Averager");
+  useBreadcrumbs([
+    { name: "BNRA 2023 - 2026", url: "/" },
+    { name: "Analysis", url: "/analysis" },
+    { name: "Input Averager", url: "" },
+  ]);
 
   const averageDirectAnalyses = async () => {
     if (riskFiles && directAnalyses) {
@@ -207,17 +146,17 @@ export default function AnalysisAveragerPage() {
 
         if (cascade && analyses.length > 0) {
           const fieldsToUpdate = {
-            cr4de_c2c: cascade.c2c || getAverage("cr4de_c2c", "CP", cascade, analyses),
-            cr4de_c2m: cascade.c2m || getAverage("cr4de_c2m", "CP", cascade, analyses),
-            cr4de_c2e: cascade.c2e || getAverage("cr4de_c2e", "CP", cascade, analyses),
+            cr4de_c2c: cascade.cr4de_c2c || getAverage("cr4de_c2c", "CP", cascade, analyses),
+            cr4de_c2m: cascade.cr4de_c2m || getAverage("cr4de_c2m", "CP", cascade, analyses),
+            cr4de_c2e: cascade.cr4de_c2e || getAverage("cr4de_c2e", "CP", cascade, analyses),
 
-            cr4de_m2c: cascade.m2c || getAverage("cr4de_m2c", "CP", cascade, analyses),
-            cr4de_m2m: cascade.m2m || getAverage("cr4de_m2m", "CP", cascade, analyses),
-            cr4de_m2e: cascade.m2e || getAverage("cr4de_m2e", "CP", cascade, analyses),
+            cr4de_m2c: cascade.cr4de_m2c || getAverage("cr4de_m2c", "CP", cascade, analyses),
+            cr4de_m2m: cascade.cr4de_m2m || getAverage("cr4de_m2m", "CP", cascade, analyses),
+            cr4de_m2e: cascade.cr4de_m2e || getAverage("cr4de_m2e", "CP", cascade, analyses),
 
-            cr4de_e2c: cascade.e2c || getAverage("cr4de_e2c", "CP", cascade, analyses),
-            cr4de_e2m: cascade.e2m || getAverage("cr4de_e2m", "CP", cascade, analyses),
-            cr4de_e2e: cascade.e2e || getAverage("cr4de_e2e", "CP", cascade, analyses),
+            cr4de_e2c: cascade.cr4de_e2c || getAverage("cr4de_e2c", "CP", cascade, analyses),
+            cr4de_e2m: cascade.cr4de_e2m || getAverage("cr4de_e2m", "CP", cascade, analyses),
+            cr4de_e2e: cascade.cr4de_e2e || getAverage("cr4de_e2e", "CP", cascade, analyses),
           };
 
           const response = await fetch(
@@ -245,37 +184,35 @@ export default function AnalysisAveragerPage() {
   };
 
   return (
-    <>
-      <Container sx={{ mt: 4, pb: 8 }}>
-        <Paper sx={{ p: 2 }}>
-          <Typography>{riskFiles ? `Loaded ${riskFiles.length} risk files` : "Loading risk files..."}</Typography>
-          <Typography>{cascades ? `Loaded ${cascades.length} risk cascades` : "Loading risk cascades..."}</Typography>
-          <Typography>
-            {directAnalyses
-              ? `Loaded ${directAnalyses.length} direct analysis objects to process`
-              : "Loading direct analyses..."}
+    <Container sx={{ mt: 4, pb: 8 }}>
+      <Paper sx={{ p: 2 }}>
+        <Typography>{riskFiles ? `Loaded ${riskFiles.length} risk files` : "Loading risk files..."}</Typography>
+        <Typography>{cascades ? `Loaded ${cascades.length} risk cascades` : "Loading risk cascades..."}</Typography>
+        <Typography>
+          {directAnalyses
+            ? `Loaded ${directAnalyses.length} direct analysis objects to process`
+            : "Loading direct analyses..."}
+        </Typography>
+        <Typography>
+          {cascadeAnalyses
+            ? `Loaded ${cascadeAnalyses.length} cascade analysis objects to process`
+            : "Loading cascade analyses..."}
+        </Typography>
+        {riskFiles && directAnalyses && updatedDAs > 0 && (
+          <Typography sx={{ mb: 2 }}>
+            Updating direct analysis averages ({updatedDAs}/{riskFiles.length})
           </Typography>
-          <Typography>
-            {cascadeAnalyses
-              ? `Loaded ${cascadeAnalyses.length} cascade analysis objects to process`
-              : "Loading cascade analyses..."}
+        )}
+        {cascades && cascadeAnalyses && updatedCAs > 0 && (
+          <Typography sx={{ mb: 2 }}>
+            Updating cascade analysis averages ({updatedCAs}/{cascades.length})
           </Typography>
-          {riskFiles && directAnalyses && updatedDAs > 0 && (
-            <Typography sx={{ mb: 2 }}>
-              Updating direct analysis averages ({updatedDAs}/{riskFiles.length})
-            </Typography>
-          )}
-          {cascades && cascadeAnalyses && updatedCAs > 0 && (
-            <Typography sx={{ mb: 2 }}>
-              Updating cascade analysis averages ({updatedCAs}/{cascades.length})
-            </Typography>
-          )}
-          <Stack direction="row">
-            <Button onClick={averageDirectAnalyses}>Average Direct Analyses</Button>
-            <Button onClick={averageCascadeAnalyses}>Average Cascade Analyses</Button>
-          </Stack>
-        </Paper>
-      </Container>
-    </>
+        )}
+        <Stack direction="row">
+          <Button onClick={averageDirectAnalyses}>Average Direct Analyses</Button>
+          <Button onClick={averageCascadeAnalyses}>Average Cascade Analyses</Button>
+        </Stack>
+      </Paper>
+    </Container>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -11,7 +11,6 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import useLoggedInUser from "../hooks/useLoggedInUser";
 
 export default function TitleBar({ title, onDrawerToggle }: { title: string; onDrawerToggle: () => void }) {
-  const navigate = useNavigate();
   const { user } = useLoggedInUser();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

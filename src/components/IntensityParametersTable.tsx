@@ -2,7 +2,13 @@ import React from "react";
 import { Box, Typography, Table, TableBody, TableCell, TableRow, TableHead, Skeleton } from "@mui/material";
 import { IntensityParameter } from "../functions/intensityParameters";
 
-function IntensityParameterTable({ parameters }: { parameters?: IntensityParameter[] }) {
+function IntensityParameterTable({
+  parameters,
+  editable = true,
+}: {
+  parameters?: IntensityParameter[];
+  editable?: boolean;
+}) {
   if (parameters === undefined)
     return (
       <Box mt={3}>

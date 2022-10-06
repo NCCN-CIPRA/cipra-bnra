@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CssBaseline, Box, Toolbar, Container } from "@mui/material";
+import { CssBaseline, Box, Toolbar } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import AppContext from "../functions/AppContext";
 import SideDrawer from "../components/SideDrawer";

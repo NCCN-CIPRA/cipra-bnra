@@ -14,6 +14,6 @@ export default function useLoggedInUser() {
     };
     getUser();
   }, [api, setUser, user]);
-  console.log(user);
+
   return { user };
 }

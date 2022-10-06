@@ -11,9 +11,14 @@ export default function BreadcrumbNavigation({ breadcrumbs }: { breadcrumbs: (Br
   return (
     <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />}>
       {breadcrumbs.map((b, i) => {
-        if (!b) return <Skeleton variant="text" width="200px" />;
+        if (!b) return <Skeleton key={i} variant="text" width="200px" />;
 
-        if (i === breadcrumbs.length - 1) return <Typography color="text.primary">{b.name}</Typography>;
+        if (i === breadcrumbs.length - 1)
+          return (
+            <Typography key={b.name} color="text.primary">
+              {b.name}
+            </Typography>
+          );
 
         return (
           <Link key={b.name} underline="hover" color="inherit" to={b.url} component={RouterLink}>

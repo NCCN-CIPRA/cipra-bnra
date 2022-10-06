@@ -3,7 +3,7 @@ import { Box, Typography } from "@mui/material";
 
 export default function ImpactSankey({ riskFile }: { riskFile: any }) {
   if (!riskFile) return null;
-  console.log(riskFile);
+
   const data = {
     nodes: [
       { name: riskFile.cr4de_title },
@@ -18,7 +18,7 @@ export default function ImpactSankey({ riskFile }: { riskFile: any }) {
         })),
     ],
     links: [
-      { source: 0, target: 1, value: riskFile.calculated.di },
+      ...(riskFile.calculated.di > 0 ? [{ source: 0, target: 1, value: riskFile.calculated.di }] : []),
       ...riskFile.calculated.effects
         .filter(
           (e: any, i: number) =>

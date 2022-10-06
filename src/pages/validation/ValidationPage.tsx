@@ -1,34 +1,29 @@
-import { useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
-import {
-  Box,
-  Container,
-  Typography,
-  Paper,
-  Divider,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  TableHead,
-  Button,
-  Skeleton,
-} from "@mui/material";
+import { Box, Container, Typography, Paper, Divider, Button, Skeleton } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import TextInputBox from "../../components/TextInputBox";
-import tableToJson from "../../functions/tableToJson";
 import TransferList from "../../components/TransferList";
 import SaveIcon from "@mui/icons-material/Save";
 import { DVValidation } from "../../types/dataverse/DVValidation";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import useAPI from "../../hooks/useAPI";
+import useAPI, { DataTable } from "../../hooks/useAPI";
 import * as S from "../../functions/scenarios";
 import * as HE from "../../functions/historicalEvents";
 import * as IP from "../../functions/intensityParameters";
+import useRecord from "../../hooks/useRecord";
+import useLazyRecords from "../../hooks/useLazyRecords";
+import useAutosave from "../../hooks/useAutosave";
+import usePageTitle from "../../hooks/usePageTitle";
+import useBreadcrumbs from "../../hooks/useBreadcrumbs";
+import { Breadcrumb } from "../../components/BreadcrumbNavigation";
+import ScenariosTable from "../../components/ScenariosTable";
+import IntensityParametersTable from "../../components/IntensityParametersTable";
+import HistoricalEventsTable from "../../components/HistoricalEventsTable";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -46,17 +41,21 @@ interface OtherHazard {
   cr4de_definition?: string;
 }
 
+type RouteParams = {
+  validation_id: string;
+};
+
+const defaultBreadcrumbs: Breadcrumb[] = [
+  { name: "BNRA 2023 - 2026", url: "/" },
+  { name: "Validation", url: "/validation" },
+];
+
 export default function ValidationPage() {
-  const params = useParams();
+  const params = useParams() as RouteParams;
   const navigate = useNavigate();
   const api = useAPI();
 
-  const [validation, setValidation] = useState<DVValidation<DVRiskFile> | null>(null);
   const [riskFile, setRiskFile] = useState<ProcessedRiskFile | null>(null);
-  const [otherHazards, setOtherHazards] = useState<OtherHazard[] | null>(null);
-  const [causes, setCauses] = useState<DVRiskCascade<OtherHazard>[] | null>(null);
-  const [effects, setEffects] = useState<DVRiskCascade<string, OtherHazard>[] | null>(null);
-  const [catalysing, setCatalysing] = useState<DVRiskCascade<OtherHazard>[] | null>(null);
 
   const [definitionFeedback, setDefinitionFeedback] = useState<string | undefined>(undefined);
   const [historicalEventsFeedback, setHistoricalEventsFeedback] = useState<string | undefined>(undefined);
@@ -67,24 +66,30 @@ export default function ValidationPage() {
   const [catalysingFeedback, setCatalysingFeedback] = useState<string | undefined>(undefined);
   const [horizonFeedback, setHorizonFeedback] = useState<string | undefined>(undefined);
 
-  const [saving, setSaving] = useState(false);
-
-  const fieldsToUpdate: any = {};
+  const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<OtherHazard>({
+    table: DataTable.RISK_FILE,
+  });
+  const [causes, setCauses] = useState<DVRiskCascade<OtherHazard>[] | null>(null);
+  const [catalysing, setCatalysing] = useState<DVRiskCascade<OtherHazard>[] | null>(null);
+  const { getData: getAllCauses } = useLazyRecords<DVRiskCascade<OtherHazard>>({
+    table: DataTable.RISK_CASCADE,
+    onComplete: async (allCauses) => {
+      setCauses(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk"));
+      setCatalysing(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk"));
+    },
+  });
+  const { data: effects, getData: getEffects } = useLazyRecords<DVRiskCascade<string, OtherHazard>>({
+    table: DataTable.RISK_CASCADE,
+  });
 
   /**
-   * This effect retrieves the Validation record from the database that is defined in the page url when the page loads
+   * Retrieve the Validation record from the database that is defined in the page url when the page loads
    */
-  useEffect(() => {
-    // Do not run this effect if the validation record has already been retrieved
-    if (validation) return;
-
-    const getValidation = async function () {
-      if (!params.validation_id) return;
-
-      const result = await api.getValidation<DVValidation<DVRiskFile>>(params.validation_id, "$expand=cr4de_RiskFile");
-
-      setValidation(result);
-
+  const { data: validation, reloadData: reloadValidation } = useRecord<DVValidation<DVRiskFile>>({
+    table: DataTable.VALIDATION,
+    id: params.validation_id,
+    query: "$expand=cr4de_RiskFile",
+    onComplete: async (result) => {
       const ips = IP.unwrap(result.cr4de_RiskFile.cr4de_intensity_parameters);
 
       // Parse complex data fields before displaying the risk file object
@@ -109,92 +114,112 @@ export default function ValidationPage() {
       setEffectsFeedback(result.cr4de_effects_feedback);
       setCatalysingFeedback(result.cr4de_catalysing_effects_feedback);
       setHorizonFeedback(result.cr4de_horizon_analysis_feedback);
-    };
 
-    getValidation();
-  }, [api, params.validation_id, validation]);
+      getOtherHazards({
+        query: `$filter=cr4de_riskfilesid ne ${processedRiskFile.cr4de_riskfilesid}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`,
+      });
+      getAllCauses({
+        query: `$filter=_cr4de_effect_hazard_value eq ${processedRiskFile.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+      });
+      getEffects({
+        query: `$filter=_cr4de_cause_hazard_value eq ${processedRiskFile.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+      });
+    },
+  });
 
-  useEffect(() => {
-    if (!riskFile || causes || effects || catalysing) return;
+  const updateValidation = useCallback(
+    async (fieldsToUpdate: Partial<DVValidation<DVRiskFile>>) => {
+      if (fieldsToUpdate === null) return;
 
-    const getOtherHazards = async function () {
-      const result = await api.getRiskFiles<OtherHazard>(
-        `$filter=cr4de_riskfilesid ne ${riskFile.cr4de_riskfilesid}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`
-      );
+      setIsSaving(true);
 
-      setOtherHazards(result);
-    };
+      await api.updateValidation(params.validation_id, fieldsToUpdate);
+      await reloadValidation();
 
-    const getCauses = async function () {
-      const result = await api.getRiskCascades<DVRiskCascade<OtherHazard>>(
-        `$filter=_cr4de_effect_hazard_value eq ${riskFile.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`
-      );
+      setIsSaving(false);
+    },
+    [api, params.validation_id, reloadValidation]
+  );
 
-      setCauses(result.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk"));
-      setCatalysing(result.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk"));
-    };
+  const [isSaving, setIsSaving] = useState(false);
 
-    const getEffects = async function () {
-      const result = await api.getRiskCascades<DVRiskCascade<string, OtherHazard>>(
-        `$filter=_cr4de_cause_hazard_value eq ${riskFile.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`
-      );
+  const { isSaving: isAutosaving, fieldsToUpdate } = useAutosave<DVValidation<DVRiskFile>>({
+    fields: {
+      cr4de_definition_feedback: definitionFeedback,
+      cr4de_historical_events_feedback: historicalEventsFeedback,
+      cr4de_intensity_parameters_feedback: parametersFeedback,
+      cr4de_scenarios_feedback: scenariosFeedback,
+      cr4de_horizon_analysis_feedback: horizonFeedback,
+      cr4de_causes_feedback: causesFeedback,
+      cr4de_effects_feedback: effectsFeedback,
+      cr4de_catalysing_effects_feedback: catalysingFeedback,
+    },
+    compareTo: validation || {},
+    handleSave: updateValidation,
+    enable: !isSaving && validation !== null,
+  });
 
-      setEffects(result);
-    };
+  usePageTitle("BNRA 2023 - 2026 Risk Identification: Validation");
+  useBreadcrumbs([...defaultBreadcrumbs, riskFile ? { name: riskFile.cr4de_title, url: "" } : null]);
 
-    getOtherHazards();
-    getCauses();
-    getEffects();
-  }, [api, catalysing, causes, effects, riskFile]);
+  // Calculate transfer list data (causes, effects, catalysing effect) and memorize for efficiency
+  const causesChoises = useMemo<OtherHazard[]>(
+    () =>
+      otherHazards && causes
+        ? otherHazards.filter((rf) => !causes.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid))
+        : [],
+    [causes, otherHazards]
+  );
+  const causesChosen = useMemo<OtherHazard[]>(
+    () =>
+      causes
+        ? causes.map((c) => ({
+            ...c.cr4de_cause_hazard,
+            reason: c.cr4de_reason,
+          }))
+        : [],
+    [causes]
+  );
 
-  if (validation) {
-    if (definitionFeedback !== validation.cr4de_definition_feedback)
-      fieldsToUpdate.cr4de_definition_feedback = definitionFeedback;
-    if (historicalEventsFeedback !== validation.cr4de_historical_events_feedback)
-      fieldsToUpdate.cr4de_historical_events_feedback = historicalEventsFeedback;
-    if (parametersFeedback !== validation.cr4de_intensity_parameters_feedback)
-      fieldsToUpdate.cr4de_intensity_parameters_feedback = parametersFeedback;
-    if (scenariosFeedback !== validation.cr4de_scenarios_feedback)
-      fieldsToUpdate.cr4de_scenarios_feedback = scenariosFeedback;
-    if (causesFeedback !== validation.cr4de_causes_feedback) fieldsToUpdate.cr4de_causes_feedback = causesFeedback;
-    if (effectsFeedback !== validation.cr4de_effects_feedback) fieldsToUpdate.cr4de_effects_feedback = effectsFeedback;
-    if (catalysingFeedback !== validation.cr4de_catalysing_effects_feedback)
-      fieldsToUpdate.cr4de_catalysing_effects_feedback = catalysingFeedback;
-    if (horizonFeedback !== validation.cr4de_horizon_analysis_feedback)
-      fieldsToUpdate.cr4de_horizon_analysis_feedback = horizonFeedback;
-  }
+  const effectsChoices = useMemo<OtherHazard[]>(
+    () =>
+      otherHazards && effects
+        ? otherHazards.filter((rf) => effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid))
+        : [],
+    [effects, otherHazards]
+  );
+  const effectsChosen = useMemo<OtherHazard[]>(
+    () =>
+      effects
+        ? effects.map((c) => ({
+            ...c.cr4de_effect_hazard,
+            reason: c.cr4de_reason,
+          }))
+        : [],
+    [effects]
+  );
 
-  const updateValidation = async () => {
-    if (!validation || !params.validation_id) return;
-
-    if (Object.keys(fieldsToUpdate).length <= 0) return;
-
-    await api.updateValidation(params.validation_id, fieldsToUpdate);
-
-    setValidation({
-      ...validation,
-      ...fieldsToUpdate,
-    });
-  };
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      if (Object.keys(fieldsToUpdate).length <= 0) return;
-
-      setSaving(true);
-
-      try {
-        await updateValidation();
-      } catch (e) {
-        // Empty by design
-      }
-
-      setSaving(false);
-    }, 10000);
-
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fieldsToUpdate]);
+  const catalysingChoices = useMemo<OtherHazard[]>(
+    () =>
+      otherHazards && catalysing
+        ? otherHazards.filter(
+            (rf) =>
+              rf.cr4de_risk_type === "Emerging Risk" &&
+              !catalysing.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
+          )
+        : [],
+    [catalysing, otherHazards]
+  );
+  const catalysingChosen = useMemo<OtherHazard[]>(
+    () =>
+      catalysing
+        ? catalysing.map((c) => ({
+            ...c.cr4de_cause_hazard,
+            reason: c.cr4de_reason,
+          }))
+        : [],
+    [catalysing]
+  );
 
   return (
     <>
@@ -268,39 +293,7 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              {riskFile ? (
-                <Table>
-                  <TableBody>
-                    {riskFile.historicalEvents ? (
-                      riskFile.historicalEvents.map((e, i) => (
-                        <TableRow key={i}>
-                          <TableCell sx={{ whiteSpace: "nowrap", verticalAlign: "top" }}>
-                            <Typography variant="subtitle1">{e.location}</Typography>
-                            <Typography variant="subtitle2">{e.time}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body1" paragraph>
-                              {e.description}
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={2} sx={{ textAlign: "center" }}>
-                          <Typography variant="subtitle1">No historical events suggested...</Typography>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              ) : (
-                <Box mt={3}>
-                  <Skeleton variant="text" />
-                  <Skeleton variant="text" />
-                  <Skeleton variant="text" />
-                </Box>
-              )}
+              <HistoricalEventsTable historicalEvents={riskFile?.historicalEvents} editable={false} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 Please provide any comments or feedback on the historical event examples of the hazard below:
@@ -332,44 +325,7 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              {riskFile ? (
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>Parameter Name</TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>Parameter Description</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {riskFile.intensityParameters ? (
-                      riskFile.intensityParameters.map((e, i) => (
-                        <TableRow key={i}>
-                          <TableCell sx={{ whiteSpace: "nowrap", verticalAlign: "top" }}>
-                            <Typography variant="body1">{e.name}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body1" paragraph>
-                              {e.description}
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={2} sx={{ textAlign: "center" }}>
-                          <Typography variant="subtitle1">No intensity parameters suggested...</Typography>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              ) : (
-                <Box mt={3}>
-                  <Skeleton variant="text" />
-                  <Skeleton variant="text" />
-                  <Skeleton variant="text" />
-                </Box>
-              )}
+              <IntensityParametersTable parameters={riskFile?.intensityParameters} editable={false} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 Please provide any comments or feedback on the intensity parameters of the hazard below:
@@ -407,56 +363,7 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              {riskFile ? (
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>Parameter Name</TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>Considerable</TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>Major</TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>Extreme</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {riskFile.intensityParameters ? (
-                      riskFile.intensityParameters.map((p, i) => (
-                        <TableRow key={i}>
-                          <TableCell sx={{ whiteSpace: "nowrap", verticalAlign: "top" }}>
-                            <Typography variant="body1">{p.name}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body1" paragraph>
-                              {riskFile.scenarios.considerable && riskFile.scenarios.considerable[i]?.value}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body1" paragraph>
-                              {riskFile.scenarios.major && riskFile.scenarios.major[i]?.value}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body1" paragraph>
-                              {riskFile.scenarios.extreme && riskFile.scenarios.extreme[i]?.value}
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={2} sx={{ textAlign: "center" }}>
-                          <Typography variant="subtitle1">No intensity parameters suggested...</Typography>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              ) : (
-                <Box mt={3}>
-                  <Skeleton variant="text" />
-                  <Skeleton variant="text" />
-                  <Skeleton variant="text" />
-                </Box>
-              )}
+              <ScenariosTable scenarios={riskFile?.scenarios} editable={false} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 Please provide any comments or feedback on the intensity scenarios of the hazard below:
@@ -614,13 +521,8 @@ export default function ValidationPage() {
 
               {causes !== null && otherHazards !== null && (
                 <TransferList
-                  choices={otherHazards.filter(
-                    (rf) => !causes.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
-                  )}
-                  chosen={causes.map((c) => ({
-                    ...c.cr4de_cause_hazard,
-                    reason: c.cr4de_reason,
-                  }))}
+                  choices={causesChoises}
+                  chosen={causesChosen}
                   choicesLabel="Non-causing hazards"
                   chosenLabel="Causing hazards"
                   chosenSubheader={`${causes.length} causes identified`}
@@ -663,13 +565,8 @@ export default function ValidationPage() {
 
               {effects !== null && otherHazards !== null && (
                 <TransferList
-                  choices={otherHazards.filter((rf) =>
-                    effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid)
-                  )}
-                  chosen={effects.map((c) => ({
-                    ...c.cr4de_effect_hazard,
-                    reason: c.cr4de_reason,
-                  }))}
+                  choices={effectsChoices}
+                  chosen={effectsChosen}
                   choicesLabel="Non-potential action hazards"
                   chosenLabel="Potential action hazards"
                   chosenSubheader={`${effects.length} potential actions identified`}
@@ -711,13 +608,8 @@ export default function ValidationPage() {
 
               {effects !== null && otherHazards !== null && (
                 <TransferList
-                  choices={otherHazards.filter(
-                    (rf) => !effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid)
-                  )}
-                  chosen={effects.map((c) => ({
-                    ...c.cr4de_effect_hazard,
-                    reason: c.cr4de_reason,
-                  }))}
+                  choices={effectsChoices}
+                  chosen={effectsChosen}
                   choicesLabel="Non-effect hazards"
                   chosenLabel="Effect hazards"
                   chosenSubheader={`${effects.length} effects identified`}
@@ -760,13 +652,8 @@ export default function ValidationPage() {
 
               {effects !== null && otherHazards !== null && (
                 <TransferList
-                  choices={otherHazards.filter(
-                    (rf) => !effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid)
-                  )}
-                  chosen={effects.map((c) => ({
-                    ...c.cr4de_effect_hazard,
-                    reason: c.cr4de_reason,
-                  }))}
+                  choices={effectsChoices}
+                  chosen={effectsChosen}
                   choicesLabel="Non-effect hazards"
                   chosenLabel="Effect hazards"
                   chosenSubheader={`${effects.length} effects identified`}
@@ -816,15 +703,8 @@ export default function ValidationPage() {
 
               {catalysing !== null && otherHazards !== null && (
                 <TransferList
-                  choices={otherHazards.filter(
-                    (rf) =>
-                      rf.cr4de_risk_type === "Emerging Risk" &&
-                      !catalysing.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
-                  )}
-                  chosen={catalysing.map((c) => ({
-                    ...c.cr4de_cause_hazard,
-                    reason: c.cr4de_reason,
-                  }))}
+                  choices={catalysingChoices}
+                  chosen={catalysingChosen}
                   choicesLabel="Non-catalysing hazards"
                   chosenLabel="Catalysing hazards"
                   chosenSubheader={`${catalysing.length} catalysing effects identified`}
@@ -865,17 +745,17 @@ export default function ValidationPage() {
           Exit
         </Button>
         <Box sx={{ flex: "1 1 auto" }} />
-        {saving && (
+        {(isSaving || isAutosaving) && (
           <LoadingButton color="secondary" sx={{ mr: 1 }} loading loadingPosition="start" startIcon={<SaveIcon />}>
             Saving
           </LoadingButton>
         )}
-        {!saving && Object.keys(fieldsToUpdate).length > 0 && (
-          <Button color="secondary" sx={{ mr: 1 }} onClick={updateValidation}>
+        {!(isSaving || isAutosaving) && fieldsToUpdate && (
+          <Button color="secondary" sx={{ mr: 1 }} onClick={() => updateValidation(fieldsToUpdate)}>
             Save
           </Button>
         )}
-        {!saving && Object.keys(fieldsToUpdate).length <= 0 && (
+        {!(isSaving || isAutosaving) && !fieldsToUpdate && (
           <Button color="secondary" disabled sx={{ mr: 1 }}>
             Saved
           </Button>
@@ -884,7 +764,7 @@ export default function ValidationPage() {
         <Button
           color="secondary"
           onClick={() => {
-            updateValidation();
+            if (fieldsToUpdate) updateValidation(fieldsToUpdate);
             navigate("/validation");
           }}
         >

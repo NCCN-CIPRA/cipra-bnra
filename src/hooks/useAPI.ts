@@ -1,15 +1,18 @@
 import { useNavigate } from "react-router-dom";
+import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DVContact } from "../types/dataverse/DVContact";
+import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { DVValidation } from "../types/dataverse/DVValidation";
 
 export enum DataTable {
   RISK_FILE,
-
   RISK_CASCADE,
 
   VALIDATION,
+  DIRECT_ANALYSIS,
+  CASCADE_ANALYSIS,
 }
 
 export interface AuthResponse<T = null> {
@@ -38,6 +41,14 @@ export interface API {
   getValidations<T = DVValidation>(query?: string): Promise<T[]>;
   getValidation<T = DVValidation>(id: string, query?: string): Promise<T>;
   updateValidation(id: string, fields: object): Promise<void>;
+
+  getDirectAnalyses<T = DVDirectAnalysis>(query?: string): Promise<T[]>;
+  getDirectAnalysis<T = DVDirectAnalysis>(id: string, query?: string): Promise<T>;
+  updateDirectAnalysis(id: string, fields: object): Promise<void>;
+
+  getCascadeAnalyses<T = DVCascadeAnalysis>(query?: string): Promise<T[]>;
+  getCascadeAnalysis<T = DVCascadeAnalysis>(id: string, query?: string): Promise<T>;
+  updateCascadeAnalysis(id: string, fields: object): Promise<void>;
 }
 
 export default function useAPI(): API {
@@ -212,6 +223,56 @@ export default function useAPI(): API {
     },
     updateValidation: async function (id: string, fields: object): Promise<void> {
       await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${id})`, {
+        method: "PATCH",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+    },
+
+    getDirectAnalyses: async function <T = DVDirectAnalysis>(query?: string): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises${query ? "?" + query : ""}`
+      );
+
+      return (await response.json()).value;
+    },
+    getDirectAnalysis: async function <T = DVDirectAnalysis>(id: string, query?: string): Promise<T> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})${query ? "?" + query : ""}`
+      );
+
+      return (await response.json()) as T;
+    },
+    updateDirectAnalysis: async function (id: string, fields: object): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})`, {
+        method: "PATCH",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+    },
+
+    getCascadeAnalyses: async function <T = DVCascadeAnalysis>(query?: string): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises${query ? "?" + query : ""}`
+      );
+
+      return (await response.json()).value;
+    },
+    getCascadeAnalysis: async function <T = DVCascadeAnalysis>(id: string, query?: string): Promise<T> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises(${id})${query ? "?" + query : ""}`
+      );
+
+      return (await response.json()) as T;
+    },
+    updateCascadeAnalysis: async function (id: string, fields: object): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises(${id})`, {
         method: "PATCH",
         headers: {
           __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",

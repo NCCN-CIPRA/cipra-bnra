@@ -1,8 +1,14 @@
 import React from "react";
-import { Box, Typography, Table, TableBody, TableCell, TableRow, TableHead, Skeleton } from "@mui/material";
+import { Box, Typography, Table, TableBody, TableCell, TableRow, Skeleton } from "@mui/material";
 import { HistoricalEvent } from "../functions/historicalEvents";
 
-function HistoricalEventsTable({ historicalEvents }: { historicalEvents?: HistoricalEvent[] }) {
+function HistoricalEventsTable({
+  historicalEvents,
+  editable = true,
+}: {
+  historicalEvents?: HistoricalEvent[];
+  editable?: boolean;
+}) {
   if (historicalEvents === undefined)
     return (
       <Box mt={3}>
