@@ -9,9 +9,12 @@ import {
   Toolbar,
   Box,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 export default function SideDrawer({ open, width, onClose }: { open: boolean; width: number; onClose: () => void }) {
+  const { t } = useTranslation();
+
   return (
     <Drawer
       open={open}
@@ -31,51 +34,51 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/editor" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
-              <ListItemText primary="Risk File Editor" />
+              <ListItemText primary={t("riskFile.appName")} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/validation" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
-              <ListItemText primary="Validation" />
+              <ListItemText primary={t("validation.appName")} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/analysisA" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
-              <ListItemText primary="Analysis A" />
+              <ListItemText primary={t("analysis.A.appName")} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/analysisA" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
-              <ListItemText primary="Analysis B" />
+              <ListItemText primary={t("analysis.B.appName")} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/analysisA" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
-              <ListItemText primary="Consensus" />
+              <ListItemText primary={t("consensus.appName")} />
             </ListItemButton>
           </ListItem>
           <Divider />
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/reporting" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
-              <ListItemText primary="Results Overview" />
+              <ListItemText primary={t("reporting.appName")} />
             </ListItemButton>
           </ListItem>
           <Divider />
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/analysis/averager" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
-              <ListItemText primary="Result Averager" />
+              <ListItemText primary={t("analysis.averager.appName")} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/analysis/calculator" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
-              <ListItemText primary="Risk Calculator" />
+              <ListItemText primary={t("analysis.calculator.appName")} />
             </ListItemButton>
           </ListItem>
         </List>

@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography, Table, TableBody, TableCell, TableRow, TableHead, Skeleton } from "@mui/material";
 import { IntensityParameter } from "../functions/intensityParameters";
+import { Trans } from "react-i18next";
 
 function IntensityParameterTable({
   parameters,
@@ -22,8 +23,12 @@ function IntensityParameterTable({
     <Table>
       <TableHead>
         <TableRow>
-          <TableCell sx={{ whiteSpace: "nowrap" }}>Parameter Name</TableCell>
-          <TableCell sx={{ whiteSpace: "nowrap" }}>Parameter Description</TableCell>
+          <TableCell sx={{ whiteSpace: "nowrap" }}>
+            <Trans i18nKey="intensityParameters.name">Parameter Name</Trans>
+          </TableCell>
+          <TableCell sx={{ whiteSpace: "nowrap" }}>
+            <Trans i18nKey="intensityParameters.description">Parameter Description</Trans>
+          </TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -43,7 +48,9 @@ function IntensityParameterTable({
         ) : (
           <TableRow>
             <TableCell colSpan={2} sx={{ textAlign: "center" }}>
-              <Typography variant="subtitle1">No intensity parameters suggested...</Typography>
+              <Typography variant="subtitle1">
+                <Trans i18nKey="intensityParameters.none">No intensity parameters suggested...</Trans>
+              </Typography>
             </TableCell>
           </TableRow>
         )}

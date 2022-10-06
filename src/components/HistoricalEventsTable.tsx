@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography, Table, TableBody, TableCell, TableRow, Skeleton } from "@mui/material";
 import { HistoricalEvent } from "../functions/historicalEvents";
+import { Trans } from "react-i18next";
 
 function HistoricalEventsTable({
   historicalEvents,
@@ -38,7 +39,9 @@ function HistoricalEventsTable({
         ) : (
           <TableRow>
             <TableCell colSpan={2} sx={{ textAlign: "center" }}>
-              <Typography variant="subtitle1">No historical events suggested...</Typography>
+              <Typography variant="subtitle1">
+                <Trans i18nKey="historicalEvents.none">No historical events suggested...</Trans>
+              </Typography>
             </TableCell>
           </TableRow>
         )}

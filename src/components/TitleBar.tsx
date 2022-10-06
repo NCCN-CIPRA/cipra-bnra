@@ -9,6 +9,7 @@ import { IconButton, Menu, MenuItem } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import useLoggedInUser from "../hooks/useLoggedInUser";
+import { Trans } from "react-i18next";
 
 export default function TitleBar({ title, onDrawerToggle }: { title: string; onDrawerToggle: () => void }) {
   const { user } = useLoggedInUser();
@@ -43,7 +44,7 @@ export default function TitleBar({ title, onDrawerToggle }: { title: string; onD
             </Typography>
             {user === null && (
               <Button color="inherit" component={Link} to="/auth">
-                Login
+                <Trans i18nKey="button.login">Login</Trans>
               </Button>
             )}
             {user !== undefined && user !== null && (
@@ -72,7 +73,7 @@ export default function TitleBar({ title, onDrawerToggle }: { title: string; onD
                       window.location.href = "https://bnra.powerappsportals.com/Account/Login/LogOff?returnUrl=/#/auth";
                     }}
                   >
-                    Log out
+                    <Trans i18nKey="button.logout">Log out</Trans>
                   </MenuItem>
                 </Menu>
               </>

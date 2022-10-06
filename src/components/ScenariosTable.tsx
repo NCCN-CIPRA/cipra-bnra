@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography, Table, TableBody, TableCell, TableRow, TableHead, Skeleton } from "@mui/material";
 import { Scenarios } from "../functions/scenarios";
+import { Trans } from "react-i18next";
 
 function ScenariosTable({ scenarios, editable = true }: { scenarios?: Scenarios; editable?: boolean }) {
   if (scenarios === undefined)
@@ -16,10 +17,18 @@ function ScenariosTable({ scenarios, editable = true }: { scenarios?: Scenarios;
     <Table>
       <TableHead>
         <TableRow>
-          <TableCell sx={{ whiteSpace: "nowrap" }}>Parameter Name</TableCell>
-          <TableCell sx={{ whiteSpace: "nowrap" }}>Considerable</TableCell>
-          <TableCell sx={{ whiteSpace: "nowrap" }}>Major</TableCell>
-          <TableCell sx={{ whiteSpace: "nowrap" }}>Extreme</TableCell>
+          <TableCell sx={{ whiteSpace: "nowrap" }}>
+            <Trans i18nKey="intensityParameters.name">Parameter Name</Trans>
+          </TableCell>
+          <TableCell sx={{ whiteSpace: "nowrap" }}>
+            <Trans i18nKey="scenarios.considerable">Considerable</Trans>
+          </TableCell>
+          <TableCell sx={{ whiteSpace: "nowrap" }}>
+            <Trans i18nKey="scenarios.major">Major</Trans>
+          </TableCell>
+          <TableCell sx={{ whiteSpace: "nowrap" }}>
+            <Trans i18nKey="scenarios.extreme">Extreme</Trans>
+          </TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -49,7 +58,9 @@ function ScenariosTable({ scenarios, editable = true }: { scenarios?: Scenarios;
         ) : (
           <TableRow>
             <TableCell colSpan={2} sx={{ textAlign: "center" }}>
-              <Typography variant="subtitle1">No intensity parameters suggested...</Typography>
+              <Typography variant="subtitle1">
+                <Trans i18nKey="scenarios.none">No intensity scenarios suggested...</Trans>
+              </Typography>
             </TableCell>
           </TableRow>
         )}

@@ -9,6 +9,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import Button from "@mui/material/Button";
 import { Divider, Typography } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { Trans } from "react-i18next";
 
 type SIDE = "LEFT" | "RIGHT";
 
@@ -98,7 +99,8 @@ function TransferList({
           }}
         >
           <Typography variant="subtitle2" mb={1}>
-            Definition of '{(selected.side === "LEFT" ? choices : chosen)[selected.index].cr4de_title}'
+            <Trans i18nKey="transferList.definition">Definition of</Trans> '
+            {(selected.side === "LEFT" ? choices : chosen)[selected.index].cr4de_title}'
           </Typography>
           <Box
             dangerouslySetInnerHTML={{
@@ -118,7 +120,7 @@ function TransferList({
           }}
         >
           <Typography variant="subtitle2" mb={1}>
-            Reason for the causal relationship
+            <Trans i18nKey="transferList.reason">Reason for the causal relationship</Trans>
           </Typography>
           <Box
             dangerouslySetInnerHTML={{

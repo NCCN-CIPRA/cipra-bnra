@@ -24,6 +24,7 @@ import { Breadcrumb } from "../../components/BreadcrumbNavigation";
 import ScenariosTable from "../../components/ScenariosTable";
 import IntensityParametersTable from "../../components/IntensityParametersTable";
 import HistoricalEventsTable from "../../components/HistoricalEventsTable";
+import { Trans, useTranslation } from "react-i18next";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -45,14 +46,10 @@ type RouteParams = {
   validation_id: string;
 };
 
-const defaultBreadcrumbs: Breadcrumb[] = [
-  { name: "BNRA 2023 - 2026", url: "/" },
-  { name: "Validation", url: "/validation" },
-];
-
 export default function ValidationPage() {
   const params = useParams() as RouteParams;
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const api = useAPI();
 
   const [riskFile, setRiskFile] = useState<ProcessedRiskFile | null>(null);
@@ -159,8 +156,12 @@ export default function ValidationPage() {
     enable: !isSaving && validation !== null,
   });
 
-  usePageTitle("BNRA 2023 - 2026 Risk Identification: Validation");
-  useBreadcrumbs([...defaultBreadcrumbs, riskFile ? { name: riskFile.cr4de_title, url: "" } : null]);
+  usePageTitle(t("validation.appFullName"));
+  useBreadcrumbs([
+    { name: t("bnra.shortName"), url: "/" },
+    { name: t("validation.appName"), url: "/validation" },
+    riskFile ? { name: riskFile.cr4de_title, url: "" } : null,
+  ]);
 
   // Calculate transfer list data (causes, effects, catalysing effect) and memorize for efficiency
   const causesChoises = useMemo<OtherHazard[]>(
@@ -226,10 +227,10 @@ export default function ValidationPage() {
       <Box m={2} ml="76px">
         <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />}>
           <Link underline="hover" color="inherit" to="/" component={RouterLink}>
-            BNRA 2023 - 2026
+            <Trans i18nKey="bnra.shortName">BNRA 2023 - 2026</Trans>
           </Link>
           <Link underline="hover" color="inherit" to="/validation" component={RouterLink}>
-            Validation
+            <Trans i18nKey="validation.appName">Validation</Trans>
           </Link>
           {riskFile ? (
             <Typography color="text.primary">{riskFile.cr4de_title}</Typography>
@@ -242,7 +243,7 @@ export default function ValidationPage() {
         <Paper>
           <Box p={2} my={4}>
             <Typography variant="h6" mb={1} color="secondary">
-              1. Definition
+              1. <Trans i18nKey="riskFile.definition.title">Definition</Trans>
             </Typography>
             <Divider />
             {riskFile ? (
@@ -261,7 +262,9 @@ export default function ValidationPage() {
             )}
 
             <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
-              Please provide any comments or feedback on the definition of the hazard below:
+              <Trans i18nKey="riskFile.definition.feedback">
+                Please provide any comments or feedback on the definition of the hazard below:
+              </Trans>
             </Typography>
 
             {validation ? (
@@ -279,24 +282,30 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               <Typography variant="h6" mb={1} color="secondary">
-                2. Historical Events
+                2. <Trans i18nKey="riskFile.historicalEvents.title">Historical Events</Trans>
               </Typography>
               <Divider />
 
               <Box mt={1}>
                 <Typography variant="caption" paragraph>
-                  Examples of events corresponding to the definition of this hazard in Belgium or other countries.
+                  <Trans i18nKey="riskFile.historicalEvents.helpText1">
+                    Examples of events corresponding to the definition of this hazard in Belgium or other countries.
+                  </Trans>
                 </Typography>
                 <Typography variant="caption" paragraph>
-                  This field is optional and serves as a guide when determining intensity parameters and building
-                  scenarios. It is in no way meant to be a complete overview of all known events.
+                  <Trans i18nKey="riskFile.historicalEvents.helpText2">
+                    This field is optional and serves as a guide when determining intensity parameters and building
+                    scenarios. It is in no way meant to be a complete overview of all known events.
+                  </Trans>
                 </Typography>
               </Box>
 
               <HistoricalEventsTable historicalEvents={riskFile?.historicalEvents} editable={false} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
-                Please provide any comments or feedback on the historical event examples of the hazard below:
+                <Trans i18nKey="riskFile.historicalEvents.feedback">
+                  Please provide any comments or feedback on the historical event examples of the hazard below:
+                </Trans>
               </Typography>
 
               {validation ? (
@@ -315,20 +324,24 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               <Typography variant="h6" mb={1} color="secondary">
-                3. Intensity Parameters
+                3. <Trans i18nKey="riskFile.intensityParameters.title">Intensity Parameters</Trans>
               </Typography>
               <Divider />
 
               <Box mt={1}>
                 <Typography variant="caption" paragraph>
-                  Factors which influence the evolution and consequences of an event of this type.
+                  <Trans i18nKey="riskFile.intensityParameters.helpText">
+                    Factors which influence the evolution and consequences of an event of this type.
+                  </Trans>
                 </Typography>
               </Box>
 
               <IntensityParametersTable parameters={riskFile?.intensityParameters} editable={false} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
-                Please provide any comments or feedback on the intensity parameters of the hazard below:
+                <Trans i18nKey="riskFile.intensityParameters.feedback">
+                  Please provide any comments or feedback on the intensity parameters of the hazard below:
+                </Trans>
               </Typography>
 
               {validation ? (
@@ -347,26 +360,32 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               <Typography variant="h6" mb={1} color="secondary">
-                4. Intensity Scenarios
+                4. <Trans i18nKey="riskFile.intensityScenarios.title">Intensity Scenarios</Trans>
               </Typography>
 
               <Divider />
 
               <Box mt={1}>
                 <Typography variant="caption" paragraph>
-                  Outline of the scenarios according to three levels of intensity - <i>considerable, major</i> and{" "}
-                  <i>extreme</i> - described in terms of the intensity parameters defined in the previous section.
+                  <Trans i18nKey="riskFile.intensityScenarios.helpText1">
+                    Outline of the scenarios according to three levels of intensity - <i>considerable, major</i> and{" "}
+                    <i>extreme</i> - described in terms of the intensity parameters defined in the previous section.
+                  </Trans>
                 </Typography>
                 <Typography variant="caption" paragraph>
-                  Each scenario should be intuitively differentiable with respect to its impact, but no strict rules are
-                  defined as to the limits of the scenarios.
+                  <Trans i18nKey="riskFile.intensityScenarios.helpText2">
+                    Each scenario should be intuitively differentiable with respect to its impact, but no strict rules
+                    are defined as to the limits of the scenarios.
+                  </Trans>
                 </Typography>
               </Box>
 
               <ScenariosTable scenarios={riskFile?.scenarios} editable={false} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
-                Please provide any comments or feedback on the intensity scenarios of the hazard below:
+                <Trans i18nKey="riskFile.intensityScenarios.feedback">
+                  Please provide any comments or feedback on the intensity scenarios of the hazard below:
+                </Trans>
               </Typography>
 
               {validation ? (
@@ -385,36 +404,46 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               <Typography variant="h6" mb={1} color="secondary">
-                2. Actor Capabilities
+                2. <Trans i18nKey="riskFile.actorCapabilities.title">Actor Capabilities</Trans>
               </Typography>
 
               <Divider />
 
               <Box mt={1}>
                 <Typography variant="caption" paragraph>
-                  Outline of the actor groups according to three levels of capabilities - <i>considerable, major</i> and{" "}
-                  <i>extreme</i>.
+                  <Trans i18nKey="riskFile.actorCapabilities.helpText1">
+                    Outline of the actor groups according to three levels of capabilities - <i>considerable, major</i>{" "}
+                    and <i>extreme</i>.
+                  </Trans>
                 </Typography>
                 <Typography variant="caption" paragraph>
-                  The information contained in the risk files is considered 'Limited Distribution'.
+                  <Trans i18nKey="riskFile.actorCapabilities.helpText2">
+                    The information contained in the risk files is considered 'Limited Distribution'.
+                  </Trans>
                 </Typography>
               </Box>
 
               {riskFile ? (
                 <Box>
-                  <Typography variant="subtitle2">Considerable Capabilities</Typography>
+                  <Typography variant="subtitle2">
+                    <Trans i18nKey="riskFile.actorCapabilities.considerable">Considerable Capabilities</Trans>
+                  </Typography>
                   <Box
                     dangerouslySetInnerHTML={{
                       __html: riskFile.scenarios.considerable ? riskFile.scenarios.considerable[0].value : "",
                     }}
                   />
-                  <Typography variant="subtitle2">Major Capabilities</Typography>
+                  <Typography variant="subtitle2">
+                    <Trans i18nKey="riskFile.actorCapabilities.major">Major Capabilities</Trans>
+                  </Typography>
                   <Box
                     dangerouslySetInnerHTML={{
                       __html: riskFile.scenarios.major ? riskFile.scenarios.major[0].value : "",
                     }}
                   />
-                  <Typography variant="subtitle2">Extreme Capabilities</Typography>
+                  <Typography variant="subtitle2">
+                    <Trans i18nKey="riskFile.actorCapabilities.extreme">Extreme Capabilities</Trans>
+                  </Typography>
                   <Box
                     dangerouslySetInnerHTML={{
                       __html: riskFile.scenarios.extreme ? riskFile.scenarios.extreme[0].value : "",
@@ -430,7 +459,9 @@ export default function ValidationPage() {
               )}
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
-                Please provide any comments or feedback on the actor capabilities of the hazard below:
+                <Trans i18nKey="riskFile.actorCapabilities.feedback">
+                  Please provide any comments or feedback on the actor capabilities of the hazard below:
+                </Trans>
               </Typography>
 
               {validation ? (
@@ -449,22 +480,28 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               <Typography variant="h6" mb={1} color="secondary">
-                2. Horizon Analysis
+                2. <Trans i18nKey="riskFile.horizonAnalysis.title">Horizon Analysis</Trans>
               </Typography>
 
               <Divider />
 
               <Box mt={1}>
                 <Typography variant="caption" paragraph>
-                  This section should include a qualitative (or quantitative if possible) description of one or more
-                  possible evolution pathways of the emerging risk (e.g. different GHG emission pathways for climate
-                  change scenario’s, adoption curves for new technologies, …), including potential timeframes or trigger
-                  events.
+                  <Trans i18nKey="riskFile.horizonAnalysis.helpText1">
+                    This section should include a qualitative (or quantitative if possible) description of one or more
+                    possible evolution pathways of the emerging risk (e.g. different GHG emission pathways for climate
+                    change scenario’s, adoption curves for new technologies, …), including potential timeframes or
+                    trigger events.
+                  </Trans>
                 </Typography>
                 <Typography variant="caption" paragraph>
-                  {
-                    "The horizon analysis investigates and tries to predict at what speed the emerging risk manifests itself. Will a new technology or phenomenon become mature or more prominent in the near future (e.g. 5-10 years) or rather long-term (>30-50 years)? Due to the uncertainty that emerging risks present, it is encouraged to discuss multiple scenarios with which these risks may emerge and influence others."
-                  }
+                  <Trans i18nKey="riskFile.horizonAnalysis.helpText2">
+                    The horizon analysis investigates and tries to predict at what speed the emerging risk manifests
+                    itself. Will a new technology or phenomenon become mature or more prominent in the near future (e.g.
+                    5-10 years) or rather long-term (30-50 years)? Due to the uncertainty that emerging risks present,
+                    it is encouraged to discuss multiple scenarios with which these risks may emerge and influence
+                    others.
+                  </Trans>
                 </Typography>
               </Box>
 
@@ -484,7 +521,9 @@ export default function ValidationPage() {
               )}
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
-                Please provide any comments or feedback on the horizon analysis of the emerging risk below:
+                <Trans i18nKey="riskFile.horizonAnalysis.feedback">
+                  Please provide any comments or feedback on the horizon analysis of the emerging risk below:
+                </Trans>
               </Typography>
 
               {validation ? (
@@ -503,19 +542,23 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               <Typography variant="h6" mb={1} color="secondary">
-                5. Causing Hazards
+                5. <Trans i18nKey="riskFile.causes.title">Causing Hazards</Trans>
               </Typography>
               <Divider />
 
               <Box mt={1}>
                 <Typography variant="caption" paragraph>
-                  This section identifies other hazards in the BNRA hazard catalogue that may cause the current hazard.
-                  A short reason should be provided for each non-trivial causal relation.
+                  <Trans i18nKey="riskFile.causes.helpText1">
+                    This section identifies other hazards in the BNRA hazard catalogue that may cause the current
+                    hazard. A short reason should be provided for each non-trivial causal relation.
+                  </Trans>
                 </Typography>
                 <Typography variant="caption" paragraph>
-                  On the left are the hazards that were identified by NCCN analist as being a potential cause. On the
-                  right are all the other hazards in the hazard catalogue. The definition of a hazard selected in the
-                  windows below can be found beneath the comment box.
+                  <Trans i18nKey="riskFile.causes.helpText2">
+                    On the left are the hazards that were identified by NCCN analist as being a potential cause. On the
+                    right are all the other hazards in the hazard catalogue. The definition of a hazard selected in the
+                    windows below can be found beneath the comment box.
+                  </Trans>
                 </Typography>
               </Box>
 
@@ -523,14 +566,16 @@ export default function ValidationPage() {
                 <TransferList
                   choices={causesChoises}
                   chosen={causesChosen}
-                  choicesLabel="Non-causing hazards"
-                  chosenLabel="Causing hazards"
+                  choicesLabel={t("riskFile.causes.choices")}
+                  chosenLabel={t("riskFile.causes.chosen")}
                   chosenSubheader={`${causes.length} causes identified`}
                 />
               )}
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
-                Please provide any comments or feedback on the intensity scenarios of the hazard below:
+                <Trans i18nKey="riskFile.causes.feedback">
+                  Please provide any comments or feedback on the intensity scenarios of the hazard below:
+                </Trans>
               </Typography>
 
               {validation ? (
@@ -546,20 +591,24 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               <Typography variant="h6" mb={1} color="secondary">
-                3. Malicious Actions
+                3. <Trans i18nKey="riskFile.maliciousActions.title">Malicious Actions</Trans>
               </Typography>
               <Divider />
 
               <Box mt={1}>
                 <Typography variant="caption" paragraph>
-                  This section tries to identify potential malicious actions in the BNRA hazard catalogue that may be
-                  taken by the actors described by this hazard. A short reason should be provided for each non-evident
-                  action.
+                  <Trans i18nKey="riskFile.maliciousActions.helpText1">
+                    This section tries to identify potential malicious actions in the BNRA hazard catalogue that may be
+                    taken by the actors described by this hazard. A short reason should be provided for each non-evident
+                    action.
+                  </Trans>
                 </Typography>
                 <Typography variant="caption" paragraph>
-                  On the left are the hazards that were identified by NCCN analist as being a potential malicious
-                  actions. On the right are all the other malicious actions in the hazard catalogue. The definition of a
-                  hazard selected in the windows below can be found beneath the comment box.
+                  <Trans i18nKey="riskFile.maliciousActions.helpText2">
+                    On the left are the hazards that were identified by NCCN analist as being a potential malicious
+                    actions. On the right are all the other malicious actions in the hazard catalogue. The definition of
+                    a hazard selected in the windows below can be found beneath the comment box.
+                  </Trans>
                 </Typography>
               </Box>
 
@@ -567,14 +616,16 @@ export default function ValidationPage() {
                 <TransferList
                   choices={effectsChoices}
                   chosen={effectsChosen}
-                  choicesLabel="Non-potential action hazards"
-                  chosenLabel="Potential action hazards"
+                  choicesLabel={t("riskFile.maliciousActions.choices")}
+                  chosenLabel={t("riskFile.maliciousActions.chosen")}
                   chosenSubheader={`${effects.length} potential actions identified`}
                 />
               )}
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
-                Please provide any comments or feedback on the list of potential actions of these actors below:
+                <Trans i18nKey="riskFile.maliciousActions.feedback">
+                  Please provide any comments or feedback on the list of potential actions of these actors below:
+                </Trans>
               </Typography>
 
               {validation ? (
@@ -590,19 +641,23 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               <Typography variant="h6" mb={1} color="secondary">
-                6. Effect Hazards
+                6. <Trans i18nKey="riskFile.effects.title">Effect Hazards</Trans>
               </Typography>
               <Divider />
 
               <Box mt={1}>
                 <Typography variant="caption" paragraph>
-                  This section identifies other hazards in the BNRA hazard catalogue that may be a direct consequence of
-                  the current hazard. A short reason should be provided for each non-trivial causal relation.
+                  <Trans i18nKey="riskFile.effects.helpText.part1">
+                    This section identifies other hazards in the BNRA hazard catalogue that may be a direct consequence
+                    of the current hazard. A short reason should be provided for each non-trivial causal relation.
+                  </Trans>
                 </Typography>
                 <Typography variant="caption" paragraph>
-                  On the left are the hazards that were identified by NCCN analist as being a potential effect. On the
-                  right are all the other hazards in the hazard catalogue. The definition of a hazard selected in the
-                  windows below can be found beneath the comment box.
+                  <Trans i18nKey="riskFile.effects.helpText.part2">
+                    On the left are the hazards that were identified by NCCN analist as being a potential effect. On the
+                    right are all the other hazards in the hazard catalogue. The definition of a hazard selected in the
+                    windows below can be found beneath the comment box.
+                  </Trans>
                 </Typography>
               </Box>
 
@@ -610,14 +665,16 @@ export default function ValidationPage() {
                 <TransferList
                   choices={effectsChoices}
                   chosen={effectsChosen}
-                  choicesLabel="Non-effect hazards"
-                  chosenLabel="Effect hazards"
+                  choicesLabel={t("riskFile.effects.choices")}
+                  chosenLabel={t("riskFile.effects.chosen")}
                   chosenSubheader={`${effects.length} effects identified`}
                 />
               )}
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
-                Please provide any comments or feedback on the intensity scenarios of the hazard below:
+                <Trans i18nKey="riskFile.effects.feedback">
+                  Please provide any comments or feedback on the intensity scenarios of the hazard below:
+                </Trans>
               </Typography>
 
               {validation ? (
@@ -633,20 +690,24 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               <Typography variant="h6" mb={1} color="secondary">
-                3. Catalysing effects
+                3. <Trans i18nKey="riskFile.catalysedEffects.title">Catalysing Effects</Trans>
               </Typography>
               <Divider />
 
               <Box mt={1}>
                 <Typography variant="caption" paragraph>
-                  This section tries to identify other hazards in the BNRA hazard catalogue that may be catalysed by the
-                  current emerging risk (this means in the future it may affect the probability and/or impact of the
-                  other hazard). A short reason may be provided for each non-trivial causal relation.
+                  <Trans i18nKey="riskFile.catalysedEffects.helpText.part1">
+                    This section tries to identify other hazards in the BNRA hazard catalogue that may be catalysed by
+                    the current emerging risk (this means in the future it may affect the probability and/or impact of
+                    the other hazard). A short reason may be provided for each non-trivial causal relation.
+                  </Trans>
                 </Typography>
                 <Typography variant="caption" paragraph>
-                  On the left are the hazards that may experience a catalysing effect. On the right are all the other
-                  risks in the hazard catalogue. The definition of a hazard selected in the windows below can be found
-                  beneath the comment box.
+                  <Trans i18nKey="riskFile.catalysedEffects.helpText.part2">
+                    On the left are the hazards that may experience a catalysing effect. On the right are all the other
+                    risks in the hazard catalogue. The definition of a hazard selected in the windows below can be found
+                    beneath the comment box.
+                  </Trans>
                 </Typography>
               </Box>
 
@@ -654,14 +715,16 @@ export default function ValidationPage() {
                 <TransferList
                   choices={effectsChoices}
                   chosen={effectsChosen}
-                  choicesLabel="Non-effect hazards"
-                  chosenLabel="Effect hazards"
+                  choicesLabel={t("riskFile.catalysedEffects.choices")}
+                  chosenLabel={t("riskFile.catalysedEffects.chosen")}
                   chosenSubheader={`${effects.length} effects identified`}
                 />
               )}
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
-                Please provide any comments or feedback on the intensity scenarios of the hazard below:
+                <Trans i18nKey="riskFile.catalysedEffects.feedback">
+                  Please provide any comments or feedback on the intensity scenarios of the hazard below:
+                </Trans>
               </Typography>
 
               {validation ? (
@@ -678,26 +741,30 @@ export default function ValidationPage() {
             <Box p={2} my={8}>
               {riskFile.cr4de_risk_type === "Standard Risk" && (
                 <Typography variant="h6" mb={1} color="secondary">
-                  7. Catalysing Effects
+                  7. <Trans i18nKey="riskFile.catalysingEffects.title">Catalysing Effects</Trans>
                 </Typography>
               )}
               {riskFile.cr4de_risk_type === "Malicious Man-made Risk" && (
                 <Typography variant="h6" mb={1} color="secondary">
-                  4. Catalysing Effects
+                  4. <Trans i18nKey="riskFile.catalysingEffects.title">Catalysing Effects</Trans>
                 </Typography>
               )}
               <Divider />
 
               <Box mt={1}>
                 <Typography variant="caption" paragraph>
-                  This section tries to identifies the emerging risks in the BNRA hazard catalogue that may catalyse the
-                  current hazard (this means in the future it may have an effect on the probability and/or impact of
-                  this hazard). A short reason may be provided for each non-trivial causal relation.
+                  <Trans i18nKey="riskFile.catalysingEffects.helpText.part1">
+                    This section tries to identifies the emerging risks in the BNRA hazard catalogue that may catalyse
+                    the current hazard (this means in the future it may have an effect on the probability and/or impact
+                    of this hazard). A short reason may be provided for each non-trivial causal relation.
+                  </Trans>
                 </Typography>
                 <Typography variant="caption" paragraph>
-                  On the left are the hazards that were identified by NCCN analists as having a potential catalysing
-                  effect. On the right are all the other emerging risks in the hazard catalogue. The definition of a
-                  hazard selected in the windows below can be found beneath the comment box.
+                  <Trans i18nKey="riskFile.catalysingEffects.helpText.part2">
+                    On the left are the hazards that were identified by NCCN analists as having a potential catalysing
+                    effect. On the right are all the other emerging risks in the hazard catalogue. The definition of a
+                    hazard selected in the windows below can be found beneath the comment box.
+                  </Trans>
                 </Typography>
               </Box>
 
@@ -705,14 +772,16 @@ export default function ValidationPage() {
                 <TransferList
                   choices={catalysingChoices}
                   chosen={catalysingChosen}
-                  choicesLabel="Non-catalysing hazards"
-                  chosenLabel="Catalysing hazards"
+                  choicesLabel={t("riskFile.catalysingEffects.choices")}
+                  chosenLabel={t("riskFile.catalysingEffects.chosen")}
                   chosenSubheader={`${catalysing.length} catalysing effects identified`}
                 />
               )}
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
-                Please provide any comments or feedback on the intensity scenarios of the hazard below:
+                <Trans i18nKey="riskFile.catalysingEffects.feedback">
+                  Please provide any comments or feedback on the catalysing effects of the hazard below:
+                </Trans>
               </Typography>
 
               {validation ? (
@@ -742,22 +811,22 @@ export default function ValidationPage() {
         elevation={5}
       >
         <Button color="error" sx={{ mr: 1 }} component={RouterLink} to="/validation">
-          Exit
+          <Trans i18nKey="button.exit">Exit</Trans>
         </Button>
         <Box sx={{ flex: "1 1 auto" }} />
         {(isSaving || isAutosaving) && (
           <LoadingButton color="secondary" sx={{ mr: 1 }} loading loadingPosition="start" startIcon={<SaveIcon />}>
-            Saving
+            <Trans i18nKey="button.saving">Saving</Trans>
           </LoadingButton>
         )}
         {!(isSaving || isAutosaving) && fieldsToUpdate && (
           <Button color="secondary" sx={{ mr: 1 }} onClick={() => updateValidation(fieldsToUpdate)}>
-            Save
+            <Trans i18nKey="button.save">Save</Trans>
           </Button>
         )}
         {!(isSaving || isAutosaving) && !fieldsToUpdate && (
           <Button color="secondary" disabled sx={{ mr: 1 }}>
-            Saved
+            <Trans i18nKey="button.saved">Saved</Trans>
           </Button>
         )}
 
@@ -768,7 +837,7 @@ export default function ValidationPage() {
             navigate("/validation");
           }}
         >
-          Save & Exit
+          <Trans i18nKey="button.saveAndExit">Save & Exit</Trans>
         </Button>
       </Box>
     </>
