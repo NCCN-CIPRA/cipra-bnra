@@ -1,6 +1,19 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useRef, useState, useCallback } from "react";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
-import { Box, Container, Typography, Paper, Divider, Button, Skeleton } from "@mui/material";
+import {
+  Stack,
+  Box,
+  Container,
+  Typography,
+  Paper,
+  Snackbar,
+  Alert,
+  Divider,
+  Button,
+  Skeleton,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import TextInputBox from "../../components/TextInputBox";
 import TransferList from "../../components/TransferList";
@@ -20,21 +33,15 @@ import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import HistoricalEventsTable from "../../components/HistoricalEventsTable";
 import IntensityParametersTable from "../../components/IntensityParametersTable";
 import ScenariosTable from "../../components/ScenariosTable";
+import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
+import useLoggedInUser from "../../hooks/useLoggedInUser";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
   intensityParameters: IP.IntensityParameter[];
   scenarios: S.Scenarios;
-}
-
-interface OtherHazard {
-  cr4de_riskfilesid: string;
-  cr4de_hazard_id: string;
-
-  cr4de_title: string;
-  cr4de_risk_type: string;
-
-  cr4de_definition?: string;
 }
 
 type RouteParams = {
@@ -50,6 +57,12 @@ export default function EditorPage() {
   const api = useAPI();
   const params = useParams() as RouteParams;
   const navigate = useNavigate();
+  const { user } = useLoggedInUser();
+
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const [uploadField, setUploadField] = useState<string | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const [isUploadingFinished, setIsUploadingFinished] = useState(false);
 
   const [definition, setDefinition] = useState<string | null>(null);
   const [historicalEvents, setHistoricalEvents] = useState<HE.HistoricalEvent[] | null>(null);
@@ -57,20 +70,23 @@ export default function EditorPage() {
   const [scenarios, setScenarios] = useState<S.Scenarios | null>(null);
   const [horizon, setHorizon] = useState<string | null>(null);
 
-  const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<OtherHazard>({
+  const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<SmallRisk>({
     table: DataTable.RISK_FILE,
   });
-  const [causes, setCauses] = useState<DVRiskCascade<OtherHazard>[] | null>(null);
-  const [catalysing, setCatalysing] = useState<DVRiskCascade<OtherHazard>[] | null>(null);
-  const { getData: getAllCauses } = useLazyRecords<DVRiskCascade<OtherHazard>>({
+  const [causes, setCauses] = useState<DVRiskCascade<SmallRisk>[] | null>(null);
+  const [catalysing, setCatalysing] = useState<DVRiskCascade<SmallRisk>[] | null>(null);
+  const { data: allCauses, getData: getAllCauses } = useLazyRecords<DVRiskCascade<SmallRisk>>({
     table: DataTable.RISK_CASCADE,
     onComplete: async (allCauses) => {
       setCauses(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk"));
       setCatalysing(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk"));
     },
   });
-  const { data: effects, getData: getEffects } = useLazyRecords<DVRiskCascade<string, OtherHazard>>({
+  const { data: effects, getData: getEffects } = useLazyRecords<DVRiskCascade<string, SmallRisk>>({
     table: DataTable.RISK_CASCADE,
+  });
+  const { data: attachments, getData: getAttachments } = useLazyRecords<DVAttachment>({
+    table: DataTable.ATTACHMENT,
   });
 
   const { data: riskFile, reloadData: reloadRiskFile } = useRecord<ProcessedRiskFile>({
@@ -98,15 +114,19 @@ export default function EditorPage() {
       setScenarios(rf.scenarios);
       setHorizon(rf.cr4de_horizon_analysis || null);
 
-      getOtherHazards({
-        query: `$filter=cr4de_riskfilesid ne ${rf.cr4de_riskfilesid}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`,
-      });
-      getAllCauses({
-        query: `$filter=_cr4de_effect_hazard_value eq ${rf.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-      });
-      getEffects({
-        query: `$filter=_cr4de_cause_hazard_value eq ${rf.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-      });
+      if (!otherHazards)
+        getOtherHazards({
+          query: `$filter=cr4de_riskfilesid ne ${rf.cr4de_riskfilesid}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`,
+        });
+      if (!allCauses)
+        getAllCauses({
+          query: `$filter=_cr4de_effect_hazard_value eq ${rf.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+        });
+      if (!effects)
+        getEffects({
+          query: `$filter=_cr4de_cause_hazard_value eq ${rf.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+        });
+      if (!attachments) getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${rf.cr4de_riskfilesid}` });
     },
   });
 
@@ -145,43 +165,45 @@ export default function EditorPage() {
   useBreadcrumbs([...defaultBreadcrumbs, riskFile ? { name: riskFile.cr4de_title, url: "" } : null]);
 
   // Calculate transfer list data (causes, effects, catalysing effect) and memorize for efficiency
-  const causesChoises = useMemo<OtherHazard[]>(
+  const causesChoises = useMemo<SmallRisk[]>(
     () =>
       otherHazards && causes
         ? otherHazards.filter((rf) => !causes.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid))
         : [],
     [causes, otherHazards]
   );
-  const causesChosen = useMemo<OtherHazard[]>(
+  const causesChosen = useMemo(
     () =>
       causes
         ? causes.map((c) => ({
             ...c.cr4de_cause_hazard,
+            cascadeId: c.cr4de_bnrariskcascadeid,
             reason: c.cr4de_reason,
           }))
         : [],
     [causes]
   );
 
-  const effectsChoices = useMemo<OtherHazard[]>(
+  const effectsChoices = useMemo<SmallRisk[]>(
     () =>
       otherHazards && effects
         ? otherHazards.filter((rf) => effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid))
         : [],
     [effects, otherHazards]
   );
-  const effectsChosen = useMemo<OtherHazard[]>(
+  const effectsChosen = useMemo(
     () =>
       effects
         ? effects.map((c) => ({
             ...c.cr4de_effect_hazard,
+            cascadeId: c.cr4de_bnrariskcascadeid,
             reason: c.cr4de_reason,
           }))
         : [],
     [effects]
   );
 
-  const catalysingChoices = useMemo<OtherHazard[]>(
+  const catalysingChoices = useMemo<SmallRisk[]>(
     () =>
       otherHazards && catalysing
         ? otherHazards.filter(
@@ -192,26 +214,73 @@ export default function EditorPage() {
         : [],
     [catalysing, otherHazards]
   );
-  const catalysingChosen = useMemo<OtherHazard[]>(
+  const catalysingChosen = useMemo(
     () =>
       catalysing
         ? catalysing.map((c) => ({
             ...c.cr4de_cause_hazard,
+            cascadeId: c.cr4de_bnrariskcascadeid,
             reason: c.cr4de_reason,
           }))
         : [],
     [catalysing]
   );
 
+  const handleAttach = (field: string | null) => () => {
+    if (!uploadRef.current) return;
+
+    setUploadField(field);
+    uploadRef.current.click();
+  };
+
+  const handleUploadAttachment = async (e: React.FormEvent<HTMLInputElement>) => {
+    if (!riskFile || !uploadRef.current || !uploadRef.current.files || uploadRef.current.files.length <= 0) return;
+
+    setIsUploadingFile(true);
+
+    const file = uploadRef.current.files[0];
+
+    await api.createAttachment(
+      {
+        "cr4de_owner@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+        cr4de_name: file.name,
+        cr4de_reference: attachments ? attachments.reduce((max, a) => Math.max(max, a.cr4de_reference), -1) + 1 : 1,
+        cr4de_field: uploadField,
+        "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
+      },
+      file
+    );
+
+    setIsUploadingFile(false);
+    setIsUploadingFinished(true);
+  };
+
   return (
     <>
       <Container sx={{ pb: 8 }}>
+        <input ref={uploadRef} type="file" style={{ display: "none" }} onInput={handleUploadAttachment} />
+        <Snackbar open={isUploadingFile}>
+          <Alert severity="info" icon={false} sx={{ width: "100%" }}>
+            <CircularProgress size={12} sx={{ mr: 1 }} /> Uploading attachment
+          </Alert>
+        </Snackbar>
+        <Snackbar open={isUploadingFinished} autoHideDuration={6000} onClose={() => setIsUploadingFinished(false)}>
+          <Alert severity="success" sx={{ width: "100%" }} onClose={() => setIsUploadingFinished(false)}>
+            Upload finished
+          </Alert>
+        </Snackbar>
+
         <Paper>
           <Box p={2} my={4}>
-            <Typography variant="h6" mb={1} color="secondary">
-              1. Definition
-            </Typography>
-            <Divider />
+            <Stack direction="row">
+              <Typography variant="h6" color="secondary" sx={{ flex: 1 }}>
+                1. Definition
+              </Typography>
+              <IconButton size="small" onClick={handleAttach("definition")}>
+                <AttachFileIcon />
+              </IconButton>
+            </Stack>
+            <Divider sx={{ mb: 1 }} />
             {riskFile ? (
               <TextInputBox initialValue={riskFile.cr4de_definition || ""} setValue={setDefinition} />
             ) : (
@@ -242,11 +311,15 @@ export default function EditorPage() {
 
               <HistoricalEventsTable
                 historicalEvents={riskFile?.historicalEvents}
-                onChange={async (newHistoricalEvents) => {
-                  await updateRiskFile({
-                    cr4de_historical_events: HE.wrap(newHistoricalEvents),
-                  });
-                  await reloadRiskFile();
+                onChange={async (update, instant = false) => {
+                  if (instant) {
+                    await updateRiskFile({
+                      cr4de_historical_events: HE.wrap(update),
+                    });
+                    await reloadRiskFile();
+                  } else {
+                    setHistoricalEvents(update);
+                  }
                 }}
               />
             </Box>
@@ -267,7 +340,19 @@ export default function EditorPage() {
                 </Typography>
               </Box>
 
-              <IntensityParametersTable parameters={riskFile?.intensityParameters} />
+              <IntensityParametersTable
+                parameters={riskFile?.intensityParameters}
+                onChange={async (update, instant = false) => {
+                  if (instant) {
+                    await updateRiskFile({
+                      cr4de_intensity_parameters: IP.wrap(update),
+                    });
+                    await reloadRiskFile();
+                  } else {
+                    setParameters(update);
+                  }
+                }}
+              />
             </Box>
           </Paper>
         )}
@@ -292,7 +377,11 @@ export default function EditorPage() {
                 </Typography>
               </Box>
 
-              <ScenariosTable scenarios={riskFile?.scenarios} />
+              <ScenariosTable
+                parameters={riskFile?.intensityParameters}
+                scenarios={riskFile?.scenarios}
+                onChange={setScenarios}
+              />
             </Box>
           </Paper>
         )}
@@ -383,9 +472,11 @@ export default function EditorPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
-                5. Causing Hazards
-              </Typography>
+              <Stack direction="row">
+                <Typography variant="h6" mb={1} color="secondary">
+                  5. Causing Hazards
+                </Typography>
+              </Stack>
               <Divider />
 
               <Box mt={1}>
@@ -407,6 +498,21 @@ export default function EditorPage() {
                   choicesLabel="Non-causing hazards"
                   chosenLabel="Causing hazards"
                   chosenSubheader={`${causes.length} causes identified`}
+                  onAddChosen={async (chosen) => {
+                    await api.createCascade({
+                      "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
+                      "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
+                    });
+                    getAllCauses({
+                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                  }}
+                  onRemoveChosen={async (chosen) => {
+                    await api.deleteCascade(chosen.cascadeId);
+                    getAllCauses({
+                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                  }}
                 />
               )}
             </Box>
@@ -441,6 +547,17 @@ export default function EditorPage() {
                   choicesLabel="Non-potential action hazards"
                   chosenLabel="Potential action hazards"
                   chosenSubheader={`${effects.length} potential actions identified`}
+                  onAddChosen={async (chosen) => {
+                    await api.createCascade({
+                      "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
+                      "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
+                    });
+                    getEffects();
+                  }}
+                  onRemoveChosen={async (chosen) => {
+                    await api.deleteCascade(chosen.cascadeId);
+                    getEffects();
+                  }}
                 />
               )}
             </Box>
@@ -474,6 +591,17 @@ export default function EditorPage() {
                   choicesLabel="Non-effect hazards"
                   chosenLabel="Effect hazards"
                   chosenSubheader={`${effects.length} effects identified`}
+                  onAddChosen={async (chosen) => {
+                    await api.createCascade({
+                      "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
+                      "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
+                    });
+                    getEffects();
+                  }}
+                  onRemoveChosen={async (chosen) => {
+                    await api.deleteCascade(chosen.cascadeId);
+                    getEffects();
+                  }}
                 />
               )}
             </Box>
@@ -508,6 +636,17 @@ export default function EditorPage() {
                   choicesLabel="Non-effect hazards"
                   chosenLabel="Effect hazards"
                   chosenSubheader={`${effects.length} effects identified`}
+                  onAddChosen={async (chosen) => {
+                    await api.createCascade({
+                      "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
+                      "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
+                    });
+                    getEffects();
+                  }}
+                  onRemoveChosen={async (chosen) => {
+                    await api.deleteCascade(chosen.cascadeId);
+                    getEffects();
+                  }}
                 />
               )}
             </Box>
@@ -549,6 +688,17 @@ export default function EditorPage() {
                   choicesLabel="Non-catalysing hazards"
                   chosenLabel="Catalysing hazards"
                   chosenSubheader={`${catalysing.length} catalysing effects identified`}
+                  onAddChosen={async (chosen) => {
+                    await api.createCascade({
+                      "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
+                      "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
+                    });
+                    getAllCauses();
+                  }}
+                  onRemoveChosen={async (chosen) => {
+                    await api.deleteCascade(chosen.cascadeId);
+                    getAllCauses();
+                  }}
                 />
               )}
             </Box>

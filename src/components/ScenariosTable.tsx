@@ -1,9 +1,18 @@
 import React from "react";
-import { Box, Typography, Table, TableBody, TableCell, TableRow, TableHead, Skeleton } from "@mui/material";
+import { Box, Typography, TextField, Table, TableBody, TableCell, TableRow, TableHead, Skeleton } from "@mui/material";
 import { Scenarios } from "../functions/scenarios";
+import { IntensityParameter } from "../functions/intensityParameters";
 import { Trans } from "react-i18next";
 
-function ScenariosTable({ scenarios, editable = true }: { scenarios?: Scenarios; editable?: boolean }) {
+function ScenariosTable({
+  parameters,
+  scenarios,
+  onChange,
+}: {
+  parameters: IntensityParameter[];
+  scenarios?: Scenarios;
+  onChange?: (update: Scenarios) => void;
+}) {
   if (scenarios === undefined)
     return (
       <Box mt={3}>
@@ -12,6 +21,8 @@ function ScenariosTable({ scenarios, editable = true }: { scenarios?: Scenarios;
         <Skeleton variant="text" />
       </Box>
     );
+
+  const handleChange = (scenario: keyof Scenarios, parameter: number, newValue: string) => {};
 
   return (
     <Table>
@@ -32,34 +43,64 @@ function ScenariosTable({ scenarios, editable = true }: { scenarios?: Scenarios;
         </TableRow>
       </TableHead>
       <TableBody>
-        {scenarios.considerable ? (
-          scenarios.considerable.map((p, i) => (
+        {parameters ? (
+          parameters.map((p, i) => (
             <TableRow key={p.name}>
-              <TableCell sx={{ whiteSpace: "nowrap", verticalAlign: "top" }}>
-                <Typography variant="body1">{p.name}</Typography>
+              <TableCell sx={{ verticalAlign: "top" }}>
+                <Typography variant="body1">{p.name || "???"}</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="body1" paragraph>
-                  {scenarios.considerable && scenarios.considerable[i].value}
-                </Typography>
+                {onChange ? (
+                  <TextField
+                    size="small"
+                    defaultValue={scenarios.considerable[i]?.value || ""}
+                    multiline
+                    inputProps={{ style: { width: "250px", height: "134px" } }}
+                    onChange={(e) => handleChange("considerable", i, e.target.value)}
+                  />
+                ) : (
+                  <Typography variant="body1" paragraph>
+                    {scenarios.considerable[i]?.value}
+                  </Typography>
+                )}
               </TableCell>
               <TableCell>
-                <Typography variant="body1" paragraph>
-                  {scenarios.major && scenarios.major[i].value}
-                </Typography>
+                {onChange ? (
+                  <TextField
+                    size="small"
+                    defaultValue={scenarios.major[i]?.value || ""}
+                    multiline
+                    inputProps={{ style: { width: "250px", height: "134px" } }}
+                    onChange={(e) => handleChange("major", i, e.target.value)}
+                  />
+                ) : (
+                  <Typography variant="body1" paragraph>
+                    {scenarios.major[i]?.value || ""}
+                  </Typography>
+                )}
               </TableCell>
               <TableCell>
-                <Typography variant="body1" paragraph>
-                  {scenarios.extreme && scenarios.extreme[i].value}
-                </Typography>
+                {onChange ? (
+                  <TextField
+                    size="small"
+                    defaultValue={scenarios.extreme[i]?.value || ""}
+                    multiline
+                    inputProps={{ style: { width: "250px", height: "134px" } }}
+                    onChange={(e) => handleChange("extreme", i, e.target.value)}
+                  />
+                ) : (
+                  <Typography variant="body1" paragraph>
+                    {scenarios.extreme[i]?.value || ""}
+                  </Typography>
+                )}
               </TableCell>
             </TableRow>
           ))
         ) : (
           <TableRow>
-            <TableCell colSpan={2} sx={{ textAlign: "center" }}>
+            <TableCell colSpan={4} sx={{ textAlign: "center" }}>
               <Typography variant="subtitle1">
-                <Trans i18nKey="scenarios.none">No intensity scenarios suggested...</Trans>
+                <Trans i18nKey="scenarios.none">No intensity parameters defined...</Trans>
               </Typography>
             </TableCell>
           </TableRow>

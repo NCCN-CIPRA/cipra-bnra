@@ -15,17 +15,21 @@ const fontValues = [
 const headerValues = [false, 1, 2, 3, 4, 5];
 
 function TextInputBox({
+  height = "300px",
   initialValue,
+  limitedOptions,
   setValue,
   onBlur,
 }: {
+  height?: string;
   initialValue: string;
+  limitedOptions?: boolean;
   setValue: (value: string) => void;
   onBlur?: () => void;
 }) {
   return (
     <HtmlEditor
-      height="300px"
+      height={height}
       defaultValue={initialValue}
       onValueChanged={(e) => {
         setValue(e.value);
@@ -36,41 +40,41 @@ function TextInputBox({
         <Item name="undo" />
         <Item name="redo" />
         <Item name="separator" />
-        <Item name="size" acceptedValues={sizeValues} />
-        <Item name="font" acceptedValues={fontValues} />
-        <Item name="separator" />
+        {!limitedOptions && <Item name="size" acceptedValues={sizeValues} />}
+        {!limitedOptions && <Item name="font" acceptedValues={fontValues} />}
+        {!limitedOptions && <Item name="separator" />}
         <Item name="bold" />
         <Item name="italic" />
         <Item name="strike" />
         <Item name="underline" />
         <Item name="separator" />
-        <Item name="alignLeft" />
-        <Item name="alignCenter" />
-        <Item name="alignRight" />
-        <Item name="alignJustify" />
-        <Item name="separator" />
+        {!limitedOptions && <Item name="alignLeft" />}
+        {!limitedOptions && <Item name="alignCenter" />}
+        {!limitedOptions && <Item name="alignRight" />}
+        {!limitedOptions && <Item name="alignJustify" />}
+        {!limitedOptions && <Item name="separator" />}
         <Item name="orderedList" />
         <Item name="bulletList" />
         <Item name="separator" />
-        <Item name="header" acceptedValues={headerValues} />
-        <Item name="separator" />
-        <Item name="color" />
-        <Item name="background" />
-        <Item name="separator" />
+        {!limitedOptions && <Item name="header" acceptedValues={headerValues} />}
+        {!limitedOptions && <Item name="separator" />}
+        {!limitedOptions && <Item name="color" />}
+        {!limitedOptions && <Item name="background" />}
+        {!limitedOptions && <Item name="separator" />}
         <Item name="link" />
         <Item name="separator" />
         <Item name="clear" />
-        <Item name="codeBlock" />
-        <Item name="blockquote" />
-        <Item name="separator" />
-        <Item name="insertTable" />
-        <Item name="deleteTable" />
-        <Item name="insertRowAbove" />
-        <Item name="insertRowBelow" />
-        <Item name="deleteRow" />
-        <Item name="insertColumnLeft" />
-        <Item name="insertColumnRight" />
-        <Item name="deleteColumn" />
+        {!limitedOptions && <Item name="codeBlock" />}
+        {!limitedOptions && <Item name="blockquote" />}
+        {!limitedOptions && <Item name="separator" />}
+        {!limitedOptions && <Item name="insertTable" />}
+        {!limitedOptions && <Item name="deleteTable" />}
+        {!limitedOptions && <Item name="insertRowAbove" />}
+        {!limitedOptions && <Item name="insertRowBelow" />}
+        {!limitedOptions && <Item name="deleteRow" />}
+        {!limitedOptions && <Item name="insertColumnLeft" />}
+        {!limitedOptions && <Item name="insertColumnRight" />}
+        {!limitedOptions && <Item name="deleteColumn" />}
       </Toolbar>
     </HtmlEditor>
   );

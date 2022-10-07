@@ -38,9 +38,11 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
       response = await api.getValidations<T>(o.query);
     } else if (o.table === DataTable.DIRECT_ANALYSIS) {
       response = await api.getDirectAnalyses<T>(o.query);
-    } else {
-      // (o.table === DataTable.CASCADE_ANALYSIS) {
+    } else if (o.table === DataTable.CASCADE_ANALYSIS) {
       response = await api.getCascadeAnalyses<T>(o.query);
+    } else {
+      // (o.table === DataTable.ATTACHMENT) {
+      response = await api.getAttachments<T>(o.query);
     }
 
     const result = o.transformResult ? o.transformResult(response) : response;

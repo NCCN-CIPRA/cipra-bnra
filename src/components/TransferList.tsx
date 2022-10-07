@@ -10,8 +10,14 @@ import Button from "@mui/material/Button";
 import { Divider, Typography } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Trans } from "react-i18next";
+import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 
 type SIDE = "LEFT" | "RIGHT";
+
+interface CascadeRisk extends SmallRisk {
+  cascadeId: string;
+  reason: string;
+}
 
 function TransferList({
   choicesLabel,
@@ -20,13 +26,17 @@ function TransferList({
   chosenSubheader,
   choices,
   chosen,
+  onAddChosen,
+  onRemoveChosen,
 }: {
   choicesLabel: string;
   choicesSubheader?: string;
   chosenLabel: string;
   chosenSubheader?: string;
-  choices: any[];
-  chosen: any[];
+  choices: SmallRisk[];
+  chosen: CascadeRisk[];
+  onAddChosen?: (added: SmallRisk) => void;
+  onRemoveChosen?: (removed: CascadeRisk) => void;
 }) {
   const [selected, setSelected] = useState<{
     side: SIDE;
@@ -84,7 +94,42 @@ function TransferList({
       <Box justifyContent="center" alignItems="center" sx={{ display: "flex", flexDirection: "row" }}>
         {customList(choicesLabel, choices, "LEFT", choicesSubheader)}
         <Box alignItems="center" sx={{ mx: 2, display: "flex", flexDirection: "column" }}>
-          <ArrowForwardIcon color="disabled" fontSize="large" />
+          {onAddChosen && onRemoveChosen ? (
+            <>
+              <Button
+                sx={{ my: 0.5 }}
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  if (selected) {
+                    setSelected(null);
+                    onAddChosen(choices[selected.index]);
+                  }
+                }}
+                disabled={choices.length === 0 || selected?.side !== "LEFT"}
+                aria-label="move selected right"
+              >
+                &gt;
+              </Button>
+              <Button
+                sx={{ my: 0.5 }}
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  if (selected) {
+                    setSelected(null);
+                    selected && onRemoveChosen(chosen[selected.index]);
+                  }
+                }}
+                disabled={chosen.length === 0 || selected?.side !== "RIGHT"}
+                aria-label="move selected left"
+              >
+                &lt;
+              </Button>
+            </>
+          ) : (
+            <ArrowForwardIcon color="disabled" fontSize="large" />
+          )}
         </Box>
         {customList(chosenLabel, chosen, "RIGHT", chosenSubheader)}
       </Box>
@@ -104,7 +149,9 @@ function TransferList({
           </Typography>
           <Box
             dangerouslySetInnerHTML={{
-              __html: (selected.side === "LEFT" ? choices : chosen)[selected.index].cr4de_definition,
+              __html:
+                (selected.side === "LEFT" ? choices : chosen)[selected.index].cr4de_definition ||
+                "<p>(No reason provided)</p>",
             }}
           />
         </Box>
@@ -124,7 +171,7 @@ function TransferList({
           </Typography>
           <Box
             dangerouslySetInnerHTML={{
-              __html: chosen[selected.index].reason,
+              __html: chosen[selected.index].reason || "<p>(No reason provided)</p>",
             }}
           />
         </Box>

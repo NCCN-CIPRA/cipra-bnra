@@ -11,6 +11,7 @@ export default function patchFetch() {
     if (e.data && e.data.requestData) {
       responses[e.data.requestData.id] = new Response(e.data.body || undefined, {
         status: e.data.status,
+        headers: new Headers(e.data.headers),
       });
     }
   };

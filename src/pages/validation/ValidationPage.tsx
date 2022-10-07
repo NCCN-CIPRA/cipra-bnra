@@ -25,21 +25,12 @@ import ScenariosTable from "../../components/ScenariosTable";
 import IntensityParametersTable from "../../components/IntensityParametersTable";
 import HistoricalEventsTable from "../../components/HistoricalEventsTable";
 import { Trans, useTranslation } from "react-i18next";
+import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
   intensityParameters: IP.IntensityParameter[];
   scenarios: S.Scenarios;
-}
-
-interface OtherHazard {
-  cr4de_riskfilesid: string;
-  cr4de_hazard_id: string;
-
-  cr4de_title: string;
-  cr4de_risk_type: string;
-
-  cr4de_definition?: string;
 }
 
 type RouteParams = {
@@ -63,19 +54,19 @@ export default function ValidationPage() {
   const [catalysingFeedback, setCatalysingFeedback] = useState<string | undefined>(undefined);
   const [horizonFeedback, setHorizonFeedback] = useState<string | undefined>(undefined);
 
-  const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<OtherHazard>({
+  const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<SmallRisk>({
     table: DataTable.RISK_FILE,
   });
-  const [causes, setCauses] = useState<DVRiskCascade<OtherHazard>[] | null>(null);
-  const [catalysing, setCatalysing] = useState<DVRiskCascade<OtherHazard>[] | null>(null);
-  const { getData: getAllCauses } = useLazyRecords<DVRiskCascade<OtherHazard>>({
+  const [causes, setCauses] = useState<DVRiskCascade<SmallRisk>[] | null>(null);
+  const [catalysing, setCatalysing] = useState<DVRiskCascade<SmallRisk>[] | null>(null);
+  const { getData: getAllCauses } = useLazyRecords<DVRiskCascade<SmallRisk>>({
     table: DataTable.RISK_CASCADE,
     onComplete: async (allCauses) => {
       setCauses(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk"));
       setCatalysing(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk"));
     },
   });
-  const { data: effects, getData: getEffects } = useLazyRecords<DVRiskCascade<string, OtherHazard>>({
+  const { data: effects, getData: getEffects } = useLazyRecords<DVRiskCascade<string, SmallRisk>>({
     table: DataTable.RISK_CASCADE,
   });
 
@@ -164,43 +155,45 @@ export default function ValidationPage() {
   ]);
 
   // Calculate transfer list data (causes, effects, catalysing effect) and memorize for efficiency
-  const causesChoises = useMemo<OtherHazard[]>(
+  const causesChoises = useMemo<SmallRisk[]>(
     () =>
       otherHazards && causes
         ? otherHazards.filter((rf) => !causes.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid))
         : [],
     [causes, otherHazards]
   );
-  const causesChosen = useMemo<OtherHazard[]>(
+  const causesChosen = useMemo(
     () =>
       causes
         ? causes.map((c) => ({
             ...c.cr4de_cause_hazard,
+            cascadeId: c.cr4de_bnrariskcascadeid,
             reason: c.cr4de_reason,
           }))
         : [],
     [causes]
   );
 
-  const effectsChoices = useMemo<OtherHazard[]>(
+  const effectsChoices = useMemo<SmallRisk[]>(
     () =>
       otherHazards && effects
         ? otherHazards.filter((rf) => effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid))
         : [],
     [effects, otherHazards]
   );
-  const effectsChosen = useMemo<OtherHazard[]>(
+  const effectsChosen = useMemo(
     () =>
       effects
         ? effects.map((c) => ({
             ...c.cr4de_effect_hazard,
+            cascadeId: c.cr4de_bnrariskcascadeid,
             reason: c.cr4de_reason,
           }))
         : [],
     [effects]
   );
 
-  const catalysingChoices = useMemo<OtherHazard[]>(
+  const catalysingChoices = useMemo<SmallRisk[]>(
     () =>
       otherHazards && catalysing
         ? otherHazards.filter(
@@ -211,11 +204,12 @@ export default function ValidationPage() {
         : [],
     [catalysing, otherHazards]
   );
-  const catalysingChosen = useMemo<OtherHazard[]>(
+  const catalysingChosen = useMemo(
     () =>
       catalysing
         ? catalysing.map((c) => ({
             ...c.cr4de_cause_hazard,
+            cascadeId: c.cr4de_bnrariskcascadeid,
             reason: c.cr4de_reason,
           }))
         : [],
@@ -300,7 +294,7 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              <HistoricalEventsTable historicalEvents={riskFile?.historicalEvents} editable={false} />
+              <HistoricalEventsTable historicalEvents={riskFile?.historicalEvents} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 <Trans i18nKey="riskFile.historicalEvents.feedback">
@@ -336,7 +330,7 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              <IntensityParametersTable parameters={riskFile?.intensityParameters} editable={false} />
+              <IntensityParametersTable parameters={riskFile?.intensityParameters} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 <Trans i18nKey="riskFile.intensityParameters.feedback">
@@ -380,7 +374,7 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              <ScenariosTable scenarios={riskFile?.scenarios} editable={false} />
+              <ScenariosTable parameters={riskFile?.intensityParameters} scenarios={riskFile?.scenarios} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 <Trans i18nKey="riskFile.intensityScenarios.feedback">

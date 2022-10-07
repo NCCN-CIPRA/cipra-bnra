@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import fileToByteArray from "../functions/fileToByteArray";
+import { DVAttachment } from "../types/dataverse/DVAttachment";
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DVContact } from "../types/dataverse/DVContact";
 import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
@@ -13,6 +15,8 @@ export enum DataTable {
   VALIDATION,
   DIRECT_ANALYSIS,
   CASCADE_ANALYSIS,
+
+  ATTACHMENT,
 }
 
 export interface AuthResponse<T = null> {
@@ -22,6 +26,10 @@ export interface AuthResponse<T = null> {
 
 export interface RegistrationData {
   formHtml: string;
+}
+
+export interface CreateResponse {
+  id: string;
 }
 
 export interface API {
@@ -36,7 +44,9 @@ export interface API {
 
   getRiskCascades<T = DVRiskCascade>(query?: string): Promise<T[]>;
   getRiskCascade<T = DVRiskCascade>(id: string, query?: string): Promise<T>;
+  createCascade(fields: object): Promise<CreateResponse>;
   updateCascade(id: string, fields: object): Promise<void>;
+  deleteCascade(id: string): Promise<void>;
 
   getValidations<T = DVValidation>(query?: string): Promise<T[]>;
   getValidation<T = DVValidation>(id: string, query?: string): Promise<T>;
@@ -49,6 +59,9 @@ export interface API {
   getCascadeAnalyses<T = DVCascadeAnalysis>(query?: string): Promise<T[]>;
   getCascadeAnalysis<T = DVCascadeAnalysis>(id: string, query?: string): Promise<T>;
   updateCascadeAnalysis(id: string, fields: object): Promise<void>;
+
+  getAttachments<T = DVAttachment>(query?: string): Promise<T[]>;
+  createAttachment(fields: object, file: File): Promise<CreateResponse>;
 }
 
 export default function useAPI(): API {
@@ -196,6 +209,18 @@ export default function useAPI(): API {
 
       return (await response.json()) as T;
     },
+    createCascade: async function (fields: object): Promise<CreateResponse> {
+      const response = await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades`, {
+        method: "POST",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+
+      return { id: response.headers.get("entityId") as string };
+    },
     updateCascade: async function (id: string, fields: object): Promise<void> {
       await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${id})`, {
         method: "PATCH",
@@ -204,6 +229,15 @@ export default function useAPI(): API {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(fields),
+      });
+    },
+    deleteCascade: async function (id: string): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${id})`, {
+        method: "DELETE",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
       });
     },
 
@@ -280,6 +314,40 @@ export default function useAPI(): API {
         },
         body: JSON.stringify(fields),
       });
+    },
+
+    getAttachments: async function <T = DVAttachment>(query?: string): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises${query ? "?" + query : ""}`
+      );
+
+      return (await response.json()).value;
+    },
+    createAttachment: async function (fields: object, file: File): Promise<CreateResponse> {
+      const response = await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraattachments`, {
+        method: "POST",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+
+      for (var pair of Array.from(response.headers.entries())) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
+      const id = response.headers.get("entityId") as string;
+
+      // await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${id})/cr4de_file`, {
+      //   method: "PUT",
+      //   headers: {
+      //     __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: await fileToByteArray(file),
+      // });
+
+      return { id };
     },
   };
 }

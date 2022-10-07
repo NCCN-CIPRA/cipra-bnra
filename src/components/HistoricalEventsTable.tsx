@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -7,27 +7,117 @@ import {
   TableCell,
   TableRow,
   Skeleton,
-  Fab,
   IconButton,
   TextField,
+  Stack,
+  CircularProgress,
 } from "@mui/material";
 import { HistoricalEvent } from "../functions/historicalEvents";
 import { Trans } from "react-i18next";
-import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TextInputBox from "./TextInputBox";
+import LoadingButton from "@mui/lab/LoadingButton";
+
+function HistoricalEventRow({
+  event,
+  onChange,
+  onRemove,
+}: {
+  event: HistoricalEvent;
+  onChange?: (update: HistoricalEvent) => void;
+  onRemove?: () => void;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, [event, setIsLoading]);
+
+  return (
+    <TableRow>
+      <TableCell sx={{ whiteSpace: "nowrap", verticalAlign: "top", minWidth: 200 }}>
+        {onChange ? (
+          <Stack direction="column" spacing={2}>
+            <TextField
+              size="small"
+              defaultValue={event.location}
+              onChange={(e) => onChange({ ...event, location: e.target.value })}
+            />
+            <TextField
+              defaultValue={event.time}
+              onChange={(e) => onChange({ ...event, time: e.target.value })}
+              size="small"
+              inputProps={{ style: { fontSize: 12, fontWeight: "bold" } }}
+            />
+          </Stack>
+        ) : (
+          <Stack direction="column">
+            <Typography
+              variant="subtitle1"
+              sx={{ "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" }, transition: "0.3s", px: "5px" }}
+            >
+              {event.location}
+            </Typography>
+            <Typography
+              variant="subtitle2"
+              sx={{ "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" }, transition: "0.3s", px: "5px" }}
+            >
+              {event.time}
+            </Typography>
+          </Stack>
+        )}
+      </TableCell>
+      <TableCell>
+        {onChange ? (
+          <TextInputBox
+            height="200px"
+            initialValue={event.description}
+            limitedOptions
+            setValue={(v) => onChange({ ...event, description: v })}
+          />
+        ) : (
+          <Box
+            dangerouslySetInnerHTML={{
+              __html: event.description || "",
+            }}
+          />
+        )}
+      </TableCell>
+      {onChange && (
+        <TableCell>
+          {isLoading ? (
+            <CircularProgress size="small" />
+          ) : (
+            <IconButton
+              color="error"
+              onClick={() => {
+                if (!onRemove) return;
+
+                setIsLoading(true);
+                onRemove();
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          )}
+        </TableCell>
+      )}
+    </TableRow>
+  );
+}
 
 function HistoricalEventsTable({
   historicalEvents,
-  editable = true,
   onChange,
 }: {
   historicalEvents?: HistoricalEvent[];
-  editable?: boolean;
-  onChange?: (update: HistoricalEvent[]) => Promise<void>;
+  onChange?: (update: HistoricalEvent[], instant?: boolean) => void;
 }) {
-  const [focusField, setFocusField] = useState<string | null>(null);
-  const [updatedFieldValue, setUpdatedFieldValue] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, [historicalEvents, setIsLoading]);
 
   if (historicalEvents === undefined)
     return (
@@ -38,135 +128,77 @@ function HistoricalEventsTable({
       </Box>
     );
 
-  const handleAddRow = () => {
+  const handleAddRow = async () => {
     if (!onChange) return;
+    setIsLoading(true);
 
-    onChange([...historicalEvents, { time: "", location: "", description: "" }]);
+    return onChange([...historicalEvents, { time: "", location: "", description: "" }], true);
   };
 
-  const handleRemoveRow = (i: number) => {
+  const handleRemoveRow = async (i: number) => {
     if (!onChange) return;
 
     if (window.confirm("Are you sure you wish to delete this event?")) {
-      onChange([...historicalEvents.slice(0, i), ...historicalEvents.slice(i + 1, historicalEvents.length)]);
+      return onChange(
+        [...historicalEvents.slice(0, i), ...historicalEvents.slice(i + 1, historicalEvents.length)],
+        true
+      );
     }
   };
 
-  const handleUpdate = (field: string, i: number, value: string) => {
+  const handleUpdate = async (updatedEvent: HistoricalEvent, i: number) => {
     if (!onChange) return;
 
-    onChange([
+    return onChange([
       ...historicalEvents.slice(0, i),
-      {
-        ...historicalEvents[i],
-        [field]: value,
-      },
+      updatedEvent,
       ...historicalEvents.slice(i + 1, historicalEvents.length),
     ]);
   };
 
   return (
     <>
-      <Table>
-        <TableBody>
-          {historicalEvents ? (
-            historicalEvents.map((e, i) => (
-              <TableRow key={e.description}>
-                <TableCell sx={{ whiteSpace: "nowrap", verticalAlign: "top" }}>
-                  {focusField === "location" ? (
-                    <TextField
-                      size="small"
-                      defaultValue={e.location}
-                      onChange={(e) => setUpdatedFieldValue(e.target.value)}
-                      onBlur={() => {
-                        if (updatedFieldValue) {
-                          handleUpdate("location", i, updatedFieldValue);
-                        }
-                        setUpdatedFieldValue(null);
-                        setFocusField(null);
-                      }}
-                    />
-                  ) : (
-                    <Typography
-                      variant="subtitle1"
-                      onClick={() => setFocusField("location")}
-                      sx={{ "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" }, transition: "0.3s", px: "5px" }}
-                    >
-                      {e.location}
-                    </Typography>
-                  )}
-                  {focusField === "time" ? (
-                    <TextField
-                      defaultValue={e.time}
-                      onChange={(e) => setUpdatedFieldValue(e.target.value)}
-                      onBlur={() => {
-                        if (updatedFieldValue) {
-                          handleUpdate("time", i, updatedFieldValue);
-                        }
-                        setUpdatedFieldValue(null);
-                        setFocusField(null);
-                      }}
-                      size="small"
-                      inputProps={{ style: { fontSize: 12, fontWeight: "bold" } }}
-                    />
-                  ) : (
-                    <Typography
-                      variant="subtitle2"
-                      onClick={() => setFocusField("time")}
-                      sx={{ "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" }, transition: "0.3s", px: "5px" }}
-                    >
-                      {e.time}
-                    </Typography>
-                  )}
+      <Box sx={{ position: "relative" }}>
+        <Table>
+          <TableBody>
+            {historicalEvents ? (
+              historicalEvents.map((e, i) => (
+                <HistoricalEventRow
+                  key={i}
+                  event={e}
+                  onChange={(updatedEvent) => handleUpdate(updatedEvent, i)}
+                  onRemove={() => handleRemoveRow(i)}
+                />
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={2} sx={{ textAlign: "center" }}>
+                  <Typography variant="subtitle1">
+                    <Trans i18nKey="historicalEvents.none">No historical events suggested...</Trans>
+                  </Typography>
                 </TableCell>
-                <TableCell>
-                  {focusField === "description" ? (
-                    <TextInputBox
-                      initialValue={e.description}
-                      setValue={setUpdatedFieldValue}
-                      onBlur={() => {
-                        if (updatedFieldValue) {
-                          handleUpdate("description", i, updatedFieldValue);
-                        }
-                        setUpdatedFieldValue(null);
-                        setFocusField(null);
-                      }}
-                    />
-                  ) : (
-                    <Box
-                      onClick={() => setFocusField("description")}
-                      sx={{ "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" }, transition: "0.3s", px: "5px" }}
-                      dangerouslySetInnerHTML={{
-                        __html: e.description || "",
-                      }}
-                    />
-                  )}
-                </TableCell>
-                {onChange && (
-                  <TableCell>
-                    <IconButton color="error" onClick={() => handleRemoveRow(i)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                )}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={2} sx={{ textAlign: "center" }}>
-                <Typography variant="subtitle1">
-                  <Trans i18nKey="historicalEvents.none">No historical events suggested...</Trans>
-                </Typography>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+        {isLoading && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(255,255,255, 0.6)",
+            }}
+          />
+        )}
+      </Box>
       {onChange && (
         <Box sx={{ mt: 2, textAlign: "right" }}>
-          <Fab size="medium" color="primary" aria-label="add" onClick={handleAddRow}>
-            <AddIcon />
-          </Fab>
+          <LoadingButton loading={isLoading} variant="outlined" onClick={handleAddRow}>
+            Add Historical Event
+          </LoadingButton>
         </Box>
       )}
     </>
