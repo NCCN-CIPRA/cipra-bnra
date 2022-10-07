@@ -333,19 +333,15 @@ export default function useAPI(): API {
         body: JSON.stringify(fields),
       });
 
-      for (var pair of Array.from(response.headers.entries())) {
-        console.log(pair[0] + ": " + pair[1]);
-      }
       const id = response.headers.get("entityId") as string;
 
-      // await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${id})/cr4de_file`, {
-      //   method: "PUT",
-      //   headers: {
-      //     __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: await fileToByteArray(file),
-      // });
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${id})/cr4de_file`, {
+        method: "PUT",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+        },
+        body: file,
+      });
 
       return { id };
     },
