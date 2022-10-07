@@ -339,6 +339,7 @@ export default function useAPI(): API {
         method: "PUT",
         headers: {
           __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/octet-stream",
         },
         body: await fileToByteArray(file),
       });
