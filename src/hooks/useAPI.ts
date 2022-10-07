@@ -335,15 +335,12 @@ export default function useAPI(): API {
 
       const id = response.headers.get("entityId") as string;
 
-      const formData = new FormData();
-      formData.append("file", file);
-
       await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${id})/cr4de_file`, {
         method: "PUT",
         headers: {
           __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
         },
-        body: formData,
+        body: await fileToByteArray(file),
       });
 
       return { id };
