@@ -1,6 +1,9 @@
 export interface DVAttachment {
   cr4de_bnraattachmentid: string;
 
+  _cr4de_owner_value: string;
+  cr4de_owner: string;
+
   cr4de_name: string;
   cr4de_reference: number;
 

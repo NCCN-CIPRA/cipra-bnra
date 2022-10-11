@@ -237,15 +237,7 @@ export default function EditorPage() {
               </Box>
             )}
 
-            <Attachments
-              attachments={useMemo(
-                () => attachments?.filter((a) => a.cr4de_field === "definition") || [],
-                [attachments]
-              )}
-              riskFile={riskFile}
-              field="definition"
-              onUpdate={getAttachments}
-            />
+            <Attachments attachments={attachments} riskFile={riskFile} field="definition" onUpdate={getAttachments} />
           </Box>
         </Paper>
 
@@ -280,6 +272,13 @@ export default function EditorPage() {
                   }
                 }}
               />
+
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="historical_events"
+                onUpdate={getAttachments}
+              />
             </Box>
           </Paper>
         )}
@@ -311,6 +310,13 @@ export default function EditorPage() {
                   }
                 }}
               />
+
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="intensity_parameters"
+                onUpdate={getAttachments}
+              />
             </Box>
           </Paper>
         )}
@@ -340,6 +346,8 @@ export default function EditorPage() {
                 scenarios={riskFile?.scenarios}
                 onChange={setScenarios}
               />
+
+              <Attachments attachments={attachments} riskFile={riskFile} field="scenarios" onUpdate={getAttachments} />
             </Box>
           </Paper>
         )}
@@ -391,6 +399,13 @@ export default function EditorPage() {
                   <Skeleton variant="text" />
                 </Box>
               )}
+
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="capabilities"
+                onUpdate={getAttachments}
+              />
             </Box>
           </Paper>
         )}
@@ -423,6 +438,13 @@ export default function EditorPage() {
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
+
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="horizon_analysis"
+                onUpdate={getAttachments}
+              />
             </Box>
           </Paper>
         )}
@@ -473,6 +495,8 @@ export default function EditorPage() {
                   }}
                 />
               )}
+
+              <Attachments attachments={attachments} riskFile={riskFile} field="causes" onUpdate={getAttachments} />
             </Box>
           </Paper>
         )}
@@ -518,6 +542,13 @@ export default function EditorPage() {
                   }}
                 />
               )}
+
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="malicious_actions"
+                onUpdate={getAttachments}
+              />
             </Box>
           </Paper>
         )}
@@ -562,6 +593,8 @@ export default function EditorPage() {
                   }}
                 />
               )}
+
+              <Attachments attachments={attachments} riskFile={riskFile} field="effects" onUpdate={getAttachments} />
             </Box>
           </Paper>
         )}
@@ -607,6 +640,8 @@ export default function EditorPage() {
                   }}
                 />
               )}
+
+              <Attachments attachments={attachments} riskFile={riskFile} field="catalysed" onUpdate={getAttachments} />
             </Box>
           </Paper>
         )}
@@ -659,6 +694,8 @@ export default function EditorPage() {
                   }}
                 />
               )}
+
+              <Attachments attachments={attachments} riskFile={riskFile} field="catalysing" onUpdate={getAttachments} />
             </Box>
           </Paper>
         )}

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -15,7 +15,6 @@ import {
   Snackbar,
   CircularProgress,
   Alert,
-  List,
 } from "@mui/material";
 import useLoggedInUser from "../hooks/useLoggedInUser";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
@@ -31,7 +30,7 @@ export default function Attachments({
   riskFile,
   onUpdate,
 }: {
-  attachments: DVAttachment[];
+  attachments: DVAttachment[] | null;
   field: string;
   riskFile?: DVRiskFile | null;
   onUpdate: () => Promise<void>;
@@ -40,7 +39,7 @@ export default function Attachments({
   const api = useAPI();
   const { user } = useLoggedInUser();
 
-  const [openDialog, setOpenDialog] = useState(true);
+  const [openDialog, setOpenDialog] = useState(false);
 
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [isUploadingFinished, setIsUploadingFinished] = useState(false);
@@ -51,6 +50,14 @@ export default function Attachments({
   const [url, setUrl] = useState<string | null>(null);
 
   const handleToggleDialog = () => setOpenDialog(!openDialog);
+
+  const fieldAttachments = useMemo(() => {
+    if (!attachments) return [];
+
+    if (!field) return attachments;
+
+    return attachments?.filter((a) => a.cr4de_field === field);
+  }, [attachments, field]);
 
   const handlePickFile = () => {
     if (!inputRef.current) return;
@@ -174,7 +181,7 @@ export default function Attachments({
       </Snackbar>
 
       <Box sx={{ flexWrap: "wrap", display: "flex", listStyle: "none" }}>
-        {attachments.map((a) => (
+        {fieldAttachments.map((a) => (
           <ListItem key={a.cr4de_bnraattachmentid} sx={{ width: "auto", px: "8px" }}>
             <Chip
               label={a.cr4de_name}
@@ -182,7 +189,13 @@ export default function Attachments({
               onClick={() => {
                 api.serveAttachmentFile(a);
               }}
-              onDelete={() => handleRemoveAttachment(a.cr4de_bnraattachmentid)}
+              onDelete={
+                a._cr4de_owner_value === user?.contactid
+                  ? () => {
+                      handleRemoveAttachment(a.cr4de_bnraattachmentid);
+                    }
+                  : undefined
+              }
             />
           </ListItem>
         ))}
