@@ -335,23 +335,20 @@ export default function useAPI(): API {
             method: "GET",
             headers: {
               __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
-              "Content-Type": "application/octet-stream",
+              "Content-Type": "application/json",
             },
           }
         );
 
-        const blob = new Blob([await response.arrayBuffer()]);
+        const { value: fileContent } = await response.json();
 
         const a = document.createElement("a");
         document.body.appendChild(a);
         a.setAttribute("style", "display: none");
 
-        const url = window.URL.createObjectURL(blob);
-        a.href = url;
+        a.href = fileContent;
         a.download = attachment.cr4de_name;
         a.click();
-
-        window.URL.revokeObjectURL(url);
       }
     },
     createAttachment: async function (fields: object, file: File | null): Promise<CreateResponse> {
@@ -366,18 +363,29 @@ export default function useAPI(): API {
 
       const id = response.headers.get("entityId") as string;
 
-      if (file) {
-        await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${id})/cr4de_file`, {
-          method: "PUT",
-          headers: {
-            __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
-            "Content-Type": "application/octet-stream",
-          },
-          body: await fileToByteArray(file),
-        });
-      }
+      if (!file) return { id };
 
-      return { id };
+      return new Promise<CreateResponse>((resolve) => {
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async function (e) {
+          let fileContent = e.target?.result as string;
+
+          await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${id})/cr4de_file`, {
+            method: "PUT",
+            headers: {
+              __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+              "Content-Type": "application/octet-stream",
+            },
+            body: JSON.stringify({
+              value: fileContent,
+              // file_name: "test.pdf",
+            }),
+          });
+
+          return resolve({ id });
+        };
+      });
     },
     deleteAttachment: async function (id: string): Promise<void> {
       await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${id})`, {

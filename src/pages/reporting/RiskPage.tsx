@@ -83,292 +83,268 @@ export default function RiskPage() {
   });
 
   return (
-    <>
-      <Box m={2} ml="76px">
-        <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />}>
-          <Link underline="hover" color="inherit" to="/" component={RouterLink}>
-            BNRA 2023 - 2026
-          </Link>
-          <Link underline="hover" color="inherit" to="/reporting" component={RouterLink}>
-            Risk Ranking
-          </Link>
-          {riskFile ? (
-            <Typography color="text.primary">{riskFile.cr4de_title}</Typography>
-          ) : (
-            <Skeleton variant="text" width="200px" />
-          )}
-        </Breadcrumbs>
-      </Box>
-
-      <Container sx={{ mt: 4, pb: 8 }}>
-        <Stack direction="row" sx={{ mb: 8 }}>
-          <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
-            <ProbabilitySankey riskFile={riskFile} />
+    <Container sx={{ mt: 4, pb: 8 }}>
+      <Stack direction="row" sx={{ mb: 8 }}>
+        <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
+          <ProbabilitySankey riskFile={riskFile} />
+        </Box>
+        <Stack direction="column" sx={{ width: 300, p: "50px" }}>
+          <Box
+            sx={{
+              width: 200,
+              height: 200,
+            }}
+          >
+            <ProbabilityOriginPieChart riskFile={riskFile} />
           </Box>
-          <Stack direction="column" sx={{ width: 300, p: "50px" }}>
-            <Box
-              sx={{
-                width: 200,
-                height: 200,
-              }}
-            >
-              <ProbabilityOriginPieChart riskFile={riskFile} />
-            </Box>
-            <Box
-              sx={{
-                width: 200,
-                height: 200,
-              }}
-            >
-              <ImpactOriginPieChart riskFile={riskFile} />
-            </Box>
-            <Box
-              sx={{
-                width: 200,
-                height: 200,
-              }}
-            >
-              <ImpactDistributionPieChart riskFile={riskFile} />
-            </Box>
-          </Stack>
-          <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
-            <ImpactSankey riskFile={riskFile} />
+          <Box
+            sx={{
+              width: 200,
+              height: 200,
+            }}
+          >
+            <ImpactOriginPieChart riskFile={riskFile} />
+          </Box>
+          <Box
+            sx={{
+              width: 200,
+              height: 200,
+            }}
+          >
+            <ImpactDistributionPieChart riskFile={riskFile} />
           </Box>
         </Stack>
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ textAlign: "left", whiteSpace: "nowrap" }}></TableCell>
-                <TableCell sx={{ whiteSpace: "nowrap" }}>Considerable</TableCell>
-                <TableCell sx={{ whiteSpace: "nowrap" }}>Major</TableCell>
-                <TableCell sx={{ whiteSpace: "nowrap" }}>Extreme</TableCell>
-                <TableCell sx={{ whiteSpace: "nowrap", textAlign: "right" }}>Total</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {riskFile ? (
-                <>
-                  <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                    <TableCell
-                      component="th"
-                      scope="row"
+        <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
+          <ImpactSankey riskFile={riskFile} />
+        </Box>
+      </Stack>
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ textAlign: "left", whiteSpace: "nowrap" }}></TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>Considerable</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>Major</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>Extreme</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap", textAlign: "right" }}>Total</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {riskFile ? (
+              <>
+                <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <Typography variant="body1">Direct P</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="body1">
+                      {getProbabilityScale(
+                        riskFile.calculated.dp_c,
+                        riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
+                      )}
+                    </Typography>
+                    <Typography variant="caption">{Math.round(riskFile.calculated.dp_c * 10000) / 100}%</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="body1">
+                      {getProbabilityScale(
+                        riskFile.calculated.dp_m,
+                        riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
+                      )}
+                    </Typography>
+                    <Typography variant="caption">{Math.round(riskFile.calculated.dp_m * 10000) / 100}%</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="body1">
+                      {getProbabilityScale(
+                        riskFile.calculated.dp_e,
+                        riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
+                      )}
+                    </Typography>
+                    <Typography variant="caption">{Math.round(riskFile.calculated.dp_e * 10000) / 100}%</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
+                    {Math.round(riskFile.calculated.dp * 10000) / 100}%
+                  </TableCell>
+                </TableRow>
+                <TableRow key={riskFile.cr4de_title} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <Typography variant="body1">Indirect P</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="body1">
+                      {getProbabilityScale(
+                        riskFile.calculated.ip_c,
+                        riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
+                      )}
+                    </Typography>
+                    <Typography variant="caption">{Math.round(riskFile.calculated.ip_c * 10000) / 100}%</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="body1">
+                      {getProbabilityScale(
+                        riskFile.calculated.ip_m,
+                        riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
+                      )}
+                    </Typography>
+                    <Typography variant="caption">{Math.round(riskFile.calculated.ip_m * 10000) / 100}%</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="body1">
+                      {getProbabilityScale(
+                        riskFile.calculated.ip_e,
+                        riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
+                      )}
+                    </Typography>
+                    <Typography variant="caption">{Math.round(riskFile.calculated.ip_e * 10000) / 100}%</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
+                    {Math.round(riskFile.calculated.ip * 10000) / 100}%
+                  </TableCell>
+                </TableRow>
+                <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <Typography variant="body1">Total P</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="body1">
+                      {getProbabilityScale(
+                        riskFile.calculated.tp_c,
+                        riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
+                      )}
+                    </Typography>
+                    <Typography variant="caption">{Math.round(riskFile.calculated.tp_c * 10000) / 100}%</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="body1">
+                      {getProbabilityScale(
+                        riskFile.calculated.tp_m,
+                        riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
+                      )}
+                    </Typography>
+                    <Typography variant="caption">{Math.round(riskFile.calculated.tp_m * 10000) / 100}%</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="body1">
+                      {getProbabilityScale(
+                        riskFile.calculated.tp_e,
+                        riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
+                      )}
+                    </Typography>
+                    <Typography variant="caption">{Math.round(riskFile.calculated.tp_e * 10000) / 100}%</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
+                    {Math.round(riskFile.calculated.tp * 10000) / 100}%
+                  </TableCell>
+                </TableRow>
+                <TableRow sx={{ backgroundColor: "#eee" }}>
+                  <TableCell colSpan={100}> </TableCell>
+                </TableRow>
+                {impactFields.map((f, i) =>
+                  f === null ? (
+                    <TableRow key={i} sx={{ backgroundColor: "#eee" }}>
+                      <TableCell colSpan={100}> </TableCell>
+                    </TableRow>
+                  ) : (
+                    <TableRow
+                      key={f.fieldName}
                       sx={{
-                        whiteSpace: "nowrap",
+                        "&:last-child td, &:last-child th": { border: 0 },
                       }}
                     >
-                      <Typography variant="body1">Direct P</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <Typography variant="body1">
-                        {getProbabilityScale(
-                          riskFile.calculated.dp_c,
-                          riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-                        )}
-                      </Typography>
-                      <Typography variant="caption">{Math.round(riskFile.calculated.dp_c * 10000) / 100}%</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <Typography variant="body1">
-                        {getProbabilityScale(
-                          riskFile.calculated.dp_m,
-                          riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-                        )}
-                      </Typography>
-                      <Typography variant="caption">{Math.round(riskFile.calculated.dp_m * 10000) / 100}%</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <Typography variant="body1">
-                        {getProbabilityScale(
-                          riskFile.calculated.dp_e,
-                          riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-                        )}
-                      </Typography>
-                      <Typography variant="caption">{Math.round(riskFile.calculated.dp_e * 10000) / 100}%</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
-                      {Math.round(riskFile.calculated.dp * 10000) / 100}%
-                    </TableCell>
-                  </TableRow>
-                  <TableRow key={riskFile.cr4de_title} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      sx={{
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      <Typography variant="body1">Indirect P</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <Typography variant="body1">
-                        {getProbabilityScale(
-                          riskFile.calculated.ip_c,
-                          riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-                        )}
-                      </Typography>
-                      <Typography variant="caption">{Math.round(riskFile.calculated.ip_c * 10000) / 100}%</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <Typography variant="body1">
-                        {getProbabilityScale(
-                          riskFile.calculated.ip_m,
-                          riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-                        )}
-                      </Typography>
-                      <Typography variant="caption">{Math.round(riskFile.calculated.ip_m * 10000) / 100}%</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <Typography variant="body1">
-                        {getProbabilityScale(
-                          riskFile.calculated.ip_e,
-                          riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-                        )}
-                      </Typography>
-                      <Typography variant="caption">{Math.round(riskFile.calculated.ip_e * 10000) / 100}%</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
-                      {Math.round(riskFile.calculated.ip * 10000) / 100}%
-                    </TableCell>
-                  </TableRow>
-                  <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      sx={{
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      <Typography variant="body1">Total P</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <Typography variant="body1">
-                        {getProbabilityScale(
-                          riskFile.calculated.tp_c,
-                          riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-                        )}
-                      </Typography>
-                      <Typography variant="caption">{Math.round(riskFile.calculated.tp_c * 10000) / 100}%</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <Typography variant="body1">
-                        {getProbabilityScale(
-                          riskFile.calculated.tp_m,
-                          riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-                        )}
-                      </Typography>
-                      <Typography variant="caption">{Math.round(riskFile.calculated.tp_m * 10000) / 100}%</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <Typography variant="body1">
-                        {getProbabilityScale(
-                          riskFile.calculated.tp_e,
-                          riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-                        )}
-                      </Typography>
-                      <Typography variant="caption">{Math.round(riskFile.calculated.tp_e * 10000) / 100}%</Typography>
-                    </TableCell>
-                    <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
-                      {Math.round(riskFile.calculated.tp * 10000) / 100}%
-                    </TableCell>
-                  </TableRow>
-                  <TableRow sx={{ backgroundColor: "#eee" }}>
-                    <TableCell colSpan={100}> </TableCell>
-                  </TableRow>
-                  {impactFields.map((f, i) =>
-                    f === null ? (
-                      <TableRow key={i} sx={{ backgroundColor: "#eee" }}>
-                        <TableCell colSpan={100}> </TableCell>
-                      </TableRow>
-                    ) : (
-                      <TableRow
-                        key={f.fieldName}
+                      <TableCell
+                        component="th"
+                        scope="row"
                         sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
+                          whiteSpace: "nowrap",
                         }}
                       >
-                        <TableCell
-                          component="th"
-                          scope="row"
-                          sx={{
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          <Typography variant="body1">{f.name}</Typography>
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          <Typography variant="body1">
-                            {getImpactScale(
-                              riskFile.calculated[`${f.fieldName}_c` as keyof RiskCalculation] as number as number,
-                              f.fieldName.split("_")[1] || ""
-                            )}
-                          </Typography>
-                          <Typography variant="caption">
-                            {curFormat.format(
-                              riskFile.calculated[`${f.fieldName}_c` as keyof RiskCalculation] as number
-                            )}
-                          </Typography>
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          <Typography variant="body1">
-                            {getImpactScale(
-                              riskFile.calculated[`${f.fieldName}_m` as keyof RiskCalculation] as number,
-                              f.fieldName?.split("_")[1] || ""
-                            )}
-                          </Typography>
-                          <Typography variant="caption">
-                            {curFormat.format(
-                              riskFile.calculated[`${f.fieldName}_m` as keyof RiskCalculation] as number
-                            )}
-                          </Typography>
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          <Typography variant="body1">
-                            {getImpactScale(
-                              riskFile.calculated[`${f.fieldName}_e` as keyof RiskCalculation] as number,
-                              f.fieldName?.split("_")[1] || ""
-                            )}
-                          </Typography>
-                          <Typography variant="caption">
-                            {curFormat.format(
-                              riskFile.calculated[`${f.fieldName}_e` as keyof RiskCalculation] as number
-                            )}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                          <Typography variant="body2">
-                            {curFormat.format(riskFile.calculated[f.fieldName as keyof RiskCalculation] as number)}
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  )}
-                </>
-              ) : (
-                [1, 2, 3].map((i) => (
-                  <TableRow key={i} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                    <TableCell>
-                      <Skeleton variant="rectangular" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton variant="rectangular" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton variant="rectangular" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton variant="rectangular" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton variant="rectangular" />
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Container>
-    </>
+                        <Typography variant="body1">{f.name}</Typography>
+                      </TableCell>
+                      <TableCell component="th" scope="row">
+                        <Typography variant="body1">
+                          {getImpactScale(
+                            riskFile.calculated[`${f.fieldName}_c` as keyof RiskCalculation] as number as number,
+                            f.fieldName.split("_")[1] || ""
+                          )}
+                        </Typography>
+                        <Typography variant="caption">
+                          {curFormat.format(riskFile.calculated[`${f.fieldName}_c` as keyof RiskCalculation] as number)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell component="th" scope="row">
+                        <Typography variant="body1">
+                          {getImpactScale(
+                            riskFile.calculated[`${f.fieldName}_m` as keyof RiskCalculation] as number,
+                            f.fieldName?.split("_")[1] || ""
+                          )}
+                        </Typography>
+                        <Typography variant="caption">
+                          {curFormat.format(riskFile.calculated[`${f.fieldName}_m` as keyof RiskCalculation] as number)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell component="th" scope="row">
+                        <Typography variant="body1">
+                          {getImpactScale(
+                            riskFile.calculated[`${f.fieldName}_e` as keyof RiskCalculation] as number,
+                            f.fieldName?.split("_")[1] || ""
+                          )}
+                        </Typography>
+                        <Typography variant="caption">
+                          {curFormat.format(riskFile.calculated[`${f.fieldName}_e` as keyof RiskCalculation] as number)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography variant="body2">
+                          {curFormat.format(riskFile.calculated[f.fieldName as keyof RiskCalculation] as number)}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  )
+                )}
+              </>
+            ) : (
+              [1, 2, 3].map((i) => (
+                <TableRow key={i} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                  <TableCell>
+                    <Skeleton variant="rectangular" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rectangular" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rectangular" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rectangular" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rectangular" />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Container>
   );
 }

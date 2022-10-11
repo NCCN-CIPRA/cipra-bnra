@@ -1,19 +1,23 @@
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { DVContact } from "../types/dataverse/DVContact";
 import useAPI from "./useAPI";
 
 export default function useLoggedInUser() {
   const api = useAPI();
+  const isFetching = useRef<Boolean>(false);
   const [user, setUser] = useState<DVContact | null | undefined>(undefined);
 
   useEffect(() => {
-    if (user) return;
+    if (user || isFetching.current) return;
 
     const getUser = async () => {
       setUser(await api.getUser());
+      isFetching.current = false;
     };
+
     getUser();
-  }, [api, setUser, user]);
+    isFetching.current = true;
+  }, [api, setUser, user, isFetching]);
 
   return { user };
 }
