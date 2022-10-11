@@ -12,7 +12,6 @@ export default function useLoggedInUser() {
 
     const getUser = async () => {
       setUser(await api.getUser());
-      isFetching.current = false;
     };
 
     getUser();
