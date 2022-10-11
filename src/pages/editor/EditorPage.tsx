@@ -36,7 +36,7 @@ import ScenariosTable from "../../components/ScenariosTable";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
-import useLoggedInUser from "../../hooks/useLoggedInUser";
+import Attachments from "../../components/Attachments";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -57,12 +57,6 @@ export default function EditorPage() {
   const api = useAPI();
   const params = useParams() as RouteParams;
   const navigate = useNavigate();
-  const { user } = useLoggedInUser();
-
-  const uploadRef = useRef<HTMLInputElement>(null);
-  const [uploadField, setUploadField] = useState<string | null>(null);
-  const [isUploadingFile, setIsUploadingFile] = useState(false);
-  const [isUploadingFinished, setIsUploadingFinished] = useState(false);
 
   const [definition, setDefinition] = useState<string | null>(null);
   const [historicalEvents, setHistoricalEvents] = useState<HE.HistoricalEvent[] | null>(null);
@@ -226,60 +220,14 @@ export default function EditorPage() {
     [catalysing]
   );
 
-  const handleAttach = (field: string | null) => () => {
-    if (!uploadRef.current) return;
-
-    setUploadField(field);
-    uploadRef.current.click();
-  };
-
-  const handleUploadAttachment = async (e: React.FormEvent<HTMLInputElement>) => {
-    if (!riskFile || !uploadRef.current || !uploadRef.current.files || uploadRef.current.files.length <= 0) return;
-
-    setIsUploadingFile(true);
-
-    const file = uploadRef.current.files[0];
-
-    await api.createAttachment(
-      {
-        "cr4de_owner@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
-        cr4de_name: file.name,
-        cr4de_reference: attachments ? attachments.reduce((max, a) => Math.max(max, a.cr4de_reference), -1) + 1 : 1,
-        cr4de_field: uploadField,
-        "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
-      },
-      file
-    );
-
-    setIsUploadingFile(false);
-    setIsUploadingFinished(true);
-  };
-
   return (
     <>
       <Container sx={{ pb: 8 }}>
-        <input ref={uploadRef} type="file" style={{ display: "none" }} onInput={handleUploadAttachment} />
-        <Snackbar open={isUploadingFile}>
-          <Alert severity="info" icon={false} sx={{ width: "100%" }}>
-            <CircularProgress size={12} sx={{ mr: 1 }} /> Uploading attachment
-          </Alert>
-        </Snackbar>
-        <Snackbar open={isUploadingFinished} autoHideDuration={6000} onClose={() => setIsUploadingFinished(false)}>
-          <Alert severity="success" sx={{ width: "100%" }} onClose={() => setIsUploadingFinished(false)}>
-            Upload finished
-          </Alert>
-        </Snackbar>
-
         <Paper>
           <Box p={2} my={4}>
-            <Stack direction="row">
-              <Typography variant="h6" color="secondary" sx={{ flex: 1 }}>
-                1. Definition
-              </Typography>
-              <IconButton size="small" onClick={handleAttach("definition")}>
-                <AttachFileIcon />
-              </IconButton>
-            </Stack>
+            <Typography variant="h6" color="secondary" sx={{ flex: 1 }}>
+              1. Definition
+            </Typography>
             <Divider sx={{ mb: 1 }} />
             {riskFile ? (
               <TextInputBox initialValue={riskFile.cr4de_definition || ""} setValue={setDefinition} />
@@ -288,6 +236,16 @@ export default function EditorPage() {
                 <Skeleton variant="text" />
               </Box>
             )}
+
+            <Attachments
+              attachments={useMemo(
+                () => attachments?.filter((a) => a.cr4de_field === "definition") || [],
+                [attachments]
+              )}
+              riskFile={riskFile}
+              field="definition"
+              onUpdate={getAttachments}
+            />
           </Box>
         </Paper>
 
