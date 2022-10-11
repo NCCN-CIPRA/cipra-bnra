@@ -37,6 +37,9 @@ import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import Attachments from "../../components/Attachments";
+import FeedbackList from "./FeedbackList";
+import { DVValidation } from "../../types/dataverse/DVValidation";
+import { DVContact } from "../../types/dataverse/DVContact";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -50,7 +53,7 @@ type RouteParams = {
 
 const defaultBreadcrumbs: Breadcrumb[] = [
   { name: "BNRA 2023 - 2026", url: "/" },
-  { name: "Risk Files", url: "/editor" },
+  { name: "Hazard Catalogue", url: "/hazards" },
 ];
 
 export default function EditorPage() {
@@ -81,6 +84,9 @@ export default function EditorPage() {
   });
   const { data: attachments, getData: getAttachments } = useLazyRecords<DVAttachment>({
     table: DataTable.ATTACHMENT,
+  });
+  const { data: validations, getData: getValidations } = useLazyRecords<DVValidation<undefined, DVContact>>({
+    table: DataTable.VALIDATION,
   });
 
   const { data: riskFile, reloadData: reloadRiskFile } = useRecord<ProcessedRiskFile>({
@@ -121,6 +127,10 @@ export default function EditorPage() {
           query: `$filter=_cr4de_cause_hazard_value eq ${rf.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
         });
       if (!attachments) getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${rf.cr4de_riskfilesid}` });
+      if (!validations)
+        getValidations({
+          query: `$filter=_cr4de_riskfile_value eq ${rf.cr4de_riskfilesid}&$expand=cr4de_expert`,
+        });
     },
   });
 
@@ -238,6 +248,8 @@ export default function EditorPage() {
             )}
 
             <Attachments attachments={attachments} riskFile={riskFile} field="definition" onUpdate={getAttachments} />
+
+            <FeedbackList validations={validations} field="definition" />
           </Box>
         </Paper>
 
@@ -279,6 +291,8 @@ export default function EditorPage() {
                 field="historical_events"
                 onUpdate={getAttachments}
               />
+
+              <FeedbackList validations={validations} field="historical_events" />
             </Box>
           </Paper>
         )}
@@ -317,6 +331,8 @@ export default function EditorPage() {
                 field="intensity_parameters"
                 onUpdate={getAttachments}
               />
+
+              <FeedbackList validations={validations} field="intensity_parameters" />
             </Box>
           </Paper>
         )}
@@ -348,6 +364,8 @@ export default function EditorPage() {
               />
 
               <Attachments attachments={attachments} riskFile={riskFile} field="scenarios" onUpdate={getAttachments} />
+
+              <FeedbackList validations={validations} field="scenarios" />
             </Box>
           </Paper>
         )}
@@ -400,12 +418,9 @@ export default function EditorPage() {
                 </Box>
               )}
 
-              <Attachments
-                attachments={attachments}
-                riskFile={riskFile}
-                field="capabilities"
-                onUpdate={getAttachments}
-              />
+              <Attachments attachments={attachments} riskFile={riskFile} field="scenarios" onUpdate={getAttachments} />
+
+              <FeedbackList validations={validations} field="scenarios" />
             </Box>
           </Paper>
         )}
@@ -445,6 +460,8 @@ export default function EditorPage() {
                 field="horizon_analysis"
                 onUpdate={getAttachments}
               />
+
+              <FeedbackList validations={validations} field="horizon_analysis" />
             </Box>
           </Paper>
         )}
@@ -497,6 +514,8 @@ export default function EditorPage() {
               )}
 
               <Attachments attachments={attachments} riskFile={riskFile} field="causes" onUpdate={getAttachments} />
+
+              <FeedbackList validations={validations} field="causes" />
             </Box>
           </Paper>
         )}
@@ -543,12 +562,9 @@ export default function EditorPage() {
                 />
               )}
 
-              <Attachments
-                attachments={attachments}
-                riskFile={riskFile}
-                field="malicious_actions"
-                onUpdate={getAttachments}
-              />
+              <Attachments attachments={attachments} riskFile={riskFile} field="effects" onUpdate={getAttachments} />
+
+              <FeedbackList validations={validations} field="effects" />
             </Box>
           </Paper>
         )}
@@ -595,6 +611,8 @@ export default function EditorPage() {
               )}
 
               <Attachments attachments={attachments} riskFile={riskFile} field="effects" onUpdate={getAttachments} />
+
+              <FeedbackList validations={validations} field="effects" />
             </Box>
           </Paper>
         )}
@@ -641,7 +659,14 @@ export default function EditorPage() {
                 />
               )}
 
-              <Attachments attachments={attachments} riskFile={riskFile} field="catalysed" onUpdate={getAttachments} />
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="catalysing_effects"
+                onUpdate={getAttachments}
+              />
+
+              <FeedbackList validations={validations} field="catalysing_effects" />
             </Box>
           </Paper>
         )}
@@ -695,7 +720,14 @@ export default function EditorPage() {
                 />
               )}
 
-              <Attachments attachments={attachments} riskFile={riskFile} field="catalysing" onUpdate={getAttachments} />
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="catalysing_effects"
+                onUpdate={getAttachments}
+              />
+
+              <FeedbackList validations={validations} field="catalysing_effects" />
             </Box>
           </Paper>
         )}

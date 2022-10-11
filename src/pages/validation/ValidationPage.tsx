@@ -218,21 +218,6 @@ export default function ValidationPage() {
 
   return (
     <>
-      <Box m={2} ml="76px">
-        <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />}>
-          <Link underline="hover" color="inherit" to="/" component={RouterLink}>
-            <Trans i18nKey="bnra.shortName">BNRA 2023 - 2026</Trans>
-          </Link>
-          <Link underline="hover" color="inherit" to="/validation" component={RouterLink}>
-            <Trans i18nKey="validation.appName">Validation</Trans>
-          </Link>
-          {riskFile ? (
-            <Typography color="text.primary">{riskFile.cr4de_title}</Typography>
-          ) : (
-            <Skeleton variant="text" width="200px" />
-          )}
-        </Breadcrumbs>
-      </Box>
       <Container sx={{ pb: 8 }}>
         <Paper>
           <Box p={2} my={4}>

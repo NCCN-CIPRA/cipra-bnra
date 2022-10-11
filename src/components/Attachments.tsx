@@ -23,16 +23,19 @@ import { Trans } from "react-i18next";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import useAPI from "../hooks/useAPI";
+import { DVValidation } from "../types/dataverse/DVValidation";
 
 export default function Attachments({
   attachments,
   field,
   riskFile,
+  validation,
   onUpdate,
 }: {
   attachments: DVAttachment[] | null;
   field: string;
   riskFile?: DVRiskFile | null;
+  validation?: DVValidation | null;
   onUpdate: () => Promise<void>;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -83,6 +86,11 @@ export default function Attachments({
         ...(riskFile
           ? {
               "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
+            }
+          : {}),
+        ...(validation
+          ? {
+              "cr4de_validation@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${validation.cr4de_bnravalidationid})`,
             }
           : {}),
       },

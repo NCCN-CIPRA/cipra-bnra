@@ -17,7 +17,7 @@ export default function ValidationIntroPage() {
   // Get all validation records from O365 dataverse
   //  Dataverse security only return records that belong to the currently logged in user, i.e. the user in the "expert" column
   const { data: validations } = useRecords<DVValidation<DVRiskFile>>({
-    table: DataTable.RISK_FILE,
+    table: DataTable.VALIDATION,
     query: "$expand=cr4de_RiskFile",
   });
 

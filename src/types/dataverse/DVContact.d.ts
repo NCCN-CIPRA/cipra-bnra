@@ -1,7 +1,7 @@
 export interface DVContact {
   contactid: string;
 
-  emailaddres1: string;
+  emailaddress1: string;
   firstname: string;
   lastname: string;
 }

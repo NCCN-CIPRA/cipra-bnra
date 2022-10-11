@@ -32,7 +32,7 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
       <Box sx={{ overflow: "auto" }}>
         <List>
           <ListItem disablePadding>
-            <ListItemButton component={Link} to="/editor" onClick={onClose}>
+            <ListItemButton component={Link} to="/hazards" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
               <ListItemText primary={t("riskFile.appName")} />
             </ListItemButton>

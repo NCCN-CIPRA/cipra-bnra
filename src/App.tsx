@@ -40,11 +40,11 @@ function App() {
         },
 
         {
-          path: "/editor",
+          path: "/hazards",
           element: <EditorIntroPage />,
         },
         {
-          path: "/editor/:risk_file_id",
+          path: "/hazards/:risk_file_id",
           element: <EditorPage />,
         },
 

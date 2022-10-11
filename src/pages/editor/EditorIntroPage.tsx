@@ -1,10 +1,12 @@
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 
 import { useNavigate } from "react-router-dom";
-import { Box, Container, Typography } from "@mui/material";
+import { Container } from "@mui/material";
 import RiskFileList from "../../components/RiskFileList";
 import { DataTable } from "../../hooks/useAPI";
 import useRecords from "../../hooks/useRecords";
+import usePageTitle from "../../hooks/usePageTitle";
+import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 
 export default function EditorIntroPage() {
   const navigate = useNavigate();
@@ -12,21 +14,21 @@ export default function EditorIntroPage() {
   // Get all risk file records from O365 dataverse
   const { data: riskFiles } = useRecords<DVRiskFile>({ table: DataTable.RISK_FILE });
 
+  usePageTitle("BNRA 2023 - 2026 Hazard Catalogue");
+  useBreadcrumbs([
+    { name: "BNRA 2023 - 2026", url: "/" },
+    { name: "Hazard Catalogue", url: "/hazards" },
+  ]);
+
   return (
     <>
       <Container>
-        <Box mt={5}>
-          <Typography variant="body1" my={2}>
-            Welcome to the <b>BNRA 2023 - 2026 Risk File Editor Application</b>
-          </Typography>
-        </Box>
-
         <RiskFileList
           riskFiles={riskFiles}
           onClick={async (riskFile) => {
             if (!riskFiles) return;
 
-            navigate(`/editor/${riskFile.cr4de_riskfilesid}`);
+            navigate(`/hazards/${riskFile.cr4de_riskfilesid}`);
           }}
         />
       </Container>

@@ -1,8 +1,8 @@
-export interface DVAttachment {
+export interface DVAttachment<ContactType = undefined> {
   cr4de_bnraattachmentid: string;
 
   _cr4de_owner_value: string;
-  cr4de_owner: string;
+  cr4de_owner: ContactType;
 
   cr4de_name: string;
   cr4de_reference: number;
