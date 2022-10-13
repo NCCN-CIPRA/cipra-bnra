@@ -1,4 +1,4 @@
-import { Box, Container, Button, Link, Typography } from "@mui/material";
+import { Box, Container, Button, Link, Stack, Typography } from "@mui/material";
 import {
   Timeline,
   TimelineItem,
@@ -8,9 +8,9 @@ import {
   TimelineDot,
   TimelineOppositeContent,
 } from "@mui/lab";
+import { Link as RouterLink } from "react-router-dom";
 import { timelineOppositeContentClasses } from "@mui/lab/TimelineOppositeContent";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
-import { Stack } from "@mui/system";
 
 export default function HomePage() {
   useBreadcrumbs(null);
@@ -42,7 +42,12 @@ export default function HomePage() {
         }}
       >
         <Container sx={{ display: "flex", alignItems: "flex-end", height: "100%", pb: 4 }}>
-          <img src="https://bnra.powerappsportals.com/logo_text.png" style={{ width: 300, marginBottom: 4 }} />
+          <Stack direction="column">
+            <img src="https://bnra.powerappsportals.com/logo_text.png" style={{ width: 300, marginBottom: 20 }} />
+            <Typography variant="subtitle1" paragraph>
+              Belgian National Risk Assessment 2023 - 2026
+            </Typography>
+          </Stack>
         </Container>
       </Box>
       <Box sx={{ bgcolor: "white", width: "100%", pt: 4 }}>
@@ -159,6 +164,15 @@ export default function HomePage() {
               </TimelineItem>
             </Timeline>
           </Box>
+          <Stack direction="column" sx={{ pb: 8, textAlign: "justify" }}>
+            <Typography variant="body1" paragraph>
+              Een diepgaande uitleg over de methodologie en tools die tijdens BNRA gehanteerde zullen worden, alsook
+              praktijkvoorbeelden, zijn terug te vinden in het leerplatform.
+            </Typography>
+            <Button variant="contained" sx={{ alignSelf: "center", mt: 4 }} to="/learning" component={RouterLink}>
+              Naar het leerplatform
+            </Button>
+          </Stack>
         </Container>
       </Box>
       <Box
@@ -214,6 +228,7 @@ export default function HomePage() {
           width: "100%",
           backgroundColor: "white",
           pt: 8,
+          pb: 16,
         }}
       >
         <Container>
@@ -256,15 +271,15 @@ export default function HomePage() {
               hier meer.
             </Typography>
           </Box>
-          <Stack direction="row" sx={{ justifyContent: "space-evenly", mt: 32, pb: 4 }}>
-            <img
-              src="https://crisiscentrum.be/sites/default/files/2021-07/Logo_liggend_NL_kleur.svg"
-              style={{ height: 50 }}
-            />
-            <img src="https://bnra.powerappsportals.com/logo_text.png" style={{ height: 50 }} />
-          </Stack>
         </Container>
       </Box>
+      <Stack direction="row" sx={{ justifyContent: "space-evenly", my: 4 }}>
+        <img
+          src="https://crisiscentrum.be/sites/default/files/2021-07/Logo_liggend_NL_kleur.svg"
+          style={{ height: 50 }}
+        />
+        <img src="https://bnra.powerappsportals.com/logo_text.png" style={{ height: 50 }} />
+      </Stack>
     </>
   );
 }
