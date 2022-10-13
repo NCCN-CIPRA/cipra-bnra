@@ -39,6 +39,10 @@ root.render(
           onLoad={() => {
             // @ts-expect-error
             window.fetch.loaded = true;
+
+            const iframeDoc = document.getElementById("localApi").contentWindow.document;
+
+            console.log(iframeDoc);
           }}
         />
         <iframe

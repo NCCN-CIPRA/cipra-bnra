@@ -4,6 +4,17 @@ export default function LocalAPI() {
   useEffect(() => {
     const listener = async function (e: any) {
       try {
+        if (e.data === "getUserInfo") {
+          // eslint-disable-next-line no-restricted-globals
+          parent?.postMessage(
+            {
+              userInfo: document.getElementById("user-information")?.outerHTML,
+            },
+            "*"
+          );
+
+          return;
+        }
         // console.log needed to buffer data???
         // console.log(e.data);
         const data = JSON.parse(e.data);

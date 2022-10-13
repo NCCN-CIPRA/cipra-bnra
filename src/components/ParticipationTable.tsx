@@ -19,6 +19,7 @@ import {
   Select,
   MenuItem,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { DVParticipation } from "../types/dataverse/DVParticipation";
@@ -46,7 +47,7 @@ export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile 
   const handleAddParticipant = async () => {
     setIsLoading(true);
 
-    const existingContact = await api.getContacts(`$filter=emailaddress1 eq ${email}`);
+    const existingContact = await api.getContacts(`$filter=contains(emailaddress1,'${email}')`);
 
     let contactId;
 
@@ -94,7 +95,9 @@ export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile 
           <TableBody>
             {!participants && (
               <TableRow>
-                <TableCell colSpan={5}>Loading</TableCell>
+                <TableCell colSpan={5} sx={{ textAlign: "center" }}>
+                  <CircularProgress size="small" />
+                </TableCell>
               </TableRow>
             )}
             {participants &&
@@ -119,7 +122,7 @@ export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile 
           <TableFooter>
             <TableRow>
               <TableCell colSpan={5} size="small" sx={{ textAlign: "right" }}>
-                <Button>Add Participant</Button>
+                <Button onClick={() => setDialogOpen(true)}>Add Participant</Button>
               </TableCell>
             </TableRow>
           </TableFooter>
@@ -140,15 +143,10 @@ export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile 
               onChange={(e) => setEmail(e.target.value)}
             />
             <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Role</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={role}
-                label="Role"
-                onChange={(e) => setRole(e.target.value)}
-              >
+              <InputLabel>Role</InputLabel>
+              <Select value={role} label="Role" onChange={(e) => setRole(e.target.value)}>
                 <MenuItem value="analist">CIPRA Analist</MenuItem>
+                <MenuItem value="analist_2">CIPRA Analist (back-up)</MenuItem>
                 <MenuItem value="expert">Topical Expert</MenuItem>
               </Select>
             </FormControl>

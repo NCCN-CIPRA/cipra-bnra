@@ -13,6 +13,10 @@ export default function patchFetch() {
         status: e.data.status,
         headers: new Headers(e.data.headers),
       });
+    } else if (e.data && e.data.userInfo) {
+      const div = document.createElement("div");
+      div.innerHTML = e.data.userInfo;
+      document.body.appendChild(div);
     }
   };
 }

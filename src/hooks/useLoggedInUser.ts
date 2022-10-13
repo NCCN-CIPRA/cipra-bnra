@@ -1,22 +1,26 @@
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { DVContact } from "../types/dataverse/DVContact";
-import useAPI from "./useAPI";
 
 export default function useLoggedInUser() {
-  const api = useAPI();
-  const isFetching = useRef<Boolean>(false);
   const [user, setUser] = useState<DVContact | null | undefined>(undefined);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (user || isFetching.current) return;
+    const info = document.getElementById("user-information");
 
-    const getUser = async () => {
-      setUser(await api.getUser());
-    };
-
-    getUser();
-    isFetching.current = true;
-  }, [api, setUser, user, isFetching]);
+    if (info && info.getAttribute("data-id") && info.getAttribute("data-id") !== "") {
+      if (info.getAttribute("data-id") !== user?.contactid) {
+        setUser({
+          contactid: info?.getAttribute("data-id") || "",
+          emailaddress1: info?.getAttribute("data-email") || "",
+          firstname: info?.getAttribute("data-firstname") || "",
+          lastname: info?.getAttribute("data-lastname") || "",
+        });
+      }
+    } else {
+      setUser(null);
+    }
+  });
 
   return { user };
 }

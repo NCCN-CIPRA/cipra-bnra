@@ -47,7 +47,7 @@ export default function TitleBar({ title, onDrawerToggle }: { title: string; onD
                 <Trans i18nKey="button.login">Login</Trans>
               </Button>
             )}
-            {user !== undefined && user !== null && (
+            {user != null && (
               <>
                 <Button variant="text" color="inherit" startIcon={<AccountCircleIcon />} onClick={handleMenu}>
                   {user?.firstname} {user?.lastname}

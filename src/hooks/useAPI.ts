@@ -38,7 +38,6 @@ export interface API {
   login(email: string, password: string, remember: boolean): Promise<AuthResponse>;
   requestPasswordReset(email: string): Promise<AuthResponse>;
   requestRegistrationLink(invitationCode: string): Promise<AuthResponse<RegistrationData>>;
-  getUser(): Promise<DVContact>;
 
   getContacts<T = DVContact>(query?: string): Promise<T[]>;
   createContact(fields: object): Promise<CreateResponse>;
@@ -166,17 +165,6 @@ export default function useAPI(): API {
         return {
           error: "Invalid invitation code",
         };
-      }
-    },
-    getUser: async function () {
-      const response = await fetch(`https://bnra.powerappsportals.com/_api/contacts`);
-
-      if (response.status === 200) {
-        const results = await response.json();
-
-        if (results.value && results.value.length > 0) return results.value[0];
-        return null;
-      } else {
       }
     },
 
