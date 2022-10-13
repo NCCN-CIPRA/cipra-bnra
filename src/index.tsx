@@ -40,9 +40,8 @@ root.render(
             // @ts-expect-error
             window.fetch.loaded = true;
 
-            const iframeDoc = document.getElementById("localApi").contentWindow.document;
-
-            console.log(iframeDoc);
+            // @ts-expect-error
+            window.frames.localApi.postMessage("getUserInfo", "*");
           }}
         />
         <iframe
