@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { ReactNode, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -15,7 +15,19 @@ import {
   Snackbar,
   CircularProgress,
   Alert,
+  Stack,
+  IconButton,
+  Tooltip,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Link,
+  Collapse,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 import useLoggedInUser from "../hooks/useLoggedInUser";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
@@ -24,30 +36,48 @@ import { DVAttachment } from "../types/dataverse/DVAttachment";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import useAPI from "../hooks/useAPI";
 import { DVValidation } from "../types/dataverse/DVValidation";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DeleteIcon from "@mui/icons-material/Delete";
+
+export interface Action {
+  icon: ReactNode;
+  tooltip: string;
+  onClick: (e: any) => Promise<void>;
+}
 
 export default function Attachments({
+  actions,
   attachments,
+  children,
   field,
   riskFile,
   validation,
+  isExternal = false,
   onUpdate,
 }: {
+  actions?: Action[];
   attachments: DVAttachment[] | null;
+  children?: ReactNode;
   field: string;
   riskFile?: DVRiskFile | null;
-  validation?: DVValidation | null;
+  validation?: DVValidation<DVRiskFile | undefined> | null;
+  isExternal?: boolean;
   onUpdate: () => Promise<void>;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const api = useAPI();
+  const theme = useTheme();
+  const [t] = useTranslation();
   const { user } = useLoggedInUser();
 
   const [openDialog, setOpenDialog] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [isUploadingFinished, setIsUploadingFinished] = useState(false);
   const [isRemovingFile, setIsRemovingFile] = useState(false);
   const [isRemovingFinished, setIsRemovingFinished] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const [title, setTitle] = useState<string | null>(null);
   const [url, setUrl] = useState<string | null>(null);
@@ -59,8 +89,22 @@ export default function Attachments({
 
     if (!field) return attachments;
 
-    return attachments?.filter((a) => a.cr4de_field === field);
-  }, [attachments, field]);
+    return attachments?.filter((a) => {
+      // Only show attachments that belong to this field
+      if (a.cr4de_field !== field) return false;
+
+      // If the viewer is not external (CIPRA) we can show all sources
+      if (!isExternal) return true;
+
+      // If the viewer is external, only show CIPRA sources
+      if (a._cr4de_validation_value === null) return true;
+
+      // And their own source
+      if (a._cr4de_owner_value === user?.contactid) return true;
+
+      return false;
+    });
+  }, [attachments, field, isExternal, user?.contactid]);
 
   const handlePickFile = () => {
     if (!inputRef.current) return;
@@ -138,7 +182,7 @@ export default function Attachments({
                 autoFocus
                 margin="dense"
                 id="name"
-                label="Source Title"
+                label={t("source.dialog.sourceTitle")}
                 fullWidth
                 variant="standard"
                 value={title || ""}
@@ -147,7 +191,7 @@ export default function Attachments({
               <TextField
                 margin="dense"
                 id="url"
-                label="Link"
+                label={t("source.dialog.sourceLink")}
                 fullWidth
                 variant="standard"
                 value={url || ""}
@@ -157,63 +201,135 @@ export default function Attachments({
             <Divider orientation="vertical" flexItem sx={{ mx: 4 }} />
             <Grid item xs sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Button variant="outlined" startIcon={<UploadFileIcon />} onClick={handlePickFile}>
-                Upload File
+                <Trans i18nKey="source.dialog.uploadFile">Upload File</Trans>
               </Button>
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleToggleDialog}>Cancel</Button>
-          <Button onClick={handleSaveAttachment}>Add source</Button>
+          <Button onClick={handleToggleDialog}>
+            <Trans i18nKey="source.dialog.cancel">Cancel</Trans>
+          </Button>
+          <Button onClick={handleSaveAttachment}>
+            <Trans i18nKey="source.dialog.addSource">Add source</Trans>
+          </Button>
         </DialogActions>
       </Dialog>
       <Snackbar open={isUploadingFile}>
         <Alert severity="info" icon={false} sx={{ width: "100%" }}>
-          <CircularProgress size={12} sx={{ mr: 1 }} /> Saving attachment
+          <CircularProgress size={12} sx={{ mr: 1 }} />{" "}
+          <Trans i18nKey="source.alert.savingAttachment">Saving attachment</Trans>
         </Alert>
       </Snackbar>
       <Snackbar open={isUploadingFinished} autoHideDuration={6000} onClose={() => setIsUploadingFinished(false)}>
         <Alert severity="success" sx={{ width: "100%" }} onClose={() => setIsUploadingFinished(false)}>
-          Attachment saved
+          <Trans i18nKey="source.alert.attachmentSaved">Attachment saved</Trans>
         </Alert>
       </Snackbar>
       <Snackbar open={isRemovingFile}>
         <Alert severity="info" icon={false} sx={{ width: "100%" }}>
-          <CircularProgress size={12} sx={{ mr: 1 }} /> Removing attachment
+          <CircularProgress size={12} sx={{ mr: 1 }} />{" "}
+          <Trans i18nKey="source.alert.removingAttachment">Removing attachment</Trans>
         </Alert>
       </Snackbar>
       <Snackbar open={isRemovingFinished} autoHideDuration={6000} onClose={() => setIsRemovingFinished(false)}>
         <Alert severity="success" sx={{ width: "100%" }} onClose={() => setIsRemovingFinished(false)}>
-          Attachment removed
+          <Trans i18nKey="source.alert.attachmentRemoved">Attachment removed</Trans>
+        </Alert>
+      </Snackbar>
+      <Snackbar open={isDownloading}>
+        <Alert severity="info" icon={false} sx={{ width: "100%" }}>
+          <CircularProgress size={12} sx={{ mr: 1 }} />{" "}
+          <Trans i18nKey="source.alert.downloadingAttachment">Downloading attachment</Trans>
         </Alert>
       </Snackbar>
 
-      <Box sx={{ flexWrap: "wrap", display: "flex", listStyle: "none" }}>
-        {fieldAttachments.map((a) => (
-          <ListItem key={a.cr4de_bnraattachmentid} sx={{ width: "auto", px: "8px" }}>
-            <Chip
-              label={a.cr4de_name}
-              icon={<AttachFileIcon sx={{ fontSize: 16, mb: "2px" }} />}
-              onClick={() => {
-                api.serveAttachmentFile(a);
+      <Stack direction="row" sx={{ mt: 2 }}>
+        <Tooltip title={t("source.button.attach")}>
+          <IconButton onClick={handleToggleDialog}>
+            <AttachFileIcon />
+          </IconButton>
+        </Tooltip>
+        {actions &&
+          actions.map((a, i) => (
+            <Tooltip title={a.tooltip}>
+              <IconButton key={i} onClick={a.onClick}>
+                {a.icon}
+              </IconButton>
+            </Tooltip>
+          ))}
+        <Box sx={{ flex: 1 }} />
+        <Tooltip title={expanded ? t("source.button.hide") : t("source.button.show")}>
+          <IconButton onClick={() => setExpanded(!expanded)}>
+            <ExpandMoreIcon
+              sx={{
+                transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                transition: theme.transitions.create("transform", {
+                  duration: theme.transitions.duration.shortest,
+                }),
               }}
-              onDelete={
-                a._cr4de_owner_value === user?.contactid
-                  ? () => {
-                      handleRemoveAttachment(a.cr4de_bnraattachmentid);
-                    }
-                  : undefined
-              }
             />
-          </ListItem>
-        ))}
-      </Box>
+          </IconButton>
+        </Tooltip>
+      </Stack>
 
-      <Box sx={{ textAlign: "right" }}>
-        <Button startIcon={<AttachFileIcon />} onClick={handleToggleDialog}>
-          Provide source material
-        </Button>
-      </Box>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <Trans i18nKey="source.list.fileName">Source filename</Trans>
+              </TableCell>
+              <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
+                <Trans i18nKey="source.list.type">Source Type</Trans>
+              </TableCell>
+              <TableCell align="right" sx={{ width: 0 }}></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {fieldAttachments.length > 0 ? (
+              fieldAttachments.map((a) => (
+                <TableRow key={a.cr4de_name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                  <TableCell component="th" scope="row">
+                    <Link
+                      sx={{ "&:hover": { cursor: "pointer" } }}
+                      onClick={async () => {
+                        if (a) {
+                          setIsDownloading(true);
+                        }
+                        await api.serveAttachmentFile(a);
+                        setIsDownloading(false);
+                      }}
+                    >
+                      {a.cr4de_name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{a.cr4de_url ? t("source.type.link") : t("source.type.file")}</TableCell>
+                  <TableCell align="center">
+                    {(!isExternal || a._cr4de_owner_value === user?.contactid) && (
+                      <IconButton
+                        onClick={() => {
+                          handleRemoveAttachment(a.cr4de_bnraattachmentid);
+                        }}
+                      >
+                        <DeleteIcon color="error" />
+                      </IconButton>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell sx={{ textAlign: "center" }} colSpan={3}>
+                  <Trans i18nKey="source.list.noSources">No sources attached</Trans>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+
+        {children}
+      </Collapse>
     </Box>
   );
 }

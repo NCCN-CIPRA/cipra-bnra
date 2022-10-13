@@ -32,7 +32,7 @@ function HistoricalEventRow({
   useEffect(() => {
     setIsLoading(false);
   }, [event, setIsLoading]);
-
+  console.log(onChange);
   return (
     <TableRow>
       <TableCell sx={{ whiteSpace: "nowrap", verticalAlign: "top", minWidth: 200 }}>
@@ -135,25 +135,29 @@ function HistoricalEventsTable({
     return onChange([...historicalEvents, { time: "", location: "", description: "" }], true);
   };
 
-  const handleRemoveRow = async (i: number) => {
+  const handleRemoveRow = (i: number) => {
     if (!onChange) return;
 
-    if (window.confirm("Are you sure you wish to delete this event?")) {
-      return onChange(
-        [...historicalEvents.slice(0, i), ...historicalEvents.slice(i + 1, historicalEvents.length)],
-        true
-      );
-    }
+    return async () => {
+      if (window.confirm("Are you sure you wish to delete this event?")) {
+        return onChange(
+          [...historicalEvents.slice(0, i), ...historicalEvents.slice(i + 1, historicalEvents.length)],
+          true
+        );
+      }
+    };
   };
 
-  const handleUpdate = async (updatedEvent: HistoricalEvent, i: number) => {
+  const handleUpdate = (i: number) => {
     if (!onChange) return;
 
-    return onChange([
-      ...historicalEvents.slice(0, i),
-      updatedEvent,
-      ...historicalEvents.slice(i + 1, historicalEvents.length),
-    ]);
+    return async (updatedEvent: HistoricalEvent) => {
+      return onChange([
+        ...historicalEvents.slice(0, i),
+        updatedEvent,
+        ...historicalEvents.slice(i + 1, historicalEvents.length),
+      ]);
+    };
   };
 
   return (
@@ -163,12 +167,7 @@ function HistoricalEventsTable({
           <TableBody>
             {historicalEvents ? (
               historicalEvents.map((e, i) => (
-                <HistoricalEventRow
-                  key={i}
-                  event={e}
-                  onChange={(updatedEvent) => handleUpdate(updatedEvent, i)}
-                  onRemove={() => handleRemoveRow(i)}
-                />
+                <HistoricalEventRow key={i} event={e} onChange={handleUpdate(i)} onRemove={handleRemoveRow(i)} />
               ))
             ) : (
               <TableRow>

@@ -114,18 +114,22 @@ function IntensityParameterTable({
     return onChange([...parameters, { name: "", description: "", value: undefined }], true);
   };
 
-  const handleRemoveRow = async (i: number) => {
+  const handleRemoveRow = (i: number) => {
     if (!onChange) return;
 
-    if (window.confirm("Are you sure you wish to delete this parameter?")) {
-      return onChange([...parameters.slice(0, i), ...parameters.slice(i + 1, parameters.length)], true);
-    }
+    return async () => {
+      if (window.confirm("Are you sure you wish to delete this parameter?")) {
+        return onChange([...parameters.slice(0, i), ...parameters.slice(i + 1, parameters.length)], true);
+      }
+    };
   };
 
-  const handleUpdate = async (updated: IntensityParameter, i: number) => {
+  const handleUpdate = (i: number) => {
     if (!onChange) return;
 
-    return onChange([...parameters.slice(0, i), updated, ...parameters.slice(i + 1, parameters.length)]);
+    return async (updated: IntensityParameter) => {
+      return onChange([...parameters.slice(0, i), updated, ...parameters.slice(i + 1, parameters.length)]);
+    };
   };
 
   return (
@@ -145,12 +149,7 @@ function IntensityParameterTable({
           <TableBody>
             {parameters ? (
               parameters.map((e, i) => (
-                <ParameterRow
-                  key={i}
-                  parameter={e}
-                  onChange={(update) => handleUpdate(update, i)}
-                  onRemove={() => handleRemoveRow(i)}
-                />
+                <ParameterRow key={i} parameter={e} onChange={handleUpdate(i)} onRemove={handleRemoveRow(i)} />
               ))
             ) : (
               <TableRow>

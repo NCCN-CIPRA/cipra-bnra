@@ -12,7 +12,7 @@ export default function EditorIntroPage() {
   const navigate = useNavigate();
 
   // Get all risk file records from O365 dataverse
-  const { data: riskFiles } = useRecords<DVRiskFile>({ table: DataTable.RISK_FILE });
+  const { data: riskFiles } = useRecords<DVRiskFile>({ table: DataTable.RISK_FILE, query: "$orderby=cr4de_hazard_id" });
 
   usePageTitle("BNRA 2023 - 2026 Hazard Catalogue");
   useBreadcrumbs([

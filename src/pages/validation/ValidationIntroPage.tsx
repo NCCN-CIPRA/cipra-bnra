@@ -66,7 +66,8 @@ export default function ValidationIntroPage() {
         </Box>
 
         <RiskFileList
-          riskFiles={validations && validations.map((v: any) => v.cr4de_RiskFile)}
+          riskFiles={validations && validations.map((v: any) => ({ ...v.cr4de_RiskFile, finished: v.cr4de_finished }))}
+          finishedTooltip={t("validation.tooltip.finished")}
           onClick={async (riskFile) => {
             if (!validations) return;
 

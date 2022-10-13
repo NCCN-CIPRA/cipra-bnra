@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import Card from "@mui/material/Card";
@@ -11,6 +11,8 @@ import { Divider, Typography } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Trans } from "react-i18next";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
+import TextInputBox from "./TextInputBox";
+import { HtmlEditor } from "devextreme-react";
 
 type SIDE = "LEFT" | "RIGHT";
 
@@ -28,6 +30,7 @@ function TransferList({
   chosen,
   onAddChosen,
   onRemoveChosen,
+  onChangeReason,
 }: {
   choicesLabel: string;
   choicesSubheader?: string;
@@ -37,20 +40,41 @@ function TransferList({
   chosen: CascadeRisk[];
   onAddChosen?: (added: SmallRisk) => void;
   onRemoveChosen?: (removed: CascadeRisk) => void;
+  onChangeReason?: (selected: CascadeRisk, newReason: string) => void;
 }) {
   const [selected, setSelected] = useState<{
     side: SIDE;
     index: number;
   } | null>(null);
+  const [reason, setReason] = useState<string | null>(null);
+  const [hasChanged, setHasChanged] = useState(false);
 
   const handleListItemClick = (side: SIDE, index: number) => {
+    commitChangedReason();
     setSelected({ side, index });
+    if (side === "RIGHT") {
+      setReason(chosen[index].reason);
+    } else {
+      setReason(null);
+    }
+  };
+
+  const handleChangeReason = (newReason: string) => {
+    setReason(newReason);
+    setHasChanged(true);
+  };
+
+  const commitChangedReason = () => {
+    if (hasChanged && onChangeReason && selected && reason) {
+      setHasChanged(false);
+      onChangeReason(chosen[selected.index], reason);
+    }
   };
 
   const customList = (title: ReactNode, items: readonly any[], side: SIDE, subheader?: string) => (
     <Card elevation={0} sx={{ border: "1px solid #eee", flex: 1, mt: 2 }}>
       <CardHeader
-        sx={{ px: 2, py: 1 }}
+        sx={{ ml: -2, py: 1 }}
         title={title}
         avatar={" "}
         subheader={subheader || "-"}
@@ -133,6 +157,30 @@ function TransferList({
         </Box>
         {customList(chosenLabel, chosen, "RIGHT", chosenSubheader)}
       </Box>
+      {selected && selected.side === "RIGHT" && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            mt: 2,
+            p: 1,
+            border: "1px solid #eee",
+          }}
+        >
+          <Typography variant="subtitle2" mb={1}>
+            <Trans i18nKey="transferList.reason">Reason for the causal relationship</Trans>
+          </Typography>
+          {onChangeReason ? (
+            <TextInputBox value={reason} setValue={handleChangeReason} onBlur={commitChangedReason} />
+          ) : (
+            <Box
+              dangerouslySetInnerHTML={{
+                __html: chosen[selected.index].reason || "<p>(No reason provided)</p>",
+              }}
+            />
+          )}
+        </Box>
+      )}
       {selected && (
         <Box
           sx={{
@@ -151,27 +199,7 @@ function TransferList({
             dangerouslySetInnerHTML={{
               __html:
                 (selected.side === "LEFT" ? choices : chosen)[selected.index].cr4de_definition ||
-                "<p>(No reason provided)</p>",
-            }}
-          />
-        </Box>
-      )}
-      {selected && selected.side === "RIGHT" && (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            mt: 2,
-            p: 1,
-            border: "1px solid #eee",
-          }}
-        >
-          <Typography variant="subtitle2" mb={1}>
-            <Trans i18nKey="transferList.reason">Reason for the causal relationship</Trans>
-          </Typography>
-          <Box
-            dangerouslySetInnerHTML={{
-              __html: chosen[selected.index].reason || "<p>(No reason provided)</p>",
+                "<p>(No definition provided)</p>",
             }}
           />
         </Box>

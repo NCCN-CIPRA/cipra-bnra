@@ -15,15 +15,7 @@ import { scaleLog } from "d3-scale";
 import { getImpactScale } from "../functions/Impact";
 import { NameType } from "recharts/types/component/DefaultTooltipContent";
 import { Typography } from "@mui/material";
-
-const colors: { [key: string]: string } = {
-  Cyber: "#dfe6e9",
-  EcoTech: "#ffeaa7",
-  Health: "#74b9ff",
-  "Man-made": "#ff7675",
-  Nature: "#55efc4",
-  Transversal: "#636e72",
-};
+import getCategoryColor from "../functions/getCategoryColor";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   if (active && payload && payload.length) {
@@ -129,7 +121,7 @@ export default function RiskMatrix({ riskFiles }: { riskFiles: any[] | null }) {
           {data.map((d) => (
             <Cell
               key={d.name}
-              fill={colors[d.category] || "#000"}
+              fill={getCategoryColor(d.category)}
               radius={20}
               style={{ cursor: "pointer" }}
               onClick={(e) => navigate(`/reporting/${d.id}`)}

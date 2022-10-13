@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import fileToByteArray from "../functions/fileToByteArray";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DVContact } from "../types/dataverse/DVContact";
 import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
+import { DVParticipation } from "../types/dataverse/DVParticipation";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { DVValidation } from "../types/dataverse/DVValidation";
@@ -11,6 +11,8 @@ import { DVValidation } from "../types/dataverse/DVValidation";
 export enum DataTable {
   RISK_FILE,
   RISK_CASCADE,
+
+  PARTICIPATION,
 
   VALIDATION,
   DIRECT_ANALYSIS,
@@ -38,6 +40,9 @@ export interface API {
   requestRegistrationLink(invitationCode: string): Promise<AuthResponse<RegistrationData>>;
   getUser(): Promise<DVContact>;
 
+  getContacts<T = DVContact>(query?: string): Promise<T[]>;
+  createContact(fields: object): Promise<CreateResponse>;
+
   getRiskFiles<T = DVRiskFile>(query?: string): Promise<T[]>;
   getRiskFile<T = DVRiskFile>(id: string, query?: string): Promise<T>;
   updateRiskFile(id: string, fields: object): Promise<void>;
@@ -47,6 +52,9 @@ export interface API {
   createCascade(fields: object): Promise<CreateResponse>;
   updateCascade(id: string, fields: object): Promise<void>;
   deleteCascade(id: string): Promise<void>;
+
+  getParticipants<T = DVParticipation>(query?: string): Promise<T[]>;
+  createParticipant(fields: object): Promise<CreateResponse>;
 
   getValidations<T = DVValidation>(query?: string): Promise<T[]>;
   getValidation<T = DVValidation>(id: string, query?: string): Promise<T>;
@@ -172,6 +180,24 @@ export default function useAPI(): API {
       }
     },
 
+    getContacts: async function <T = DVContact>(query?: string): Promise<T[]> {
+      const response = await authFetch(`https://bnra.powerappsportals.com/_api/contacts${query ? "?" + query : ""}`);
+
+      return (await response.json()).value;
+    },
+    createContact: async function (fields: object): Promise<CreateResponse> {
+      const response = await authFetch(`https://bnra.powerappsportals.com/_api/contacts`, {
+        method: "POST",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+
+      return { id: response.headers.get("entityId") as string };
+    },
+
     getRiskFiles: async function <T = DVRiskFile>(query?: string): Promise<T[]> {
       const response = await authFetch(
         `https://bnra.powerappsportals.com/_api/cr4de_riskfileses${query ? "?" + query : ""}`
@@ -241,6 +267,26 @@ export default function useAPI(): API {
           "Content-Type": "application/json",
         },
       });
+    },
+
+    getParticipants: async function <T = DVParticipation>(query?: string): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnraparticipations${query ? "?" + query : ""}`
+      );
+
+      return (await response.json()).value;
+    },
+    createParticipant: async function (fields: object): Promise<CreateResponse> {
+      const response = await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraparticipations`, {
+        method: "POST",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+
+      return { id: response.headers.get("entityId") as string };
     },
 
     getValidations: async function <T = DVValidation>(query?: string): Promise<T[]> {

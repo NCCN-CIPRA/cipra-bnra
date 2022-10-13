@@ -34,6 +34,8 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
       response = await api.getRiskFiles<T>(o.query);
     } else if (o.table === DataTable.RISK_CASCADE) {
       response = await api.getRiskCascades<T>(o.query);
+    } else if (o.table === DataTable.PARTICIPATION) {
+      response = await api.getParticipants<T>(o.query);
     } else if (o.table === DataTable.VALIDATION) {
       response = await api.getValidations<T>(o.query);
     } else if (o.table === DataTable.DIRECT_ANALYSIS) {

@@ -40,6 +40,8 @@ import Attachments from "../../components/Attachments";
 import FeedbackList from "./FeedbackList";
 import { DVValidation } from "../../types/dataverse/DVValidation";
 import { DVContact } from "../../types/dataverse/DVContact";
+import ParticipationTable from "../../components/ParticipationTable";
+import { DVParticipation } from "../../types/dataverse/DVParticipation";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -233,6 +235,8 @@ export default function EditorPage() {
   return (
     <>
       <Container sx={{ pb: 8 }}>
+        {riskFile && <ParticipationTable riskFile={riskFile} />}
+
         <Paper>
           <Box p={2} my={4}>
             <Typography variant="h6" color="secondary" sx={{ flex: 1 }}>
@@ -247,7 +251,14 @@ export default function EditorPage() {
               </Box>
             )}
 
-            <Attachments attachments={attachments} riskFile={riskFile} field="definition" onUpdate={getAttachments} />
+            <Attachments
+              attachments={attachments}
+              riskFile={riskFile}
+              field="definition"
+              onUpdate={() =>
+                getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+              }
+            />
 
             <FeedbackList validations={validations} field="definition" />
           </Box>
@@ -289,7 +300,9 @@ export default function EditorPage() {
                 attachments={attachments}
                 riskFile={riskFile}
                 field="historical_events"
-                onUpdate={getAttachments}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                }
               />
 
               <FeedbackList validations={validations} field="historical_events" />
@@ -329,7 +342,9 @@ export default function EditorPage() {
                 attachments={attachments}
                 riskFile={riskFile}
                 field="intensity_parameters"
-                onUpdate={getAttachments}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                }
               />
 
               <FeedbackList validations={validations} field="intensity_parameters" />
@@ -363,7 +378,14 @@ export default function EditorPage() {
                 onChange={setScenarios}
               />
 
-              <Attachments attachments={attachments} riskFile={riskFile} field="scenarios" onUpdate={getAttachments} />
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="scenarios"
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                }
+              />
 
               <FeedbackList validations={validations} field="scenarios" />
             </Box>
@@ -418,7 +440,14 @@ export default function EditorPage() {
                 </Box>
               )}
 
-              <Attachments attachments={attachments} riskFile={riskFile} field="scenarios" onUpdate={getAttachments} />
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="scenarios"
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                }
+              />
 
               <FeedbackList validations={validations} field="scenarios" />
             </Box>
@@ -458,7 +487,9 @@ export default function EditorPage() {
                 attachments={attachments}
                 riskFile={riskFile}
                 field="horizon_analysis"
-                onUpdate={getAttachments}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                }
               />
 
               <FeedbackList validations={validations} field="horizon_analysis" />
@@ -496,24 +527,45 @@ export default function EditorPage() {
                   chosenLabel="Causing hazards"
                   chosenSubheader={`${causes.length} causes identified`}
                   onAddChosen={async (chosen) => {
+                    setIsSaving(true);
                     await api.createCascade({
                       "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
                       "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
                     });
-                    getAllCauses({
+                    await getAllCauses({
                       query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
                     });
+                    setIsSaving(false);
                   }}
                   onRemoveChosen={async (chosen) => {
+                    setIsSaving(true);
                     await api.deleteCascade(chosen.cascadeId);
-                    getAllCauses({
+                    await getAllCauses({
                       query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
                     });
+                    setIsSaving(false);
+                  }}
+                  onChangeReason={async (chosen, newReason) => {
+                    setIsSaving(true);
+                    await api.updateCascade(chosen.cascadeId, {
+                      cr4de_reason: newReason,
+                    });
+                    await getAllCauses({
+                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
                   }}
                 />
               )}
 
-              <Attachments attachments={attachments} riskFile={riskFile} field="causes" onUpdate={getAttachments} />
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="causes"
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                }
+              />
 
               <FeedbackList validations={validations} field="causes" />
             </Box>
@@ -549,20 +601,45 @@ export default function EditorPage() {
                   chosenLabel="Potential action hazards"
                   chosenSubheader={`${effects.length} potential actions identified`}
                   onAddChosen={async (chosen) => {
+                    setIsSaving(true);
                     await api.createCascade({
                       "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
                       "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
                     });
-                    getEffects();
+                    await getEffects({
+                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
                   }}
                   onRemoveChosen={async (chosen) => {
+                    setIsSaving(true);
                     await api.deleteCascade(chosen.cascadeId);
-                    getEffects();
+                    await getEffects({
+                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
+                  }}
+                  onChangeReason={async (chosen, newReason) => {
+                    setIsSaving(true);
+                    await api.updateCascade(chosen.cascadeId, {
+                      cr4de_reason: newReason,
+                    });
+                    await getEffects({
+                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
                   }}
                 />
               )}
 
-              <Attachments attachments={attachments} riskFile={riskFile} field="effects" onUpdate={getAttachments} />
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="effects"
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                }
+              />
 
               <FeedbackList validations={validations} field="effects" />
             </Box>
@@ -597,20 +674,45 @@ export default function EditorPage() {
                   chosenLabel="Effect hazards"
                   chosenSubheader={`${effects.length} effects identified`}
                   onAddChosen={async (chosen) => {
+                    setIsSaving(true);
                     await api.createCascade({
                       "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
                       "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
                     });
-                    getEffects();
+                    await getEffects({
+                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
                   }}
                   onRemoveChosen={async (chosen) => {
+                    setIsSaving(true);
                     await api.deleteCascade(chosen.cascadeId);
-                    getEffects();
+                    await getEffects({
+                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
+                  }}
+                  onChangeReason={async (chosen, newReason) => {
+                    setIsSaving(true);
+                    await api.updateCascade(chosen.cascadeId, {
+                      cr4de_reason: newReason,
+                    });
+                    await getEffects({
+                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
                   }}
                 />
               )}
 
-              <Attachments attachments={attachments} riskFile={riskFile} field="effects" onUpdate={getAttachments} />
+              <Attachments
+                attachments={attachments}
+                riskFile={riskFile}
+                field="effects"
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                }
+              />
 
               <FeedbackList validations={validations} field="effects" />
             </Box>
@@ -646,15 +748,33 @@ export default function EditorPage() {
                   chosenLabel="Effect hazards"
                   chosenSubheader={`${effects.length} effects identified`}
                   onAddChosen={async (chosen) => {
+                    setIsSaving(true);
                     await api.createCascade({
                       "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
                       "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
                     });
-                    getEffects();
+                    await getEffects({
+                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
                   }}
                   onRemoveChosen={async (chosen) => {
+                    setIsSaving(true);
                     await api.deleteCascade(chosen.cascadeId);
-                    getEffects();
+                    await getEffects({
+                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
+                  }}
+                  onChangeReason={async (chosen, newReason) => {
+                    setIsSaving(true);
+                    await api.updateCascade(chosen.cascadeId, {
+                      cr4de_reason: newReason,
+                    });
+                    await getEffects({
+                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
                   }}
                 />
               )}
@@ -662,8 +782,10 @@ export default function EditorPage() {
               <Attachments
                 attachments={attachments}
                 riskFile={riskFile}
-                field="catalysing_effects"
-                onUpdate={getAttachments}
+                field="effects"
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                }
               />
 
               <FeedbackList validations={validations} field="catalysing_effects" />
@@ -707,15 +829,33 @@ export default function EditorPage() {
                   chosenLabel="Catalysing hazards"
                   chosenSubheader={`${catalysing.length} catalysing effects identified`}
                   onAddChosen={async (chosen) => {
+                    setIsSaving(true);
                     await api.createCascade({
                       "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
                       "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
                     });
-                    getAllCauses();
+                    await getAllCauses({
+                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
                   }}
                   onRemoveChosen={async (chosen) => {
+                    setIsSaving(true);
                     await api.deleteCascade(chosen.cascadeId);
-                    getAllCauses();
+                    await getAllCauses({
+                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
+                  }}
+                  onChangeReason={async (chosen, newReason) => {
+                    setIsSaving(true);
+                    await api.updateCascade(chosen.cascadeId, {
+                      cr4de_reason: newReason,
+                    });
+                    await getAllCauses({
+                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+                    });
+                    setIsSaving(false);
                   }}
                 />
               )}
@@ -724,7 +864,9 @@ export default function EditorPage() {
                 attachments={attachments}
                 riskFile={riskFile}
                 field="catalysing_effects"
-                onUpdate={getAttachments}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                }
               />
 
               <FeedbackList validations={validations} field="catalysing_effects" />

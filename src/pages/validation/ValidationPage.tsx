@@ -1,10 +1,20 @@
 import { useCallback, useMemo, useState } from "react";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
-import { Box, Container, Typography, Paper, Divider, Button, Skeleton } from "@mui/material";
+import {
+  Box,
+  Container,
+  Typography,
+  Paper,
+  Divider,
+  Button,
+  Skeleton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
-import Link from "@mui/material/Link";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import TextInputBox from "../../components/TextInputBox";
 import TransferList from "../../components/TransferList";
 import SaveIcon from "@mui/icons-material/Save";
@@ -20,12 +30,14 @@ import useLazyRecords from "../../hooks/useLazyRecords";
 import useAutosave from "../../hooks/useAutosave";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
-import { Breadcrumb } from "../../components/BreadcrumbNavigation";
 import ScenariosTable from "../../components/ScenariosTable";
 import IntensityParametersTable from "../../components/IntensityParametersTable";
 import HistoricalEventsTable from "../../components/HistoricalEventsTable";
 import { Trans, useTranslation } from "react-i18next";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import Attachments from "../../components/Attachments";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -54,12 +66,14 @@ export default function ValidationPage() {
   const [catalysingFeedback, setCatalysingFeedback] = useState<string | undefined>(undefined);
   const [horizonFeedback, setHorizonFeedback] = useState<string | undefined>(undefined);
 
+  const [finishedDialogOpen, setFinishedDialogOpen] = useState(false);
+
   const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<SmallRisk>({
     table: DataTable.RISK_FILE,
   });
   const [causes, setCauses] = useState<DVRiskCascade<SmallRisk>[] | null>(null);
   const [catalysing, setCatalysing] = useState<DVRiskCascade<SmallRisk>[] | null>(null);
-  const { getData: getAllCauses } = useLazyRecords<DVRiskCascade<SmallRisk>>({
+  const { data: allCauses, getData: getAllCauses } = useLazyRecords<DVRiskCascade<SmallRisk>>({
     table: DataTable.RISK_CASCADE,
     onComplete: async (allCauses) => {
       setCauses(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk"));
@@ -68,6 +82,9 @@ export default function ValidationPage() {
   });
   const { data: effects, getData: getEffects } = useLazyRecords<DVRiskCascade<string, SmallRisk>>({
     table: DataTable.RISK_CASCADE,
+  });
+  const { data: attachments, getData: getAttachments } = useLazyRecords<DVAttachment>({
+    table: DataTable.ATTACHMENT,
   });
 
   /**
@@ -103,15 +120,20 @@ export default function ValidationPage() {
       setCatalysingFeedback(result.cr4de_catalysing_effects_feedback);
       setHorizonFeedback(result.cr4de_horizon_analysis_feedback);
 
-      getOtherHazards({
-        query: `$filter=cr4de_riskfilesid ne ${processedRiskFile.cr4de_riskfilesid}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`,
-      });
-      getAllCauses({
-        query: `$filter=_cr4de_effect_hazard_value eq ${processedRiskFile.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-      });
-      getEffects({
-        query: `$filter=_cr4de_cause_hazard_value eq ${processedRiskFile.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-      });
+      if (!otherHazards)
+        getOtherHazards({
+          query: `$filter=cr4de_riskfilesid ne ${processedRiskFile.cr4de_riskfilesid}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`,
+        });
+      if (!allCauses)
+        getAllCauses({
+          query: `$filter=_cr4de_effect_hazard_value eq ${processedRiskFile.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+        });
+      if (!effects)
+        getEffects({
+          query: `$filter=_cr4de_cause_hazard_value eq ${processedRiskFile.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+        });
+      if (!attachments)
+        getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${processedRiskFile.cr4de_riskfilesid}` });
     },
   });
 
@@ -254,6 +276,17 @@ export default function ValidationPage() {
             ) : (
               <Skeleton variant="rectangular" width="100%" height="300px" />
             )}
+
+            <Attachments
+              attachments={attachments}
+              field="definition"
+              riskFile={riskFile}
+              validation={validation}
+              isExternal={true}
+              onUpdate={() =>
+                getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+              }
+            />
           </Box>
         </Paper>
 
@@ -295,6 +328,17 @@ export default function ValidationPage() {
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
+
+              <Attachments
+                attachments={attachments}
+                field="historical_events"
+                riskFile={riskFile}
+                validation={validation}
+                isExternal={true}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+                }
+              />
             </Box>
           </Paper>
         )}
@@ -331,6 +375,17 @@ export default function ValidationPage() {
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
+
+              <Attachments
+                attachments={attachments}
+                field="intensity_parameters"
+                riskFile={riskFile}
+                validation={validation}
+                isExternal={true}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+                }
+              />
             </Box>
           </Paper>
         )}
@@ -375,6 +430,17 @@ export default function ValidationPage() {
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
+
+              <Attachments
+                attachments={attachments}
+                field="scenarios"
+                riskFile={riskFile}
+                validation={validation}
+                isExternal={true}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+                }
+              />
             </Box>
           </Paper>
         )}
@@ -451,6 +517,17 @@ export default function ValidationPage() {
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
+
+              <Attachments
+                attachments={attachments}
+                field="scenarios"
+                riskFile={riskFile}
+                validation={validation}
+                isExternal={true}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+                }
+              />
             </Box>
           </Paper>
         )}
@@ -513,6 +590,17 @@ export default function ValidationPage() {
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
+
+              <Attachments
+                attachments={attachments}
+                field="horizon_analysis"
+                riskFile={riskFile}
+                validation={validation}
+                isExternal={true}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+                }
+              />
             </Box>
           </Paper>
         )}
@@ -521,7 +609,7 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               <Typography variant="h6" mb={1} color="secondary">
-                5. <Trans i18nKey="riskFile.causes.title">Causing Hazards</Trans>
+                5. <Trans i18nKey="transferList.causes.title">Causing Hazards</Trans>
               </Typography>
               <Divider />
 
@@ -547,7 +635,7 @@ export default function ValidationPage() {
                   chosen={causesChosen}
                   choicesLabel={t("riskFile.causes.choices")}
                   chosenLabel={t("riskFile.causes.chosen")}
-                  chosenSubheader={`${causes.length} causes identified`}
+                  chosenSubheader={t("riskFile.causes.subheader", { count: causes.length })}
                 />
               )}
 
@@ -562,6 +650,17 @@ export default function ValidationPage() {
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
+
+              <Attachments
+                attachments={attachments}
+                field="causes"
+                riskFile={riskFile}
+                validation={validation}
+                isExternal={true}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+                }
+              />
             </Box>
           </Paper>
         )}
@@ -597,7 +696,7 @@ export default function ValidationPage() {
                   chosen={effectsChosen}
                   choicesLabel={t("riskFile.maliciousActions.choices")}
                   chosenLabel={t("riskFile.maliciousActions.chosen")}
-                  chosenSubheader={`${effects.length} potential actions identified`}
+                  chosenSubheader={t("riskFile.maliciousActions.subheader", { count: effects.length })}
                 />
               )}
 
@@ -612,6 +711,17 @@ export default function ValidationPage() {
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
+
+              <Attachments
+                attachments={attachments}
+                field="effects"
+                riskFile={riskFile}
+                validation={validation}
+                isExternal={true}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+                }
+              />
             </Box>
           </Paper>
         )}
@@ -646,7 +756,7 @@ export default function ValidationPage() {
                   chosen={effectsChosen}
                   choicesLabel={t("riskFile.effects.choices")}
                   chosenLabel={t("riskFile.effects.chosen")}
-                  chosenSubheader={`${effects.length} effects identified`}
+                  chosenSubheader={t("riskFile.effects.subheader", { count: effects.length })}
                 />
               )}
 
@@ -661,6 +771,17 @@ export default function ValidationPage() {
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
+
+              <Attachments
+                attachments={attachments}
+                field="catalysing_effects"
+                riskFile={riskFile}
+                validation={validation}
+                isExternal={true}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+                }
+              />
             </Box>
           </Paper>
         )}
@@ -696,7 +817,7 @@ export default function ValidationPage() {
                   chosen={effectsChosen}
                   choicesLabel={t("riskFile.catalysedEffects.choices")}
                   chosenLabel={t("riskFile.catalysedEffects.chosen")}
-                  chosenSubheader={`${effects.length} effects identified`}
+                  chosenSubheader={t("riskFile.catalysedEffects.subheader", { count: effects.length })}
                 />
               )}
 
@@ -711,6 +832,17 @@ export default function ValidationPage() {
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
+
+              <Attachments
+                attachments={attachments}
+                field="effects"
+                riskFile={riskFile}
+                validation={validation}
+                isExternal={true}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+                }
+              />
             </Box>
           </Paper>
         )}
@@ -753,7 +885,7 @@ export default function ValidationPage() {
                   chosen={catalysingChosen}
                   choicesLabel={t("riskFile.catalysingEffects.choices")}
                   chosenLabel={t("riskFile.catalysingEffects.chosen")}
-                  chosenSubheader={`${catalysing.length} catalysing effects identified`}
+                  chosenSubheader={t("riskFile.catalysedEffects.subheader", { count: catalysing.length })}
                 />
               )}
 
@@ -771,6 +903,17 @@ export default function ValidationPage() {
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
+
+              <Attachments
+                attachments={attachments}
+                field="catalysing"
+                riskFile={riskFile}
+                validation={validation}
+                isExternal={true}
+                onUpdate={() =>
+                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
+                }
+              />
             </Box>
           </Paper>
         )}
@@ -813,12 +956,44 @@ export default function ValidationPage() {
           color="secondary"
           onClick={() => {
             if (fieldsToUpdate) updateValidation(fieldsToUpdate);
-            navigate("/validation");
+            setFinishedDialogOpen(true);
           }}
         >
           <Trans i18nKey="button.saveAndExit">Save & Exit</Trans>
         </Button>
       </Box>
+
+      <Dialog open={finishedDialogOpen} onClose={() => setFinishedDialogOpen(false)}>
+        <DialogTitle>
+          <Trans i18nKey="validation.dialog.title">Are you finished validating this risk file?</Trans>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            <Trans i18nKey="validation.dialog.helpText">
+              Even if you indicate that you are finished, you can still return at a later time to make changes until the
+              end of the validation phase.
+            </Trans>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setFinishedDialogOpen(false)}>
+            <Trans i18nKey="validation.dialog.cancel">No, I am not finished</Trans>
+          </Button>
+          <Button
+            onClick={() => {
+              if (!validation) return;
+
+              api.updateValidation(validation.cr4de_bnravalidationid, {
+                cr4de_finished: true,
+              });
+              setFinishedDialogOpen(true);
+              navigate("/validation");
+            }}
+          >
+            <Trans i18nKey="validation.dialog.finish">Yes, I am finished</Trans>
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

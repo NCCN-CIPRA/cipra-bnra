@@ -14,4 +14,6 @@ export interface DVValidation<RiskFileType = undefined, ContactType = undefined>
   cr4de_causes_feedback?: string;
   cr4de_effects_feedback?: string;
   cr4de_catalysing_effects_feedback?: string;
+
+  cr4de_finished: boolean;
 }
