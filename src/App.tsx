@@ -15,6 +15,7 @@ import "./App.css";
 import BasePage from "./pages/BasePage";
 import EditorIntroPage from "./pages/editor/EditorIntroPage";
 import EditorPage from "./pages/editor/EditorPage";
+import LearningOverviewPage from "./pages/learning/LearningOverviewPage";
 
 function App() {
   useEffect(() => {
@@ -37,6 +38,11 @@ function App() {
         {
           path: "/",
           element: <HomePage />,
+        },
+
+        {
+          path: "/learning",
+          element: <LearningOverviewPage />,
         },
 
         {

@@ -7,7 +7,9 @@ export interface Breadcrumb {
   url: string;
 }
 
-export default function BreadcrumbNavigation({ breadcrumbs }: { breadcrumbs: (Breadcrumb | null)[] }) {
+export default function BreadcrumbNavigation({ breadcrumbs }: { breadcrumbs: (Breadcrumb | null)[] | null }) {
+  if (!breadcrumbs) return null;
+
   return (
     <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />}>
       {breadcrumbs.map((b, i) => {
