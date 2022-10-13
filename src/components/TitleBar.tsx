@@ -42,7 +42,7 @@ export default function TitleBar({ title, onDrawerToggle }: { title: string; onD
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               {title}
             </Typography>
-            {user === null && (
+            {user == null && (
               <Button color="inherit" component={Link} to="/auth">
                 <Trans i18nKey="button.login">Login</Trans>
               </Button>
