@@ -10,6 +10,8 @@ export interface DVParticipation<
   _cr4de_contact_value: string;
   cr4de_contact: ContactType;
 
+  cr4de_role: string;
+
   _cr4de_risk_file_value: string | null;
   cr4de_risk_file: RiskFileType;
 

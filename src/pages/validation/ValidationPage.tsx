@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
-import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link as RouterLink, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import {
   Box,
   Container,
@@ -15,7 +15,7 @@ import {
   DialogActions,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import TextInputBox from "../../components/TextInputBox";
+import TextInputBox, { TextInputBoxGetter } from "../../components/TextInputBox";
 import TransferList from "../../components/TransferList";
 import SaveIcon from "@mui/icons-material/Save";
 import { DVValidation } from "../../types/dataverse/DVValidation";
@@ -38,6 +38,8 @@ import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import Attachments from "../../components/Attachments";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
+import SurveyDialog from "../../components/SurveyDialog";
+import { AuthPageContext } from "../AuthPage";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -49,24 +51,29 @@ type RouteParams = {
   validation_id: string;
 };
 
+const AUTOSAVE_INTERVAL = 15000;
+
 export default function ValidationPage() {
   const params = useParams() as RouteParams;
   const navigate = useNavigate();
   const { t } = useTranslation();
   const api = useAPI();
+  const { user } = useOutletContext<AuthPageContext>();
+  const autoSaver = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [riskFile, setRiskFile] = useState<ProcessedRiskFile | null>(null);
 
-  const [definitionFeedback, setDefinitionFeedback] = useState<string | undefined>(undefined);
-  const [historicalEventsFeedback, setHistoricalEventsFeedback] = useState<string | undefined>(undefined);
-  const [parametersFeedback, setParametersFeedback] = useState<string | undefined>(undefined);
-  const [scenariosFeedback, setScenariosFeedback] = useState<string | undefined>(undefined);
-  const [causesFeedback, setCausesFeedback] = useState<string | undefined>(undefined);
-  const [effectsFeedback, setEffectsFeedback] = useState<string | undefined>(undefined);
-  const [catalysingFeedback, setCatalysingFeedback] = useState<string | undefined>(undefined);
-  const [horizonFeedback, setHorizonFeedback] = useState<string | undefined>(undefined);
+  const [definitionFeedback] = useState<TextInputBoxGetter>({ getValue: null });
+  const [historicalEventsFeedback] = useState<TextInputBoxGetter>({ getValue: null });
+  const [parametersFeedback] = useState<TextInputBoxGetter>({ getValue: null });
+  const [scenariosFeedback] = useState<TextInputBoxGetter>({ getValue: null });
+  const [causesFeedback] = useState<TextInputBoxGetter>({ getValue: null });
+  const [effectsFeedback] = useState<TextInputBoxGetter>({ getValue: null });
+  const [catalysingFeedback] = useState<TextInputBoxGetter>({ getValue: null });
+  const [horizonFeedback] = useState<TextInputBoxGetter>({ getValue: null });
 
   const [finishedDialogOpen, setFinishedDialogOpen] = useState(false);
+  const [surveyDialogOpen, setSurveyDialogOpen] = useState(false);
 
   const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<SmallRisk>({
     table: DataTable.RISK_FILE,
@@ -111,15 +118,6 @@ export default function ValidationPage() {
       };
       setRiskFile(processedRiskFile);
 
-      setDefinitionFeedback(result.cr4de_definition_feedback);
-      setHistoricalEventsFeedback(result.cr4de_historical_events_feedback);
-      setParametersFeedback(result.cr4de_intensity_parameters_feedback);
-      setScenariosFeedback(result.cr4de_scenarios_feedback);
-      setCausesFeedback(result.cr4de_causes_feedback);
-      setEffectsFeedback(result.cr4de_effects_feedback);
-      setCatalysingFeedback(result.cr4de_catalysing_effects_feedback);
-      setHorizonFeedback(result.cr4de_horizon_analysis_feedback);
-
       if (!otherHazards)
         getOtherHazards({
           query: `$filter=cr4de_riskfilesid ne ${processedRiskFile.cr4de_riskfilesid}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`,
@@ -137,42 +135,65 @@ export default function ValidationPage() {
     },
   });
 
-  const updateValidation = useCallback(
-    async (fieldsToUpdate: Partial<DVValidation<DVRiskFile>>) => {
-      if (fieldsToUpdate === null) return;
-
-      setIsSaving(true);
-
-      await api.updateValidation(params.validation_id, fieldsToUpdate);
-      await reloadValidation();
-
-      setIsSaving(false);
-    },
-    [api, params.validation_id, reloadValidation]
-  );
-
   const [isSaving, setIsSaving] = useState(false);
 
-  const { isSaving: isAutosaving, fieldsToUpdate } = useAutosave<DVValidation<DVRiskFile>>({
-    fields: {
-      cr4de_definition_feedback: definitionFeedback,
-      cr4de_historical_events_feedback: historicalEventsFeedback,
-      cr4de_intensity_parameters_feedback: parametersFeedback,
-      cr4de_scenarios_feedback: scenariosFeedback,
-      cr4de_horizon_analysis_feedback: horizonFeedback,
-      cr4de_causes_feedback: causesFeedback,
-      cr4de_effects_feedback: effectsFeedback,
-      cr4de_catalysing_effects_feedback: catalysingFeedback,
-    },
-    compareTo: validation || {},
-    handleSave: updateValidation,
-    enable: !isSaving && validation !== null,
+  const updateValidation = async (forceUpdates?: Partial<DVRiskFile>) => {
+    if (autoSaver.current) clearTimeout(autoSaver.current);
+
+    autoSaver.current = setTimeout(updateValidation, AUTOSAVE_INTERVAL);
+
+    if (!validation) return;
+
+    const fields: Partial<DVValidation> = {
+      cr4de_definition_feedback: definitionFeedback.getValue && definitionFeedback.getValue(),
+      cr4de_historical_events_feedback: historicalEventsFeedback.getValue && historicalEventsFeedback.getValue(),
+      cr4de_intensity_parameters_feedback: parametersFeedback.getValue && parametersFeedback.getValue(),
+      cr4de_scenarios_feedback: scenariosFeedback.getValue && scenariosFeedback.getValue(),
+      cr4de_horizon_analysis_feedback: horizonFeedback.getValue && horizonFeedback.getValue(),
+      cr4de_causes_feedback: causesFeedback.getValue && causesFeedback.getValue(),
+      cr4de_effects_feedback: effectsFeedback.getValue && effectsFeedback.getValue(),
+      cr4de_catalysing_effects_feedback: catalysingFeedback.getValue && catalysingFeedback.getValue(),
+      ...forceUpdates,
+    };
+
+    const fieldsToUpdate = Object.keys(fields)
+      .filter(
+        (f) =>
+          fields[f as keyof DVValidation] !== validation[f as keyof DVValidation] &&
+          !(fields[f as keyof DVValidation] === "" && validation[f as keyof DVValidation] === null)
+      )
+      .reduce(
+        (u, f) => ({
+          ...u,
+          [f]: fields[f as keyof DVValidation],
+        }),
+        {}
+      );
+
+    if (fieldsToUpdate === null || Object.keys(fieldsToUpdate).length <= 0) return;
+
+    setIsSaving(true);
+
+    await api.updateValidation(params.validation_id, fieldsToUpdate);
+    await reloadValidation();
+
+    setIsSaving(false);
+  };
+
+  useEffect(() => {
+    if (autoSaver.current) clearTimeout(autoSaver.current);
+
+    autoSaver.current = setTimeout(updateValidation, AUTOSAVE_INTERVAL);
+
+    return () => {
+      if (autoSaver.current) clearTimeout(autoSaver.current);
+    };
   });
 
-  usePageTitle(t("validation.appFullName"));
+  usePageTitle(t("validation.pageTitle", "BNRA 2023 - 2026 Risk Identification"));
   useBreadcrumbs([
     { name: t("bnra.shortName"), url: "/" },
-    { name: t("validation.appName"), url: "/validation" },
+    { name: t("validation.breadcrumb", "Risk Identification"), url: "/overview" },
     riskFile ? { name: riskFile.cr4de_title, url: "" } : null,
   ]);
 
@@ -271,7 +292,7 @@ export default function ValidationPage() {
             {validation ? (
               <TextInputBox
                 initialValue={validation.cr4de_definition_feedback || ""}
-                setValue={setDefinitionFeedback}
+                valueGetter={definitionFeedback}
               />
             ) : (
               <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -312,7 +333,7 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              <HistoricalEventsTable historicalEvents={riskFile?.historicalEvents} />
+              <HistoricalEventsTable initialHistoricalEvents={riskFile?.historicalEvents} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 <Trans i18nKey="riskFile.historicalEvents.feedback">
@@ -323,7 +344,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_historical_events_feedback || ""}
-                  setValue={setHistoricalEventsFeedback}
+                  valueGetter={historicalEventsFeedback}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -359,7 +380,7 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              <IntensityParametersTable parameters={riskFile?.intensityParameters} />
+              <IntensityParametersTable initialParameters={riskFile?.intensityParameters} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 <Trans i18nKey="riskFile.intensityParameters.feedback">
@@ -370,7 +391,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_intensity_parameters_feedback || ""}
-                  setValue={setParametersFeedback}
+                  valueGetter={parametersFeedback}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -414,7 +435,7 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              <ScenariosTable parameters={riskFile?.intensityParameters} scenarios={riskFile?.scenarios} />
+              <ScenariosTable parameters={riskFile?.intensityParameters} initialScenarios={riskFile?.scenarios} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 <Trans i18nKey="riskFile.intensityScenarios.feedback">
@@ -425,7 +446,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_scenarios_feedback || ""}
-                  setValue={setScenariosFeedback}
+                  valueGetter={scenariosFeedback}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -512,7 +533,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_scenarios_feedback || ""}
-                  setValue={setScenariosFeedback}
+                  valueGetter={scenariosFeedback}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -585,7 +606,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_scenarios_feedback || ""}
-                  setValue={setScenariosFeedback}
+                  valueGetter={scenariosFeedback}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -646,7 +667,7 @@ export default function ValidationPage() {
               </Typography>
 
               {validation ? (
-                <TextInputBox initialValue={validation.cr4de_causes_feedback || ""} setValue={setCausesFeedback} />
+                <TextInputBox initialValue={validation.cr4de_causes_feedback || ""} valueGetter={causesFeedback} />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
@@ -707,7 +728,7 @@ export default function ValidationPage() {
               </Typography>
 
               {validation ? (
-                <TextInputBox initialValue={validation.cr4de_causes_feedback || ""} setValue={setCausesFeedback} />
+                <TextInputBox initialValue={validation.cr4de_causes_feedback || ""} valueGetter={causesFeedback} />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
@@ -767,7 +788,7 @@ export default function ValidationPage() {
               </Typography>
 
               {validation ? (
-                <TextInputBox initialValue={validation.cr4de_effects_feedback || ""} setValue={setEffectsFeedback} />
+                <TextInputBox initialValue={validation.cr4de_effects_feedback || ""} valueGetter={effectsFeedback} />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
@@ -828,7 +849,7 @@ export default function ValidationPage() {
               </Typography>
 
               {validation ? (
-                <TextInputBox initialValue={validation.cr4de_effects_feedback || ""} setValue={setEffectsFeedback} />
+                <TextInputBox initialValue={validation.cr4de_effects_feedback || ""} valueGetter={effectsFeedback} />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
@@ -898,7 +919,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_catalysing_effects_feedback || ""}
-                  setValue={setCatalysingFeedback}
+                  valueGetter={catalysingFeedback}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -936,26 +957,20 @@ export default function ValidationPage() {
           <Trans i18nKey="button.exit">Exit</Trans>
         </Button>
         <Box sx={{ flex: "1 1 auto" }} />
-        {(isSaving || isAutosaving) && (
+        {isSaving ? (
           <LoadingButton color="secondary" sx={{ mr: 1 }} loading loadingPosition="start" startIcon={<SaveIcon />}>
             <Trans i18nKey="button.saving">Saving</Trans>
           </LoadingButton>
-        )}
-        {!(isSaving || isAutosaving) && fieldsToUpdate && (
-          <Button color="secondary" sx={{ mr: 1 }} onClick={() => updateValidation(fieldsToUpdate)}>
+        ) : (
+          <Button color="secondary" sx={{ mr: 1 }} onClick={() => updateValidation()}>
             <Trans i18nKey="button.save">Save</Trans>
-          </Button>
-        )}
-        {!(isSaving || isAutosaving) && !fieldsToUpdate && (
-          <Button color="secondary" disabled sx={{ mr: 1 }}>
-            <Trans i18nKey="button.saved">Saved</Trans>
           </Button>
         )}
 
         <Button
           color="secondary"
           onClick={() => {
-            if (fieldsToUpdate) updateValidation(fieldsToUpdate);
+            updateValidation();
             setFinishedDialogOpen(true);
           }}
         >
@@ -980,20 +995,36 @@ export default function ValidationPage() {
             <Trans i18nKey="validation.dialog.cancel">No, I am not finished</Trans>
           </Button>
           <Button
-            onClick={() => {
+            onClick={async () => {
               if (!validation) return;
 
-              api.updateValidation(validation.cr4de_bnravalidationid, {
-                cr4de_finished: true,
-              });
-              setFinishedDialogOpen(true);
-              navigate("/validation");
+              setFinishedDialogOpen(false);
+              setSurveyDialogOpen(true);
+
+              const participants = await api.getParticipants(
+                `$filter=_cr4de_contact_value eq ${user.contactid} and _cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}`
+              );
+
+              if (participants.length >= 0) {
+                api.updateParticipant(participants[0].cr4de_bnraparticipationid, {
+                  cr4de_validation_finished: true,
+                });
+              }
             }}
           >
             <Trans i18nKey="validation.dialog.finish">Yes, I am finished</Trans>
           </Button>
         </DialogActions>
       </Dialog>
+
+      <SurveyDialog
+        open={surveyDialogOpen}
+        riskFile={riskFile}
+        onClose={() => {
+          setSurveyDialogOpen(false);
+          navigate("/overview");
+        }}
+      />
     </>
   );
 }

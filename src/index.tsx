@@ -54,7 +54,7 @@ root.render(
             width: "100vw",
             height: "100vh",
             top: 0,
-            zIndex: 1000,
+            zIndex: 10000,
             backgroundColor: "white",
           }}
         />

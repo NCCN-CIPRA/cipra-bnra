@@ -1,8 +1,7 @@
 import {
   Box,
   Container,
-  Button,
-  Link,
+  ListItemIcon,
   Stack,
   Typography,
   List,
@@ -11,14 +10,19 @@ import {
   ListItemText,
   Paper,
 } from "@mui/material";
-import { Trans } from "react-i18next";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { Trans, useTranslation } from "react-i18next";
+import { Link as RouterLink } from "react-router-dom";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 
 export default function LearningOverviewPage({}) {
+  const { t } = useTranslation();
+
   useBreadcrumbs([
     { name: "BNRA 2023 - 2026", url: "/" },
-    { name: "Learning Platform", url: "" },
+    { name: "Information Portal", url: "" },
   ]);
+
   return (
     <>
       <Box
@@ -47,9 +51,13 @@ export default function LearningOverviewPage({}) {
       >
         <Container sx={{ display: "flex", alignItems: "flex-end", height: "100%", pb: 4 }}>
           <Stack direction="column">
-            <img src="https://bnra.powerappsportals.com/logo_text.png" style={{ width: 300, marginBottom: 20 }} />
+            <img
+              alt="bnra"
+              src="https://bnra.powerappsportals.com/logo_text.png"
+              style={{ width: 300, marginBottom: 20 }}
+            />
             <Typography variant="subtitle1" paragraph>
-              <Trans i18nKey="learning.title">Information Portal</Trans>
+              <Trans i18nKey="learning.title">Belgian National Risk Assessment 2023 - 2026</Trans>
             </Typography>
           </Stack>
         </Container>
@@ -58,13 +66,15 @@ export default function LearningOverviewPage({}) {
         <Container>
           <Box sx={{ py: 4, textAlign: "justify" }}>
             <Typography variant="subtitle2" paragraph>
-              Welkom op het BNRA informatieportaal
+              <Trans i18nKey="learning.welcome">Welkom op het BNRA informatieportaal</Trans>
             </Typography>
             <Typography variant="body1" paragraph>
-              Hier vindt je alle achtergrondinformatie en gebruikshandleidingen voor je deelname aan de Belgische
-              Nationale Risico Beoordeling 2023 - 2026 (BNRA). Deze website wordt aangeboden door het Nationaal
-              Crisiscentrum (NCCN) van de FOD Binnenlandse Zaken. Vragen, suggesties of opmerkingen kunt u sturen naar
-              het mailadres onder de contactgegevens.
+              <Trans i18nKey="learning.welcome.text">
+                Hier vindt je alle achtergrondinformatie en gebruikshandleidingen voor je deelname aan de Belgische
+                Nationale Risico Beoordeling 2023 - 2026 (BNRA). Deze website wordt aangeboden door het Nationaal
+                Crisiscentrum (NCCN) van de FOD Binnenlandse Zaken. Vragen, suggesties of opmerkingen kunt u sturen naar
+                het mailadres onder de contactgegevens.
+              </Trans>
             </Typography>
           </Box>
 
@@ -74,19 +84,48 @@ export default function LearningOverviewPage({}) {
               component={Paper}
               aria-labelledby="nested-list-subheader"
               subheader={
-                <ListSubheader component="div" id="nested-list-subheader">
-                  Methodology
+                <ListSubheader component="div" id="nested-list-subheader" sx={{ borderBottom: "1px solid #eee" }}>
+                  <Typography variant="h6" sx={{ pt: 2, pb: 2 }} color="primary">
+                    <Trans i18nKey="learning.methodology.title">Methodology</Trans>
+                  </Typography>
                 </ListSubheader>
               }
             >
-              <ListItemButton>
-                <ListItemText primary="Sent mail" />
+              <ListItemButton component={RouterLink} to="/learning/methodology/introduction">
+                <ListItemIcon sx={{ minWidth: "32px" }}>
+                  <ChevronRightIcon />
+                </ListItemIcon>
+                <ListItemText primary={t("learning.methodology.general", "General Introduction")} />
               </ListItemButton>
-              <ListItemButton>
-                <ListItemText primary="Drafts" />
+              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology/standard">
+                <ListItemIcon sx={{ minWidth: "32px" }}>
+                  <ChevronRightIcon />
+                </ListItemIcon>
+                <ListItemText primary={t("learning.methodology.standardRisks", "Standard Risks")} />
               </ListItemButton>
-              <ListItemButton>
-                <ListItemText primary="Inbox" />
+              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology/actors">
+                <ListItemIcon sx={{ minWidth: "32px" }}>
+                  <ChevronRightIcon />
+                </ListItemIcon>
+                <ListItemText primary={t("learning.methodology.actors", "Malicious Actors")} />
+              </ListItemButton>
+              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology/emerging">
+                <ListItemIcon sx={{ minWidth: "32px" }}>
+                  <ChevronRightIcon />
+                </ListItemIcon>
+                <ListItemText primary={t("learning.methodology.emerging", "Emerging Risks")} />
+              </ListItemButton>
+              <ListItemButton component={RouterLink} to="/learning/methodology/impact">
+                <ListItemIcon sx={{ minWidth: "32px" }}>
+                  <ChevronRightIcon />
+                </ListItemIcon>
+                <ListItemText primary={t("learning.methodology.impact", "Impact Categories and Damage Indicators")} />
+              </ListItemButton>
+              <ListItemButton component={RouterLink} to="/learning/methodology/evaluation">
+                <ListItemIcon sx={{ minWidth: "32px" }}>
+                  <ChevronRightIcon />
+                </ListItemIcon>
+                <ListItemText primary={t("learning.methodology.evaluation", "Quantitative Evaluation")} />
               </ListItemButton>
             </List>
 
@@ -95,19 +134,36 @@ export default function LearningOverviewPage({}) {
               component={Paper}
               aria-labelledby="nested-list-subheader"
               subheader={
-                <ListSubheader component="div" id="nested-list-subheader">
-                  Tool Manuals
+                <ListSubheader component="div" id="nested-list-subheader" sx={{ borderBottom: "1px solid #eee" }}>
+                  <Typography variant="h6" sx={{ pt: 2, pb: 2 }} color="primary">
+                    <Trans i18nKey="learning.tools.title">Tool Manuals</Trans>
+                  </Typography>
                 </ListSubheader>
               }
             >
-              <ListItemButton>
-                <ListItemText primary="Sent mail" />
+              <ListItemButton component={RouterLink} to="/learning/tools/validation">
+                <ListItemIcon sx={{ minWidth: "32px" }}>
+                  <ChevronRightIcon />
+                </ListItemIcon>
+                <ListItemText primary={t("learning.tools.validation", "Risk File Validation")} />
               </ListItemButton>
-              <ListItemButton>
-                <ListItemText primary="Drafts" />
+              <ListItemButton component={RouterLink} to="/learning/tools/analysisA">
+                <ListItemIcon sx={{ minWidth: "32px" }}>
+                  <ChevronRightIcon />
+                </ListItemIcon>
+                <ListItemText primary={t("learning.tools.analysisA", "Risk Analysis A")} />
               </ListItemButton>
-              <ListItemButton>
-                <ListItemText primary="Inbox" />
+              <ListItemButton component={RouterLink} to="/learning/tools/analysisB">
+                <ListItemIcon sx={{ minWidth: "32px" }}>
+                  <ChevronRightIcon />
+                </ListItemIcon>
+                <ListItemText primary={t("learning.tools.analysisB", "Risk Analysis B")} />
+              </ListItemButton>
+              <ListItemButton component={RouterLink} to="/learning/tools/consensus">
+                <ListItemIcon sx={{ minWidth: "32px" }}>
+                  <ChevronRightIcon />
+                </ListItemIcon>
+                <ListItemText primary={t("learning.tools.consensus", "Consensus")} />
               </ListItemButton>
             </List>
           </Stack>

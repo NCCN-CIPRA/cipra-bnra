@@ -28,6 +28,12 @@ import useAPI, { DataTable } from "../hooks/useAPI";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import useRecords from "../hooks/useRecords";
 
+const roles = {
+  analist: "Author",
+  analist_2: "Co-author (backup)",
+  expert: "Topical Expert",
+};
+
 export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile }) {
   const api = useAPI();
 
@@ -36,7 +42,7 @@ export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile 
     query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}&$expand=cr4de_contact`,
   });
 
-  const [dialogOpen, setDialogOpen] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -68,6 +74,10 @@ export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile 
 
     await getParticipants();
 
+    setDialogOpen(false);
+    setEmail("");
+    setRole("expert");
+
     setIsLoading(false);
   };
 
@@ -78,9 +88,7 @@ export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile 
           <TableHead>
             <TableRow>
               <TableCell sx={{ width: "100%" }}>Email</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }} align="right">
-                Role
-              </TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>Role</TableCell>
               <TableCell sx={{ whiteSpace: "nowrap" }} align="right">
                 Validation
               </TableCell>
@@ -90,38 +98,40 @@ export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile 
               <TableCell sx={{ whiteSpace: "nowrap" }} align="right">
                 Cascade Analysis
               </TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {!participants && (
               <TableRow>
-                <TableCell colSpan={5} sx={{ textAlign: "center" }}>
-                  <CircularProgress size="small" />
+                <TableCell colSpan={6} sx={{ textAlign: "center" }}>
+                  <CircularProgress size={20} />
                 </TableCell>
               </TableRow>
             )}
             {participants &&
               participants.length > 0 &&
               participants.map((p) => (
-                <TableRow key={p.cr4de_bnraparticipationid} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                <TableRow key={p.cr4de_bnraparticipationid}>
                   <TableCell component="th" scope="row">
                     {p.cr4de_contact.emailaddress1}
                   </TableCell>
-                  <TableCell align="right"></TableCell>
-                  <TableCell align="right"></TableCell>
-                  <TableCell align="right"></TableCell>
-                  <TableCell align="right"></TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>{roles[p.cr4de_role as keyof typeof roles]}</TableCell>
+                  <TableCell align="center"></TableCell>
+                  <TableCell align="center"></TableCell>
+                  <TableCell align="center"></TableCell>
+                  <TableCell align="center"></TableCell>
                 </TableRow>
               ))}
             {participants && participants.length <= 0 && (
               <TableRow>
-                <TableCell colSpan={5}>No participants defined, add some!</TableCell>
+                <TableCell colSpan={6}>No participants defined, add some!</TableCell>
               </TableRow>
             )}
           </TableBody>
           <TableFooter>
             <TableRow>
-              <TableCell colSpan={5} size="small" sx={{ textAlign: "right" }}>
+              <TableCell colSpan={6} size="small" sx={{ textAlign: "right" }}>
                 <Button onClick={() => setDialogOpen(true)}>Add Participant</Button>
               </TableCell>
             </TableRow>
@@ -145,8 +155,8 @@ export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile 
             <FormControl fullWidth>
               <InputLabel>Role</InputLabel>
               <Select value={role} label="Role" onChange={(e) => setRole(e.target.value)}>
-                <MenuItem value="analist">CIPRA Analist</MenuItem>
-                <MenuItem value="analist_2">CIPRA Analist (back-up)</MenuItem>
+                <MenuItem value="analist">Author</MenuItem>
+                <MenuItem value="analist_2">Co-author (back-up)</MenuItem>
                 <MenuItem value="expert">Topical Expert</MenuItem>
               </Select>
             </FormControl>

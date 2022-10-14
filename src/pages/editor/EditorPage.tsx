@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useCallback } from "react";
+import { useMemo, useRef, useEffect, useState, useCallback } from "react";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import {
   Stack,
@@ -15,7 +15,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import TextInputBox from "../../components/TextInputBox";
+import TextInputBox, { TextInputBoxGetter } from "../../components/TextInputBox";
 import TransferList from "../../components/TransferList";
 import SaveIcon from "@mui/icons-material/Save";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
@@ -34,7 +34,7 @@ import HistoricalEventsTable from "../../components/HistoricalEventsTable";
 import IntensityParametersTable from "../../components/IntensityParametersTable";
 import ScenariosTable from "../../components/ScenariosTable";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
+import AddIcon from "@mui/icons-material/Add";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import Attachments from "../../components/Attachments";
 import FeedbackList from "./FeedbackList";
@@ -42,8 +42,10 @@ import { DVValidation } from "../../types/dataverse/DVValidation";
 import { DVContact } from "../../types/dataverse/DVContact";
 import ParticipationTable from "../../components/ParticipationTable";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
+import CascadeSections from "./CascadeSections";
+import { HtmlEditor } from "devextreme-react";
 
-interface ProcessedRiskFile extends DVRiskFile {
+export interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
   intensityParameters: IP.IntensityParameter[];
   scenarios: S.Scenarios;
@@ -52,6 +54,8 @@ interface ProcessedRiskFile extends DVRiskFile {
 type RouteParams = {
   risk_file_id: string;
 };
+
+const AUTOSAVE_INTERVAL = 15000;
 
 const defaultBreadcrumbs: Breadcrumb[] = [
   { name: "BNRA 2023 - 2026", url: "/" },
@@ -62,12 +66,13 @@ export default function EditorPage() {
   const api = useAPI();
   const params = useParams() as RouteParams;
   const navigate = useNavigate();
+  const autoSaver = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [definition, setDefinition] = useState<string | null>(null);
-  const [historicalEvents, setHistoricalEvents] = useState<HE.HistoricalEvent[] | null>(null);
-  const [parameters, setParameters] = useState<IP.IntensityParameter[] | null>(null);
-  const [scenarios, setScenarios] = useState<S.Scenarios | null>(null);
-  const [horizon, setHorizon] = useState<string | null>(null);
+  const [definition] = useState<TextInputBoxGetter>({ getValue: null });
+  const historicalEvents = useRef<HE.HistoricalEvent[] | null>(null);
+  const parameters = useRef<IP.IntensityParameter[] | null>(null);
+  const scenarios = useRef<S.Scenarios | null>(null);
+  const [horizonAnalysis] = useState<TextInputBoxGetter>({ getValue: null });
 
   const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<SmallRisk>({
     table: DataTable.RISK_FILE,
@@ -81,7 +86,7 @@ export default function EditorPage() {
       setCatalysing(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk"));
     },
   });
-  const { data: effects, getData: getEffects } = useLazyRecords<DVRiskCascade<string, SmallRisk>>({
+  const { data: effects, getData: getEffects } = useLazyRecords<DVRiskCascade<undefined, SmallRisk>>({
     table: DataTable.RISK_CASCADE,
   });
   const { data: attachments, getData: getAttachments } = useLazyRecords<DVAttachment>({
@@ -110,11 +115,9 @@ export default function EditorPage() {
       };
     },
     onComplete: async (rf) => {
-      setDefinition(rf.cr4de_definition || null);
-      setHistoricalEvents(rf.historicalEvents);
-      setParameters(rf.intensityParameters);
-      setScenarios(rf.scenarios);
-      setHorizon(rf.cr4de_horizon_analysis || null);
+      historicalEvents.current = rf.historicalEvents;
+      parameters.current = rf.intensityParameters;
+      scenarios.current = rf.scenarios;
 
       if (!otherHazards)
         getOtherHazards({
@@ -136,101 +139,62 @@ export default function EditorPage() {
     },
   });
 
-  const updateRiskFile = useCallback(
-    async (fieldsToUpdate: Partial<DVRiskFile>) => {
-      if (fieldsToUpdate === null) return;
-
-      setIsSaving(true);
-
-      await api.updateRiskFile(params.risk_file_id, fieldsToUpdate);
-      await reloadRiskFile();
-
-      setIsSaving(false);
-    },
-    [api, params.risk_file_id, reloadRiskFile]
-  );
-
   const [isSaving, setIsSaving] = useState(false);
 
-  const { isSaving: isAutosaving, fieldsToUpdate } = useAutosave<DVRiskFile>({
-    fields: {
-      cr4de_definition: definition,
-      cr4de_historical_events: historicalEvents && HE.wrap(historicalEvents),
-      cr4de_intensity_parameters: parameters && IP.wrap(parameters),
-      cr4de_scenario_considerable: scenarios && S.wrap(scenarios.considerable),
-      cr4de_scenario_major: scenarios && S.wrap(scenarios.major),
-      cr4de_scenario_extreme: scenarios && S.wrap(scenarios.extreme),
-      cr4de_horizon_analysis: horizon,
-    },
-    compareTo: riskFile || {},
-    handleSave: updateRiskFile,
-    enable: !isSaving && riskFile !== null,
+  const updateRiskFile = async (forceUpdates?: Partial<DVRiskFile>) => {
+    if (autoSaver.current) clearTimeout(autoSaver.current);
+
+    autoSaver.current = setTimeout(updateRiskFile, AUTOSAVE_INTERVAL);
+
+    if (!riskFile) return;
+
+    const fields: Partial<DVRiskFile> = {
+      cr4de_definition: definition.getValue && definition.getValue(),
+      cr4de_historical_events: historicalEvents.current && HE.wrap(historicalEvents.current),
+      cr4de_intensity_parameters: parameters.current && IP.wrap(parameters.current),
+      cr4de_scenario_considerable: scenarios.current && S.wrap(scenarios.current.considerable),
+      cr4de_scenario_major: scenarios.current && S.wrap(scenarios.current.major),
+      cr4de_scenario_extreme: scenarios.current && S.wrap(scenarios.current.extreme),
+      cr4de_horizon_analysis: horizonAnalysis.getValue && horizonAnalysis.getValue(),
+      ...forceUpdates,
+    };
+
+    const fieldsToUpdate = Object.keys(fields)
+      .filter(
+        (f) =>
+          fields[f as keyof DVRiskFile] !== riskFile[f as keyof DVRiskFile] &&
+          !(fields[f as keyof DVRiskFile] === "" && riskFile[f as keyof DVRiskFile] === null)
+      )
+      .reduce(
+        (u, f) => ({
+          ...u,
+          [f]: fields[f as keyof DVRiskFile],
+        }),
+        {}
+      );
+
+    if (fieldsToUpdate === null || Object.keys(fieldsToUpdate).length <= 0) return;
+
+    setIsSaving(true);
+
+    await api.updateRiskFile(params.risk_file_id, fieldsToUpdate);
+    await reloadRiskFile();
+
+    setIsSaving(false);
+  };
+
+  useEffect(() => {
+    if (autoSaver.current) clearTimeout(autoSaver.current);
+
+    autoSaver.current = setTimeout(updateRiskFile, AUTOSAVE_INTERVAL);
+
+    return () => {
+      if (autoSaver.current) clearTimeout(autoSaver.current);
+    };
   });
 
   usePageTitle("BNRA 2023 - 2026 Risk File Editor");
   useBreadcrumbs([...defaultBreadcrumbs, riskFile ? { name: riskFile.cr4de_title, url: "" } : null]);
-
-  // Calculate transfer list data (causes, effects, catalysing effect) and memorize for efficiency
-  const causesChoises = useMemo<SmallRisk[]>(
-    () =>
-      otherHazards && causes
-        ? otherHazards.filter((rf) => !causes.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid))
-        : [],
-    [causes, otherHazards]
-  );
-  const causesChosen = useMemo(
-    () =>
-      causes
-        ? causes.map((c) => ({
-            ...c.cr4de_cause_hazard,
-            cascadeId: c.cr4de_bnrariskcascadeid,
-            reason: c.cr4de_reason,
-          }))
-        : [],
-    [causes]
-  );
-
-  const effectsChoices = useMemo<SmallRisk[]>(
-    () =>
-      otherHazards && effects
-        ? otherHazards.filter((rf) => effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid))
-        : [],
-    [effects, otherHazards]
-  );
-  const effectsChosen = useMemo(
-    () =>
-      effects
-        ? effects.map((c) => ({
-            ...c.cr4de_effect_hazard,
-            cascadeId: c.cr4de_bnrariskcascadeid,
-            reason: c.cr4de_reason,
-          }))
-        : [],
-    [effects]
-  );
-
-  const catalysingChoices = useMemo<SmallRisk[]>(
-    () =>
-      otherHazards && catalysing
-        ? otherHazards.filter(
-            (rf) =>
-              rf.cr4de_risk_type === "Emerging Risk" &&
-              !catalysing.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
-          )
-        : [],
-    [catalysing, otherHazards]
-  );
-  const catalysingChosen = useMemo(
-    () =>
-      catalysing
-        ? catalysing.map((c) => ({
-            ...c.cr4de_cause_hazard,
-            cascadeId: c.cr4de_bnrariskcascadeid,
-            reason: c.cr4de_reason,
-          }))
-        : [],
-    [catalysing]
-  );
 
   return (
     <>
@@ -244,7 +208,7 @@ export default function EditorPage() {
             </Typography>
             <Divider sx={{ mb: 1 }} />
             {riskFile ? (
-              <TextInputBox initialValue={riskFile.cr4de_definition || ""} setValue={setDefinition} />
+              <TextInputBox valueGetter={definition} initialValue={riskFile.cr4de_definition || ""} />
             ) : (
               <Box mt={3}>
                 <Skeleton variant="text" />
@@ -258,9 +222,11 @@ export default function EditorPage() {
               onUpdate={() =>
                 getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}` })
               }
-            />
-
-            <FeedbackList validations={validations} field="definition" />
+            >
+              <Box sx={{ mx: 0, my: 4 }}>
+                <FeedbackList validations={validations} field="definition" />
+              </Box>
+            </Attachments>
           </Box>
         </Paper>
 
@@ -283,7 +249,7 @@ export default function EditorPage() {
               </Box>
 
               <HistoricalEventsTable
-                historicalEvents={riskFile?.historicalEvents}
+                initialHistoricalEvents={riskFile?.historicalEvents}
                 onChange={async (update, instant = false) => {
                   if (instant) {
                     await updateRiskFile({
@@ -291,7 +257,7 @@ export default function EditorPage() {
                     });
                     await reloadRiskFile();
                   } else {
-                    setHistoricalEvents(update);
+                    historicalEvents.current = update;
                   }
                 }}
               />
@@ -303,9 +269,11 @@ export default function EditorPage() {
                 onUpdate={() =>
                   getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
                 }
-              />
-
-              <FeedbackList validations={validations} field="historical_events" />
+              >
+                <Box sx={{ mx: 0, my: 4 }}>
+                  <FeedbackList validations={validations} field="historical_events" />
+                </Box>
+              </Attachments>
             </Box>
           </Paper>
         )}
@@ -325,7 +293,7 @@ export default function EditorPage() {
               </Box>
 
               <IntensityParametersTable
-                parameters={riskFile?.intensityParameters}
+                initialParameters={riskFile?.intensityParameters}
                 onChange={async (update, instant = false) => {
                   if (instant) {
                     await updateRiskFile({
@@ -333,7 +301,7 @@ export default function EditorPage() {
                     });
                     await reloadRiskFile();
                   } else {
-                    setParameters(update);
+                    parameters.current = update;
                   }
                 }}
               />
@@ -345,9 +313,11 @@ export default function EditorPage() {
                 onUpdate={() =>
                   getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
                 }
-              />
-
-              <FeedbackList validations={validations} field="intensity_parameters" />
+              >
+                <Box sx={{ mx: 0, my: 4 }}>
+                  <FeedbackList validations={validations} field="intensity_parameters" />
+                </Box>
+              </Attachments>
             </Box>
           </Paper>
         )}
@@ -374,8 +344,10 @@ export default function EditorPage() {
 
               <ScenariosTable
                 parameters={riskFile?.intensityParameters}
-                scenarios={riskFile?.scenarios}
-                onChange={setScenarios}
+                initialScenarios={riskFile?.scenarios}
+                onChange={(update) => {
+                  scenarios.current = update;
+                }}
               />
 
               <Attachments
@@ -385,9 +357,11 @@ export default function EditorPage() {
                 onUpdate={() =>
                   getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
                 }
-              />
-
-              <FeedbackList validations={validations} field="scenarios" />
+              >
+                <Box sx={{ mx: 0, my: 4 }}>
+                  <FeedbackList validations={validations} field="scenarios" />
+                </Box>
+              </Attachments>
             </Box>
           </Paper>
         )}
@@ -447,9 +421,11 @@ export default function EditorPage() {
                 onUpdate={() =>
                   getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
                 }
-              />
-
-              <FeedbackList validations={validations} field="scenarios" />
+              >
+                <Box sx={{ mx: 0, my: 4 }}>
+                  <FeedbackList validations={validations} field="scenarios" />
+                </Box>
+              </Attachments>
             </Box>
           </Paper>
         )}
@@ -478,7 +454,7 @@ export default function EditorPage() {
               </Box>
 
               {riskFile ? (
-                <TextInputBox initialValue={riskFile.cr4de_horizon_analysis || ""} setValue={setHorizon} />
+                <TextInputBox valueGetter={horizonAnalysis} initialValue={riskFile.cr4de_horizon_analysis || ""} />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
@@ -490,389 +466,28 @@ export default function EditorPage() {
                 onUpdate={() =>
                   getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
                 }
-              />
-
-              <FeedbackList validations={validations} field="horizon_analysis" />
+              >
+                <Box sx={{ mx: 0, my: 4 }}>
+                  <FeedbackList validations={validations} field="horizon_analysis" />
+                </Box>
+              </Attachments>
             </Box>
           </Paper>
         )}
 
-        {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
-          <Paper>
-            <Box p={2} my={8}>
-              <Stack direction="row">
-                <Typography variant="h6" mb={1} color="secondary">
-                  5. Causing Hazards
-                </Typography>
-              </Stack>
-              <Divider />
-
-              <Box mt={1}>
-                <Typography variant="caption" paragraph>
-                  This section identifies other hazards in the BNRA hazard catalogue that may cause the current hazard.
-                  A short reason should be provided for each non-trivial causal relation.
-                </Typography>
-                <Typography variant="caption" paragraph>
-                  On the left are the hazards that were identified by NCCN analist as being a potential cause. On the
-                  right are all the other hazards in the hazard catalogue. The definition of a hazard selected in the
-                  windows below can be found beneath the comment box.
-                </Typography>
-              </Box>
-
-              {causes !== null && otherHazards !== null && (
-                <TransferList
-                  choices={causesChoises}
-                  chosen={causesChosen}
-                  choicesLabel="Non-causing hazards"
-                  chosenLabel="Causing hazards"
-                  chosenSubheader={`${causes.length} causes identified`}
-                  onAddChosen={async (chosen) => {
-                    setIsSaving(true);
-                    await api.createCascade({
-                      "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
-                      "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
-                    });
-                    await getAllCauses({
-                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                  onRemoveChosen={async (chosen) => {
-                    setIsSaving(true);
-                    await api.deleteCascade(chosen.cascadeId);
-                    await getAllCauses({
-                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                  onChangeReason={async (chosen, newReason) => {
-                    setIsSaving(true);
-                    await api.updateCascade(chosen.cascadeId, {
-                      cr4de_reason: newReason,
-                    });
-                    await getAllCauses({
-                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                />
-              )}
-
-              <Attachments
-                attachments={attachments}
-                riskFile={riskFile}
-                field="causes"
-                onUpdate={() =>
-                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
-                }
-              />
-
-              <FeedbackList validations={validations} field="causes" />
-            </Box>
-          </Paper>
-        )}
-
-        {riskFile && riskFile.cr4de_risk_type === "Malicious Man-made Risk" && (
-          <Paper>
-            <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
-                3. Malicious Actions
-              </Typography>
-              <Divider />
-
-              <Box mt={1}>
-                <Typography variant="caption" paragraph>
-                  This section tries to identify potential malicious actions in the BNRA hazard catalogue that may be
-                  taken by the actors described by this hazard. A short reason should be provided for each non-evident
-                  action.
-                </Typography>
-                <Typography variant="caption" paragraph>
-                  On the left are the hazards that were identified by NCCN analist as being a potential malicious
-                  actions. On the right are all the other malicious actions in the hazard catalogue. The definition of a
-                  hazard selected in the windows below can be found beneath the comment box.
-                </Typography>
-              </Box>
-
-              {effects !== null && otherHazards !== null && (
-                <TransferList
-                  choices={effectsChoices}
-                  chosen={effectsChosen}
-                  choicesLabel="Non-potential action hazards"
-                  chosenLabel="Potential action hazards"
-                  chosenSubheader={`${effects.length} potential actions identified`}
-                  onAddChosen={async (chosen) => {
-                    setIsSaving(true);
-                    await api.createCascade({
-                      "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
-                      "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
-                    });
-                    await getEffects({
-                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                  onRemoveChosen={async (chosen) => {
-                    setIsSaving(true);
-                    await api.deleteCascade(chosen.cascadeId);
-                    await getEffects({
-                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                  onChangeReason={async (chosen, newReason) => {
-                    setIsSaving(true);
-                    await api.updateCascade(chosen.cascadeId, {
-                      cr4de_reason: newReason,
-                    });
-                    await getEffects({
-                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                />
-              )}
-
-              <Attachments
-                attachments={attachments}
-                riskFile={riskFile}
-                field="effects"
-                onUpdate={() =>
-                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
-                }
-              />
-
-              <FeedbackList validations={validations} field="effects" />
-            </Box>
-          </Paper>
-        )}
-
-        {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
-          <Paper>
-            <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
-                6. Effect Hazards
-              </Typography>
-              <Divider />
-
-              <Box mt={1}>
-                <Typography variant="caption" paragraph>
-                  This section identifies other hazards in the BNRA hazard catalogue that may be a direct consequence of
-                  the current hazard. A short reason should be provided for each non-trivial causal relation.
-                </Typography>
-                <Typography variant="caption" paragraph>
-                  On the left are the hazards that were identified by NCCN analist as being a potential effect. On the
-                  right are all the other hazards in the hazard catalogue. The definition of a hazard selected in the
-                  windows below can be found beneath the comment box.
-                </Typography>
-              </Box>
-
-              {effects !== null && otherHazards !== null && (
-                <TransferList
-                  choices={effectsChoices}
-                  chosen={effectsChosen}
-                  choicesLabel="Non-effect hazards"
-                  chosenLabel="Effect hazards"
-                  chosenSubheader={`${effects.length} effects identified`}
-                  onAddChosen={async (chosen) => {
-                    setIsSaving(true);
-                    await api.createCascade({
-                      "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
-                      "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
-                    });
-                    await getEffects({
-                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                  onRemoveChosen={async (chosen) => {
-                    setIsSaving(true);
-                    await api.deleteCascade(chosen.cascadeId);
-                    await getEffects({
-                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                  onChangeReason={async (chosen, newReason) => {
-                    setIsSaving(true);
-                    await api.updateCascade(chosen.cascadeId, {
-                      cr4de_reason: newReason,
-                    });
-                    await getEffects({
-                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                />
-              )}
-
-              <Attachments
-                attachments={attachments}
-                riskFile={riskFile}
-                field="effects"
-                onUpdate={() =>
-                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
-                }
-              />
-
-              <FeedbackList validations={validations} field="effects" />
-            </Box>
-          </Paper>
-        )}
-
-        {riskFile && riskFile.cr4de_risk_type === "Emerging Risk" && (
-          <Paper>
-            <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
-                3. Catalysing effects
-              </Typography>
-              <Divider />
-
-              <Box mt={1}>
-                <Typography variant="caption" paragraph>
-                  This section tries to identify other hazards in the BNRA hazard catalogue that may be catalysed by the
-                  current emerging risk (this means in the future it may affect the probability and/or impact of the
-                  other hazard). A short reason may be provided for each non-trivial causal relation.
-                </Typography>
-                <Typography variant="caption" paragraph>
-                  On the left are the hazards that may experience a catalysing effect. On the right are all the other
-                  risks in the hazard catalogue. The definition of a hazard selected in the windows below can be found
-                  beneath the comment box.
-                </Typography>
-              </Box>
-
-              {effects !== null && otherHazards !== null && (
-                <TransferList
-                  choices={effectsChoices}
-                  chosen={effectsChosen}
-                  choicesLabel="Non-effect hazards"
-                  chosenLabel="Effect hazards"
-                  chosenSubheader={`${effects.length} effects identified`}
-                  onAddChosen={async (chosen) => {
-                    setIsSaving(true);
-                    await api.createCascade({
-                      "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
-                      "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
-                    });
-                    await getEffects({
-                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                  onRemoveChosen={async (chosen) => {
-                    setIsSaving(true);
-                    await api.deleteCascade(chosen.cascadeId);
-                    await getEffects({
-                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                  onChangeReason={async (chosen, newReason) => {
-                    setIsSaving(true);
-                    await api.updateCascade(chosen.cascadeId, {
-                      cr4de_reason: newReason,
-                    });
-                    await getEffects({
-                      query: `$filter=_cr4de_cause_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                />
-              )}
-
-              <Attachments
-                attachments={attachments}
-                riskFile={riskFile}
-                field="effects"
-                onUpdate={() =>
-                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
-                }
-              />
-
-              <FeedbackList validations={validations} field="catalysing_effects" />
-            </Box>
-          </Paper>
-        )}
-
-        {riskFile && riskFile.cr4de_risk_type !== "Emerging Risk" && (
-          <Paper>
-            <Box p={2} my={8}>
-              {riskFile.cr4de_risk_type === "Standard Risk" && (
-                <Typography variant="h6" mb={1} color="secondary">
-                  7. Catalysing Effects
-                </Typography>
-              )}
-              {riskFile.cr4de_risk_type === "Malicious Man-made Risk" && (
-                <Typography variant="h6" mb={1} color="secondary">
-                  4. Catalysing Effects
-                </Typography>
-              )}
-              <Divider />
-
-              <Box mt={1}>
-                <Typography variant="caption" paragraph>
-                  This section tries to identifies the emerging risks in the BNRA hazard catalogue that may catalyse the
-                  current hazard (this means in the future it may have an effect on the probability and/or impact of
-                  this hazard). A short reason may be provided for each non-trivial causal relation.
-                </Typography>
-                <Typography variant="caption" paragraph>
-                  On the left are the hazards that were identified by NCCN analists as having a potential catalysing
-                  effect. On the right are all the other emerging risks in the hazard catalogue. The definition of a
-                  hazard selected in the windows below can be found beneath the comment box.
-                </Typography>
-              </Box>
-
-              {catalysing !== null && otherHazards !== null && (
-                <TransferList
-                  choices={catalysingChoices}
-                  chosen={catalysingChosen}
-                  choicesLabel="Non-catalysing hazards"
-                  chosenLabel="Catalysing hazards"
-                  chosenSubheader={`${catalysing.length} catalysing effects identified`}
-                  onAddChosen={async (chosen) => {
-                    setIsSaving(true);
-                    await api.createCascade({
-                      "cr4de_cause_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${chosen.cr4de_riskfilesid})`,
-                      "cr4de_effect_hazard@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
-                    });
-                    await getAllCauses({
-                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                  onRemoveChosen={async (chosen) => {
-                    setIsSaving(true);
-                    await api.deleteCascade(chosen.cascadeId);
-                    await getAllCauses({
-                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                  onChangeReason={async (chosen, newReason) => {
-                    setIsSaving(true);
-                    await api.updateCascade(chosen.cascadeId, {
-                      cr4de_reason: newReason,
-                    });
-                    await getAllCauses({
-                      query: `$filter=_cr4de_effect_hazard_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
-                    });
-                    setIsSaving(false);
-                  }}
-                />
-              )}
-
-              <Attachments
-                attachments={attachments}
-                riskFile={riskFile}
-                field="catalysing_effects"
-                onUpdate={() =>
-                  getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
-                }
-              />
-
-              <FeedbackList validations={validations} field="catalysing_effects" />
-            </Box>
-          </Paper>
-        )}
+        <CascadeSections
+          riskFile={riskFile}
+          otherHazards={otherHazards}
+          causes={causes}
+          effects={effects}
+          catalysing={catalysing}
+          validations={validations}
+          attachments={attachments}
+          setIsSaving={setIsSaving}
+          getAllCauses={getAllCauses}
+          getEffects={getEffects}
+          getAttachments={getAttachments}
+        />
       </Container>
 
       <Box
@@ -892,26 +507,21 @@ export default function EditorPage() {
           Exit
         </Button>
         <Box sx={{ flex: "1 1 auto" }} />
-        {(isSaving || isAutosaving) && (
+        {isSaving ? (
           <LoadingButton color="secondary" sx={{ mr: 1 }} loading loadingPosition="start" startIcon={<SaveIcon />}>
             Saving
           </LoadingButton>
-        )}
-        {!(isSaving || isAutosaving) && fieldsToUpdate && (
-          <Button color="secondary" sx={{ mr: 1 }} onClick={() => updateRiskFile(fieldsToUpdate)}>
+        ) : (
+          <Button color="secondary" sx={{ mr: 1 }} onClick={() => updateRiskFile()}>
             Save
-          </Button>
-        )}
-        {!(isSaving || isAutosaving) && !fieldsToUpdate && (
-          <Button color="secondary" disabled sx={{ mr: 1 }}>
-            Saved
           </Button>
         )}
 
         <Button
           color="secondary"
           onClick={() => {
-            if (fieldsToUpdate) updateRiskFile(fieldsToUpdate);
+            updateRiskFile();
+
             navigate("/editor");
           }}
         >

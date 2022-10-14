@@ -16,6 +16,10 @@ import BasePage from "./pages/BasePage";
 import EditorIntroPage from "./pages/editor/EditorIntroPage";
 import EditorPage from "./pages/editor/EditorPage";
 import LearningOverviewPage from "./pages/learning/LearningOverviewPage";
+import GeneralIntroductionPage from "./pages/learning/GeneralIntroductionPage";
+import OverviewPage from "./pages/main/OverviewPage";
+import AuthPage from "./pages/AuthPage";
+import TranslationsPage from "./pages/main/TranslationsPage";
 
 function App() {
   useEffect(() => {
@@ -44,41 +48,58 @@ function App() {
           path: "/learning",
           element: <LearningOverviewPage />,
         },
-
         {
-          path: "/hazards",
-          element: <EditorIntroPage />,
-        },
-        {
-          path: "/hazards/:risk_file_id",
-          element: <EditorPage />,
+          path: "/learning/methodology/introduction",
+          element: <GeneralIntroductionPage />,
         },
 
         {
-          path: "/validation",
-          element: <ValidationIntroPage />,
-        },
-        {
-          path: "/validation/:validation_id",
-          element: <ValidationPage />,
-        },
+          path: "/",
+          element: <AuthPage />,
+          children: [
+            {
+              path: "/hazards",
+              element: <EditorIntroPage />,
+            },
+            {
+              path: "/hazards/:risk_file_id",
+              element: <EditorPage />,
+            },
 
-        {
-          path: "/analysis/averager",
-          element: <AnalysisAveragerPage />,
-        },
-        {
-          path: "/analysis/calculator",
-          element: <CalculationPage />,
-        },
+            {
+              path: "/overview",
+              element: <OverviewPage />,
+            },
 
-        {
-          path: "/reporting",
-          element: <RankingPage />,
-        },
-        {
-          path: "/reporting/:risk_id",
-          element: <RiskPage />,
+            {
+              path: "/validation",
+              element: <ValidationIntroPage />,
+            },
+            {
+              path: "/validation/:validation_id",
+              element: <ValidationPage />,
+            },
+
+            {
+              path: "/analysis/averager",
+              element: <AnalysisAveragerPage />,
+            },
+            {
+              path: "/analysis/calculator",
+              element: <CalculationPage />,
+            },
+
+            {
+              path: "/reporting",
+              element: <RankingPage />,
+            },
+            {
+              path: "/reporting/:risk_id",
+              element: <RiskPage />,
+            },
+
+            { path: "/translations", element: <TranslationsPage /> },
+          ],
         },
       ],
     },

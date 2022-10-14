@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography, TextField, Table, TableBody, TableCell, TableRow, TableHead, Skeleton } from "@mui/material";
 import { Scenarios } from "../functions/scenarios";
 import { IntensityParameter } from "../functions/intensityParameters";
@@ -6,13 +6,23 @@ import { Trans } from "react-i18next";
 
 function ScenariosTable({
   parameters,
-  scenarios,
+  initialScenarios,
   onChange,
 }: {
   parameters: IntensityParameter[];
-  scenarios?: Scenarios;
+  initialScenarios?: Scenarios;
   onChange?: (update: Scenarios) => void;
 }) {
+  const [scenarios, setScenarios] = useState(initialScenarios);
+  const [update, setUpdate] = useState(false);
+
+  useEffect(() => {
+    if (scenarios === undefined || update) {
+      setScenarios(initialScenarios);
+      setUpdate(false);
+    }
+  }, [scenarios, setScenarios, update, initialScenarios]);
+
   if (scenarios === undefined)
     return (
       <Box mt={3}>
@@ -22,7 +32,25 @@ function ScenariosTable({
       </Box>
     );
 
-  const handleChange = (scenario: keyof Scenarios, parameter: number, newValue: string) => {};
+  const handleChange = (scenario: keyof Scenarios, parameter: number, newValue: string) => {
+    if (!onChange) return;
+    console.log(scenarios, scenario);
+    const update = {
+      ...scenarios,
+      [scenario]: [
+        ...scenarios[scenario].slice(0, parameter),
+        {
+          ...parameters[parameter],
+          value: newValue,
+        },
+        ...scenarios[scenario].slice(parameter + 1, scenarios[scenario].length),
+      ],
+    };
+
+    setScenarios(update);
+
+    return onChange(update);
+  };
 
   return (
     <Table>

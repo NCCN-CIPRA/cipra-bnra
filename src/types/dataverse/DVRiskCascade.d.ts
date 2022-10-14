@@ -1,4 +1,4 @@
-export interface DVRiskCascade<CauseType = string, EffectType = string> {
+export interface DVRiskCascade<CauseType = undefined, EffectType = undefined> {
   cr4de_bnrariskcascadeid: string;
 
   cr4de_cause_hazard: CauseType;

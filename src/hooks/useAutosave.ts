@@ -1,14 +1,14 @@
-import { useRef, useEffect, useState } from "react";
+import { useCallback, useRef, useEffect, useState } from "react";
 
 const DEBOUNCE_SAVE_DELAY_MS = 10000;
 
 export default function useAutosave<T extends { [key: string]: any }>({
-  fields,
+  getFields,
   compareTo,
   handleSave,
   enable,
 }: {
-  fields: Partial<T>;
+  getFields: () => Partial<T>;
   compareTo: Partial<T>;
   handleSave: (fieldsToSave: Partial<T>) => Promise<void>;
   enable: boolean;
@@ -17,7 +17,9 @@ export default function useAutosave<T extends { [key: string]: any }>({
   const [fieldsToUpdate, setFieldsToUpdate] = useState<Partial<T> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
+  const getUpdatedFields = useCallback(() => {
+    const fields = getFields();
+
     const newFieldsToUpdate = Object.keys(fields).filter((f) => compareTo[f] && fields[f] !== compareTo[f]);
 
     if (newFieldsToUpdate.length > 0) {
@@ -32,11 +34,31 @@ export default function useAutosave<T extends { [key: string]: any }>({
       // Check if we already found these fields in a previous update
       if (JSON.stringify(updatedFields) === JSON.stringify(fieldsToUpdate)) return;
 
-      setFieldsToUpdate(updatedFields);
+      return updatedFields;
     } else if (fieldsToUpdate !== null) {
-      setFieldsToUpdate(null);
+      return null;
     }
-  }, [fields, compareTo, setFieldsToUpdate, fieldsToUpdate]);
+  }, [getFields, compareTo, fieldsToUpdate]);
+
+  const forceUpdate = async () => {
+    const updatedFields = getUpdatedFields();
+
+    if (updatedFields != null) {
+      setFieldsToUpdate(updatedFields);
+
+      setIsSaving(true);
+
+      await handleSave(updatedFields);
+
+      setIsSaving(false);
+    }
+  };
+
+  useEffect(() => {
+    const updatedFields = getUpdatedFields();
+
+    if (updatedFields !== undefined) setFieldsToUpdate(updatedFields);
+  }, [setFieldsToUpdate, getUpdatedFields]);
 
   useEffect(() => {
     if (enable) {
@@ -62,5 +84,5 @@ export default function useAutosave<T extends { [key: string]: any }>({
     };
   }, [enable, fieldsToUpdate, handleSave]);
 
-  return { isSaving, fieldsToUpdate };
+  return { isSaving, fieldsToUpdate, forceUpdate };
 }

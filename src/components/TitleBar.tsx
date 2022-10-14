@@ -5,13 +5,14 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { IconButton, Menu, MenuItem } from "@mui/material";
+import { IconButton, Menu, MenuItem, Stack } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import useLoggedInUser from "../hooks/useLoggedInUser";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 export default function TitleBar({ title, onDrawerToggle }: { title: string; onDrawerToggle: () => void }) {
+  const { i18n } = useTranslation();
   const { user } = useLoggedInUser();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -23,7 +24,7 @@ export default function TitleBar({ title, onDrawerToggle }: { title: string; onD
   const handleClose = () => {
     setAnchorEl(null);
   };
-
+  console.log(i18n.languages);
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
@@ -42,6 +43,44 @@ export default function TitleBar({ title, onDrawerToggle }: { title: string; onD
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               {title}
             </Typography>
+            <Stack direction="row" sx={{ mr: 4 }}>
+              <Button
+                variant={i18n.languages[0] === "nl" ? "outlined" : "text"}
+                color="inherit"
+                size="small"
+                sx={{ minWidth: 35 }}
+                onClick={() => i18n.changeLanguage("nl")}
+              >
+                nl
+              </Button>
+              <Button
+                variant={i18n.languages[0] === "fr" ? "outlined" : "text"}
+                color="inherit"
+                size="small"
+                sx={{ minWidth: 35 }}
+                onClick={() => i18n.changeLanguage("fr")}
+              >
+                fr
+              </Button>
+              <Button
+                variant={i18n.languages[0] === "de" ? "outlined" : "text"}
+                color="inherit"
+                size="small"
+                sx={{ minWidth: 35 }}
+                onClick={() => i18n.changeLanguage("de")}
+              >
+                de
+              </Button>
+              <Button
+                variant={i18n.languages[0] === "en" ? "outlined" : "text"}
+                color="inherit"
+                size="small"
+                sx={{ minWidth: 35 }}
+                onClick={() => i18n.changeLanguage("en")}
+              >
+                en
+              </Button>
+            </Stack>
             {user == null && (
               <Button color="inherit" component={Link} to="/auth">
                 <Trans i18nKey="button.login">Login</Trans>

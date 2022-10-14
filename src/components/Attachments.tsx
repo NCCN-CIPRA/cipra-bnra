@@ -67,7 +67,7 @@ export default function Attachments({
   const inputRef = useRef<HTMLInputElement>(null);
   const api = useAPI();
   const theme = useTheme();
-  const [t] = useTranslation();
+  const { t } = useTranslation();
   const { user } = useLoggedInUser();
 
   const [openDialog, setOpenDialog] = useState(false);
@@ -274,6 +274,7 @@ export default function Attachments({
       </Stack>
 
       <Collapse in={expanded} timeout="auto" unmountOnExit>
+        {children}
         <Table size="small">
           <TableHead>
             <TableRow>
@@ -327,8 +328,6 @@ export default function Attachments({
             )}
           </TableBody>
         </Table>
-
-        {children}
       </Collapse>
     </Box>
   );

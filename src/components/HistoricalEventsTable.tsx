@@ -11,11 +11,13 @@ import {
   TextField,
   Stack,
   CircularProgress,
+  Tooltip,
 } from "@mui/material";
 import { HistoricalEvent } from "../functions/historicalEvents";
 import { Trans } from "react-i18next";
 import DeleteIcon from "@mui/icons-material/Delete";
-import TextInputBox from "./TextInputBox";
+import AddIcon from "@mui/icons-material/Add";
+import TextInputBox, { TextInputBoxGetter } from "./TextInputBox";
 import LoadingButton from "@mui/lab/LoadingButton";
 
 function HistoricalEventRow({
@@ -32,7 +34,7 @@ function HistoricalEventRow({
   useEffect(() => {
     setIsLoading(false);
   }, [event, setIsLoading]);
-  console.log(onChange);
+
   return (
     <TableRow>
       <TableCell sx={{ whiteSpace: "nowrap", verticalAlign: "top", minWidth: 200 }}>
@@ -90,11 +92,12 @@ function HistoricalEventRow({
           ) : (
             <IconButton
               color="error"
-              onClick={() => {
+              onClick={async () => {
                 if (!onRemove) return;
 
                 setIsLoading(true);
-                onRemove();
+                await onRemove();
+                setIsLoading(false);
               }}
             >
               <DeleteIcon />
@@ -107,17 +110,23 @@ function HistoricalEventRow({
 }
 
 function HistoricalEventsTable({
-  historicalEvents,
+  initialHistoricalEvents,
   onChange,
 }: {
-  historicalEvents?: HistoricalEvent[];
+  initialHistoricalEvents?: HistoricalEvent[];
   onChange?: (update: HistoricalEvent[], instant?: boolean) => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [historicalEvents, setHistoricalEvents] = useState(initialHistoricalEvents);
+  const [update, setUpdate] = useState(false);
 
   useEffect(() => {
     setIsLoading(false);
-  }, [historicalEvents, setIsLoading]);
+    if (historicalEvents === undefined || update) {
+      setHistoricalEvents(initialHistoricalEvents);
+      setUpdate(false);
+    }
+  }, [historicalEvents, setIsLoading, setHistoricalEvents, update, initialHistoricalEvents]);
 
   if (historicalEvents === undefined)
     return (
@@ -132,7 +141,13 @@ function HistoricalEventsTable({
     if (!onChange) return;
     setIsLoading(true);
 
-    return onChange([...historicalEvents, { time: "", location: "", description: "" }], true);
+    const update = [...historicalEvents, { time: "", location: "", description: "" }];
+    setHistoricalEvents(update);
+
+    await onChange(update, true);
+
+    setUpdate(true);
+    setIsLoading(false);
   };
 
   const handleRemoveRow = (i: number) => {
@@ -140,10 +155,10 @@ function HistoricalEventsTable({
 
     return async () => {
       if (window.confirm("Are you sure you wish to delete this event?")) {
-        return onChange(
-          [...historicalEvents.slice(0, i), ...historicalEvents.slice(i + 1, historicalEvents.length)],
-          true
-        );
+        const update = [...historicalEvents.slice(0, i), ...historicalEvents.slice(i + 1, historicalEvents.length)];
+
+        setHistoricalEvents(update);
+        return onChange(update, true);
       }
     };
   };
@@ -152,11 +167,15 @@ function HistoricalEventsTable({
     if (!onChange) return;
 
     return async (updatedEvent: HistoricalEvent) => {
-      return onChange([
+      const update = [
         ...historicalEvents.slice(0, i),
         updatedEvent,
         ...historicalEvents.slice(i + 1, historicalEvents.length),
-      ]);
+      ];
+
+      setHistoricalEvents(update);
+
+      return onChange(update);
     };
   };
 
@@ -194,10 +213,12 @@ function HistoricalEventsTable({
         )}
       </Box>
       {onChange && (
-        <Box sx={{ mt: 2, textAlign: "right" }}>
-          <LoadingButton loading={isLoading} variant="outlined" onClick={handleAddRow}>
-            Add Historical Event
-          </LoadingButton>
+        <Box sx={{ position: "relative" }}>
+          <Tooltip title="Add new historical event">
+            <IconButton onClick={handleAddRow} sx={{ position: "absolute", mt: 2, ml: 6 }}>
+              {isLoading ? <CircularProgress /> : <AddIcon />}
+            </IconButton>
+          </Tooltip>
         </Box>
       )}
     </>

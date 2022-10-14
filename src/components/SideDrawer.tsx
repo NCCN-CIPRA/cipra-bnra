@@ -39,51 +39,39 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
               <ListItem disablePadding>
                 <ListItemButton component={Link} to="/hazards" onClick={onClose}>
                   <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("riskFile.appName")} />
+                  <ListItemText primary={t("sideDrawer.hazardCatalogue", "Hazard Catalogue")} />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>
-                <ListItemButton component={Link} to="/validation" onClick={onClose}>
+                <ListItemButton component={Link} to="/overview" onClick={onClose}>
                   <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("validation.appName")} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton component={Link} to="/analysisA" onClick={onClose}>
-                  <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("analysis.A.appName")} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton component={Link} to="/analysisA" onClick={onClose}>
-                  <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("analysis.B.appName")} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton component={Link} to="/analysisA" onClick={onClose}>
-                  <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("consensus.appName")} />
+                  <ListItemText primary={t("sideDrawer.riskAnalysis", "Risk Analysis")} />
                 </ListItemButton>
               </ListItem>
               <Divider />
               <ListItem disablePadding>
                 <ListItemButton component={Link} to="/reporting" onClick={onClose}>
                   <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("reporting.appName")} />
+                  <ListItemText primary={t("sideDrawer.reporting", "Reporting")} />
                 </ListItemButton>
               </ListItem>
               <Divider />
               <ListItem disablePadding>
                 <ListItemButton component={Link} to="/analysis/averager" onClick={onClose}>
                   <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("analysis.averager.appName")} />
+                  <ListItemText primary={t("sideDrawer.averager", "Response Averager")} />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>
                 <ListItemButton component={Link} to="/analysis/calculator" onClick={onClose}>
                   <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("analysis.calculator.appName")} />
+                  <ListItemText primary={t("sideDrawer.calculator", "Risk Calculator")} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/translations" onClick={onClose}>
+                  <ListItemIcon></ListItemIcon>
+                  <ListItemText primary={t("sideDrawer.translations", "App Translation")} />
                 </ListItemButton>
               </ListItem>
             </>

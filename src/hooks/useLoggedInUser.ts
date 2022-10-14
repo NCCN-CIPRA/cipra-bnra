@@ -4,9 +4,10 @@ import { DVContact } from "../types/dataverse/DVContact";
 export default function useLoggedInUser() {
   const [user, setUser] = useState<DVContact | null | undefined>(undefined);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
+  const refreshUser = () => {
     const info = document.getElementById("user-information");
+
+    if (!info) return;
 
     if (info && info.getAttribute("data-id") && info.getAttribute("data-id") !== "") {
       if (info.getAttribute("data-id") !== user?.contactid) {
@@ -20,7 +21,10 @@ export default function useLoggedInUser() {
     } else {
       setUser(null);
     }
-  });
+  };
 
-  return { user };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(refreshUser);
+
+  return { user, refreshUser };
 }

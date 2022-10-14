@@ -11,11 +11,13 @@ import {
   TableRow,
   TableHead,
   Skeleton,
+  Tooltip,
 } from "@mui/material";
 import { IntensityParameter } from "../functions/intensityParameters";
 import { Trans } from "react-i18next";
 import DeleteIcon from "@mui/icons-material/Delete";
 import LoadingButton from "@mui/lab/LoadingButton";
+import AddIcon from "@mui/icons-material/Add";
 import TextInputBox from "./TextInputBox";
 
 function ParameterRow({
@@ -86,17 +88,23 @@ function ParameterRow({
 }
 
 function IntensityParameterTable({
-  parameters,
+  initialParameters,
   onChange,
 }: {
-  parameters?: IntensityParameter[];
+  initialParameters?: IntensityParameter[];
   onChange?: (update: IntensityParameter[], instant?: boolean) => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [parameters, setParameters] = useState(initialParameters);
+  const [update, setUpdate] = useState(false);
 
   useEffect(() => {
     setIsLoading(false);
-  }, [parameters, setIsLoading]);
+    if (parameters === undefined || update) {
+      setParameters(initialParameters);
+      setUpdate(false);
+    }
+  }, [parameters, setIsLoading, setParameters, update, initialParameters]);
 
   if (parameters === undefined)
     return (
@@ -111,7 +119,12 @@ function IntensityParameterTable({
     if (!onChange) return;
     setIsLoading(true);
 
-    return onChange([...parameters, { name: "", description: "", value: undefined }], true);
+    const update = [...parameters, { name: "", description: "", value: undefined }];
+    setParameters(update);
+
+    await onChange(update, true);
+
+    setUpdate(true);
   };
 
   const handleRemoveRow = (i: number) => {
@@ -119,7 +132,10 @@ function IntensityParameterTable({
 
     return async () => {
       if (window.confirm("Are you sure you wish to delete this parameter?")) {
-        return onChange([...parameters.slice(0, i), ...parameters.slice(i + 1, parameters.length)], true);
+        const update = [...parameters.slice(0, i), ...parameters.slice(i + 1, parameters.length)];
+
+        setParameters(update);
+        return onChange(update);
       }
     };
   };
@@ -128,7 +144,10 @@ function IntensityParameterTable({
     if (!onChange) return;
 
     return async (updated: IntensityParameter) => {
-      return onChange([...parameters.slice(0, i), updated, ...parameters.slice(i + 1, parameters.length)]);
+      const update = [...parameters.slice(0, i), updated, ...parameters.slice(i + 1, parameters.length)];
+
+      setParameters(update);
+      return onChange(update);
     };
   };
 
@@ -176,10 +195,12 @@ function IntensityParameterTable({
         )}
       </Box>
       {onChange && (
-        <Box sx={{ mt: 2, textAlign: "right" }}>
-          <LoadingButton loading={isLoading} variant="outlined" onClick={handleAddRow}>
-            Add Intensity Parameter
-          </LoadingButton>
+        <Box sx={{ position: "relative" }}>
+          <Tooltip title="Add new intensity parameter">
+            <IconButton onClick={handleAddRow} sx={{ position: "absolute", mt: 2, ml: 6 }}>
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
       )}
     </>

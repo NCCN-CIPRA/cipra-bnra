@@ -1,4 +1,4 @@
-export interface DVDirectAnalysis<RiskFileType = string> {
+export interface DVDirectAnalysis<RiskFileType = undefined> {
   cr4de_bnradirectanalysisid: string;
 
   cr4de_expert: string;

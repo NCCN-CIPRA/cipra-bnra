@@ -1,4 +1,4 @@
-export interface DVCascadeAnalysis<RiskCascadeType = string> {
+export interface DVCascadeAnalysis<RiskCascadeType = undefined> {
   cr4de_bnracascadeanalysisid: string;
 
   cr4de_expert: string;

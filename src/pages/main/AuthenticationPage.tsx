@@ -70,7 +70,9 @@ export default function AuthenticationPage() {
   const handleLogin = async () => {
     const result = await api.login(email, password, remember);
 
-    if (!result.error) navigate("/");
+    if (!result.error) {
+      window.location.href = "/";
+    }
   };
 
   const handleForgotPassword = async () => {

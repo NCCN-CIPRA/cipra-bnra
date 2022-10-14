@@ -3,9 +3,11 @@ import { DVAttachment } from "../types/dataverse/DVAttachment";
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DVContact } from "../types/dataverse/DVContact";
 import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
+import { DVFeedback } from "../types/dataverse/DVFeedback";
 import { DVParticipation } from "../types/dataverse/DVParticipation";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import { DVTranslation } from "../types/dataverse/DVTranslation";
 import { DVValidation } from "../types/dataverse/DVValidation";
 
 export enum DataTable {
@@ -19,6 +21,8 @@ export enum DataTable {
   CASCADE_ANALYSIS,
 
   ATTACHMENT,
+
+  TRANSLATIONS,
 }
 
 export interface AuthResponse<T = null> {
@@ -54,9 +58,11 @@ export interface API {
 
   getParticipants<T = DVParticipation>(query?: string): Promise<T[]>;
   createParticipant(fields: object): Promise<CreateResponse>;
+  updateParticipant(id: string, fields: object): Promise<void>;
 
   getValidations<T = DVValidation>(query?: string): Promise<T[]>;
   getValidation<T = DVValidation>(id: string, query?: string): Promise<T>;
+  createValidation(fields: object): Promise<CreateResponse>;
   updateValidation(id: string, fields: object): Promise<void>;
 
   getDirectAnalyses<T = DVDirectAnalysis>(query?: string): Promise<T[]>;
@@ -71,6 +77,14 @@ export interface API {
   serveAttachmentFile(attachment: DVAttachment): Promise<void>;
   createAttachment(fields: object, file: File | null): Promise<CreateResponse>;
   deleteAttachment(id: string): Promise<void>;
+
+  getFeedbacks<T = DVFeedback>(query?: string): Promise<T[]>;
+  createFeedback(fields: object): Promise<CreateResponse>;
+  updateFeedback(id: string, fields: object): Promise<void>;
+
+  getTranslations<T = DVTranslation>(query?: string): Promise<T[]>;
+  updateTranslation(id: string, fields: object): Promise<void>;
+  deleteTranslation(id: string): Promise<void>;
 }
 
 export default function useAPI(): API {
@@ -276,6 +290,16 @@ export default function useAPI(): API {
 
       return { id: response.headers.get("entityId") as string };
     },
+    updateParticipant: async function (id: string, fields: object): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraparticipations(${id})`, {
+        method: "PATCH",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+    },
 
     getValidations: async function <T = DVValidation>(query?: string): Promise<T[]> {
       const response = await authFetch(
@@ -290,6 +314,18 @@ export default function useAPI(): API {
       );
 
       return (await response.json()) as T;
+    },
+    createValidation: async function (fields: object): Promise<CreateResponse> {
+      const response = await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnravalidations`, {
+        method: "POST",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+
+      return { id: response.headers.get("entityId") as string };
     },
     updateValidation: async function (id: string, fields: object): Promise<void> {
       await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${id})`, {
@@ -423,6 +459,63 @@ export default function useAPI(): API {
     },
     deleteAttachment: async function (id: string): Promise<void> {
       await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${id})`, {
+        method: "DELETE",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+      });
+    },
+
+    getFeedbacks: async function <T = DVFeedback>(query?: string): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnrafeedbacks${query ? "?" + query : ""}`
+      );
+
+      return (await response.json()).value;
+    },
+    createFeedback: async function (fields: object): Promise<CreateResponse> {
+      const response = await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnrafeedbacks`, {
+        method: "POST",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+
+      return { id: response.headers.get("entityId") as string };
+    },
+    updateFeedback: async function (id: string, fields: object): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnrafeedbacks(${id})`, {
+        method: "PATCH",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+    },
+
+    getTranslations: async function <T = DVTranslation>(query?: string): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnratranslations${query ? "?" + query : ""}`
+      );
+
+      return (await response.json()).value;
+    },
+    updateTranslation: async function (id: string, fields: object): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnratranslations(${id})`, {
+        method: "PATCH",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+    },
+    deleteTranslation: async function (id: string): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnratranslations(${id})`, {
         method: "DELETE",
         headers: {
           __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
