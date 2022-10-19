@@ -19,6 +19,7 @@
     "@types/recharts": "^1.8.23",
     "d3-scale": "^4.0.2",
     "devextreme-react": "22.1.5",
+    "http-proxy-middleware": "^2.0.6",
     "i18next": "^21.10.0",
     "i18next-browser-languagedetector": "^6.1.6",
     "react": "^18.2.0",
@@ -58,6 +59,8 @@
     ]
   },
   "devDependencies": {
-    "@types/uuid": "^8.3.4"
+    "@types/uuid": "^8.3.4",
+    "cypress": "^10.10.0",
+    "eslint-plugin-cypress": "^2.12.1"
   }
 }

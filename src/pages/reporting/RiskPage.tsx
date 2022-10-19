@@ -19,6 +19,8 @@ import { DataTable } from "../../hooks/useAPI";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { CalculatedRisk } from "../../types/CalculatedRisk";
 import { RiskCalculation } from "../../types/RiskCalculation";
+import usePageTitle from "../../hooks/usePageTitle";
+import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 
 const impactFields = [
   { name: "Direct Ha", fieldName: "di_Ha" },
@@ -60,6 +62,10 @@ const impactFields = [
   { name: "Direct Fb", fieldName: "di_Fb" },
   { name: "Indirect Fb", fieldName: "ii_Fb" },
   { name: "Total Fb", fieldName: "ti_Fb" },
+  null,
+  { name: "Direct Impact", fieldName: "di" },
+  { name: "Indirect Impact", fieldName: "ii" },
+  { name: "Total Impact", fieldName: "ti" },
 ];
 const curFormat = new Intl.NumberFormat("nl-BE", {
   style: "currency",
@@ -82,14 +88,21 @@ export default function RiskPage() {
     }),
   });
 
+  usePageTitle("BNRA 2023 - 2026 Results Overview");
+  useBreadcrumbs([
+    { name: "BNRA 2023 - 2026", url: "/" },
+    { name: "Results", url: "/reporting" },
+    riskFile ? { name: riskFile.cr4de_title, url: "" } : null,
+  ]);
+
   return (
     <Container sx={{ mt: 4, pb: 8 }}>
       <Stack direction="row" sx={{ mb: 8 }}>
         <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
           <ProbabilitySankey riskFile={riskFile} />
         </Box>
-        <Stack direction="column" sx={{ width: 300, p: "50px" }}>
-          <Box
+        <Stack direction="column" justifyContent="center" sx={{ width: 300, p: "50px" }}>
+          {/* <Box
             sx={{
               width: 200,
               height: 200,
@@ -104,6 +117,9 @@ export default function RiskPage() {
             }}
           >
             <ImpactOriginPieChart riskFile={riskFile} />
+          </Box> */}
+          <Box sx={{ width: "100%", textAlign: "center", mb: 6 }}>
+            <Typography variant="h6">{riskFile?.cr4de_title}</Typography>
           </Box>
           <Box
             sx={{
@@ -112,12 +128,31 @@ export default function RiskPage() {
             }}
           >
             <ImpactDistributionPieChart riskFile={riskFile} />
+            <Box sx={{ width: "100%", textAlign: "center", mt: 2 }}>
+              <Typography variant="subtitle2">Damage Indicators</Typography>
+            </Box>
           </Box>
         </Stack>
         <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
           <ImpactSankey riskFile={riskFile} />
         </Box>
       </Stack>
+      <Box>
+        {riskFile ? (
+          <Box
+            mt={3}
+            dangerouslySetInnerHTML={{
+              __html: riskFile.cr4de_dp_quali || "",
+            }}
+          />
+        ) : (
+          <Box mt={3}>
+            <Skeleton variant="text" />
+            <Skeleton variant="text" />
+            <Skeleton variant="text" />
+          </Box>
+        )}
+      </Box>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
           <TableHead>
@@ -255,9 +290,61 @@ export default function RiskPage() {
                     {Math.round(riskFile.calculated.tp * 10000) / 100}%
                   </TableCell>
                 </TableRow>
-                <TableRow sx={{ backgroundColor: "#eee" }}>
-                  <TableCell colSpan={100}> </TableCell>
+              </>
+            ) : (
+              [1, 2, 3].map((i) => (
+                <TableRow key={i} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                  <TableCell>
+                    <Skeleton variant="rectangular" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rectangular" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rectangular" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rectangular" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rectangular" />
+                  </TableCell>
                 </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Box>
+        {riskFile ? (
+          <Box
+            mt={3}
+            dangerouslySetInnerHTML={{
+              __html: riskFile.cr4de_di_quali_h_e || "",
+            }}
+          />
+        ) : (
+          <Box mt={3}>
+            <Skeleton variant="text" />
+            <Skeleton variant="text" />
+            <Skeleton variant="text" />
+          </Box>
+        )}
+      </Box>
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ textAlign: "left", whiteSpace: "nowrap" }}></TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>Considerable</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>Major</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>Extreme</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap", textAlign: "right" }}>Total</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {riskFile ? (
+              <>
                 {impactFields.map((f, i) =>
                   f === null ? (
                     <TableRow key={i} sx={{ backgroundColor: "#eee" }}>

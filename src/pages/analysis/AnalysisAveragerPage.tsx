@@ -12,7 +12,7 @@ import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 const getScaleValue = (scaleString: string) => {
   if (scaleString === null) return 0;
 
-  const matches = scaleString.match(/[A-Z]{1,2}([\d.]+)/);
+  const matches = scaleString.match(/[A-Za-z]{1,2}([\d.]+)/);
 
   if (!matches || matches.length <= 1) return 0;
 
@@ -27,10 +27,10 @@ const getScaleString = (scaleNumber: number, prefix: string) => {
 };
 
 const getAverage = (fieldName: string, scalePrefix: string, record: any, analyses: any) => {
-  if (record[fieldName]) return record[fieldName];
+  // if (record[fieldName]) return record[fieldName];
 
   if (analyses.length <= 0) return getScaleString(0, scalePrefix);
-
+  console.log(analyses.reduce((acc: number, an: any) => acc + getScaleValue(an[fieldName]), 0) / analyses.length);
   return getScaleString(
     analyses.reduce((acc: number, an: any) => acc + getScaleValue(an[fieldName]), 0) / analyses.length,
     scalePrefix
@@ -58,6 +58,8 @@ export default function AnalysisAveragerPage() {
       for (let i = 0; i < riskFiles.length; i++) {
         const riskFile = riskFiles[i];
         const analyses = directAnalyses.filter((da) => da._cr4de_risk_file_value === riskFile.cr4de_riskfilesid);
+
+        if (analyses.length <= 0) continue;
 
         if (riskFile) {
           const fieldsToUpdate = {
@@ -113,7 +115,7 @@ export default function AnalysisAveragerPage() {
             cr4de_di_quanti_fa_e: getAverage("cr4de_di_quanti_fa_e", "Fa", riskFile, analyses),
             cr4de_di_quanti_fb_e: getAverage("cr4de_di_quanti_fb_e", "Fb", riskFile, analyses),
           };
-
+          console.log(fieldsToUpdate, analyses);
           const response = await fetch(
             `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
             {
@@ -146,17 +148,17 @@ export default function AnalysisAveragerPage() {
 
         if (cascade && analyses.length > 0) {
           const fieldsToUpdate = {
-            cr4de_c2c: cascade.cr4de_c2c || getAverage("cr4de_c2c", "CP", cascade, analyses),
-            cr4de_c2m: cascade.cr4de_c2m || getAverage("cr4de_c2m", "CP", cascade, analyses),
-            cr4de_c2e: cascade.cr4de_c2e || getAverage("cr4de_c2e", "CP", cascade, analyses),
+            cr4de_c2c: getAverage("cr4de_c2c", "CP", cascade, analyses),
+            cr4de_c2m: getAverage("cr4de_c2m", "CP", cascade, analyses),
+            cr4de_c2e: getAverage("cr4de_c2e", "CP", cascade, analyses),
 
-            cr4de_m2c: cascade.cr4de_m2c || getAverage("cr4de_m2c", "CP", cascade, analyses),
-            cr4de_m2m: cascade.cr4de_m2m || getAverage("cr4de_m2m", "CP", cascade, analyses),
-            cr4de_m2e: cascade.cr4de_m2e || getAverage("cr4de_m2e", "CP", cascade, analyses),
+            cr4de_m2c: getAverage("cr4de_m2c", "CP", cascade, analyses),
+            cr4de_m2m: getAverage("cr4de_m2m", "CP", cascade, analyses),
+            cr4de_m2e: getAverage("cr4de_m2e", "CP", cascade, analyses),
 
-            cr4de_e2c: cascade.cr4de_e2c || getAverage("cr4de_e2c", "CP", cascade, analyses),
-            cr4de_e2m: cascade.cr4de_e2m || getAverage("cr4de_e2m", "CP", cascade, analyses),
-            cr4de_e2e: cascade.cr4de_e2e || getAverage("cr4de_e2e", "CP", cascade, analyses),
+            cr4de_e2c: getAverage("cr4de_e2c", "CP", cascade, analyses),
+            cr4de_e2m: getAverage("cr4de_e2m", "CP", cascade, analyses),
+            cr4de_e2e: getAverage("cr4de_e2e", "CP", cascade, analyses),
           };
 
           const response = await fetch(

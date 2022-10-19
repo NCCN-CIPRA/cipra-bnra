@@ -18,7 +18,7 @@ class DataverseBackend implements Module {
       const response = await fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnratranslations`);
 
       const allTranslations: DVTranslation[] = (await response.json()).value;
-      console.log(allTranslations);
+
       const loadedTranslations: Translations = {
         en: {},
         nl: {},
@@ -27,10 +27,10 @@ class DataverseBackend implements Module {
       };
 
       allTranslations.forEach((t) => {
-        loadedTranslations.en[t.cr4de_name] = t.cr4de_en;
-        loadedTranslations.nl[t.cr4de_name] = t.cr4de_nl;
-        loadedTranslations.fr[t.cr4de_name] = t.cr4de_fr;
-        loadedTranslations.de[t.cr4de_name] = t.cr4de_de;
+        if (t.cr4de_en) loadedTranslations.en[t.cr4de_name] = t.cr4de_en;
+        if (t.cr4de_nl) loadedTranslations.nl[t.cr4de_name] = t.cr4de_nl;
+        if (t.cr4de_fr) loadedTranslations.fr[t.cr4de_name] = t.cr4de_fr;
+        if (t.cr4de_de) loadedTranslations.de[t.cr4de_name] = t.cr4de_de;
       });
 
       return resolve(loadedTranslations);
@@ -46,7 +46,10 @@ class DataverseBackend implements Module {
   }
 
   async create(languages: string[], namespace: string, key: string, fallbackValue: string) {
-    fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnratranslations`, {
+    console.log(languages);
+    if (languages[0] !== "en") return;
+
+    fetch(`/_api/cr4de_bnratranslations`, {
       method: "POST",
       headers: {
         __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",

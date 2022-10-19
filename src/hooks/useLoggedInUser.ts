@@ -7,7 +7,10 @@ export default function useLoggedInUser() {
   const refreshUser = () => {
     const info = document.getElementById("user-information");
 
-    if (!info) return;
+    if (!info) {
+      setTimeout(refreshUser, 1000);
+      return;
+    }
 
     if (info && info.getAttribute("data-id") && info.getAttribute("data-id") !== "") {
       if (info.getAttribute("data-id") !== user?.contactid) {

@@ -56,6 +56,7 @@ async function devFetch(input: RequestInfo | URL, init?: RequestInit | undefined
             if (errorJson.error && errorJson.error.code === "90040120") {
               // Not logged in in Iframe
               document.getElementById("loginWindow")!.style.display = "block";
+              document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/#/auth");
 
               const testingInterval = setInterval(async () => {
                 const testResponse = await devFetch(input, init);

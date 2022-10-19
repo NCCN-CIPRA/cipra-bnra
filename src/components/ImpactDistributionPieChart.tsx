@@ -1,5 +1,6 @@
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip, TooltipProps } from "recharts";
 import { Box, Typography } from "@mui/material";
+import { getImpactScale } from "../functions/Impact";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
@@ -11,18 +12,13 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
           padding: "10px",
         }}
       >
-        <p
-          style={{
-            margin: 0,
-            color: "#666",
-            fontWeight: 700,
-            paddingBottom: 5,
-            borderBottom: "2px solid #f5f5f5",
-          }}
-        >
-          {payload[0].name}
+        <p style={{ margin: 0, marginBottom: 5, textDecoration: "underline" }}>
+          <Typography variant="subtitle1">{payload[0].name}:</Typography>
         </p>
-        <p style={{ margin: 0 }}>
+        <p style={{ margin: 0, marginLeft: 10 }}>
+          <Typography variant="subtitle2">{getImpactScale(payload[0]!.value!, payload[0]!.payload.scale!)}</Typography>
+        </p>
+        <p style={{ margin: 0, marginLeft: 10 }}>
           <Typography variant="caption">
             {Math.round((payload[0]!.value! / payload[0]!.payload.total!) * 10000) / 100}% of total impact
           </Typography>
@@ -39,29 +35,33 @@ export default function ImpactDistributionPieChart({ riskFile }: { riskFile: any
 
   const dataGlobal = [
     {
-      name: "Human",
+      name: "Human Impact",
       value: riskFile.calculated.ti_Ha + riskFile.calculated.ti_Hb + riskFile.calculated.ti_Hc,
-      color: "rgba(214, 48, 49,1.0)",
+      color: "#c2000a",
       total: riskFile.calculated.ti,
+      scale: "H",
     },
     {
-      name: "Societal",
+      name: "Societal Impact",
       value:
         riskFile.calculated.ti_Sa + riskFile.calculated.ti_Sb + riskFile.calculated.ti_Sc + riskFile.calculated.ti_Sd,
-      color: "rgba(108, 92, 231,1.0)",
+      color: "#a6932d",
       total: riskFile.calculated.ti,
+      scale: "S",
     },
     {
-      name: "Environmental",
+      name: "Environmental Impact",
       value: riskFile.calculated.ti_Ea,
-      color: "rgba(0, 184, 148,1.0)",
+      color: "#488f31",
       total: riskFile.calculated.ti,
+      scale: "E",
     },
     {
-      name: "Financial",
+      name: "Financial Impact",
       value: riskFile.calculated.ti_Fa + riskFile.calculated.ti_Fb,
-      color: "rgba(99, 110, 114,1.0)",
+      color: "#004c6d",
       total: riskFile.calculated.ti,
+      scale: "F",
     },
   ];
 
@@ -69,70 +69,77 @@ export default function ImpactDistributionPieChart({ riskFile }: { riskFile: any
     {
       name: "Fatalities",
       value: riskFile.calculated.ti_Ha,
-      color: "rgba(214, 48, 49,0.8)",
+      color: "#de6148",
       total: riskFile.calculated.ti,
+      scale: "Ha",
     },
     {
       name: "Injured and sick people",
       value: riskFile.calculated.ti_Hb,
-      color: "rgba(214, 48, 49,0.6)",
+      color: "#f39d87",
       total: riskFile.calculated.ti,
+      scale: "Hb",
     },
     {
       name: "People in need of assistance",
       value: riskFile.calculated.ti_Hc,
-      color: "rgba(214, 48, 49,0.4)",
+      color: "#ffd7cc",
       total: riskFile.calculated.ti,
+      scale: "Hv",
     },
     {
       name: "Supply shortfalls and unmet human needs",
       value: riskFile.calculated.ti_Sa,
-      color: "rgba(108, 92, 231,0.8)",
+      color: "#bca632",
       total: riskFile.calculated.ti,
+      scale: "Sa",
     },
     {
       name: "Diminished public order and domestic security",
       value: riskFile.calculated.ti_Sb,
-      color: "rgba(108, 92, 231,0.6)",
+      color: "#d2ba37",
       total: riskFile.calculated.ti,
+      scale: "Sb",
     },
     {
       name: "Damage to the reputation of Belgium",
       value: riskFile.calculated.ti_Sc,
-      color: "rgba(108, 92, 231,0.4)",
+      color: "#e8ce3d",
       total: riskFile.calculated.ti,
+      scale: "Sc",
     },
     {
       name: "Loss of confidence in or loss of functioning of the state and/or its values",
       value: riskFile.calculated.ti_Sd,
-      color: "rgba(108, 92, 231,0.2)",
+      color: "#ffe342",
       total: riskFile.calculated.ti,
+      scale: "Sd",
     },
     {
       name: "Damaged ecosystems",
       value: riskFile.calculated.ti_Ea,
-      color: "rgba(0, 184, 148,0.8)",
+      color: "#83af70",
       total: riskFile.calculated.ti,
+      scale: "Ea",
     },
     {
       name: "Financial asset damages",
       value: riskFile.calculated.ti_Fa,
-      color: "rgba(99, 110, 114,0.8)",
+      color: "#6996b3",
       total: riskFile.calculated.ti,
+      scale: "Fa",
     },
     {
       name: "Reduction of economic performance",
       value: riskFile.calculated.ti_Fb,
-      color: "rgba(99, 110, 114,0.6)",
+      color: "#c1e7ff",
       total: riskFile.calculated.ti,
+      scale: "Fb",
     },
   ];
 
   return (
     <>
-      <Box sx={{ width: "100%", textAlign: "center" }}>
-        <Typography variant="h6">Impact Distribution</Typography>
-      </Box>
       <ResponsiveContainer width="100%" height={160}>
         <PieChart>
           <Pie data={dataGlobal} dataKey="value" cx="50%" cy="50%" outerRadius={55} fill="#8884d8">

@@ -49,6 +49,7 @@ export interface API {
   getRiskFiles<T = DVRiskFile>(query?: string): Promise<T[]>;
   getRiskFile<T = DVRiskFile>(id: string, query?: string): Promise<T>;
   updateRiskFile(id: string, fields: object): Promise<void>;
+  deleteRiskFile(id: string): Promise<void>;
 
   getRiskCascades<T = DVRiskCascade>(query?: string): Promise<T[]>;
   getRiskCascade<T = DVRiskCascade>(id: string, query?: string): Promise<T>;
@@ -59,19 +60,23 @@ export interface API {
   getParticipants<T = DVParticipation>(query?: string): Promise<T[]>;
   createParticipant(fields: object): Promise<CreateResponse>;
   updateParticipant(id: string, fields: object): Promise<void>;
+  deleteParticipant(id: string): Promise<void>;
 
   getValidations<T = DVValidation>(query?: string): Promise<T[]>;
   getValidation<T = DVValidation>(id: string, query?: string): Promise<T>;
   createValidation(fields: object): Promise<CreateResponse>;
   updateValidation(id: string, fields: object): Promise<void>;
+  deleteValidation(id: string): Promise<void>;
 
   getDirectAnalyses<T = DVDirectAnalysis>(query?: string): Promise<T[]>;
   getDirectAnalysis<T = DVDirectAnalysis>(id: string, query?: string): Promise<T>;
   updateDirectAnalysis(id: string, fields: object): Promise<void>;
+  deleteDirectAnalysis(id: string): Promise<void>;
 
   getCascadeAnalyses<T = DVCascadeAnalysis>(query?: string): Promise<T[]>;
   getCascadeAnalysis<T = DVCascadeAnalysis>(id: string, query?: string): Promise<T>;
   updateCascadeAnalysis(id: string, fields: object): Promise<void>;
+  deleteCascadeAnalysis(id: string): Promise<void>;
 
   getAttachments<T = DVAttachment>(query?: string): Promise<T[]>;
   serveAttachmentFile(attachment: DVAttachment): Promise<void>;
@@ -81,6 +86,7 @@ export interface API {
   getFeedbacks<T = DVFeedback>(query?: string): Promise<T[]>;
   createFeedback(fields: object): Promise<CreateResponse>;
   updateFeedback(id: string, fields: object): Promise<void>;
+  deleteFeedback(id: string): Promise<void>;
 
   getTranslations<T = DVTranslation>(query?: string): Promise<T[]>;
   updateTranslation(id: string, fields: object): Promise<void>;
@@ -224,6 +230,15 @@ export default function useAPI(): API {
         body: JSON.stringify(fields),
       });
     },
+    deleteRiskFile: async function (id: string): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${id})`, {
+        method: "DELETE",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+      });
+    },
 
     getRiskCascades: async function <T = DVRiskCascade>(query?: string): Promise<T[]> {
       const response = await authFetch(
@@ -300,6 +315,15 @@ export default function useAPI(): API {
         body: JSON.stringify(fields),
       });
     },
+    deleteParticipant: async function (id: string): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraparticipations(${id})`, {
+        method: "DELETE",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+      });
+    },
 
     getValidations: async function <T = DVValidation>(query?: string): Promise<T[]> {
       const response = await authFetch(
@@ -337,6 +361,15 @@ export default function useAPI(): API {
         body: JSON.stringify(fields),
       });
     },
+    deleteValidation: async function (id: string): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${id})`, {
+        method: "DELETE",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+      });
+    },
 
     getDirectAnalyses: async function <T = DVDirectAnalysis>(query?: string): Promise<T[]> {
       const response = await authFetch(
@@ -362,6 +395,15 @@ export default function useAPI(): API {
         body: JSON.stringify(fields),
       });
     },
+    deleteDirectAnalysis: async function (id: string): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})`, {
+        method: "DELETE",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+      });
+    },
 
     getCascadeAnalyses: async function <T = DVCascadeAnalysis>(query?: string): Promise<T[]> {
       const response = await authFetch(
@@ -385,6 +427,15 @@ export default function useAPI(): API {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(fields),
+      });
+    },
+    deleteCascadeAnalysis: async function (id: string): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises(${id})`, {
+        method: "DELETE",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
       });
     },
 
@@ -494,6 +545,15 @@ export default function useAPI(): API {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(fields),
+      });
+    },
+    deleteFeedback: async function (id: string): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnrafeedbacks(${id})`, {
+        method: "DELETE",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
       });
     },
 

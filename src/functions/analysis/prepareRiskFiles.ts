@@ -190,6 +190,8 @@ export default async function prepareRiskFiles(
 
       ti: 0,
 
+      r: 0,
+
       causes: [],
       effects: [],
     }));

@@ -15,11 +15,17 @@ interface OtherHazard {
   cr4de_title: string;
 }
 
+const roundNumberField = (n: number) => {
+  if (n > 10) return Math.round(n);
+
+  return Math.round(1000 * n) / 1000;
+};
+
 const roundNumberFields = (obj: object) => {
   return (Object.keys(obj) as Array<keyof typeof obj>).reduce(
     (rounded, key) => ({
       ...rounded,
-      [key]: typeof obj[key] === "number" ? Math.round(1000 * (obj[key] as number)) / 1000 : obj[key],
+      [key]: typeof obj[key] === "number" ? roundNumberField(obj[key] as number) : obj[key],
     }),
     {}
   );
@@ -100,6 +106,9 @@ export default function CalculationPage() {
     await convergeProbabilities(calculations, log);
     await convergeImpacts(calculations, log);
 
+    calculations.forEach((c) => {
+      c.r = c.ti * c.tp;
+    });
     setResults(calculations);
 
     setLog([...logLines, "Done"]);

@@ -19,7 +19,7 @@ import { CalculatedRisk } from "../../types/CalculatedRisk";
 export default function RankingPage() {
   const navigate = useNavigate();
 
-  const [impactField, setImpactField] = useState("ti");
+  const [impactField, setImpactField] = useState("r");
   const { data: riskFiles } = useRecords<CalculatedRisk>({
     table: DataTable.RISK_FILE,
     transformResult: (results) => {
@@ -65,13 +65,15 @@ export default function RankingPage() {
               <TableCell sx={{ width: 50, textAlign: "center", whiteSpace: "nowrap" }}>#</TableCell>
               <TableCell>Hazard Name</TableCell>
               <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
-                <FormControl sx={{ m: 0, width: 150 }} size="small">
+                {/* <FormControl sx={{ m: 0, width: 150 }} size="small">
                   <Select
                     value={impactField}
                     onChange={(e) => {
                       setImpactField(e.target.value);
                     }}
                   >
+                    <MenuItem value={"r"}>Risk</MenuItem>
+                    <Divider />
                     <MenuItem value={"ti"}>Total Impact</MenuItem>
                     <MenuItem value={"tp"}>Total Probability</MenuItem>
                     <Divider />
@@ -111,7 +113,7 @@ export default function RankingPage() {
                     <MenuItem value={"ii_Fa"}>Indirect Fa</MenuItem>
                     <MenuItem value={"ii_Fb"}>Indirect Fb</MenuItem>
                   </Select>
-                </FormControl>
+                </FormControl> */}
               </TableCell>
             </TableRow>
           </TableHead>
@@ -142,7 +144,7 @@ export default function RankingPage() {
                       {risk.cr4de_title}
                     </TableCell>
                     <TableCell align="right">
-                      {Math.round(100 * (risk.calculated[impactField as keyof RiskCalculation] as number)) / 100}
+                      {/* {Math.round(100 * (risk.calculated[impactField as keyof RiskCalculation] as number)) / 100} */}
                     </TableCell>
                   </TableRow>
                 ))

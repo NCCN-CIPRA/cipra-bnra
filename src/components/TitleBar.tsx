@@ -24,7 +24,7 @@ export default function TitleBar({ title, onDrawerToggle }: { title: string; onD
   const handleClose = () => {
     setAnchorEl(null);
   };
-  console.log(i18n.languages);
+
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>

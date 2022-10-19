@@ -193,6 +193,9 @@ export interface RiskCalculation {
   // Total impact
   ti: number;
 
+  // Risk
+  r: number;
+
   causes: {
     // The object holding the calculated fields for the causing risk
     risk: RiskCalculation;

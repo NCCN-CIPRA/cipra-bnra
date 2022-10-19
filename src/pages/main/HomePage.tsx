@@ -11,9 +11,11 @@ import {
 import { Link as RouterLink } from "react-router-dom";
 import { timelineOppositeContentClasses } from "@mui/lab/TimelineOppositeContent";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 export default function HomePage() {
+  useTranslation();
+
   useBreadcrumbs(null);
 
   return (

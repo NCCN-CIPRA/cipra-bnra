@@ -99,6 +99,12 @@ function App() {
             },
 
             { path: "/translations", element: <TranslationsPage /> },
+
+            // DEV ONLY
+            {
+              path: "/__dev/migrate",
+              element: <DataMigrator />,
+            },
           ],
         },
       ],
@@ -112,10 +118,6 @@ function App() {
     {
       path: "/__dev/localapi",
       element: <LocalAPI />,
-    },
-    {
-      path: "/__dev/migrate",
-      element: <DataMigrator />,
     },
   ]);
 

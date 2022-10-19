@@ -28,38 +28,40 @@ root.render(
     <ThemeProvider theme={theme}>
       <App />
     </ThemeProvider>
-    {!window.location.href.match(/__dev\/localapi/i) && (
-      <>
-        <iframe
-          id="localApi"
-          title="localApi"
-          name="localApi"
-          src="https://bnra.powerappsportals.com/#/__dev/localapi"
-          style={{ display: "none" }}
-          onLoad={() => {
-            // @ts-expect-error
-            window.fetch.loaded = true;
+    {
+      // These iframes are used for development purposes only
+      window.location.href.indexOf("localhost") >= 0 && (
+        <>
+          <iframe
+            id="localApi"
+            title="localApi"
+            name="localApi"
+            src="https://bnra.powerappsportals.com/#/__dev/localapi"
+            style={{ display: "none" }}
+            onLoad={() => {
+              // @ts-expect-error
+              window.fetch.loaded = true;
 
-            // @ts-expect-error
-            window.frames.localApi.postMessage("getUserInfo", "*");
-          }}
-        />
-        <iframe
-          id="loginWindow"
-          title="loginWindow"
-          src="https://bnra.powerappsportals.com/#/auth"
-          style={{
-            display: "none",
-            position: "absolute",
-            width: "100vw",
-            height: "100vh",
-            top: 0,
-            zIndex: 10000,
-            backgroundColor: "white",
-          }}
-        />
-      </>
-    )}
+              // @ts-expect-error
+              window.frames.localApi.postMessage("getUserInfo", "*");
+            }}
+          />
+          <iframe
+            id="loginWindow"
+            title="loginWindow"
+            style={{
+              display: "none",
+              position: "absolute",
+              width: "100vw",
+              height: "100vh",
+              top: 0,
+              zIndex: 10000,
+              backgroundColor: "white",
+            }}
+          />
+        </>
+      )
+    }
   </React.StrictMode>
 );
 

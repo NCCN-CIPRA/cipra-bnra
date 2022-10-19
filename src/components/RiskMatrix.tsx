@@ -84,7 +84,14 @@ export default function RiskMatrix({ riskFiles }: { riskFiles: any[] | null }) {
           left: 20,
         }}
       >
-        <CartesianGrid />
+        <defs>
+          <linearGradient id="colorUv" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="15%" stopColor="#69B34C" stopOpacity={0.5} />
+            <stop offset="50%" stopColor="#FAB733" stopOpacity={0.5} />
+            <stop offset="95%" stopColor="#FF0D0D" stopOpacity={0.5} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid fill="url(#colorUv)" />
         <XAxis
           type="number"
           dataKey="x"

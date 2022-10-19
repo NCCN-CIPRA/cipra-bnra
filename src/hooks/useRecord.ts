@@ -25,5 +25,12 @@ export default function useRecord<T>(options: GetRecordParams<T>) {
     setFired(true);
   }, [_fired, getData]);
 
+  useEffect(() => {
+    if (_fired && data) {
+      getData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options.id]);
+
   return { loading, data, reloadData: getData };
 }
