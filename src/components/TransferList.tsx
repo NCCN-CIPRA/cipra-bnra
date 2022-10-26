@@ -40,34 +40,40 @@ function TransferList({
   chosen: CascadeRisk[];
   onAddChosen?: (added: SmallRisk) => void;
   onRemoveChosen?: (removed: CascadeRisk) => void;
-  onChangeReason?: (selected: CascadeRisk, newReason: string) => void;
+  onChangeReason?: (selected: CascadeRisk, newReason: string | null) => void;
 }) {
   const [selected, setSelected] = useState<{
     side: SIDE;
     index: number;
   } | null>(null);
-  const [reason, setReason] = useState<string | null>(null);
+  const reason = useRef<string | null>(null);
   const [hasChanged, setHasChanged] = useState(false);
+  const [resetTextInput, setResetTextInput] = useState(false);
 
   const handleListItemClick = (side: SIDE, index: number) => {
     commitChangedReason();
     setSelected({ side, index });
     if (side === "RIGHT") {
-      setReason(chosen[index].reason);
+      reason.current = chosen[index].reason;
     } else {
-      setReason(null);
+      reason.current = null;
+    }
+    setResetTextInput(!resetTextInput);
+  };
+
+  const handleChangeReason = (newReason: string | null | undefined) => {
+    if (newReason === undefined) {
+      setHasChanged(false);
+    } else {
+      reason.current = newReason;
+      setHasChanged(true);
     }
   };
 
-  const handleChangeReason = (newReason: string) => {
-    setReason(newReason);
-    setHasChanged(true);
-  };
-
   const commitChangedReason = () => {
-    if (hasChanged && onChangeReason && selected && reason) {
+    if (hasChanged && onChangeReason && selected) {
       setHasChanged(false);
-      onChangeReason(chosen[selected.index], reason);
+      onChangeReason(chosen[selected.index], reason.current);
     }
   };
 
@@ -163,15 +169,30 @@ function TransferList({
             display: "flex",
             flexDirection: "column",
             mt: 2,
-            p: 1,
-            border: "1px solid #eee",
           }}
         >
           <Typography variant="subtitle2" mb={1}>
             <Trans i18nKey="transferList.reason">Reason for the causal relationship</Trans>
           </Typography>
           {onChangeReason ? (
-            <TextInputBox value={reason} setValue={handleChangeReason} onBlur={commitChangedReason} />
+            <>
+              {resetTextInput && (
+                <TextInputBox
+                  initialValue={reason.current || ""}
+                  onSave={commitChangedReason}
+                  setUpdatedValue={handleChangeReason}
+                  onBlur={commitChangedReason}
+                />
+              )}
+              {!resetTextInput && (
+                <TextInputBox
+                  initialValue={reason.current || ""}
+                  onSave={commitChangedReason}
+                  setUpdatedValue={handleChangeReason}
+                  onBlur={commitChangedReason}
+                />
+              )}
+            </>
           ) : (
             <Box
               dangerouslySetInnerHTML={{
@@ -187,8 +208,6 @@ function TransferList({
             display: "flex",
             flexDirection: "column",
             mt: 2,
-            p: 1,
-            border: "1px solid #eee",
           }}
         >
           <Typography variant="subtitle2" mb={1}>

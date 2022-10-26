@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -13,12 +13,12 @@ import {
   CircularProgress,
   Tooltip,
 } from "@mui/material";
-import { HistoricalEvent } from "../functions/historicalEvents";
+import { HistoricalEvent, unwrap, wrap } from "../functions/historicalEvents";
 import { Trans } from "react-i18next";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import TextInputBox, { TextInputBoxGetter } from "./TextInputBox";
-import LoadingButton from "@mui/lab/LoadingButton";
+import TextInputBox from "./TextInputBox";
+import useDebounce from "../hooks/useDebounce";
 
 function HistoricalEventRow({
   event,
@@ -43,10 +43,12 @@ function HistoricalEventRow({
             <TextField
               size="small"
               defaultValue={event.location}
+              label="Location"
               onChange={(e) => onChange({ ...event, location: e.target.value })}
             />
             <TextField
               defaultValue={event.time}
+              label="Time"
               onChange={(e) => onChange({ ...event, time: e.target.value })}
               size="small"
               inputProps={{ style: { fontSize: 12, fontWeight: "bold" } }}
@@ -75,7 +77,7 @@ function HistoricalEventRow({
             height="200px"
             initialValue={event.description}
             limitedOptions
-            setValue={(v) => onChange({ ...event, description: v })}
+            onSave={(v) => onChange({ ...event, description: v || "" })}
           />
         ) : (
           <Box
@@ -111,22 +113,29 @@ function HistoricalEventRow({
 
 function HistoricalEventsTable({
   initialHistoricalEvents,
-  onChange,
+
+  onSave,
+  setUpdatedValue,
 }: {
-  initialHistoricalEvents?: HistoricalEvent[];
-  onChange?: (update: HistoricalEvent[], instant?: boolean) => void;
+  initialHistoricalEvents: string | null;
+
+  onSave?: (newValue: string | null) => void;
+  setUpdatedValue?: (newValue: string | null | undefined) => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [historicalEvents, setHistoricalEvents] = useState(initialHistoricalEvents);
-  const [update, setUpdate] = useState(false);
+  const [savedValue, setSavedValue] = useState(initialHistoricalEvents);
+  const [innerValue, setInnerValue] = useState(initialHistoricalEvents);
+  const [debouncedValue, setDebouncedValue] = useDebounce(innerValue, 2000);
+
+  const historicalEvents = useMemo(() => unwrap(innerValue), [innerValue]);
 
   useEffect(() => {
-    setIsLoading(false);
-    if (historicalEvents === undefined || update) {
-      setHistoricalEvents(initialHistoricalEvents);
-      setUpdate(false);
+    if (onSave && debouncedValue !== savedValue) {
+      onSave(debouncedValue);
+      setSavedValue(debouncedValue);
+      setUpdatedValue && setUpdatedValue(undefined);
     }
-  }, [historicalEvents, setIsLoading, setHistoricalEvents, update, initialHistoricalEvents]);
+  }, [debouncedValue, savedValue, onSave, setSavedValue, setUpdatedValue]);
 
   if (historicalEvents === undefined)
     return (
@@ -137,45 +146,46 @@ function HistoricalEventsTable({
       </Box>
     );
 
-  const handleAddRow = async () => {
-    if (!onChange) return;
+  const handleForceSave = async (update: HistoricalEvent[]) => {
+    if (!onSave) return;
     setIsLoading(true);
 
-    const update = [...historicalEvents, { time: "", location: "", description: "" }];
-    setHistoricalEvents(update);
+    const wrapped = wrap(update);
 
-    await onChange(update, true);
+    setInnerValue(wrapped);
+    setSavedValue(wrapped);
+    setDebouncedValue(wrapped);
 
-    setUpdate(true);
+    await onSave(wrapped);
+    setUpdatedValue && setUpdatedValue(undefined);
+
     setIsLoading(false);
   };
 
-  const handleRemoveRow = (i: number) => {
-    if (!onChange) return;
+  const handleAddRow = async () => {
+    return handleForceSave([...historicalEvents, { time: "", location: "", description: "" }]);
+  };
 
+  const handleRemoveRow = (i: number) => {
     return async () => {
       if (window.confirm("Are you sure you wish to delete this event?")) {
-        const update = [...historicalEvents.slice(0, i), ...historicalEvents.slice(i + 1, historicalEvents.length)];
-
-        setHistoricalEvents(update);
-        return onChange(update, true);
+        return handleForceSave([
+          ...historicalEvents.slice(0, i),
+          ...historicalEvents.slice(i + 1, historicalEvents.length),
+        ]);
       }
     };
   };
 
   const handleUpdate = (i: number) => {
-    if (!onChange) return;
-
-    return async (updatedEvent: HistoricalEvent) => {
-      const update = [
+    return (updatedEvent: HistoricalEvent) => {
+      const newValue = wrap([
         ...historicalEvents.slice(0, i),
         updatedEvent,
         ...historicalEvents.slice(i + 1, historicalEvents.length),
-      ];
-
-      setHistoricalEvents(update);
-
-      return onChange(update);
+      ]);
+      setInnerValue(newValue);
+      setUpdatedValue && setUpdatedValue(newValue);
     };
   };
 
@@ -212,7 +222,7 @@ function HistoricalEventsTable({
           />
         )}
       </Box>
-      {onChange && (
+      {onSave && (
         <Box sx={{ position: "relative" }}>
           <Tooltip title="Add new historical event">
             <IconButton onClick={handleAddRow} sx={{ position: "absolute", mt: 2, ml: 6 }}>

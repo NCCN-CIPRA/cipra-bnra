@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   CircularProgress,
@@ -13,12 +13,13 @@ import {
   Skeleton,
   Tooltip,
 } from "@mui/material";
-import { IntensityParameter } from "../functions/intensityParameters";
+import { IntensityParameter, unwrap, wrap } from "../functions/intensityParameters";
 import { Trans } from "react-i18next";
 import DeleteIcon from "@mui/icons-material/Delete";
 import LoadingButton from "@mui/lab/LoadingButton";
 import AddIcon from "@mui/icons-material/Add";
 import TextInputBox from "./TextInputBox";
+import useDebounce from "../hooks/useDebounce";
 
 function ParameterRow({
   parameter,
@@ -56,7 +57,7 @@ function ParameterRow({
             height="200px"
             initialValue={parameter.description}
             limitedOptions
-            setValue={(v) => onChange({ ...parameter, description: v })}
+            onSave={(v) => onChange({ ...parameter, description: v || "" })}
           />
         ) : (
           <Typography variant="body1" paragraph>
@@ -89,22 +90,29 @@ function ParameterRow({
 
 function IntensityParameterTable({
   initialParameters,
-  onChange,
+
+  onSave,
+  setUpdatedValue,
 }: {
-  initialParameters?: IntensityParameter[];
-  onChange?: (update: IntensityParameter[], instant?: boolean) => void;
+  initialParameters: string | null;
+
+  onSave?: (newValue: string | null) => void;
+  setUpdatedValue?: (newValue: string | null | undefined) => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [parameters, setParameters] = useState(initialParameters);
-  const [update, setUpdate] = useState(false);
+  const [savedValue, setSavedValue] = useState(initialParameters);
+  const [innerValue, setInnerValue] = useState(initialParameters);
+  const [debouncedValue, setDebouncedValue] = useDebounce(innerValue, 2000);
+
+  const parameters = useMemo(() => unwrap(innerValue), [innerValue]);
 
   useEffect(() => {
-    setIsLoading(false);
-    if (parameters === undefined || update) {
-      setParameters(initialParameters);
-      setUpdate(false);
+    if (onSave && debouncedValue !== savedValue) {
+      onSave(debouncedValue);
+      setSavedValue(debouncedValue);
+      setUpdatedValue && setUpdatedValue(undefined);
     }
-  }, [parameters, setIsLoading, setParameters, update, initialParameters]);
+  }, [debouncedValue, savedValue, onSave, setSavedValue, setUpdatedValue]);
 
   if (parameters === undefined)
     return (
@@ -115,39 +123,40 @@ function IntensityParameterTable({
       </Box>
     );
 
-  const handleAddRow = async () => {
-    if (!onChange) return;
+  const handleForceSave = async (update: IntensityParameter[]) => {
+    if (!onSave) return;
     setIsLoading(true);
 
-    const update = [...parameters, { name: "", description: "", value: undefined }];
-    setParameters(update);
+    const wrapped = wrap(update);
 
-    await onChange(update, true);
+    setInnerValue(wrapped);
+    setSavedValue(wrapped);
+    setDebouncedValue(wrapped);
 
-    setUpdate(true);
+    await onSave(wrapped);
+    setUpdatedValue && setUpdatedValue(undefined);
+
+    setIsLoading(false);
+  };
+
+  const handleAddRow = async () => {
+    return handleForceSave([...parameters, { name: "", description: "", value: undefined }]);
   };
 
   const handleRemoveRow = (i: number) => {
-    if (!onChange) return;
-
     return async () => {
       if (window.confirm("Are you sure you wish to delete this parameter?")) {
-        const update = [...parameters.slice(0, i), ...parameters.slice(i + 1, parameters.length)];
-
-        setParameters(update);
-        return onChange(update);
+        return handleForceSave([...parameters.slice(0, i), ...parameters.slice(i + 1, parameters.length)]);
       }
     };
   };
 
   const handleUpdate = (i: number) => {
-    if (!onChange) return;
+    return (updatedEvent: IntensityParameter) => {
+      const newValue = wrap([...parameters.slice(0, i), updatedEvent, ...parameters.slice(i + 1, parameters.length)]);
 
-    return async (updated: IntensityParameter) => {
-      const update = [...parameters.slice(0, i), updated, ...parameters.slice(i + 1, parameters.length)];
-
-      setParameters(update);
-      return onChange(update);
+      setInnerValue(newValue);
+      setUpdatedValue && setUpdatedValue(newValue);
     };
   };
 
@@ -194,11 +203,11 @@ function IntensityParameterTable({
           />
         )}
       </Box>
-      {onChange && (
+      {onSave && (
         <Box sx={{ position: "relative" }}>
           <Tooltip title="Add new intensity parameter">
             <IconButton onClick={handleAddRow} sx={{ position: "absolute", mt: 2, ml: 6 }}>
-              <AddIcon />
+              {isLoading ? <CircularProgress /> : <AddIcon />}
             </IconButton>
           </Tooltip>
         </Box>

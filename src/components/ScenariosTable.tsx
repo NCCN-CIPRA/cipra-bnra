@@ -1,27 +1,66 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, Typography, TextField, Table, TableBody, TableCell, TableRow, TableHead, Skeleton } from "@mui/material";
-import { Scenarios } from "../functions/scenarios";
+import { Scenarios, unwrap, wrap } from "../functions/scenarios";
 import { IntensityParameter } from "../functions/intensityParameters";
 import { Trans } from "react-i18next";
+import useDebounce from "../hooks/useDebounce";
+import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+
+interface RawScenarios {
+  considerable: string | null;
+  major: string | null;
+  extreme: string | null;
+}
+
+const getChangedScenarios = (old: RawScenarios, new_: RawScenarios) => {
+  const update: Partial<RawScenarios> = {};
+
+  if (old.considerable !== new_.considerable) update.considerable = new_.considerable;
+  if (old.major !== new_.major) update.major = new_.major;
+  if (old.extreme !== new_.extreme) update.extreme = new_.extreme;
+
+  return update;
+};
 
 function ScenariosTable({
   parameters,
   initialScenarios,
-  onChange,
+
+  onSave,
+  setUpdatedValue,
 }: {
   parameters: IntensityParameter[];
-  initialScenarios?: Scenarios;
-  onChange?: (update: Scenarios) => void;
+  initialScenarios: RawScenarios;
+
+  onSave?: (updatedFields: Partial<DVRiskFile>) => void;
+  setUpdatedValue?: (updatedFields: Partial<DVRiskFile>) => void;
 }) {
-  const [scenarios, setScenarios] = useState(initialScenarios);
-  const [update, setUpdate] = useState(false);
+  const [savedValue, setSavedValue] = useState(initialScenarios);
+  const [innerValue, setInnerValue] = useState(initialScenarios);
+  const [debouncedValue] = useDebounce(innerValue, 2000);
+
+  const scenarios = useMemo(
+    () => unwrap(parameters, innerValue.considerable, innerValue.major, innerValue.extreme),
+    [parameters, innerValue]
+  );
 
   useEffect(() => {
-    if (scenarios === undefined || update) {
-      setScenarios(initialScenarios);
-      setUpdate(false);
+    if (onSave) {
+      const update = getChangedScenarios(savedValue, debouncedValue);
+
+      if (Object.keys(update).length > 0) {
+        const fieldsToUpdate: Partial<DVRiskFile> = {};
+
+        if (update.considerable !== undefined) fieldsToUpdate.cr4de_scenario_considerable = update.considerable;
+        if (update.major !== undefined) fieldsToUpdate.cr4de_scenario_major = update.major;
+        if (update.extreme !== undefined) fieldsToUpdate.cr4de_scenario_extreme = update.extreme;
+
+        onSave(fieldsToUpdate);
+        setSavedValue(debouncedValue);
+        setUpdatedValue && setUpdatedValue({});
+      }
     }
-  }, [scenarios, setScenarios, update, initialScenarios]);
+  }, [debouncedValue, savedValue, onSave, setSavedValue, setUpdatedValue]);
 
   if (scenarios === undefined)
     return (
@@ -32,24 +71,23 @@ function ScenariosTable({
       </Box>
     );
 
-  const handleChange = (scenario: keyof Scenarios, parameter: number, newValue: string) => {
-    if (!onChange) return;
-    console.log(scenarios, scenario);
-    const update = {
-      ...scenarios,
-      [scenario]: [
+  const handleUpdate = (scenario: keyof Scenarios, parameter: number, newValue: string) => {
+    const updated = {
+      ...innerValue,
+      [scenario]: wrap([
         ...scenarios[scenario].slice(0, parameter),
         {
           ...parameters[parameter],
           value: newValue,
         },
         ...scenarios[scenario].slice(parameter + 1, scenarios[scenario].length),
-      ],
+      ]),
     };
-
-    setScenarios(update);
-
-    return onChange(update);
+    setInnerValue(updated);
+    setUpdatedValue &&
+      setUpdatedValue({
+        [`cr4de_scenario_${scenario}`]: updated[scenario],
+      });
   };
 
   return (
@@ -78,13 +116,13 @@ function ScenariosTable({
                 <Typography variant="body1">{p.name || "???"}</Typography>
               </TableCell>
               <TableCell>
-                {onChange ? (
+                {onSave ? (
                   <TextField
                     size="small"
                     defaultValue={scenarios.considerable[i]?.value || ""}
                     multiline
                     inputProps={{ style: { width: "250px", height: "134px" } }}
-                    onChange={(e) => handleChange("considerable", i, e.target.value)}
+                    onChange={(e) => handleUpdate("considerable", i, e.target.value)}
                   />
                 ) : (
                   <Typography variant="body1" paragraph>
@@ -93,13 +131,13 @@ function ScenariosTable({
                 )}
               </TableCell>
               <TableCell>
-                {onChange ? (
+                {onSave ? (
                   <TextField
                     size="small"
                     defaultValue={scenarios.major[i]?.value || ""}
                     multiline
                     inputProps={{ style: { width: "250px", height: "134px" } }}
-                    onChange={(e) => handleChange("major", i, e.target.value)}
+                    onChange={(e) => handleUpdate("major", i, e.target.value)}
                   />
                 ) : (
                   <Typography variant="body1" paragraph>
@@ -108,13 +146,13 @@ function ScenariosTable({
                 )}
               </TableCell>
               <TableCell>
-                {onChange ? (
+                {onSave ? (
                   <TextField
                     size="small"
                     defaultValue={scenarios.extreme[i]?.value || ""}
                     multiline
                     inputProps={{ style: { width: "250px", height: "134px" } }}
-                    onChange={(e) => handleChange("extreme", i, e.target.value)}
+                    onChange={(e) => handleUpdate("extreme", i, e.target.value)}
                   />
                 ) : (
                   <Typography variant="body1" paragraph>

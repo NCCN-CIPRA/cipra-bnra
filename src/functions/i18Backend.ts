@@ -38,7 +38,7 @@ class DataverseBackend implements Module {
   }
 
   init() {
-    console.log("INIT");
+    // console.log("INIT");
   }
 
   async read(language: string, namespace: string, callback: any) {

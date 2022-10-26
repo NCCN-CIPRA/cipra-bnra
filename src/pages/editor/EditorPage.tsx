@@ -1,22 +1,8 @@
-import { useMemo, useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useState } from "react";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
-import {
-  Stack,
-  Box,
-  Container,
-  Typography,
-  Paper,
-  Snackbar,
-  Alert,
-  Divider,
-  Button,
-  Skeleton,
-  IconButton,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Container, Typography, Paper, Divider, Button, Skeleton } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import TextInputBox, { TextInputBoxGetter } from "../../components/TextInputBox";
-import TransferList from "../../components/TransferList";
+import TextInputBox from "../../components/TextInputBox";
 import SaveIcon from "@mui/icons-material/Save";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
@@ -26,7 +12,6 @@ import * as IP from "../../functions/intensityParameters";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import useRecord from "../../hooks/useRecord";
 import useLazyRecords from "../../hooks/useLazyRecords";
-import useAutosave from "../../hooks/useAutosave";
 import usePageTitle from "../../hooks/usePageTitle";
 import { Breadcrumb } from "../../components/BreadcrumbNavigation";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
@@ -34,16 +19,14 @@ import HistoricalEventsTable from "../../components/HistoricalEventsTable";
 import IntensityParametersTable from "../../components/IntensityParametersTable";
 import ScenariosTable from "../../components/ScenariosTable";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import AddIcon from "@mui/icons-material/Add";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import Attachments from "../../components/Attachments";
 import FeedbackList from "./FeedbackList";
 import { DVValidation } from "../../types/dataverse/DVValidation";
 import { DVContact } from "../../types/dataverse/DVContact";
 import ParticipationTable from "../../components/ParticipationTable";
-import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import CascadeSections from "./CascadeSections";
-import { HtmlEditor } from "devextreme-react";
+import { TNullablePartial } from "../../types/TNullablePartial";
 
 export interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -55,8 +38,6 @@ type RouteParams = {
   risk_file_id: string;
 };
 
-const AUTOSAVE_INTERVAL = 15000;
-
 const defaultBreadcrumbs: Breadcrumb[] = [
   { name: "BNRA 2023 - 2026", url: "/" },
   { name: "Hazard Catalogue", url: "/hazards" },
@@ -66,13 +47,9 @@ export default function EditorPage() {
   const api = useAPI();
   const params = useParams() as RouteParams;
   const navigate = useNavigate();
-  const autoSaver = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fieldsToUpdate = useRef<TNullablePartial<DVRiskFile>>({});
 
-  const [definition] = useState<TextInputBoxGetter>({ getValue: null });
-  const historicalEvents = useRef<HE.HistoricalEvent[] | null>(null);
-  const parameters = useRef<IP.IntensityParameter[] | null>(null);
-  const scenarios = useRef<S.Scenarios | null>(null);
-  const [horizonAnalysis] = useState<TextInputBoxGetter>({ getValue: null });
+  const [dirty, setDirty] = useState(false);
 
   const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<SmallRisk>({
     table: DataTable.RISK_FILE,
@@ -115,10 +92,6 @@ export default function EditorPage() {
       };
     },
     onComplete: async (rf) => {
-      historicalEvents.current = rf.historicalEvents;
-      parameters.current = rf.intensityParameters;
-      scenarios.current = rf.scenarios;
-
       if (!otherHazards)
         getOtherHazards({
           query: `$filter=cr4de_riskfilesid ne ${rf.cr4de_riskfilesid}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`,
@@ -126,6 +99,10 @@ export default function EditorPage() {
       if (!allCauses)
         getAllCauses({
           query: `$filter=_cr4de_effect_hazard_value eq ${rf.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+          onComplete: async (allCauses) => {
+            setCauses(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk"));
+            setCatalysing(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk"));
+          },
         });
       if (!effects)
         getEffects({
@@ -141,57 +118,49 @@ export default function EditorPage() {
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const updateRiskFile = async (forceUpdates?: Partial<DVRiskFile>) => {
-    if (autoSaver.current) clearTimeout(autoSaver.current);
-
-    autoSaver.current = setTimeout(updateRiskFile, AUTOSAVE_INTERVAL);
-
+  const handleSaveFields = async (fields: Partial<{ [key in keyof DVRiskFile]: string | null }>) => {
     if (!riskFile) return;
-
-    const fields: Partial<DVRiskFile> = {
-      cr4de_definition: definition.getValue && definition.getValue(),
-      cr4de_historical_events: historicalEvents.current && HE.wrap(historicalEvents.current),
-      cr4de_intensity_parameters: parameters.current && IP.wrap(parameters.current),
-      cr4de_scenario_considerable: scenarios.current && S.wrap(scenarios.current.considerable),
-      cr4de_scenario_major: scenarios.current && S.wrap(scenarios.current.major),
-      cr4de_scenario_extreme: scenarios.current && S.wrap(scenarios.current.extreme),
-      cr4de_horizon_analysis: horizonAnalysis.getValue && horizonAnalysis.getValue(),
-      ...forceUpdates,
-    };
-
-    const fieldsToUpdate = Object.keys(fields)
-      .filter(
-        (f) =>
-          fields[f as keyof DVRiskFile] !== riskFile[f as keyof DVRiskFile] &&
-          !(fields[f as keyof DVRiskFile] === "" && riskFile[f as keyof DVRiskFile] === null)
-      )
-      .reduce(
-        (u, f) => ({
-          ...u,
-          [f]: fields[f as keyof DVRiskFile],
-        }),
-        {}
-      );
-
-    if (fieldsToUpdate === null || Object.keys(fieldsToUpdate).length <= 0) return;
 
     setIsSaving(true);
 
-    await api.updateRiskFile(params.risk_file_id, fieldsToUpdate);
-    await reloadRiskFile();
+    await api.updateRiskFile(params.risk_file_id, fields);
 
     setIsSaving(false);
   };
 
-  useEffect(() => {
-    if (autoSaver.current) clearTimeout(autoSaver.current);
+  const handleSaveField = (field: keyof DVRiskFile) => async (newValue: string | null) => {
+    console.log("Saving ", field, " as ", newValue);
+    return handleSaveFields({ [field]: newValue });
+  };
 
-    autoSaver.current = setTimeout(updateRiskFile, AUTOSAVE_INTERVAL);
+  const handleSetFieldUpdates = async (fields: Partial<{ [key in keyof DVRiskFile]: string | null }>) => {
+    Object.keys(fields).forEach((f) => {
+      const newValue = fields[f as keyof DVRiskFile];
 
-    return () => {
-      if (autoSaver.current) clearTimeout(autoSaver.current);
-    };
-  });
+      if (newValue === undefined) {
+        if (fieldsToUpdate.current[f as keyof DVRiskFile]) {
+          delete fieldsToUpdate.current[f as keyof DVRiskFile];
+        }
+      } else {
+        fieldsToUpdate.current[f as keyof DVRiskFile] = newValue;
+      }
+    });
+
+    setDirty(Object.keys(fieldsToUpdate.current).length > 0);
+  };
+
+  const handleSetFieldUpdate = (field: keyof DVRiskFile) => async (newValue: string | null | undefined) => {
+    return handleSetFieldUpdates({ [field]: newValue });
+  };
+
+  const handleSave = async () => {
+    if (!riskFile) return;
+    setIsSaving(true);
+
+    await api.updateRiskFile(params.risk_file_id, fieldsToUpdate.current);
+
+    setIsSaving(false);
+  };
 
   usePageTitle("BNRA 2023 - 2026 Risk File Editor");
   useBreadcrumbs([...defaultBreadcrumbs, riskFile ? { name: riskFile.cr4de_title, url: "" } : null]);
@@ -208,7 +177,11 @@ export default function EditorPage() {
             </Typography>
             <Divider sx={{ mb: 1 }} />
             {riskFile ? (
-              <TextInputBox valueGetter={definition} initialValue={riskFile.cr4de_definition || ""} />
+              <TextInputBox
+                initialValue={riskFile.cr4de_definition}
+                onSave={handleSaveField("cr4de_definition")}
+                setUpdatedValue={handleSetFieldUpdate("cr4de_definition")}
+              />
             ) : (
               <Box mt={3}>
                 <Skeleton variant="text" />
@@ -249,17 +222,9 @@ export default function EditorPage() {
               </Box>
 
               <HistoricalEventsTable
-                initialHistoricalEvents={riskFile?.historicalEvents}
-                onChange={async (update, instant = false) => {
-                  if (instant) {
-                    await updateRiskFile({
-                      cr4de_historical_events: HE.wrap(update),
-                    });
-                    await reloadRiskFile();
-                  } else {
-                    historicalEvents.current = update;
-                  }
-                }}
+                initialHistoricalEvents={riskFile?.cr4de_historical_events}
+                onSave={handleSaveField("cr4de_historical_events")}
+                setUpdatedValue={handleSetFieldUpdate("cr4de_historical_events")}
               />
 
               <Attachments
@@ -293,17 +258,9 @@ export default function EditorPage() {
               </Box>
 
               <IntensityParametersTable
-                initialParameters={riskFile?.intensityParameters}
-                onChange={async (update, instant = false) => {
-                  if (instant) {
-                    await updateRiskFile({
-                      cr4de_intensity_parameters: IP.wrap(update),
-                    });
-                    await reloadRiskFile();
-                  } else {
-                    parameters.current = update;
-                  }
-                }}
+                initialParameters={riskFile?.cr4de_intensity_parameters}
+                onSave={handleSaveField("cr4de_intensity_parameters")}
+                setUpdatedValue={handleSetFieldUpdate("cr4de_intensity_parameters")}
               />
 
               <Attachments
@@ -344,10 +301,13 @@ export default function EditorPage() {
 
               <ScenariosTable
                 parameters={riskFile?.intensityParameters}
-                initialScenarios={riskFile?.scenarios}
-                onChange={(update) => {
-                  scenarios.current = update;
+                initialScenarios={{
+                  considerable: riskFile?.cr4de_scenario_considerable,
+                  major: riskFile?.cr4de_scenario_major,
+                  extreme: riskFile?.cr4de_scenario_extreme,
                 }}
+                onSave={handleSaveFields}
+                setUpdatedValue={handleSetFieldUpdates}
               />
 
               <Attachments
@@ -388,22 +348,22 @@ export default function EditorPage() {
               {riskFile ? (
                 <Box>
                   <Typography variant="subtitle2">Considerable Capabilities</Typography>
-                  <Box
-                    dangerouslySetInnerHTML={{
-                      __html: riskFile.scenarios.considerable ? riskFile.scenarios.considerable[0].value : "",
-                    }}
+                  <TextInputBox
+                    initialValue={riskFile.cr4de_scenario_considerable}
+                    onSave={handleSaveField("cr4de_scenario_considerable")}
+                    setUpdatedValue={handleSetFieldUpdate("cr4de_scenario_considerable")}
                   />
                   <Typography variant="subtitle2">Major Capabilities</Typography>
-                  <Box
-                    dangerouslySetInnerHTML={{
-                      __html: riskFile.scenarios.major ? riskFile.scenarios.major[0].value : "",
-                    }}
+                  <TextInputBox
+                    initialValue={riskFile.cr4de_scenario_major}
+                    onSave={handleSaveField("cr4de_scenario_major")}
+                    setUpdatedValue={handleSetFieldUpdate("cr4de_scenario_major")}
                   />
                   <Typography variant="subtitle2">Extreme Capabilities</Typography>
-                  <Box
-                    dangerouslySetInnerHTML={{
-                      __html: riskFile.scenarios.extreme ? riskFile.scenarios.extreme[0].value : "",
-                    }}
+                  <TextInputBox
+                    initialValue={riskFile.cr4de_scenario_extreme}
+                    onSave={handleSaveField("cr4de_scenario_extreme")}
+                    setUpdatedValue={handleSetFieldUpdate("cr4de_scenario_extreme")}
                   />
                 </Box>
               ) : (
@@ -454,9 +414,15 @@ export default function EditorPage() {
               </Box>
 
               {riskFile ? (
-                <TextInputBox valueGetter={horizonAnalysis} initialValue={riskFile.cr4de_horizon_analysis || ""} />
+                <TextInputBox
+                  initialValue={riskFile.cr4de_horizon_analysis}
+                  onSave={handleSaveField("cr4de_horizon_analysis")}
+                  setUpdatedValue={handleSetFieldUpdate("cr4de_horizon_analysis")}
+                />
               ) : (
-                <Skeleton variant="rectangular" width="100%" height="300px" />
+                <Box mt={3}>
+                  <Skeleton variant="text" />
+                </Box>
               )}
 
               <Attachments
@@ -512,15 +478,15 @@ export default function EditorPage() {
             Saving
           </LoadingButton>
         ) : (
-          <Button color="secondary" sx={{ mr: 1 }} onClick={() => updateRiskFile()}>
+          <Button color="secondary" sx={{ mr: 1 }} onClick={handleSave}>
             Save
           </Button>
         )}
 
         <Button
           color="secondary"
-          onClick={() => {
-            updateRiskFile();
+          onClick={async () => {
+            await handleSave();
 
             navigate("/editor");
           }}

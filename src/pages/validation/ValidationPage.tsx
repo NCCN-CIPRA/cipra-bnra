@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link as RouterLink, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import {
   Box,
@@ -15,7 +15,7 @@ import {
   DialogActions,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import TextInputBox, { TextInputBoxGetter } from "../../components/TextInputBox";
+import TextInputBox from "../../components/TextInputBox";
 import TransferList from "../../components/TransferList";
 import SaveIcon from "@mui/icons-material/Save";
 import { DVValidation } from "../../types/dataverse/DVValidation";
@@ -27,7 +27,6 @@ import * as HE from "../../functions/historicalEvents";
 import * as IP from "../../functions/intensityParameters";
 import useRecord from "../../hooks/useRecord";
 import useLazyRecords from "../../hooks/useLazyRecords";
-import useAutosave from "../../hooks/useAutosave";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import ScenariosTable from "../../components/ScenariosTable";
@@ -35,11 +34,11 @@ import IntensityParametersTable from "../../components/IntensityParametersTable"
 import HistoricalEventsTable from "../../components/HistoricalEventsTable";
 import { Trans, useTranslation } from "react-i18next";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
 import Attachments from "../../components/Attachments";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import SurveyDialog from "../../components/SurveyDialog";
 import { AuthPageContext } from "../AuthPage";
+import { TNullablePartial } from "../../types/TNullablePartial";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -51,26 +50,17 @@ type RouteParams = {
   validation_id: string;
 };
 
-const AUTOSAVE_INTERVAL = 15000;
-
 export default function ValidationPage() {
   const params = useParams() as RouteParams;
   const navigate = useNavigate();
   const { t } = useTranslation();
   const api = useAPI();
   const { user } = useOutletContext<AuthPageContext>();
-  const autoSaver = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fieldsToUpdate = useRef<TNullablePartial<DVValidation>>({});
+
+  const [dirty, setDirty] = useState(false);
 
   const [riskFile, setRiskFile] = useState<ProcessedRiskFile | null>(null);
-
-  const [definitionFeedback] = useState<TextInputBoxGetter>({ getValue: null });
-  const [historicalEventsFeedback] = useState<TextInputBoxGetter>({ getValue: null });
-  const [parametersFeedback] = useState<TextInputBoxGetter>({ getValue: null });
-  const [scenariosFeedback] = useState<TextInputBoxGetter>({ getValue: null });
-  const [causesFeedback] = useState<TextInputBoxGetter>({ getValue: null });
-  const [effectsFeedback] = useState<TextInputBoxGetter>({ getValue: null });
-  const [catalysingFeedback] = useState<TextInputBoxGetter>({ getValue: null });
-  const [horizonFeedback] = useState<TextInputBoxGetter>({ getValue: null });
 
   const [finishedDialogOpen, setFinishedDialogOpen] = useState(false);
   const [surveyDialogOpen, setSurveyDialogOpen] = useState(false);
@@ -137,58 +127,49 @@ export default function ValidationPage() {
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const updateValidation = async (forceUpdates?: Partial<DVRiskFile>) => {
-    if (autoSaver.current) clearTimeout(autoSaver.current);
-
-    autoSaver.current = setTimeout(updateValidation, AUTOSAVE_INTERVAL);
-
+  const handleSaveFields = async (fields: Partial<{ [key in keyof DVValidation]: string | null }>) => {
     if (!validation) return;
-
-    const fields: Partial<DVValidation> = {
-      cr4de_definition_feedback: definitionFeedback.getValue && definitionFeedback.getValue(),
-      cr4de_historical_events_feedback: historicalEventsFeedback.getValue && historicalEventsFeedback.getValue(),
-      cr4de_intensity_parameters_feedback: parametersFeedback.getValue && parametersFeedback.getValue(),
-      cr4de_scenarios_feedback: scenariosFeedback.getValue && scenariosFeedback.getValue(),
-      cr4de_horizon_analysis_feedback: horizonFeedback.getValue && horizonFeedback.getValue(),
-      cr4de_causes_feedback: causesFeedback.getValue && causesFeedback.getValue(),
-      cr4de_effects_feedback: effectsFeedback.getValue && effectsFeedback.getValue(),
-      cr4de_catalysing_effects_feedback: catalysingFeedback.getValue && catalysingFeedback.getValue(),
-      ...forceUpdates,
-    };
-
-    const fieldsToUpdate = Object.keys(fields)
-      .filter(
-        (f) =>
-          fields[f as keyof DVValidation] !== validation[f as keyof DVValidation] &&
-          !(fields[f as keyof DVValidation] === "" && validation[f as keyof DVValidation] === null)
-      )
-      .reduce(
-        (u, f) => ({
-          ...u,
-          [f]: fields[f as keyof DVValidation],
-        }),
-        {}
-      );
-
-    if (fieldsToUpdate === null || Object.keys(fieldsToUpdate).length <= 0) return;
 
     setIsSaving(true);
 
-    await api.updateValidation(params.validation_id, fieldsToUpdate);
-    await reloadValidation();
+    await api.updateValidation(params.validation_id, fields);
 
     setIsSaving(false);
   };
 
-  useEffect(() => {
-    if (autoSaver.current) clearTimeout(autoSaver.current);
+  const handleSaveField = (field: keyof DVValidation) => async (newValue: string | null) => {
+    return handleSaveFields({ [field]: newValue });
+  };
 
-    autoSaver.current = setTimeout(updateValidation, AUTOSAVE_INTERVAL);
+  const handleSetFieldUpdates = async (fields: Partial<{ [key in keyof DVValidation]: string | null }>) => {
+    Object.keys(fields).forEach((f) => {
+      const newValue = fields[f as keyof DVValidation];
 
-    return () => {
-      if (autoSaver.current) clearTimeout(autoSaver.current);
-    };
-  });
+      if (newValue === undefined) {
+        if (fieldsToUpdate.current[f as keyof DVValidation]) {
+          delete fieldsToUpdate.current[f as keyof DVValidation];
+        }
+      } else {
+        //  @ts-expect-error
+        fieldsToUpdate.current[f as keyof DVValidation] = newValue;
+      }
+    });
+
+    setDirty(Object.keys(fieldsToUpdate.current).length > 0);
+  };
+
+  const handleSetFieldUpdate = (field: keyof DVValidation) => async (newValue: string | null | undefined) => {
+    return handleSetFieldUpdates({ [field]: newValue });
+  };
+
+  const handleSave = async () => {
+    if (!validation) return;
+    setIsSaving(true);
+
+    await api.updateValidation(params.validation_id, fieldsToUpdate.current);
+
+    setIsSaving(false);
+  };
 
   usePageTitle(t("validation.pageTitle", "BNRA 2023 - 2026 Risk Identification"));
   useBreadcrumbs([
@@ -291,8 +272,9 @@ export default function ValidationPage() {
 
             {validation ? (
               <TextInputBox
-                initialValue={validation.cr4de_definition_feedback || ""}
-                valueGetter={definitionFeedback}
+                initialValue={validation.cr4de_definition_feedback}
+                onSave={handleSaveField("cr4de_definition_feedback")}
+                setUpdatedValue={handleSetFieldUpdate("cr4de_definition_feedback")}
               />
             ) : (
               <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -333,7 +315,7 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              <HistoricalEventsTable initialHistoricalEvents={riskFile?.historicalEvents} />
+              <HistoricalEventsTable initialHistoricalEvents={riskFile?.cr4de_historical_events} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 <Trans i18nKey="riskFile.historicalEvents.feedback">
@@ -343,8 +325,9 @@ export default function ValidationPage() {
 
               {validation ? (
                 <TextInputBox
-                  initialValue={validation.cr4de_historical_events_feedback || ""}
-                  valueGetter={historicalEventsFeedback}
+                  initialValue={validation.cr4de_historical_events_feedback}
+                  onSave={handleSaveField("cr4de_historical_events_feedback")}
+                  setUpdatedValue={handleSetFieldUpdate("cr4de_historical_events_feedback")}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -380,7 +363,7 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              <IntensityParametersTable initialParameters={riskFile?.intensityParameters} />
+              <IntensityParametersTable initialParameters={riskFile?.cr4de_intensity_parameters} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 <Trans i18nKey="riskFile.intensityParameters.feedback">
@@ -390,8 +373,9 @@ export default function ValidationPage() {
 
               {validation ? (
                 <TextInputBox
-                  initialValue={validation.cr4de_intensity_parameters_feedback || ""}
-                  valueGetter={parametersFeedback}
+                  initialValue={validation.cr4de_intensity_parameters_feedback}
+                  onSave={handleSaveField("cr4de_intensity_parameters_feedback")}
+                  setUpdatedValue={handleSetFieldUpdate("cr4de_intensity_parameters_feedback")}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -435,7 +419,14 @@ export default function ValidationPage() {
                 </Typography>
               </Box>
 
-              <ScenariosTable parameters={riskFile?.intensityParameters} initialScenarios={riskFile?.scenarios} />
+              <ScenariosTable
+                parameters={riskFile?.intensityParameters}
+                initialScenarios={{
+                  considerable: riskFile?.cr4de_scenario_considerable,
+                  major: riskFile?.cr4de_scenario_major,
+                  extreme: riskFile?.cr4de_scenario_extreme,
+                }}
+              />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
                 <Trans i18nKey="riskFile.intensityScenarios.feedback">
@@ -445,8 +436,9 @@ export default function ValidationPage() {
 
               {validation ? (
                 <TextInputBox
-                  initialValue={validation.cr4de_scenarios_feedback || ""}
-                  valueGetter={scenariosFeedback}
+                  initialValue={validation.cr4de_scenarios_feedback}
+                  onSave={handleSaveField("cr4de_scenarios_feedback")}
+                  setUpdatedValue={handleSetFieldUpdate("cr4de_scenarios_feedback")}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -532,8 +524,9 @@ export default function ValidationPage() {
 
               {validation ? (
                 <TextInputBox
-                  initialValue={validation.cr4de_scenarios_feedback || ""}
-                  valueGetter={scenariosFeedback}
+                  initialValue={validation.cr4de_scenarios_feedback}
+                  onSave={handleSaveField("cr4de_scenarios_feedback")}
+                  setUpdatedValue={handleSetFieldUpdate("cr4de_scenarios_feedback")}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -605,8 +598,9 @@ export default function ValidationPage() {
 
               {validation ? (
                 <TextInputBox
-                  initialValue={validation.cr4de_scenarios_feedback || ""}
-                  valueGetter={scenariosFeedback}
+                  initialValue={validation.cr4de_scenarios_feedback}
+                  onSave={handleSaveField("cr4de_scenarios_feedback")}
+                  setUpdatedValue={handleSetFieldUpdate("cr4de_scenarios_feedback")}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -667,7 +661,11 @@ export default function ValidationPage() {
               </Typography>
 
               {validation ? (
-                <TextInputBox initialValue={validation.cr4de_causes_feedback || ""} valueGetter={causesFeedback} />
+                <TextInputBox
+                  initialValue={validation.cr4de_causes_feedback}
+                  onSave={handleSaveField("cr4de_causes_feedback")}
+                  setUpdatedValue={handleSetFieldUpdate("cr4de_causes_feedback")}
+                />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
@@ -728,7 +726,11 @@ export default function ValidationPage() {
               </Typography>
 
               {validation ? (
-                <TextInputBox initialValue={validation.cr4de_causes_feedback || ""} valueGetter={causesFeedback} />
+                <TextInputBox
+                  initialValue={validation.cr4de_effects_feedback}
+                  onSave={handleSaveField("cr4de_effects_feedback")}
+                  setUpdatedValue={handleSetFieldUpdate("cr4de_effects_feedback")}
+                />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
@@ -788,7 +790,11 @@ export default function ValidationPage() {
               </Typography>
 
               {validation ? (
-                <TextInputBox initialValue={validation.cr4de_effects_feedback || ""} valueGetter={effectsFeedback} />
+                <TextInputBox
+                  initialValue={validation.cr4de_effects_feedback}
+                  onSave={handleSaveField("cr4de_effects_feedback")}
+                  setUpdatedValue={handleSetFieldUpdate("cr4de_effects_feedback")}
+                />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
@@ -849,7 +855,11 @@ export default function ValidationPage() {
               </Typography>
 
               {validation ? (
-                <TextInputBox initialValue={validation.cr4de_effects_feedback || ""} valueGetter={effectsFeedback} />
+                <TextInputBox
+                  initialValue={validation.cr4de_effects_feedback}
+                  onSave={handleSaveField("cr4de_effects_feedback")}
+                  setUpdatedValue={handleSetFieldUpdate("cr4de_effects_feedback")}
+                />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
@@ -918,8 +928,9 @@ export default function ValidationPage() {
 
               {validation ? (
                 <TextInputBox
-                  initialValue={validation.cr4de_catalysing_effects_feedback || ""}
-                  valueGetter={catalysingFeedback}
+                  initialValue={validation.cr4de_catalysing_effects_feedback}
+                  onSave={handleSaveField("cr4de_catalysing_effects_feedback")}
+                  setUpdatedValue={handleSetFieldUpdate("cr4de_catalysing_effects_feedback")}
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -962,7 +973,7 @@ export default function ValidationPage() {
             <Trans i18nKey="button.saving">Saving</Trans>
           </LoadingButton>
         ) : (
-          <Button color="secondary" sx={{ mr: 1 }} onClick={() => updateValidation()}>
+          <Button color="secondary" sx={{ mr: 1 }} onClick={handleSave}>
             <Trans i18nKey="button.save">Save</Trans>
           </Button>
         )}
@@ -970,7 +981,7 @@ export default function ValidationPage() {
         <Button
           color="secondary"
           onClick={() => {
-            updateValidation();
+            handleSave();
             setFinishedDialogOpen(true);
           }}
         >

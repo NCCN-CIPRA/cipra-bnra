@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import HtmlEditor, { Toolbar, Item } from "devextreme-react/html-editor";
+import useDebounce from "../hooks/useDebounce";
 
 export interface TextInputBoxGetter {
   getValue: (() => string) | null;
@@ -21,38 +22,39 @@ const headerValues = [false, 1, 2, 3, 4, 5];
 function TextInputBox({
   height = "300px",
   initialValue,
-  value,
   limitedOptions,
-  setValue,
-  onBlur,
-  onDirty,
 
-  valueGetter,
+  onSave,
+  onBlur,
+  setUpdatedValue,
 }: {
   height?: string;
-  initialValue?: string;
-  value?: string | null;
+  initialValue: string | null;
   limitedOptions?: boolean;
-  setValue?: (value: string) => void;
-  onDirty?: () => void;
+
+  onSave?: (newValue: string | null) => void;
   onBlur?: () => void;
-
-  valueGetter?: TextInputBoxGetter;
+  setUpdatedValue?: (newValue: string | null | undefined) => void;
 }) {
-  const [innerValue, setInnerValue] = useState(value || initialValue);
+  const [savedValue, setSavedValue] = useState(initialValue);
+  const [innerValue, setInnerValue] = useState(initialValue);
+  const [debouncedValue] = useDebounce(innerValue, 2000);
 
-  if (valueGetter) {
-    valueGetter.getValue = () => innerValue || "";
-  }
+  useEffect(() => {
+    if (onSave && debouncedValue !== savedValue) {
+      onSave(debouncedValue);
+      setSavedValue(debouncedValue);
+      setUpdatedValue && setUpdatedValue(undefined);
+    }
+  }, [debouncedValue, savedValue, onSave, setSavedValue, setUpdatedValue]);
 
   return (
     <HtmlEditor
       height={height}
-      value={value || innerValue || ""}
+      value={innerValue}
       onValueChanged={(e) => {
         setInnerValue(e.value);
-        setValue && setValue(e.value);
-        onDirty && onDirty();
+        if (setUpdatedValue) setUpdatedValue(e.value);
       }}
       onFocusOut={onBlur}
     >

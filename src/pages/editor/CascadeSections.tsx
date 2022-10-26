@@ -49,18 +49,27 @@ function CascadeSections({
   const causesChoises = useMemo<SmallRisk[]>(
     () =>
       otherHazards && causes
-        ? otherHazards.filter((rf) => !causes.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid))
+        ? otherHazards
+            .filter(
+              (rf) =>
+                !causes.find(
+                  (c) => rf.cr4de_risk_type !== "Emerging Risk" && c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid
+                )
+            )
+            .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
     [causes, otherHazards]
   );
   const causesChosen = useMemo(
     () =>
       causes
-        ? causes.map((c) => ({
-            ...c.cr4de_cause_hazard,
-            cascadeId: c.cr4de_bnrariskcascadeid,
-            reason: c.cr4de_reason,
-          }))
+        ? causes
+            .map((c) => ({
+              ...c.cr4de_cause_hazard,
+              cascadeId: c.cr4de_bnrariskcascadeid,
+              reason: c.cr4de_reason,
+            }))
+            .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
     [causes]
   );
@@ -68,41 +77,53 @@ function CascadeSections({
   const effectsChoices = useMemo<SmallRisk[]>(
     () =>
       otherHazards && effects
-        ? otherHazards.filter((rf) => effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid))
+        ? otherHazards
+            .filter(
+              (rf) =>
+                rf.cr4de_risk_type !== "Emerging Risk" &&
+                !effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid)
+            )
+            .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
     [effects, otherHazards]
   );
   const effectsChosen = useMemo(
     () =>
       effects
-        ? effects.map((c) => ({
-            ...c.cr4de_effect_hazard,
-            cascadeId: c.cr4de_bnrariskcascadeid,
-            reason: c.cr4de_reason,
-          }))
+        ? effects
+            .map((c) => ({
+              ...c.cr4de_effect_hazard,
+              cascadeId: c.cr4de_bnrariskcascadeid,
+              reason: c.cr4de_reason,
+            }))
+            .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
     [effects]
   );
 
-  const catalysingChoices = useMemo<SmallRisk[]>(
+  const catalyserChoices = useMemo<SmallRisk[]>(
     () =>
       otherHazards && catalysing
-        ? otherHazards.filter(
-            (rf) =>
-              rf.cr4de_risk_type === "Emerging Risk" &&
-              !catalysing.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
-          )
+        ? otherHazards
+            .filter(
+              (rf) =>
+                rf.cr4de_risk_type === "Emerging Risk" &&
+                !catalysing.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
+            )
+            .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
     [catalysing, otherHazards]
   );
-  const catalysingChosen = useMemo(
+  const catalyserChosen = useMemo(
     () =>
       catalysing
-        ? catalysing.map((c) => ({
-            ...c.cr4de_cause_hazard,
-            cascadeId: c.cr4de_bnrariskcascadeid,
-            reason: c.cr4de_reason,
-          }))
+        ? catalysing
+            .map((c) => ({
+              ...c.cr4de_cause_hazard,
+              cascadeId: c.cr4de_bnrariskcascadeid,
+              reason: c.cr4de_reason,
+            }))
+            .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
     [catalysing]
   );
@@ -443,8 +464,8 @@ function CascadeSections({
 
             {catalysing !== null && otherHazards !== null && (
               <TransferList
-                choices={catalysingChoices}
-                chosen={catalysingChosen}
+                choices={catalyserChoices}
+                chosen={catalyserChosen}
                 choicesLabel="Non-catalysing hazards"
                 chosenLabel="Catalysing hazards"
                 chosenSubheader={`${catalysing.length} catalysing effects identified`}

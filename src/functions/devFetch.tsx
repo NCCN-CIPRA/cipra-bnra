@@ -16,7 +16,16 @@ export default function patchFetch() {
     } else if (e.data && e.data.userInfo) {
       const div = document.createElement("div");
       div.innerHTML = e.data.userInfo;
-      document.body.appendChild(div);
+
+      if (e.data.userInfo.indexOf('data-id=""') > 0) {
+        // Not logged in in Iframe
+        document.getElementById("loginWindow")!.style.display = "block";
+        document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/#/auth");
+
+        window.alert("Please log in and refresh the page");
+      } else {
+        document.body.appendChild(div);
+      }
     }
   };
 }
@@ -64,6 +73,7 @@ async function devFetch(input: RequestInfo | URL, init?: RequestInit | undefined
                 if (testResponse.status !== 403) {
                   clearInterval(testingInterval);
                   document.getElementById("loginWindow")!.style.display = "none";
+                  document.getElementById("loginWindow")!.setAttribute("src", "");
 
                   return resolve(testResponse);
                 }
