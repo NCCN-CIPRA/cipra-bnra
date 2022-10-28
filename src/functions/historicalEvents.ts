@@ -1,6 +1,8 @@
 import tableToJson from "./tableToJson";
+import { v4 as uuidv4 } from "uuid";
 
 export interface HistoricalEvent {
+  id: string;
   time: string;
   location: string;
   description: string;
@@ -10,7 +12,15 @@ export function unwrap(historicalEvents: string | null): HistoricalEvent[] {
   if (!historicalEvents) return [];
 
   try {
-    return JSON.parse(historicalEvents);
+    return JSON.parse(historicalEvents).map((e: any) => {
+      if (!e.id) {
+        return {
+          ...e,
+          id: uuidv4(),
+        };
+      }
+      return e;
+    });
   } catch (e) {
     // Old HTML format
     const json = tableToJson(historicalEvents);
@@ -18,6 +28,7 @@ export function unwrap(historicalEvents: string | null): HistoricalEvent[] {
     if (!json) return [];
 
     return json?.map((event) => ({
+      id: uuidv4(),
       location: event[0],
       time: event[1],
       description: event[2],

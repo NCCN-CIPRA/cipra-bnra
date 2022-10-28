@@ -19,6 +19,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import TextInputBox from "./TextInputBox";
 import useDebounce from "../hooks/useDebounce";
+import { v4 as uuidv4 } from "uuid";
 
 function HistoricalEventRow({
   event,
@@ -78,6 +79,7 @@ function HistoricalEventRow({
             initialValue={event.description}
             limitedOptions
             onSave={(v) => onChange({ ...event, description: v || "" })}
+            setUpdatedValue={(v) => onChange({ ...event, description: v || "" })}
           />
         ) : (
           <Box
@@ -131,6 +133,7 @@ function HistoricalEventsTable({
 
   useEffect(() => {
     if (onSave && debouncedValue !== savedValue) {
+      console.log("debounce", debouncedValue, savedValue);
       onSave(debouncedValue);
       setSavedValue(debouncedValue);
       setUpdatedValue && setUpdatedValue(undefined);
@@ -152,6 +155,7 @@ function HistoricalEventsTable({
 
     const wrapped = wrap(update);
 
+    console.log("setall", wrapped);
     setInnerValue(wrapped);
     setSavedValue(wrapped);
     setDebouncedValue(wrapped);
@@ -163,7 +167,7 @@ function HistoricalEventsTable({
   };
 
   const handleAddRow = async () => {
-    return handleForceSave([...historicalEvents, { time: "", location: "", description: "" }]);
+    return handleForceSave([...historicalEvents, { id: uuidv4(), time: "", location: "", description: "" }]);
   };
 
   const handleRemoveRow = (i: number) => {
@@ -196,7 +200,7 @@ function HistoricalEventsTable({
           <TableBody>
             {historicalEvents ? (
               historicalEvents.map((e, i) => (
-                <HistoricalEventRow key={i} event={e} onChange={handleUpdate(i)} onRemove={handleRemoveRow(i)} />
+                <HistoricalEventRow key={e.id} event={e} onChange={handleUpdate(i)} onRemove={handleRemoveRow(i)} />
               ))
             ) : (
               <TableRow>

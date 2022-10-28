@@ -52,11 +52,12 @@ function CascadeSections({
         ? otherHazards
             .filter(
               (rf) =>
-                !causes.find(
-                  (c) => rf.cr4de_risk_type !== "Emerging Risk" && c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid
-                )
+                rf.cr4de_risk_type !== "Emerging Risk" &&
+                !causes.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
             )
-            .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
+            .sort((a, b) => {
+              return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
+            })
         : [],
     [causes, otherHazards]
   );
@@ -80,7 +81,7 @@ function CascadeSections({
         ? otherHazards
             .filter(
               (rf) =>
-                rf.cr4de_risk_type !== "Emerging Risk" &&
+                rf.cr4de_risk_type === "Standard Risk" &&
                 !effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid)
             )
             .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))

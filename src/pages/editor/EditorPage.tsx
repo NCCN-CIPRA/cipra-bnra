@@ -129,7 +129,6 @@ export default function EditorPage() {
   };
 
   const handleSaveField = (field: keyof DVRiskFile) => async (newValue: string | null) => {
-    console.log("Saving ", field, " as ", newValue);
     return handleSaveFields({ [field]: newValue });
   };
 
