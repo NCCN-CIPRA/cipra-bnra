@@ -14,3 +14,18 @@ code {
 .recharts-wrapper svg {
   overflow: inherit !important;
 }
+
+.dx-htmleditor-content blockquote,
+.dx-htmleditor-content h1,
+.dx-htmleditor-content h2,
+.dx-htmleditor-content h3,
+.dx-htmleditor-content h4,
+.dx-htmleditor-content h5,
+.dx-htmleditor-content h6,
+.dx-htmleditor-content ol,
+.dx-htmleditor-content p,
+.dx-htmleditor-content pre,
+.dx-htmleditor-content ul {
+  margin-block-start: 1em !important;
+  margin-block-end: 1em !important;
+}

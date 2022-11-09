@@ -40,9 +40,11 @@ export default function useLazyRecord<T>(options: GetRecordParams<T>) {
       response = await api.getValidation<T>(o.id, o.query);
     } else if (o.table === DataTable.DIRECT_ANALYSIS) {
       response = await api.getDirectAnalysis<T>(o.id, o.query);
-    } else {
-      // (o.table === DataTable.CASCADE_ANALYSIS) {
+    } else if (o.table === DataTable.CASCADE_ANALYSIS) {
       response = await api.getCascadeAnalysis<T>(o.id, o.query);
+    } else {
+      // (o.table === DataTable.PAGE) {
+      response = await api.getPage<T>(o.id, o.query);
     }
 
     const result = o.transformResult ? o.transformResult(response) : response;
