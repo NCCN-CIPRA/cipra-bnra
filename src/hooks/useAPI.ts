@@ -4,6 +4,7 @@ import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DVContact } from "../types/dataverse/DVContact";
 import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
 import { DVFeedback } from "../types/dataverse/DVFeedback";
+import { DVPage } from "../types/dataverse/DVPage";
 import { DVParticipation } from "../types/dataverse/DVParticipation";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
@@ -23,6 +24,8 @@ export enum DataTable {
   ATTACHMENT,
 
   TRANSLATIONS,
+
+  PAGE,
 }
 
 export interface AuthResponse<T = null> {
@@ -91,6 +94,9 @@ export interface API {
   getTranslations<T = DVTranslation>(query?: string): Promise<T[]>;
   updateTranslation(id: string, fields: object): Promise<void>;
   deleteTranslation(id: string): Promise<void>;
+
+  getPage<T = DVPage>(name: string, query?: string): Promise<T>;
+  updatePage(id: string, fields: object): Promise<void>;
 }
 
 export default function useAPI(): API {
@@ -581,6 +587,26 @@ export default function useAPI(): API {
           __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
           "Content-Type": "application/json",
         },
+      });
+    },
+
+    getPage: async function <T = DVPage>(name: string, query?: string): Promise<T> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnrapages?$filter=cr4de_name eq '${name}'`
+      );
+
+      const results: T[] = (await response.json()).value;
+
+      return results[0];
+    },
+    updatePage: async function (id: string, fields: object): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnrapages(${id})`, {
+        method: "PATCH",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
       });
     },
   };

@@ -91,37 +91,37 @@ export default function LearningOverviewPage({}) {
                 </ListSubheader>
               }
             >
-              <ListItemButton component={RouterLink} to="/learning/methodology/introduction">
+              <ListItemButton component={RouterLink} to="/learning/methodology-introduction">
                 <ListItemIcon sx={{ minWidth: "32px" }}>
                   <ChevronRightIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("learning.methodology.general", "General Introduction")} />
               </ListItemButton>
-              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology/standard">
+              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology-standard">
                 <ListItemIcon sx={{ minWidth: "32px" }}>
                   <ChevronRightIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("learning.methodology.standardRisks", "Standard Risks")} />
               </ListItemButton>
-              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology/actors">
+              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology-actors">
                 <ListItemIcon sx={{ minWidth: "32px" }}>
                   <ChevronRightIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("learning.methodology.actors", "Malicious Actors")} />
               </ListItemButton>
-              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology/emerging">
+              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology-emerging">
                 <ListItemIcon sx={{ minWidth: "32px" }}>
                   <ChevronRightIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("learning.methodology.emerging", "Emerging Risks")} />
               </ListItemButton>
-              <ListItemButton component={RouterLink} to="/learning/methodology/impact">
+              <ListItemButton component={RouterLink} to="/learning/methodology-impact">
                 <ListItemIcon sx={{ minWidth: "32px" }}>
                   <ChevronRightIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("learning.methodology.impact", "Impact Categories and Damage Indicators")} />
               </ListItemButton>
-              <ListItemButton component={RouterLink} to="/learning/methodology/evaluation">
+              <ListItemButton component={RouterLink} to="/learning/methodology-evaluation">
                 <ListItemIcon sx={{ minWidth: "32px" }}>
                   <ChevronRightIcon />
                 </ListItemIcon>
@@ -141,25 +141,25 @@ export default function LearningOverviewPage({}) {
                 </ListSubheader>
               }
             >
-              <ListItemButton component={RouterLink} to="/learning/tools/validation">
+              <ListItemButton component={RouterLink} to="/learning/tools-validation">
                 <ListItemIcon sx={{ minWidth: "32px" }}>
                   <ChevronRightIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("learning.tools.validation", "Risk File Validation")} />
               </ListItemButton>
-              <ListItemButton component={RouterLink} to="/learning/tools/analysisA">
+              <ListItemButton component={RouterLink} to="/learning/tools-analysisA">
                 <ListItemIcon sx={{ minWidth: "32px" }}>
                   <ChevronRightIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("learning.tools.analysisA", "Risk Analysis A")} />
               </ListItemButton>
-              <ListItemButton component={RouterLink} to="/learning/tools/analysisB">
+              <ListItemButton component={RouterLink} to="/learning/tools-analysisB">
                 <ListItemIcon sx={{ minWidth: "32px" }}>
                   <ChevronRightIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("learning.tools.analysisB", "Risk Analysis B")} />
               </ListItemButton>
-              <ListItemButton component={RouterLink} to="/learning/tools/consensus">
+              <ListItemButton component={RouterLink} to="/learning/tools-consensus">
                 <ListItemIcon sx={{ minWidth: "32px" }}>
                   <ChevronRightIcon />
                 </ListItemIcon>

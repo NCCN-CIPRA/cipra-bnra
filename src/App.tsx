@@ -16,10 +16,10 @@ import BasePage from "./pages/BasePage";
 import EditorIntroPage from "./pages/editor/EditorIntroPage";
 import EditorPage from "./pages/editor/EditorPage";
 import LearningOverviewPage from "./pages/learning/LearningOverviewPage";
-import GeneralIntroductionPage from "./pages/learning/GeneralIntroductionPage";
 import OverviewPage from "./pages/main/OverviewPage";
 import AuthPage from "./pages/AuthPage";
 import TranslationsPage from "./pages/main/TranslationsPage";
+import LearningPage from "./pages/learning/LearningPage";
 
 function App() {
   useEffect(() => {
@@ -49,8 +49,8 @@ function App() {
           element: <LearningOverviewPage />,
         },
         {
-          path: "/learning/methodology/introduction",
-          element: <GeneralIntroductionPage />,
+          path: "/learning/:page_name",
+          element: <LearningPage />,
         },
 
         {
