@@ -17,7 +17,7 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
   const { t } = useTranslation();
 
   const { user } = useLoggedInUser();
-
+  console.log(user);
   return (
     <Drawer
       open={open}
