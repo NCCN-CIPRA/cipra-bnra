@@ -35,18 +35,25 @@ export function unwrap(
 
     if (!jsonC || !jsonM || !jsonE) return noScenarios;
 
+    console.log({
+      extreme: parameters.map((p, i) => ({
+        ...p,
+        value: jsonE[0],
+      })),
+    });
+
     return {
       considerable: parameters.map((p, i) => ({
         ...p,
-        value: jsonC[0][i],
+        value: jsonC[i][0],
       })),
       major: parameters.map((p, i) => ({
         ...p,
-        value: jsonM[0][i],
+        value: jsonM[i][0],
       })),
       extreme: parameters.map((p, i) => ({
         ...p,
-        value: jsonE[0][i],
+        value: jsonE[i][0],
       })),
     };
   }
