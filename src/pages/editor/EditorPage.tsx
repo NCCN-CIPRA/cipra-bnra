@@ -171,7 +171,7 @@ export default function EditorPage() {
 
         <Paper>
           <Box p={2} my={4}>
-            <Typography variant="h6" color="secondary" sx={{ flex: 1 }}>
+            <Typography variant="h6" color="primary" sx={{ flex: 1 }}>
               1. Definition
             </Typography>
             <Divider sx={{ mb: 1 }} />
@@ -205,7 +205,7 @@ export default function EditorPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 2. Historical Events
               </Typography>
               <Divider />
@@ -245,7 +245,7 @@ export default function EditorPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 3. Intensity Parameters
               </Typography>
               <Divider />
@@ -281,7 +281,7 @@ export default function EditorPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 4. Intensity Scenarios
               </Typography>
 
@@ -328,7 +328,7 @@ export default function EditorPage() {
         {riskFile && riskFile.cr4de_risk_type === "Malicious Man-made Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 2. Actor Capabilities
               </Typography>
 
@@ -392,7 +392,7 @@ export default function EditorPage() {
         {riskFile && riskFile.cr4de_risk_type === "Emerging Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 2. Horizon Analysis
               </Typography>
 

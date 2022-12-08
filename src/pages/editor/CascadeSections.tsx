@@ -135,7 +135,7 @@ function CascadeSections({
         <Paper>
           <Box p={2} my={8}>
             <Stack direction="row">
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 5. Causing Hazards
               </Typography>
             </Stack>
@@ -211,7 +211,7 @@ function CascadeSections({
       {riskFile && riskFile.cr4de_risk_type === "Malicious Man-made Risk" && (
         <Paper>
           <Box p={2} my={8}>
-            <Typography variant="h6" mb={1} color="secondary">
+            <Typography variant="h6" mb={1} color="primary">
               3. Malicious Actions
             </Typography>
             <Divider />
@@ -287,7 +287,7 @@ function CascadeSections({
       {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
         <Paper>
           <Box p={2} my={8}>
-            <Typography variant="h6" mb={1} color="secondary">
+            <Typography variant="h6" mb={1} color="primary">
               6. Effect Hazards
             </Typography>
             <Divider />
@@ -362,7 +362,7 @@ function CascadeSections({
       {riskFile && riskFile.cr4de_risk_type === "Emerging Risk" && (
         <Paper>
           <Box p={2} my={8}>
-            <Typography variant="h6" mb={1} color="secondary">
+            <Typography variant="h6" mb={1} color="primary">
               3. Catalysing effects
             </Typography>
             <Divider />
@@ -439,12 +439,12 @@ function CascadeSections({
         <Paper>
           <Box p={2} my={8}>
             {riskFile.cr4de_risk_type === "Standard Risk" && (
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 7. Catalysing Effects
               </Typography>
             )}
             {riskFile.cr4de_risk_type === "Malicious Man-made Risk" && (
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 4. Catalysing Effects
               </Typography>
             )}

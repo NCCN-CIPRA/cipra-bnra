@@ -90,6 +90,8 @@ function ScenariosTable({
       });
   };
 
+  console.log(scenarios, initialScenarios);
+
   return (
     <Table>
       <TableHead>

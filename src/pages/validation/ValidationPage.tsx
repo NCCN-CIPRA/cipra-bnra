@@ -13,6 +13,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  IconButton,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import TextInputBox from "../../components/TextInputBox";
@@ -39,6 +40,9 @@ import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import SurveyDialog from "../../components/SurveyDialog";
 import { AuthPageContext } from "../AuthPage";
 import { TNullablePartial } from "../../types/TNullablePartial";
+import LiveHelpIcon from "@mui/icons-material/LiveHelp";
+import ValidationTutorial from "./ValidationTutorial";
+import HelpButton from "../../components/HelpButton";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -182,18 +186,26 @@ export default function ValidationPage() {
   const causesChoises = useMemo<SmallRisk[]>(
     () =>
       otherHazards && causes
-        ? otherHazards.filter((rf) => !causes.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid))
+        ? otherHazards
+            .filter((rf) => !causes.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid))
+            .sort((a, b) => {
+              return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
+            })
         : [],
     [causes, otherHazards]
   );
   const causesChosen = useMemo(
     () =>
       causes
-        ? causes.map((c) => ({
-            ...c.cr4de_cause_hazard,
-            cascadeId: c.cr4de_bnrariskcascadeid,
-            reason: c.cr4de_reason,
-          }))
+        ? causes
+            .map((c) => ({
+              ...c.cr4de_cause_hazard,
+              cascadeId: c.cr4de_bnrariskcascadeid,
+              reason: c.cr4de_reason,
+            }))
+            .sort((a, b) => {
+              return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
+            })
         : [],
     [causes]
   );
@@ -201,18 +213,26 @@ export default function ValidationPage() {
   const effectsChoices = useMemo<SmallRisk[]>(
     () =>
       otherHazards && effects
-        ? otherHazards.filter((rf) => effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid))
+        ? otherHazards
+            .filter((rf) => effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid))
+            .sort((a, b) => {
+              return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
+            })
         : [],
     [effects, otherHazards]
   );
   const effectsChosen = useMemo(
     () =>
       effects
-        ? effects.map((c) => ({
-            ...c.cr4de_effect_hazard,
-            cascadeId: c.cr4de_bnrariskcascadeid,
-            reason: c.cr4de_reason,
-          }))
+        ? effects
+            .map((c) => ({
+              ...c.cr4de_effect_hazard,
+              cascadeId: c.cr4de_bnrariskcascadeid,
+              reason: c.cr4de_reason,
+            }))
+            .sort((a, b) => {
+              return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
+            })
         : [],
     [effects]
   );
@@ -220,37 +240,76 @@ export default function ValidationPage() {
   const catalysingChoices = useMemo<SmallRisk[]>(
     () =>
       otherHazards && catalysing
-        ? otherHazards.filter(
-            (rf) =>
-              rf.cr4de_risk_type === "Emerging Risk" &&
-              !catalysing.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
-          )
+        ? otherHazards
+            .filter(
+              (rf) =>
+                rf.cr4de_risk_type === "Emerging Risk" &&
+                !catalysing.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
+            )
+            .sort((a, b) => {
+              return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
+            })
         : [],
     [catalysing, otherHazards]
   );
   const catalysingChosen = useMemo(
     () =>
       catalysing
-        ? catalysing.map((c) => ({
-            ...c.cr4de_cause_hazard,
-            cascadeId: c.cr4de_bnrariskcascadeid,
-            reason: c.cr4de_reason,
-          }))
+        ? catalysing
+            .map((c) => ({
+              ...c.cr4de_cause_hazard,
+              cascadeId: c.cr4de_bnrariskcascadeid,
+              reason: c.cr4de_reason,
+            }))
+            .sort((a, b) => {
+              return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
+            })
         : [],
     [catalysing]
   );
 
   return (
     <>
-      <Container sx={{ pb: 8 }}>
+      <Container sx={{ pb: 8 }} id="risk-file-container">
         <Paper>
-          <Box p={2} my={4}>
-            <Typography variant="h6" mb={1} color="secondary">
+          <Box p={2} my={4} id="definition-container">
+            <HelpButton
+              steps={[
+                {
+                  disableBeacon: true,
+                  target: "body",
+                  placement: "center",
+                  content: (
+                    <Box sx={{ textAlign: "left" }}>
+                      <Typography variant="body1" my={2}>
+                        <Trans i18nKey="validation.intro.part3">The base of each risk file is the definition.</Trans>
+                      </Typography>
+                      <Typography variant="body1" my={2}>
+                        <Trans i18nKey="validation.intro.part3">
+                          The definition should be as short and concise as possible (to ensure optimal readability for
+                          efficient referencing) while still being complete and clearly delineating the scope of the
+                          risk (and outlining the distinctions relative to other risks where necessary).
+                        </Trans>
+                      </Typography>
+                      <Typography variant="body1" my={2}>
+                        <Trans i18nKey="validation.intro.part3">
+                          The definition should <b>not</b> contain any indications of the magnitude or impact of the
+                          risk.
+                        </Trans>
+                      </Typography>
+                    </Box>
+                  ),
+                  styles: { options: { width: 800 } },
+                },
+              ]}
+            />
+            <Typography variant="h6" mb={1} color="primary">
               1. <Trans i18nKey="riskFile.definition.title">Definition</Trans>
             </Typography>
             <Divider />
             {riskFile ? (
               <Box
+                id="definition"
                 mt={3}
                 dangerouslySetInnerHTML={{
                   __html: riskFile.cr4de_definition || "",
@@ -264,7 +323,7 @@ export default function ValidationPage() {
               </Box>
             )}
 
-            <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
+            <Typography variant="subtitle2" mt={8} mb={2} color="primary">
               <Trans i18nKey="riskFile.definition.feedback">
                 Please provide any comments or feedback on the definition of the hazard below:
               </Trans>
@@ -272,6 +331,7 @@ export default function ValidationPage() {
 
             {validation ? (
               <TextInputBox
+                id="defintion-feedback"
                 initialValue={validation.cr4de_definition_feedback}
                 onSave={handleSaveField("cr4de_definition_feedback")}
                 setUpdatedValue={handleSetFieldUpdate("cr4de_definition_feedback")}
@@ -296,7 +356,7 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 2. <Trans i18nKey="riskFile.historicalEvents.title">Historical Events</Trans>
               </Typography>
               <Divider />
@@ -317,7 +377,7 @@ export default function ValidationPage() {
 
               <HistoricalEventsTable initialHistoricalEvents={riskFile?.cr4de_historical_events} />
 
-              <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
+              <Typography variant="subtitle2" mt={8} mb={2} color="primary">
                 <Trans i18nKey="riskFile.historicalEvents.feedback">
                   Please provide any comments or feedback on the historical event examples of the hazard below:
                 </Trans>
@@ -350,7 +410,7 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 3. <Trans i18nKey="riskFile.intensityParameters.title">Intensity Parameters</Trans>
               </Typography>
               <Divider />
@@ -365,7 +425,7 @@ export default function ValidationPage() {
 
               <IntensityParametersTable initialParameters={riskFile?.cr4de_intensity_parameters} />
 
-              <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
+              <Typography variant="subtitle2" mt={8} mb={2} color="primary">
                 <Trans i18nKey="riskFile.intensityParameters.feedback">
                   Please provide any comments or feedback on the intensity parameters of the hazard below:
                 </Trans>
@@ -398,7 +458,7 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 4. <Trans i18nKey="riskFile.intensityScenarios.title">Intensity Scenarios</Trans>
               </Typography>
 
@@ -428,7 +488,7 @@ export default function ValidationPage() {
                 }}
               />
 
-              <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
+              <Typography variant="subtitle2" mt={8} mb={2} color="primary">
                 <Trans i18nKey="riskFile.intensityScenarios.feedback">
                   Please provide any comments or feedback on the intensity scenarios of the hazard below:
                 </Trans>
@@ -461,7 +521,7 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Malicious Man-made Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 2. <Trans i18nKey="riskFile.actorCapabilities.title">Actor Capabilities</Trans>
               </Typography>
 
@@ -516,7 +576,7 @@ export default function ValidationPage() {
                 </Box>
               )}
 
-              <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
+              <Typography variant="subtitle2" mt={8} mb={2} color="primary">
                 <Trans i18nKey="riskFile.actorCapabilities.feedback">
                   Please provide any comments or feedback on the actor capabilities of the hazard below:
                 </Trans>
@@ -549,7 +609,7 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Emerging Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 2. <Trans i18nKey="riskFile.horizonAnalysis.title">Horizon Analysis</Trans>
               </Typography>
 
@@ -590,7 +650,7 @@ export default function ValidationPage() {
                 </Box>
               )}
 
-              <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
+              <Typography variant="subtitle2" mt={8} mb={2} color="primary">
                 <Trans i18nKey="riskFile.horizonAnalysis.feedback">
                   Please provide any comments or feedback on the horizon analysis of the emerging risk below:
                 </Trans>
@@ -623,7 +683,7 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 5. <Trans i18nKey="transferList.causes.title">Causing Hazards</Trans>
               </Typography>
               <Divider />
@@ -654,7 +714,7 @@ export default function ValidationPage() {
                 />
               )}
 
-              <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
+              <Typography variant="subtitle2" mt={8} mb={2} color="primary">
                 <Trans i18nKey="riskFile.causes.feedback">
                   Please provide any comments or feedback on the intensity scenarios of the hazard below:
                 </Trans>
@@ -687,7 +747,7 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Malicious Man-made Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 3. <Trans i18nKey="riskFile.maliciousActions.title">Malicious Actions</Trans>
               </Typography>
               <Divider />
@@ -719,7 +779,7 @@ export default function ValidationPage() {
                 />
               )}
 
-              <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
+              <Typography variant="subtitle2" mt={8} mb={2} color="primary">
                 <Trans i18nKey="riskFile.maliciousActions.feedback">
                   Please provide any comments or feedback on the list of potential actions of these actors below:
                 </Trans>
@@ -752,7 +812,7 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 6. <Trans i18nKey="riskFile.effects.title">Effect Hazards</Trans>
               </Typography>
               <Divider />
@@ -783,7 +843,7 @@ export default function ValidationPage() {
                 />
               )}
 
-              <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
+              <Typography variant="subtitle2" mt={8} mb={2} color="primary">
                 <Trans i18nKey="riskFile.effects.feedback">
                   Please provide any comments or feedback on the intensity scenarios of the hazard below:
                 </Trans>
@@ -816,7 +876,7 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Emerging Risk" && (
           <Paper>
             <Box p={2} my={8}>
-              <Typography variant="h6" mb={1} color="secondary">
+              <Typography variant="h6" mb={1} color="primary">
                 3. <Trans i18nKey="riskFile.catalysedEffects.title">Catalysing Effects</Trans>
               </Typography>
               <Divider />
@@ -848,7 +908,7 @@ export default function ValidationPage() {
                 />
               )}
 
-              <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
+              <Typography variant="subtitle2" mt={8} mb={2} color="primary">
                 <Trans i18nKey="riskFile.catalysedEffects.feedback">
                   Please provide any comments or feedback on the intensity scenarios of the hazard below:
                 </Trans>
@@ -882,12 +942,12 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               {riskFile.cr4de_risk_type === "Standard Risk" && (
-                <Typography variant="h6" mb={1} color="secondary">
+                <Typography variant="h6" mb={1} color="primary">
                   7. <Trans i18nKey="riskFile.catalysingEffects.title">Catalysing Effects</Trans>
                 </Typography>
               )}
               {riskFile.cr4de_risk_type === "Malicious Man-made Risk" && (
-                <Typography variant="h6" mb={1} color="secondary">
+                <Typography variant="h6" mb={1} color="primary">
                   4. <Trans i18nKey="riskFile.catalysingEffects.title">Catalysing Effects</Trans>
                 </Typography>
               )}
@@ -920,7 +980,7 @@ export default function ValidationPage() {
                 />
               )}
 
-              <Typography variant="subtitle2" mt={8} mb={2} color="secondary">
+              <Typography variant="subtitle2" mt={8} mb={2} color="primary">
                 <Trans i18nKey="riskFile.catalysingEffects.feedback">
                   Please provide any comments or feedback on the catalysing effects of the hazard below:
                 </Trans>
@@ -951,6 +1011,8 @@ export default function ValidationPage() {
         )}
       </Container>
 
+      <ValidationTutorial />
+
       <Box
         sx={{
           display: "flex",
@@ -973,13 +1035,13 @@ export default function ValidationPage() {
             <Trans i18nKey="button.saving">Saving</Trans>
           </LoadingButton>
         ) : (
-          <Button color="secondary" sx={{ mr: 1 }} onClick={handleSave}>
+          <Button color="primary" sx={{ mr: 1 }} onClick={handleSave}>
             <Trans i18nKey="button.save">Save</Trans>
           </Button>
         )}
 
         <Button
-          color="secondary"
+          color="primary"
           onClick={() => {
             handleSave();
             setFinishedDialogOpen(true);

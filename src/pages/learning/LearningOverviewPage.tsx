@@ -70,10 +70,10 @@ export default function LearningOverviewPage({}) {
             </Typography>
             <Typography variant="body1" paragraph>
               <Trans i18nKey="learning.welcome.text">
-                Hier vindt je alle achtergrondinformatie en gebruikshandleidingen voor je deelname aan de Belgische
-                Nationale Risico Beoordeling 2023 - 2026 (BNRA). Deze website wordt aangeboden door het Nationaal
-                Crisiscentrum (NCCN) van de FOD Binnenlandse Zaken. Vragen, suggesties of opmerkingen kunt u sturen naar
-                het mailadres onder de contactgegevens.
+                Hier vindt je alle achtergrondinformatie en gebruikshandleidingen voor je deelname aan de
+                <b>Belgische Nationale Risico Beoordeling 2023 - 2026 (BNRA)</b>. Deze website wordt aangeboden door het
+                Nationaal Crisiscentrum (NCCN) van de FOD Binnenlandse Zaken. Vragen, suggesties of opmerkingen kunt u
+                sturen naar het mailadres onder de contactgegevens.
               </Trans>
             </Typography>
           </Box>

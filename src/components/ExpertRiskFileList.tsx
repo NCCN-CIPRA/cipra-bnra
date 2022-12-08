@@ -30,6 +30,7 @@ import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { useNavigate } from "react-router-dom";
 import useAPI from "../hooks/useAPI";
+import useLoggedInUser from "../hooks/useLoggedInUser";
 
 export interface FinishableRiskFile extends DVRiskFile {
   finished?: boolean;
@@ -42,6 +43,7 @@ function RiskFileList({
   participations: DVParticipation<undefined, DVRiskFile>[] | null;
   finishedTooltip?: string;
 }) {
+  const { user } = useLoggedInUser();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const api = useAPI();
@@ -78,8 +80,13 @@ function RiskFileList({
       </Backdrop>
       <Paper>
         <List sx={{ width: "100%", bgcolor: "background.paper", mb: 10 }}>
-          {participations
-            ? participations.map((p) => (
+          {participations &&
+            (participations.length <= 0 ? (
+              <ListItem>
+                <ListItemText primary={t("overview.noRisks", "No risks have currently been assigned to you")} />
+              </ListItem>
+            ) : (
+              participations.map((p) => (
                 <ListItem key={p.cr4de_bnraparticipationid} disablePadding>
                   <ListItemButton onClick={handleClick(p)}>
                     <ListItemAvatar>
@@ -90,9 +97,10 @@ function RiskFileList({
                     <ListItemText
                       primary={p.cr4de_risk_file.cr4de_title}
                       secondary={t(p.cr4de_risk_file.cr4de_risk_type)}
+                      sx={{ flex: 1 }}
                     />
-                    <ListItemText>
-                      <Stepper activeStep={0} alternativeLabel>
+                    <ListItemText sx={{ width: "550px", flexGrow: 0 }}>
+                      <Stepper activeStep={0} alternativeLabel sx={{ width: "550px" }}>
                         <Step completed={p.cr4de_validation_finished || false}>
                           <Tooltip
                             title={
@@ -124,17 +132,19 @@ function RiskFileList({
                   </ListItemButton>
                 </ListItem>
               ))
-            : [1, 2, 3].map((i) => (
-                <ListItem key={i}>
-                  <Stack direction="row" sx={{ flex: 1 }}>
-                    <Skeleton variant="circular" width={42} height={42} sx={{ mr: "14px" }}></Skeleton>
-                    <Stack direction="column" sx={{ flex: 1, maxWidth: 300 }}>
-                      <Skeleton variant="text" sx={{ fontSize: "1rem" }}></Skeleton>
-                      <Skeleton variant="text" sx={{ fontSize: "0.7rem" }}></Skeleton>
-                    </Stack>
+            ))}
+          {!participations &&
+            [1, 2, 3].map((i) => (
+              <ListItem key={i}>
+                <Stack direction="row" sx={{ flex: 1 }}>
+                  <Skeleton variant="circular" width={42} height={42} sx={{ mr: "14px" }}></Skeleton>
+                  <Stack direction="column" sx={{ flex: 1, maxWidth: 300 }}>
+                    <Skeleton variant="text" sx={{ fontSize: "1rem" }}></Skeleton>
+                    <Skeleton variant="text" sx={{ fontSize: "0.7rem" }}></Skeleton>
                   </Stack>
-                </ListItem>
-              ))}
+                </Stack>
+              </ListItem>
+            ))}
         </List>
       </Paper>
     </>

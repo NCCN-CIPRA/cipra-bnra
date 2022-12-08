@@ -260,7 +260,7 @@ export default function Attachments({
           ))}
         <Box sx={{ flex: 1 }} />
         <Tooltip title={expanded ? t("source.button.hide") : t("source.button.show")}>
-          <IconButton onClick={() => setExpanded(!expanded)}>
+          <IconButton onClick={() => setExpanded(!expanded)} className="attachment-expand-button">
             <ExpandMoreIcon
               sx={{
                 transform: expanded ? "rotate(180deg)" : "rotate(0deg)",

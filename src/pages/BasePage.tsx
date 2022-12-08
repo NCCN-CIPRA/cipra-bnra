@@ -30,9 +30,11 @@ export default function BasePage() {
       <SideDrawer open={drawerOpen} width={drawerWidth} onClose={() => setDrawerOpen(false)} />
       <Box>
         <Toolbar />
-        <Box sx={{ m: 2, ml: "76px" }}>
-          <BreadcrumbNavigation breadcrumbs={breadcrumbs} />
-        </Box>
+        {breadcrumbs && (
+          <Box sx={{ m: 2, ml: "76px" }}>
+            <BreadcrumbNavigation breadcrumbs={breadcrumbs} />
+          </Box>
+        )}
         <Outlet />
       </Box>
     </AppContext.Provider>

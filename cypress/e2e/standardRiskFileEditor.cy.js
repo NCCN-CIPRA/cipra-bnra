@@ -46,6 +46,12 @@ describe("Standard Risk File Editor", () => {
               cr4de_title: "Test Risk",
               cr4de_risk_type: "Standard Risk",
               cr4de_hazard_id: "X01",
+              cr4de_intensity_parameters:
+                "<table><tr><td>A</td><td>Description A</td></tr><tr><td>B</td><td>Description B</td></tr></table>",
+              cr4de_scenario_considerable:
+                "<table><tr><td>Considerable A</td></tr><tr><td>Considerable B</td></tr></table>",
+              cr4de_scenario_major: "<table><tr><td>Major A</td></tr><tr><td>Major B</td></tr></table>",
+              cr4de_scenario_extreme: "<table><tr><td>Extreme A</td></tr><tr><td>Extreme B</td></tr></table>",
             });
           })
           .then(() => {

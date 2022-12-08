@@ -177,7 +177,12 @@ function IntensityParameterTable({
           <TableBody>
             {parameters ? (
               parameters.map((e, i) => (
-                <ParameterRow key={i} parameter={e} onChange={handleUpdate(i)} onRemove={handleRemoveRow(i)} />
+                <ParameterRow
+                  key={i}
+                  parameter={e}
+                  onChange={onSave && handleUpdate(i)}
+                  onRemove={onSave && handleRemoveRow(i)}
+                />
               ))
             ) : (
               <TableRow>

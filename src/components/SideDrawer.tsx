@@ -17,7 +17,7 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
   const { t } = useTranslation();
 
   const { user } = useLoggedInUser();
-  console.log(user);
+
   return (
     <Drawer
       open={open}
@@ -70,6 +70,12 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
               </ListItem>
               <ListItem disablePadding>
                 <ListItemButton component={Link} to="/translations" onClick={onClose}>
+                  <ListItemIcon></ListItemIcon>
+                  <ListItemText primary={t("sideDrawer.translations", "App Translation")} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/__dev/migrate" onClick={onClose}>
                   <ListItemIcon></ListItemIcon>
                   <ListItemText primary={t("sideDrawer.translations", "App Translation")} />
                 </ListItemButton>

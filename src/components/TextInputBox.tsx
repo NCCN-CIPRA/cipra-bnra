@@ -22,6 +22,7 @@ const fontValues = [
 const headerValues = [false, 1, 2, 3, 4, 5];
 
 function TextInputBox({
+  id,
   height = "300px",
   initialValue,
   limitedOptions,
@@ -30,6 +31,7 @@ function TextInputBox({
   onBlur,
   setUpdatedValue,
 }: {
+  id?: string;
   height?: string;
   initialValue: string | null;
   limitedOptions?: boolean;
@@ -52,9 +54,9 @@ function TextInputBox({
 
   // @ts-ignore-next-line
   if (window.Cypress) {
-    console.log("CYPRESSSS");
     return (
       <TextField
+        id={id}
         multiline
         fullWidth
         minRows={6}
@@ -69,6 +71,7 @@ function TextInputBox({
 
   return (
     <HtmlEditor
+      id={id}
       height={height}
       value={innerValue}
       onValueChanged={(e) => {

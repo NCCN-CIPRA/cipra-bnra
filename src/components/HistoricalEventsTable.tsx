@@ -35,7 +35,7 @@ function HistoricalEventRow({
   useEffect(() => {
     setIsLoading(false);
   }, [event, setIsLoading]);
-
+  console.log(onChange);
   return (
     <TableRow>
       <TableCell sx={{ whiteSpace: "nowrap", verticalAlign: "top", minWidth: 200 }}>
@@ -155,7 +155,6 @@ function HistoricalEventsTable({
 
     const wrapped = wrap(update);
 
-    console.log("setall", wrapped);
     setInnerValue(wrapped);
     setSavedValue(wrapped);
     setDebouncedValue(wrapped);
@@ -200,7 +199,12 @@ function HistoricalEventsTable({
           <TableBody>
             {historicalEvents ? (
               historicalEvents.map((e, i) => (
-                <HistoricalEventRow key={e.id} event={e} onChange={handleUpdate(i)} onRemove={handleRemoveRow(i)} />
+                <HistoricalEventRow
+                  key={e.id}
+                  event={e}
+                  onChange={onSave && handleUpdate(i)}
+                  onRemove={onSave && handleRemoveRow(i)}
+                />
               ))
             ) : (
               <TableRow>

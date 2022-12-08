@@ -1,4 +1,5 @@
 import { createTheme } from "@mui/material";
+import { blueGrey } from "@mui/material/colors";
 
 export default createTheme({
   palette: {
@@ -9,8 +10,6 @@ export default createTheme({
       main: "rgb(0, 164, 154)",
       light: "#F8F8F8",
     },
-    secondary: {
-      main: "rgb(0, 164, 154)",
-    },
+    secondary: blueGrey,
   },
 });

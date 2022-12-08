@@ -160,14 +160,9 @@ describe("Standard Risk File Validation", () => {
         return cy
           .wrap(cards[0])
           .should("contain.text", "1. Definition")
-          .get("[contenteditable]")
+          .get(".MuiInputBase-inputMultiline")
           .eq(0)
-          .click()
-          .clear({ force: true })
-          .wait(100)
-          .type(randomInput[0])
-          .wait(100)
-          .type(randomInput[0]);
+          .type(randomInput);
       })
       .then(() => {
         // Wait for autosave
@@ -190,7 +185,8 @@ describe("Standard Risk File Validation", () => {
             return cy
               .wrap(cards[0])
               .should("contain.text", "1. Definition")
-              .get("[contenteditable]")
+              .get(".MuiInputBase-inputMultiline")
+              .eq(0)
               .should("contain.text", randomInput);
           });
       });

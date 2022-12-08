@@ -45,13 +45,13 @@ export default function TitleBar({ title, onDrawerToggle }: { title: string; onD
             </Typography>
             <Stack direction="row" sx={{ mr: 4 }}>
               <Button
-                variant={i18n.languages[0] === "nl" ? "outlined" : "text"}
+                variant={i18n.languages[0] === "en" ? "outlined" : "text"}
                 color="inherit"
                 size="small"
                 sx={{ minWidth: 35 }}
-                onClick={() => i18n.changeLanguage("nl")}
+                onClick={() => i18n.changeLanguage("en")}
               >
-                nl
+                en
               </Button>
               <Button
                 variant={i18n.languages[0] === "fr" ? "outlined" : "text"}
@@ -63,22 +63,13 @@ export default function TitleBar({ title, onDrawerToggle }: { title: string; onD
                 fr
               </Button>
               <Button
-                variant={i18n.languages[0] === "de" ? "outlined" : "text"}
+                variant={i18n.languages[0] === "nl" ? "outlined" : "text"}
                 color="inherit"
                 size="small"
                 sx={{ minWidth: 35 }}
-                onClick={() => i18n.changeLanguage("de")}
+                onClick={() => i18n.changeLanguage("nl")}
               >
-                de
-              </Button>
-              <Button
-                variant={i18n.languages[0] === "en" ? "outlined" : "text"}
-                color="inherit"
-                size="small"
-                sx={{ minWidth: 35 }}
-                onClick={() => i18n.changeLanguage("en")}
-              >
-                en
+                nl
               </Button>
             </Stack>
             {user == null && (
