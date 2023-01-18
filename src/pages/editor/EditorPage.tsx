@@ -119,7 +119,7 @@ export default function EditorPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveFields = async (fields: Partial<{ [key in keyof DVRiskFile]: string | null }>) => {
-    if (!riskFile) return;
+    if (!riskFile || isSaving) return;
 
     setIsSaving(true);
 
@@ -468,7 +468,7 @@ export default function EditorPage() {
         component={Paper}
         elevation={5}
       >
-        <Button color="error" sx={{ mr: 1 }} component={RouterLink} to="/validation">
+        <Button color="error" sx={{ mr: 1 }} component={RouterLink} to="/hazards">
           Exit
         </Button>
         <Box sx={{ flex: "1 1 auto" }} />
@@ -487,7 +487,7 @@ export default function EditorPage() {
           onClick={async () => {
             await handleSave();
 
-            navigate("/editor");
+            navigate("/hazards");
           }}
         >
           Save & Exit
