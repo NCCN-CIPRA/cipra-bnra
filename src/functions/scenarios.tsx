@@ -13,6 +13,22 @@ const noScenarios = {
   extreme: [],
 };
 
+const unwrapScenario = (scenario: string, parameters: IntensityParameter[]) => {
+  try {
+    return JSON.parse(scenario);
+  } catch (e) {
+    // Old HTML format
+    const json = tableToJson(scenario);
+
+    if (!json) return [];
+
+    return parameters.map((p, i) => ({
+      ...p,
+      value: json[0],
+    }));
+  }
+};
+
 export function unwrap(
   parameters: IntensityParameter[],
   considerable: string | null,
@@ -21,42 +37,11 @@ export function unwrap(
 ): Scenarios {
   if (!considerable || !major || !extreme) return noScenarios;
 
-  try {
-    return {
-      considerable: JSON.parse(considerable),
-      major: JSON.parse(major),
-      extreme: JSON.parse(extreme),
-    };
-  } catch (e) {
-    // Old HTML format
-    const jsonC = tableToJson(considerable);
-    const jsonM = tableToJson(major);
-    const jsonE = tableToJson(extreme);
-
-    if (!jsonC || !jsonM || !jsonE) return noScenarios;
-
-    console.log({
-      extreme: parameters.map((p, i) => ({
-        ...p,
-        value: jsonE[0],
-      })),
-    });
-
-    return {
-      considerable: parameters.map((p, i) => ({
-        ...p,
-        value: jsonC[i][0],
-      })),
-      major: parameters.map((p, i) => ({
-        ...p,
-        value: jsonM[i][0],
-      })),
-      extreme: parameters.map((p, i) => ({
-        ...p,
-        value: jsonE[i][0],
-      })),
-    };
-  }
+  return {
+    considerable: unwrapScenario(considerable, parameters),
+    major: unwrapScenario(major, parameters),
+    extreme: unwrapScenario(extreme, parameters),
+  };
 }
 
 export function wrap(scenario: IntensityParameter<string>[]): string {

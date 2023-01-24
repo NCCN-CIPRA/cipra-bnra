@@ -39,6 +39,7 @@ function ScenariosTable({
   const [innerValue, setInnerValue] = useState(initialScenarios);
   const [debouncedValue] = useDebounce(innerValue, 2000);
 
+  console.log(innerValue);
   const scenarios = useMemo(
     () => unwrap(parameters, innerValue.considerable, innerValue.major, innerValue.extreme),
     [parameters, innerValue]
