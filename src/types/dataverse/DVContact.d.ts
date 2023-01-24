@@ -4,4 +4,6 @@ export interface DVContact {
   emailaddress1: string;
   firstname: string;
   lastname: string;
+
+  admin: boolean;
 }

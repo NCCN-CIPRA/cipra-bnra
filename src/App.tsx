@@ -18,7 +18,8 @@ import EditorPage from "./pages/editor/EditorPage";
 import LearningOverviewPage from "./pages/learning/LearningOverviewPage";
 import OverviewPage from "./pages/main/OverviewPage";
 import AuthPage from "./pages/AuthPage";
-import TranslationsPage from "./pages/main/TranslationsPage";
+import TranslationsPage from "./pages/admin/TranslationsPage";
+import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
 import LearningPage from "./pages/learning/LearningPage";
 import UploadCodePage from "./pages/_dev/UploadCodePage";
 
@@ -99,7 +100,8 @@ function App() {
               element: <RiskPage />,
             },
 
-            { path: "/translations", element: <TranslationsPage /> },
+            { path: "/admin/translations", element: <TranslationsPage /> },
+            { path: "/admin/experts", element: <ExpertManagementPage /> },
 
             // DEV ONLY
             {

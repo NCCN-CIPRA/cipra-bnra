@@ -19,6 +19,7 @@ export default function useLoggedInUser() {
           emailaddress1: info?.getAttribute("data-email") || "",
           firstname: info?.getAttribute("data-firstname") || "",
           lastname: info?.getAttribute("data-lastname") || "",
+          admin: info?.hasAttribute("data-admin"),
         });
       }
     } else {

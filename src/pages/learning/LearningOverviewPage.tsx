@@ -9,11 +9,21 @@ import {
   ListItemButton,
   ListItemText,
   Paper,
+  Grid,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Trans, useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
+
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  paddingLeft: theme.spacing(2),
+  color: theme.palette.text.secondary,
+}));
 
 export default function LearningOverviewPage({}) {
   const { t } = useTranslation();
@@ -78,95 +88,151 @@ export default function LearningOverviewPage({}) {
             </Typography>
           </Box>
 
-          <Stack direction="row" justifyContent="space-evenly">
-            <List
-              sx={{ width: 400, bgcolor: "background.paper" }}
-              component={Paper}
-              aria-labelledby="nested-list-subheader"
-              subheader={
-                <ListSubheader component="div" id="nested-list-subheader" sx={{ borderBottom: "1px solid #eee" }}>
-                  <Typography variant="h6" sx={{ pt: 2, pb: 2 }} color="primary">
-                    <Trans i18nKey="learning.methodology.title">Methodology</Trans>
-                  </Typography>
-                </ListSubheader>
-              }
-            >
-              <ListItemButton component={RouterLink} to="/learning/methodology-introduction">
-                <ListItemIcon sx={{ minWidth: "32px" }}>
-                  <ChevronRightIcon />
-                </ListItemIcon>
-                <ListItemText primary={t("learning.methodology.general", "General Introduction")} />
-              </ListItemButton>
-              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology-standard">
-                <ListItemIcon sx={{ minWidth: "32px" }}>
-                  <ChevronRightIcon />
-                </ListItemIcon>
-                <ListItemText primary={t("learning.methodology.standardRisks", "Standard Risks")} />
-              </ListItemButton>
-              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology-actors">
-                <ListItemIcon sx={{ minWidth: "32px" }}>
-                  <ChevronRightIcon />
-                </ListItemIcon>
-                <ListItemText primary={t("learning.methodology.actors", "Malicious Actors")} />
-              </ListItemButton>
-              <ListItemButton sx={{ pl: 5 }} component={RouterLink} to="/learning/methodology-emerging">
-                <ListItemIcon sx={{ minWidth: "32px" }}>
-                  <ChevronRightIcon />
-                </ListItemIcon>
-                <ListItemText primary={t("learning.methodology.emerging", "Emerging Risks")} />
-              </ListItemButton>
-              <ListItemButton component={RouterLink} to="/learning/methodology-impact">
-                <ListItemIcon sx={{ minWidth: "32px" }}>
-                  <ChevronRightIcon />
-                </ListItemIcon>
-                <ListItemText primary={t("learning.methodology.impact", "Impact Categories and Damage Indicators")} />
-              </ListItemButton>
-              <ListItemButton component={RouterLink} to="/learning/methodology-evaluation">
-                <ListItemIcon sx={{ minWidth: "32px" }}>
-                  <ChevronRightIcon />
-                </ListItemIcon>
-                <ListItemText primary={t("learning.methodology.evaluation", "Quantitative Evaluation")} />
-              </ListItemButton>
-            </List>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={4}>
+              <Item>
+                <List
+                  aria-labelledby="nested-list-subheader"
+                  subheader={
+                    <ListSubheader component="div" id="nested-list-subheader" sx={{ borderBottom: "1px solid #eee" }}>
+                      <Typography variant="h6" sx={{ pt: 1, pb: 1 }} color="primary">
+                        <Trans i18nKey="learning.general.title">General Information</Trans>
+                      </Typography>
+                    </ListSubheader>
+                  }
+                >
+                  <ListItemButton component={RouterLink} to="/learning/general-introduction">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.general.introduction", "General Introduction")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/risk-catalogue">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.general.riskCatalogue", "Risk Catalogue")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/impact-categories">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.general.impact", "Impact Categories & Damage Indicators")} />
+                  </ListItemButton>
+                </List>
+              </Item>
+            </Grid>
 
-            <List
-              sx={{ width: 400, bgcolor: "background.paper" }}
-              component={Paper}
-              aria-labelledby="nested-list-subheader"
-              subheader={
-                <ListSubheader component="div" id="nested-list-subheader" sx={{ borderBottom: "1px solid #eee" }}>
-                  <Typography variant="h6" sx={{ pt: 2, pb: 2 }} color="primary">
-                    <Trans i18nKey="learning.tools.title">Tool Manuals</Trans>
-                  </Typography>
-                </ListSubheader>
-              }
-            >
-              <ListItemButton component={RouterLink} to="/learning/tools-validation">
-                <ListItemIcon sx={{ minWidth: "32px" }}>
-                  <ChevronRightIcon />
-                </ListItemIcon>
-                <ListItemText primary={t("learning.tools.validation", "Risk File Validation")} />
-              </ListItemButton>
-              <ListItemButton component={RouterLink} to="/learning/tools-analysisA">
-                <ListItemIcon sx={{ minWidth: "32px" }}>
-                  <ChevronRightIcon />
-                </ListItemIcon>
-                <ListItemText primary={t("learning.tools.analysisA", "Risk Analysis A")} />
-              </ListItemButton>
-              <ListItemButton component={RouterLink} to="/learning/tools-analysisB">
-                <ListItemIcon sx={{ minWidth: "32px" }}>
-                  <ChevronRightIcon />
-                </ListItemIcon>
-                <ListItemText primary={t("learning.tools.analysisB", "Risk Analysis B")} />
-              </ListItemButton>
-              <ListItemButton component={RouterLink} to="/learning/tools-consensus">
-                <ListItemIcon sx={{ minWidth: "32px" }}>
-                  <ChevronRightIcon />
-                </ListItemIcon>
-                <ListItemText primary={t("learning.tools.consensus", "Consensus")} />
-              </ListItemButton>
-            </List>
-          </Stack>
+            <Grid item xs={12} md={4}>
+              <Item>
+                <List
+                  aria-labelledby="nested-list-subheader"
+                  subheader={
+                    <ListSubheader component="div" id="nested-list-subheader" sx={{ borderBottom: "1px solid #eee" }}>
+                      <Typography variant="h6" sx={{ pt: 1, pb: 1 }} color="primary">
+                        <Trans i18nKey="learning.methodology.title">Methodology</Trans>
+                      </Typography>
+                    </ListSubheader>
+                  }
+                >
+                  <ListItemButton component={RouterLink} to="/learning/methodology-introduction">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.methodology.introduction", "Introduction")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/methodology-risk-catalogue">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.methodology.riskCatalogue", "Risk Catalogue")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/methodology-scenarios">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.methodology.scenarios", "Intensity Scenarios and Parameters")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/methodology-risk-cascades">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.methodology.riskCascades", "Risk Cascades")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/methodology-impact-probability">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.methodology.impactProbability", "Probability and Impact")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/methodology-additional-elements">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.methodology.additionalElements", "Additional Elements")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/methodology-use-cases">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.methodology.useCases", "Use Cases")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/methodology-actors">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.methodology.actors", "Malicious Actors (optional)")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/methodology-emerging">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.methodology.emerging", "Emerging Risks (optional)")} />
+                  </ListItemButton>
+                </List>
+              </Item>
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <Item>
+                <List
+                  aria-labelledby="nested-list-subheader"
+                  subheader={
+                    <ListSubheader component="div" id="nested-list-subheader" sx={{ borderBottom: "1px solid #eee" }}>
+                      <Typography variant="h6" sx={{ pt: 1, pb: 1 }} color="primary">
+                        <Trans i18nKey="learning.tools.title">Tool Manuals</Trans>
+                      </Typography>
+                    </ListSubheader>
+                  }
+                >
+                  <ListItemButton component={RouterLink} to="/learning/tools-validation">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.tools.validation", "Risk File Validation")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/tools-analysisA">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.tools.analysisA", "Risk Analysis A")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/tools-analysisB">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.tools.analysisB", "Risk Analysis B")} />
+                  </ListItemButton>
+                  <ListItemButton component={RouterLink} to="/learning/tools-consensus">
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.tools.consensus", "Consensus")} />
+                  </ListItemButton>
+                </List>
+              </Item>
+            </Grid>
+          </Grid>
         </Container>
       </Box>
     </>
