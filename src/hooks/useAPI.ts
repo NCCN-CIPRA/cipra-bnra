@@ -84,6 +84,7 @@ export interface API {
   getAttachments<T = DVAttachment>(query?: string): Promise<T[]>;
   serveAttachmentFile(attachment: DVAttachment): Promise<void>;
   createAttachment(fields: object, file: File | null): Promise<CreateResponse>;
+  updateAttachment(id: string, file: File | null): Promise<void>;
   deleteAttachment(id: string): Promise<void>;
 
   getFeedbacks<T = DVFeedback>(query?: string): Promise<T[]>;
@@ -503,6 +504,7 @@ export default function useAPI(): API {
             headers: {
               __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
               "Content-Type": "application/octet-stream",
+              // "x-ms-file-name": "main.js",
             },
             body: JSON.stringify({
               value: fileContent,
@@ -511,6 +513,31 @@ export default function useAPI(): API {
           });
 
           return resolve({ id });
+        };
+      });
+    },
+    updateAttachment: async function (id: string, file: File | null): Promise<void> {
+      if (!file) return;
+
+      return new Promise<void>((resolve) => {
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async function (e) {
+          let fileContent = e.target?.result as string;
+
+          await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${id})/cr4de_file`, {
+            method: "PUT",
+            headers: {
+              __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+              "Content-Type": "application/octet-stream",
+              "x-ms-file-name": "main.js",
+            },
+            body: JSON.stringify({
+              value: fileContent,
+            }),
+          });
+
+          return resolve();
         };
       });
     },

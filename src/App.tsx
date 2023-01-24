@@ -20,6 +20,7 @@ import OverviewPage from "./pages/main/OverviewPage";
 import AuthPage from "./pages/AuthPage";
 import TranslationsPage from "./pages/main/TranslationsPage";
 import LearningPage from "./pages/learning/LearningPage";
+import UploadCodePage from "./pages/_dev/UploadCodePage";
 
 function App() {
   useEffect(() => {
@@ -104,6 +105,10 @@ function App() {
             {
               path: "/__dev/migrate",
               element: <DataMigrator />,
+            },
+            {
+              path: "/__dev/code",
+              element: <UploadCodePage />,
             },
           ],
         },
