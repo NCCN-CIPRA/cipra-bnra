@@ -16,7 +16,8 @@ import {
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import useAPI from "../../hooks/useAPI";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
+import TitleBar from "../../components/TitleBar";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -48,6 +49,7 @@ function a11yProps(index: number) {
 }
 
 export default function AuthenticationPage() {
+  const { t } = useTranslation();
   const api = useAPI();
 
   const [tab, setTab] = useState(0);
@@ -80,7 +82,8 @@ export default function AuthenticationPage() {
   return (
     <>
       <CssBaseline />
-      <Container maxWidth="md" component={Paper} sx={{ mt: 8 }}>
+      <TitleBar title={t("auth.registration.title", "BNRA 2023 - 2026 Login")} />
+      <Container maxWidth="md" component={Paper} sx={{ mt: 20 }}>
         <Box sx={{ width: "100%" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs value={tab} onChange={handleChangeTab} aria-label="basic tabs example">

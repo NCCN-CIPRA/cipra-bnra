@@ -64,7 +64,7 @@ export default function RegistrationPage() {
   const [password2, setPassword2] = useState("");
   const [inviteCode, setInviteCode] = useState(params.registration_code);
   const [accept, setAccept] = useState(false);
-  const [registering, setRegistering] = useState(true);
+  const [registering, setRegistering] = useState(false);
   const [error, setError] = useState<boolean | string>(false);
   const [loading, setLoading] = useState(false);
 

@@ -13,7 +13,7 @@ import { Trans, useTranslation } from "react-i18next";
 
 export default function TitleBar({
   title,
-  showUser = false,
+  showUser = true,
   onDrawerToggle,
 }: {
   title: string;
