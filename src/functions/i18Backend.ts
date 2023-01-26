@@ -1,4 +1,4 @@
-import { Module, ModuleType, NewableModule } from "i18next";
+import { Module, ModuleType } from "i18next";
 import { DVTranslation } from "../types/dataverse/DVTranslation";
 
 interface Translations {
@@ -46,10 +46,9 @@ class DataverseBackend implements Module {
   }
 
   async create(languages: string[], namespace: string, key: string, fallbackValue: string) {
-    console.log(languages);
     if (languages[0] !== "en") return;
 
-    fetch(`/_api/cr4de_bnratranslations`, {
+    fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnratranslations`, {
       method: "POST",
       headers: {
         __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",

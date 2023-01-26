@@ -12,6 +12,8 @@ import { DVTranslation } from "../types/dataverse/DVTranslation";
 import { DVValidation } from "../types/dataverse/DVValidation";
 
 export enum DataTable {
+  CONTACT,
+
   RISK_FILE,
   RISK_CASCADE,
 
@@ -35,6 +37,7 @@ export interface AuthResponse<T = null> {
 
 export interface RegistrationData {
   formHtml: string;
+  email: string;
 }
 
 export interface CreateResponse {
@@ -98,6 +101,8 @@ export interface API {
 
   getPage<T = DVPage>(name: string, query?: string): Promise<T>;
   updatePage(id: string, fields: object): Promise<void>;
+
+  sendInvitationEmail(contactIds: string[]): Promise<void>;
 }
 
 export default function useAPI(): API {
@@ -110,13 +115,11 @@ export default function useAPI(): API {
       if (response.status === 403) {
         navigate("/auth");
 
-        console.error(response, await response.json());
         throw new Error("Not Authenticated");
       }
 
       return response;
     } catch (e) {
-      console.error(e);
       throw e;
     }
   };
@@ -183,9 +186,13 @@ export default function useAPI(): API {
 
         const formHtml = r && r[0].replace('action="./Register', 'action="/Account/Login/Register');
 
+        const e = responseText.match(/.*value="(.*)" id="EmailTextBox".*/);
+        const email = e && e[1];
+
         return {
           data: {
             formHtml,
+            email,
           },
         } as AuthResponse<RegistrationData>;
       } else {
@@ -635,6 +642,21 @@ export default function useAPI(): API {
         },
         body: JSON.stringify(fields),
       });
+    },
+
+    sendInvitationEmail: async function (contactIds: string[]): Promise<void> {
+      await fetch(
+        "https://prod-03.westeurope.logic.azure.com:443/workflows/987f8d4c173d41ff81d3d3259346d6c6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=0h3uYyRN7UPfaTsc4VqJwezF8ZXqwwHEiFPD1iuv-ts",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contacts: contactIds,
+          }),
+        }
+      );
     },
   };
 }

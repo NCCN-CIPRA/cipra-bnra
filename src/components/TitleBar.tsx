@@ -11,7 +11,15 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import useLoggedInUser from "../hooks/useLoggedInUser";
 import { Trans, useTranslation } from "react-i18next";
 
-export default function TitleBar({ title, onDrawerToggle }: { title: string; onDrawerToggle: () => void }) {
+export default function TitleBar({
+  title,
+  showUser = false,
+  onDrawerToggle,
+}: {
+  title: string;
+  showUser?: boolean;
+  onDrawerToggle?: () => void;
+}) {
   const { i18n } = useTranslation();
   const { user } = useLoggedInUser();
 
@@ -30,16 +38,18 @@ export default function TitleBar({ title, onDrawerToggle }: { title: string; onD
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
           <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 2 }}
-              onClick={onDrawerToggle}
-            >
-              <MenuIcon />
-            </IconButton>
+            {onDrawerToggle && (
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+                sx={{ mr: 2 }}
+                onClick={onDrawerToggle}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               {title}
             </Typography>
@@ -72,12 +82,12 @@ export default function TitleBar({ title, onDrawerToggle }: { title: string; onD
                 nl
               </Button>
             </Stack>
-            {user == null && (
+            {showUser && user == null && (
               <Button color="inherit" component={Link} to="/auth">
                 <Trans i18nKey="button.login">Login</Trans>
               </Button>
             )}
-            {user != null && (
+            {showUser && user != null && (
               <>
                 <Button variant="text" color="inherit" startIcon={<AccountCircleIcon />} onClick={handleMenu}>
                   {user?.firstname} {user?.lastname}

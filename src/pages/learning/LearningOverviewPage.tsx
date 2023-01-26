@@ -16,6 +16,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Trans, useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -28,9 +29,10 @@ const Item = styled(Paper)(({ theme }) => ({
 export default function LearningOverviewPage({}) {
   const { t } = useTranslation();
 
+  usePageTitle(t("learning.title", "BNRA 2023 - 2026 Informatieportaal"));
   useBreadcrumbs([
     { name: "BNRA 2023 - 2026", url: "/" },
-    { name: "Information Portal", url: "" },
+    { name: t("learning.platform", "Informatieportaal"), url: "/learning" },
   ]);
 
   return (
@@ -113,11 +115,11 @@ export default function LearningOverviewPage({}) {
                     </ListItemIcon>
                     <ListItemText primary={t("learning.general.riskCatalogue", "Risk Catalogue")} />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/impact-categories">
+                  <ListItemButton component={RouterLink} to="/learning/quantitative-categories">
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.general.impact", "Impact Categories & Damage Indicators")} />
+                    <ListItemText primary={t("learning.general.impact", "Kwantitatieve Schalen")} />
                   </ListItemButton>
                 </List>
               </Item>

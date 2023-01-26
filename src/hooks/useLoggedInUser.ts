@@ -20,6 +20,7 @@ export default function useLoggedInUser() {
           firstname: info?.getAttribute("data-firstname") || "",
           lastname: info?.getAttribute("data-lastname") || "",
           admin: info?.hasAttribute("data-admin"),
+          participations: undefined,
         });
       }
     } else {

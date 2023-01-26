@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Tabs,
   Container,
@@ -10,12 +9,14 @@ import {
   Stack,
   Button,
   CssBaseline,
+  Typography,
   Alert,
   AlertTitle,
 } from "@mui/material";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import useAPI from "../../hooks/useAPI";
+import { Trans } from "react-i18next";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -47,23 +48,17 @@ function a11yProps(index: number) {
 }
 
 export default function AuthenticationPage() {
-  const navigate = useNavigate();
   const api = useAPI();
 
   const [tab, setTab] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("");
   const [remember, setRemember] = useState(false);
-  const [inviteCode, setInviteCode] = useState("");
+  const [passwordResetSent, setPasswordResetSent] = useState(false);
   const [resetPassword, setResetPassword] = useState(false);
-  const [registering, setRegistering] = useState(false);
-
-  const [registrationForm, setRegistrationForm] = useState("");
 
   const handleChangeTab = async (event: React.SyntheticEvent, newValue: number) => {
     setResetPassword(false);
-    setRegistering(false);
     setTab(newValue);
   };
 
@@ -76,28 +71,10 @@ export default function AuthenticationPage() {
   };
 
   const handleForgotPassword = async () => {
+    setPasswordResetSent(true);
     const result = await api.requestPasswordReset(email);
 
     if (!result.error) setResetPassword(false);
-  };
-
-  const handleRegisterStart = async () => {
-    const result = await api.requestRegistrationLink(inviteCode);
-
-    if (!result.error && result.data) {
-      setRegistrationForm(result.data.formHtml);
-
-      setRegistering(true);
-    }
-  };
-
-  const handleRegister = async () => {
-    document.getElementById("EmailTextBox")!.setAttribute("value", email);
-    document.getElementById("UserNameTextBox")!.setAttribute("value", email);
-    document.getElementById("PasswordTextBox")!.setAttribute("value", password);
-    document.getElementById("ConfirmPasswordTextBox")!.setAttribute("value", password2);
-
-    document.getElementById("SubmitButton")!.click();
   };
 
   return (
@@ -109,7 +86,6 @@ export default function AuthenticationPage() {
             <Tabs value={tab} onChange={handleChangeTab} aria-label="basic tabs example">
               <Tab label="Log In (External Expert)" {...a11yProps(0)} />
               <Tab label="Log In (Internal NCCN)" {...a11yProps(0)} />
-              <Tab label="Register" {...a11yProps(1)} />
             </Tabs>
           </Box>
           <TabPanel value={tab} index={0}>
@@ -121,6 +97,12 @@ export default function AuthenticationPage() {
                     flexDirection: "column",
                   }}
                 >
+                  <Typography variant="body2" paragraph>
+                    <Trans i18nKey="auth.resetPassword">
+                      Please enter the email you used to register on the platform below. An email will be sent
+                      containing instruction to reset your password.
+                    </Trans>
+                  </Typography>
                   <TextField
                     id="outlined-email-input"
                     label="Email"
@@ -143,10 +125,16 @@ export default function AuthenticationPage() {
               </>
             ) : (
               <>
-                <Alert severity="info">
-                  <AlertTitle>Password Reset Requested</AlertTitle>
-                  Please check your email to reset your password.
-                </Alert>
+                {passwordResetSent && (
+                  <Alert severity="info">
+                    <AlertTitle>
+                      <Trans i18nKey="auth.resetPassword.sentTitle">Password Reset Requested</Trans>
+                    </AlertTitle>
+                    <Trans i18nKey="auth.resetPassword.sentContent">
+                      Please check your email to reset your password.
+                    </Trans>
+                  </Alert>
+                )}
                 <Box
                   sx={{
                     display: "flex",
@@ -211,82 +199,6 @@ export default function AuthenticationPage() {
                 </Button>
               </form>
             </Stack>
-          </TabPanel>
-          <TabPanel value={tab} index={2}>
-            {registering ? (
-              <>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <TextField
-                    id="outlined-email-input"
-                    label="Email"
-                    type="email"
-                    autoComplete="current-email"
-                    fullWidth
-                    sx={{ my: 2 }}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  <TextField
-                    id="outlined-password-input"
-                    label="Password"
-                    type="password"
-                    autoComplete="current-password"
-                    fullWidth
-                    sx={{ my: 2 }}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <TextField
-                    id="outlined-password-input"
-                    label="Repeat Password"
-                    type="password"
-                    fullWidth
-                    sx={{ my: 2 }}
-                    value={password2}
-                    onChange={(e) => setPassword2(e.target.value)}
-                  />
-                </Box>
-                <Stack spacing={2} direction="row" mt={4}>
-                  <Button variant="contained" onClick={handleRegister}>
-                    Register
-                  </Button>
-                </Stack>
-                <div
-                  id="registration-form"
-                  style={{ display: "none" }}
-                  dangerouslySetInnerHTML={{ __html: registrationForm }}
-                />
-              </>
-            ) : (
-              <>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <TextField
-                    id="outlined-email-input"
-                    label="Invitation Code"
-                    type="invitationCode"
-                    fullWidth
-                    sx={{ my: 2 }}
-                    value={inviteCode}
-                    onChange={(e) => setInviteCode(e.target.value)}
-                  />
-                </Box>
-                <Stack spacing={2} direction="row" mt={4}>
-                  <Button variant="contained" onClick={handleRegisterStart}>
-                    Register
-                  </Button>
-                </Stack>
-              </>
-            )}
           </TabPanel>
         </Box>
       </Container>

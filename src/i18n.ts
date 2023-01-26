@@ -15,7 +15,7 @@ i18n
   .init({
     debug: false,
     fallbackLng: "en",
-    // saveMissing: true,
+    saveMissing: true,
     load: "languageOnly",
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default

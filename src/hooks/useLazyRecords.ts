@@ -30,7 +30,9 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
     let response;
     const o = { ...options, ...lazyOptions };
 
-    if (o.table === DataTable.RISK_FILE) {
+    if (o.table === DataTable.CONTACT) {
+      response = await api.getContacts<T>(o.query);
+    } else if (o.table === DataTable.RISK_FILE) {
       response = await api.getRiskFiles<T>(o.query);
     } else if (o.table === DataTable.RISK_CASCADE) {
       response = await api.getRiskCascades<T>(o.query);

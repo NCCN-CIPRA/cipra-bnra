@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 import AnalysisAveragerPage from "./pages/analysis/AnalysisAveragerPage";
-import AuthenticationPage from "./pages/main/AuthenticationPage";
+import AuthenticationPage from "./pages/auth/AuthenticationPage";
 import DataMigrator from "./pages/main/DataMigrator";
 import HomePage from "./pages/main/HomePage";
 import LocalAPI from "./pages/main/LocalAPI";
@@ -9,7 +9,7 @@ import CalculationPage from "./pages/analysis/CalculationPage";
 import RankingPage from "./pages/reporting/RankingPage";
 import ValidationIntroPage from "./pages/validation/ValidationIntroPage";
 import ValidationPage from "./pages/validation/ValidationPage";
-import RiskPage from "./pages/reporting/RiskPage";
+import RiskPage from "./pages/learning/RiskPage";
 
 import "./App.css";
 import BasePage from "./pages/BasePage";
@@ -22,6 +22,9 @@ import TranslationsPage from "./pages/admin/TranslationsPage";
 import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
 import LearningPage from "./pages/learning/LearningPage";
 import UploadCodePage from "./pages/_dev/UploadCodePage";
+import RiskCataloguePage from "./pages/learning/RiskCataloguePage";
+import QuantitativeScalesPage from "./pages/learning/QuantitativeScalesPage";
+import RegistrationPage from "./pages/auth/RegistrationPage";
 
 function App() {
   useEffect(() => {
@@ -47,18 +50,30 @@ function App() {
         },
 
         {
-          path: "/learning",
-          element: <LearningOverviewPage />,
-        },
-        {
-          path: "/learning/:page_name",
-          element: <LearningPage />,
-        },
-
-        {
           path: "/",
           element: <AuthPage />,
           children: [
+            {
+              path: "/learning",
+              element: <LearningOverviewPage />,
+            },
+            {
+              path: "/learning/risk-catalogue",
+              element: <RiskCataloguePage />,
+            },
+            {
+              path: "/learning/quantitative-categories",
+              element: <QuantitativeScalesPage />,
+            },
+            {
+              path: "/learning/risk/:risk_file_id",
+              element: <RiskPage />,
+            },
+            {
+              path: "/learning/:page_name",
+              element: <LearningPage />,
+            },
+
             {
               path: "/hazards",
               element: <EditorIntroPage />,
@@ -119,6 +134,10 @@ function App() {
     {
       path: "/auth",
       element: <AuthenticationPage />,
+    },
+    {
+      path: "/auth/register/:registration_code",
+      element: <RegistrationPage />,
     },
 
     // DEV ONLY
