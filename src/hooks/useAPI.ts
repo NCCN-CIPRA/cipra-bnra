@@ -47,6 +47,7 @@ export interface CreateResponse {
 export interface API {
   login(email: string, password: string, remember: boolean): Promise<AuthResponse>;
   requestPasswordReset(email: string): Promise<AuthResponse>;
+  resetPassword(userId: string, code: string, password: string): Promise<AuthResponse>;
   requestRegistrationLink(invitationCode: string): Promise<AuthResponse<RegistrationData>>;
 
   getContacts<T = DVContact>(query?: string): Promise<T[]>;
@@ -148,7 +149,7 @@ export default function useAPI(): API {
       }
     },
     requestPasswordReset: async function (email: string) {
-      const response = await fetch("https://bnra.powerappsportals.com/ForgotPassword", {
+      const response = await fetch("https://bnra.powerappsportals.com/Account/Login/ForgotPassword", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -167,6 +168,30 @@ export default function useAPI(): API {
         };
       }
     },
+    resetPassword: async function (userId: string, code: string, password: string) {
+      const response = await fetch("https://bnra.powerappsportals.com/Account/Login/ResetPassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          UserId: userId,
+          Code: code,
+          Password: password,
+          ConfirmPassword: password,
+        }),
+      });
+
+      if (response.status === 200) {
+        return { data: null };
+      } else {
+        return {
+          error: "Invalid email",
+        };
+      }
+    },
+
     requestRegistrationLink: async function (invitationCode: string) {
       const response = await fetch("https://bnra.powerappsportals.com/Register?returnUrl=/", {
         method: "POST",

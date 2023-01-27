@@ -82,13 +82,13 @@ export default function AuthenticationPage() {
   return (
     <>
       <CssBaseline />
-      <TitleBar title={t("auth.registration.title", "BNRA 2023 - 2026 Login")} />
+      <TitleBar title={t("auth.login.title", "BNRA 2023 - 2026 Login")} />
       <Container maxWidth="md" component={Paper} sx={{ mt: 20 }}>
         <Box sx={{ width: "100%" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs value={tab} onChange={handleChangeTab} aria-label="basic tabs example">
-              <Tab label="Log In (External Expert)" {...a11yProps(0)} />
-              <Tab label="Log In (Internal NCCN)" {...a11yProps(0)} />
+              <Tab label={t("auth.login.tabName1", "Log In (External Expert)")} {...a11yProps(0)} />
+              <Tab label={t("auth.login.tabName2", "Log In (Internal NCCN)")} {...a11yProps(0)} />
             </Tabs>
           </Box>
           <TabPanel value={tab} index={0}>

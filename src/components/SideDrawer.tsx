@@ -36,20 +36,23 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
         <List>
           {user && (
             <>
+              {user.admin && (
+                <ListItem disablePadding>
+                  <ListItemButton component={Link} to="/hazards" onClick={onClose}>
+                    <ListItemIcon></ListItemIcon>
+                    <ListItemText primary={t("sideDrawer.hazardCatalogue", "Hazard Catalogue")} />
+                  </ListItemButton>
+                </ListItem>
+              )}
               <ListItem disablePadding>
-                <ListItemButton component={Link} to="/hazards" onClick={onClose}>
+                <ListItemButton component={Link} to="/overview" onClick={onClose}>
                   <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("sideDrawer.hazardCatalogue", "Hazard Catalogue")} />
+                  <ListItemText primary={t("sideDrawer.riskAnalysis", "Risk Analysis")} />
                 </ListItemButton>
               </ListItem>
+
               {user.admin && (
                 <>
-                  <ListItem disablePadding>
-                    <ListItemButton component={Link} to="/overview" onClick={onClose}>
-                      <ListItemIcon></ListItemIcon>
-                      <ListItemText primary={t("sideDrawer.riskAnalysis", "Risk Analysis")} />
-                    </ListItemButton>
-                  </ListItem>
                   <Divider />
                   <ListItem disablePadding>
                     <ListItemButton component={Link} to="/reporting" onClick={onClose}>
@@ -83,9 +86,9 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
                       <ListItemText primary={t("sideDrawer.translations", "App Translation")} />
                     </ListItemButton>
                   </ListItem>
+                  <Divider />
                 </>
               )}
-              <Divider />
               <ListItem disablePadding>
                 <ListItemButton component={Link} to="/learning" onClick={onClose}>
                   <ListItemIcon></ListItemIcon>

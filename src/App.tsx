@@ -25,6 +25,7 @@ import UploadCodePage from "./pages/_dev/UploadCodePage";
 import RiskCataloguePage from "./pages/learning/RiskCataloguePage";
 import QuantitativeScalesPage from "./pages/learning/QuantitativeScalesPage";
 import RegistrationPage from "./pages/auth/RegistrationPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 function App() {
   useEffect(() => {
@@ -138,6 +139,10 @@ function App() {
     {
       path: "/auth/register/:registration_code",
       element: <RegistrationPage />,
+    },
+    {
+      path: "/auth/resetPassword/:user_id/:code",
+      element: <ResetPasswordPage />,
     },
 
     // DEV ONLY

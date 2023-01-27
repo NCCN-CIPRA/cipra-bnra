@@ -213,19 +213,19 @@ export default function LearningOverviewPage({}) {
                     </ListItemIcon>
                     <ListItemText primary={t("learning.tools.validation", "Risk File Validation")} />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/tools-analysisA">
+                  <ListItemButton component={RouterLink} to="/learning/tools-analysisA" disabled>
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
                     <ListItemText primary={t("learning.tools.analysisA", "Risk Analysis A")} />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/tools-analysisB">
+                  <ListItemButton component={RouterLink} to="/learning/tools-analysisB" disabled>
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
                     <ListItemText primary={t("learning.tools.analysisB", "Risk Analysis B")} />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/tools-consensus">
+                  <ListItemButton component={RouterLink} to="/learning/tools-consensus" disabled>
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>

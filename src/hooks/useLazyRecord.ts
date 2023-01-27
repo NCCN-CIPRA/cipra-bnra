@@ -29,6 +29,7 @@ export default function useLazyRecord<T>(options: GetRecordParams<T>) {
   const [data, setData] = useState<T | null>(null);
 
   const getData = async (lazyOptions?: Partial<GetRecordParams<T>>) => {
+    setLoading(true);
     let response;
     const o = { ...options, ...lazyOptions };
 

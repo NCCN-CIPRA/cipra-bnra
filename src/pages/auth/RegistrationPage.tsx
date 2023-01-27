@@ -105,11 +105,19 @@ export default function RegistrationPage() {
   const handleRegister = async () => {
     setLoading(true);
 
-    if (email.length < 1 || email.indexOf("@") < 0) setError("email");
-    else if (!goodPW(password)) setError("password");
-    else if (password !== password2) setError("passwordMatch");
-    else if (!accept) setError("accept");
-    else {
+    if (email.length < 1 || email.indexOf("@") < 0) {
+      setError("email");
+      setLoading(false);
+    } else if (!goodPW(password)) {
+      setError("password");
+      setLoading(false);
+    } else if (password !== password2) {
+      setError("passwordMatch");
+      setLoading(false);
+    } else if (!accept) {
+      setError("accept");
+      setLoading(false);
+    } else {
       setError(false);
       document.getElementById("EmailTextBox")!.setAttribute("value", email);
       document.getElementById("UserNameTextBox")!.setAttribute("value", email);
@@ -118,8 +126,6 @@ export default function RegistrationPage() {
 
       document.getElementById("SubmitButton")!.click();
     }
-
-    setLoading(false);
   };
 
   return (
@@ -130,7 +136,7 @@ export default function RegistrationPage() {
         <Box sx={{ width: "100%", mb: 12 }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs value={0} aria-label="basic tabs example">
-              <Tab label="Register" {...a11yProps(0)} />
+              <Tab label={t("auth.registration.tabName", "Register")} {...a11yProps(0)} />
             </Tabs>
           </Box>
           <TabPanel value={0} index={0}>
