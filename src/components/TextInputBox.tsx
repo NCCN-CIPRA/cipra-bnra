@@ -42,7 +42,7 @@ function TextInputBox({
 }) {
   const [savedValue, setSavedValue] = useState(initialValue);
   const [innerValue, setInnerValue] = useState(initialValue);
-  const [debouncedValue] = useDebounce(innerValue, 2000);
+  const [debouncedValue] = useDebounce(innerValue, 5000);
 
   useEffect(() => {
     if (onSave && debouncedValue !== savedValue) {

@@ -52,6 +52,7 @@ export interface API {
 
   getContacts<T = DVContact>(query?: string): Promise<T[]>;
   createContact(fields: object): Promise<CreateResponse>;
+  deleteContact(id: string): Promise<void>;
 
   getRiskFiles<T = DVRiskFile>(query?: string): Promise<T[]>;
   getRiskFile<T = DVRiskFile>(id: string, query?: string): Promise<T>;
@@ -243,6 +244,15 @@ export default function useAPI(): API {
       });
 
       return { id: response.headers.get("entityId") as string };
+    },
+    deleteContact: async function (id: string): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/contacts(${id})`, {
+        method: "DELETE",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+      });
     },
 
     getRiskFiles: async function <T = DVRiskFile>(query?: string): Promise<T[]> {

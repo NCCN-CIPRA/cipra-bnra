@@ -274,6 +274,7 @@ export default function ValidationPage() {
         <Paper>
           <Box p={2} my={4} id="definition-container">
             <HelpButton
+              id="definition-help-button"
               steps={[
                 {
                   disableBeacon: true,
@@ -282,17 +283,19 @@ export default function ValidationPage() {
                   content: (
                     <Box sx={{ textAlign: "left" }}>
                       <Typography variant="body1" my={2}>
-                        <Trans i18nKey="validation.intro.part3">The base of each risk file is the definition.</Trans>
+                        <Trans i18nKey="validation.definition.info.1">
+                          The base of each risk file is the definition.
+                        </Trans>
                       </Typography>
                       <Typography variant="body1" my={2}>
-                        <Trans i18nKey="validation.intro.part3">
+                        <Trans i18nKey="validation.definition.info.2">
                           The definition should be as short and concise as possible (to ensure optimal readability for
                           efficient referencing) while still being complete and clearly delineating the scope of the
                           risk (and outlining the distinctions relative to other risks where necessary).
                         </Trans>
                       </Typography>
                       <Typography variant="body1" my={2}>
-                        <Trans i18nKey="validation.intro.part3">
+                        <Trans i18nKey="validation.definition.info.3">
                           The definition should <b>not</b> contain any indications of the magnitude or impact of the
                           risk.
                         </Trans>
@@ -1026,21 +1029,22 @@ export default function ValidationPage() {
         component={Paper}
         elevation={5}
       >
-        <Button color="error" sx={{ mr: 1 }} component={RouterLink} to="/validation">
+        {/* <Button color="error" sx={{ mr: 1 }} component={RouterLink} to="/validation">
           <Trans i18nKey="button.exit">Exit</Trans>
-        </Button>
+        </Button> */}
         <Box sx={{ flex: "1 1 auto" }} />
         {isSaving ? (
           <LoadingButton color="secondary" sx={{ mr: 1 }} loading loadingPosition="start" startIcon={<SaveIcon />}>
             <Trans i18nKey="button.saving">Saving</Trans>
           </LoadingButton>
         ) : (
-          <Button color="primary" sx={{ mr: 1 }} onClick={handleSave}>
+          <Button id="save-button" color="primary" sx={{ mr: 1 }} onClick={handleSave}>
             <Trans i18nKey="button.save">Save</Trans>
           </Button>
         )}
 
         <Button
+          id="save-and-exit-button"
           color="primary"
           onClick={() => {
             handleSave();

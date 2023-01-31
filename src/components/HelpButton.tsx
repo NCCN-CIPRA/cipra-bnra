@@ -2,8 +2,10 @@ import { IconButton, useTheme } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import Joyride, { Step, STATUS, EVENTS, CallBackProps, ACTIONS } from "react-joyride";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-export default ({ steps }: { steps: Step[] }) => {
+export default function HelpButton({ id, steps }: { id?: string; steps: Step[] }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [run, setRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
@@ -23,7 +25,7 @@ export default ({ steps }: { steps: Step[] }) => {
 
   return (
     <>
-      <IconButton sx={{ float: "right" }} onClick={() => setRun(true)}>
+      <IconButton id={id} sx={{ float: "right" }} onClick={() => setRun(true)}>
         <InfoOutlinedIcon color="primary" />
       </IconButton>
       <Joyride
@@ -38,7 +40,14 @@ export default ({ steps }: { steps: Step[] }) => {
         }}
         callback={handleCallback}
         scrollOffset={72}
+        locale={{
+          back: t("button.back", "Back"),
+          last: t("button.last", "Exit"),
+          close: t("button.close", "Exit"),
+          next: t("button.next", "Next"),
+          skip: t("button.skip", "Skip"),
+        }}
       />
     </>
   );
-};
+}

@@ -1,18 +1,11 @@
 import React, { useState } from "react";
 import {
   Box,
-  Button,
   Checkbox,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   IconButton,
   Paper,
   Step,
-  StepIcon,
   StepLabel,
   Stepper,
   Table,
@@ -27,15 +20,15 @@ import {
 } from "@mui/material";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import useRecords from "../../hooks/useRecords";
-import { DVTranslation } from "../../types/dataverse/DVTranslation";
-import { Stack } from "@mui/system";
 import { LoadingButton } from "@mui/lab";
-import Delete from "@mui/icons-material/Delete";
 import { DVContact } from "../../types/dataverse/DVContact";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import PersonIcon from "@mui/icons-material/Person";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Accordion from "@mui/material/Accordion";
 
 interface SelectableExpert extends DVContact<DVParticipation<DVContact, DVRiskFile>[]> {
   selected: boolean;
@@ -164,7 +157,6 @@ const ExpertsTable = ({
         };
       })
     );
-    console.log(experts);
   };
 
   return (
@@ -213,17 +205,33 @@ const ExpertsTable = ({
                     </Tooltip>
                   </TableCell>
                 </TableRow>
-                {e.participations.map((p) => (
-                  <TableRow key={p.cr4de_risk_file.cr4de_riskfilesid}>
-                    <TableCell></TableCell>
-                    <TableCell component="td" scope="row" sx={{ p: 1, pl: 4 }}>
-                      {p.cr4de_risk_file.cr4de_title}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>
-                      <ParticipationStepper participation={p} />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {e.participations.map((p) => {
+                  if (p.cr4de_role === "expert") {
+                    return (
+                      <TableRow key={p.cr4de_risk_file.cr4de_riskfilesid}>
+                        <TableCell></TableCell>
+                        <TableCell component="td" scope="row" sx={{ p: 1, pl: 4 }}>
+                          {p.cr4de_risk_file.cr4de_title}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "right" }}>
+                          <ParticipationStepper participation={p} />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  } else {
+                    return (
+                      <TableRow key={p.cr4de_risk_file.cr4de_riskfilesid}>
+                        <TableCell></TableCell>
+                        <TableCell component="td" scope="row" sx={{ p: 1, pl: 4 }}>
+                          {p.cr4de_risk_file.cr4de_title}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                          <Typography variant="body1">{p.cr4de_role === "analist" ? "Author" : "Co-Author"}</Typography>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+                })}
                 <TableRow>
                   <TableCell
                     colSpan={100}
@@ -240,6 +248,117 @@ const ExpertsTable = ({
   );
 };
 
+const ParticipantInput = ({
+  experts,
+  onFinishUpload,
+}: {
+  experts: SelectableExpert[];
+  onFinishUpload: () => Promise<void>;
+}) => {
+  const api = useAPI();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [expertsCSV, setExpertsCSV] = useState("");
+
+  const handleUploadExperts = async () => {
+    setIsLoading(true);
+
+    const delimiter = expertsCSV.indexOf(";") >= 0 ? ";" : ",";
+
+    const contacts = await api.getContacts("$select=emailaddress1");
+    const missingContacts = [];
+
+    const expertData: { [email: string]: any } = expertsCSV
+      .split("\n")
+      .map((l) => {
+        const [email, hazardId, role] = l.split(delimiter);
+
+        return { email, hazardId, role };
+      })
+      .reduce((acc: any, e) => {
+        if (!acc[e.email]) {
+          acc[e.email] = {};
+        }
+
+        const existingContact = contacts?.find((c) => c.emailaddress1 === e.email);
+        const existingParticipation = experts?.find((expert) => expert.emailaddress1 === e.email);
+
+        if (!existingContact) {
+          missingContacts.push(e);
+
+          return acc;
+        } else {
+          acc[e.email].contact = existingContact;
+        }
+
+        if (existingParticipation?.participations.some((p) => p.cr4de_risk_file.cr4de_hazard_id === e.hazardId)) {
+          return acc;
+        }
+
+        if (!acc[e.email].participations) {
+          acc[e.email].participations = [];
+        }
+
+        acc[e.email].participations.push(e.hazardId);
+
+        return acc;
+      }, {});
+
+    for (let expert of Object.values(expertData)) {
+      for (let hazardId of expert.participations) {
+        const riskFile = await api.getRiskFiles(`$filter=cr4de_hazard_id eq '${hazardId}'`);
+
+        if (riskFile?.length > 0) {
+          await api.createParticipant({
+            "cr4de_contact@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${expert.contact.contactid})`,
+            cr4de_role: expert.role,
+            "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile[0].cr4de_riskfilesid})`,
+          });
+        }
+      }
+    }
+
+    await onFinishUpload();
+
+    setIsLoading(false);
+  };
+
+  return (
+    <Accordion sx={{ mb: 4 }}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+        <Typography>Load Participation Data</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+          Paste CSV participation data below to load in the following format:
+        </Typography>
+        <pre style={{ marginLeft: 16 }}>
+          <Typography variant="caption" paragraph sx={{ m: 0 }}>
+            [Email],[Risk File Hazard ID],[expert|analist|analist_2]
+          </Typography>
+          <Typography variant="caption" paragraph sx={{ m: 0 }}>
+            [Email],[Risk File Hazard ID],[expert|analist|analist_2]
+          </Typography>
+          <Typography variant="caption">...</Typography>
+        </pre>
+        <TextField
+          multiline
+          fullWidth
+          minRows={5}
+          maxRows={5}
+          value={expertsCSV}
+          onChange={(e) => setExpertsCSV(e.target.value)}
+        />
+        <Box sx={{ mt: 2, textAlign: "right" }}>
+          <LoadingButton onClick={handleUploadExperts} loading={false}>
+            Upload
+          </LoadingButton>
+        </Box>
+      </AccordionDetails>
+    </Accordion>
+  );
+};
+
 export default function ExpertManagementPage() {
   const api = useAPI();
 
@@ -249,15 +368,13 @@ export default function ExpertManagementPage() {
   const [filteredExperts, setFilteredExperts] = useState<SelectableExpert[] | null>(null);
 
   // Get all participation records from O365 dataverse
-  useRecords<SelectableExpert>({
+  const { reloadData } = useRecords<SelectableExpert>({
     table: DataTable.PARTICIPATION,
     query: `$expand=cr4de_contact,cr4de_risk_file`,
     transformResult: (participations: DVParticipation<DVContact, DVRiskFile>[]) => {
       const contacts: { [id: string]: SelectableExpert } = {};
 
       participations.forEach((p) => {
-        if (p.cr4de_role !== "expert") return;
-
         if (!contacts[p._cr4de_contact_value]) {
           contacts[p._cr4de_contact_value] = {
             ...p.cr4de_contact,
@@ -283,13 +400,9 @@ export default function ExpertManagementPage() {
         `Are you sure you wish to send an invitation email to ${experts.length} expert${experts.length > 1 ? "s" : ""}?`
       )
     ) {
-      setIsLoading(true);
-
       await api.sendInvitationEmail(experts.map((e) => e.contactid));
 
-      // await reloadData();
-
-      setIsLoading(false);
+      await reloadData();
     }
   };
 
@@ -318,6 +431,8 @@ export default function ExpertManagementPage() {
         <Box mt={5}>
           <Typography variant="body1" my={2}></Typography>
         </Box>
+
+        {experts && <ParticipantInput experts={experts} onFinishUpload={() => reloadData()} />}
 
         {filteredExperts && (
           <ExpertsTable

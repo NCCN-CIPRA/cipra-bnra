@@ -30,13 +30,11 @@ const TranslationsTable = React.memo(
   ({
     translations,
     setEditTranslation,
-    setNewTranslation,
     setEditLanguage,
     onRemove,
   }: {
     translations: DVTranslation[] | null;
     setEditTranslation: (t: DVTranslation) => void;
-    setNewTranslation: (t: string | null) => void;
     setEditLanguage: (l: string) => void;
     onRemove: (t: DVTranslation) => Promise<void>;
   }) => (
@@ -49,13 +47,13 @@ const TranslationsTable = React.memo(
             <TableCell>Nederlands</TableCell>
             <TableCell>Français</TableCell>
             <TableCell>Deutsch</TableCell>
-            <TableCell width={0}></TableCell>
+            <TableCell width={50}></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {translations &&
             translations.map((t) => (
-              <TableRow key={t.cr4de_name}>
+              <TableRow key={t.cr4de_bnratranslationid}>
                 <TableCell component="th" scope="row">
                   {t.cr4de_name}
                 </TableCell>
@@ -63,7 +61,6 @@ const TranslationsTable = React.memo(
                   sx={{ "&:hover": { bgcolor: "rgba(0, 0, 0, 0.1)", cursor: "pointer" } }}
                   onClick={(event) => {
                     setEditTranslation(t);
-                    setNewTranslation(t.cr4de_en);
                     setEditLanguage("en");
                   }}
                 >
@@ -73,7 +70,6 @@ const TranslationsTable = React.memo(
                   sx={{ "&:hover": { bgcolor: "rgba(0, 0, 0, 0.1)", cursor: "pointer" } }}
                   onClick={(event) => {
                     setEditTranslation(t);
-                    setNewTranslation(t.cr4de_nl);
                     setEditLanguage("nl");
                   }}
                 >
@@ -83,7 +79,6 @@ const TranslationsTable = React.memo(
                   sx={{ "&:hover": { bgcolor: "rgba(0, 0, 0, 0.1)", cursor: "pointer" } }}
                   onClick={(event) => {
                     setEditTranslation(t);
-                    setNewTranslation(t.cr4de_fr);
                     setEditLanguage("fr");
                   }}
                 >
@@ -93,13 +88,12 @@ const TranslationsTable = React.memo(
                   sx={{ "&:hover": { bgcolor: "rgba(0, 0, 0, 0.1)", cursor: "pointer" } }}
                   onClick={(event) => {
                     setEditTranslation(t);
-                    setNewTranslation(t.cr4de_de);
                     setEditLanguage("de");
                   }}
                 >
                   {t.cr4de_de}
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ width: 30 }}>
                   <IconButton onClick={() => onRemove(t)}>
                     <Delete />
                   </IconButton>
@@ -112,6 +106,45 @@ const TranslationsTable = React.memo(
   )
 );
 
+function TranslationDialog({
+  open,
+  loading,
+  name,
+  translation,
+  handleCloseEditDialog,
+}: {
+  open: boolean;
+  loading: boolean;
+  name: string;
+  translation: string;
+  handleCloseEditDialog: (newValue?: string) => void;
+}) {
+  const [newTranslation, setNewTranslation] = useState<string>(translation);
+
+  return (
+    <Dialog open={open} onClose={() => handleCloseEditDialog(newTranslation)}>
+      <DialogTitle>Edit Translations</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          <Typography variant="body1" paragraph>
+            {name}
+          </Typography>
+          <Stack direction="column" spacing={3}>
+            <Stack direction="row" alignItems="center" spacing={1}></Stack>
+            <TextField multiline rows={3} value={newTranslation} onChange={(e) => setNewTranslation(e.target.value)} />
+          </Stack>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => handleCloseEditDialog()}>Cancel</Button>
+        <LoadingButton loading={loading} variant="text" onClick={() => handleCloseEditDialog(newTranslation)}>
+          Save
+        </LoadingButton>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 export default function TranslationsPage() {
   const api = useAPI();
 
@@ -120,16 +153,39 @@ export default function TranslationsPage() {
   const [editTranslation, setEditTranslation] = useState<DVTranslation | null>(null);
   const [editLanguage, setEditLanguage] = useState<string>("en");
 
-  const [newTranslation, setNewTranslation] = useState<string | null>(null);
-
   const { data: translations, reloadData } = useRecords<DVTranslation>({
     table: DataTable.TRANSLATIONS,
     query: "$orderby=cr4de_name",
+    // REMOVE DOUBLES
+    // onComplete: async (data) => {
+    //   const col: { [key: string]: DVTranslation[] } = {};
+
+    //   data.forEach((t) => {
+    //     if (!col[t.cr4de_name]) col[t.cr4de_name] = [];
+
+    //     col[t.cr4de_name].push(t);
+    //   });
+
+    //   const doubles = Object.values(col).filter((c) => c.length > 1);
+    //   console.log(doubles.length);
+    //   console.log(doubles);
+    //   for (let i = 0; i < doubles.length; i++) {
+    //     for (let j = 1; j < doubles[i].length; j++) {
+    //       console.log(doubles[i][j].cr4de_name);
+    //       await api.deleteTranslation(doubles[i][j].cr4de_bnratranslationid);
+    //       await new Promise((r) => setTimeout(r, 500));
+    //     }
+    //   }
+    // },
   });
 
-  const handleCloseEditDialog = () => setEditTranslation(null);
+  const handleCloseEditDialog = (newTranslation?: string) => {
+    setEditTranslation(null);
 
-  const handleSaveTranslation = async () => {
+    if (newTranslation) handleSaveTranslation(newTranslation);
+  };
+
+  const handleSaveTranslation = async (newTranslation: string) => {
     if (!editTranslation) return;
 
     setIsLoading(true);
@@ -158,7 +214,7 @@ export default function TranslationsPage() {
 
   return (
     <>
-      <Container sx={{ mb: 8 }}>
+      <Box mx={10}>
         <Box mt={5}>
           <Typography variant="body1" my={2}></Typography>
         </Box>
@@ -166,37 +222,20 @@ export default function TranslationsPage() {
         <TranslationsTable
           translations={translations}
           setEditTranslation={setEditTranslation}
-          setNewTranslation={setNewTranslation}
           setEditLanguage={setEditLanguage}
           onRemove={handleRemove}
         />
-      </Container>
 
-      <Dialog open={editTranslation !== null} onClose={handleCloseEditDialog}>
-        <DialogTitle>Edit Translations</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            <Typography variant="body1" paragraph>
-              {editTranslation?.cr4de_name}
-            </Typography>
-            <Stack direction="column" spacing={3}>
-              <Stack direction="row" alignItems="center" spacing={1}></Stack>
-              <TextField
-                multiline
-                rows={3}
-                value={newTranslation}
-                onChange={(e) => setNewTranslation(e.target.value)}
-              />
-            </Stack>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseEditDialog}>Cancel</Button>
-          <LoadingButton loading={isLoading} variant="text" onClick={handleSaveTranslation}>
-            Save
-          </LoadingButton>
-        </DialogActions>
-      </Dialog>
+        {editTranslation && (
+          <TranslationDialog
+            open={editTranslation !== null}
+            loading={isLoading}
+            name={editTranslation?.cr4de_name}
+            translation={editTranslation[`cr4de_${editLanguage}` as keyof DVTranslation] || ""}
+            handleCloseEditDialog={handleCloseEditDialog}
+          />
+        )}
+      </Box>
     </>
   );
 }

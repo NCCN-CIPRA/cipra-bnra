@@ -5,7 +5,7 @@ import theme from "../../theme";
 import { useState } from "react";
 import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 
-export default () => {
+export default function ValidationTutorial() {
   const { t } = useTranslation();
 
   const [run, setRun] = useState(true);
@@ -39,18 +39,18 @@ export default () => {
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="validation.intro.part2">
+            <Trans i18nKey="validation.tutorial.1.1">
               This page contains the <b>preliminary risk file</b> written by NCCN analists.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="validation.intro.part2">
+            <Trans i18nKey="validation.tutorial.1.2">
               The goal of this phase is the <b>validation and correction</b> (if needed) of the information in the
               preliminary risk file according to your topical expertise.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="validation.intro.part2">
+            <Trans i18nKey="validation.tutorial.1.3">
               Because the risk files will serve as the common basis for all of the following analytical phases, it is of
               utmost importance that the information they hold is correct and complete.
             </Trans>
@@ -65,10 +65,10 @@ export default () => {
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="validation.intro.part3">Each risk file is divided into several sections.</Trans>
+            <Trans i18nKey="validation.tutorial.2.1">Each risk file is divided into several sections.</Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="validation.intro.part3">
+            <Trans i18nKey="validation.tutorial.2.2">
               For each section, we kindly ask you to carefully consider its existing contents proposed by NCCN analists.
             </Trans>
           </Typography>
@@ -77,12 +77,12 @@ export default () => {
       styles: { options: { width: 800 } },
     },
     {
-      target: "body",
-      placement: "center",
+      target: "#definition-help-button",
+      placement: "bottom-end",
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="validation.intro.part3">
+            <Trans i18nKey="validation.tutorial.3.1">
               For more background information on the purpose of a section, you can click this button.
             </Trans>
           </Typography>
@@ -96,7 +96,7 @@ export default () => {
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="validation.intro.part3">
+            <Trans i18nKey="validation.tutorial.4.1">
               Any sources that were used by NCCN Analists can be consulted by clicking this button.
             </Trans>
           </Typography>
@@ -109,15 +109,56 @@ export default () => {
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="validation.intro.part3">
+            <Trans i18nKey="validation.tutorial.5.1">
               This input box should be used to provide any corrections, remarks, elaborations etc. on the content of the
               section.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="validation.intro.part3">
+            <Trans i18nKey="validation.tutorial.5.2">
               All input may be provided in the language you feel most comfortable with.
             </Trans>
+          </Typography>
+        </Box>
+      ),
+      styles: { options: { width: 600 } },
+    },
+    {
+      target: "#save-button",
+      placement: "top",
+      content: (
+        <Box sx={{ textAlign: "left" }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="validation.tutorial.6.1">
+              Your changes are saved automatically every few seconds, but you can click this button to save manually.
+            </Trans>
+          </Typography>
+        </Box>
+      ),
+      styles: { options: { width: 600 } },
+    },
+    {
+      target: "#save-and-exit-button",
+      placement: "top",
+      content: (
+        <Box sx={{ textAlign: "left" }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="validation.tutorial.7.1">
+              When you are finished or would like to continue another time, click this button to return to the list of
+              risks and save your progress.
+            </Trans>
+          </Typography>
+        </Box>
+      ),
+      styles: { options: { width: 600 } },
+    },
+    {
+      target: "#tutorialButton",
+      placement: "top",
+      content: (
+        <Box sx={{ textAlign: "left" }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="validation.tutorial.8.1">Press this button to replay the tutorial.</Trans>
           </Typography>
         </Box>
       ),
@@ -188,11 +229,19 @@ export default () => {
         styles={{
           options: {
             primaryColor: theme.palette.primary.main,
+            zIndex: 1500,
           },
         }}
         callback={handleTutorialCallback}
-        scrollOffset={72}
-        disableScrolling={true}
+        scrollOffset={500}
+        // disableScrolling={true},
+        locale={{
+          back: t("button.back", "Back"),
+          last: t("button.last", "Exit"),
+          close: t("button.close", "Exit"),
+          next: t("button.next", "Next"),
+          skip: t("button.skip", "Skip"),
+        }}
       />
       <Joyride
         steps={stepsSkip}
@@ -206,6 +255,12 @@ export default () => {
           },
         }}
         callback={handleSkipCallback}
+        locale={{
+          back: t("button.back", "Back"),
+          last: t("button.last", "Exit"),
+          next: t("button.next", "Next"),
+          skip: t("button.skip", "Skip"),
+        }}
       />
 
       <IconButton id="tutorialButton" sx={{ position: "fixed", bottom: 60, left: 8 }} onClick={() => setRun(true)}>
@@ -213,4 +268,4 @@ export default () => {
       </IconButton>
     </>
   );
-};
+}
