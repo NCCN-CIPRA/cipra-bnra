@@ -24,7 +24,7 @@ const unwrapScenario = (scenario: string, parameters: IntensityParameter[]) => {
 
     return parameters.map((p, i) => ({
       ...p,
-      value: json[0],
+      value: json[i],
     }));
   }
 };

@@ -30,7 +30,7 @@ const getAverage = (fieldName: string, scalePrefix: string, record: any, analyse
   // if (record[fieldName]) return record[fieldName];
 
   if (analyses.length <= 0) return getScaleString(0, scalePrefix);
-  console.log(analyses.reduce((acc: number, an: any) => acc + getScaleValue(an[fieldName]), 0) / analyses.length);
+
   return getScaleString(
     analyses.reduce((acc: number, an: any) => acc + getScaleValue(an[fieldName]), 0) / analyses.length,
     scalePrefix
@@ -115,7 +115,7 @@ export default function AnalysisAveragerPage() {
             cr4de_di_quanti_fa_e: getAverage("cr4de_di_quanti_fa_e", "Fa", riskFile, analyses),
             cr4de_di_quanti_fb_e: getAverage("cr4de_di_quanti_fb_e", "Fb", riskFile, analyses),
           };
-          console.log(fieldsToUpdate, analyses);
+
           const response = await fetch(
             `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
             {

@@ -29,7 +29,6 @@ export default function UploadCodePage() {
     if (!inputRef.current) return;
 
     const file = inputRef.current.files && inputRef.current.files[0];
-    console.log(file);
 
     setIsUploadingFile(true);
 

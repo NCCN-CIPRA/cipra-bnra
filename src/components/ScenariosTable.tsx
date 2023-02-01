@@ -39,11 +39,12 @@ function ScenariosTable({
   const [innerValue, setInnerValue] = useState(initialScenarios);
   const [debouncedValue] = useDebounce(innerValue, 2000);
 
-  console.log(innerValue);
-  const scenarios = useMemo(
-    () => unwrap(parameters, innerValue.considerable, innerValue.major, innerValue.extreme),
-    [parameters, innerValue]
-  );
+  // const scenarios = useMemo(
+  //   () => unwrap(parameters, innerValue.considerable, innerValue.major, innerValue.extreme),
+  //   [parameters, innerValue]
+  // );
+
+  const scenarios = unwrap(parameters, innerValue.considerable, innerValue.major, innerValue.extreme);
 
   useEffect(() => {
     if (onSave) {
@@ -90,8 +91,6 @@ function ScenariosTable({
         [`cr4de_scenario_${scenario}`]: updated[scenario],
       });
   };
-
-  console.log(scenarios, initialScenarios);
 
   return (
     <Table>

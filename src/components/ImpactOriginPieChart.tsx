@@ -3,7 +3,6 @@ import { Box, Typography } from "@mui/material";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
-    console.log(payload);
     return (
       <div
         style={{

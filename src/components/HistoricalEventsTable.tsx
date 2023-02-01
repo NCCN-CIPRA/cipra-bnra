@@ -35,7 +35,7 @@ function HistoricalEventRow({
   useEffect(() => {
     setIsLoading(false);
   }, [event, setIsLoading]);
-  console.log(onChange);
+
   return (
     <TableRow>
       <TableCell sx={{ whiteSpace: "nowrap", verticalAlign: "top", minWidth: 200 }}>
@@ -133,7 +133,6 @@ function HistoricalEventsTable({
 
   useEffect(() => {
     if (onSave && debouncedValue !== savedValue) {
-      console.log("debounce", debouncedValue, savedValue);
       onSave(debouncedValue);
       setSavedValue(debouncedValue);
       setUpdatedValue && setUpdatedValue(undefined);
