@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import {
   Box,
   Button,
+  Card,
+  CardActions,
   Container,
   Dialog,
   DialogActions,
@@ -46,7 +48,7 @@ const TranslationsTable = React.memo(
             <TableCell>English</TableCell>
             <TableCell>Nederlands</TableCell>
             <TableCell>Français</TableCell>
-            <TableCell>Deutsch</TableCell>
+            {/* <TableCell>Deutsch</TableCell> */}
             <TableCell width={50}></TableCell>
           </TableRow>
         </TableHead>
@@ -84,7 +86,7 @@ const TranslationsTable = React.memo(
                 >
                   {t.cr4de_fr}
                 </TableCell>
-                <TableCell
+                {/* <TableCell
                   sx={{ "&:hover": { bgcolor: "rgba(0, 0, 0, 0.1)", cursor: "pointer" } }}
                   onClick={(event) => {
                     setEditTranslation(t);
@@ -92,7 +94,7 @@ const TranslationsTable = React.memo(
                   }}
                 >
                   {t.cr4de_de}
-                </TableCell>
+                </TableCell> */}
                 <TableCell sx={{ width: 30 }}>
                   <IconButton onClick={() => onRemove(t)}>
                     <Delete />
@@ -152,6 +154,7 @@ export default function TranslationsPage() {
 
   const [editTranslation, setEditTranslation] = useState<DVTranslation | null>(null);
   const [editLanguage, setEditLanguage] = useState<string>("en");
+  const [filter, setFilter] = useState(false);
 
   const { data: translations, reloadData } = useRecords<DVTranslation>({
     table: DataTable.TRANSLATIONS,
@@ -219,8 +222,18 @@ export default function TranslationsPage() {
           <Typography variant="body1" my={2}></Typography>
         </Box>
 
+        <Card sx={{ my: 4 }}>
+          <CardActions>
+            <Button onClick={() => setFilter(!filter)}>{filter ? "Show All" : "Show Incomplete"}</Button>
+          </CardActions>
+        </Card>
+
         <TranslationsTable
-          translations={translations}
+          translations={
+            translations && filter
+              ? translations.filter((t) => t.cr4de_nl === null || t.cr4de_fr === null || t.cr4de_en === null)
+              : translations
+          }
           setEditTranslation={setEditTranslation}
           setEditLanguage={setEditLanguage}
           onRemove={handleRemove}

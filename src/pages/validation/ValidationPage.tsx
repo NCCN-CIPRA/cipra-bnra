@@ -288,9 +288,23 @@ export default function ValidationPage() {
                     <Box sx={{ textAlign: "left" }}>
                       <Typography variant="body1" my={2}>
                         <Trans i18nKey="validation.definition.info.1">
-                          The base of each risk file is the definition.
+                          The base of each risk file is the definition. It determines the scope of the risk under study
+                          and in some cases it also specifies which elements fall outside the scope. This section also
+                          specifies, if relevant, the differences between the risk studied and the other risks studied
+                          within the framework of this Belgian National Risk Assessment.
                         </Trans>
                       </Typography>
+                    </Box>
+                  ),
+                  styles: { options: { width: 800 } },
+                },
+
+                {
+                  disableBeacon: true,
+                  target: "body",
+                  placement: "center",
+                  content: (
+                    <Box sx={{ textAlign: "left" }}>
                       <Typography variant="body1" my={2}>
                         <Trans i18nKey="validation.definition.info.2">
                           The definition should be as short and concise as possible (to ensure optimal readability for
@@ -363,6 +377,61 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
+              <HelpButton
+                id="historical-events-help-button"
+                steps={[
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.historicalEvents.info.1.1">
+                            De historische gebeurtenissen in de risicofiche zijn voorbeelden van gebeurtenissen die zich
+                            in België of in het buitenland hebben voorgedaan.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.historicalEvents.info.1.2">
+                            Deze sectie is optioneel en beoogt evenmin volledig te zijn, maar ze kan wel helpen bij de
+                            selectie van relevante intensiteitsparameters.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.historicalEvents.info.2.1">
+                            We nodigen u uit om kennis te nemen van de historische gebeurtenissen in de onlineapplicatie
+                            en deze te verbeteren of aan te vullen met andere relevante historische gebeurtenissen en/of
+                            feedback te geven in het daartoe voorziene vak.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.historicalEvents.info.2.2">
+                            Van specifiek belang zijn grootte-ordes van de intensiteit en/of impact van de gebeurtenis.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.historicalEvents.info.2.3">
+                            Indien u beschikt over referenties, kunnen deze onderaan toegevoegd worden.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                ]}
+              />
               <Typography variant="h6" mb={1} color="primary">
                 2. <Trans i18nKey="riskFile.historicalEvents.title">Historical Events</Trans>
               </Typography>
@@ -417,6 +486,124 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
+              <HelpButton
+                id="parameters-help-button"
+                steps={[
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.parameters.info.1.1">
+                            Het beoordelen van een risico in termen van impact en waarschijnlijkheid op basis van een
+                            definitie alleen kan ingewikkeld zijn. Een risico kan zich immers in verschillende mate van
+                            intensiteit voordoen.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.parameters.info.1.2">
+                            Om dit probleem op te vangen, wordt elk te beoordelen risico gekarakteriseerd aan de hand
+                            van 3 intensiteitscenario's; een “<i>considerable</i>", een “<i>major</i>" en een "
+                            <i>extreme</i>" scenario, deze worden opgebouwd aan de hand van risicospecifieke
+                            <b>intensiteitsparameters</b>.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.parameters.info.2.1">
+                            De <b>intensiteitsparameters</b> komen overeen met factoren die de ontwikkeling en de
+                            gevolgen van het risico beïnvloeden.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.parameters.info.2.2">
+                            Elk risico wordt dus gekenmerkt door specifieke parameters. Zo zijn de parameters die de
+                            risico's « <i>fluvial flood</i> » en « <i>nuclear plant incident</i> » kenmerken
+                            verschillend, omdat zij specifiek zijn voor het te beoordelen risico.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.parameters.info.3.1">
+                            Bijvoorbeeld, het risico « nuclear plant incident » wordt gekenmerkt door volgende
+                            specifieke parameters; die de ontwikkeling en de gevolgen van het risico beïnvloeden:
+                          </Trans>
+                        </Typography>
+                        <ul>
+                          <li>
+                            <Typography variant="body1" my={2}>
+                              <Trans i18nKey="validation.parameters.info.3.2">
+                                <b>Type incident:</b> parameter die de aard van het incident beschrijft
+                              </Trans>
+                            </Typography>
+                          </li>
+                          <li>
+                            <Typography variant="body1" my={2}>
+                              <Trans i18nKey="validation.parameters.info.3.3">
+                                <b>Vrijgavetijd:</b> tijd tussen het incident en het vrijkomen van nucleaire stoffen
+                              </Trans>
+                            </Typography>
+                          </li>
+                          <li>
+                            <Typography variant="body1" my={2}>
+                              <Trans i18nKey="validation.parameters.info.3.3">
+                                <b>Meteorologische omstandigheden:</b> beschrijft de meteorologische omstandigheden
+                                tijdens het incident.
+                              </Trans>
+                            </Typography>
+                          </li>
+                        </ul>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.parameters.info.4.1">
+                            We nodigen u uit om de voorgestelde intensiteitsparameters en hun omschrijving te bestuderen
+                            en feedback te formuleren ten aanzien van deze elementen.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.parameters.info.4.2">
+                            Als u vindt dat er een specifieke parameter ontbreekt om de intensiteitsscenario's te
+                            karakteriseren, kan u dit aangeven in het daartoe bestemde vak.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                ]}
+              />
               <Typography variant="h6" mb={1} color="primary">
                 3. <Trans i18nKey="riskFile.intensityParameters.title">Intensity Parameters</Trans>
               </Typography>
@@ -465,6 +652,79 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
+              <HelpButton
+                id="scenarios-help-button"
+                steps={[
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.scenarios.info.1.1">
+                            Het beoordelen van een risico in termen van impact en waarschijnlijkheid op basis van een
+                            definitie alleen kan ingewikkeld zijn. Een risico kan zich immers in verschillende mate van
+                            intensiteit voordoen.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.scenarios.info.1.2">
+                            Om dit probleem op te vangen, wordt elk te beoordelen risico gekarakteriseerd aan de hand
+                            van 3 intensiteitscenario's; een “<i>considerable</i>", een “<i>major</i>" en een "
+                            <i>extreme</i>" scenario, deze worden opgebouwd aan de hand van risicospecifieke
+                            <b>intensiteitsparameters</b>.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.scenarios.info.2.1">
+                            Om een intensiteitsscenario te definiëren of vorm te geven, wordt aan elk van de specifieke
+                            parameters hierboven een waarde toegekend. De parameter “<i>Vrijgavetijd</i>” kan
+                            bijvoorbeeld worden geschat op 12 uur voor een “<i>considerable</i>” scenario, 9 uur voor
+                            een “<i>mayor</i>” scenario en tussen 2 en 4 uur voor een “<i>extreme</i>” scenario.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.scenarios.info.2.2">
+                            Tijdens de volgende stappen van de risicobeoordeling, net na deze identificatiestap, dienen
+                            alle 3 risicoscenario’s apart van elkaar beoordeeld te worden. Daarom is het tijdens deze
+                            eerste stap belangrijk dat de 3 intensiteitsscenario's door alle deelnemende experten, voor
+                            een specifiek risico, gevalideerd worden.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.parameters.info.3.1">
+                            We nodigen u uit om de drie voorgestelde intensiteitsscenario's voor uw risico te bestuderen
+                            en eventuele feedback te formuleren in het daartoe bestemde vak.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                ]}
+              />
               <Typography variant="h6" mb={1} color="primary">
                 4. <Trans i18nKey="riskFile.intensityScenarios.title">Intensity Scenarios</Trans>
               </Typography>
@@ -690,6 +950,144 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
+              <HelpButton
+                id="causes-help-button"
+                steps={[
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.causes.info.1.1">
+                            Deze en de volgende sectie van de risicofiche behandelen de identificatie van de risico
+                            cascade of met andere woorden identificeren de oorzaken en gevolgen voor het bestudeerde
+                            risico.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.causes.info.1.2">
+                            In deze sectie identificeren we specifiek andere risico's uit de catalogus die aan de
+                            oorsprong van het bestudeerde risico's kunnen liggen, dit wil zeggen de oorzaken van het
+                            bestudeerde risico.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.causes.info.2.1">
+                            Ter herinnering, in de 2de stap, de stap van de risicobeoordeling, zal u onder andere worden
+                            gevraagd om de waarschijnlijkheid van elk intensiteitsscenario in te schatten. In onze
+                            analyse bestaat deze inschatting uit twee verschillende elementen:
+                          </Trans>
+                        </Typography>
+                        <ul>
+                          <li>
+                            <Typography variant="body1" my={2}>
+                              <Trans i18nKey="validation.causes.info.2.2">
+                                De directe waarschijnlijkheid (de waarschijnlijkheid van optreden van ons risico dat
+                                niet kan worden toegeschreven aan het zich voordoen van een ander risico)
+                              </Trans>
+                            </Typography>
+                          </li>
+                          <li>
+                            <Typography variant="body1" my={2}>
+                              <Trans i18nKey="validation.causes.info.2.3">
+                                De voorwaardelijke/ conditionele of indirecte waarschijnlijkheid (de waarschijnlijkheid
+                                dat ons risico optreedt net wel ten gevolge van het zich voordoen van een ander risico).
+                              </Trans>
+                            </Typography>
+                          </li>
+                        </ul>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.causes.info.2.1">
+                            Om de conditionele waarschijnlijkheden te kunnen berekenen, moeten van te voren de linken
+                            tussen de risico's worden bepaald of moeten met andere woorden de cascades van elk te
+                            beoordelen risico uit de BNRA23-26 volledig in kaart gebracht worden.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.causes.info.2.1">
+                            Gelet op het belang ervan in de volgende stap, is het essentieel dat de potentiële oorzaken
+                            voor een specifiek risico in deze 1ste stap door alle deelnemende experten gevalideerd
+                            worden.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.causes.info.3.1">
+                            <b>OPGELET!</b> In onze BNRA23-26 beschouwen wij een risico alleen als zijnde een oorzaak
+                            als en slechts als het een DIRECTE oorzaak is van het onderzochte risico.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.causes.info.3.2">
+                            Laat ons een concreet voorbeeld uitwerken: één van de te beoordelen risico's uit de
+                            BNRA23-26 is het risico “fluvial (riverine) flood” - overstroming door het buiten de oevers
+                            treden van rivieren.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.causes.info.3.3">
+                            Wij beschouwen het scenario « riverbank erosion » echter niet als een DIRECTE oorzaak voor
+                            het risico “fluvial (riverine) flood”. «Riverbank erosion» kan indirect wel overstromingen
+                            veroorzaken door een dijk te destabiliseren en een dijkdoorbraak te veroorzaken. In onze
+                            beoordeling wordt het risico « riverbank erosion » dus beschouwd als een DIRECTE oorzaak van
+                            het risico « dike failure », dat op zijn beurt wel wordt beschouwd als een DIREKTE oorzaak
+                            van het scenario “fluvial (riverine) flood”.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.causes.info.4.1">
+                            We nodigen u uit om de voorgestelde oorzaken voor uw risico, en indien beschikbaar, de
+                            redenen waarom een link is vastgesteld tussen twee risico's te bestuderen en uw feedback te
+                            formuleren ten aanzien van deze elementen.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.causes.info.4.2">
+                            Wenst u aanpassingen aan te brengen, met name, wenst u een toevoeging of schrapping van een
+                            risico uit de lijst van te evalueren risico's van de BNRA 2023-2026 voor te stellen, geef
+                            dit dan ook aan in het daartoe voorziene tekst vak in de onlinetool. Desgevallend is het wel
+                            wenselijk om kort toe te lichten waarom een risico al dan niet als een DIRECTE oorzaak van
+                            het bestudeerde risico moet worden beschouwd.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                ]}
+              />
               <Typography variant="h6" mb={1} color="primary">
                 5. <Trans i18nKey="transferList.causes.title">Causing Hazards</Trans>
               </Typography>
@@ -819,6 +1217,142 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Standard Risk" && (
           <Paper>
             <Box p={2} my={8}>
+              <HelpButton
+                id="effects-help-button"
+                steps={[
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.1.1">
+                            Deze en de vorige sectie van de risicofiche behandelen de identificatie van de risico
+                            cascade of met andere woorden identificeren de oorzaken en gevolgen voor het bestudeerde
+                            risico.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.1.2">
+                            In deze sectie identificeren we specifiek andere risico's uit de catalogus die een mogelijk
+                            gevolg van het bestudeerde risico's kunnen zijn.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.2.1">
+                            Ter herinnering, in de 2de stap, de stap van de risicobeoordeling, zal u onder andere worden
+                            gevraagd om de waarschijnlijkheid van elk intensiteitsscenario in te schatten. In onze
+                            analyse bestaat deze inschatting uit twee verschillende elementen:
+                          </Trans>
+                        </Typography>
+                        <ul>
+                          <li>
+                            <Typography variant="body1" my={2}>
+                              <Trans i18nKey="validation.effects.info.2.2">
+                                De directe waarschijnlijkheid (de waarschijnlijkheid van optreden van ons risico dat
+                                niet kan worden toegeschreven aan het zich voordoen van een ander risico)
+                              </Trans>
+                            </Typography>
+                          </li>
+                          <li>
+                            <Typography variant="body1" my={2}>
+                              <Trans i18nKey="validation.effects.info.2.3">
+                                De voorwaardelijke/ conditionele of indirecte waarschijnlijkheid (de waarschijnlijkheid
+                                dat ons risico optreedt net wel ten gevolge van het zich voordoen van een ander risico).
+                              </Trans>
+                            </Typography>
+                          </li>
+                        </ul>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.2.1">
+                            Om de conditionele waarschijnlijkheden te kunnen berekenen, moeten van te voren de linken
+                            tussen de risico's worden bepaald of moeten met andere woorden de cascades van elk te
+                            beoordelen risico uit de BNRA23-26 volledig in kaart gebracht worden.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.2.1">
+                            Gelet op het belang ervan in de volgende stap, is het essentieel dat de potentiële gevolgen
+                            voor een specifiek risico in deze 1ste stap door alle deelnemende experten gevalideerd
+                            worden.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.3.1">
+                            <b>OPGELET!</b> In onze BNRA23-26 beschouwen wij een risico alleen als zijnde een gevolg als
+                            en slechts als het een DIRECTE gevolg is van het onderzochte risico.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.3.2">
+                            Laat ons een concreet voorbeeld uitwerken: één van de te beoordelen risico's uit de
+                            BNRA23-26 is het risico “attack against a CBRN-e infrastructure” - een aanval tegen een
+                            infrastructuur waar risicolijke stoffen verwerkt worden.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.3.3">
+                            Wij beschouwen het scenario « release of chemical agents » echter niet als een DIRECTE
+                            gevolg voor het risico “attack against a CBRN-e infrastructure”. « release of chemical
+                            agents » kan wel indirect volgen uit het risico « incident in a CBRN-e infrastructure », dat
+                            op zijn beurt wel wordt beschouwd als een DIRECT gevolg van het risico “attack against a
+                            CBRN-e infrastructure”.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.4.1">
+                            We nodigen u uit om de voorgestelde gevolgen voor uw risico, en indien beschikbaar, de
+                            redenen waarom een link is vastgesteld tussen twee risico's te bestuderen en uw feedback te
+                            formuleren ten aanzien van deze elementen.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.4.2">
+                            Wenst u aanpassingen aan te brengen, met name, wenst u een toevoeging of schrapping van een
+                            risico uit de lijst van te evalueren risico's van de BNRA 2023-2026 voor te stellen, geef
+                            dit dan ook aan in het daartoe voorziene tekst vak in de onlinetool. Desgevallend is het wel
+                            wenselijk om kort toe te lichten waarom een risico al dan niet als een DIRECT gevolg van het
+                            bestudeerde risico moet worden beschouwd.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                ]}
+              />
               <Typography variant="h6" mb={1} color="primary">
                 6. <Trans i18nKey="riskFile.effects.title">Effect Hazards</Trans>
               </Typography>
@@ -948,6 +1482,107 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type !== "Emerging Risk" && (
           <Paper>
             <Box p={2} my={8}>
+              <HelpButton
+                id="catalysing-help-button"
+                steps={[
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.catalysing.info.1.1">
+                            Deze sectie van de risicofiche identificeert uit opkomende risico’s die de impacten en of de
+                            waarschijnlijkheden van het bestudeerde risico beïnvloed of "katalyseert".
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.catalysing.info.2.1">
+                            In onze studie wordt een opkomend risico gedefinieerd als elk proces dat nieuwe combinaties
+                            van risico's kan creëren of bestaande risico's kan wijzigen.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.catalysing.info.2.2">
+                            Dit zijn risico's die momenteel op zichzelf geen risico vormen, maar die, als zij zich
+                            ontwikkelen, van invloed kunnen zijn op de andere risico's die geanalyseerd worden binnen de
+                            BNRA 2023-2026.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.catalysing.info.3.1">
+                            Laat ons een concreet voorbeeld beschouwen.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.catalysing.info.3.2">
+                            «Quantum computing» is momenteel geen technologie die op grote schaal in onze samenleving
+                            wordt gebruikt. De opkomst/uitrol ervan in de toekomst zou echter de waarschijnlijkheid van
+                            optreden van het risico «Cyber attack against a government institution» kunnen vergroten.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.catalysing.info.3.3">
+                            Een opkomend risico oefent een katalyserend effect uit op het bestudeerde risico indien het,
+                            in de toekomst, een effect kan hebben op de “gevolgen / impacten” of de “waarschijnlijkheid
+                            van optreden” van het bestudeerde risico.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.4.1">
+                            We nodigen u uit om de voorgestelde geïdentificeerde opkomende risico’s en indien
+                            beschikbaar, de redenen waarom dit opkomende risico een katalyserend effect heeft op het
+                            bestudeerde risico, te bestuderen en uw feedback te formuleren ten aanzien van deze
+                            elementen.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.effects.info.4.2">
+                            Wenst u aanpassingen aan te brengen, met name, wenst u een opkomend risico uit de selectie
+                            te schrappen of een opkomend risico uit de lijst van beschikbare opkomende risico’s van de
+                            BNRA 2023-2026 toe te voegen, geef dit dan ook aan in het daartoe voorziene tekst vak in de
+                            onlinetool. Desgevallend is het wel wenselijk om kort toe te lichten waarom een opkomend
+                            risico al dan niet een katalyserend effect uitoefent op het bestudeerde risico.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                ]}
+              />
               {riskFile.cr4de_risk_type === "Standard Risk" && (
                 <Typography variant="h6" mb={1} color="primary">
                   7. <Trans i18nKey="riskFile.catalysingEffects.title">Catalysing Effects</Trans>

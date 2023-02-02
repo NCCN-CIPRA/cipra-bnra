@@ -4,6 +4,7 @@ import Joyride, { Step, ACTIONS, EVENTS, STATUS, CallBackProps } from "react-joy
 import theme from "../../theme";
 import { useState } from "react";
 import LiveHelpIcon from "@mui/icons-material/LiveHelp";
+import TourTooltip from "../../components/TourTooltip";
 
 export default function ValidationTutorial() {
   const { t } = useTranslation();
@@ -104,7 +105,7 @@ export default function ValidationTutorial() {
       ),
     },
     {
-      target: "#definition-input",
+      target: "#defintion-feedback",
       placement: "bottom",
       content: (
         <Box sx={{ textAlign: "left" }}>
@@ -125,6 +126,7 @@ export default function ValidationTutorial() {
     },
     {
       target: "#save-button",
+      disableScrolling: true,
       placement: "top",
       content: (
         <Box sx={{ textAlign: "left" }}>
@@ -139,6 +141,7 @@ export default function ValidationTutorial() {
     },
     {
       target: "#save-and-exit-button",
+      disableScrolling: true,
       placement: "top",
       content: (
         <Box sx={{ textAlign: "left" }}>
@@ -154,6 +157,7 @@ export default function ValidationTutorial() {
     },
     {
       target: "#tutorialButton",
+      disableScrolling: true,
       placement: "top",
       content: (
         <Box sx={{ textAlign: "left" }}>
@@ -170,6 +174,7 @@ export default function ValidationTutorial() {
     {
       disableBeacon: true,
       target: "#tutorialButton",
+      disableScrolling: true,
       placement: "top-end",
       content: (
         <Typography variant="body1">
@@ -182,7 +187,7 @@ export default function ValidationTutorial() {
 
   const handleTutorialCallback = (data: CallBackProps) => {
     const { action, index, status, type } = data;
-
+    console.log(type);
     // @ts-ignore-next-line
     if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
       // Update state to advance the tour
@@ -240,6 +245,7 @@ export default function ValidationTutorial() {
           next: t("button.next", "Next"),
           skip: t("button.skip", "Skip"),
         }}
+        tooltipComponent={TourTooltip}
       />
       <Joyride
         steps={stepsSkip}
@@ -259,6 +265,7 @@ export default function ValidationTutorial() {
           next: t("button.next", "Next"),
           skip: t("button.skip", "Skip"),
         }}
+        tooltipComponent={TourTooltip}
       />
 
       <IconButton id="tutorialButton" sx={{ position: "fixed", bottom: 60, left: 8 }} onClick={() => setRun(true)}>

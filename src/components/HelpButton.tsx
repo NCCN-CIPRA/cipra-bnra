@@ -3,6 +3,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import Joyride, { Step, STATUS, EVENTS, CallBackProps, ACTIONS } from "react-joyride";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import TourTooltip from "./TourTooltip";
 
 export default function HelpButton({ id, steps }: { id?: string; steps: Step[] }) {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export default function HelpButton({ id, steps }: { id?: string; steps: Step[] }
 
   return (
     <>
-      <IconButton id={id} sx={{ float: "right" }} onClick={() => setRun(true)}>
+      <IconButton id={id} sx={{ float: "right", mt: "-8px" }} onClick={() => setRun(true)}>
         <InfoOutlinedIcon color="primary" />
       </IconButton>
       <Joyride
@@ -47,6 +48,7 @@ export default function HelpButton({ id, steps }: { id?: string; steps: Step[] }
           next: t("button.next", "Next"),
           skip: t("button.skip", "Skip"),
         }}
+        tooltipComponent={TourTooltip}
       />
     </>
   );
