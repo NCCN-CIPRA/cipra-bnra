@@ -29,6 +29,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Accordion from "@mui/material/Accordion";
+import Delete from "@mui/icons-material/Delete";
 
 interface SelectableExpert extends DVContact<DVParticipation<DVContact, DVRiskFile>[]> {
   selected: boolean;
@@ -116,12 +117,14 @@ const ExpertsTable = ({
   filter,
   setFilter,
   onInvite,
+  onRemove,
 }: {
   experts: SelectableExpert[];
   setExperts: (newExperts: SelectableExpert[]) => void;
   filter: string;
   setFilter: (filter: string) => void;
   onInvite: (t: SelectableExpert[]) => Promise<void>;
+  onRemove: (participationId: string) => Promise<void>;
 }) => {
   const [allSelected, setAllSelected] = useState(false);
 
@@ -205,33 +208,47 @@ const ExpertsTable = ({
                     </Tooltip>
                   </TableCell>
                 </TableRow>
-                {e.participations.map((p) => {
-                  if (p.cr4de_role === "expert") {
-                    return (
-                      <TableRow key={`${e.emailaddress1}_${p.cr4de_risk_file.cr4de_riskfilesid}_${p.cr4de_role}`}>
-                        <TableCell></TableCell>
-                        <TableCell component="td" scope="row" sx={{ p: 1, pl: 4 }}>
-                          {p.cr4de_risk_file.cr4de_hazard_id} {p.cr4de_risk_file.cr4de_title}
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "right" }}>
-                          <ParticipationStepper participation={p} />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  } else {
-                    return (
-                      <TableRow key={`${e.emailaddress1}_${p.cr4de_risk_file.cr4de_riskfilesid}`}>
-                        <TableCell></TableCell>
-                        <TableCell component="td" scope="row" sx={{ p: 1, pl: 4 }}>
-                          {p.cr4de_risk_file.cr4de_hazard_id} {p.cr4de_risk_file.cr4de_title}
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                          <Typography variant="body1">{p.cr4de_role === "analist" ? "Author" : "Co-Author"}</Typography>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  }
-                })}
+                {e.participations
+                  .sort((a, b) => a.cr4de_risk_file.cr4de_hazard_id.localeCompare(b.cr4de_risk_file.cr4de_hazard_id))
+                  .map((p) => {
+                    if (p.cr4de_role === "expert") {
+                      return (
+                        <TableRow key={`${e.emailaddress1}_${p.cr4de_risk_file.cr4de_riskfilesid}_${p.cr4de_role}`}>
+                          <TableCell></TableCell>
+                          <TableCell component="td" scope="row" sx={{ p: 1, pl: 4 }}>
+                            {p.cr4de_risk_file.cr4de_hazard_id} {p.cr4de_risk_file.cr4de_title}
+                          </TableCell>
+                          <TableCell sx={{ textAlign: "right" }}>
+                            <ParticipationStepper participation={p} />
+                          </TableCell>
+                          <TableCell sx={{ width: 30 }}>
+                            <IconButton onClick={() => onRemove(p.cr4de_bnraparticipationid)}>
+                              <Delete />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    } else {
+                      return (
+                        <TableRow key={`${e.emailaddress1}_${p.cr4de_risk_file.cr4de_riskfilesid}_${p.cr4de_role}`}>
+                          <TableCell></TableCell>
+                          <TableCell component="td" scope="row" sx={{ p: 1, pl: 4 }}>
+                            {p.cr4de_risk_file.cr4de_hazard_id} {p.cr4de_risk_file.cr4de_title}
+                          </TableCell>
+                          <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="body1">
+                              {p.cr4de_role === "analist" ? "Author" : "Co-Author"}
+                            </Typography>
+                          </TableCell>
+                          <TableCell sx={{ width: 30 }}>
+                            <IconButton onClick={() => onRemove(p.cr4de_bnraparticipationid)}>
+                              <Delete />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }
+                  })}
                 <TableRow>
                   <TableCell
                     colSpan={100}
@@ -448,6 +465,14 @@ export default function ExpertManagementPage() {
     }
   };
 
+  const handleRemove = async (participationId: string) => {
+    if (window.confirm("Are you sure you wish to delete this participation?")) {
+      await api.deleteParticipant(participationId);
+
+      await reloadData();
+    }
+  };
+
   return (
     <>
       <Container sx={{ mb: 8 }}>
@@ -464,6 +489,7 @@ export default function ExpertManagementPage() {
             filter={filter || ""}
             setFilter={handleUpdateFilter}
             onInvite={handleInvites}
+            onRemove={handleRemove}
           />
         )}
       </Container>

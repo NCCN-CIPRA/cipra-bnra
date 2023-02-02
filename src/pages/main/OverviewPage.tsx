@@ -18,7 +18,7 @@ export default function OverviewPage() {
   // Get all participation records from O365 dataverse
   const { data: participations } = useRecords<DVParticipation<undefined, DVRiskFile>>({
     table: DataTable.PARTICIPATION,
-    query: `$filter=_cr4de_contact_value eq ${user?.contactid}&$expand=cr4de_risk_file`,
+    query: `$filter=_cr4de_contact_value eq ${user?.contactid} and cr4de_role eq 'expert'&$expand=cr4de_risk_file`,
   });
 
   usePageTitle(t("analysis.overviewTitle"));
