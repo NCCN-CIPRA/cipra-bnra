@@ -10,6 +10,7 @@ import {
   ListItemText,
   Paper,
   Grid,
+  TableFooter,
 } from "@mui/material";
 import { useState } from "react";
 import { styled } from "@mui/material/styles";
@@ -388,13 +389,33 @@ export default function QuantitativeScalesPage({}) {
             </TableContainer>
 
             <Typography variant="h6" paragraph>
-              <Trans i18nKey="learning.impact.hc.title">Hc - Fatalities</Trans>
+              <Trans i18nKey="learning.impact.hc.title">Hc - People in need of assistance</Trans>
             </Typography>
             <Typography variant="body1" paragraph>
-              <Trans i18nKey="learning.impact.hc.introduction">
-                What follows is a description of each of the 10 damage indicators used in the BNRA 2023 - 2026. For each
-                damage indicator, there are five damage extent classes, along with the ranges of their respective
-                measurement units. These damage classes are logarithmically cumulative .
+              <Trans i18nKey="learning.impact.hc.introduction.1">
+                Indicator Hc covers people who must be evacuated, temporarily housed, and/or otherwise cared for before,
+                during, and after an event. This may involve, for instance, housing in emergency shelters; supplying
+                food to people in locations cut off from the outside world; or giving emergency psychological assistance
+                to people who are not, however, affected by actual mental illnesses. The duration of assistance required
+                by the directly affected persons is registered. Effects such as supply shortfalls and disruptions for
+                large parts of the population are counted not under Hc, but under the indicator Sa – Supply shortfalls
+                and service disruptions.
+              </Trans>
+            </Typography>
+            <Typography variant="body1" paragraph>
+              <Trans i18nKey="learning.impact.hc.introduction.2">
+                The unit to quantify the need for assistance is the person day. This is determined by multiplying the
+                number of people requiring assistance with the duration of impairment in days . The effective duration
+                of assistance required by all individuals is added up. The minimum unit per person is one day. The
+                duration of the requirement for assistance is counted, rather than the period in which assistance
+                services are provided. For instance, one would count the number of days during which the total number of
+                traumatised individuals require emergency psychological assistance, rather than the duration for which
+                the members of care-providing organisations have been deployed.
+              </Trans>
+            </Typography>
+            <Typography variant="body1" paragraph>
+              <Trans i18nKey="learning.impact.hc.introduction.3">
+                The cost of providing support services is accounted for in the indicator Fa – Financial asset damages.
               </Trans>
             </Typography>
 
@@ -425,35 +446,57 @@ export default function QuantitativeScalesPage({}) {
                 <TableBody>
                   <TableRow>
                     <TableCell>{t("learning.impact.hc.0", "No impact")}</TableCell>
-                    <TableCell>{t("learning.impact.hc.1", "< 10")}</TableCell>
-                    <TableCell>{t("learning.impact.hc.2", "11 – 100")}</TableCell>
-                    <TableCell>{t("learning.impact.hc.3", "101 – 1 000")}</TableCell>
-                    <TableCell>{t("learning.impact.hc.4", "1 001 – 10 000")}</TableCell>
-                    <TableCell>{t("learning.impact.hc.5", "> 10 000")}</TableCell>
+                    <TableCell>{t("learning.impact.hc.1", "< 200 000")}</TableCell>
+                    <TableCell>{t("learning.impact.hc.2", "200 001 – 2 000 000")}</TableCell>
+                    <TableCell>{t("learning.impact.hc.3", "2 000 001 – 20 000 000")}</TableCell>
+                    <TableCell>{t("learning.impact.hc.4", "20 000 001 – 200 000 000")}</TableCell>
+                    <TableCell>{t("learning.impact.hc.5", "> 200 000 000")}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
 
             <Typography variant="h5" paragraph>
-              <Trans i18nKey="learning.impact.text.title">Human Impact</Trans>
+              <Trans i18nKey="learning.impact.s.title">2 Societal Impact</Trans>
             </Typography>
             <Typography variant="body1" paragraph>
-              <Trans i18nKey="learning.impact.text.introduction">
-                What follows is a description of each of the 10 damage indicators used in the BNRA 2023 - 2026. For each
-                damage indicator, there are five damage extent classes, along with the ranges of their respective
-                measurement units. These damage classes are logarithmically cumulative .
+              <Trans i18nKey="learning.impact.s.introduction">
+                The damage area relating to society measures significant disruptions caused by the hazard under
+                investigation. On the one hand, these may include the effects on the Belgian population, e.g. through
+                supply shortfalls and disruptions (Sa) or diminished public order and domestic security (Sb). On the
+                other hand, it captures the effects on the state: damage to the reputation of Belgium abroad (Sc) and a
+                loss of confidence in or functioning of the state and/or its values (Sd).
               </Trans>
             </Typography>
 
             <Typography variant="h6" paragraph>
-              <Trans i18nKey="learning.impact.text.title">Sa - Fatalities</Trans>
+              <Trans i18nKey="learning.impact.sa.title">Sa - Supply shortfalls and unmet human needs</Trans>
             </Typography>
             <Typography variant="body1" paragraph>
-              <Trans i18nKey="learning.impact.text.introduction">
-                What follows is a description of each of the 10 damage indicators used in the BNRA 2023 - 2026. For each
-                damage indicator, there are five damage extent classes, along with the ranges of their respective
-                measurement units. These damage classes are logarithmically cumulative .
+              <Trans i18nKey="learning.impact.sa.introduction.1">
+                This indicator measures breakdowns or severe disruptions to the supply of critical goods and services to
+                the entire population or parts of it. They are grouped into three sets according to their importance.
+              </Trans>
+            </Typography>
+            <Typography variant="body1" paragraph>
+              <Trans i18nKey="learning.impact.sa.introduction.2">
+                Supply shortfalls are calculated by multiplying the number of persons affected with the duration (in
+                days) for which their needs are not met. The effective duration of the disruption for those affected is
+                added together. Additionally, a distinction should be made between needs of varying importance. The
+                human need for water and food is obviously more immediately important than the need for postal and
+                courier services. Physical needs are to be fulfilled if the individual is to survive, whereas the next
+                categories rather ensure the security and comfort needs. To model this fact, a weighting factor is given
+                to each need which should be applied in the final calculations. Notice that there may exist some
+                cascading effects between unmet needs, i.e. if the need for electricity is not met, usually the need for
+                telecommunication will also not be met. This effect is not taken into account in the weighting factor
+                and should thus be separately included in the final calculations . The weighting factors are loosely
+                based on Maslow’s hierarchy of needs and similar theories.
+              </Trans>
+            </Typography>
+            <Typography variant="body1" paragraph>
+              <Trans i18nKey="learning.impact.sa.introduction.3">
+                Economic consequences are covered by the indicators Fa – Asset losses and cost of coping and Fb –
+                Reduction of economic performance.
               </Trans>
             </Typography>
 
@@ -484,13 +527,81 @@ export default function QuantitativeScalesPage({}) {
                 <TableBody>
                   <TableRow>
                     <TableCell>{t("learning.impact.sa.0", "No impact")}</TableCell>
-                    <TableCell>{t("learning.impact.sa.1", "< 10")}</TableCell>
-                    <TableCell>{t("learning.impact.sa.2", "11 – 100")}</TableCell>
-                    <TableCell>{t("learning.impact.sa.3", "101 – 1 000")}</TableCell>
-                    <TableCell>{t("learning.impact.sa.4", "1 001 – 10 000")}</TableCell>
-                    <TableCell>{t("learning.impact.sa.5", "> 10 000")}</TableCell>
+                    <TableCell>{t("learning.impact.sa.1", "< 10 000")}</TableCell>
+                    <TableCell>{t("learning.impact.sa.2", "10 001 – 100 000")}</TableCell>
+                    <TableCell>{t("learning.impact.sa.3", "100 001 – 1 000 000")}</TableCell>
+                    <TableCell>{t("learning.impact.sa.4", "1 000 001 – 10 000 000")}</TableCell>
+                    <TableCell>{t("learning.impact.sa.5", "> 10 000 000")}</TableCell>
                   </TableRow>
                 </TableBody>
+              </Table>
+            </TableContainer>
+
+            <TableContainer component={Paper} sx={{ mb: 6 }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.importance">Importance</Trans>
+                    </TableCell>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.needs">Needs</Trans>
+                    </TableCell>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.factor">Weighting factor</Trans>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.importance.1">Physical needs</Trans>
+                    </TableCell>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.needs.1">
+                        Potable water, basic foodstuffs, medicine, medical emergency services, first responders
+                        communication
+                      </Trans>
+                    </TableCell>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.factor.1">1</Trans>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.importance.2">Security needs</Trans>
+                    </TableCell>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.needs.2">
+                        Electricity, heating, non-emergency medical care, telecommunications, transport, financial
+                        services
+                      </Trans>
+                    </TableCell>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.factor.2">0.5</Trans>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.importance.3">Comfort needs</Trans>
+                    </TableCell>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.needs.3">
+                        Fuel, media, waste management, government, postal and courier services
+                      </Trans>
+                    </TableCell>
+                    <TableCell sx={{ width: "16.6%" }}>
+                      <Trans i18nKey="learning.impact.sa.factor.3">0.1</Trans>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+                <TableFooter>
+                  <TableCell colSpan={3}>
+                    <Trans i18nKey="learning.impact.sa.importance.footer">
+                      Needs weighted by degree of importance for a sustained and comfortable human life
+                    </Trans>
+                  </TableCell>
+                </TableFooter>
               </Table>
             </TableContainer>
 

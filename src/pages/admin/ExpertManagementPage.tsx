@@ -285,8 +285,8 @@ const ParticipantInput = ({
           acc[e.email].participations = [];
         }
 
-        const existingContact = contacts?.find((c) => c.emailaddress1 === e.email);
-        const existingParticipation = experts?.find((expert) => expert.emailaddress1 === e.email);
+        const existingContact = contacts?.find((c) => c.emailaddress1 === e.email.toLowerCase());
+        const existingParticipation = experts?.find((expert) => expert.emailaddress1 === e.email.toLowerCase());
 
         if (!existingContact) {
           missingContacts.push(e);
