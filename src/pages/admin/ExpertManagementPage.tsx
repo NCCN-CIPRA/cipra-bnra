@@ -287,7 +287,7 @@ const ParticipantInput = ({
 
         const existingContact = contacts?.find((c) => c.emailaddress1 === e.email);
         const existingParticipation = experts?.find((expert) => expert.emailaddress1 === e.email);
-        console.log(acc[e.email], existingContact);
+
         if (!existingContact) {
           missingContacts.push(e);
 
@@ -295,7 +295,6 @@ const ParticipantInput = ({
         } else {
           acc[e.email].contact = existingContact;
         }
-        console.log(existingParticipation);
 
         if (existingParticipation?.participations.some((p) => p.cr4de_risk_file.cr4de_hazard_id === e.hazardId)) {
           return acc;
@@ -310,18 +309,17 @@ const ParticipantInput = ({
       }, {});
 
     for (let expert of Object.values(expertData)) {
-      console.log(expert);
-      // for (let p of expert.participations) {
-      //   const riskFile = await api.getRiskFiles(`$filter=cr4de_hazard_id eq '${p.hazardId}'`);
+      for (let p of expert.participations) {
+        const riskFile = await api.getRiskFiles(`$filter=cr4de_hazard_id eq '${p.hazardId}'`);
 
-      //   if (riskFile?.length > 0) {
-      //     await api.createParticipant({
-      //       "cr4de_contact@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${expert.contact.contactid})`,
-      //       cr4de_role: p.role,
-      //       "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile[0].cr4de_riskfilesid})`,
-      //     });
-      //   }
-      // }
+        if (riskFile?.length > 0) {
+          await api.createParticipant({
+            "cr4de_contact@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${expert.contact.contactid})`,
+            cr4de_role: p.role,
+            "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile[0].cr4de_riskfilesid})`,
+          });
+        }
+      }
     }
 
     await onFinishUpload();
