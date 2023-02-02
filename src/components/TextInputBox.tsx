@@ -76,6 +76,7 @@ function TextInputBox({
       value={innerValue}
       onValueChanged={(e) => {
         setInnerValue(e.value);
+        console.log(e.value);
         if (setUpdatedValue) setUpdatedValue(e.value);
       }}
       onFocusOut={onBlur}
