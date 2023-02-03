@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -105,26 +105,52 @@ function RiskFileList({
                           <Tooltip
                             title={
                               p.cr4de_validation_finished
-                                ? "You have completed the validation step for this Risk File"
-                                : "The validation step can now be completed"
+                                ? t(
+                                    "riskFile.steps.1.complete",
+                                    "You have completed the validation step for this Risk File"
+                                  )
+                                : t("riskFile.steps.1.progress", "The validation step can now be completed")
                             }
                           >
-                            <StepLabel>Validation</StepLabel>
+                            <StepLabel>
+                              <Trans i18nKey="riskFile.steps.1.name">Identification</Trans>
+                            </StepLabel>
                           </Tooltip>
                         </Step>
                         <Step>
-                          <Tooltip title="This step cannot be started yet, we will contact you when it becomes available">
-                            <StepLabel>Analysis A</StepLabel>
+                          <Tooltip
+                            title={t(
+                              "riskFile.steps.2A.notyet",
+                              "This step cannot be started yet, we will contact you when it becomes available"
+                            )}
+                          >
+                            <StepLabel>
+                              <Trans i18nKey="riskFile.steps.2A.name">Analysis A</Trans>
+                            </StepLabel>
                           </Tooltip>
                         </Step>
                         <Step>
-                          <Tooltip title="This step cannot be started yet, we will contact you when it becomes available">
-                            <StepLabel>Analysis B</StepLabel>
+                          <Tooltip
+                            title={t(
+                              "riskFile.steps.2B.notyet",
+                              "This step cannot be started yet, we will contact you when it becomes available"
+                            )}
+                          >
+                            <StepLabel>
+                              <Trans i18nKey="riskFile.steps.2B.name">Analysis B</Trans>
+                            </StepLabel>
                           </Tooltip>
                         </Step>
                         <Step>
-                          <Tooltip title="This step cannot be started yet, we will contact you when it becomes available">
-                            <StepLabel>Consensus</StepLabel>
+                          <Tooltip
+                            title={t(
+                              "riskFile.steps.3.notyet",
+                              "This step cannot be started yet, we will contact you when it becomes available"
+                            )}
+                          >
+                            <StepLabel>
+                              <Trans i18nKey="riskFile.steps.3.name">Consensus</Trans>
+                            </StepLabel>
                           </Tooltip>
                         </Step>
                       </Stepper>
