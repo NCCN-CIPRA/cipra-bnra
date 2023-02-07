@@ -2,6 +2,8 @@ export interface DVRiskFile {
   cr4de_riskfilesid: string;
   cr4de_hazard_id: string;
 
+  cr4de_source_migration: string;
+
   cr4de_title: string;
   cr4de_risk_type: string;
   cr4de_risk_category: string;

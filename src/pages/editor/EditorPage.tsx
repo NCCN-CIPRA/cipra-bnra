@@ -172,6 +172,20 @@ export default function EditorPage() {
         <Paper>
           <Box p={2} my={4}>
             <Typography variant="h6" color="primary" sx={{ flex: 1 }}>
+              0. Source Migrations
+            </Typography>
+            <Divider sx={{ mb: 1 }} />
+            <Box
+              dangerouslySetInnerHTML={{
+                __html: riskFile?.cr4de_source_migration || "No online sources found",
+              }}
+            />
+          </Box>
+        </Paper>
+
+        <Paper>
+          <Box p={2} my={4}>
+            <Typography variant="h6" color="primary" sx={{ flex: 1 }}>
               1. Definition
             </Typography>
             <Divider sx={{ mb: 1 }} />

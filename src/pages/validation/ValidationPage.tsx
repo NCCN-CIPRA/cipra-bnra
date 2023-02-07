@@ -1280,14 +1280,14 @@ export default function ValidationPage() {
                           </li>
                         </ul>
                         <Typography variant="body1" my={2}>
-                          <Trans i18nKey="validation.effects.info.2.1">
+                          <Trans i18nKey="validation.effects.info.2.4">
                             Om de conditionele waarschijnlijkheden te kunnen berekenen, moeten van te voren de linken
                             tussen de risico's worden bepaald of moeten met andere woorden de cascades van elk te
                             beoordelen risico uit de BNRA23-26 volledig in kaart gebracht worden.
                           </Trans>
                         </Typography>
                         <Typography variant="body1" my={2}>
-                          <Trans i18nKey="validation.effects.info.2.1">
+                          <Trans i18nKey="validation.effects.info.2.5">
                             Gelet op het belang ervan in de volgende stap, is het essentieel dat de potentiële gevolgen
                             voor een specifiek risico in deze 1ste stap door alle deelnemende experten gevalideerd
                             worden.
