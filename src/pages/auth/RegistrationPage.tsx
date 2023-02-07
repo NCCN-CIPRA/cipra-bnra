@@ -217,7 +217,10 @@ export default function RegistrationPage() {
                       <Trans i18nKey="auth.registration.disclaimer1">
                         Deze website gebruikt cookies van Microsoft om de functionaliteit te verbeteren. Deze gegevens
                         worden door Microsoft opgeslagen. Meer informatie over cookies vindt u in ons{" "}
-                        <a href="https://crisiscentrum.be/nl/bnra/cookiebeleid">cookiebeleid</a>.
+                        <a target="_blank" href="https://crisiscentrum.be/nl/bnra/cookiebeleid">
+                          cookiebeleid
+                        </a>
+                        .
                       </Trans>
                     </Typography>
                     <Typography variant="body2" paragraph>
@@ -232,7 +235,10 @@ export default function RegistrationPage() {
                       <Trans i18nKey="auth.registration.disclaimer3">
                         Uw gegevens worden bewaard tot het einde van de studie en nog een jaar langer om de studie voor
                         de volgende periode te starten, dus maximaal 5 jaar. Voor meer informatie: lees de{" "}
-                        <a href="https://crisiscentrum.be/nl/bnra/privacyverklaring-bnra">privacyverklaring</a>.
+                        <a target="_blank" href="https://crisiscentrum.be/nl/bnra/privacyverklaring-bnra">
+                          privacyverklaring
+                        </a>
+                        .
                       </Trans>
                     </Typography>
                     <Typography variant="body2" paragraph>
@@ -253,7 +259,7 @@ export default function RegistrationPage() {
                 </Box>
                 <Stack spacing={2} direction="row" mt={4}>
                   <LoadingButton variant="contained" sx={{ mr: 1 }} loading={loading} onClick={handleRegister}>
-                    Register
+                    <Trans i18nKey="auth.button.registration">Register</Trans>
                   </LoadingButton>
                 </Stack>
                 <div
@@ -298,7 +304,7 @@ export default function RegistrationPage() {
                 </Box>
                 <Stack spacing={2} direction="row" mt={2}>
                   <LoadingButton variant="contained" sx={{ mr: 1 }} loading={loading} onClick={handleRegisterStart}>
-                    Start Registration
+                    <Trans i18nKey="auth.button.startRegistration">Start Registration</Trans>
                   </LoadingButton>
                 </Stack>
               </>

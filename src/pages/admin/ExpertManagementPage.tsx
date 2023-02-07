@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Checkbox,
@@ -30,6 +30,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Accordion from "@mui/material/Accordion";
 import Delete from "@mui/icons-material/Delete";
+import { DVInvitation } from "../../types/dataverse/DVInvitation";
 
 interface SelectableExpert extends DVContact<DVParticipation<DVContact, DVRiskFile>[]> {
   selected: boolean;
@@ -407,10 +408,34 @@ export default function ExpertManagementPage() {
   const [experts, setExperts] = useState<SelectableExpert[] | null>(null);
   const [filteredExperts, setFilteredExperts] = useState<SelectableExpert[] | null>(null);
 
+  useEffect(() => {
+    Promise.all([api.getContacts(), api.getInvitations(), api.getParticipants()]).then(
+      ([contacts, invitations, participations]) => {
+        const contactDict = contacts.reduce((acc, c) => ({ ...acc, [c.contactid]: c }), {});
+        const invitationsDict = invitations.reduce((acc: { [key: string]: DVInvitation[] }, i) => {
+          if (!acc[i._adx_invitecontact_value]) acc[i._adx_invitecontact_value] = [];
+
+          acc[i._adx_invitecontact_value].push(i);
+
+          return acc;
+        }, {});
+        const participationsDict = participations.reduce((acc: { [key: string]: DVParticipation[] }, p) => {
+          if (!acc[p._cr4de_contact_value]) acc[p._cr4de_contact_value] = [];
+
+          acc[p._cr4de_contact_value].push(p);
+
+          return acc;
+        }, {});
+
+        console.log(contactDict, invitationsDict, participationsDict);
+      }
+    );
+  }, []);
+
   // Get all participation records from O365 dataverse
   const { reloadData } = useRecords<SelectableExpert>({
     table: DataTable.PARTICIPATION,
-    query: `$expand=cr4de_contact($select=emailaddress1,firstname,lastname),cr4de_risk_file($select=cr4de_hazard_id,cr4de_title)`,
+    query: `$expand=cr4de_contact($select=emailaddress1,firstname,lastname,msdyn_portaltermsagreementdate),cr4de_risk_file($select=cr4de_hazard_id,cr4de_title)`,
     transformResult: (participations: DVParticipation<DVContact, DVRiskFile>[]) => {
       const contacts: { [id: string]: SelectableExpert } = {};
 

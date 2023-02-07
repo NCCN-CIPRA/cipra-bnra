@@ -32,7 +32,7 @@ export default function ValidationTutorial() {
         </Box>
       ),
       styles: { options: { width: 600 } },
-      locale: { next: t("button.yes", "Yes") },
+      locale: { next: t("button.yes", "Yes"), skip: t("button.no", "No") },
     },
     {
       target: "body",
@@ -187,7 +187,7 @@ export default function ValidationTutorial() {
 
   const handleTutorialCallback = (data: CallBackProps) => {
     const { action, index, status, type } = data;
-    console.log(type);
+
     // @ts-ignore-next-line
     if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
       // Update state to advance the tour
@@ -262,8 +262,9 @@ export default function ValidationTutorial() {
         locale={{
           back: t("button.back", "Back"),
           last: t("button.last", "Exit"),
+          close: t("button.close", "Exit"),
           next: t("button.next", "Next"),
-          skip: t("button.skip", "Skip"),
+          skip: null,
         }}
         tooltipComponent={TourTooltip}
       />

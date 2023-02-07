@@ -4,6 +4,7 @@ import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DVContact } from "../types/dataverse/DVContact";
 import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
 import { DVFeedback } from "../types/dataverse/DVFeedback";
+import { DVInvitation } from "../types/dataverse/DVInvitation";
 import { DVPage } from "../types/dataverse/DVPage";
 import { DVParticipation } from "../types/dataverse/DVParticipation";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
@@ -54,6 +55,8 @@ export interface API {
   createContact(fields: object): Promise<CreateResponse>;
   deleteContact(id: string): Promise<void>;
 
+  getInvitations<T = DVInvitation>(query?: string): Promise<T[]>;
+
   getRiskFiles<T = DVRiskFile>(query?: string): Promise<T[]>;
   getRiskFile<T = DVRiskFile>(id: string, query?: string): Promise<T>;
   updateRiskFile(id: string, fields: object): Promise<void>;
@@ -75,6 +78,7 @@ export interface API {
   createValidation(fields: object): Promise<CreateResponse>;
   updateValidation(id: string, fields: object): Promise<void>;
   deleteValidation(id: string): Promise<void>;
+  finishValidation(riskFileId: string, contactId: string, step: string): Promise<void>;
 
   getDirectAnalyses<T = DVDirectAnalysis>(query?: string): Promise<T[]>;
   getDirectAnalysis<T = DVDirectAnalysis>(id: string, query?: string): Promise<T>;
@@ -140,6 +144,8 @@ export default function useAPI(): API {
           RememberMe: String(remember),
         }),
       });
+
+      console.log(await response.text());
 
       if (response.status === 200) {
         return { data: null };
@@ -253,6 +259,14 @@ export default function useAPI(): API {
           "Content-Type": "application/json",
         },
       });
+    },
+
+    getInvitations: async function <T = DVInvitation>(query?: string): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/adx_invitations${query ? "?" + query : ""}`
+      );
+
+      return (await response.json()).value;
     },
 
     getRiskFiles: async function <T = DVRiskFile>(query?: string): Promise<T[]> {
@@ -418,6 +432,22 @@ export default function useAPI(): API {
           "Content-Type": "application/json",
         },
       });
+    },
+    finishValidation: async function (riskFileId: string, contactId: string, step: string): Promise<void> {
+      await authFetch(
+        "https://prod-233.westeurope.logic.azure.com:443/workflows/9ca84342adac4c8192391b17507e8a93/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KvQCYydJbAMruMqSy7Psc3U6pqDXC8QehNcDwzGS3QY",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            riskFileId,
+            contactId,
+            step,
+          }),
+        }
+      );
     },
 
     getDirectAnalyses: async function <T = DVDirectAnalysis>(query?: string): Promise<T[]> {

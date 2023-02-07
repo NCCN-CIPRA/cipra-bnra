@@ -11,7 +11,6 @@ export default function TourTooltip({
   skipProps,
   tooltipProps,
 }) {
-  console.log(continuous, skipProps);
   return (
     <span {...tooltipProps}>
       <Card>
@@ -21,7 +20,7 @@ export default function TourTooltip({
               {step.title}
             </Typography>
           )}
-          <Typography variant="body2">{step.content}</Typography>
+          {step.content}
         </CardContent>
         <CardActions sx={{ justifyContent: "flex-end" }}>
           {skipProps && (
@@ -29,11 +28,13 @@ export default function TourTooltip({
               {skipProps.title}
             </Button>
           )}
-          <Box sx={{ flex: 1, textAlign: "center" }}>
-            <Typography variant="caption" color="primary">
-              {index + 1}/{size}
-            </Typography>
-          </Box>
+          {size > 1 && (
+            <Box sx={{ flex: 1, textAlign: "center" }}>
+              <Typography variant="caption" color="primary">
+                {index + 1}/{size}
+              </Typography>
+            </Box>
+          )}
           {index > 0 && <Button {...backProps}>{backProps.title}</Button>}
           {continuous && <Button {...primaryProps}>{primaryProps.title}</Button>}
           {!continuous && <Button {...closeProps}>{closeProps.title}</Button>}

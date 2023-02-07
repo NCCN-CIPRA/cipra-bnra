@@ -316,7 +316,7 @@ export default function HomePage() {
                 Het Nationaal Crisiscentrum is verantwoordelijk voor de nationale noodplanning en het crisisbeheer
                 tijdens federale fases in België. De directie CIPRA (Kritieke Infrastructuur en Risicoanalyse) binnen
                 het NCCN houdt zich bezig met het eerste aspect van de risicocyclus, nl. risico-identificatie en
-                -evaluatie. Lees hier meer.
+                -evaluatie. <a href="https://crisiscentrum.be/nl">Lees hier meer</a>.
               </Trans>
             </Typography>
           </Box>

@@ -14,6 +14,7 @@ import {
   DialogContentText,
   DialogActions,
   IconButton,
+  Alert,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import TextInputBox from "../../components/TextInputBox";
@@ -437,20 +438,6 @@ export default function ValidationPage() {
               </Typography>
               <Divider />
 
-              <Box mt={1}>
-                <Typography variant="caption" paragraph>
-                  <Trans i18nKey="riskFile.historicalEvents.helpText1">
-                    Examples of events corresponding to the definition of this hazard in Belgium or other countries.
-                  </Trans>
-                </Typography>
-                <Typography variant="caption" paragraph>
-                  <Trans i18nKey="riskFile.historicalEvents.helpText2">
-                    This field is optional and serves as a guide when determining intensity parameters and building
-                    scenarios. It is in no way meant to be a complete overview of all known events.
-                  </Trans>
-                </Typography>
-              </Box>
-
               <HistoricalEventsTable initialHistoricalEvents={riskFile?.cr4de_historical_events} />
 
               <Typography variant="subtitle2" mt={8} mb={2} color="primary">
@@ -568,7 +555,7 @@ export default function ValidationPage() {
                           </li>
                           <li>
                             <Typography variant="body1" my={2}>
-                              <Trans i18nKey="validation.parameters.info.3.3">
+                              <Trans i18nKey="validation.parameters.info.3.4">
                                 <b>Meteorologische omstandigheden:</b> beschrijft de meteorologische omstandigheden
                                 tijdens het incident.
                               </Trans>
@@ -714,7 +701,7 @@ export default function ValidationPage() {
                     content: (
                       <Box sx={{ textAlign: "left" }}>
                         <Typography variant="body1" my={2}>
-                          <Trans i18nKey="validation.parameters.info.3.1">
+                          <Trans i18nKey="validation.scenarios.info.3.1">
                             We nodigen u uit om de drie voorgestelde intensiteitsscenario's voor uw risico te bestuderen
                             en eventuele feedback te formuleren in het daartoe bestemde vak.
                           </Trans>
@@ -1017,7 +1004,7 @@ export default function ValidationPage() {
                           </Trans>
                         </Typography>
                         <Typography variant="body1" my={2}>
-                          <Trans i18nKey="validation.causes.info.2.1">
+                          <Trans i18nKey="validation.causes.info.2.2">
                             Gelet op het belang ervan in de volgende stap, is het essentieel dat de potentiële oorzaken
                             voor een specifiek risico in deze 1ste stap door alle deelnemende experten gevalideerd
                             worden.
@@ -1094,7 +1081,16 @@ export default function ValidationPage() {
               <Divider />
 
               <Box mt={1}>
-                <Typography variant="caption" paragraph>
+                <Alert severity="warning">
+                  <Typography variant="caption">
+                    <Trans i18nKey="transferList.attention">
+                      Attention! You are not able to directly move the the risks between the lists. Please describe your
+                      proposed changes in the input field below
+                    </Trans>
+                  </Typography>
+                </Alert>
+
+                {/* <Typography variant="caption" paragraph>
                   <Trans i18nKey="riskFile.causes.helpText1">
                     This section identifies other hazards in the BNRA hazard catalogue that may cause the current
                     hazard. A short reason should be provided for each non-trivial causal relation.
@@ -1106,7 +1102,7 @@ export default function ValidationPage() {
                     right are all the other hazards in the hazard catalogue. The definition of a hazard selected in the
                     windows below can be found beneath the comment box.
                   </Trans>
-                </Typography>
+                </Typography> */}
               </Box>
 
               {causes !== null && otherHazards !== null && (
@@ -1158,7 +1154,15 @@ export default function ValidationPage() {
               <Divider />
 
               <Box mt={1}>
-                <Typography variant="caption" paragraph>
+                <Alert severity="warning">
+                  <Typography variant="caption">
+                    <Trans i18nKey="transferList.attention">
+                      Attention! You are not able to directly move the the risks between the lists. Please describe your
+                      proposed changes in the input field below
+                    </Trans>
+                  </Typography>
+                </Alert>
+                {/* <Typography variant="caption" paragraph>
                   <Trans i18nKey="riskFile.maliciousActions.helpText1">
                     This section tries to identify potential malicious actions in the BNRA hazard catalogue that may be
                     taken by the actors described by this hazard. A short reason should be provided for each non-evident
@@ -1171,7 +1175,7 @@ export default function ValidationPage() {
                     actions. On the right are all the other malicious actions in the hazard catalogue. The definition of
                     a hazard selected in the windows below can be found beneath the comment box.
                   </Trans>
-                </Typography>
+                </Typography> */}
               </Box>
 
               {effects !== null && otherHazards !== null && (
@@ -1359,7 +1363,15 @@ export default function ValidationPage() {
               <Divider />
 
               <Box mt={1}>
-                <Typography variant="caption" paragraph>
+                <Alert severity="warning">
+                  <Typography variant="caption">
+                    <Trans i18nKey="transferList.attention">
+                      Attention! You are not able to directly move the the risks between the lists. Please describe your
+                      proposed changes in the input field below
+                    </Trans>
+                  </Typography>
+                </Alert>
+                {/* <Typography variant="caption" paragraph>
                   <Trans i18nKey="riskFile.effects.helpText.part1">
                     This section identifies other hazards in the BNRA hazard catalogue that may be a direct consequence
                     of the current hazard. A short reason should be provided for each non-trivial causal relation.
@@ -1371,7 +1383,7 @@ export default function ValidationPage() {
                     right are all the other hazards in the hazard catalogue. The definition of a hazard selected in the
                     windows below can be found beneath the comment box.
                   </Trans>
-                </Typography>
+                </Typography> */}
               </Box>
 
               {effects !== null && otherHazards !== null && (
@@ -1423,7 +1435,15 @@ export default function ValidationPage() {
               <Divider />
 
               <Box mt={1}>
-                <Typography variant="caption" paragraph>
+                <Alert severity="warning">
+                  <Typography variant="caption">
+                    <Trans i18nKey="transferList.attention">
+                      Attention! You are not able to directly move the the risks between the lists. Please describe your
+                      proposed changes in the input field below
+                    </Trans>
+                  </Typography>
+                </Alert>
+                {/* <Typography variant="caption" paragraph>
                   <Trans i18nKey="riskFile.catalysedEffects.helpText.part1">
                     This section tries to identify other hazards in the BNRA hazard catalogue that may be catalysed by
                     the current emerging risk (this means in the future it may affect the probability and/or impact of
@@ -1436,7 +1456,7 @@ export default function ValidationPage() {
                     risks in the hazard catalogue. The definition of a hazard selected in the windows below can be found
                     beneath the comment box.
                   </Trans>
-                </Typography>
+                </Typography> */}
               </Box>
 
               {effects !== null && otherHazards !== null && (
@@ -1596,7 +1616,15 @@ export default function ValidationPage() {
               <Divider />
 
               <Box mt={1}>
-                <Typography variant="caption" paragraph>
+                <Alert severity="warning">
+                  <Typography variant="caption">
+                    <Trans i18nKey="transferList.attention">
+                      Attention! You are not able to directly move the the risks between the lists. Please describe your
+                      proposed changes in the input field below
+                    </Trans>
+                  </Typography>
+                </Alert>
+                {/* <Typography variant="caption" paragraph>
                   <Trans i18nKey="riskFile.catalysingEffects.helpText.part1">
                     This section tries to identifies the emerging risks in the BNRA hazard catalogue that may catalyse
                     the current hazard (this means in the future it may have an effect on the probability and/or impact
@@ -1609,7 +1637,7 @@ export default function ValidationPage() {
                     effect. On the right are all the other emerging risks in the hazard catalogue. The definition of a
                     hazard selected in the windows below can be found beneath the comment box.
                   </Trans>
-                </Typography>
+                </Typography> */}
               </Box>
 
               {catalysing !== null && otherHazards !== null && (
@@ -1712,7 +1740,7 @@ export default function ValidationPage() {
           </Button>
           <Button
             onClick={async () => {
-              if (!validation) return;
+              if (!validation || !riskFile) return;
 
               setFinishedDialogOpen(false);
               setSurveyDialogOpen(true);
@@ -1725,6 +1753,8 @@ export default function ValidationPage() {
                 api.updateParticipant(participants[0].cr4de_bnraparticipationid, {
                   cr4de_validation_finished: true,
                 });
+
+                api.finishValidation(riskFile?.cr4de_riskfilesid, user.contactid, "VALIDATION");
               }
             }}
           >
