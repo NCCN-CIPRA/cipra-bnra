@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { createHashRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AnalysisAveragerPage from "./pages/analysis/AnalysisAveragerPage";
 import AuthenticationPage from "./pages/auth/AuthenticationPage";
 import DataMigrator from "./pages/main/DataMigrator";
@@ -40,7 +40,7 @@ function App() {
     getAntiForgeryToken();
   }, []);
 
-  const router = createHashRouter([
+  const router = createBrowserRouter([
     {
       path: "/",
       element: <BasePage />,

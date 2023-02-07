@@ -185,7 +185,7 @@ export default function AuthenticationPage() {
           </TabPanel>
           <TabPanel value={tab} index={1}>
             <Stack spacing={2} direction="row" mt={2}>
-              <form action="/Account/Login/ExternalLogin?ReturnUrl=/#/auth/ad" method="post">
+              <form action="/Account/Login/ExternalLogin?ReturnUrl=/auth/ad" method="post">
                 <input
                   name="__RequestVerificationToken"
                   type="hidden"

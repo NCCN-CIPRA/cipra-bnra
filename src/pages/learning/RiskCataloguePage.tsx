@@ -60,7 +60,7 @@ export default function RiskCataloguePage() {
             onClick={async (riskFile) => {
               if (!riskFiles) return;
 
-              openInNewTab(`/#/learning/risk/${riskFile.cr4de_riskfilesid}`);
+              openInNewTab(`/learning/risk/${riskFile.cr4de_riskfilesid}`);
             }}
           />
         </Container>

@@ -36,7 +36,7 @@ root.render(
             id="localApi"
             title="localApi"
             name="localApi"
-            src="https://bnra.powerappsportals.com/#/__dev/localapi"
+            src="https://bnra.powerappsportals.com/__dev/localapi"
             style={{ display: "none" }}
             onLoad={() => {
               // @ts-expect-error

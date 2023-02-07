@@ -110,7 +110,7 @@ export default function TitleBar({
                   <MenuItem
                     onClick={() => {
                       handleClose();
-                      window.location.href = "https://bnra.powerappsportals.com/Account/Login/LogOff?returnUrl=/#/auth";
+                      window.location.href = "https://bnra.powerappsportals.com/Account/Login/LogOff?returnUrl=/auth";
                     }}
                   >
                     <Trans i18nKey="button.logout">Log out</Trans>

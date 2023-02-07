@@ -41,7 +41,7 @@ Cypress.Commands.add("bnraDelete", (table, token, id) => {
 Cypress.Commands.add("bnraLogin", (email, password, instant = false) => {
   cy.intercept("/_layout/tokenhtml*").as("token");
 
-  cy.visit("https://bnra.powerappsportals.com/#/auth");
+  cy.visit("https://bnra.powerappsportals.com/auth");
 
   cy.get("#outlined-email-input").type(email, { delay: instant ? 0 : 10 });
   cy.get("#outlined-password-input").type(password, { delay: instant ? 0 : 10 });

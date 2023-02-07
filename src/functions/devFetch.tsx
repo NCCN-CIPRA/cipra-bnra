@@ -20,7 +20,7 @@ export default function patchFetch() {
       if (e.data.userInfo.indexOf('data-id=""') > 0) {
         // Not logged in in Iframe
         document.getElementById("loginWindow")!.style.display = "block";
-        document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/#/auth");
+        document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/uth");
 
         window.alert("Please log in and refresh the page");
       } else {
@@ -65,7 +65,7 @@ async function devFetch(input: RequestInfo | URL, init?: RequestInit | undefined
             if (errorJson.error && errorJson.error.code === "90040120") {
               // Not logged in in Iframe
               document.getElementById("loginWindow")!.style.display = "block";
-              document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/#/auth");
+              document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/auth");
 
               const testingInterval = setInterval(async () => {
                 const testResponse = await devFetch(input, init);
