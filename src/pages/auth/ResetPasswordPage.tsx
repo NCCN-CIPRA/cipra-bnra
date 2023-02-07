@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Tabs, Container, Paper, TextField, Stack, CssBaseline, Alert, AlertTitle } from "@mui/material";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
@@ -45,7 +45,7 @@ function a11yProps(index: number) {
 
 export default function ResetPasswordPage() {
   const { t } = useTranslation();
-  const params = useParams() as RouteParams;
+  let [searchParams] = useSearchParams();
   const api = useAPI();
 
   const [password, setPassword] = useState("");
@@ -78,7 +78,11 @@ export default function ResetPasswordPage() {
       setError("passwordMatch");
       setLoading(false);
     } else {
-      const result = await api.resetPassword(params.user_id, params.code, password);
+      const result = await api.resetPassword(
+        searchParams.get("user_id") || "",
+        searchParams.get("code") || "",
+        password
+      );
 
       if (!result.error) {
         setError(false);

@@ -37,6 +37,7 @@ import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import useAPI from "../hooks/useAPI";
 import { DVValidation } from "../types/dataverse/DVValidation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export interface Action {
@@ -79,6 +80,7 @@ export default function Attachments({
   const [isRemovingFinished, setIsRemovingFinished] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const [existingId, setExistingId] = useState<string | null>(null);
   const [title, setTitle] = useState<string | null>(null);
   const [url, setUrl] = useState<string | null>(null);
 
@@ -120,27 +122,32 @@ export default function Attachments({
     setIsUploadingFile(true);
     setOpenDialog(false);
 
-    await api.createAttachment(
-      {
-        "cr4de_owner@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
-        cr4de_name: title || (file && file.name),
-        cr4de_reference: attachments ? attachments.reduce((max, a) => Math.max(max, a.cr4de_reference), -1) + 1 : 1,
-        cr4de_field: field,
-        cr4de_url: url,
-        ...(riskFile
-          ? {
-              "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
-            }
-          : {}),
-        ...(validation
-          ? {
-              "cr4de_validation@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${validation.cr4de_bnravalidationid})`,
-            }
-          : {}),
-      },
-      file
-    );
+    if (existingId) {
+      await api.updateAttachmentFields(existingId, { cr4de_name: title || (file && file.name), cr4de_url: url });
+    } else {
+      await api.createAttachment(
+        {
+          "cr4de_owner@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+          cr4de_name: title || (file && file.name),
+          cr4de_reference: attachments ? attachments.reduce((max, a) => Math.max(max, a.cr4de_reference), -1) + 1 : 1,
+          cr4de_field: field,
+          cr4de_url: url,
+          ...(riskFile
+            ? {
+                "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
+              }
+            : {}),
+          ...(validation
+            ? {
+                "cr4de_validation@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${validation.cr4de_bnravalidationid})`,
+              }
+            : {}),
+        },
+        file
+      );
+    }
 
+    setExistingId(null);
     setTitle(null);
     setUrl(null);
 
@@ -148,6 +155,14 @@ export default function Attachments({
 
     setIsUploadingFile(false);
     setIsUploadingFinished(true);
+  };
+
+  const handleEditAttachment = async (attachment: DVAttachment) => {
+    setExistingId(attachment.cr4de_bnraattachmentid);
+    setTitle(attachment.cr4de_name);
+    setUrl(attachment.cr4de_url);
+
+    setOpenDialog(true);
   };
 
   const handleRemoveAttachment = async (id: string) => {
@@ -199,11 +214,13 @@ export default function Attachments({
               />
             </Grid>
             <Divider orientation="vertical" flexItem sx={{ mx: 4 }} />
-            <Grid item xs sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Button variant="outlined" startIcon={<UploadFileIcon />} onClick={handlePickFile}>
-                <Trans i18nKey="source.dialog.uploadFile">Upload File</Trans>
-              </Button>
-            </Grid>
+            {!existingId && (
+              <Grid item xs sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Button variant="outlined" startIcon={<UploadFileIcon />} onClick={handlePickFile}>
+                  <Trans i18nKey="source.dialog.uploadFile">Upload File</Trans>
+                </Button>
+              </Grid>
+            )}
           </Grid>
         </DialogContent>
         <DialogActions>
@@ -306,15 +323,26 @@ export default function Attachments({
                     </Link>
                   </TableCell>
                   <TableCell>{a.cr4de_url ? t("source.type.link") : t("source.type.file")}</TableCell>
-                  <TableCell align="center">
+                  <TableCell align="center" sx={{ whiteSpace: "nowrap", textAlign: "right" }}>
                     {(!isExternal || a._cr4de_owner_value === user?.contactid) && (
-                      <IconButton
-                        onClick={() => {
-                          handleRemoveAttachment(a.cr4de_bnraattachmentid);
-                        }}
-                      >
-                        <DeleteIcon color="error" />
-                      </IconButton>
+                      <>
+                        {a.cr4de_url && (
+                          <IconButton
+                            onClick={() => {
+                              handleEditAttachment(a);
+                            }}
+                          >
+                            <EditIcon color="primary" />
+                          </IconButton>
+                        )}
+                        <IconButton
+                          onClick={() => {
+                            handleRemoveAttachment(a.cr4de_bnraattachmentid);
+                          }}
+                        >
+                          <DeleteIcon color="error" />
+                        </IconButton>
+                      </>
                     )}
                   </TableCell>
                 </TableRow>

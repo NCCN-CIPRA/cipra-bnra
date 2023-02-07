@@ -20,7 +20,7 @@ export default function patchFetch() {
       if (e.data.userInfo.indexOf('data-id=""') > 0) {
         // Not logged in in Iframe
         document.getElementById("loginWindow")!.style.display = "block";
-        document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/uth");
+        document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/auth");
 
         window.alert("Please log in and refresh the page");
       } else {

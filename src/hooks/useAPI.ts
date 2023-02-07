@@ -94,6 +94,7 @@ export interface API {
   serveAttachmentFile(attachment: DVAttachment): Promise<void>;
   createAttachment(fields: object, file: File | null): Promise<CreateResponse>;
   updateAttachment(id: string, file: File | null): Promise<void>;
+  updateAttachmentFields(id: string, fields: object): Promise<void>;
   deleteAttachment(id: string): Promise<void>;
 
   getFeedbacks<T = DVFeedback>(query?: string): Promise<T[]>;
@@ -611,6 +612,16 @@ export default function useAPI(): API {
 
           return resolve();
         };
+      });
+    },
+    updateAttachmentFields: async function (id: string, fields: object): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${id})`, {
+        method: "PATCH",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
       });
     },
     deleteAttachment: async function (id: string): Promise<void> {

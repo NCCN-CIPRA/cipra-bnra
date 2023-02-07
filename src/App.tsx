@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import AnalysisAveragerPage from "./pages/analysis/AnalysisAveragerPage";
 import AuthenticationPage from "./pages/auth/AuthenticationPage";
 import DataMigrator from "./pages/main/DataMigrator";
@@ -26,6 +26,7 @@ import RiskCataloguePage from "./pages/learning/RiskCataloguePage";
 import QuantitativeScalesPage from "./pages/learning/QuantitativeScalesPage";
 import RegistrationPage from "./pages/auth/RegistrationPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import ErrorPage from "./pages/ErrorPage";
 
 function App() {
   useEffect(() => {
@@ -43,112 +44,119 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <BasePage />,
+      element: <Outlet />,
+      errorElement: <ErrorPage />,
       children: [
         {
           path: "/",
-          element: <HomePage />,
-        },
-
-        {
-          path: "/",
-          element: <AuthPage />,
+          element: <BasePage />,
           children: [
             {
-              path: "/learning",
-              element: <LearningOverviewPage />,
-            },
-            {
-              path: "/learning/risk-catalogue",
-              element: <RiskCataloguePage />,
-            },
-            {
-              path: "/learning/quantitative-categories",
-              element: <QuantitativeScalesPage />,
-            },
-            {
-              path: "/learning/risk/:risk_file_id",
-              element: <RiskPage />,
-            },
-            {
-              path: "/learning/:page_name",
-              element: <LearningPage />,
+              path: "/",
+              element: <HomePage />,
             },
 
             {
-              path: "/hazards",
-              element: <EditorIntroPage />,
-            },
-            {
-              path: "/hazards/:risk_file_id",
-              element: <EditorPage />,
-            },
+              path: "/",
+              element: <AuthPage />,
+              children: [
+                {
+                  path: "/learning",
+                  element: <LearningOverviewPage />,
+                },
+                {
+                  path: "/learning/risk-catalogue",
+                  element: <RiskCataloguePage />,
+                },
+                {
+                  path: "/learning/quantitative-categories",
+                  element: <QuantitativeScalesPage />,
+                },
+                {
+                  path: "/learning/risk/:risk_file_id",
+                  element: <RiskPage />,
+                },
+                {
+                  path: "/learning/:page_name",
+                  element: <LearningPage />,
+                },
 
-            {
-              path: "/overview",
-              element: <OverviewPage />,
-            },
+                {
+                  path: "/hazards",
+                  element: <EditorIntroPage />,
+                },
+                {
+                  path: "/hazards/:risk_file_id",
+                  element: <EditorPage />,
+                },
 
-            {
-              path: "/validation",
-              element: <ValidationIntroPage />,
-            },
-            {
-              path: "/validation/:validation_id",
-              element: <ValidationPage />,
-            },
+                {
+                  path: "/overview",
+                  element: <OverviewPage />,
+                },
 
-            {
-              path: "/analysis/averager",
-              element: <AnalysisAveragerPage />,
-            },
-            {
-              path: "/analysis/calculator",
-              element: <CalculationPage />,
-            },
+                {
+                  path: "/validation",
+                  element: <ValidationIntroPage />,
+                },
+                {
+                  path: "/validation/:validation_id",
+                  element: <ValidationPage />,
+                },
 
-            {
-              path: "/reporting",
-              element: <RankingPage />,
-            },
-            {
-              path: "/reporting/:risk_id",
-              element: <RiskPage />,
-            },
+                {
+                  path: "/analysis/averager",
+                  element: <AnalysisAveragerPage />,
+                },
+                {
+                  path: "/analysis/calculator",
+                  element: <CalculationPage />,
+                },
 
-            { path: "/admin/translations", element: <TranslationsPage /> },
-            { path: "/admin/experts", element: <ExpertManagementPage /> },
+                {
+                  path: "/reporting",
+                  element: <RankingPage />,
+                },
+                {
+                  path: "/reporting/:risk_id",
+                  element: <RiskPage />,
+                },
 
-            // DEV ONLY
-            {
-              path: "/__dev/migrate",
-              element: <DataMigrator />,
-            },
-            {
-              path: "/__dev/code",
-              element: <UploadCodePage />,
+                { path: "/admin/translations", element: <TranslationsPage /> },
+                { path: "/admin/experts", element: <ExpertManagementPage /> },
+
+                // DEV ONLY
+                {
+                  path: "/__dev/migrate",
+                  element: <DataMigrator />,
+                },
+                {
+                  path: "/__dev/code",
+                  element: <UploadCodePage />,
+                },
+              ],
             },
           ],
         },
-      ],
-    },
-    {
-      path: "/auth",
-      element: <AuthenticationPage />,
-    },
-    {
-      path: "/auth/register/:registration_code",
-      element: <RegistrationPage />,
-    },
-    {
-      path: "/auth/resetPassword/:user_id/:code",
-      element: <ResetPasswordPage />,
-    },
+        {
+          path: "/auth",
+          element: <AuthenticationPage />,
+        },
+        {
+          path: "/auth/register/:registration_code",
+          element: <RegistrationPage />,
+        },
+        {
+          path: "/auth/resetPassword",
+          element: <ResetPasswordPage />,
+        },
 
-    // DEV ONLY
-    {
-      path: "/__dev/localapi",
-      element: <LocalAPI />,
+        // DEV ONLY
+        {
+          path: "/__dev/localapi",
+          element: <LocalAPI />,
+        },
+      ],
     },
   ]);
 
