@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Our hook
 export default function useDebounce(value: any, delay: number) {
@@ -31,4 +31,24 @@ export default function useDebounce(value: any, delay: number) {
   );
 
   return [debouncedValue, setDebouncedValue];
+}
+
+// Our hook
+export function useDifferentDebounce(value: any, delay: number) {
+  // State and setters for debounced value
+  const [instantValue, setInstantValue] = useState(value);
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  const valueSetter = useRef<ReturnType<typeof setTimeout> | null>();
+
+  const setValue = (newValue: any) => {
+    setInstantValue(newValue);
+
+    if (valueSetter.current) clearTimeout(valueSetter.current);
+
+    valueSetter.current = setTimeout(() => {
+      setDebouncedValue(newValue);
+    }, delay);
+  };
+
+  return [instantValue, debouncedValue, setValue];
 }

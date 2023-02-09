@@ -11,6 +11,7 @@ import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { DVTranslation } from "../types/dataverse/DVTranslation";
 import { DVValidation } from "../types/dataverse/DVValidation";
+import { Buffer } from "buffer";
 
 export enum DataTable {
   CONTACT,
@@ -53,6 +54,7 @@ export interface API {
 
   getContacts<T = DVContact>(query?: string): Promise<T[]>;
   createContact(fields: object): Promise<CreateResponse>;
+  updateContact(id: string, fields: object): Promise<void>;
   deleteContact(id: string): Promise<void>;
 
   getInvitations<T = DVInvitation>(query?: string): Promise<T[]>;
@@ -263,6 +265,16 @@ export default function useAPI(): API {
       });
 
       return { id: response.headers.get("entityId") as string };
+    },
+    updateContact: async function (id: string, fields: object): Promise<void> {
+      await authFetch(`https://bnra.powerappsportals.com/_api/contacts(${id})`, {
+        method: "PATCH",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
     },
     deleteContact: async function (id: string): Promise<void> {
       await authFetch(`https://bnra.powerappsportals.com/_api/contacts(${id})`, {
@@ -542,24 +554,38 @@ export default function useAPI(): API {
       if (attachment.cr4de_url) {
         window.open(attachment.cr4de_url, "_blank");
       } else {
-        const response = await authFetch(
-          `https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${attachment.cr4de_bnraattachmentid})/cr4de_file/$value`,
-          {
-            method: "GET",
-            headers: {
-              __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const responseText = await response.text();
-
         let fileContent;
-        try {
-          ({ value: fileContent } = JSON.parse(responseText));
-        } catch (e) {
-          fileContent = btoa(responseText);
+
+        if (new Date(attachment.createdon) < new Date("2023-02-01")) {
+          const response = await authFetch(
+            `https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${attachment.cr4de_bnraattachmentid})/cr4de_file?size=full`,
+            {
+              method: "GET",
+              headers: {
+                __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          const { value } = await response.json();
+
+          fileContent = `data:application/pdf;base64,${value.value || value}`;
+        } else {
+          const response = await authFetch(
+            `https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${attachment.cr4de_bnraattachmentid})/cr4de_file/$value`,
+            {
+              method: "GET",
+              headers: {
+                __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          const { value } = await response.json();
+
+          fileContent = value;
         }
 
         const a = document.createElement("a");

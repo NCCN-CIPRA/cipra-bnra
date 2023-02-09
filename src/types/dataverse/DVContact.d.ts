@@ -2,11 +2,13 @@ export interface DVContact<ParticipationsType = undefined, InvitationType = unde
   contactid: string;
 
   emailaddress1: string;
-  firstname: string;
-  lastname: string;
+  firstname?: string;
+  lastname?: string;
+
+  msdyn_portaltermsagreementdate?: Date;
 
   admin: boolean?;
 
-  invitation?: InvitationType;
+  invitations?: InvitationType;
   participations: ParticipationsType;
 }

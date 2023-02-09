@@ -15,4 +15,6 @@ export interface DVAttachment<ContactType = undefined> {
   _cr4de_validation_value: string | null;
   _cr4de_direct_analysis_value: string | null;
   _cr4de_cascade_analysis_value: string | null;
+
+  createdon: string;
 }

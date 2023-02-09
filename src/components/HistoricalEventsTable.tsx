@@ -132,7 +132,6 @@ function HistoricalEventsTable({
 
   useEffect(() => {
     if (onSave && debouncedValue !== savedValue) {
-      console.log(debouncedValue, savedValue);
       onSave(debouncedValue);
       setSavedValue(debouncedValue);
       setUpdatedValue && setUpdatedValue(undefined);
@@ -186,7 +185,7 @@ function HistoricalEventsTable({
         updatedEvent,
         ...historicalEvents.slice(i + 1, historicalEvents.length),
       ]);
-      console.log(updatedEvent);
+
       setInnerValue(newValue);
       setUpdatedValue && setUpdatedValue(newValue);
     };

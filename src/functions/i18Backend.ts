@@ -27,7 +27,7 @@ class DataverseBackend implements Module {
         fr: {},
         de: {},
       };
-      console.log(loadedTranslations);
+
       allTranslations.forEach((t) => {
         if (t.cr4de_en) loadedTranslations.en[t.cr4de_name] = t.cr4de_en;
         if (t.cr4de_nl) loadedTranslations.nl[t.cr4de_name] = t.cr4de_nl;

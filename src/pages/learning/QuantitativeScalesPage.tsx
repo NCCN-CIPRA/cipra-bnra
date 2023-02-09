@@ -13,6 +13,8 @@ import {
   TableFooter,
   IconButton,
   Grow,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import { useState } from "react";
 import { styled } from "@mui/material/styles";
@@ -29,6 +31,9 @@ import TableContainer from "@mui/material/TableContainer";
 import LearningSideBar from "../../components/LearningSideBar";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import TabContext from "@mui/lab/TabContext";
+import TabList from "@mui/lab/TabList";
+import TabPanel from "@mui/lab/TabPanel";
 
 const drawerWidth = 320;
 
@@ -55,6 +60,7 @@ export default function QuantitativeScalesPage({}) {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(true);
+  const [currentTab, setCurrentTab] = useState("p");
 
   const [collapsed, setCollapsed] = useState<{ [key: string]: boolean }>({
     p: false,
@@ -77,6 +83,10 @@ export default function QuantitativeScalesPage({}) {
     m: false,
   });
 
+  const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
+    setCurrentTab(newValue);
+  };
+
   usePageTitle(t("learning.impact.title", "BNRA 2023 - 2026 Kwantitatieve Schalen"));
   useBreadcrumbs([
     { name: "BNRA 2023 - 2026", url: "/" },
@@ -94,136 +104,357 @@ export default function QuantitativeScalesPage({}) {
       />
       <Main open={open}>
         <Container sx={{ mt: 8 }}>
-          <Box sx={{ py: 1, textAlign: "justify" }}>
-            <Typography variant="h4" paragraph>
-              <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, p: !collapsed.p })}>
-                {collapsed.p ? <ExpandMoreIcon /> : <ChevronRightIcon />}
-              </IconButton>
-              <Trans i18nKey="learning.probability.text.title">Waarschijnlijkheid</Trans>
+          <Box>
+            <Typography variant="body1" paragraph>
+              <Trans i18nKey="learning.general.scales.introduction.1">
+                Tijdens de BNRA 2023 - 2026 geven experten enerzijds <i>kwalitatieve</i> beschrijvingen van de
+                waarschijnlijkheid en impact van de verschillende risicoscenario's. Anderzijds wordt gevraagd een
+                <i>kwantitatieve</i> inschatting te geven die het mogelijk zal maken de verschillende risico's aan het
+                einde van de beoordeling onderling te vergelijken.
+              </Trans>
             </Typography>
-
-            <Box sx={{ height: collapsed.p ? "auto" : 0 }}>
-              <Grow in={collapsed.p} style={{ transformOrigin: "0 0 0" }}>
-                <Box sx={{ mb: 8, ml: 3 }}>
-                  <Typography variant="body1" paragraph>
-                    <Trans i18nKey="learning.probability.text.introduction">
-                      What follows is a description of each of the 10 damage indicators used in the BNRA 2023 - 2026.
-                      For each damage indicator, there are five damage extent classes, along with the ranges of their
-                      respective measurement units. These damage classes are logarithmically cumulative .
-                    </Trans>
-                  </Typography>
-
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>
-                            <Trans i18nKey="learning.scales.classCode">Class Code</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.returnPeriod">Return Period</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.3yearLikelihood">3 Year Likelihood</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.10yearLikelihood">10 Year Likelihood</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.qualitative">Qualitative Description</Trans>
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>DP5</TableCell>
-                          <TableCell>{t("learning.probability.rp.5", "< 3 years")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.3yl.5">{"> 63%"}</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.10yl.5">{"> 96%"}</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.q.5">
-                              Almost certain; Multiple events in Belgium during a human lifespan
-                            </Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>DP4</TableCell>
-                          <TableCell>{t("learning.probability.rp.4", "3 – 30 years")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.3yl.4">{"63% – 9.5%"}</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.10yl.4">{"96% - 28%"}</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.q.4">
-                              Very likely; Few events in Belgium during a human lifespan
-                            </Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>DP3</TableCell>
-                          <TableCell>{t("learning.probability.rp.3", "31 – 300 years")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.3yl.3">{"9.5% - 1%"}</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.10yl.3">{"28% - 3.3%"}</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.q.3">
-                              Likely; On average one event in Belgium during a human lifespan
-                            </Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>DP2</TableCell>
-                          <TableCell>{t("learning.probability.rp.2", "301 – 3000 years")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.3yl.2">{"1% - 0.1%"}</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.10yl.2">{"3.3% - 0.3%"}</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.q.2">
-                              Unlikely; May have occurred in Belgium, but possibly some generations ago
-                            </Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>DP1</TableCell>
-                          <TableCell>{t("learning.probability.rp.1", "> 3000 years")}</TableCell>
-                          <TableCell>{t("learning.probability.3yl.1", "< 0.1%")}</TableCell>
-                          <TableCell>{t("learning.probability.10yl.1", "< 0.3%")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.probability.q.1">
-                              Very unlikely; Few, if any, known events worldwide
-                            </Trans>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              </Grow>
-            </Box>
+            <Typography variant="body1" paragraph>
+              <Trans i18nKey="learning.general.scales.introduction.2">
+                Om deze kwantitatieve inschatting te vergemakkelijken, werden voor elke parameter 5 (+ 1) schalen
+                opgesteld. De extra schaal is steeds de 0-schaal. Deze komt overeen met een kans of impact van 0. De
+                standaard schalen gaan van 1 tot 5 waarbij 1 de laagste waarschijnlijkheid of impact aangeeft, en 5 de
+                hoogste.
+              </Trans>
+            </Typography>
+            <Typography variant="body1" paragraph>
+              <Trans i18nKey="learning.general.scales.introduction.3">
+                In onderstaande tabs worden de schalen en hun bijhorende drempelwaarden weergegeven. Merk op dat de
+                impact opgedeeld is in 10 subschalen die <i>schade-indicatoren</i> genoemd worden.
+              </Trans>
+            </Typography>
           </Box>
 
-          <Box sx={{ py: 1, textAlign: "justify" }}>
-            <Typography variant="h4" paragraph>
-              <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, i: !collapsed.i })}>
-                {collapsed.i ? <ExpandMoreIcon /> : <ChevronRightIcon />}
-              </IconButton>
-              <Trans i18nKey="learning.impact.text.title">Impact Indicatoren</Trans>
-            </Typography>
-            <Box sx={{ height: collapsed.i ? "auto" : 0 }}>
-              <Grow in={collapsed.i} style={{ transformOrigin: "0 0 0" }}>
-                <Box sx={{ mb: 8, ml: 3 }}>
+          <TabContext value={currentTab}>
+            <TabList
+              onChange={handleChangeTab}
+              textColor="primary"
+              indicatorColor="primary"
+              aria-label="primary tabs example"
+              sx={{ mt: 8 }}
+            >
+              <Tab value="p" label={t("learning.probability.text.title", "Waarschijnlijkheid")} />
+              <Tab value="m" label={t("learning.motivation.text.title", "Motivatie")} />
+              <Tab value="cp" label={t("learning.cp.text.title", "Voorwaardelijke Kans")} />
+              <Tab value="i" label={t("learning.impact.text.title", "Impact")} />
+            </TabList>
+
+            <TabPanel value="p">
+              <Box sx={{ mb: 4 }}>
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="learning.probability.text.introduction.1">
+                      For estimating the probability of a risk scenario, the following 3 measures are proposed:
+                    </Trans>
+                  </Typography>
+                  <ul>
+                    <li>
+                      <Typography variant="body2">
+                        <Trans i18nKey="learning.probability.text.introduction.2">
+                          The return period, i.e. the timespan expressed in years during which statistical computations
+                          or estimates expect a given event to occur at least once on average. It is expressed as
+                          occurring once every x years.
+                        </Trans>
+                      </Typography>
+                    </li>
+                    <li>
+                      <Typography variant="body2">
+                        <Trans i18nKey="learning.probability.text.introduction.3">
+                          The 3 year likelihood, i.e. the probability of a given event occurring at least once during
+                          the next 3 years. Always takes a value between 0 and 100%.
+                        </Trans>
+                      </Typography>
+                    </li>
+                    <li>
+                      <Typography variant="body2">
+                        <Trans i18nKey="learning.probability.text.introduction.4">
+                          The 10 year likelihood, i.e. the probability of a given event occurring at least once during
+                          the next 10 years. Always takes a value between 0 and 100%.
+                        </Trans>
+                      </Typography>
+                    </li>
+                    <li>
+                      <Typography variant="body2">
+                        <Trans i18nKey="learning.probability.text.introduction.5">A qualitative description</Trans>
+                      </Typography>
+                    </li>
+                  </ul>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="learning.probability.text.introduction.6">
+                      All these measures are essentially equivalent; they just use different scales. The assessment is
+                      based on five probability classes shown in the table below.
+                    </Trans>
+                  </Typography>
+                </Box>
+
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <Trans i18nKey="learning.scales.classCode">Class Code</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.returnPeriod">Return Period</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.3yearLikelihood">3 Year Likelihood</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.10yearLikelihood">10 Year Likelihood</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.qualitative">Qualitative Description</Trans>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>DP5</TableCell>
+                        <TableCell>{t("learning.probability.rp.5", "< 3 years")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.3yl.5">{"> 63%"}</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.10yl.5">{"> 96%"}</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.q.5">
+                            Almost certain; Multiple events in Belgium during a human lifespan
+                          </Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>DP4</TableCell>
+                        <TableCell>{t("learning.probability.rp.4", "3 – 30 years")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.3yl.4">{"63% – 9.5%"}</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.10yl.4">{"96% - 28%"}</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.q.4">
+                            Very likely; Few events in Belgium during a human lifespan
+                          </Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>DP3</TableCell>
+                        <TableCell>{t("learning.probability.rp.3", "31 – 300 years")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.3yl.3">{"9.5% - 1%"}</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.10yl.3">{"28% - 3.3%"}</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.q.3">
+                            Likely; On average one event in Belgium during a human lifespan
+                          </Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>DP2</TableCell>
+                        <TableCell>{t("learning.probability.rp.2", "301 – 3000 years")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.3yl.2">{"1% - 0.1%"}</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.10yl.2">{"3.3% - 0.3%"}</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.q.2">
+                            Unlikely; May have occurred in Belgium, but possibly some generations ago
+                          </Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>DP1</TableCell>
+                        <TableCell>{t("learning.probability.rp.1", "> 3000 years")}</TableCell>
+                        <TableCell>{t("learning.probability.3yl.1", "< 0.1%")}</TableCell>
+                        <TableCell>{t("learning.probability.10yl.1", "< 0.3%")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.q.1">
+                            Very unlikely; Few, if any, known events worldwide
+                          </Trans>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            </TabPanel>
+
+            <TabPanel value="m">
+              <Box sx={{ pb: 4, textAlign: "justify" }}>
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="learning.motivation.text.introduction.1">
+                      There are several factors which make it impossible to reach a definitive conclusion on the
+                      likelihood of occurrence (frequency) of maliciously induced events (e.g. terrorist attacks,
+                      political events and armed conflicts). They include the unpredictability of the actors; the
+                      fluctuating willingness to act and react to evolving security situations and the resulting
+                      fast-changing threat landscapes, as well as the lack of statistically useful case numbers.
+                    </Trans>
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="learning.motivation.text.introduction.2">
+                      An alternative methodology is proposed that makes use of well-known parameters in the intelligence
+                      service community, such as ability and motivation, as well as some assumptions about the behaviour
+                      of intelligent and malicious actors.
+                    </Trans>
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="learning.motivation.text.introduction.3">
+                      The probability should be read as the chance that the actor would execute any attack within their
+                      capabilities between now and 3 years.
+                    </Trans>
+                  </Typography>
+                </Box>
+
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <Trans i18nKey="learning.scales.classCode">Class Code</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.motivation.3yearLikelihood">Likelihood</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.motivation.qualitative">Qualitative Description</Trans>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>M3</TableCell>
+                        <TableCell>{t("learning.motivation.rp.4", "90% – 100%")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.motivation.q.4">Proven motivation</Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>M2</TableCell>
+                        <TableCell>{t("learning.motivation.rp.3", "50% – 90%")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.motivation.q.3">Some motivation</Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>M1</TableCell>
+                        <TableCell>{t("learning.motivation.rp.2", "1% – 50%")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.motivation.q.2">Low motivation</Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>M0</TableCell>
+                        <TableCell>{t("learning.motivation.rp.1", "0%")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.motivation.q.1">No motivation</Trans>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            </TabPanel>
+
+            <TabPanel value="cp">
+              <Box sx={{ mb: 4, textAlign: "justify" }}>
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="learning.cp.text.introduction.1">
+                      For each cause-effect relation identified in the BNRA, conditional probabilities should be
+                      established between the different intensity scenarios of the cause and the effect. This is the
+                      estimated probability that an incident of the (effect) risk in question will occur, given the fact
+                      that an incident of the causing risk has already occurred.
+                    </Trans>
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="learning.cp.text.introduction.2">
+                      For example, an earthquake of an extreme intensity has about 95% chance of causing a major
+                      ‘failure of electricity supply’, which corresponds to CP5. Note that each cause-effect
+                      relationship with 3 intensity scenarios (considerable, major, extreme) requires 9 estimations of
+                      conditional likelihood.
+                    </Trans>
+                  </Typography>
+                </Box>
+
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <Trans i18nKey="learning.scales.classCode">Class Code</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.cp.3yearLikelihood">Conditional Likelihood</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.cp.qualitative">Qualitative Description</Trans>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>CP5</TableCell>
+                        <TableCell>{t("learning.cp.rp.5", "90% - 100%")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.cp.q.5">Always</Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>CP4</TableCell>
+                        <TableCell>{t("learning.cp.rp.4", "50% - 90%")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.cp.q.4">Often</Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>CP3</TableCell>
+                        <TableCell>{t("learning.cp.rp.3", "10% - 50%")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.cp.q.3">Occasionally</Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>CP2</TableCell>
+                        <TableCell>{t("learning.cp.rp.2", "1% - 10%")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.cp.q.2">Rarely</Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>CP1</TableCell>
+                        <TableCell>{t("learning.cp.rp.1", "< 1%")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.cp.q.1">Very rarely</Trans>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>CP0</TableCell>
+                        <TableCell>{t("learning.cp.rp.1", "0%")}</TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.cp.q.1">Never</Trans>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            </TabPanel>
+
+            <TabPanel value="i">
+              <Box sx={{ py: 1, textAlign: "justify" }}>
+                <Box sx={{ mb: 8 }}>
                   <Typography variant="body1" paragraph>
                     <Trans i18nKey="learning.impact.text.introduction">
                       What follows is a description of each of the 10 damage indicators used in the BNRA 2023 - 2026.
@@ -903,6 +1134,28 @@ export default function QuantitativeScalesPage({}) {
                             </TableFooter>
                           </Table>
                         </TableContainer>
+
+                        <Typography variant="body1" paragraph>
+                          <Trans i18nKey="learning.impact.sd.introduction.3">
+                            The descriptions and timeframes represented in the qualitative descriptions of indicator Sc
+                            and Sd should not be interpreted as strong limits, but rather as peak values of a
+                            distribution in time. E.g. for damage class Sd2 it may be possible that some critical media
+                            coverage still occurs months later, but the extent and frequency should be much lower than
+                            during the first few weeks. This is illustrated in Figure 1.
+                          </Trans>
+                        </Typography>
+
+                        <Box sx={{ textAlign: "center", sb: 2 }}>
+                          <img src="https://bnra.powerappsportals.com/sd.png" style={{ width: 600 }} />
+
+                          <Typography variant="caption" paragraph>
+                            <i>
+                              <Trans i18nKey="learning.impact.sd.image">
+                                Graphs showing the distribution in time of the different damages classes of indicator Sd
+                              </Trans>
+                            </i>
+                          </Typography>
+                        </Box>
                       </Box>
                     </Grow>
                   </Box>
@@ -1006,30 +1259,30 @@ export default function QuantitativeScalesPage({}) {
                             </TableFooter>
                           </Table>
                         </TableContainer>
+
+                        <Typography variant="body1" paragraph>
+                          <Trans i18nKey="learning.impact.sd.introduction.3">
+                            The descriptions and timeframes represented in the qualitative descriptions of indicator Sc
+                            and Sd should not be interpreted as strong limits, but rather as peak values of a
+                            distribution in time. E.g. for damage class Sd2 it may be possible that some critical media
+                            coverage still occurs months later, but the extent and frequency should be much lower than
+                            during the first few weeks. This is illustrated in Figure 1.
+                          </Trans>
+                        </Typography>
+
+                        <Box sx={{ textAlign: "center", sb: 2 }}>
+                          <img src="https://bnra.powerappsportals.com/sd.png" style={{ width: 600 }} />
+
+                          <Typography variant="caption" paragraph>
+                            <i>
+                              <Trans i18nKey="learning.impact.sd.image">
+                                Graphs showing the distribution in time of the different damages classes of indicator Sd
+                              </Trans>
+                            </i>
+                          </Typography>
+                        </Box>
                       </Box>
                     </Grow>
-                  </Box>
-
-                  <Typography variant="body1" paragraph>
-                    <Trans i18nKey="learning.impact.sd.introduction.3">
-                      The descriptions and timeframes represented in the qualitative descriptions of indicator Sc and Sd
-                      should not be interpreted as strong limits, but rather as peak values of a distribution in time.
-                      E.g. for damage class Sd2 it may be possible that some critical media coverage still occurs months
-                      later, but the extent and frequency should be much lower than during the first few weeks. This is
-                      illustrated in Figure 1.
-                    </Trans>
-                  </Typography>
-
-                  <Box sx={{ textAlign: "center", sb: 2 }}>
-                    <img src="https://bnra.powerappsportals.com/sd.png" style={{ width: 600 }} />
-
-                    <Typography variant="caption" paragraph>
-                      <i>
-                        <Trans i18nKey="learning.impact.sd.image">
-                          Graphs showing the distribution in time of the different damages classes of indicator Sd
-                        </Trans>
-                      </i>
-                    </Typography>
                   </Box>
 
                   <Typography variant="h5" paragraph sx={{ mt: 4 }}>
@@ -1414,163 +1667,9 @@ export default function QuantitativeScalesPage({}) {
                     </Grow>
                   </Box>
                 </Box>
-              </Grow>
-            </Box>
-          </Box>
-
-          <Box sx={{ py: 1, textAlign: "justify" }}>
-            <Typography variant="h4" paragraph>
-              <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, cp: !collapsed.cp })}>
-                {collapsed.cp ? <ExpandMoreIcon /> : <ChevronRightIcon />}
-              </IconButton>
-              <Trans i18nKey="learning.cp.text.title">Voorwaardelijke Kans</Trans>
-            </Typography>
-            <Box sx={{ height: collapsed.cp ? "auto" : 0 }}>
-              <Grow in={collapsed.cp} style={{ transformOrigin: "0 0 0" }}>
-                <Box sx={{ mb: 8, ml: 3 }}>
-                  <Typography variant="body1" paragraph>
-                    <Trans i18nKey="learning.cp.text.introduction">
-                      What follows is a description of each of the 10 damage indicators used in the BNRA 2023 - 2026.
-                      For each damage indicator, there are five damage extent classes, along with the ranges of their
-                      respective measurement units. These damage classes are logarithmically cumulative .
-                    </Trans>
-                  </Typography>
-
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>
-                            <Trans i18nKey="learning.scales.classCode">Class Code</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.cp.3yearLikelihood">Conditional Likelihood</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.cp.qualitative">Qualitative Description</Trans>
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>CP5</TableCell>
-                          <TableCell>{t("learning.cp.rp.5", "90% - 100%")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.cp.q.5">Always</Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>CP4</TableCell>
-                          <TableCell>{t("learning.cp.rp.4", "50% - 90%")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.cp.q.4">Often</Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>CP3</TableCell>
-                          <TableCell>{t("learning.cp.rp.3", "10% - 50%")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.cp.q.3">Occasionally</Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>CP2</TableCell>
-                          <TableCell>{t("learning.cp.rp.2", "1% - 10%")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.cp.q.2">Rarely</Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>CP1</TableCell>
-                          <TableCell>{t("learning.cp.rp.1", "< 1%")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.cp.q.1">Very rarely</Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>CP0</TableCell>
-                          <TableCell>{t("learning.cp.rp.1", "0%")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.cp.q.1">Never</Trans>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              </Grow>
-            </Box>
-          </Box>
-
-          <Box sx={{ py: 1, textAlign: "justify" }}>
-            <Typography variant="h4" paragraph>
-              <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, m: !collapsed.m })}>
-                {collapsed.m ? <ExpandMoreIcon /> : <ChevronRightIcon />}
-              </IconButton>
-              <Trans i18nKey="learning.motivation.text.title">Motivatie</Trans>
-            </Typography>
-            <Box sx={{ height: collapsed.m ? "auto" : 0 }}>
-              <Grow in={collapsed.m} style={{ transformOrigin: "0 0 0" }}>
-                <Box sx={{ mb: 8, ml: 3 }}>
-                  <Typography variant="body1" paragraph>
-                    <Trans i18nKey="learning.motivation.text.introduction">
-                      What follows is a description of each of the 10 damage indicators used in the BNRA 2023 - 2026.
-                      For each damage indicator, there are five damage extent classes, along with the ranges of their
-                      respective measurement units. These damage classes are logarithmically cumulative .
-                    </Trans>
-                  </Typography>
-
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>
-                            <Trans i18nKey="learning.scales.classCode">Class Code</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.motivation.3yearLikelihood">Likelihood</Trans>
-                          </TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.motivation.qualitative">Qualitative Description</Trans>
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>M3</TableCell>
-                          <TableCell>{t("learning.motivation.rp.4", "90% – 100%")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.motivation.q.4">Proven motivation</Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>M2</TableCell>
-                          <TableCell>{t("learning.motivation.rp.3", "50% – 90%")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.motivation.q.3">Some motivation</Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>M1</TableCell>
-                          <TableCell>{t("learning.motivation.rp.2", "1% – 50%")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.motivation.q.2">Low motivation</Trans>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>M0</TableCell>
-                          <TableCell>{t("learning.motivation.rp.1", "0%")}</TableCell>
-                          <TableCell>
-                            <Trans i18nKey="learning.motivation.q.1">No motivation</Trans>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              </Grow>
-            </Box>
-          </Box>
+              </Box>
+            </TabPanel>
+          </TabContext>
         </Container>
       </Main>
     </>

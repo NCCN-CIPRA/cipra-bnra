@@ -491,13 +491,13 @@ export default function EditorPage() {
             Saving
           </LoadingButton>
         ) : (
-          <Button color="secondary" sx={{ mr: 1 }} onClick={handleSave}>
+          <Button color="primary" sx={{ mr: 1 }} onClick={handleSave}>
             Save
           </Button>
         )}
 
         <Button
-          color="secondary"
+          color="primary"
           onClick={async () => {
             await handleSave();
 
