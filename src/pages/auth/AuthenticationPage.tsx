@@ -18,6 +18,7 @@ import Box from "@mui/material/Box";
 import useAPI from "../../hooks/useAPI";
 import { Trans, useTranslation } from "react-i18next";
 import TitleBar from "../../components/TitleBar";
+import { LoadingButton } from "@mui/lab";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -58,6 +59,8 @@ export default function AuthenticationPage() {
   const [remember, setRemember] = useState(false);
   const [passwordResetSent, setPasswordResetSent] = useState(false);
   const [resetPassword, setResetPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChangeTab = async (event: React.SyntheticEvent, newValue: number) => {
     setResetPassword(false);
@@ -65,18 +68,26 @@ export default function AuthenticationPage() {
   };
 
   const handleLogin = async () => {
+    setLoading(true);
     const result = await api.login(email, password, remember);
 
     if (!result.error) {
       window.location.href = "/";
+    } else {
+      setError(result.error);
     }
+
+    setLoading(false);
   };
 
   const handleForgotPassword = async () => {
+    setLoading(true);
     setPasswordResetSent(true);
     const result = await api.requestPasswordReset(email);
 
     if (!result.error) setResetPassword(false);
+
+    setLoading(false);
   };
 
   return (
@@ -129,13 +140,26 @@ export default function AuthenticationPage() {
             ) : (
               <>
                 {passwordResetSent && (
-                  <Alert severity="info">
+                  <Alert severity="info" sx={{ mb: 4 }}>
                     <AlertTitle>
                       <Trans i18nKey="auth.resetPassword.sentTitle">Password Reset Requested</Trans>
                     </AlertTitle>
                     <Trans i18nKey="auth.resetPassword.sentContent">
                       Please check your email to reset your password.
                     </Trans>
+                  </Alert>
+                )}
+                {error && (
+                  <Alert severity="error" sx={{ mb: 4 }}>
+                    <AlertTitle>
+                      <Trans i18nKey="auth.login.errorTitle">Login Error</Trans>
+                    </AlertTitle>
+
+                    <Typography variant="caption">
+                      <Trans i18nKey={error}>
+                        Ongeldige Aanmeldpoging. <a href="mailto:cipra.bnra@nccn.fgov.be">cipra.bnra@nccn.fgov.be</a>
+                      </Trans>
+                    </Typography>
                   </Alert>
                 )}
                 <Box
@@ -148,7 +172,7 @@ export default function AuthenticationPage() {
                     id="outlined-email-input"
                     label="Email"
                     type="email"
-                    autoComplete="current-email"
+                    autoComplete="email"
                     fullWidth
                     sx={{ my: 2 }}
                     value={email}
@@ -158,7 +182,7 @@ export default function AuthenticationPage() {
                     id="outlined-password-input"
                     label="Password"
                     type="password"
-                    autoComplete="current-password"
+                    autoComplete="password"
                     fullWidth
                     sx={{ my: 2 }}
                     value={password}
@@ -173,9 +197,9 @@ export default function AuthenticationPage() {
                   />
                 </Box>
                 <Stack spacing={2} direction="row" mt={4}>
-                  <Button variant="contained" onClick={handleLogin}>
+                  <LoadingButton loading={loading} variant="contained" onClick={handleLogin}>
                     Login
-                  </Button>
+                  </LoadingButton>
                   <Button variant="outlined" onClick={() => setResetPassword(true)}>
                     Forgot Password
                   </Button>

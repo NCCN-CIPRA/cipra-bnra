@@ -16,7 +16,7 @@ import {
   IconButton,
   Alert,
 } from "@mui/material";
-import { LoadingButton } from "@mui/lab";
+import { AlertTitle, LoadingButton } from "@mui/lab";
 import TextInputBox from "../../components/TextInputBox";
 import TransferList from "../../components/TransferList";
 import SaveIcon from "@mui/icons-material/Save";
@@ -219,7 +219,11 @@ export default function ValidationPage() {
     () =>
       otherHazards && effects
         ? otherHazards
-            .filter((rf) => !effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid))
+            .filter(
+              (rf) =>
+                rf.cr4de_risk_type === "Standard Risk" &&
+                !effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid)
+            )
             .sort((a, b) => {
               return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
             })
@@ -227,6 +231,37 @@ export default function ValidationPage() {
     [effects, otherHazards]
   );
   const effectsChosen = useMemo(
+    () =>
+      effects
+        ? effects
+            .map((c) => ({
+              ...c.cr4de_effect_hazard,
+              cascadeId: c.cr4de_bnrariskcascadeid,
+              reason: c.cr4de_reason,
+            }))
+            .sort((a, b) => {
+              return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
+            })
+        : [],
+    [effects]
+  );
+
+  const catalysedEffectsChoices = useMemo<SmallRisk[]>(
+    () =>
+      otherHazards && effects
+        ? otherHazards
+            .filter(
+              (rf) =>
+                rf.cr4de_risk_type !== "Emerging Risk" &&
+                !effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid)
+            )
+            .sort((a, b) => {
+              return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
+            })
+        : [],
+    [effects, otherHazards]
+  );
+  const catalysedEffectsChosen = useMemo(
     () =>
       effects
         ? effects
@@ -776,13 +811,130 @@ export default function ValidationPage() {
           <Paper>
             <Box p={2} my={8}>
               <Typography variant="h6" mb={1} color="primary">
+                <HelpButton
+                  id="actions-help-button"
+                  steps={[
+                    {
+                      disableBeacon: true,
+                      target: "body",
+                      placement: "center",
+                      content: (
+                        <Box sx={{ textAlign: "left" }}>
+                          <Typography variant="body1" my={2}>
+                            <Trans i18nKey="validation.capabilities.info.1.1">
+                              La section concernant les capacités des acteurs permet de distinguer trois scénarios
+                              d’intensité pour les risques malveillants d’origine humaine en regroupant les acteurs
+                              selon trois niveaux de capacité.
+                            </Trans>
+                          </Typography>
+                          <Typography variant="body1" my={2}>
+                            <Trans i18nKey="validation.capabilities.info.1.2">
+                              Plus précisément, les 3 scénarios d’intensité suivants sont considérés:
+                            </Trans>
+                          </Typography>
+                          <ul>
+                            <li>
+                              <Typography variant="body1" my={2}>
+                                <Trans i18nKey="validation.capabilities.info.1.3">
+                                  <b>Considérable:</b> regroupe les acteurs disposant de faibles capacités techniques et
+                                  opérationnelles
+                                </Trans>
+                              </Typography>
+                            </li>
+                            <li>
+                              <Typography variant="body1" my={2}>
+                                <Trans i18nKey="validation.capabilities.info.1.4">
+                                  <b>Majeur:</b> regroupe les acteurs disposant de capacités techniques ou
+                                  opérationnelles élevées (mais pas les deux à la fois)
+                                </Trans>
+                              </Typography>
+                            </li>
+                            <li>
+                              <Typography variant="body1" my={2}>
+                                <Trans i18nKey="validation.capabilities.info.1.5">
+                                  <b>Extrême:</b> regroupe les acteurs disposant de capacités techniques et
+                                  opérationnelles élevées.
+                                </Trans>
+                              </Typography>
+                            </li>
+                          </ul>
+                        </Box>
+                      ),
+                      styles: { options: { width: 800 } },
+                    },
+                    {
+                      disableBeacon: true,
+                      target: "body",
+                      placement: "center",
+                      content: (
+                        <Box sx={{ textAlign: "left" }}>
+                          <Typography variant="body1" my={2}>
+                            <Trans i18nKey="validation.capabilities.info.2.1">
+                              Lors de la seconde étape de notre étude (évaluation des risques), les capacités des
+                              acteurs seront utilisées pour évaluer les motivations des acteurs.
+                            </Trans>
+                          </Typography>
+                          <Typography variant="body1" my={2}>
+                            <Trans i18nKey="validation.capabilities.info.2.2">
+                              Pour que l’étape 2 puisse se dérouler dans les meilleures conditions, il est donc
+                              primordial que les scénarios d’intensité soient validés par l’ensemble des experts lors de
+                              cette étape 1.
+                            </Trans>
+                          </Typography>
+                        </Box>
+                      ),
+                      styles: { options: { width: 800 } },
+                    },
+                    {
+                      disableBeacon: true,
+                      target: "body",
+                      placement: "center",
+                      content: (
+                        <Box sx={{ textAlign: "left" }}>
+                          <Typography variant="body1" my={2}>
+                            <Trans i18nKey="validation.capabilities.info.3.1">
+                              Nous vous invitons à consulter la préparation des analystes CIPRA et à donner votre
+                              feedback.
+                            </Trans>
+                          </Typography>
+                          <Typography variant="body1" my={2}>
+                            <Trans i18nKey="validation.capabilities.info.3.2">
+                              Nous sommes conscients que les informations demandées peuvent être sensibles. Les
+                              informations contenues dans ces fiches de risques sont considérées comme étant à{" "}
+                              <b>diffusion restreinte</b>.
+                            </Trans>
+                          </Typography>
+                          <Typography variant="body1" my={2}>
+                            <Trans i18nKey="validation.capabilities.info.3.3">
+                              Toutefois, si des informations sont trop sensibles que pour les introduire dans les fiches
+                              de risques, nous vous invitons à utiliser des données agrégées (ex : au lieu de citer une
+                              liste de pays précis en tant qu’acteur, vous avez la possibilité d’utiliser une
+                              dénomination générique du type « acteurs étatiques hostiles »).
+                            </Trans>
+                          </Typography>
+                        </Box>
+                      ),
+                      styles: { options: { width: 800 } },
+                    },
+                  ]}
+                />
                 2. <Trans i18nKey="riskFile.actorCapabilities.title">Actor Capabilities</Trans>
               </Typography>
 
               <Divider />
 
               <Box mt={1}>
-                <Typography variant="caption" paragraph>
+                <Alert severity="warning" sx={{ mb: 4 }}>
+                  <AlertTitle>
+                    <Trans i18nKey="actorCapabilities.attention.title">Attention</Trans>
+                  </AlertTitle>
+                  <Typography variant="caption">
+                    <Trans i18nKey="actorCapabilities.attention">
+                      The information contained in the risk files is considered 'Limited Distribution'.
+                    </Trans>
+                  </Typography>
+                </Alert>
+                {/* <Typography variant="caption" paragraph>
                   <Trans i18nKey="riskFile.actorCapabilities.helpText1">
                     Outline of the actor groups according to three levels of capabilities - <i>considerable, major</i>{" "}
                     and <i>extreme</i>.
@@ -792,7 +944,7 @@ export default function ValidationPage() {
                   <Trans i18nKey="riskFile.actorCapabilities.helpText2">
                     The information contained in the risk files is considered 'Limited Distribution'.
                   </Trans>
-                </Typography>
+                </Typography> */}
               </Box>
 
               {riskFile ? (
@@ -863,13 +1015,90 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Emerging Risk" && (
           <Paper>
             <Box p={2} my={8}>
+              <HelpButton
+                id="horizon-help-button"
+                steps={[
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.horizon.info.1.1">
+                            Pour rappel, au sein de notre étude, un risque émergent est un risque qui, à l’heure
+                            actuelle, ne constitue pas de menace en lui-même mais qui, s’il se développe dans le futur,
+                            peut influencer les autres risques analysés dans la BNRA 2023-2026.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.horizon.info.1.2">
+                            L'analyse de l'horizon étudie et tente de prédire à quelle vitesse le risque émergent peut
+                            se manifester.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.horizon.info.1.3">
+                            Cette section comprend donc une description qualitative (ou quantitative lorsque, cela est
+                            possible) d’une ou plusieurs trajectoires d'évolution possibles du risque émergent y compris
+                            les délais potentiels ou les événements déclencheurs.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.horizon.info.2.1">
+                            Prenons un exemple concret : pour le risque émergent relatif au changement climatique,
+                            l’analyse d’horizon comprendra par exemple une description quantitative de différents
+                            scénarios basés sur les trajectoires d'émission de GES. Pour une nouvelle technologie, cette
+                            section comprendra par exemple une description qualitative des courbes d'adoption de la
+                            nouvelle technologie en question.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.horizon.info.2.2">
+                            {
+                              "Dans cette section, on tentera par exemple de décrire à partir de quand une nouvelle technologie ou un nouveau phénomène arrivera à maturité ou occupera une place plus importante dans la société : est-ce plutôt dans un avenir proche (p. ex. 5-10 ans) ou plutôt à long terme (>30-50 ans)?"
+                            }
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.horizon.info.3.1">
+                            Nous vous invitons à consulter la préparation des analystes CIPRA et à donner votre
+                            feedback.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                ]}
+              />
               <Typography variant="h6" mb={1} color="primary">
                 2. <Trans i18nKey="riskFile.horizonAnalysis.title">Horizon Analysis</Trans>
               </Typography>
 
               <Divider />
 
-              <Box mt={1}>
+              {/* <Box mt={1}>
                 <Typography variant="caption" paragraph>
                   <Trans i18nKey="riskFile.horizonAnalysis.helpText1">
                     This section should include a qualitative (or quantitative if possible) description of one or more
@@ -887,7 +1116,7 @@ export default function ValidationPage() {
                     others.
                   </Trans>
                 </Typography>
-              </Box>
+              </Box> */}
 
               {riskFile ? (
                 <Box
@@ -1082,10 +1311,13 @@ export default function ValidationPage() {
 
               <Box mt={1}>
                 <Alert severity="warning">
+                  <AlertTitle>
+                    <Trans i18nKey="transferList.attention.title">Attention!</Trans>
+                  </AlertTitle>
                   <Typography variant="caption">
                     <Trans i18nKey="transferList.attention">
-                      Attention! You are not able to directly move the the risks between the lists. Please describe your
-                      proposed changes in the input field below
+                      You are not able to directly move the the risks between the lists. Please describe your proposed
+                      changes in the input field below
                     </Trans>
                   </Typography>
                 </Alert>
@@ -1148,6 +1380,94 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Malicious Man-made Risk" && (
           <Paper>
             <Box p={2} my={8}>
+              <HelpButton
+                id="actions-help-button"
+                steps={[
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.actions.info.1.1">
+                            Les actions malveillantes correspondent aux risques de la BNRA-2023-2026 qui peuvent être
+                            provoqués par les groupes d’acteurs identifiés dans une fiche de type man made.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.actions.info.2.1">
+                            Ter herinnering, in de 2de stap, de stap van de risicobeoordeling, zal u onder andere worden
+                            gevraagd om de waarschijnlijkheid van elk intensiteitsscenario in te schatten. In onze
+                            analyse bestaat deze inschatting uit twee verschillende elementen:
+                          </Trans>
+                        </Typography>
+                        <ul>
+                          <li>
+                            <Typography variant="body1" my={2}>
+                              <Trans i18nKey="validation.actions.info.2.2">
+                                De directe waarschijnlijkheid (de waarschijnlijkheid van optreden van ons risico dat
+                                niet kan worden toegeschreven aan het zich voordoen van een ander risico)
+                              </Trans>
+                            </Typography>
+                          </li>
+                          <li>
+                            <Typography variant="body1" my={2}>
+                              <Trans i18nKey="validation.actions.info.2.3">
+                                De voorwaardelijke/ conditionele of indirecte waarschijnlijkheid (de waarschijnlijkheid
+                                dat ons risico optreedt net wel ten gevolge van het zich voordoen van een ander risico).
+                              </Trans>
+                            </Typography>
+                          </li>
+                        </ul>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.actions.info.2.4">
+                            Om de conditionele waarschijnlijkheden te kunnen berekenen, moeten van te voren de linken
+                            tussen de risico's worden bepaald of moeten met andere woorden de cascades van elk te
+                            beoordelen risico uit de BNRA23-26 volledig in kaart gebracht worden.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.actions.info.3.1">
+                            Nous vous invitons à consulter la proposition des analystes CIPRA et à donner votre
+                            feedback.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.actions.info.3.2">
+                            Si, selon vous, il serait pertinent d’ajouter ou de supprimer une action malveillante à la
+                            liste proposée, signalez-le également via l’outil en ligne, en expliquant brièvement
+                            pourquoi cette action malveillante doit ou non être considérée comme dans le cadre de votre
+                            fiche de risques.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                ]}
+              />
               <Typography variant="h6" mb={1} color="primary">
                 3. <Trans i18nKey="riskFile.maliciousActions.title">Malicious Actions</Trans>
               </Typography>
@@ -1155,10 +1475,13 @@ export default function ValidationPage() {
 
               <Box mt={1}>
                 <Alert severity="warning">
+                  <AlertTitle>
+                    <Trans i18nKey="transferList.attention.title">Attention!</Trans>
+                  </AlertTitle>
                   <Typography variant="caption">
                     <Trans i18nKey="transferList.attention">
-                      Attention! You are not able to directly move the the risks between the lists. Please describe your
-                      proposed changes in the input field below
+                      You are not able to directly move the the risks between the lists. Please describe your proposed
+                      changes in the input field below
                     </Trans>
                   </Typography>
                 </Alert>
@@ -1364,10 +1687,13 @@ export default function ValidationPage() {
 
               <Box mt={1}>
                 <Alert severity="warning">
+                  <AlertTitle>
+                    <Trans i18nKey="transferList.attention.title">Attention!</Trans>
+                  </AlertTitle>
                   <Typography variant="caption">
                     <Trans i18nKey="transferList.attention">
-                      Attention! You are not able to directly move the the risks between the lists. Please describe your
-                      proposed changes in the input field below
+                      You are not able to directly move the the risks between the lists. Please describe your proposed
+                      changes in the input field below
                     </Trans>
                   </Typography>
                 </Alert>
@@ -1429,6 +1755,58 @@ export default function ValidationPage() {
         {riskFile && riskFile.cr4de_risk_type === "Emerging Risk" && (
           <Paper>
             <Box p={2} my={8}>
+              <HelpButton
+                id="catalysing-help-button"
+                steps={[
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.catalysedEffects.info.1.1">
+                            Een opkomend risico oefent een katalyserend effect uit op een ander gevaar, indien het in de
+                            toekomst, een effect kan hebben op de gevolgen of de waarschijnlijkheid van het optreden van
+                            het gevaar in kwestie.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.catalysedEffects.info.1.2">
+                            Les analystes CIPRA ont, au sein de chaque fiche de risque, réalisé une première
+                            identification des des dangers qui peuvent être catalysées par le risque qui vous a été
+                            attribué.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+
+                  {
+                    disableBeacon: true,
+                    target: "body",
+                    placement: "center",
+                    content: (
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.catalysedEffects.info.2.1">
+                            Nous vous invitons à consulter la proposition réalisée par les analystes CIPRA et à donner
+                            votre feedback sur ces différents éléments.
+                          </Trans>
+                        </Typography>
+                        <Typography variant="body1" my={2}>
+                          <Trans i18nKey="validation.catalysedEffects.info.2.2">
+                            En cas de modification, veuillez expliquer brièvement pourquoi un risque émergent doit ou
+                            non être considéré comme ayant un effet catalyseur sur un autre danger.
+                          </Trans>
+                        </Typography>
+                      </Box>
+                    ),
+                    styles: { options: { width: 800 } },
+                  },
+                ]}
+              />
               <Typography variant="h6" mb={1} color="primary">
                 3. <Trans i18nKey="riskFile.catalysedEffects.title">Catalysing Effects</Trans>
               </Typography>
@@ -1436,10 +1814,13 @@ export default function ValidationPage() {
 
               <Box mt={1}>
                 <Alert severity="warning">
+                  <AlertTitle>
+                    <Trans i18nKey="transferList.attention.title">Attention!</Trans>
+                  </AlertTitle>
                   <Typography variant="caption">
                     <Trans i18nKey="transferList.attention">
-                      Attention! You are not able to directly move the the risks between the lists. Please describe your
-                      proposed changes in the input field below
+                      You are not able to directly move the the risks between the lists. Please describe your proposed
+                      changes in the input field below
                     </Trans>
                   </Typography>
                 </Alert>
@@ -1461,8 +1842,8 @@ export default function ValidationPage() {
 
               {effects !== null && otherHazards !== null && (
                 <TransferList
-                  choices={effectsChoices}
-                  chosen={effectsChosen}
+                  choices={catalysedEffectsChoices}
+                  chosen={catalysedEffectsChosen}
                   choicesLabel={t("riskFile.catalysedEffects.choices")}
                   chosenLabel={t("riskFile.catalysedEffects.chosen")}
                   chosenSubheader={t("riskFile.catalysedEffects.subheader", { count: effects.length })}
@@ -1617,10 +1998,13 @@ export default function ValidationPage() {
 
               <Box mt={1}>
                 <Alert severity="warning">
+                  <AlertTitle>
+                    <Trans i18nKey="transferList.attention.title">Attention!</Trans>
+                  </AlertTitle>
                   <Typography variant="caption">
                     <Trans i18nKey="transferList.attention">
-                      Attention! You are not able to directly move the the risks between the lists. Please describe your
-                      proposed changes in the input field below
+                      You are not able to directly move the the risks between the lists. Please describe your proposed
+                      changes in the input field below
                     </Trans>
                   </Typography>
                 </Alert>

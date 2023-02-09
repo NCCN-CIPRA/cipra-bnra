@@ -146,7 +146,19 @@ export default function useAPI(): API {
         }),
       });
 
-      console.log(await response.text());
+      const responseHtml = await response.text();
+
+      if (
+        responseHtml.indexOf("Ongeldige aanmeldingspoging.") >= 0 ||
+        responseHtml.indexOf("Er is een fout opgetreden") >= 0
+      )
+        return {
+          error: "auth.login.error.message",
+        };
+      else if (responseHtml.indexOf("De gebruikersaccount is momenteel vergrendeld") >= 0)
+        return {
+          error: "auth.login.locked.message",
+        };
 
       if (response.status === 200) {
         return { data: null };
@@ -541,7 +553,14 @@ export default function useAPI(): API {
           }
         );
 
-        const { value: fileContent } = await response.json();
+        const responseText = await response.text();
+
+        let fileContent;
+        try {
+          ({ value: fileContent } = JSON.parse(responseText));
+        } catch (e) {
+          fileContent = btoa(responseText);
+        }
 
         const a = document.createElement("a");
         document.body.appendChild(a);
@@ -603,7 +622,7 @@ export default function useAPI(): API {
             headers: {
               __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
               "Content-Type": "application/octet-stream",
-              "x-ms-file-name": "main.js",
+              // "x-ms-file-name": "main.js",
             },
             body: JSON.stringify({
               value: fileContent,

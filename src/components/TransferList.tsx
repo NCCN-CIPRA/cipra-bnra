@@ -8,7 +8,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import Button from "@mui/material/Button";
 import { Divider, Typography } from "@mui/material";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArrowForwardIcon from "@mui/icons-material/CompareArrows";
 import { Trans } from "react-i18next";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import TextInputBox from "./TextInputBox";

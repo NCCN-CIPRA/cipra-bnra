@@ -270,7 +270,7 @@ export default function Attachments({
         {actions &&
           actions.map((a, i) => (
             <Tooltip title={a.tooltip}>
-              <IconButton key={i} onClick={a.onClick}>
+              <IconButton key={i} onClick={a.onClick} className="add-attachment-button">
                 {a.icon}
               </IconButton>
             </Tooltip>

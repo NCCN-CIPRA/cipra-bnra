@@ -15,7 +15,9 @@ class DataverseBackend implements Module {
 
   constructor() {
     this.translations = new Promise<Translations>(async (resolve) => {
-      const response = await fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnratranslations`);
+      const response = await fetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnratranslations?$select=cr4de_en,cr4de_nl,cr4de_fr,cr4de_de,cr4de_name`
+      );
 
       const allTranslations: DVTranslation[] = (await response.json()).value;
 
@@ -25,7 +27,7 @@ class DataverseBackend implements Module {
         fr: {},
         de: {},
       };
-
+      console.log(loadedTranslations);
       allTranslations.forEach((t) => {
         if (t.cr4de_en) loadedTranslations.en[t.cr4de_name] = t.cr4de_en;
         if (t.cr4de_nl) loadedTranslations.nl[t.cr4de_name] = t.cr4de_nl;

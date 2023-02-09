@@ -125,6 +125,20 @@ export default function ValidationTutorial() {
       styles: { options: { width: 600 } },
     },
     {
+      target: "#definition-container .add-attachment-button",
+      placement: "bottom",
+      content: (
+        <Box sx={{ textAlign: "left" }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="validation.tutorial.5.3">
+              Press this button to add your own source material if it is available.
+            </Trans>
+          </Typography>
+        </Box>
+      ),
+      styles: { options: { width: 600 } },
+    },
+    {
       target: "#save-button",
       disableScrolling: true,
       placement: "top",
