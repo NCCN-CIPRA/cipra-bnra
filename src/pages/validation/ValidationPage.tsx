@@ -78,7 +78,7 @@ export default function ValidationPage() {
   const { data: allCauses, getData: getAllCauses } = useLazyRecords<DVRiskCascade<SmallRisk>>({
     table: DataTable.RISK_CASCADE,
     onComplete: async (allCauses) => {
-      setCauses(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk"));
+      setCauses(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type !== "Emerging Risk"));
       setCatalysing(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk"));
     },
   });

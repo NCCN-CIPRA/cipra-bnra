@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import { Box, Container, Typography, Paper, Divider, Button, Skeleton } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
@@ -59,7 +59,7 @@ export default function EditorPage() {
   const { data: allCauses, getData: getAllCauses } = useLazyRecords<DVRiskCascade<SmallRisk>>({
     table: DataTable.RISK_CASCADE,
     onComplete: async (allCauses) => {
-      setCauses(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk"));
+      setCauses(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type !== "Emerging Risk"));
       setCatalysing(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk"));
     },
   });
@@ -100,7 +100,7 @@ export default function EditorPage() {
         getAllCauses({
           query: `$filter=_cr4de_effect_hazard_value eq ${rf.cr4de_riskfilesid}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
           onComplete: async (allCauses) => {
-            setCauses(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk"));
+            setCauses(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type !== "Emerging Risk"));
             setCatalysing(allCauses.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk"));
           },
         });
@@ -163,7 +163,7 @@ export default function EditorPage() {
 
   usePageTitle("BNRA 2023 - 2026 Risk File Editor");
   useBreadcrumbs([...defaultBreadcrumbs, riskFile ? { name: riskFile.cr4de_title, url: "" } : null]);
-
+  console.log(causes);
   return (
     <>
       <Container sx={{ pb: 8 }}>
