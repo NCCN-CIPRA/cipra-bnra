@@ -441,9 +441,9 @@ export default function QuantitativeScalesPage({}) {
                       </TableRow>
                       <TableRow>
                         <TableCell>CP0</TableCell>
-                        <TableCell>{t("learning.cp.rp.1", "0%")}</TableCell>
+                        <TableCell>{t("learning.cp.rp.0", "0%")}</TableCell>
                         <TableCell>
-                          <Trans i18nKey="learning.cp.q.1">Never</Trans>
+                          <Trans i18nKey="learning.cp.q.0">Never</Trans>
                         </TableCell>
                       </TableRow>
                     </TableBody>

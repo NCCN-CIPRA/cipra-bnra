@@ -27,6 +27,7 @@ import QuantitativeScalesPage from "./pages/learning/QuantitativeScalesPage";
 import RegistrationPage from "./pages/auth/RegistrationPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ErrorPage from "./pages/ErrorPage";
+import Step2APage from "./pages/step2A/Step2APage";
 
 function App() {
   useEffect(() => {
@@ -96,12 +97,12 @@ function App() {
                 },
 
                 {
-                  path: "/validation",
-                  element: <ValidationIntroPage />,
-                },
-                {
                   path: "/validation/:validation_id",
                   element: <ValidationPage />,
+                },
+                {
+                  path: "/step2A",
+                  element: <Step2APage />,
                 },
 
                 {
