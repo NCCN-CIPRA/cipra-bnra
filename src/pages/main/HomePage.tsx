@@ -247,14 +247,14 @@ export default function HomePage() {
                   publicaties door het NCCN met betrekking tot de BNRA.
                 </Trans>
               </Typography>
-              <Button
+              {/* <Button
                 variant="contained"
                 sx={{ alignSelf: "center", mt: 4 }}
                 href="https://crisiscentrum.be/nl/bnra/neem-deel"
                 target="_blank"
               >
                 <Trans i18nKey="homepage.button.participate">Neem deel aan de BNRA 2023 - 2026</Trans>
-              </Button>
+              </Button> */}
             </Stack>
             <Box>
               <img alt="Time estimation" src="https://bnra.powerappsportals.com/time.png" style={{ width: 400 }}></img>

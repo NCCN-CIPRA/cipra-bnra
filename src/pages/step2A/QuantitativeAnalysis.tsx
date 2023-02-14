@@ -348,7 +348,7 @@ export default function QuantitativeAnalysis({
         </Box>
       </Stack>
 
-      <Stack sx={{ mt: 4, ml: 1 }} rowGap={2}>
+      {/* <Stack sx={{ mt: 4, ml: 1 }} rowGap={2}>
         <Typography variant="subtitle1">
           <Trans i18nKey="2A.quanti.cc.title">Effect of climate change</Trans>
         </Typography>
@@ -370,7 +370,7 @@ export default function QuantitativeAnalysis({
             marks={DPMarks}
           />
         </Box>
-      </Stack>
+      </Stack> */}
     </Box>
   );
 }

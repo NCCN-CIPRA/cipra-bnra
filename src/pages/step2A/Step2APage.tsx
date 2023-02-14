@@ -69,6 +69,12 @@ export default function Step2APage() {
     },
   });
 
+  // useEffect(() => {
+  //   api.getContacts("$filter=emailaddress1 eq 'laurie.phillips@economie.fgov.be'").then((cs) => {
+  //     api.deleteContact(cs[0].contactid);
+  //   });
+  // }, []);
+
   /**
    * Retrieve the step 2A record from the database that is defined in the page url when the page loads
    */
@@ -127,7 +133,7 @@ export default function Step2APage() {
   };
 
   useEffect(() => {
-    transitionTo(STEPS.QUANTI_C);
+    transitionTo(STEPS.QUALI_P);
   }, []);
 
   return (
@@ -254,7 +260,7 @@ export default function Step2APage() {
                 <EffectsSidebar width={drawerWidth} loading={loadingEffects} effects={effects} />
               </>
             )}
-            {step === STEPS.QUALI_CC && (
+            {/* {step === STEPS.QUALI_CC && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
                   <Typography variant="h6">
@@ -268,7 +274,7 @@ export default function Step2APage() {
                 </Box>
                 <TextInputBox initialValue="" />
               </Box>
-            )}
+            )} */}
             {step === STEPS.QUANTI_C && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
