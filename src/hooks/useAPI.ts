@@ -84,6 +84,7 @@ export interface API {
 
   getDirectAnalyses<T = DVDirectAnalysis>(query?: string): Promise<T[]>;
   getDirectAnalysis<T = DVDirectAnalysis>(id: string, query?: string): Promise<T>;
+  createDirectAnalysis(fields: object): Promise<CreateResponse>;
   updateDirectAnalysis(id: string, fields: object): Promise<void>;
   deleteDirectAnalysis(id: string): Promise<void>;
 
@@ -488,6 +489,18 @@ export default function useAPI(): API {
       );
 
       return (await response.json()) as T;
+    },
+    createDirectAnalysis: async function (fields: object): Promise<CreateResponse> {
+      const response = await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises`, {
+        method: "POST",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+
+      return { id: response.headers.get("entityId") as string };
     },
     updateDirectAnalysis: async function (id: string, fields: object): Promise<void> {
       await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})`, {

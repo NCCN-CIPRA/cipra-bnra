@@ -9,10 +9,7 @@ import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { Trans, useTranslation } from "react-i18next";
 import LearningSideBar from "../../components/LearningSideBar";
 import { styled } from "@mui/material/styles";
-
-const openInNewTab = (url: string): void => {
-  window.open(url, "newwindow", "width=1300,height=900");
-};
+import openInNewTab from "../../functions/openInNewTab";
 
 const drawerWidth = 320;
 

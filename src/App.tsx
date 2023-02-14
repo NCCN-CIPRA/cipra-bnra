@@ -101,7 +101,7 @@ function App() {
                   element: <ValidationPage />,
                 },
                 {
-                  path: "/step2A",
+                  path: "/step2A/:step2A_id",
                   element: <Step2APage />,
                 },
 

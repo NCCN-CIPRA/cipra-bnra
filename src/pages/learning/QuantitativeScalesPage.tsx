@@ -34,6 +34,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
+import { DP1, DP2, DP3, DP4, DP5 } from "./QuantitativeScales/P";
 
 const drawerWidth = 320;
 
@@ -215,74 +216,33 @@ export default function QuantitativeScalesPage({}) {
                     <TableBody>
                       <TableRow>
                         <TableCell>DP5</TableCell>
-                        <TableCell>{t("learning.probability.rp.5", "< 3 years")}</TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.3yl.5">{"> 63%"}</Trans>
-                        </TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.10yl.5">{"> 96%"}</Trans>
-                        </TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.q.5">
-                            Almost certain; Multiple events in Belgium during a human lifespan
-                          </Trans>
-                        </TableCell>
+                        {DP5.map((c) => (
+                          <TableCell>{t(c)}</TableCell>
+                        ))}
                       </TableRow>
                       <TableRow>
                         <TableCell>DP4</TableCell>
-                        <TableCell>{t("learning.probability.rp.4", "3 – 30 years")}</TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.3yl.4">{"63% – 9.5%"}</Trans>
-                        </TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.10yl.4">{"96% - 28%"}</Trans>
-                        </TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.q.4">
-                            Very likely; Few events in Belgium during a human lifespan
-                          </Trans>
-                        </TableCell>
+                        {DP4.map((c) => (
+                          <TableCell>{t(c)}</TableCell>
+                        ))}
                       </TableRow>
                       <TableRow>
                         <TableCell>DP3</TableCell>
-                        <TableCell>{t("learning.probability.rp.3", "31 – 300 years")}</TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.3yl.3">{"9.5% - 1%"}</Trans>
-                        </TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.10yl.3">{"28% - 3.3%"}</Trans>
-                        </TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.q.3">
-                            Likely; On average one event in Belgium during a human lifespan
-                          </Trans>
-                        </TableCell>
+                        {DP3.map((c) => (
+                          <TableCell>{t(c)}</TableCell>
+                        ))}
                       </TableRow>
                       <TableRow>
                         <TableCell>DP2</TableCell>
-                        <TableCell>{t("learning.probability.rp.2", "301 – 3000 years")}</TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.3yl.2">{"1% - 0.1%"}</Trans>
-                        </TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.10yl.2">{"3.3% - 0.3%"}</Trans>
-                        </TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.q.2">
-                            Unlikely; May have occurred in Belgium, but possibly some generations ago
-                          </Trans>
-                        </TableCell>
+                        {DP2.map((c) => (
+                          <TableCell>{t(c)}</TableCell>
+                        ))}
                       </TableRow>
                       <TableRow>
                         <TableCell>DP1</TableCell>
-                        <TableCell>{t("learning.probability.rp.1", "> 3000 years")}</TableCell>
-                        <TableCell>{t("learning.probability.3yl.1", "< 0.1%")}</TableCell>
-                        <TableCell>{t("learning.probability.10yl.1", "< 0.3%")}</TableCell>
-                        <TableCell>
-                          <Trans i18nKey="learning.probability.q.1">
-                            Very unlikely; Few, if any, known events worldwide
-                          </Trans>
-                        </TableCell>
+                        {DP1.map((c) => (
+                          <TableCell>{t(c)}</TableCell>
+                        ))}
                       </TableRow>
                     </TableBody>
                   </Table>
