@@ -163,25 +163,11 @@ export default function EditorPage() {
 
   usePageTitle("BNRA 2023 - 2026 Risk File Editor");
   useBreadcrumbs([...defaultBreadcrumbs, riskFile ? { name: riskFile.cr4de_title, url: "" } : null]);
-  console.log(causes);
+
   return (
     <>
       <Container sx={{ pb: 8 }}>
         {riskFile && <ParticipationTable riskFile={riskFile} />}
-
-        <Paper>
-          <Box p={2} my={4}>
-            <Typography variant="h6" color="primary" sx={{ flex: 1 }}>
-              0. Source Migrations
-            </Typography>
-            <Divider sx={{ mb: 1 }} />
-            <Box
-              dangerouslySetInnerHTML={{
-                __html: riskFile?.cr4de_source_migration || "No online sources found",
-              }}
-            />
-          </Box>
-        </Paper>
 
         <Paper>
           <Box p={2} my={4}>

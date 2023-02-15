@@ -19,7 +19,6 @@ import LearningOverviewPage from "./pages/learning/LearningOverviewPage";
 import OverviewPage from "./pages/main/OverviewPage";
 import AuthPage from "./pages/AuthPage";
 import TranslationsPage from "./pages/admin/TranslationsPage";
-import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
 import LearningPage from "./pages/learning/LearningPage";
 import UploadCodePage from "./pages/_dev/UploadCodePage";
 import RiskCataloguePage from "./pages/learning/RiskCataloguePage";
@@ -28,6 +27,7 @@ import RegistrationPage from "./pages/auth/RegistrationPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ErrorPage from "./pages/ErrorPage";
 import Step2APage from "./pages/step2A/Step2APage";
+import ProcessManagementPage from "./pages/admin/Management/ProcessManagementPage";
 
 function App() {
   useEffect(() => {
@@ -124,7 +124,7 @@ function App() {
                 },
 
                 { path: "/admin/translations", element: <TranslationsPage /> },
-                { path: "/admin/experts", element: <ExpertManagementPage /> },
+                { path: "/admin/process", element: <ProcessManagementPage /> },
 
                 // DEV ONLY
                 {

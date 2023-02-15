@@ -75,7 +75,7 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
                   </ListItem>
                   <Divider />
                   <ListItem disablePadding>
-                    <ListItemButton component={Link} to="/admin/experts" onClick={onClose}>
+                    <ListItemButton component={Link} to="/admin/process" onClick={onClose}>
                       <ListItemIcon></ListItemIcon>
                       <ListItemText primary={t("sideDrawer.experts", "Expert Management")} />
                     </ListItemButton>

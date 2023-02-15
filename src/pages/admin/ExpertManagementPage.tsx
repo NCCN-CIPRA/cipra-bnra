@@ -33,7 +33,6 @@ import Delete from "@mui/icons-material/Delete";
 import { DVInvitation } from "../../types/dataverse/DVInvitation";
 import { useDifferentDebounce as useDebounce } from "../../hooks/useDebounce";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import { Center } from "devextreme-react/map";
 import CircularProgress from "@mui/material/CircularProgress";
 import Backdrop from "@mui/material/Backdrop";
 import useLoggedInUser from "../../hooks/useLoggedInUser";
