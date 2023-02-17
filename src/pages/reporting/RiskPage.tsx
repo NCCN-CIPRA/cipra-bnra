@@ -316,7 +316,7 @@ export default function RiskPage() {
         </Table>
       </TableContainer>
       <Box>
-        {riskFile ? (
+        {/* {riskFile ? (
           <Box
             mt={3}
             dangerouslySetInnerHTML={{
@@ -329,7 +329,7 @@ export default function RiskPage() {
             <Skeleton variant="text" />
             <Skeleton variant="text" />
           </Box>
-        )}
+        )} */}
       </Box>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">

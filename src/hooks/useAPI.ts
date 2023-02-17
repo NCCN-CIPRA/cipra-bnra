@@ -503,7 +503,7 @@ export default function useAPI(): API {
       return { id: response.headers.get("entityId") as string };
     },
     updateDirectAnalysis: async function (id: string, fields: object): Promise<void> {
-      await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})`, {
+      const response = await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})`, {
         method: "PATCH",
         headers: {
           __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
@@ -511,6 +511,10 @@ export default function useAPI(): API {
         },
         body: JSON.stringify(fields),
       });
+
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error(response.status.toString());
+      }
     },
     deleteDirectAnalysis: async function (id: string): Promise<void> {
       await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})`, {

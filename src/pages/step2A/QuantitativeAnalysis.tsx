@@ -21,7 +21,7 @@ const DPMarks = [0, 2, 4, 6, 8].map((value, i) => ({
       title={
         <Stack sx={{ width: 500 }}>
           {DPRows.map((r, ri) => (
-            <Stack direction="row">
+            <Stack key={r} direction="row">
               <Typography variant="body2" sx={{ whiteSpace: "nowrap", mr: 1, fontWeight: "bold" }}>
                 <Trans i18nKey={r} />:{" "}
               </Typography>

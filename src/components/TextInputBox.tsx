@@ -26,6 +26,7 @@ function TextInputBox({
   height = "300px",
   initialValue,
   limitedOptions,
+  debounceInterval = 5000,
 
   onSave,
   onBlur,
@@ -35,6 +36,7 @@ function TextInputBox({
   height?: string;
   initialValue: string | null;
   limitedOptions?: boolean;
+  debounceInterval?: number;
 
   onSave?: (newValue: string | null) => void;
   onBlur?: () => void;
@@ -42,7 +44,7 @@ function TextInputBox({
 }) {
   const [savedValue, setSavedValue] = useState(initialValue);
   const [innerValue, setInnerValue] = useState(initialValue);
-  const [debouncedValue] = useDebounce(innerValue, 5000);
+  const [debouncedValue] = useDebounce(innerValue, debounceInterval);
 
   useEffect(() => {
     if (onSave && debouncedValue !== savedValue) {

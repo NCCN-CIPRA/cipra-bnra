@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { LoadingButton } from "@mui/lab";
 import { Trans, useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import useAPI, { DataTable } from "../../hooks/useAPI";
@@ -8,7 +7,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 import useRecord from "../../hooks/useRecord";
 import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { Box, Button, Paper, Fade, Container, Typography, Drawer, Toolbar } from "@mui/material";
+import { Box, Button, Paper, Fade, Container, Typography, Drawer, Alert } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import useLoggedInUser from "../../hooks/useLoggedInUser";
 import Progress from "./Progress";
@@ -23,10 +22,14 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import openInNewTab from "../../functions/openInNewTab";
 import Stack from "@mui/material/Stack";
-import { STEPS } from "./Steps";
+import { hasDrawer, STEPS } from "./Steps";
 import CausesSidebar from "./CausesSidebar";
 import EffectsSidebar from "./EffectsSidebar";
 import QuantitativeAnalysis from "./QuantitativeAnalysis";
+import getDefaultFields from "./fields";
+import QualitativeAnalysis from "./QualitativeAnalysis";
+import SavingOverlay from "./SavingOverlay";
+import Review from "./Review";
 
 type RouteParams = {
   step2A_id: string;
@@ -34,7 +37,7 @@ type RouteParams = {
 
 const transitionDelay = 500;
 
-const drawerWidth = 360;
+const DRAWER_WIDTH = 360;
 
 export default function Step2APage() {
   const { t } = useTranslation();
@@ -44,9 +47,11 @@ export default function Step2APage() {
   const { user } = useLoggedInUser();
 
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [fade, setFade] = useState(false);
+  const [fade, setFade] = useState(true);
   const [step, setStep] = useState<STEPS | null>(null);
+  const [inputFields, setInputFields] = useState<Partial<DVDirectAnalysis> | null>(null);
 
   const {
     data: causes,
@@ -89,13 +94,33 @@ export default function Step2APage() {
       loadEffects({
         query: `$filter=_cr4de_cause_hazard_value eq ${step2A._cr4de_risk_file_value}&$expand=cr4de_effect_hazard($select=cr4de_title)`,
       });
+      setInputFields(getDefaultFields(step2A));
     },
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!step2A || !inputFields || isSaving) return;
+
     setIsSaving(true);
 
-    setIsSaving(false);
+    try {
+      await api.updateDirectAnalysis(step2A.cr4de_bnradirectanalysisid, inputFields);
+
+      setIsSaving(false);
+      setSaveError(false);
+    } catch (e) {
+      setSaveError(true);
+
+      setIsSaving(false);
+      throw e;
+    }
+  };
+
+  const handleUpdateField = (fieldName: keyof DVRiskFile) => (newValue: string | null) => {
+    setInputFields({
+      ...inputFields,
+      [fieldName]: newValue,
+    });
   };
 
   usePageTitle(t("step2A.pageTitle", "BNRA 2023 - 2026 Risk Analysis (Direct Analysis)"));
@@ -116,7 +141,9 @@ export default function Step2APage() {
     return () => clearTimeout(timer);
   };
 
-  const next = () => {
+  const next = async () => {
+    await handleSave();
+
     if (step === STEPS.REVIEW) {
       // TODO: Save and exit
     } else {
@@ -124,7 +151,9 @@ export default function Step2APage() {
     }
   };
 
-  const previous = () => {
+  const previous = async () => {
+    await handleSave();
+
     if (step === null || step === STEPS.QUALI_P) {
       // TODO: Save and exit
     } else {
@@ -133,17 +162,41 @@ export default function Step2APage() {
   };
 
   useEffect(() => {
-    transitionTo(STEPS.QUALI_P);
-  }, []);
+    if (step === null && inputFields !== null) {
+      transitionTo(STEPS.REVIEW);
+    }
+  }, [step, inputFields]);
+
+  const drawerWidth = step && hasDrawer[step] ? DRAWER_WIDTH : 0;
 
   return (
     <>
       <Container>
+        {saveError && (
+          <Box style={{ marginRight: drawerWidth, marginTop: 32, marginBottom: -32 }}>
+            <Alert severity="error" onClose={() => setSaveError(false)}>
+              <Typography paragraph variant="body2">
+                <Trans i18nKey="2A.savingError.1">
+                  An error occured while saving your input. Please check your internet connection and try again.
+                </Trans>
+              </Typography>
+              <Typography paragraph variant="body2">
+                <Trans i18nKey="2A.savingError.2">If the error keeps returning, please contact us.</Trans>
+              </Typography>
+            </Alert>
+          </Box>
+        )}
+        <SavingOverlay visible={isSaving} drawerWidth={drawerWidth} />
         <Fade in={fade} timeout={transitionDelay}>
           <Box sx={{ mt: 8, mb: 16 }}>
-            {step === STEPS.QUALI_P && (
+            {step === null && (
+              <Box sx={{ mt: 32, textAlign: "center" }}>
+                <CircularProgress />
+              </Box>
+            )}
+            {inputFields && step === STEPS.QUALI_P && (
               <>
-                <Box style={{ marginRight: drawerWidth }}>
+                <Box style={{ marginRight: drawerWidth, position: "relative" }}>
                   <Box sx={{ mb: 2, ml: 1 }}>
                     <Typography variant="h6">
                       <Trans i18nKey="2A.qualiP.title">Direct Probability</Trans>
@@ -156,15 +209,16 @@ export default function Step2APage() {
                     <Typography variant="body2">
                       <Trans i18nKey="2A.qualiP.info.2">Do not take into account the causes on the right</Trans>
                     </Typography>
+                    <QualitativeAnalysis
+                      initialValue={inputFields.cr4de_dp_quali || ""}
+                      handleUpdateValue={handleUpdateField("cr4de_dp_quali")}
+                    />
                   </Stack>
-                  <Paper sx={{ p: 2 }}>
-                    <TextInputBox initialValue="" />
-                  </Paper>
                 </Box>
                 <CausesSidebar width={drawerWidth} loading={loadingCauses} causes={causes} />
               </>
             )}
-            {step === STEPS.QUALI_I_H && (
+            {inputFields && step === STEPS.QUALI_I_H && (
               <>
                 <Box style={{ marginRight: drawerWidth }}>
                   <Box sx={{ mb: 2, ml: 1 }}>
@@ -177,12 +231,15 @@ export default function Step2APage() {
                       <Trans i18nKey="2A.qualiIH.info.1">Explanation about filling in the direct human impact</Trans>
                     </Typography>
                   </Box>
-                  <TextInputBox initialValue="" />
+                  <QualitativeAnalysis
+                    initialValue={inputFields.cr4de_di_quali_h || ""}
+                    handleUpdateValue={handleUpdateField("cr4de_di_quali_h")}
+                  />
                 </Box>
                 <EffectsSidebar width={drawerWidth} loading={loadingEffects} effects={effects} />
               </>
             )}
-            {step === STEPS.QUALI_I_S && (
+            {inputFields && step === STEPS.QUALI_I_S && (
               <>
                 <Box style={{ marginRight: drawerWidth }}>
                   <Box sx={{ mb: 2, ml: 1 }}>
@@ -195,12 +252,15 @@ export default function Step2APage() {
                       <Trans i18nKey="2A.qualiIS.info.1">Explanation about filling in the direct societal impact</Trans>
                     </Typography>
                   </Box>
-                  <TextInputBox initialValue="" />
+                  <QualitativeAnalysis
+                    initialValue={inputFields.cr4de_di_quali_s || ""}
+                    handleUpdateValue={handleUpdateField("cr4de_di_quali_s")}
+                  />
                 </Box>
                 <EffectsSidebar width={drawerWidth} loading={loadingEffects} effects={effects} />
               </>
             )}
-            {step === STEPS.QUALI_I_E && (
+            {inputFields && step === STEPS.QUALI_I_E && (
               <>
                 <Box style={{ marginRight: drawerWidth }}>
                   <Box sx={{ mb: 2, ml: 1 }}>
@@ -215,12 +275,15 @@ export default function Step2APage() {
                       </Trans>
                     </Typography>
                   </Box>
-                  <TextInputBox initialValue="" />
+                  <QualitativeAnalysis
+                    initialValue={inputFields.cr4de_di_quali_e || ""}
+                    handleUpdateValue={handleUpdateField("cr4de_di_quali_e")}
+                  />
                 </Box>
                 <EffectsSidebar width={drawerWidth} loading={loadingEffects} effects={effects} />
               </>
             )}
-            {step === STEPS.QUALI_I_F && (
+            {inputFields && step === STEPS.QUALI_I_F && (
               <>
                 <Box style={{ marginRight: drawerWidth }}>
                   <Box sx={{ mb: 2, ml: 1 }}>
@@ -235,12 +298,15 @@ export default function Step2APage() {
                       </Trans>
                     </Typography>
                   </Box>
-                  <TextInputBox initialValue="" />
+                  <QualitativeAnalysis
+                    initialValue={inputFields.cr4de_di_quali_f || ""}
+                    handleUpdateValue={handleUpdateField("cr4de_di_quali_f")}
+                  />
                 </Box>
                 <EffectsSidebar width={drawerWidth} loading={loadingEffects} effects={effects} />
               </>
             )}
-            {step === STEPS.QUALI_CB && (
+            {inputFields && step === STEPS.QUALI_CB && (
               <>
                 <Box style={{ marginRight: drawerWidth }}>
                   <Box sx={{ mb: 2, ml: 1 }}>
@@ -255,27 +321,15 @@ export default function Step2APage() {
                       </Trans>
                     </Typography>
                   </Box>
-                  <TextInputBox initialValue="" />
+                  <QualitativeAnalysis
+                    initialValue={inputFields.cr4de_cross_border_impact_quali || ""}
+                    handleUpdateValue={handleUpdateField("cr4de_cross_border_impact_quali")}
+                  />
                 </Box>
                 <EffectsSidebar width={drawerWidth} loading={loadingEffects} effects={effects} />
               </>
             )}
-            {/* {step === STEPS.QUALI_CC && (
-              <Box>
-                <Box sx={{ mb: 2, ml: 1 }}>
-                  <Typography variant="h6">
-                    <Trans i18nKey="2A.qualiCC.title">Effect of Climate Change</Trans>
-                  </Typography>
-                </Box>
-                <Box sx={{ mb: 4, ml: 1 }}>
-                  <Typography variant="body2">
-                    <Trans i18nKey="2A.qualiCC.info.1">Explanation about filling in the effect of climate change</Trans>
-                  </Typography>
-                </Box>
-                <TextInputBox initialValue="" />
-              </Box>
-            )} */}
-            {step === STEPS.QUANTI_C && step2A?.cr4de_risk_file && (
+            {inputFields && step === STEPS.QUANTI_C && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
                   <Typography variant="h6">
@@ -285,7 +339,7 @@ export default function Step2APage() {
                 <QuantitativeAnalysis riskFile={step2A.cr4de_risk_file} scenarioName="considerable" />
               </Box>
             )}
-            {step === STEPS.QUANTI_M && step2A?.cr4de_risk_file && (
+            {inputFields && step === STEPS.QUANTI_M && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
                   <Typography variant="h6">
@@ -295,7 +349,7 @@ export default function Step2APage() {
                 <QuantitativeAnalysis riskFile={step2A.cr4de_risk_file} scenarioName="major" />
               </Box>
             )}
-            {step === STEPS.QUANTI_E && step2A?.cr4de_risk_file && (
+            {inputFields && step === STEPS.QUANTI_E && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
                   <Typography variant="h6">
@@ -305,13 +359,14 @@ export default function Step2APage() {
                 <QuantitativeAnalysis riskFile={step2A.cr4de_risk_file} scenarioName="extreme" />
               </Box>
             )}
-            {step === STEPS.REVIEW && (
+            {inputFields && step === STEPS.REVIEW && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
                   <Typography variant="h6">
                     <Trans i18nKey="2A.review.title">Review your answers</Trans>
                   </Typography>
                 </Box>
+                <Review input={inputFields} />
               </Box>
             )}
           </Box>
@@ -332,13 +387,13 @@ export default function Step2APage() {
         component={Paper}
         elevation={5}
       >
-        <Button id="save-and-exit-button" color="secondary" onClick={previous}>
-          <Trans i18nKey="button.back">Save & Exit</Trans>
+        <Button id="back-button" disabled={isSaving} color="secondary" onClick={previous}>
+          <Trans i18nKey="button.back">Back</Trans>
         </Button>
 
         <Progress currentStep={step || 0} />
 
-        <Button id="next-button" color="primary" sx={{ mr: 1 }} onClick={next}>
+        <Button id="next-button" disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={next}>
           <Trans i18nKey="button.next">Next</Trans>
         </Button>
       </Box>

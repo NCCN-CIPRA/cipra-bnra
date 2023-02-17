@@ -12,7 +12,7 @@ export default function Progress({ currentStep }: { currentStep: STEPS }) {
           .map((s) => parseInt(s, 10))
           .sort((a, b) => a - b)
           .map((s: STEPS) => (
-            <Step>
+            <Step key={s}>
               <Tooltip title={t(stepNames[s])}>
                 {currentStep === s ? (
                   <StepLabel>{t(stepNames[currentStep])}</StepLabel>

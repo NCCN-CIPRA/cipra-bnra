@@ -28,6 +28,7 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ErrorPage from "./pages/ErrorPage";
 import Step2APage from "./pages/step2A/Step2APage";
 import ProcessManagementPage from "./pages/admin/Management/ProcessManagementPage";
+import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
 
 function App() {
   useEffect(() => {
@@ -125,6 +126,7 @@ function App() {
 
                 { path: "/admin/translations", element: <TranslationsPage /> },
                 { path: "/admin/process", element: <ProcessManagementPage /> },
+                { path: "/admin/experts", element: <ExpertManagementPage /> },
 
                 // DEV ONLY
                 {
