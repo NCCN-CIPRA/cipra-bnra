@@ -60,9 +60,11 @@ function ParameterRow({
             onSave={(v) => onChange({ ...parameter, description: v || "" })}
           />
         ) : (
-          <Typography variant="body1" paragraph>
-            {parameter.description}
-          </Typography>
+          <Box
+            dangerouslySetInnerHTML={{
+              __html: parameter.description || "",
+            }}
+          />
         )}
       </TableCell>
       {onChange && (

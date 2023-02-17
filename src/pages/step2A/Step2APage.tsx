@@ -163,7 +163,7 @@ export default function Step2APage() {
 
   useEffect(() => {
     if (step === null && inputFields !== null) {
-      transitionTo(STEPS.REVIEW);
+      transitionTo(STEPS.QUALI_P);
     }
   }, [step, inputFields]);
 
