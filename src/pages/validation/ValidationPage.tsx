@@ -2136,6 +2136,7 @@ export default function ValidationPage() {
               if (participants.length >= 0) {
                 api.updateParticipant(participants[0].cr4de_bnraparticipationid, {
                   cr4de_validation_finished: true,
+                  cr4de_validation_finished_on: new Date(),
                 });
 
                 api.finishValidation(riskFile?.cr4de_riskfilesid, user.contactid, "VALIDATION");

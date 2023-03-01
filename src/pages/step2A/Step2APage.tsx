@@ -1,57 +1,66 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import usePageTitle from "../../hooks/usePageTitle";
 import useRecord from "../../hooks/useRecord";
 import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { Box, Button, Paper, Fade, Container, Typography, Drawer, Alert } from "@mui/material";
-import SaveIcon from "@mui/icons-material/Save";
+import {
+  Box,
+  Button,
+  Paper,
+  Fade,
+  Container,
+  Typography,
+  Dialog,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
 import useLoggedInUser from "../../hooks/useLoggedInUser";
-import Progress from "./Progress";
-import InformationButton from "./InformationButton";
-import TextInputBox from "../../components/TextInputBox";
+import Progress from "./information/Progress";
+import InformationButton from "./information/InformationButton";
 import useLazyRecords from "../../hooks/useLazyRecords";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import CircularProgress from "@mui/material/CircularProgress";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import openInNewTab from "../../functions/openInNewTab";
 import Stack from "@mui/material/Stack";
-import { hasDrawer, STEPS } from "./Steps";
-import CausesSidebar from "./CausesSidebar";
-import EffectsSidebar from "./EffectsSidebar";
-import QuantitativeAnalysis from "./QuantitativeAnalysis";
-import getDefaultFields from "./fields";
-import QualitativeAnalysis from "./QualitativeAnalysis";
+import { stepNames, STEPS } from "./Steps";
+import { getScenarioInputs, getTrueInputs, ScenarioInput, ScenarioInputs } from "./fields";
 import SavingOverlay from "./SavingOverlay";
-import Review from "./Review";
+import Review from "./steps/Review";
+import ScenarioAnalysis, { validateScenarioInputs } from "./steps/ScenarioAnalysis";
+import { Scenarios } from "../../functions/scenarios";
 
 type RouteParams = {
   step2A_id: string;
 };
 
-const transitionDelay = 500;
+const step2Name = {
+  [STEPS.CONSIDERABLE]: "considerable" as keyof Scenarios,
+  [STEPS.MAJOR]: "major" as keyof Scenarios,
+  [STEPS.EXTREME]: "extreme" as keyof Scenarios,
+};
+
+const transitionDelay = 1000;
 
 const DRAWER_WIDTH = 360;
 
 export default function Step2APage() {
   const { t } = useTranslation();
-  const params = useParams() as RouteParams;
+  const routeParams = useParams() as RouteParams;
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const api = useAPI();
-  const { user } = useLoggedInUser();
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [fade, setFade] = useState(true);
   const [step, setStep] = useState<STEPS | null>(null);
-  const [inputFields, setInputFields] = useState<Partial<DVDirectAnalysis> | null>(null);
+
+  const inputRef = useRef<ScenarioInputs | null>(null);
+  const [inputErrors, setInputErrors] = useState<(keyof ScenarioInput)[]>([]);
 
   const {
     data: causes,
@@ -74,18 +83,12 @@ export default function Step2APage() {
     },
   });
 
-  // useEffect(() => {
-  //   api.getContacts("$filter=emailaddress1 eq 'laurie.phillips@economie.fgov.be'").then((cs) => {
-  //     api.deleteContact(cs[0].contactid);
-  //   });
-  // }, []);
-
   /**
    * Retrieve the step 2A record from the database that is defined in the page url when the page loads
    */
   const { data: step2A } = useRecord<DVDirectAnalysis<DVRiskFile>>({
     table: DataTable.DIRECT_ANALYSIS,
-    id: params.step2A_id,
+    id: routeParams.step2A_id,
     query: "$expand=cr4de_risk_file",
     onComplete: async (step2A) => {
       loadCauses({
@@ -94,19 +97,27 @@ export default function Step2APage() {
       loadEffects({
         query: `$filter=_cr4de_cause_hazard_value eq ${step2A._cr4de_risk_file_value}&$expand=cr4de_effect_hazard($select=cr4de_title)`,
       });
-      setInputFields(getDefaultFields(step2A));
+
+      inputRef.current = {
+        considerable: getScenarioInputs(step2A, "considerable"),
+        major: getScenarioInputs(step2A, "major"),
+        extreme: getScenarioInputs(step2A, "extreme"),
+      };
     },
   });
 
-  const handleSave = async () => {
-    if (!step2A || !inputFields || isSaving) return;
+  const handleSave = async (showLoader = true) => {
+    if (!step2A || !inputRef.current || isSaving) return;
 
-    setIsSaving(true);
+    if (showLoader) setIsSaving(true);
 
     try {
-      await api.updateDirectAnalysis(step2A.cr4de_bnradirectanalysisid, inputFields);
+      await api.updateDirectAnalysis(step2A.cr4de_bnradirectanalysisid, {
+        ...getTrueInputs(inputRef.current.considerable, "considerable"),
+        ...getTrueInputs(inputRef.current.major, "major"),
+        ...getTrueInputs(inputRef.current.extreme, "extreme"),
+      });
 
-      setIsSaving(false);
       setSaveError(false);
     } catch (e) {
       setSaveError(true);
@@ -116,14 +127,7 @@ export default function Step2APage() {
     }
   };
 
-  const handleUpdateField = (fieldName: keyof DVRiskFile) => (newValue: string | null) => {
-    setInputFields({
-      ...inputFields,
-      [fieldName]: newValue,
-    });
-  };
-
-  usePageTitle(t("step2A.pageTitle", "BNRA 2023 - 2026 Risk Analysis (Direct Analysis)"));
+  usePageTitle(t("step2A.pageTitle", "BNRA 2023 - 2026 Risk Analysis A"));
   useBreadcrumbs([
     { name: t("bnra.shortName"), url: "/" },
     { name: t("step2A.breadcrumb", "Risk Analysis A"), url: "/overview" },
@@ -132,241 +136,177 @@ export default function Step2APage() {
 
   const transitionTo = (newStep: STEPS) => {
     setFade(false);
+
     const timer = setTimeout(() => {
       setStep(newStep);
       setFade(true);
+      setIsSaving(false);
       window.scrollTo(0, 0);
+      setSearchParams({
+        step: newStep.toString(),
+      });
     }, transitionDelay);
 
     return () => clearTimeout(timer);
   };
 
   const next = async () => {
-    await handleSave();
+    if (inputRef.current && step !== STEPS.INTRODUCTION && step !== STEPS.REVIEW && step !== null) {
+      const errors = validateScenarioInputs(inputRef.current[step2Name[step]]);
+
+      await handleSave(errors.length <= 0);
+      console.log(errors);
+      if (errors.length > 0) {
+        setInputErrors(errors);
+        window.scrollTo(0, 0);
+
+        return;
+      }
+    }
+
+    setInputErrors([]);
 
     if (step === STEPS.REVIEW) {
-      // TODO: Save and exit
+      navigate("/overview");
     } else {
-      transitionTo(step !== null ? step + 1 : STEPS.QUALI_P);
+      transitionTo(step !== null ? step + 1 : STEPS.INTRODUCTION);
     }
   };
 
   const previous = async () => {
     await handleSave();
 
-    if (step === null || step === STEPS.QUALI_P) {
-      // TODO: Save and exit
-    } else {
+    setInputErrors([]);
+
+    if (step !== null && step !== STEPS.INTRODUCTION) {
       transitionTo(step - 1);
     }
   };
 
   useEffect(() => {
-    if (step === null && inputFields !== null) {
-      transitionTo(STEPS.QUALI_P);
+    if (step === null) {
+      const searchParamStep = searchParams.get("step");
+      if (searchParamStep && parseInt(searchParamStep, 10) in STEPS) {
+        transitionTo(parseInt(searchParamStep, 10) as STEPS);
+      } else transitionTo(STEPS.INTRODUCTION);
     }
-  }, [step, inputFields]);
+  }, [step]);
 
-  const drawerWidth = step && hasDrawer[step] ? DRAWER_WIDTH : 0;
+  const drawerWidth = DRAWER_WIDTH;
 
   return (
     <>
-      <Container>
-        {saveError && (
-          <Box style={{ marginRight: drawerWidth, marginTop: 32, marginBottom: -32 }}>
-            <Alert severity="error" onClose={() => setSaveError(false)}>
-              <Typography paragraph variant="body2">
+      <Container sx={{ position: "relative" }}>
+        <Dialog
+          open={saveError}
+          onClose={() => setSaveError(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              <Typography paragraph>
                 <Trans i18nKey="2A.savingError.1">
-                  An error occured while saving your input. Please check your internet connection and try again.
+                  An error occured while saving your input. Please check your internet connection.
                 </Trans>
               </Typography>
-              <Typography paragraph variant="body2">
-                <Trans i18nKey="2A.savingError.2">If the error keeps returning, please contact us.</Trans>
+              <Typography paragraph>
+                <Trans i18nKey="2A.savingError.2">A new autosave will be attempted in 10 seconds.</Trans>
               </Typography>
-            </Alert>
-          </Box>
-        )}
+              <Typography paragraph>
+                <Trans i18nKey="2A.savingError.3">If the error keeps returning, please contact us.</Trans>
+              </Typography>
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setSaveError(false)} autoFocus>
+              <Trans i18nKey="button.ok">Ok</Trans>
+            </Button>
+          </DialogActions>
+        </Dialog>
         <SavingOverlay visible={isSaving} drawerWidth={drawerWidth} />
         <Fade in={fade} timeout={transitionDelay}>
-          <Box sx={{ mt: 8, mb: 16 }}>
+          <Box sx={{ mt: 6, mb: 16 }}>
             {step === null && (
               <Box sx={{ mt: 32, textAlign: "center" }}>
                 <CircularProgress />
               </Box>
             )}
-            {inputFields && step === STEPS.QUALI_P && (
+            {step === STEPS.INTRODUCTION && (
               <>
                 <Box style={{ marginRight: drawerWidth, position: "relative" }}>
                   <Box sx={{ mb: 2, ml: 1 }}>
-                    <Typography variant="h6">
-                      <Trans i18nKey="2A.qualiP.title">Direct Probability</Trans>
+                    <Typography variant="h5">
+                      <Trans i18nKey="2A.introduction.title">Introduction</Trans>
                     </Typography>
                   </Box>
                   <Stack sx={{ mb: 4, ml: 1 }} rowGap={2}>
                     <Typography variant="body2">
-                      <Trans i18nKey="2A.qualiP.info.1">Explanation about filling in the direct probability</Trans>
+                      <Trans i18nKey="2A.introduction.info.1">Explanation about step 2A</Trans>
                     </Typography>
-                    <Typography variant="body2">
-                      <Trans i18nKey="2A.qualiP.info.2">Do not take into account the causes on the right</Trans>
-                    </Typography>
-                    <QualitativeAnalysis
-                      initialValue={inputFields.cr4de_dp_quali || ""}
-                      handleUpdateValue={handleUpdateField("cr4de_dp_quali")}
-                    />
                   </Stack>
                 </Box>
-                <CausesSidebar width={drawerWidth} loading={loadingCauses} causes={causes} />
               </>
             )}
-            {inputFields && step === STEPS.QUALI_I_H && (
-              <>
-                <Box style={{ marginRight: drawerWidth }}>
-                  <Box sx={{ mb: 2, ml: 1 }}>
-                    <Typography variant="h6">
-                      <Trans i18nKey="2A.qualiIH.title">Direct Impact - Human Impact</Trans>
-                    </Typography>
-                  </Box>
-                  <Box sx={{ mb: 4, ml: 1 }}>
-                    <Typography variant="body2">
-                      <Trans i18nKey="2A.qualiIH.info.1">Explanation about filling in the direct human impact</Trans>
-                    </Typography>
-                  </Box>
-                  <QualitativeAnalysis
-                    initialValue={inputFields.cr4de_di_quali_h || ""}
-                    handleUpdateValue={handleUpdateField("cr4de_di_quali_h")}
-                  />
-                </Box>
-                <EffectsSidebar width={drawerWidth} loading={loadingEffects} effects={effects} />
-              </>
-            )}
-            {inputFields && step === STEPS.QUALI_I_S && (
-              <>
-                <Box style={{ marginRight: drawerWidth }}>
-                  <Box sx={{ mb: 2, ml: 1 }}>
-                    <Typography variant="h6">
-                      <Trans i18nKey="2A.qualiIS.title">Direct Impact - Societal Impact</Trans>
-                    </Typography>
-                  </Box>
-                  <Box sx={{ mb: 4, ml: 1 }}>
-                    <Typography variant="body2">
-                      <Trans i18nKey="2A.qualiIS.info.1">Explanation about filling in the direct societal impact</Trans>
-                    </Typography>
-                  </Box>
-                  <QualitativeAnalysis
-                    initialValue={inputFields.cr4de_di_quali_s || ""}
-                    handleUpdateValue={handleUpdateField("cr4de_di_quali_s")}
-                  />
-                </Box>
-                <EffectsSidebar width={drawerWidth} loading={loadingEffects} effects={effects} />
-              </>
-            )}
-            {inputFields && step === STEPS.QUALI_I_E && (
-              <>
-                <Box style={{ marginRight: drawerWidth }}>
-                  <Box sx={{ mb: 2, ml: 1 }}>
-                    <Typography variant="h6">
-                      <Trans i18nKey="2A.qualiIE.title">Direct Impact - Environmental Impact</Trans>
-                    </Typography>
-                  </Box>
-                  <Box sx={{ mb: 4, ml: 1 }}>
-                    <Typography variant="body2">
-                      <Trans i18nKey="2A.qualiIE.info.1">
-                        Explanation about filling in the direct environmental impact
-                      </Trans>
-                    </Typography>
-                  </Box>
-                  <QualitativeAnalysis
-                    initialValue={inputFields.cr4de_di_quali_e || ""}
-                    handleUpdateValue={handleUpdateField("cr4de_di_quali_e")}
-                  />
-                </Box>
-                <EffectsSidebar width={drawerWidth} loading={loadingEffects} effects={effects} />
-              </>
-            )}
-            {inputFields && step === STEPS.QUALI_I_F && (
-              <>
-                <Box style={{ marginRight: drawerWidth }}>
-                  <Box sx={{ mb: 2, ml: 1 }}>
-                    <Typography variant="h6">
-                      <Trans i18nKey="2A.qualiIF.title">Direct Impact - Financial Impact</Trans>
-                    </Typography>
-                  </Box>
-                  <Box sx={{ mb: 4, ml: 1 }}>
-                    <Typography variant="body2">
-                      <Trans i18nKey="2A.qualiIF.info.1">
-                        Explanation about filling in the direct financial impact
-                      </Trans>
-                    </Typography>
-                  </Box>
-                  <QualitativeAnalysis
-                    initialValue={inputFields.cr4de_di_quali_f || ""}
-                    handleUpdateValue={handleUpdateField("cr4de_di_quali_f")}
-                  />
-                </Box>
-                <EffectsSidebar width={drawerWidth} loading={loadingEffects} effects={effects} />
-              </>
-            )}
-            {inputFields && step === STEPS.QUALI_CB && (
-              <>
-                <Box style={{ marginRight: drawerWidth }}>
-                  <Box sx={{ mb: 2, ml: 1 }}>
-                    <Typography variant="h6">
-                      <Trans i18nKey="2A.qualiCB.title">Cross-border Impact</Trans>
-                    </Typography>
-                  </Box>
-                  <Box sx={{ mb: 4, ml: 1 }}>
-                    <Typography variant="body2">
-                      <Trans i18nKey="2A.qualiCB.info.1">
-                        Explanation about filling in the potential cross-border impact
-                      </Trans>
-                    </Typography>
-                  </Box>
-                  <QualitativeAnalysis
-                    initialValue={inputFields.cr4de_cross_border_impact_quali || ""}
-                    handleUpdateValue={handleUpdateField("cr4de_cross_border_impact_quali")}
-                  />
-                </Box>
-                <EffectsSidebar width={drawerWidth} loading={loadingEffects} effects={effects} />
-              </>
-            )}
-            {inputFields && step === STEPS.QUANTI_C && step2A?.cr4de_risk_file && (
+            {step === STEPS.CONSIDERABLE && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
-                  <Typography variant="h6">
-                    <Trans i18nKey="2A.quantiC.title">Quantitative Analysis - Considerable Scenario</Trans>
+                  <Typography variant="h4">
+                    <Trans i18nKey="2A.considerable.title">Considerable Scenario</Trans>
                   </Typography>
                 </Box>
-                <QuantitativeAnalysis riskFile={step2A.cr4de_risk_file} scenarioName="considerable" />
+                <ScenarioAnalysis
+                  step={stepNames[STEPS.CONSIDERABLE]}
+                  riskFile={step2A.cr4de_risk_file}
+                  directAnalysis={step2A}
+                  scenarioName="considerable"
+                  inputRef={inputRef}
+                  inputErrors={inputErrors}
+                />
               </Box>
             )}
-            {inputFields && step === STEPS.QUANTI_M && step2A?.cr4de_risk_file && (
+            {step === STEPS.MAJOR && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
-                  <Typography variant="h6">
-                    <Trans i18nKey="2A.quantiM.title">Quantitative Analysis - Major Scenario</Trans>
+                  <Typography variant="h4">
+                    <Trans i18nKey="2A.major.title">Major Scenario</Trans>
                   </Typography>
                 </Box>
-                <QuantitativeAnalysis riskFile={step2A.cr4de_risk_file} scenarioName="major" />
+                <ScenarioAnalysis
+                  step={stepNames[STEPS.MAJOR]}
+                  riskFile={step2A.cr4de_risk_file}
+                  directAnalysis={step2A}
+                  scenarioName="major"
+                  inputRef={inputRef}
+                  inputErrors={inputErrors}
+                />
               </Box>
             )}
-            {inputFields && step === STEPS.QUANTI_E && step2A?.cr4de_risk_file && (
+            {step === STEPS.EXTREME && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
-                  <Typography variant="h6">
-                    <Trans i18nKey="2A.quantiE.title">Quantitative Analysis - Extreme Scenario</Trans>
+                  <Typography variant="h4">
+                    <Trans i18nKey="2A.extreme.title">Extreme Scenario</Trans>
                   </Typography>
                 </Box>
-                <QuantitativeAnalysis riskFile={step2A.cr4de_risk_file} scenarioName="extreme" />
+                <ScenarioAnalysis
+                  step={stepNames[STEPS.EXTREME]}
+                  riskFile={step2A.cr4de_risk_file}
+                  directAnalysis={step2A}
+                  scenarioName="extreme"
+                  inputRef={inputRef}
+                  inputErrors={inputErrors}
+                />
               </Box>
             )}
-            {inputFields && step === STEPS.REVIEW && (
+            {inputRef.current && step === STEPS.REVIEW && step2A && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
-                  <Typography variant="h6">
+                  <Typography variant="h4">
                     <Trans i18nKey="2A.review.title">Review your answers</Trans>
                   </Typography>
                 </Box>
-                <Review input={inputFields} />
+                <Review inputs={inputRef.current} />
               </Box>
             )}
           </Box>
@@ -391,11 +331,17 @@ export default function Step2APage() {
           <Trans i18nKey="button.back">Back</Trans>
         </Button>
 
-        <Progress currentStep={step || 0} />
+        <Progress currentStep={step || 0} goToStep={transitionTo} inputRef={inputRef} inputErrors={inputErrors} />
 
-        <Button id="next-button" disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={next}>
-          <Trans i18nKey="button.next">Next</Trans>
-        </Button>
+        {step === STEPS.REVIEW ? (
+          <Button id="next-button" disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={next}>
+            <Trans i18nKey="button.saveandexit">Save & exit</Trans>
+          </Button>
+        ) : (
+          <Button id="next-button" disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={next}>
+            <Trans i18nKey="button.next">Next</Trans>
+          </Button>
+        )}
       </Box>
     </>
   );

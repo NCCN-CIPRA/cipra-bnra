@@ -17,7 +17,7 @@ import ContactFilterField from "./ContactFilterField";
 import ContactListItem from "./ContactListItem";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { SelectableContact } from "./Selectables";
-import dayDifference from "../../../functions/dayDifference";
+import dayDifference from "../../../functions/days";
 import useLoggedInUser from "../../../hooks/useLoggedInUser";
 
 const SPECIAL_FILTERS = {

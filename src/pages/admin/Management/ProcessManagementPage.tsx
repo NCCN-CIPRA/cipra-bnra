@@ -12,7 +12,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import dayDifference from "../../../functions/dayDifference";
+import dayDifference from "../../../functions/days";
 import useAPI from "../../../hooks/useAPI";
 import useLoggedInUser from "../../../hooks/useLoggedInUser";
 import { DVInvitation } from "../../../types/dataverse/DVInvitation";
@@ -27,6 +27,8 @@ import ContactsView from "./ContactsView";
 import RiskFilesView from "./RiskFilesView";
 import usePageTitle from "../../../hooks/usePageTitle";
 import useBreadcrumbs from "../../../hooks/useBreadcrumbs";
+import GraphView from "./GraphView";
+import { DVContact } from "../../../types/dataverse/DVContact";
 
 export default function ProcessManagementPage() {
   const api = useAPI();
@@ -35,6 +37,7 @@ export default function ProcessManagementPage() {
   const [currentTab, setCurrentTab] = useState("riskFiles");
   const [contacts, setContacts] = useState<SelectableContact[] | null>(null);
   const [riskFiles, setRiskFiles] = useState<SelectableRiskFile[] | null>(null);
+  const [participations, setParticipations] = useState<DVParticipation<SelectableContact, DVRiskFile>[] | null>(null);
   const [allSelected, setAllSelected] = useState(false);
 
   const reloadData = async () => {
@@ -100,6 +103,12 @@ export default function ProcessManagementPage() {
 
     setContacts(selectableContacts);
     setRiskFiles(selectableRiskFiles);
+    setParticipations(
+      participations.map((p) => ({
+        ...p,
+        cr4de_contact: selectableContactsDict[p._cr4de_contact_value],
+      }))
+    );
   };
 
   const sendInvitationEmails = async (contact: SelectableContact[]) => {
@@ -209,6 +218,7 @@ export default function ProcessManagementPage() {
             <TabList onChange={changeTab} aria-label="lab API tabs example">
               <Tab label="Group By Contact" value="contacts" />
               <Tab label="Group By Risk File" value="riskFiles" />
+              <Tab label="Lovely Graphs" value="graphs" />
             </TabList>
           </Box>
           <TabPanel value="contacts" sx={{ padding: 0 }}>
@@ -240,6 +250,17 @@ export default function ProcessManagementPage() {
                   selectRiskFile={selectRiskFile}
                   selectAll={selectAll}
                 />
+              ) : (
+                <Box sx={{ m: 4, textAlign: "center" }}>
+                  <CircularProgress />
+                </Box>
+              )}
+            </List>
+          </TabPanel>
+          <TabPanel value="graphs">
+            <List dense>
+              {participations ? (
+                <GraphView participations={participations} />
               ) : (
                 <Box sx={{ m: 4, textAlign: "center" }}>
                   <CircularProgress />

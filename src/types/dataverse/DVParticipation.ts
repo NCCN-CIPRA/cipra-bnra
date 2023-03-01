@@ -18,6 +18,7 @@ export interface DVParticipation<
   _cr4de_validation_value: string | null;
   cr4de_validation: ValidationType;
   cr4de_validation_finished: boolean | null;
+  cr4de_validation_finished_on: Date | null;
 
   _cr4de_direct_analysis_value: string | null;
   cr4de_direct_analysis: DirectAnalysisType;
