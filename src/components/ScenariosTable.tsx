@@ -4,7 +4,7 @@ import { Scenarios, unwrap, wrap } from "../functions/scenarios";
 import { IntensityParameter } from "../functions/intensityParameters";
 import { Trans } from "react-i18next";
 import useDebounce from "../hooks/useDebounce";
-import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import { DVRiskFile, RiskFileEditableFields } from "../types/dataverse/DVRiskFile";
 
 interface RawScenarios {
   considerable: string | null;
@@ -32,8 +32,8 @@ function ScenariosTable({
   parameters: IntensityParameter[];
   initialScenarios: RawScenarios;
 
-  onSave?: (updatedFields: Partial<DVRiskFile>) => void;
-  setUpdatedValue?: (updatedFields: Partial<DVRiskFile>) => void;
+  onSave?: (updatedFields: Partial<RiskFileEditableFields>) => void;
+  setUpdatedValue?: (updatedFields: Partial<RiskFileEditableFields>) => void;
 }) {
   const [savedValue, setSavedValue] = useState(initialScenarios);
   const [innerValue, setInnerValue] = useState(initialScenarios);
@@ -51,7 +51,7 @@ function ScenariosTable({
       const update = getChangedScenarios(savedValue, debouncedValue);
 
       if (Object.keys(update).length > 0) {
-        const fieldsToUpdate: Partial<DVRiskFile> = {};
+        const fieldsToUpdate: Partial<RiskFileEditableFields> = {};
 
         if (update.considerable !== undefined) fieldsToUpdate.cr4de_scenario_considerable = update.considerable;
         if (update.major !== undefined) fieldsToUpdate.cr4de_scenario_major = update.major;

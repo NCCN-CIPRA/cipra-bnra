@@ -61,9 +61,18 @@ export default function RiskFileListItem({
         //   )
         // }
       >
-        <ListItemButton role={undefined} onClick={() => selectRiskFile(riskFile)}>
+        <ListItemButton role={undefined} component={Link} to={`/hazards/${riskFile.cr4de_riskfilesid}`} target="_blank">
           <ListItemIcon>
-            <Checkbox edge="start" checked={riskFile.selected} tabIndex={-1} disableRipple />
+            <Checkbox
+              edge="start"
+              checked={riskFile.selected}
+              tabIndex={-1}
+              disableRipple
+              onClick={(e) => {
+                e.preventDefault();
+                selectRiskFile(riskFile);
+              }}
+            />
           </ListItemIcon>
           <ListItemText primary={riskFile.cr4de_title} secondary={riskFile.cr4de_risk_type} />
         </ListItemButton>

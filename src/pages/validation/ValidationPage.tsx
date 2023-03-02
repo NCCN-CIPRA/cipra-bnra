@@ -115,7 +115,7 @@ export default function ValidationPage() {
 
       if (!otherHazards)
         getOtherHazards({
-          query: `$filter=cr4de_riskfilesid ne ${processedRiskFile.cr4de_riskfilesid}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`,
+          query: `$filter=cr4de_riskfilesid ne ${processedRiskFile.cr4de_riskfilesid}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_risk_category,cr4de_definition`,
         });
       if (!allCauses)
         getAllCauses({
@@ -191,7 +191,8 @@ export default function ValidationPage() {
             .filter(
               (rf) =>
                 !causes.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid) &&
-                rf.cr4de_risk_type !== "Emerging Risk"
+                rf.cr4de_risk_type !== "Emerging Risk" &&
+                rf.cr4de_risk_category !== "Test"
             )
             .sort((a, b) => {
               return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
@@ -222,6 +223,7 @@ export default function ValidationPage() {
             .filter(
               (rf) =>
                 rf.cr4de_risk_type === "Standard Risk" &&
+                rf.cr4de_risk_category !== "Test" &&
                 !effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid)
             )
             .sort((a, b) => {
@@ -253,6 +255,7 @@ export default function ValidationPage() {
             .filter(
               (rf) =>
                 rf.cr4de_risk_type !== "Emerging Risk" &&
+                rf.cr4de_risk_category !== "Test" &&
                 !effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid)
             )
             .sort((a, b) => {
@@ -284,6 +287,7 @@ export default function ValidationPage() {
             .filter(
               (rf) =>
                 rf.cr4de_risk_type === "Emerging Risk" &&
+                rf.cr4de_risk_category !== "Test" &&
                 !catalysing.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
             )
             .sort((a, b) => {

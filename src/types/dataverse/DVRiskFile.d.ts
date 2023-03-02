@@ -1,13 +1,4 @@
-export interface DVRiskFile {
-  cr4de_riskfilesid: string;
-  cr4de_hazard_id: string;
-
-  cr4de_source_migration: string;
-
-  cr4de_title: string;
-  cr4de_risk_type: string;
-  cr4de_risk_category: string;
-
+export interface RiskFileEditableFields {
   cr4de_definition: string | null;
   cr4de_historical_events: string | null;
   cr4de_intensity_parameters: string | null;
@@ -19,6 +10,15 @@ export interface DVRiskFile {
   cr4de_roles_responsibilities: string | null;
   cr4de_existing_measures: string | null;
   cr4de_online_sources: string | null;
+}
+
+export interface DVRiskFile extends RiskFileEditableFields {
+  cr4de_riskfilesid: string;
+  cr4de_hazard_id: string;
+
+  cr4de_title: string;
+  cr4de_risk_type: string;
+  cr4de_risk_category: string;
 
   cr4de_dp_quali: string | null;
   cr4de_di_quali_h: string | null;
@@ -71,4 +71,10 @@ export interface DVRiskFile {
   cr4de_cross_border_impact_quali: string | null;
 
   cr4de_calculated: string | null;
+
+  cr4de_validations_processed: boolean | null;
+  cr4de_validation_silent_procedure_until: Date | null;
+  cr4de_step2A_enabled: boolean | null;
+
+  cr4de_is_test: boolean | null;
 }

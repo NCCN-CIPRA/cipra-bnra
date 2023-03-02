@@ -4,7 +4,7 @@ import { Box, Container, Typography, Paper, Divider, Button, Skeleton } from "@m
 import { LoadingButton } from "@mui/lab";
 import TextInputBox from "../../components/TextInputBox";
 import SaveIcon from "@mui/icons-material/Save";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RiskFileEditableFields } from "../../types/dataverse/DVRiskFile";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import * as S from "../../functions/scenarios";
 import * as HE from "../../functions/historicalEvents";
@@ -128,20 +128,20 @@ export default function EditorPage() {
     setIsSaving(false);
   };
 
-  const handleSaveField = (field: keyof DVRiskFile) => async (newValue: string | null) => {
+  const handleSaveField = (field: keyof RiskFileEditableFields) => async (newValue: string | null) => {
     return handleSaveFields({ [field]: newValue });
   };
 
-  const handleSetFieldUpdates = async (fields: Partial<{ [key in keyof DVRiskFile]: string | null }>) => {
+  const handleSetFieldUpdates = async (fields: Partial<{ [key in keyof RiskFileEditableFields]: string | null }>) => {
     Object.keys(fields).forEach((f) => {
-      const newValue = fields[f as keyof DVRiskFile];
+      const newValue = fields[f as keyof RiskFileEditableFields];
 
       if (newValue === undefined) {
-        if (fieldsToUpdate.current[f as keyof DVRiskFile]) {
-          delete fieldsToUpdate.current[f as keyof DVRiskFile];
+        if (fieldsToUpdate.current[f as keyof RiskFileEditableFields]) {
+          delete fieldsToUpdate.current[f as keyof RiskFileEditableFields];
         }
       } else {
-        fieldsToUpdate.current[f as keyof DVRiskFile] = newValue;
+        fieldsToUpdate.current[f as keyof RiskFileEditableFields] = newValue;
       }
     });
 

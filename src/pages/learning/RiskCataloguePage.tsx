@@ -38,7 +38,10 @@ export default function RiskCataloguePage() {
   const [open, setOpen] = useState(true);
 
   // Get all risk file records from O365 dataverse
-  const { data: riskFiles } = useRecords<DVRiskFile>({ table: DataTable.RISK_FILE, query: "$orderby=cr4de_hazard_id" });
+  const { data: riskFiles } = useRecords<DVRiskFile>({
+    table: DataTable.RISK_FILE,
+    query: "$filter=cr4de_risk_category ne 'Test'&$orderby=cr4de_hazard_id",
+  });
 
   usePageTitle(t("learning.general.hazardCatalogue.title", "BNRA 2023 - 2026 Risicocatalogus"));
   useBreadcrumbs([
