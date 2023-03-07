@@ -1,9 +1,9 @@
 export interface DVParticipation<
-  ContactType = undefined,
-  RiskFileType = undefined,
-  ValidationType = undefined,
-  DirectAnalysisType = undefined,
-  CascadeAnalysisType = undefined
+  ContactType = unknown,
+  RiskFileType = unknown,
+  ValidationType = unknown,
+  DirectAnalysisType = unknown,
+  CascadeAnalysisType = unknown
 > {
   cr4de_bnraparticipationid: string;
 

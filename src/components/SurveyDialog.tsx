@@ -18,14 +18,17 @@ import useAPI from "../hooks/useAPI";
 import { useOutletContext } from "react-router-dom";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { AuthPageContext } from "../pages/AuthPage";
+import { FeedbackStep } from "../types/dataverse/DVFeedback";
 
 export default function SurveyDialog({
   open,
   riskFile,
+  step,
   onClose,
 }: {
   open: boolean;
   riskFile: DVRiskFile | null;
+  step: FeedbackStep;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -53,6 +56,7 @@ export default function SurveyDialog({
       cr4de_q3: q3,
       cr4de_q4: q4,
       cr4de_quali_validation: quali,
+      cr4de_step: step,
     });
 
     setIsLoading(false);

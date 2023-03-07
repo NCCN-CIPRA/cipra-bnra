@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams, useSearchParams } from "react-router-dom";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import usePageTitle from "../../hooks/usePageTitle";
@@ -18,9 +18,10 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  DialogTitle,
 } from "@mui/material";
 import useLoggedInUser from "../../hooks/useLoggedInUser";
-import Progress from "./information/Progress";
+import Progress, { ScenarioErrors } from "./information/Progress";
 import InformationButton from "./information/InformationButton";
 import useLazyRecords from "../../hooks/useLazyRecords";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
@@ -32,6 +33,9 @@ import SavingOverlay from "./SavingOverlay";
 import Review from "./steps/Review";
 import ScenarioAnalysis, { validateScenarioInputs } from "./steps/ScenarioAnalysis";
 import { Scenarios } from "../../functions/scenarios";
+import SurveyDialog from "../../components/SurveyDialog";
+import { AuthPageContext } from "../AuthPage";
+import { FeedbackStep } from "../../types/dataverse/DVFeedback";
 
 type RouteParams = {
   step2A_id: string;
@@ -53,14 +57,23 @@ export default function Step2APage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const api = useAPI();
+  const { user } = useOutletContext<AuthPageContext>();
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [fade, setFade] = useState(true);
-  const [step, setStep] = useState<STEPS | null>(null);
+  const [activeStep, setActiveStep] = useState<STEPS | null>(null);
+  const [currentStep, setCurrentStep] = useState(STEPS.INTRODUCTION);
+
+  const [finishedDialogOpen, setFinishedDialogOpen] = useState(false);
+  const [surveyDialogOpen, setSurveyDialogOpen] = useState(false);
 
   const inputRef = useRef<ScenarioInputs | null>(null);
-  const [inputErrors, setInputErrors] = useState<(keyof ScenarioInput)[]>([]);
+  const [inputErrors, setInputErrors] = useState<ScenarioErrors>({
+    [STEPS.CONSIDERABLE]: [],
+    [STEPS.MAJOR]: [],
+    [STEPS.EXTREME]: [],
+  });
 
   const {
     data: causes,
@@ -138,7 +151,7 @@ export default function Step2APage() {
     setFade(false);
 
     const timer = setTimeout(() => {
-      setStep(newStep);
+      setActiveStep(newStep);
       setFade(true);
       setIsSaving(false);
       window.scrollTo(0, 0);
@@ -151,46 +164,78 @@ export default function Step2APage() {
   };
 
   const next = async () => {
-    if (inputRef.current && step !== STEPS.INTRODUCTION && step !== STEPS.REVIEW && step !== null) {
-      const errors = validateScenarioInputs(inputRef.current[step2Name[step]]);
+    if (!inputRef.current) return;
 
-      await handleSave(errors.length <= 0);
-      console.log(errors);
-      if (errors.length > 0) {
+    if (activeStep === STEPS.REVIEW) {
+      const errors = {
+        [STEPS.CONSIDERABLE]: validateScenarioInputs(inputRef.current.considerable),
+        [STEPS.MAJOR]: validateScenarioInputs(inputRef.current.major),
+        [STEPS.EXTREME]: validateScenarioInputs(inputRef.current.extreme),
+      };
+
+      if (Object.values(errors).some((e) => e.length > 0)) {
         setInputErrors(errors);
-        window.scrollTo(0, 0);
 
-        return;
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      } else {
+        setIsSaving(true);
+        navigate("/overview");
       }
-    }
-
-    setInputErrors([]);
-
-    if (step === STEPS.REVIEW) {
-      navigate("/overview");
+    } else if (activeStep === STEPS.INTRODUCTION) {
+      transitionTo(activeStep + 1);
     } else {
-      transitionTo(step !== null ? step + 1 : STEPS.INTRODUCTION);
+      goToStep(activeStep !== null ? activeStep + 1 : STEPS.INTRODUCTION);
     }
   };
 
+  const goToStep = async (to: STEPS) => {
+    // Validate if we are going to the next step or if we are on a previous step
+    if (to > currentStep || activeStep !== currentStep) {
+      if (inputRef.current && activeStep !== STEPS.INTRODUCTION && activeStep !== STEPS.REVIEW && activeStep !== null) {
+        const errors = validateScenarioInputs(inputRef.current[step2Name[activeStep]]);
+
+        await handleSave(errors.length <= 0);
+
+        if (errors.length > 0) {
+          setInputErrors({ ...inputErrors, [activeStep]: errors });
+
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          });
+
+          return;
+        } else {
+          setInputErrors({ ...inputErrors, [activeStep]: [] });
+        }
+      }
+    } else {
+      await handleSave();
+
+      if (activeStep !== STEPS.INTRODUCTION && activeStep !== STEPS.REVIEW && activeStep !== null)
+        setInputErrors({ ...inputErrors, [activeStep]: [] });
+    }
+
+    transitionTo(to);
+  };
+
   const previous = async () => {
-    await handleSave();
-
-    setInputErrors([]);
-
-    if (step !== null && step !== STEPS.INTRODUCTION) {
-      transitionTo(step - 1);
+    if (activeStep !== null && activeStep !== STEPS.INTRODUCTION) {
+      goToStep(activeStep - 1);
     }
   };
 
   useEffect(() => {
-    if (step === null) {
+    if (activeStep === null) {
       const searchParamStep = searchParams.get("step");
       if (searchParamStep && parseInt(searchParamStep, 10) in STEPS) {
         transitionTo(parseInt(searchParamStep, 10) as STEPS);
       } else transitionTo(STEPS.INTRODUCTION);
     }
-  }, [step]);
+  }, [activeStep]);
 
   const drawerWidth = DRAWER_WIDTH;
 
@@ -227,12 +272,12 @@ export default function Step2APage() {
         <SavingOverlay visible={isSaving} drawerWidth={drawerWidth} />
         <Fade in={fade} timeout={transitionDelay}>
           <Box sx={{ mt: 6, mb: 16 }}>
-            {step === null && (
+            {activeStep === null && (
               <Box sx={{ mt: 32, textAlign: "center" }}>
                 <CircularProgress />
               </Box>
             )}
-            {step === STEPS.INTRODUCTION && (
+            {activeStep === STEPS.INTRODUCTION && (
               <>
                 <Box style={{ marginRight: drawerWidth, position: "relative" }}>
                   <Box sx={{ mb: 2, ml: 1 }}>
@@ -248,7 +293,7 @@ export default function Step2APage() {
                 </Box>
               </>
             )}
-            {step === STEPS.CONSIDERABLE && step2A?.cr4de_risk_file && (
+            {activeStep === STEPS.CONSIDERABLE && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
                   <Typography variant="h4">
@@ -261,11 +306,11 @@ export default function Step2APage() {
                   directAnalysis={step2A}
                   scenarioName="considerable"
                   inputRef={inputRef}
-                  inputErrors={inputErrors}
+                  inputErrors={inputErrors[STEPS.CONSIDERABLE]}
                 />
               </Box>
             )}
-            {step === STEPS.MAJOR && step2A?.cr4de_risk_file && (
+            {activeStep === STEPS.MAJOR && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
                   <Typography variant="h4">
@@ -278,11 +323,11 @@ export default function Step2APage() {
                   directAnalysis={step2A}
                   scenarioName="major"
                   inputRef={inputRef}
-                  inputErrors={inputErrors}
+                  inputErrors={inputErrors[STEPS.MAJOR]}
                 />
               </Box>
             )}
-            {step === STEPS.EXTREME && step2A?.cr4de_risk_file && (
+            {activeStep === STEPS.EXTREME && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
                   <Typography variant="h4">
@@ -295,18 +340,18 @@ export default function Step2APage() {
                   directAnalysis={step2A}
                   scenarioName="extreme"
                   inputRef={inputRef}
-                  inputErrors={inputErrors}
+                  inputErrors={inputErrors[STEPS.EXTREME]}
                 />
               </Box>
             )}
-            {inputRef.current && step === STEPS.REVIEW && step2A && (
+            {inputRef.current && activeStep === STEPS.REVIEW && step2A && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
                   <Typography variant="h4">
                     <Trans i18nKey="2A.review.title">Review your answers</Trans>
                   </Typography>
                 </Box>
-                <Review inputs={inputRef.current} />
+                <Review inputs={inputRef.current} inputErrors={inputErrors} />
               </Box>
             )}
           </Box>
@@ -331,18 +376,114 @@ export default function Step2APage() {
           <Trans i18nKey="button.back">Back</Trans>
         </Button>
 
-        <Progress currentStep={step || 0} goToStep={transitionTo} inputRef={inputRef} inputErrors={inputErrors} />
+        <Progress
+          activeStep={activeStep || 0}
+          goToStep={goToStep}
+          inputRef={inputRef}
+          inputErrors={inputErrors}
+          setCurrentStep={setCurrentStep}
+        />
 
-        {step === STEPS.REVIEW ? (
-          <Button id="next-button" disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={next}>
-            <Trans i18nKey="button.saveandexit">Save & exit</Trans>
-          </Button>
-        ) : (
+        {activeStep !== STEPS.REVIEW && (
           <Button id="next-button" disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={next}>
             <Trans i18nKey="button.next">Next</Trans>
           </Button>
         )}
+        <Button
+          id="next-button"
+          disabled={isSaving}
+          color="primary"
+          sx={{ mr: 1 }}
+          onClick={() => setFinishedDialogOpen(true)}
+        >
+          <Trans i18nKey="button.saveandexit">Save & exit</Trans>
+        </Button>
       </Box>
+
+      <Dialog open={finishedDialogOpen} onClose={() => setFinishedDialogOpen(false)}>
+        {currentStep === STEPS.REVIEW && Object.values(inputErrors).every((e) => e.length <= 0) ? (
+          <>
+            <DialogTitle>
+              <Trans i18nKey="2A.finishedDialog.title">Are you finished with step 2A?</Trans>
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                <Trans i18nKey="2A.finishedDialog.helpText">
+                  Even if you indicate that you are finished, you can still return at a later time to make changes until
+                  the end of step 2A for this risk file.
+                </Trans>
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setFinishedDialogOpen(false)}>
+                <Trans i18nKey="2A.finishedDialog.cancel">No, I am not finished</Trans>
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!step2A) return;
+
+                  setFinishedDialogOpen(false);
+                  setSurveyDialogOpen(true);
+
+                  const participants = await api.getParticipants(
+                    `$filter=_cr4de_contact_value eq ${user.contactid} and _cr4de_direct_analysis_value eq ${step2A.cr4de_bnradirectanalysisid}`
+                  );
+                  if (participants.length >= 0) {
+                    api.updateParticipant(participants[0].cr4de_bnraparticipationid, {
+                      cr4de_direct_analysis_finished: true,
+                      cr4de_direct_analysis_finished_on: new Date(),
+                    });
+                    api.finishStep(step2A._cr4de_risk_file_value, user.contactid, "2A");
+                  }
+                }}
+              >
+                <Trans i18nKey="2A.finishedDialog.finish">Yes, I am finished</Trans>
+              </Button>
+            </DialogActions>
+          </>
+        ) : (
+          <>
+            <DialogTitle>
+              <Trans i18nKey="2A.exitDialog.title">Would you like to exit step 2A?</Trans>
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                <Trans i18nKey="2A.exitDialog.helpText">
+                  Your progress will be saved and you may return at a later time to continue where you left of.
+                </Trans>
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setFinishedDialogOpen(false)}>
+                <Trans i18nKey="2A.exitDialog.cancel">No, stay here</Trans>
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!step2A) return;
+
+                  handleSave();
+
+                  navigate("/overview");
+                }}
+              >
+                <Trans i18nKey="2A.exitDialog.finish">Yes, return to my risks</Trans>
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
+
+      {step2A && (
+        <SurveyDialog
+          open={surveyDialogOpen}
+          riskFile={step2A?.cr4de_risk_file}
+          step={FeedbackStep.STEP_2A}
+          onClose={() => {
+            setSurveyDialogOpen(false);
+            navigate("/overview");
+          }}
+        />
+      )}
     </>
   );
 }

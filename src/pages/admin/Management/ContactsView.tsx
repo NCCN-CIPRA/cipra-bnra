@@ -173,7 +173,7 @@ export default function ContactsView({
       >
         <Tooltip title="Select all">
           <ListItemIcon sx={{ alignSelf: "flex-start" }}>
-            <Checkbox edge="start" checked={allSelected} tabIndex={-1} disableRipple onClick={selectAll} />
+            <Checkbox edge="start" checked={allSelected} tabIndex={-1} disableRipple onClick={() => selectAll()} />
           </ListItemIcon>
         </Tooltip>
         <Stack direction="column" sx={{ width: "100%", mr: 4 }}>

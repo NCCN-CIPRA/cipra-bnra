@@ -53,15 +53,15 @@ export interface API {
   requestRegistrationLink(invitationCode: string): Promise<AuthResponse<RegistrationData>>;
 
   getContacts<T = DVContact>(query?: string): Promise<T[]>;
-  createContact(fields: object): Promise<CreateResponse>;
-  updateContact(id: string, fields: object): Promise<void>;
+  createContact(fields: Partial<DVContact>): Promise<CreateResponse>;
+  updateContact(id: string, fields: Partial<DVContact>): Promise<void>;
   deleteContact(id: string): Promise<void>;
 
   getInvitations<T = DVInvitation>(query?: string): Promise<T[]>;
 
   getRiskFiles<T = DVRiskFile>(query?: string): Promise<T[]>;
   getRiskFile<T = DVRiskFile>(id: string, query?: string): Promise<T>;
-  updateRiskFile(id: string, fields: object): Promise<void>;
+  updateRiskFile(id: string, fields: Partial<DVRiskFile>): Promise<void>;
   deleteRiskFile(id: string): Promise<void>;
 
   getRiskCascades<T = DVRiskCascade>(query?: string): Promise<T[]>;
@@ -80,7 +80,6 @@ export interface API {
   createValidation(fields: object): Promise<CreateResponse>;
   updateValidation(id: string, fields: object): Promise<void>;
   deleteValidation(id: string): Promise<void>;
-  finishValidation(riskFileId: string, contactId: string, step: string): Promise<void>;
 
   getDirectAnalyses<T = DVDirectAnalysis>(query?: string): Promise<T[]>;
   getDirectAnalysis<T = DVDirectAnalysis>(id: string, query?: string): Promise<T>;
@@ -113,6 +112,7 @@ export interface API {
   updatePage(id: string, fields: object): Promise<void>;
 
   sendInvitationEmail(contactIds: string[]): Promise<void>;
+  finishStep(riskFileId: string, contactId: string, step: string): Promise<void>;
 }
 
 export default function useAPI(): API {
@@ -459,22 +459,6 @@ export default function useAPI(): API {
         },
       });
     },
-    finishValidation: async function (riskFileId: string, contactId: string, step: string): Promise<void> {
-      await authFetch(
-        "https://prod-233.westeurope.logic.azure.com:443/workflows/9ca84342adac4c8192391b17507e8a93/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KvQCYydJbAMruMqSy7Psc3U6pqDXC8QehNcDwzGS3QY",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            riskFileId,
-            contactId,
-            step,
-          }),
-        }
-      );
-    },
 
     getDirectAnalyses: async function <T = DVDirectAnalysis>(query?: string): Promise<T[]> {
       const response = await authFetch(
@@ -792,6 +776,22 @@ export default function useAPI(): API {
           },
           body: JSON.stringify({
             contacts: contactIds,
+          }),
+        }
+      );
+    },
+    finishStep: async function (riskFileId: string, contactId: string, step: string): Promise<void> {
+      await authFetch(
+        "https://prod-233.westeurope.logic.azure.com:443/workflows/9ca84342adac4c8192391b17507e8a93/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KvQCYydJbAMruMqSy7Psc3U6pqDXC8QehNcDwzGS3QY",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            riskFileId,
+            contactId,
+            step,
           }),
         }
       );

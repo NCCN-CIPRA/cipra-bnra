@@ -28,7 +28,6 @@ import FSection from "../sections/FSection";
 import CBSection from "../sections/CBSection";
 
 export function validateScenarioInputs(inputs: ScenarioInput): (keyof ScenarioInput)[] {
-  console.log(inputs);
   return Object.entries(inputs).reduce((acc, [fieldName, value]) => {
     if (value !== null && value !== "") return acc;
 
@@ -74,7 +73,7 @@ export default function ScenarioAnalysis({
     <Stack sx={{ mx: 1 }} rowGap={8}>
       <Stack rowGap={2}>
         {inputErrors.length > 0 && (
-          <Alert severity="warning" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 2 }}>
             <Typography>
               <Trans i18nKey="2A.errors">
                 Some inputs are missing on this page. Please check the error messages below.

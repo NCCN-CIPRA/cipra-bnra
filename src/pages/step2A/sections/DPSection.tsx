@@ -21,6 +21,23 @@ export default function DPSection({
       <Typography variant="h6">
         <Trans i18nKey="2A.dp.title">Direct Probability</Trans>
       </Typography>
+
+      <Typography variant="body2">
+        <Trans i18nKey="2A.dp.quanti.info.1">Explanation about filling in the direct probabilty value</Trans>
+      </Typography>
+
+      <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
+        <Typography variant="subtitle2">
+          <Trans i18nKey="2A.dp.quanti.dp.title">DP - Direct Probability</Trans>
+        </Typography>
+
+        <DPSlider
+          initialValue={fieldsRef.cr4de_dp_quanti}
+          error={inputErrors.indexOf("cr4de_dp_quanti") >= 0}
+          onChange={handleChangeDPValue}
+        />
+      </Box>
+
       <Typography variant="body2">
         <Trans i18nKey="2A.dp.quali.info.1">Explanation about filling in the direct probabilty textbox</Trans>
       </Typography>
@@ -34,21 +51,6 @@ export default function DPSection({
         }}
         debounceInterval={100}
       />
-      <Typography variant="body2">
-        <Trans i18nKey="2A.dp.quanti.info.1">Explanation about filling in the direct probabilty value</Trans>
-      </Typography>
-
-      <Box component={Paper} sx={{ mx: 2, p: 2 }}>
-        <Typography variant="subtitle2">
-          <Trans i18nKey="2A.dp.quanti.dp.title">DP - Direct Probability</Trans>
-        </Typography>
-
-        <DPSlider
-          initialValue={fieldsRef.cr4de_dp_quanti}
-          error={inputErrors.indexOf("cr4de_dp_quanti") >= 0}
-          onChange={handleChangeDPValue}
-        />
-      </Box>
     </Stack>
   );
 }

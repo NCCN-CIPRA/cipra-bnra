@@ -18,11 +18,14 @@ import {
   Checkbox,
   Menu,
   MenuItem,
+  ListItemSecondaryAction,
 } from "@mui/material";
 import ParticipationStepper from "./ParticipationStepper";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import useAPI from "../../../hooks/useAPI";
 import { Link } from "react-router-dom";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 
 export default function ContactListItem({
   index,
@@ -48,6 +51,16 @@ export default function ContactListItem({
   };
   const handleClose = () => {
     setAnchorEl(null);
+  };
+  const handleDeleteParticipation = async (p: DVParticipation<unknown, unknown>) => {
+    if (window.confirm("Are you sure you wish to delete this participation?")) {
+      setIsLoading(true);
+
+      await api.deleteParticipant(p.cr4de_bnraparticipationid);
+      await reloadData();
+
+      setIsLoading(false);
+    }
   };
 
   const deleteContact = async (c: SelectableContact) => {
@@ -105,7 +118,14 @@ export default function ContactListItem({
           {contact.participations
             .sort((a, b) => a.cr4de_risk_file.cr4de_hazard_id.localeCompare(b.cr4de_risk_file.cr4de_hazard_id))
             .map((p) => (
-              <ListItem key={p.cr4de_bnraparticipationid}>
+              <ListItem
+                key={p.cr4de_bnraparticipationid}
+                secondaryAction={
+                  <IconButton disabled={isLoading} onClick={() => handleDeleteParticipation(p)}>
+                    <DeleteIcon />
+                  </IconButton>
+                }
+              >
                 <ListItemButton
                   sx={{ pl: 4 }}
                   role={undefined}

@@ -1,6 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
-import { Box, Container, Typography, Paper, Divider, Button, Skeleton } from "@mui/material";
+import {
+  Box,
+  Container,
+  Typography,
+  Paper,
+  Divider,
+  Button,
+  Skeleton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import TextInputBox from "../../components/TextInputBox";
 import SaveIcon from "@mui/icons-material/Save";
@@ -27,6 +40,10 @@ import { DVContact } from "../../types/dataverse/DVContact";
 import ParticipationTable from "../../components/ParticipationTable";
 import CascadeSections from "./CascadeSections";
 import { TNullablePartial } from "../../types/TNullablePartial";
+import { Trans } from "react-i18next";
+import { addDays } from "../../functions/days";
+import { DVParticipation } from "../../types/dataverse/DVParticipation";
+import useProcess from "../../hooks/useProcess";
 
 export interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -45,17 +62,23 @@ const defaultBreadcrumbs: Breadcrumb[] = [
 
 export default function EditorPage() {
   const api = useAPI();
+  const process = useProcess();
   const params = useParams() as RouteParams;
   const navigate = useNavigate();
-  const fieldsToUpdate = useRef<TNullablePartial<DVRiskFile>>({});
+  const fieldsToUpdate = useRef<Partial<RiskFileEditableFields>>({});
 
   const [dirty, setDirty] = useState(false);
+  const [validationProcessedDialogOpen, setValidationProcessedDialogOpen] = useState(false);
 
   const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<SmallRisk>({
     table: DataTable.RISK_FILE,
   });
   const [causes, setCauses] = useState<DVRiskCascade<SmallRisk>[] | null>(null);
   const [catalysing, setCatalysing] = useState<DVRiskCascade<SmallRisk>[] | null>(null);
+
+  const { data: participants, getData: getParticipants } = useLazyRecords<DVParticipation<DVContact>>({
+    table: DataTable.PARTICIPATION,
+  });
   const { data: allCauses, getData: getAllCauses } = useLazyRecords<DVRiskCascade<SmallRisk>>({
     table: DataTable.RISK_CASCADE,
     onComplete: async (allCauses) => {
@@ -92,6 +115,11 @@ export default function EditorPage() {
       };
     },
     onComplete: async (rf) => {
+      if (!participants) {
+        getParticipants({
+          query: `$filter=_cr4de_risk_file_value eq ${rf.cr4de_riskfilesid}&$expand=cr4de_contact`,
+        });
+      }
       if (!otherHazards)
         getOtherHazards({
           query: `$filter=cr4de_riskfilesid ne ${rf.cr4de_riskfilesid}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`,
@@ -118,7 +146,7 @@ export default function EditorPage() {
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSaveFields = async (fields: Partial<{ [key in keyof DVRiskFile]: string | null }>) => {
+  const handleSaveFields = async (fields: Partial<RiskFileEditableFields>) => {
     if (!riskFile || isSaving) return;
 
     setIsSaving(true);
@@ -167,7 +195,9 @@ export default function EditorPage() {
   return (
     <>
       <Container sx={{ pb: 8 }}>
-        {riskFile && <ParticipationTable riskFile={riskFile} />}
+        {riskFile && participants && (
+          <ParticipationTable riskFile={riskFile} participants={participants} reloadParticipants={getParticipants} />
+        )}
 
         <Paper>
           <Box p={2} my={4}>
@@ -455,6 +485,50 @@ export default function EditorPage() {
         />
       </Container>
 
+      <Dialog open={validationProcessedDialogOpen} onClose={() => setValidationProcessedDialogOpen(false)}>
+        <DialogTitle>Are you finished processing the validation feedback for this risk file?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You have the option to start a silent procedure or to organise a consensus meeting.
+          </DialogContentText>
+          <DialogContentText>
+            If you choose a silent procedure, your experts will be automatically notified of this. After the end of the
+            silent procedure, the validation step will be finalized automatically and the experts will no longer be able
+            to change their input.{" "}
+            <b>ATTENTION! If a silence procedure is already underway, Pressing this button will reset the timer.</b>
+          </DialogContentText>
+          <DialogContentText>
+            If you would like to organise a meeting, nothing will change and you will have to contact your experts
+            manually. If you previously started a silence procedure, pressing this button will cancel it.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setValidationProcessedDialogOpen(false)}>I am not finished</Button>
+          <Button
+            onClick={async () => {
+              if (!riskFile) return;
+
+              process.startSilenceProcedure(riskFile);
+
+              navigate("/hazards");
+            }}
+          >
+            Start a silence procedure
+          </Button>
+          <Button
+            onClick={async () => {
+              if (!riskFile) return;
+
+              process.organiseValidationConsensus(riskFile);
+
+              navigate("/hazards");
+            }}
+          >
+            I will organise a consensus meeting
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Box
         sx={{
           display: "flex",
@@ -486,8 +560,12 @@ export default function EditorPage() {
           color="primary"
           onClick={async () => {
             await handleSave();
-
-            navigate("/hazards");
+            console.log(validations);
+            if (participants?.some((p) => p.cr4de_validation_finished)) {
+              setValidationProcessedDialogOpen(true);
+            } else {
+              navigate("/hazards");
+            }
           }}
         >
           Save & Exit

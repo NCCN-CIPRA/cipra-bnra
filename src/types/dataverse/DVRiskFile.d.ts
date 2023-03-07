@@ -74,7 +74,7 @@ export interface DVRiskFile extends RiskFileEditableFields {
 
   cr4de_validations_processed: boolean | null;
   cr4de_validation_silent_procedure_until: Date | null;
-  cr4de_step2A_enabled: boolean | null;
+  cr4de_step2a_enabled: boolean | null;
 
   cr4de_is_test: boolean | null;
 }

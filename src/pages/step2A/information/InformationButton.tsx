@@ -17,13 +17,13 @@ export default function InformationButton({ riskFile }: { riskFile: DVRiskFile |
     {
       icon: <CategoryIcon />,
       name: t("speeddial.scales", "Quantitative Scales"),
-      onClick: () => riskFile && openInNewTab("/learning/quantitative-categories"),
+      onClick: () => riskFile && openInNewTab("/learning/quantitative-categories", "Quantitative Categories"),
     },
     // { icon: <HubIcon />, name: t("speeddial.bwotie", "Bowtie Diagram") },
     {
       icon: <ArticleIcon />,
       name: t("speeddial.riskFile", "Risk File"),
-      onClick: () => riskFile && openInNewTab(`/learning/risk/${riskFile.cr4de_riskfilesid}`),
+      onClick: () => riskFile && openInNewTab(`/learning/risk/${riskFile.cr4de_riskfilesid}`, riskFile.cr4de_title),
     },
   ];
   return (

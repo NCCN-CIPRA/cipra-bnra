@@ -1,3 +1,3 @@
-export default function openInNewTab(url: string): void {
-  window.open(url, "newwindow", "width=1300,height=900");
+export default function openInNewTab(url: string, name: string = "newwindow"): void {
+  window.open(url, name, "width=1300,height=900");
 }

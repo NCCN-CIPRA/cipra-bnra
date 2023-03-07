@@ -29,6 +29,7 @@ import usePageTitle from "../../../hooks/usePageTitle";
 import useBreadcrumbs from "../../../hooks/useBreadcrumbs";
 import GraphView from "./GraphView";
 import { DVContact } from "../../../types/dataverse/DVContact";
+import { DVValidation } from "../../../types/dataverse/DVValidation";
 
 export default function ProcessManagementPage() {
   const api = useAPI();
@@ -37,7 +38,9 @@ export default function ProcessManagementPage() {
   const [currentTab, setCurrentTab] = useState("riskFiles");
   const [contacts, setContacts] = useState<SelectableContact[] | null>(null);
   const [riskFiles, setRiskFiles] = useState<SelectableRiskFile[] | null>(null);
-  const [participations, setParticipations] = useState<DVParticipation<SelectableContact, DVRiskFile>[] | null>(null);
+  const [participations, setParticipations] = useState<
+    DVParticipation<SelectableContact, DVRiskFile, DVValidation>[] | null
+  >(null);
   const [allSelected, setAllSelected] = useState(false);
 
   const reloadData = async () => {
@@ -46,8 +49,8 @@ export default function ProcessManagementPage() {
     const [rawContacts, invitations, participations] = await Promise.all([
       api.getContacts(),
       api.getInvitations(),
-      api.getParticipants<DVParticipation<undefined, DVRiskFile>>(
-        "$expand=cr4de_risk_file($select=cr4de_hazard_id,cr4de_title,cr4de_risk_type)"
+      api.getParticipants<DVParticipation<undefined, DVRiskFile, DVValidation>>(
+        "$expand=cr4de_risk_file($select=cr4de_hazard_id,cr4de_title,cr4de_risk_type),cr4de_validation"
       ),
     ]);
 
@@ -59,7 +62,7 @@ export default function ProcessManagementPage() {
       return acc;
     }, {});
     const participationsDict = participations.reduce(
-      (acc: { [key: string]: DVParticipation<undefined, DVRiskFile>[] }, p) => {
+      (acc: { [key: string]: DVParticipation<undefined, DVRiskFile, DVValidation>[] }, p) => {
         if (!acc[p._cr4de_contact_value]) acc[p._cr4de_contact_value] = [];
 
         acc[p._cr4de_contact_value].push(p);
@@ -69,7 +72,7 @@ export default function ProcessManagementPage() {
       {}
     );
     const participationsRFDict = participations.reduce(
-      (acc: { [key: string]: DVParticipation<undefined, DVRiskFile>[] }, p) => {
+      (acc: { [key: string]: DVParticipation<undefined, DVRiskFile, DVValidation>[] }, p) => {
         if (!p._cr4de_risk_file_value) return acc;
 
         if (!acc[p._cr4de_risk_file_value]) acc[p._cr4de_risk_file_value] = [];

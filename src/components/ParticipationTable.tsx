@@ -34,13 +34,16 @@ const roles = {
   expert: "Topical Expert",
 };
 
-export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile }) {
+export default function ParticipationTable({
+  riskFile,
+  participants,
+  reloadParticipants,
+}: {
+  riskFile: DVRiskFile;
+  participants: DVParticipation<DVContact>[];
+  reloadParticipants: () => Promise<void>;
+}) {
   const api = useAPI();
-
-  const { data: participants, reloadData: getParticipants } = useRecords<DVParticipation<DVContact>>({
-    table: DataTable.PARTICIPATION,
-    query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}&$expand=cr4de_contact`,
-  });
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -72,7 +75,7 @@ export default function ParticipationTable({ riskFile }: { riskFile: DVRiskFile 
       cr4de_role: role,
     });
 
-    await getParticipants();
+    await reloadParticipants();
 
     setDialogOpen(false);
     setEmail("");

@@ -53,24 +53,84 @@ function RiskFileList({
   const handleClick = (p: DVParticipation<undefined, DVRiskFile>) => async () => {
     if (!participations) return;
 
-    if (p._cr4de_validation_value === null) {
-      setIsLoading(true);
+    if (p.cr4de_risk_file.cr4de_step2a_enabled) {
+      if (p._cr4de_direct_analysis_value === null) {
+        setIsLoading(true);
 
-      const newValidation = await api.createValidation({
-        "cr4de_expert@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${p._cr4de_contact_value})`,
-        "cr4de_RiskFile@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${p._cr4de_risk_file_value})`,
-      });
+        const newDirectAnalysis = await api.createDirectAnalysis({
+          "cr4de_expert@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${p._cr4de_contact_value})`,
+          "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${p._cr4de_risk_file_value})`,
+        });
 
-      await api.updateParticipant(p.cr4de_bnraparticipationid, {
-        "cr4de_validation@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${newValidation.id})`,
-      });
+        await api.updateParticipant(p.cr4de_bnraparticipationid, {
+          "cr4de_direct_analysis@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${newDirectAnalysis.id})`,
+        });
 
-      navigate(`/validation/${newValidation.id}`);
+        navigate(`/step2A/${newDirectAnalysis.id}`);
 
-      setIsLoading(false);
+        setIsLoading(false);
+      } else {
+        navigate(`/step2A/${p._cr4de_direct_analysis_value}`);
+      }
     } else {
-      navigate(`/validation/${p._cr4de_validation_value}`);
+      if (p._cr4de_validation_value === null) {
+        setIsLoading(true);
+
+        const newValidation = await api.createValidation({
+          "cr4de_expert@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${p._cr4de_contact_value})`,
+          "cr4de_RiskFile@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${p._cr4de_risk_file_value})`,
+        });
+
+        await api.updateParticipant(p.cr4de_bnraparticipationid, {
+          "cr4de_validation@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${newValidation.id})`,
+        });
+
+        navigate(`/validation/${newValidation.id}`);
+
+        setIsLoading(false);
+      } else {
+        navigate(`/validation/${p._cr4de_validation_value}`);
+      }
     }
+  };
+
+  const getValidationTooltip = (p: DVParticipation<unknown, DVRiskFile>) => {
+    console.log(p.cr4de_risk_file);
+    if (
+      p.cr4de_risk_file.cr4de_step2a_enabled ||
+      (p.cr4de_risk_file.cr4de_validation_silent_procedure_until &&
+        new Date(p.cr4de_risk_file.cr4de_validation_silent_procedure_until) < new Date())
+    )
+      return t("riskFile.steps.1.finished", "The validation step has been finalized.");
+    else if (
+      p.cr4de_risk_file.cr4de_validation_silent_procedure_until &&
+      new Date(p.cr4de_risk_file.cr4de_validation_silent_procedure_until) >= new Date()
+    )
+      return t("riskFile.steps.1.silenceProcedure", "A silence procedure is ongoing for this risk file");
+    else if (p.cr4de_validation_finished)
+      return t("riskFile.steps.1.complete", "You have completed the validation step for this Risk File.");
+    else return t("riskFile.steps.1.progress", "The validation step can now be completed.");
+  };
+
+  const getStep2ATooltip = (p: DVParticipation<unknown, DVRiskFile>) => {
+    if (p.cr4de_risk_file.cr4de_step2a_enabled) {
+      if (p.cr4de_direct_analysis_finished)
+        return t("riskFile.steps.2A.complete", "You have completed step 2A for this Risk File.");
+      else return t("riskFile.steps.2A.progress", "Step 2A can now be completed.");
+    } else {
+      return t(
+        "riskFile.steps.2A.notyet",
+        "This step cannot be started yet, we will contact you when it becomes available"
+      );
+    }
+  };
+
+  const getActiveStep = (p: DVParticipation<unknown, DVRiskFile>) => {
+    console.log(p.cr4de_risk_file);
+    if (p.cr4de_risk_file.cr4de_step2a_enabled) {
+      return 1;
+    }
+    return 0;
   };
 
   return (
@@ -100,30 +160,16 @@ function RiskFileList({
                       sx={{ flex: 1 }}
                     />
                     <ListItemText sx={{ width: "550px", flexGrow: 0 }}>
-                      <Stepper activeStep={0} alternativeLabel sx={{ width: "550px" }}>
+                      <Stepper activeStep={getActiveStep(p)} alternativeLabel sx={{ width: "550px" }}>
                         <Step completed={p.cr4de_validation_finished || false}>
-                          <Tooltip
-                            title={
-                              p.cr4de_validation_finished
-                                ? t(
-                                    "riskFile.steps.1.complete",
-                                    "You have completed the validation step for this Risk File"
-                                  )
-                                : t("riskFile.steps.1.progress", "The validation step can now be completed")
-                            }
-                          >
+                          <Tooltip title={getValidationTooltip(p)}>
                             <StepLabel>
                               <Trans i18nKey="riskFile.steps.1.name">Identification</Trans>
                             </StepLabel>
                           </Tooltip>
                         </Step>
                         <Step>
-                          <Tooltip
-                            title={t(
-                              "riskFile.steps.2A.notyet",
-                              "This step cannot be started yet, we will contact you when it becomes available"
-                            )}
-                          >
+                          <Tooltip title={getStep2ATooltip(p)}>
                             <StepLabel>
                               <Trans i18nKey="riskFile.steps.2A.name">Analysis A</Trans>
                             </StepLabel>

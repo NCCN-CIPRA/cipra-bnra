@@ -1,3 +1,10 @@
+export enum FeedbackStep {
+  VALIDATION = "VALIDATION",
+  STEP_2A = "2A",
+  STEP_2B = "2B",
+  CONSENSUS = "CONSENSUS",
+}
+
 export interface DVFeedback<ContactType = undefined, RiskFileType = undefined> {
   cr4de_bnrafeedbackid: string;
 
@@ -11,4 +18,6 @@ export interface DVFeedback<ContactType = undefined, RiskFileType = undefined> {
   cr4de_q3: number | null;
   cr4de_q4: number | null;
   cr4de_quali_validation: string | null;
+
+  cr4de_step: FeedbackStep;
 }

@@ -23,25 +23,12 @@ export default function SSection({
       <Typography variant="h6">
         <Trans i18nKey="2A.s.title">Direct Societal Impact</Trans>
       </Typography>
-      <Typography variant="body2">
-        <Trans i18nKey="2A.s.quali.info.1">Explanation about filling in the direct societal impact textbox</Trans>
-      </Typography>
-
-      <QualiTextInputBox
-        error={inputErrors.indexOf("cr4de_di_quali_s") >= 0}
-        initialValue={fieldsRef.cr4de_di_quali_s || ""}
-        onSave={(newValue) => {
-          if (!fieldsRef) return null;
-          fieldsRef.cr4de_di_quali_s = newValue;
-        }}
-        debounceInterval={100}
-      />
 
       <Typography variant="body2">
         <Trans i18nKey="2A.s.quanti.info.1">Explanation about filling in the direct societal impacts values</Trans>
       </Typography>
 
-      <Box component={Paper} sx={{ mx: 2, p: 2 }}>
+      <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
         <Typography variant="subtitle2">
           <Trans i18nKey="2A.s.quanti.sa.title">Sa - Supply shortfalls and unmet human needs</Trans>
         </Typography>
@@ -88,6 +75,20 @@ export default function SSection({
           onChange={handleChangeDIValue}
         />
       </Box>
+
+      <Typography variant="body2">
+        <Trans i18nKey="2A.s.quali.info.1">Explanation about filling in the direct societal impact textbox</Trans>
+      </Typography>
+
+      <QualiTextInputBox
+        error={inputErrors.indexOf("cr4de_di_quali_s") >= 0}
+        initialValue={fieldsRef.cr4de_di_quali_s || ""}
+        onSave={(newValue) => {
+          if (!fieldsRef) return null;
+          fieldsRef.cr4de_di_quali_s = newValue;
+        }}
+        debounceInterval={100}
+      />
     </Stack>
   );
 }

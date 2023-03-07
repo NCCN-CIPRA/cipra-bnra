@@ -26,6 +26,24 @@ export default function ESection({
       <Typography variant="h6">
         <Trans i18nKey="2A.e.title">Direct Environmental Impact</Trans>
       </Typography>
+
+      <Typography variant="body2">
+        <Trans i18nKey="2A.e.quanti.info.1">Explanation about filling in the direct environmental impacts values</Trans>
+      </Typography>
+
+      <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
+        <Typography variant="subtitle2">
+          <Trans i18nKey="2A.e.quanti.ea.title">Ea - Damaged ecosystems</Trans>
+        </Typography>
+
+        <DISlider
+          field={Ea}
+          initialValue={fieldsRef.cr4de_di_quanti_ea}
+          error={inputErrors.indexOf("cr4de_di_quanti_ea") >= 0}
+          onChange={handleChangeDIValue}
+        />
+      </Box>
+
       <Typography variant="body2">
         <Trans i18nKey="2A.e.quali.info.1">Explanation about filling in the direct environmental impact textbox</Trans>
       </Typography>
@@ -39,23 +57,6 @@ export default function ESection({
         }}
         debounceInterval={100}
       />
-
-      <Typography variant="body2">
-        <Trans i18nKey="2A.e.quanti.info.1">Explanation about filling in the direct environmental impacts values</Trans>
-      </Typography>
-
-      <Box component={Paper} sx={{ mx: 2, p: 2 }}>
-        <Typography variant="subtitle2">
-          <Trans i18nKey="2A.e.quanti.ea.title">Ea - Damaged ecosystems</Trans>
-        </Typography>
-
-        <DISlider
-          field={Ea}
-          initialValue={fieldsRef.cr4de_di_quanti_ea}
-          error={inputErrors.indexOf("cr4de_di_quanti_ea") >= 0}
-          onChange={handleChangeDIValue}
-        />
-      </Box>
     </Stack>
   );
 }

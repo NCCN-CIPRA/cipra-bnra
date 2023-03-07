@@ -23,25 +23,12 @@ export default function FSection({
       <Typography variant="h6">
         <Trans i18nKey="2A.f.title">Direct Financial Impact</Trans>
       </Typography>
-      <Typography variant="body2">
-        <Trans i18nKey="2A.f.quali.info.1">Explanation about filling in the direct financial impact textbox</Trans>
-      </Typography>
-
-      <QualiTextInputBox
-        error={inputErrors.indexOf("cr4de_di_quali_f") >= 0}
-        initialValue={fieldsRef.cr4de_di_quali_f || ""}
-        onSave={(newValue) => {
-          if (!fieldsRef) return null;
-          fieldsRef.cr4de_di_quali_f = newValue;
-        }}
-        debounceInterval={100}
-      />
 
       <Typography variant="body2">
         <Trans i18nKey="2A.f.quanti.info.1">Explanation about filling in the direct financial impacts values</Trans>
       </Typography>
 
-      <Box component={Paper} sx={{ mx: 2, p: 2 }}>
+      <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
         <Typography variant="subtitle2">
           <Trans i18nKey="2A.f.quanti.fa.title">Fa - Financial asset damages</Trans>
         </Typography>
@@ -64,6 +51,20 @@ export default function FSection({
           onChange={handleChangeDIValue}
         />
       </Box>
+
+      <Typography variant="body2">
+        <Trans i18nKey="2A.f.quali.info.1">Explanation about filling in the direct financial impact textbox</Trans>
+      </Typography>
+
+      <QualiTextInputBox
+        error={inputErrors.indexOf("cr4de_di_quali_f") >= 0}
+        initialValue={fieldsRef.cr4de_di_quali_f || ""}
+        onSave={(newValue) => {
+          if (!fieldsRef) return null;
+          fieldsRef.cr4de_di_quali_f = newValue;
+        }}
+        debounceInterval={100}
+      />
     </Stack>
   );
 }

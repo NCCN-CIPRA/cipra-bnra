@@ -44,6 +44,7 @@ import { TNullablePartial } from "../../types/TNullablePartial";
 import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 import ValidationTutorial from "./ValidationTutorial";
 import HelpButton from "../../components/HelpButton";
+import { FeedbackStep } from "../../types/dataverse/DVFeedback";
 
 interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -2143,7 +2144,7 @@ export default function ValidationPage() {
                   cr4de_validation_finished_on: new Date(),
                 });
 
-                api.finishValidation(riskFile?.cr4de_riskfilesid, user.contactid, "VALIDATION");
+                api.finishStep(riskFile?.cr4de_riskfilesid, user.contactid, "VALIDATION");
               }
             }}
           >
@@ -2155,6 +2156,7 @@ export default function ValidationPage() {
       <SurveyDialog
         open={surveyDialogOpen}
         riskFile={riskFile}
+        step={FeedbackStep.VALIDATION}
         onClose={() => {
           setSurveyDialogOpen(false);
           navigate("/overview");
