@@ -7,7 +7,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { useMemo, useRef, RefObject } from "react";
+import { useMemo, useRef, RefObject, useState } from "react";
 import { Scenarios, unwrap as unwrapScenarios } from "../../../functions/scenarios";
 import { unwrap as unwrapParameters } from "../../../functions/intensityParameters";
 import { useTheme } from "@mui/material/styles";
@@ -15,7 +15,7 @@ import { DPRows, DPs } from "../../learning/QuantitativeScales/P";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { DISlider, DPSlider } from "../sections/QuantitativeMarks";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
-import { getScenarioInputs, ScenarioInput, ScenarioInputs } from "../fields";
+import { getScenarioInputs, ScenarioInput, ScenarioInputs, SCENARIO_SUFFIX } from "../fields";
 import TextInputBox from "../../../components/TextInputBox";
 import ScenarioBox from "../information/ScenarioBox";
 import { useInView } from "react-intersection-observer";
@@ -26,6 +26,10 @@ import { Step } from "../Steps";
 import ESection from "../sections/ESection";
 import FSection from "../sections/FSection";
 import CBSection from "../sections/CBSection";
+import AttachmentsDialog from "../sections/AttachmentsDialog";
+import useRecords from "../../../hooks/useRecords";
+import { DataTable } from "../../../hooks/useAPI";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 
 export function validateScenarioInputs(inputs: ScenarioInput): (keyof ScenarioInput)[] {
   return Object.entries(inputs).reduce((acc, [fieldName, value]) => {
@@ -54,6 +58,14 @@ export default function ScenarioAnalysis({
   const theme = useTheme();
   const { ref, inView } = useInView({ rootMargin: "-96px 0px 0px 0px", threshold: 0.9 });
 
+  const [sourceDialogOpen, setSourceDialogOpen] = useState<string | null>(null);
+  const [existingSource, setExistingSource] = useState<DVAttachment | undefined>(undefined);
+
+  const { data: attachments, reloadData: reloadAttachments } = useRecords<DVAttachment<unknown, DVAttachment>>({
+    table: DataTable.ATTACHMENT,
+    query: `$filter=_cr4de_directanalysis_value eq '${directAnalysis.cr4de_bnradirectanalysisid}'&$expand=cr4de_referencedSource`,
+  });
+
   const scenarios = useMemo(
     () =>
       unwrapScenarios(
@@ -68,6 +80,11 @@ export default function ScenarioAnalysis({
   const scenario = scenarios[scenarioName];
 
   if (!inputRef.current) return null;
+
+  const handleOpenSourceDialog = (field: string) => (existingSource?: DVAttachment) => {
+    setSourceDialogOpen(field);
+    setExistingSource(existingSource);
+  };
 
   return (
     <Stack sx={{ mx: 1 }} rowGap={8}>
@@ -139,17 +156,77 @@ export default function ScenarioAnalysis({
         />
       </Stack>
 
-      <DPSection fieldsRef={inputRef.current[scenarioName]} inputErrors={inputErrors} />
+      <DPSection
+        fieldsRef={inputRef.current[scenarioName]}
+        inputErrors={inputErrors}
+        attachments={
+          attachments?.filter((a) => a.cr4de_field === `cr4de_dp_quali${SCENARIO_SUFFIX[scenarioName]}`) ?? null
+        }
+        onOpenSourceDialog={handleOpenSourceDialog(`cr4de_dp_quali${SCENARIO_SUFFIX[scenarioName]}`)}
+        onReloadAttachments={reloadAttachments}
+      />
 
-      <HSection fieldsRef={inputRef.current[scenarioName]} inputErrors={inputErrors} />
+      <HSection
+        fieldsRef={inputRef.current[scenarioName]}
+        inputErrors={inputErrors}
+        attachments={
+          attachments?.filter((a) => a.cr4de_field === `cr4de_di_quali_h${SCENARIO_SUFFIX[scenarioName]}`) ?? null
+        }
+        onOpenSourceDialog={handleOpenSourceDialog(`cr4de_di_quali_h${SCENARIO_SUFFIX[scenarioName]}`)}
+        onReloadAttachments={reloadAttachments}
+      />
 
-      <SSection fieldsRef={inputRef.current[scenarioName]} inputErrors={inputErrors} />
+      <SSection
+        fieldsRef={inputRef.current[scenarioName]}
+        inputErrors={inputErrors}
+        attachments={
+          attachments?.filter((a) => a.cr4de_field === `cr4de_di_quali_s${SCENARIO_SUFFIX[scenarioName]}`) ?? null
+        }
+        onOpenSourceDialog={handleOpenSourceDialog(`cr4de_di_quali_s${SCENARIO_SUFFIX[scenarioName]}`)}
+        onReloadAttachments={reloadAttachments}
+      />
 
-      <ESection fieldsRef={inputRef.current[scenarioName]} inputErrors={inputErrors} />
+      <ESection
+        fieldsRef={inputRef.current[scenarioName]}
+        inputErrors={inputErrors}
+        attachments={
+          attachments?.filter((a) => a.cr4de_field === `cr4de_di_quali_e${SCENARIO_SUFFIX[scenarioName]}`) ?? null
+        }
+        onOpenSourceDialog={handleOpenSourceDialog(`cr4de_di_quali_e${SCENARIO_SUFFIX[scenarioName]}`)}
+        onReloadAttachments={reloadAttachments}
+      />
 
-      <FSection fieldsRef={inputRef.current[scenarioName]} inputErrors={inputErrors} />
+      <FSection
+        fieldsRef={inputRef.current[scenarioName]}
+        inputErrors={inputErrors}
+        attachments={
+          attachments?.filter((a) => a.cr4de_field === `cr4de_di_quali_f${SCENARIO_SUFFIX[scenarioName]}`) ?? null
+        }
+        onOpenSourceDialog={handleOpenSourceDialog(`cr4de_di_quali_f${SCENARIO_SUFFIX[scenarioName]}`)}
+        onReloadAttachments={reloadAttachments}
+      />
 
-      <CBSection fieldsRef={inputRef.current[scenarioName]} inputErrors={inputErrors} />
+      <CBSection
+        fieldsRef={inputRef.current[scenarioName]}
+        inputErrors={inputErrors}
+        attachments={
+          attachments?.filter(
+            (a) => a.cr4de_field === `cr4de_cross_border_impact_quali${SCENARIO_SUFFIX[scenarioName]}`
+          ) ?? null
+        }
+        onOpenSourceDialog={handleOpenSourceDialog(`cr4de_cross_border_impact_quali${SCENARIO_SUFFIX[scenarioName]}`)}
+        onReloadAttachments={reloadAttachments}
+      />
+
+      <AttachmentsDialog
+        field={sourceDialogOpen ?? ""}
+        riskFile={riskFile}
+        directAnalysis={directAnalysis}
+        open={sourceDialogOpen !== null}
+        existingSource={existingSource}
+        onClose={() => setSourceDialogOpen(null)}
+        onSaved={() => reloadAttachments()}
+      />
     </Stack>
   );
 }

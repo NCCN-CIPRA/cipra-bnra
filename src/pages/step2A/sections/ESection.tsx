@@ -1,5 +1,5 @@
 import { Box, Paper, Stack, Typography } from "@mui/material";
-import { ForwardedRef, Ref, RefObject } from "react";
+import { ForwardedRef, ReactNode, Ref, RefObject } from "react";
 import { Trans } from "react-i18next";
 import TextInputBox from "../../../components/TextInputBox";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
@@ -9,13 +9,20 @@ import { Ha, Hb, Hc } from "../../learning/QuantitativeScales/H";
 import { ScenarioInput } from "../fields";
 import { DISlider, DPSlider } from "./QuantitativeMarks";
 import QualiTextInputBox from "./QualiTextInputBox";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 
 export default function ESection({
   fieldsRef,
   inputErrors,
+  attachments,
+  onOpenSourceDialog,
+  onReloadAttachments,
 }: {
   fieldsRef: ScenarioInput;
   inputErrors: (keyof ScenarioInput)[];
+  attachments: DVAttachment<unknown, DVAttachment>[] | null;
+  onOpenSourceDialog: (existingSource?: DVAttachment) => void;
+  onReloadAttachments: () => Promise<void>;
 }) {
   const handleChangeDIValue = (newValue: string | null, field: DirectImpactField) => {
     fieldsRef[`cr4de_di_quanti_${field.prefix.toLowerCase()}` as keyof ScenarioInput] = newValue;
@@ -56,6 +63,9 @@ export default function ESection({
           fieldsRef.cr4de_di_quali_e = newValue;
         }}
         debounceInterval={100}
+        attachments={attachments}
+        onOpenSourceDialog={onOpenSourceDialog}
+        onReloadAttachments={onReloadAttachments}
       />
     </Stack>
   );

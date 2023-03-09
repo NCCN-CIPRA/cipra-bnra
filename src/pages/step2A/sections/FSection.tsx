@@ -6,13 +6,21 @@ import { Fa, Fb } from "../../learning/QuantitativeScales/F";
 import { ScenarioInput } from "../fields";
 import { DISlider } from "./QuantitativeMarks";
 import QualiTextInputBox from "./QualiTextInputBox";
+import { ReactNode } from "react";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 
 export default function FSection({
   fieldsRef,
   inputErrors,
+  attachments,
+  onOpenSourceDialog,
+  onReloadAttachments,
 }: {
   fieldsRef: ScenarioInput;
   inputErrors: (keyof ScenarioInput)[];
+  attachments: DVAttachment<unknown, DVAttachment>[] | null;
+  onOpenSourceDialog: (existingSource?: DVAttachment) => void;
+  onReloadAttachments: () => Promise<void>;
 }) {
   const handleChangeDIValue = (newValue: string | null, field: DirectImpactField) => {
     fieldsRef[`cr4de_di_quanti_${field.prefix.toLowerCase()}` as keyof ScenarioInput] = newValue;
@@ -64,6 +72,9 @@ export default function FSection({
           fieldsRef.cr4de_di_quali_f = newValue;
         }}
         debounceInterval={100}
+        attachments={attachments}
+        onOpenSourceDialog={onOpenSourceDialog}
+        onReloadAttachments={onReloadAttachments}
       />
     </Stack>
   );

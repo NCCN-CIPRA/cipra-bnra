@@ -45,17 +45,18 @@ export interface ScenarioInputs {
   extreme: ScenarioInput;
 }
 
+export const SCENARIO_SUFFIX: { [key in keyof Scenarios]: string } = {
+  considerable: "_s",
+  major: "_m",
+  extreme: "_e",
+};
+
 export function getTrueInputs(scenarioInputs: ScenarioInput, scenario: keyof Scenarios): Partial<DVDirectAnalysis> {
-  let suffix = "";
-
-  if (scenario === "considerable") suffix = "c";
-  else if (scenario === "major") suffix = "m";
-  else suffix = "e";
-
   return Object.keys(scenarioInputs).reduce(
     (trueInputs, scenarioField) => ({
       ...trueInputs,
-      [`${scenarioField}_${suffix}` as keyof DVDirectAnalysis]: scenarioInputs[scenarioField as keyof ScenarioInput],
+      [`${scenarioField}${SCENARIO_SUFFIX[scenario]}` as keyof DVDirectAnalysis]:
+        scenarioInputs[scenarioField as keyof ScenarioInput],
     }),
     {}
   );

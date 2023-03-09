@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { DPRows, DPs } from "../../learning/QuantitativeScales/P";
+import { DPRows, DPs, DPValueStack } from "../../learning/QuantitativeScales/P";
 import { Box, Stack, Typography, Slider, Alert } from "@mui/material";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { Trans } from "react-i18next";
-import { DirectImpactField } from "../../learning/QuantitativeScales/DI";
+import { DirectImpactField, DIValueStack } from "../../learning/QuantitativeScales/DI";
 
 export function DPSlider({
   initialValue,
@@ -42,10 +42,11 @@ export function DPSlider({
       <Slider
         value={value}
         onChange={handleChangeValue}
-        valueLabelDisplay="off"
+        valueLabelDisplay="auto"
         step={1}
         min={-1}
         max={4}
+        valueLabelFormat={(value: number) => <DPValueStack value={value} />}
         marks={Array(6)
           .fill(undefined)
           .map((_, i) => i - 1)
@@ -58,20 +59,7 @@ export function DPSlider({
                 </Typography>
               ) : (
                 <Tooltip
-                  title={
-                    <Stack sx={{ width: 500 }}>
-                      {DPRows.map((r, ri) => (
-                        <Stack key={r} direction="row">
-                          <Typography variant="body2" sx={{ whiteSpace: "nowrap", mr: 1, fontWeight: "bold" }}>
-                            <Trans i18nKey={r} />:{" "}
-                          </Typography>
-                          <Typography variant="caption">
-                            <Trans i18nKey={DPs[value][ri]} />
-                          </Typography>
-                        </Stack>
-                      ))}
-                    </Stack>
-                  }
+                  title={<DPValueStack value={value} />}
                   PopperProps={{
                     sx: {
                       [`& .${tooltipClasses.tooltip}`]: {
@@ -100,12 +88,10 @@ export function DISlider({
   error?: boolean;
   onChange: (value: string | null, field: DirectImpactField) => void;
 }) {
-  const [value, setValue] = useState(
-    initialValue ? parseInt(initialValue.replace(field.prefix, ""), 10) : field.min - 1
-  );
+  const [value, setValue] = useState(initialValue ? parseInt(initialValue.replace(field.prefix, ""), 10) : -1);
 
   const handleChangeValue = (event: Event, newValue: number | number[]) => {
-    if (newValue < field.min) {
+    if (newValue < 0) {
       onChange(null, field);
     } else {
       const t = `${field.prefix}${newValue}`;
@@ -130,37 +116,24 @@ export function DISlider({
       <Slider
         value={value}
         onChange={handleChangeValue}
-        valueLabelDisplay="off"
+        valueLabelDisplay="auto"
         step={1}
-        min={field.min - 1}
-        max={field.max}
-        marks={Array(field.max - field.min + 2)
+        min={-1}
+        max={field.intervals.length - 1}
+        valueLabelFormat={(value: number) => <DIValueStack field={field} value={value} />}
+        marks={Array(7)
           .fill(undefined)
-          .map((_, i) => i + field.min - 1)
+          .map((_, i) => i - 1)
           .map((value) => ({
             value,
             label:
-              value < field.min ? (
+              value < 0 ? (
                 <Typography variant="body2">
                   <Trans i18nKey="2A.slider.none">-</Trans>
                 </Typography>
               ) : (
                 <Tooltip
-                  title={
-                    <Stack direction="column">
-                      <Stack direction="row" alignItems="center">
-                        <Typography variant="body2" sx={{ whiteSpace: "nowrap", mr: 1, fontWeight: "bold" }}>
-                          {`${field.prefix}${value}`}
-                        </Typography>
-                        <Typography variant="caption">
-                          <Trans i18nKey={`learning.impact.${field.prefix}.${value}`} />
-                        </Typography>
-                      </Stack>
-                      <Typography variant="caption">
-                        <Trans i18nKey={field.unit} />
-                      </Typography>
-                    </Stack>
-                  }
+                  title={<DIValueStack field={field} value={value} />}
                   PopperProps={{
                     sx: {
                       [`& .${tooltipClasses.tooltip}`]: {
@@ -169,9 +142,7 @@ export function DISlider({
                     },
                   }}
                 >
-                  <Typography variant="body2">
-                    <Trans i18nKey={`${field.prefix}${value}`} />
-                  </Typography>
+                  <Typography variant="body2">{`${field.prefix}${value}`}</Typography>
                 </Tooltip>
               ),
           }))}

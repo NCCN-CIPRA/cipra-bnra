@@ -4,13 +4,22 @@ import TextInputBox from "../../../components/TextInputBox";
 import { ScenarioInput } from "../fields";
 import { DPSlider } from "./QuantitativeMarks";
 import QualiTextInputBox from "./QualiTextInputBox";
+import { ReactNode } from "react";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 
 export default function DPSection({
   fieldsRef,
   inputErrors,
+  attachments,
+
+  onOpenSourceDialog,
+  onReloadAttachments,
 }: {
   fieldsRef: ScenarioInput;
   inputErrors: (keyof ScenarioInput)[];
+  attachments: DVAttachment<unknown, DVAttachment>[] | null;
+  onOpenSourceDialog: (existingSource?: DVAttachment) => void;
+  onReloadAttachments: () => Promise<void>;
 }) {
   const handleChangeDPValue = (newValue: string | null) => {
     fieldsRef.cr4de_dp_quanti = newValue;
@@ -50,6 +59,9 @@ export default function DPSection({
           fieldsRef.cr4de_dp_quali = newValue;
         }}
         debounceInterval={100}
+        attachments={attachments}
+        onOpenSourceDialog={onOpenSourceDialog}
+        onReloadAttachments={onReloadAttachments}
       />
     </Stack>
   );
