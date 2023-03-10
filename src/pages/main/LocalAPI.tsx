@@ -4,6 +4,7 @@ export default function LocalAPI() {
   useEffect(() => {
     const listener = async function (e: any) {
       try {
+        console.log(e);
         if (e.data === "getUserInfo") {
           // eslint-disable-next-line no-restricted-globals
           parent?.postMessage(

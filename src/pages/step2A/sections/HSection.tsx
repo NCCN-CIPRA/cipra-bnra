@@ -1,5 +1,5 @@
-import { Box, Paper, Stack, Typography } from "@mui/material";
-import { Trans } from "react-i18next";
+import { Box, IconButton, Paper, Stack, Typography, Tooltip } from "@mui/material";
+import { Trans, useTranslation } from "react-i18next";
 import TextInputBox from "../../../components/TextInputBox";
 import { DirectImpactField } from "../../learning/QuantitativeScales/DI";
 import { Ha, Hb, Hc } from "../../learning/QuantitativeScales/H";
@@ -8,6 +8,8 @@ import { DISlider } from "./QuantitativeMarks";
 import QualiTextInputBox from "./QualiTextInputBox";
 import { ReactNode } from "react";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import CalculateIcon from "@mui/icons-material/Calculate";
+import HbCalculator from "./HbCalculator";
 
 export default function HSection({
   fieldsRef,
@@ -22,6 +24,8 @@ export default function HSection({
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   onReloadAttachments: () => Promise<void>;
 }) {
+  const { t } = useTranslation();
+
   const handleChangeDIValue = (newValue: string | null, field: DirectImpactField) => {
     fieldsRef[`cr4de_di_quanti_${field.prefix.toLowerCase()}` as keyof ScenarioInput] = newValue;
   };
@@ -48,9 +52,17 @@ export default function HSection({
           onChange={handleChangeDIValue}
         />
 
-        <Typography variant="subtitle2" sx={{ mt: 4 }}>
-          <Trans i18nKey="2A.h.quanti.hb.title">Hb - Injured / sick people</Trans>
-        </Typography>
+        <Box sx={{ mt: 4, display: "flex" }}>
+          <Typography variant="subtitle2" sx={{ flex: 1 }}>
+            <Trans i18nKey="2A.h.quanti.hb.title">Hb - Injured / sick people</Trans>
+          </Typography>
+          <Tooltip title={t("button.di.calculator.tooltip", "Calculate the damage scale with weights")}>
+            <IconButton>
+              <CalculateIcon />
+            </IconButton>
+          </Tooltip>
+          <HbCalculator />
+        </Box>
 
         <DISlider
           field={Hb}
