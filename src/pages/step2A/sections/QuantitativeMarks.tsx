@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DPRows, DPs, DPValueStack } from "../../learning/QuantitativeScales/P";
 import { Box, Stack, Typography, Slider, Alert } from "@mui/material";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
@@ -80,17 +80,23 @@ export function DPSlider({
 export function DISlider({
   field,
   initialValue,
+  overrideValue,
+  resetOverrideValue,
   error,
   onChange,
 }: {
   field: DirectImpactField;
   initialValue: string | null;
+  overrideValue?: string;
+  resetOverrideValue?: () => void;
   error?: boolean;
   onChange: (value: string | null, field: DirectImpactField) => void;
 }) {
-  const [value, setValue] = useState(initialValue ? parseInt(initialValue.replace(field.prefix, ""), 10) : -1);
+  const parseValue = (scale: string | null | undefined) => (scale ? parseInt(scale.replace(field.prefix, ""), 10) : -1);
 
-  const handleChangeValue = (event: Event, newValue: number | number[]) => {
+  const [value, setValue] = useState(parseValue(initialValue));
+
+  const handleChangeValue = (event: unknown, newValue: number | number[]) => {
     if (newValue < 0) {
       onChange(null, field);
     } else {
@@ -101,6 +107,13 @@ export function DISlider({
 
     setValue(newValue as number);
   };
+
+  useEffect(() => {
+    if (overrideValue) {
+      setValue(parseValue(overrideValue));
+      if (resetOverrideValue) resetOverrideValue();
+    }
+  }, [overrideValue]);
 
   return (
     <Box sx={{ mx: 2, mt: 2 }}>

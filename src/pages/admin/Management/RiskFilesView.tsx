@@ -20,12 +20,12 @@ import ContactFilterField from "./ContactFilterField";
 
 const SPECIAL_FILTERS = {
   MY_RISK_FILES: false,
+  MY_RISK_FILES_BACKUP: false,
   EXPERTS_ONLY: false,
   REGISTERED_ONLY: false,
   REMINDER: false,
   DONE_1: false,
-  DONE_2: false,
-  DONE_3: false,
+  NOT_DONE_1: false,
 };
 
 export default function RiskFilesView({
@@ -74,7 +74,15 @@ export default function RiskFilesView({
 
     if (specialFilters.MY_RISK_FILES) {
       runningFilter = runningFilter.filter((rf) =>
-        rf.participants.some((p) => p.cr4de_contact.emailaddress1 === user?.emailaddress1)
+        rf.participants.some((p) => p.cr4de_contact.emailaddress1 === user?.emailaddress1 && p.cr4de_role === "analist")
+      );
+    }
+
+    if (specialFilters.MY_RISK_FILES_BACKUP) {
+      runningFilter = runningFilter.filter((rf) =>
+        rf.participants.some(
+          (p) => p.cr4de_contact.emailaddress1 === user?.emailaddress1 && p.cr4de_role === "analist_2"
+        )
       );
     }
 
@@ -92,6 +100,12 @@ export default function RiskFilesView({
           (p) => p.cr4de_contact.msdyn_portaltermsagreementdate !== null || p.cr4de_contact.admin
         ),
       }));
+    }
+
+    if (specialFilters.DONE_1) {
+      runningFilter = runningFilter.filter((rf) =>
+        rf.participants.filter((p) => p.cr4de_role === "expert").every((p) => p.cr4de_validation_finished)
+      );
     }
 
     setFilteredRiskFiles(runningFilter);
@@ -147,8 +161,15 @@ export default function RiskFilesView({
             <Grid item xs={12} sm={6} md={4}>
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.MY_RISK_FILES} />}
-                label="Show my risk files only"
+                label="Show my risk files only (author)"
                 onClick={() => toggleSpecialFilter("MY_RISK_FILES")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControlLabel
+                control={<Checkbox checked={specialFilters.MY_RISK_FILES_BACKUP} />}
+                label="Show my risk files only (backup)"
+                onClick={() => toggleSpecialFilter("MY_RISK_FILES_BACKUP")}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
@@ -170,6 +191,13 @@ export default function RiskFilesView({
                 control={<Checkbox checked={specialFilters.REMINDER} />}
                 label="Show only problematic risk files"
                 onClick={() => toggleSpecialFilter("REMINDER")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControlLabel
+                control={<Checkbox checked={specialFilters.DONE_1} />}
+                label="Show risk files ready for validation processing"
+                onClick={() => toggleSpecialFilter("DONE_1")}
               />
             </Grid>
           </Grid>

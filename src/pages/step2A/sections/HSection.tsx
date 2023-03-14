@@ -6,7 +6,7 @@ import { Ha, Hb, Hc } from "../../learning/QuantitativeScales/H";
 import { ScenarioInput } from "../fields";
 import { DISlider } from "./QuantitativeMarks";
 import QualiTextInputBox from "./QualiTextInputBox";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import HbCalculator from "./HbCalculator";
@@ -25,6 +25,9 @@ export default function HSection({
   onReloadAttachments: () => Promise<void>;
 }) {
   const { t } = useTranslation();
+
+  const [HbCalculatorOpen, setHbCalculatorOpen] = useState(false);
+  const [HbOverride, setHbOverride] = useState<string | undefined>(undefined);
 
   const handleChangeDIValue = (newValue: string | null, field: DirectImpactField) => {
     fieldsRef[`cr4de_di_quanti_${field.prefix.toLowerCase()}` as keyof ScenarioInput] = newValue;
@@ -57,16 +60,30 @@ export default function HSection({
             <Trans i18nKey="2A.h.quanti.hb.title">Hb - Injured / sick people</Trans>
           </Typography>
           <Tooltip title={t("button.di.calculator.tooltip", "Calculate the damage scale with weights")}>
-            <IconButton>
+            <IconButton onClick={() => setHbCalculatorOpen(true)}>
               <CalculateIcon />
             </IconButton>
           </Tooltip>
-          <HbCalculator />
+          <HbCalculator
+            open={HbCalculatorOpen}
+            onClose={() => setHbCalculatorOpen(false)}
+            onApply={(newValue, qualiInput) => {
+              handleChangeDIValue(newValue, Hb);
+              setHbOverride(newValue);
+              setHbCalculatorOpen(false);
+
+              if (qualiInput) {
+                fieldsRef.cr4de_di_quali_h += qualiInput;
+              }
+            }}
+          />
         </Box>
 
         <DISlider
           field={Hb}
           initialValue={fieldsRef.cr4de_di_quanti_hb}
+          overrideValue={HbOverride}
+          resetOverrideValue={() => setHbOverride(undefined)}
           error={inputErrors.indexOf("cr4de_di_quanti_hb") >= 0}
           onChange={handleChangeDIValue}
         />

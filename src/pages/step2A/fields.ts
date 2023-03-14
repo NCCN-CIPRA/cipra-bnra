@@ -46,7 +46,7 @@ export interface ScenarioInputs {
 }
 
 export const SCENARIO_SUFFIX: { [key in keyof Scenarios]: string } = {
-  considerable: "_s",
+  considerable: "_c",
   major: "_m",
   extreme: "_e",
 };

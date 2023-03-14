@@ -22,9 +22,11 @@ import useLoggedInUser from "../../../hooks/useLoggedInUser";
 
 const SPECIAL_FILTERS = {
   MY_RISK_FILES: false,
+  MY_RISK_FILES_BACKUP: false,
   EXPERTS_ONLY: false,
   REGISTERED_ONLY: false,
   UNREGISTERED_ONLY: false,
+  UNINVITED_ONLY: false,
   REMINDER: false,
 };
 
@@ -81,7 +83,29 @@ export default function ContactsView({
 
     if (specialFilters.MY_RISK_FILES) {
       const me = contacts.find((c) => c.emailaddress1 === user?.emailaddress1);
-      const myRiskFiles = me?.participations.filter((p) => p.cr4de_role !== "expert");
+      const myRiskFiles = me?.participations.filter((p) => p.cr4de_role === "analist");
+
+      runningFilter = runningFilter
+        .filter((c) =>
+          c.participations.some((p) =>
+            myRiskFiles?.some(
+              (rf) => p.cr4de_role === "expert" && rf._cr4de_risk_file_value === p._cr4de_risk_file_value
+            )
+          )
+        )
+        .map((c) => ({
+          ...c,
+          participations: c.participations.filter((p) =>
+            myRiskFiles?.some(
+              (rf) => p.cr4de_role === "expert" && rf._cr4de_risk_file_value === p._cr4de_risk_file_value
+            )
+          ),
+        }));
+    }
+
+    if (specialFilters.MY_RISK_FILES_BACKUP) {
+      const me = contacts.find((c) => c.emailaddress1 === user?.emailaddress1);
+      const myRiskFiles = me?.participations.filter((p) => p.cr4de_role === "analist_2");
 
       runningFilter = runningFilter
         .filter((c) =>
@@ -127,6 +151,10 @@ export default function ContactsView({
           (i) => i.cr4de_laatstverzonden !== null && dayDifference(new Date(i.cr4de_laatstverzonden), today) > 2
         )
       );
+    }
+
+    if (specialFilters.UNINVITED_ONLY) {
+      runningFilter = runningFilter.filter((c) => !c.invitations || c.invitations.length <= 0);
     }
 
     setFilteredContacts(runningFilter);
@@ -182,8 +210,15 @@ export default function ContactsView({
             <Grid item xs={12} sm={6} md={4}>
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.MY_RISK_FILES} />}
-                label="Show my risk files only"
+                label="Show my risk files only (author)"
                 onClick={() => toggleSpecialFilter("MY_RISK_FILES")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControlLabel
+                control={<Checkbox checked={specialFilters.MY_RISK_FILES_BACKUP} />}
+                label="Show my risk files only (backup)"
+                onClick={() => toggleSpecialFilter("MY_RISK_FILES_BACKUP")}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
@@ -212,6 +247,13 @@ export default function ContactsView({
                 control={<Checkbox checked={specialFilters.REMINDER} />}
                 label="Show only problematic risk files"
                 onClick={() => toggleSpecialFilter("REMINDER")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControlLabel
+                control={<Checkbox checked={specialFilters.UNINVITED_ONLY} />}
+                label="Show only uninvited contacts"
+                onClick={() => toggleSpecialFilter("UNINVITED_ONLY")}
               />
             </Grid>
           </Grid>

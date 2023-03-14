@@ -1,13 +1,15 @@
-import { Box, Paper, Stack, Typography } from "@mui/material";
-import { Trans } from "react-i18next";
+import { Box, Paper, Stack, Typography, Tooltip, IconButton } from "@mui/material";
+import { Trans, useTranslation } from "react-i18next";
 import TextInputBox from "../../../components/TextInputBox";
 import { DirectImpactField } from "../../learning/QuantitativeScales/DI";
 import { Sa, Sb, Sc, Sd } from "../../learning/QuantitativeScales/S";
 import { ScenarioInput } from "../fields";
 import { DISlider } from "./QuantitativeMarks";
 import QualiTextInputBox from "./QualiTextInputBox";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import CalculateIcon from "@mui/icons-material/Calculate";
+import SaCalculator from "./SaCalculator";
 
 export default function SSection({
   fieldsRef,
@@ -22,6 +24,11 @@ export default function SSection({
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   onReloadAttachments: () => Promise<void>;
 }) {
+  const { t } = useTranslation();
+
+  const [SaCalculatorOpen, setSaCalculatorOpen] = useState(false);
+  const [SaOverride, setSaOverride] = useState<string | undefined>(undefined);
+
   const handleChangeDIValue = (newValue: string | null, field: DirectImpactField) => {
     fieldsRef[`cr4de_di_quanti_${field.prefix.toLowerCase()}` as keyof ScenarioInput] = newValue;
   };
@@ -37,9 +44,29 @@ export default function SSection({
       </Typography>
 
       <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
-        <Typography variant="subtitle2">
-          <Trans i18nKey="2A.s.quanti.sa.title">Sa - Supply shortfalls and unmet human needs</Trans>
-        </Typography>
+        <Box sx={{ display: "flex" }}>
+          <Typography variant="subtitle2" sx={{ flex: 1 }}>
+            <Trans i18nKey="2A.s.quanti.sa.title">Sa - Supply shortfalls and unmet human needs</Trans>
+          </Typography>
+          <Tooltip title={t("button.di.calculator.tooltip", "Calculate the damage scale with weights")}>
+            <IconButton onClick={() => setSaCalculatorOpen(true)}>
+              <CalculateIcon />
+            </IconButton>
+          </Tooltip>
+          <SaCalculator
+            open={SaCalculatorOpen}
+            onClose={() => setSaCalculatorOpen(false)}
+            onApply={(newValue, qualiInput) => {
+              handleChangeDIValue(newValue, Sa);
+              setSaOverride(newValue);
+              setSaCalculatorOpen(false);
+
+              if (qualiInput) {
+                fieldsRef.cr4de_di_quali_h += qualiInput;
+              }
+            }}
+          />
+        </Box>
 
         <DISlider
           field={Sa}
