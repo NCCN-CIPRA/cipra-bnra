@@ -47,6 +47,8 @@ export interface CreateResponse {
 }
 
 export interface API {
+  authFetch(input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response>;
+
   login(email: string, password: string, remember: boolean): Promise<AuthResponse>;
   requestPasswordReset(email: string): Promise<AuthResponse>;
   resetPassword(userId: string, code: string, password: string): Promise<AuthResponse>;
@@ -135,6 +137,7 @@ export default function useAPI(): API {
   };
 
   return {
+    authFetch,
     login: async function (email: string, password: string, remember: boolean) {
       const response = await fetch("https://bnra.powerappsportals.com/SignIn", {
         method: "POST",

@@ -20,6 +20,20 @@ export default function useProcess(): ProcessManager {
       });
     },
     startSilenceProcedure: async function (rf: DVRiskFile) {
+      await api.authFetch(
+        "https://prod-91.westeurope.logic.azure.com:443/workflows/79ca88049c3644349691202d00a5c58c/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ukcGNlwFwdbgAXj-tTEcT7SDTIvxP288eQqkzvgGdH8",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            riskFileId: rf.cr4de_riskfilesid,
+            step: "SILENCE_PROCEDURE",
+          }),
+        }
+      );
+
       return api.updateRiskFile(rf.cr4de_riskfilesid, {
         cr4de_validations_processed: true,
         cr4de_validation_silent_procedure_until: addDays(new Date(), 7),
