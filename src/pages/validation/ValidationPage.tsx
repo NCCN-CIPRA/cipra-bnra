@@ -402,6 +402,24 @@ export default function ValidationPage() {
               <Skeleton variant="rectangular" width="100%" height="300px" />
             )}
 
+            {validation && validation.cr4de_definition_feedback_response && (
+              <>
+                <Typography variant="subtitle2" mt={4} mb={2} color="primary">
+                  <Trans i18nKey="validation.feedback.response">
+                    Our analist has responded the following to your feedback:
+                  </Trans>
+                </Typography>
+
+                <Box
+                  width="100%"
+                  dangerouslySetInnerHTML={{
+                    __html: validation.cr4de_definition_feedback_response,
+                  }}
+                  sx={{ mb: 2, border: "1px solid #eee", px: 2 }}
+                />
+              </>
+            )}
+
             <Attachments
               attachments={attachments}
               field="definition"
@@ -494,6 +512,24 @@ export default function ValidationPage() {
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
+              )}
+
+              {validation && validation.cr4de_historical_events_feedback_response && (
+                <>
+                  <Typography variant="subtitle2" mt={4} mb={2} color="primary">
+                    <Trans i18nKey="validation.feedback.response">
+                      Our analist has responded the following to your feedback:
+                    </Trans>
+                  </Typography>
+
+                  <Box
+                    width="100%"
+                    dangerouslySetInnerHTML={{
+                      __html: validation.cr4de_historical_events_feedback_response,
+                    }}
+                    sx={{ mb: 2, border: "1px solid #eee", px: 2 }}
+                  />
+                </>
               )}
 
               <Attachments
@@ -662,6 +698,24 @@ export default function ValidationPage() {
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
 
+              {validation && validation.cr4de_intensity_parameters_feedback_response && (
+                <>
+                  <Typography variant="subtitle2" mt={4} mb={2} color="primary">
+                    <Trans i18nKey="validation.feedback.response">
+                      Our analist has responded the following to your feedback:
+                    </Trans>
+                  </Typography>
+
+                  <Box
+                    width="100%"
+                    dangerouslySetInnerHTML={{
+                      __html: validation.cr4de_intensity_parameters_feedback_response,
+                    }}
+                    sx={{ mb: 2, border: "1px solid #eee", px: 2 }}
+                  />
+                </>
+              )}
+
               <Attachments
                 attachments={attachments}
                 field="intensity_parameters"
@@ -796,6 +850,24 @@ export default function ValidationPage() {
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
+              )}
+
+              {validation && validation.cr4de_scenarios_feedback_response && (
+                <>
+                  <Typography variant="subtitle2" mt={4} mb={2} color="primary">
+                    <Trans i18nKey="validation.feedback.response">
+                      Our analist has responded the following to your feedback:
+                    </Trans>
+                  </Typography>
+
+                  <Box
+                    width="100%"
+                    dangerouslySetInnerHTML={{
+                      __html: validation.cr4de_scenarios_feedback_response,
+                    }}
+                    sx={{ mb: 2, border: "1px solid #eee", px: 2 }}
+                  />
+                </>
               )}
 
               <Attachments
@@ -1003,6 +1075,24 @@ export default function ValidationPage() {
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
 
+              {validation && validation.cr4de_scenarios_feedback_response && (
+                <>
+                  <Typography variant="subtitle2" mt={4} mb={2} color="primary">
+                    <Trans i18nKey="validation.feedback.response">
+                      Our analist has responded the following to your feedback:
+                    </Trans>
+                  </Typography>
+
+                  <Box
+                    width="100%"
+                    dangerouslySetInnerHTML={{
+                      __html: validation.cr4de_scenarios_feedback_response,
+                    }}
+                    sx={{ mb: 2, border: "1px solid #eee", px: 2 }}
+                  />
+                </>
+              )}
+
               <Attachments
                 attachments={attachments}
                 field="scenarios"
@@ -1152,6 +1242,24 @@ export default function ValidationPage() {
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
+              )}
+
+              {validation && validation.cr4de_scenarios_feedback_response && (
+                <>
+                  <Typography variant="subtitle2" mt={4} mb={2} color="primary">
+                    <Trans i18nKey="validation.feedback.response">
+                      Our analist has responded the following to your feedback:
+                    </Trans>
+                  </Typography>
+
+                  <Box
+                    width="100%"
+                    dangerouslySetInnerHTML={{
+                      __html: validation.cr4de_scenarios_feedback_response,
+                    }}
+                    sx={{ mb: 2, border: "1px solid #eee", px: 2 }}
+                  />
+                </>
               )}
 
               <Attachments
@@ -1368,6 +1476,24 @@ export default function ValidationPage() {
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
 
+              {validation && validation.cr4de_causes_feedback_response && (
+                <>
+                  <Typography variant="subtitle2" mt={4} mb={2} color="primary">
+                    <Trans i18nKey="validation.feedback.response">
+                      Our analist has responded the following to your feedback:
+                    </Trans>
+                  </Typography>
+
+                  <Box
+                    width="100%"
+                    dangerouslySetInnerHTML={{
+                      __html: validation.cr4de_causes_feedback_response,
+                    }}
+                    sx={{ mb: 2, border: "1px solid #eee", px: 2 }}
+                  />
+                </>
+              )}
+
               <Attachments
                 attachments={attachments}
                 field="causes"
@@ -1530,6 +1656,24 @@ export default function ValidationPage() {
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
+              )}
+
+              {validation && validation.cr4de_effects_feedback_response && (
+                <>
+                  <Typography variant="subtitle2" mt={4} mb={2} color="primary">
+                    <Trans i18nKey="validation.feedback.response">
+                      Our analist has responded the following to your feedback:
+                    </Trans>
+                  </Typography>
+
+                  <Box
+                    width="100%"
+                    dangerouslySetInnerHTML={{
+                      __html: validation.cr4de_effects_feedback_response,
+                    }}
+                    sx={{ mb: 2, border: "1px solid #eee", px: 2 }}
+                  />
+                </>
               )}
 
               <Attachments
@@ -1743,6 +1887,24 @@ export default function ValidationPage() {
                 <Skeleton variant="rectangular" width="100%" height="300px" />
               )}
 
+              {validation && validation.cr4de_effects_feedback_response && (
+                <>
+                  <Typography variant="subtitle2" mt={4} mb={2} color="primary">
+                    <Trans i18nKey="validation.feedback.response">
+                      Our analist has responded the following to your feedback:
+                    </Trans>
+                  </Typography>
+
+                  <Box
+                    width="100%"
+                    dangerouslySetInnerHTML={{
+                      __html: validation.cr4de_effects_feedback_response,
+                    }}
+                    sx={{ mb: 2, border: "1px solid #eee", px: 2 }}
+                  />
+                </>
+              )}
+
               <Attachments
                 attachments={attachments}
                 field="catalysing_effects"
@@ -1869,6 +2031,24 @@ export default function ValidationPage() {
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
+              )}
+
+              {validation && validation.cr4de_effects_feedback_response && (
+                <>
+                  <Typography variant="subtitle2" mt={4} mb={2} color="primary">
+                    <Trans i18nKey="validation.feedback.response">
+                      Our analist has responded the following to your feedback:
+                    </Trans>
+                  </Typography>
+
+                  <Box
+                    width="100%"
+                    dangerouslySetInnerHTML={{
+                      __html: validation.cr4de_effects_feedback_response,
+                    }}
+                    sx={{ mb: 2, border: "1px solid #eee", px: 2 }}
+                  />
+                </>
               )}
 
               <Attachments
@@ -2053,6 +2233,24 @@ export default function ValidationPage() {
                 />
               ) : (
                 <Skeleton variant="rectangular" width="100%" height="300px" />
+              )}
+
+              {validation && validation.cr4de_catalysing_effects_feedback_response && (
+                <>
+                  <Typography variant="subtitle2" mt={4} mb={2} color="primary">
+                    <Trans i18nKey="validation.feedback.response">
+                      Our analist has responded the following to your feedback:
+                    </Trans>
+                  </Typography>
+
+                  <Box
+                    width="100%"
+                    dangerouslySetInnerHTML={{
+                      __html: validation.cr4de_catalysing_effects_feedback_response,
+                    }}
+                    sx={{ mb: 2, border: "1px solid #eee", px: 2 }}
+                  />
+                </>
               )}
 
               <Attachments

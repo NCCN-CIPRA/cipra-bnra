@@ -109,11 +109,7 @@ export default function SaCalculator({
                 </Select>
               </FormControl>
               <TextField
-                label={t("calculator.hb.severe", "People with severe injuries or illnesses")}
-                helperText={t(
-                  "calculator.hb.severe.helpText",
-                  "Hospital stay of at least 7 days or chronic illness requiring medical treatment"
-                )}
+                label={t("calculator.sa.numberOfPeople", "Number of people")}
                 variant="standard"
                 type="number"
                 value={severe}

@@ -66,9 +66,11 @@ export default function EditorPage() {
   const params = useParams() as RouteParams;
   const navigate = useNavigate();
   const fieldsToUpdate = useRef<Partial<RiskFileEditableFields>>({});
+  const feedbackRefs = useRef<Partial<DVValidation>[]>([]);
 
   const [dirty, setDirty] = useState(false);
   const [validationProcessedDialogOpen, setValidationProcessedDialogOpen] = useState(false);
+  const [validationNotProcessedDialogOpen, setValidationNotProcessedDialogOpen] = useState(false);
 
   const { data: otherHazards, getData: getOtherHazards } = useLazyRecords<SmallRisk>({
     table: DataTable.RISK_FILE,
@@ -144,6 +146,49 @@ export default function EditorPage() {
     },
   });
 
+  const unprocessedFeedback = (): { [key: string]: DVValidation<unknown, DVContact>[] } => {
+    if (validations === null) return {};
+
+    return {
+      ...({
+        Definition: validations.filter(
+          (v) => v.cr4de_definition_feedback !== null && v.cr4de_definition_feedback_response === null
+        ),
+      } || {}),
+      ...({
+        "Historical Events": validations.filter(
+          (v) => v.cr4de_historical_events_feedback !== null && v.cr4de_historical_events_feedback_response === null
+        ),
+      } || {}),
+      ...({
+        "Intensity Parameters": validations.filter(
+          (v) =>
+            v.cr4de_intensity_parameters_feedback !== null && v.cr4de_intensity_parameters_feedback_response === null
+        ),
+      } || {}),
+      ...({
+        "Scenarios/Horizon Analysis": validations.filter(
+          (v) => v.cr4de_scenarios_feedback !== null && v.cr4de_scenarios_feedback_response === null
+        ),
+      } || {}),
+      ...({
+        Causes: validations.filter(
+          (v) => v.cr4de_causes_feedback !== null && v.cr4de_causes_feedback_response === null
+        ),
+      } || {}),
+      ...({
+        Effects: validations.filter(
+          (v) => v.cr4de_effects_feedback !== null && v.cr4de_effects_feedback_response === null
+        ),
+      } || {}),
+      ...({
+        "Catalysing Effects": validations.filter(
+          (v) => v.cr4de_catalysing_effects_feedback !== null && v.cr4de_catalysing_effects_feedback_response === null
+        ),
+      } || {}),
+    };
+  };
+
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveFields = async (fields: Partial<RiskFileEditableFields>) => {
@@ -186,6 +231,19 @@ export default function EditorPage() {
 
     await api.updateRiskFile(params.risk_file_id, fieldsToUpdate.current);
 
+    await Promise.all(
+      feedbackRefs.current.map((validation) => {
+        if (!validation.cr4de_bnravalidationid || Object.keys(validation).length <= 1) return Promise.resolve();
+
+        return api.updateValidation(validation.cr4de_bnravalidationid, {
+          ...validation,
+          cr4de_bnravalidationid: undefined,
+        });
+      })
+    );
+
+    feedbackRefs.current = [];
+
     setIsSaving(false);
   };
 
@@ -226,7 +284,7 @@ export default function EditorPage() {
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="definition" />
+                <FeedbackList validations={validations} field="definition" feedbackRefs={feedbackRefs} />
               </Box>
             </Attachments>
           </Box>
@@ -265,7 +323,7 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <FeedbackList validations={validations} field="historical_events" />
+                  <FeedbackList validations={validations} field="historical_events" feedbackRefs={feedbackRefs} />
                 </Box>
               </Attachments>
             </Box>
@@ -301,7 +359,7 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <FeedbackList validations={validations} field="intensity_parameters" />
+                  <FeedbackList validations={validations} field="intensity_parameters" feedbackRefs={feedbackRefs} />
                 </Box>
               </Attachments>
             </Box>
@@ -348,7 +406,7 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <FeedbackList validations={validations} field="scenarios" />
+                  <FeedbackList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
                 </Box>
               </Attachments>
             </Box>
@@ -412,7 +470,7 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <FeedbackList validations={validations} field="scenarios" />
+                  <FeedbackList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
                 </Box>
               </Attachments>
             </Box>
@@ -463,7 +521,7 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <FeedbackList validations={validations} field="horizon_analysis" />
+                  <FeedbackList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
                 </Box>
               </Attachments>
             </Box>
@@ -478,6 +536,7 @@ export default function EditorPage() {
           catalysing={catalysing}
           validations={validations}
           attachments={attachments}
+          feedbackRefs={feedbackRefs}
           setIsSaving={setIsSaving}
           getAllCauses={getAllCauses}
           getEffects={getEffects}
@@ -487,23 +546,37 @@ export default function EditorPage() {
 
       <Dialog open={validationProcessedDialogOpen} onClose={() => setValidationProcessedDialogOpen(false)}>
         <DialogTitle>Are you finished processing the validation feedback for this risk file?</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pb: 0 }}>
           <DialogContentText>
-            You have the option to start a silent procedure or to organise a consensus meeting.
+            <Typography variant="body1" paragraph>
+              You have the option to start a silent procedure or to organise a consensus meeting.
+            </Typography>
           </DialogContentText>
           <DialogContentText>
-            If you choose a silent procedure, your experts will be automatically notified of this. After the end of the
-            silent procedure, the validation step will be finalized automatically and the experts will no longer be able
-            to change their input.{" "}
-            <b>ATTENTION! If a silence procedure is already underway, Pressing this button will reset the timer.</b>
+            <Typography variant="body1" paragraph>
+              If you choose a silent procedure, your experts will be automatically notified of this. After the end of
+              the silent procedure, the validation step will be finalized automatically and the experts will no longer
+              be able to change their input.{" "}
+              <b>ATTENTION! If a silence procedure is already underway, Pressing this button will reset the timer.</b>
+            </Typography>
           </DialogContentText>
           <DialogContentText>
-            If you would like to organise a meeting, nothing will change and you will have to contact your experts
-            manually. If you previously started a silence procedure, pressing this button will cancel it.
+            <Typography variant="body1" paragraph>
+              If you would like to organise a meeting, nothing will change and you will have to contact your experts
+              manually. If you previously started a silence procedure, pressing this button will cancel it.
+            </Typography>
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setValidationProcessedDialogOpen(false)}>I am not finished</Button>
+        <DialogActions sx={{ flexDirection: "column", alignItems: "flex-end" }}>
+          <Button
+            onClick={() => {
+              setValidationProcessedDialogOpen(false);
+
+              navigate("/hazards");
+            }}
+          >
+            I am not finished
+          </Button>
           <Button
             onClick={async () => {
               if (!riskFile) return;
@@ -525,6 +598,51 @@ export default function EditorPage() {
             }}
           >
             I will organise a consensus meeting
+          </Button>
+          <Button
+            color="error"
+            onClick={() => {
+              setValidationProcessedDialogOpen(false);
+            }}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={validationNotProcessedDialogOpen} onClose={() => setValidationNotProcessedDialogOpen(false)}>
+        <DialogTitle>You have not responded to all feedback</DialogTitle>
+        <DialogContent sx={{ pb: 0 }}>
+          <DialogContentText>
+            <Typography variant="body1" paragraph>
+              You need to respond to each experts' feedback before you can start a silence procedure. Missing responses:
+            </Typography>
+          </DialogContentText>
+          <DialogContentText>
+            {Object.entries(unprocessedFeedback()).map(([field, missing]) => (
+              <Typography variant="body1">
+                Feedback on {field.toLowerCase()} by {missing.map((v) => v.cr4de_expert.emailaddress1).join(", ")}
+              </Typography>
+            ))}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ flexDirection: "column", alignItems: "flex-end" }}>
+          <Button
+            onClick={() => {
+              setValidationNotProcessedDialogOpen(false);
+
+              navigate("/hazards");
+            }}
+          >
+            I will continue at a later time
+          </Button>
+          <Button
+            color="error"
+            onClick={() => {
+              setValidationNotProcessedDialogOpen(false);
+            }}
+          >
+            Cancel
           </Button>
         </DialogActions>
       </Dialog>
@@ -560,9 +678,13 @@ export default function EditorPage() {
           color="primary"
           onClick={async () => {
             await handleSave();
-            console.log(validations);
+
             if (participants?.some((p) => p.cr4de_validation_finished)) {
-              setValidationProcessedDialogOpen(true);
+              if (Object.keys(unprocessedFeedback()).length > 0) {
+                setValidationNotProcessedDialogOpen(true);
+              } else {
+                setValidationProcessedDialogOpen(true);
+              }
             } else {
               navigate("/hazards");
             }

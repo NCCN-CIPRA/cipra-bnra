@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { MutableRefObject, useMemo } from "react";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import { Stack, Box, Typography, Paper, Divider } from "@mui/material";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
@@ -21,6 +21,7 @@ function CascadeSections({
 
   validations,
   attachments,
+  feedbackRefs,
 
   setIsSaving,
 
@@ -36,6 +37,7 @@ function CascadeSections({
 
   validations: DVValidation<undefined, DVContact>[] | null;
   attachments: DVAttachment[] | null;
+  feedbackRefs: MutableRefObject<Partial<DVValidation<unknown, unknown>>[]>;
 
   setIsSaving: (isSaving: boolean) => void;
 
@@ -201,7 +203,7 @@ function CascadeSections({
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="causes" />
+                <FeedbackList validations={validations} field="causes" feedbackRefs={feedbackRefs} />
               </Box>
             </Attachments>
           </Box>
@@ -277,7 +279,7 @@ function CascadeSections({
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="effects" />
+                <FeedbackList validations={validations} field="effects" feedbackRefs={feedbackRefs} />
               </Box>
             </Attachments>
           </Box>
@@ -352,7 +354,7 @@ function CascadeSections({
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="effects" />
+                <FeedbackList validations={validations} field="effects" feedbackRefs={feedbackRefs} />
               </Box>
             </Attachments>
           </Box>
@@ -428,7 +430,7 @@ function CascadeSections({
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="catalysing_effects" />
+                <FeedbackList validations={validations} field="effects" feedbackRefs={feedbackRefs} />
               </Box>
             </Attachments>
           </Box>
@@ -511,7 +513,7 @@ function CascadeSections({
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="catalysing_effects" />
+                <FeedbackList validations={validations} field="catalysing_effects" feedbackRefs={feedbackRefs} />
               </Box>
             </Attachments>
           </Box>
