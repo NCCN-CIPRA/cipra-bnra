@@ -71,7 +71,7 @@ export default function SSection({
               setSaCalculatorOpen(false);
 
               if (qualiInput) {
-                fieldsRef.cr4de_di_quali_h += qualiInput;
+                fieldsRef.cr4de_di_quali_s += qualiInput;
               }
             }}
           />
