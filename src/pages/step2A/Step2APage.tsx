@@ -36,6 +36,7 @@ import { Scenarios } from "../../functions/scenarios";
 import SurveyDialog from "../../components/SurveyDialog";
 import { AuthPageContext } from "../AuthPage";
 import { FeedbackStep } from "../../types/dataverse/DVFeedback";
+import Introduction from "./steps/Introduction";
 
 type RouteParams = {
   step2A_id: string;
@@ -277,22 +278,7 @@ export default function Step2APage() {
                 <CircularProgress />
               </Box>
             )}
-            {activeStep === STEPS.INTRODUCTION && (
-              <>
-                <Box style={{ marginRight: drawerWidth, position: "relative" }}>
-                  <Box sx={{ mb: 2, ml: 1 }}>
-                    <Typography variant="h5">
-                      <Trans i18nKey="2A.introduction.title">Introduction</Trans>
-                    </Typography>
-                  </Box>
-                  <Stack sx={{ mb: 4, ml: 1 }} rowGap={2}>
-                    <Typography variant="body2">
-                      <Trans i18nKey="2A.introduction.info.1">Explanation about step 2A</Trans>
-                    </Typography>
-                  </Stack>
-                </Box>
-              </>
-            )}
+            {activeStep === STEPS.INTRODUCTION && <Introduction />}
             {activeStep === STEPS.CONSIDERABLE && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>

@@ -1,4 +1,4 @@
-import { Box, Paper, Stack, Typography, Tooltip, IconButton } from "@mui/material";
+import { Box, Paper, Stack, Typography, Tooltip, IconButton, Alert } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
 import TextInputBox from "../../../components/TextInputBox";
 import { DirectImpactField } from "../../learning/QuantitativeScales/DI";
@@ -38,11 +38,20 @@ export default function SSection({
       <Typography variant="h6">
         <Trans i18nKey="2A.s.title">Direct Societal Impact</Trans>
       </Typography>
-
       <Typography variant="body2">
-        <Trans i18nKey="2A.s.quanti.info.1">Explanation about filling in the direct societal impacts values</Trans>
+        <Trans i18nKey="2A.s.quanti.info.1">
+          Please select a quantitative estimation below for each of the damage indicators for the direct societal impact
+          of the current intensity scenarios.
+        </Trans>
       </Typography>
-
+      <Alert severity="warning">
+        <Trans i18nKey="2A.s.quanti.info.2">
+          In this step, you should only estimate the <b>direct</b> societal impact. For example, when estimating the
+          direct impact of an <i>Earthquake</i>, the impact due to a possible <i>Failure of electricity supply</i>{" "}
+          should not be considered. This possibility will be explored when estimating the conditional probabilities in
+          the following phase.
+        </Trans>
+      </Alert>
       <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
         <Box sx={{ display: "flex" }}>
           <Typography variant="subtitle2" sx={{ flex: 1 }}>
@@ -110,11 +119,20 @@ export default function SSection({
           onChange={handleChangeDIValue}
         />
       </Box>
-
       <Typography variant="body2">
-        <Trans i18nKey="2A.s.quali.info.1">Explanation about filling in the direct societal impact textbox</Trans>
+        <Trans i18nKey="2A.s.quali.info.1">
+          Please use the field below to explain your reasoning for the quantitative estimations given in the previous
+          section.
+        </Trans>
+      </Typography>{" "}
+      <Typography variant="caption">
+        <Trans i18nKey="2A.s.quali.info.2">
+          Example: a <i>Fluvial flood</i> in itself will not cause a supply shortfall of electricity since this effect
+          will be estimated in the next link of the risk chain (e.g. <i>Failure of Electricity Supply</i>). However an
+          <i> Extreme fluvial flood</i> in itself might cause damage to the reputation of Belgium and loss of confidence
+          in the state.
+        </Trans>
       </Typography>
-
       <QualiTextInputBox
         error={inputErrors.indexOf("cr4de_di_quali_s") >= 0}
         initialValue={fieldsRef.cr4de_di_quali_s || ""}

@@ -32,8 +32,18 @@ export default function DPSection({
       </Typography>
 
       <Typography variant="body2">
-        <Trans i18nKey="2A.dp.quanti.info.1">Explanation about filling in the direct probabilty value</Trans>
+        <Trans i18nKey="2A.dp.quanti.info.1">
+          Please select a quantitative estimation below for the direct probability of the current intensity scenarios.
+        </Trans>
       </Typography>
+      <Alert severity="warning">
+        <Trans i18nKey="2A.dp.quanti.info.2">
+          In this step, you should only estimate the <b>direct</b> probability. For example, when estimating the direct
+          probability of a <i>Dam failure</i>, the possibility that a dam fails due to an earthquake should not be
+          considered. This possibility will be explored when estimating the conditional probabilities in the following
+          phase.
+        </Trans>
+      </Alert>
 
       <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
         <Typography variant="subtitle2">
@@ -48,7 +58,10 @@ export default function DPSection({
       </Box>
 
       <Typography variant="body2">
-        <Trans i18nKey="2A.dp.quali.info.1">Explanation about filling in the direct probabilty textbox</Trans>
+        <Trans i18nKey="2A.dp.quali.info.1">
+          Please use the field below to explain your reasoning for the quantitative estimation given in the previous
+          section.
+        </Trans>
       </Typography>
 
       <QualiTextInputBox

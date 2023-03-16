@@ -10,6 +10,7 @@ import { ReactNode, useState } from "react";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import HbCalculator from "./HbCalculator";
+import { Alert } from "@mui/lab";
 
 export default function HSection({
   fieldsRef,
@@ -38,11 +39,19 @@ export default function HSection({
       <Typography variant="h6">
         <Trans i18nKey="2A.h.title">Direct Human Impact</Trans>
       </Typography>
-
       <Typography variant="body2">
-        <Trans i18nKey="2A.h.quanti.info.1">Explanation about filling in the direct human impacts values</Trans>
+        <Trans i18nKey="2A.h.quanti.info.1">
+          Please select a quantitative estimation below for each of the damage indicators for the direct human impact of
+          the current intensity scenarios.
+        </Trans>
       </Typography>
-
+      <Alert severity="warning">
+        <Trans i18nKey="2A.h.quanti.info.2">
+          In this step, you should only estimate the <b>direct</b> human impact. For example, when estimating the direct
+          impact of an <i>Earthquake</i>, the impact due to a possible <i>Dam failure</i> should not be considered. This
+          possibility will be explored when estimating the conditional probabilities in the following phase.
+        </Trans>
+      </Alert>
       <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
         <Typography variant="subtitle2">
           <Trans i18nKey="2A.h.quanti.ha.title">Ha - Fatalities</Trans>
@@ -100,9 +109,19 @@ export default function HSection({
         />
       </Box>
       <Typography variant="body2">
-        <Trans i18nKey="2A.h.quali.info.1">Explanation about filling in the direct human impact textbox</Trans>
+        <Trans i18nKey="2A.h.quali.info.1">
+          Please use the field below to explain your reasoning for the quantitative estimations given in the previous
+          section.
+        </Trans>
+      </Typography>{" "}
+      <Typography variant="caption">
+        <Trans i18nKey="2A.h.quali.info.2">
+          Example: <i>Heatwaves</i> cause dehydration, heat stroke and exhaustion, which have a significant negative
+          impact on health. They lead to increased mortality and morbidity, especially in vulnerable groups (young
+          children and the elderly). For a considerable scenario, we can expect between 1000 and 1500 people to die
+          (mainly aged 85 years or more).
+        </Trans>
       </Typography>
-
       <QualiTextInputBox
         error={inputErrors.indexOf("cr4de_di_quali_h") >= 0}
         initialValue={fieldsRef.cr4de_di_quali_h || ""}
