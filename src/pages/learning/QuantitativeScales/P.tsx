@@ -54,7 +54,7 @@ export const DPValueStack = ({ value }: { value: number }) => {
           <Typography variant="body2" sx={{ whiteSpace: "nowrap", mr: 1, fontWeight: "bold" }}>
             <Trans i18nKey={r} />:{" "}
           </Typography>
-          <Typography variant="caption">
+          <Typography variant="caption" sx={{ whiteSpace: "normal" }}>
             <Trans i18nKey={DPs[value][ri]} />
           </Typography>
         </Stack>

@@ -41,7 +41,7 @@ root.render(
             onLoad={() => {
               // @ts-expect-error
               window.fetch.loaded = true;
-              console.log("ok");
+
               // @ts-expect-error
               window.frames.localApi.postMessage("getUserInfo", "*");
             }}

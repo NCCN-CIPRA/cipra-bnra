@@ -50,7 +50,6 @@ function TextInputBox({
     if (onSave && debouncedValue !== savedValue) {
       onSave(debouncedValue);
       setSavedValue(debouncedValue);
-      setUpdatedValue && setUpdatedValue(undefined);
     }
   }, [debouncedValue, savedValue, onSave, setSavedValue, setUpdatedValue]);
 

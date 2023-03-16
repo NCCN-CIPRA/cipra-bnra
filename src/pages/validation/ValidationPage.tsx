@@ -15,8 +15,9 @@ import {
   DialogActions,
   IconButton,
   Alert,
+  AlertTitle,
 } from "@mui/material";
-import { AlertTitle, LoadingButton } from "@mui/lab";
+import { LoadingButton } from "@mui/lab";
 import TextInputBox from "../../components/TextInputBox";
 import TransferList from "../../components/TransferList";
 import SaveIcon from "@mui/icons-material/Save";
@@ -130,7 +131,7 @@ export default function ValidationPage() {
         getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${processedRiskFile.cr4de_riskfilesid}` });
     },
   });
-
+  console.log(riskFile?.scenarios);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveFields = async (fields: Partial<{ [key in keyof DVValidation]: string | null }>) => {
@@ -1031,7 +1032,10 @@ export default function ValidationPage() {
                   </Typography>
                   <Box
                     dangerouslySetInnerHTML={{
-                      __html: riskFile.scenarios.considerable ? riskFile.scenarios.considerable[0].value : "",
+                      __html:
+                        riskFile.scenarios.considerable && riskFile.scenarios.considerable[0]
+                          ? riskFile.scenarios.considerable[0].value
+                          : "",
                     }}
                   />
                   <Typography variant="subtitle2">
@@ -1039,7 +1043,10 @@ export default function ValidationPage() {
                   </Typography>
                   <Box
                     dangerouslySetInnerHTML={{
-                      __html: riskFile.scenarios.major ? riskFile.scenarios.major[0].value : "",
+                      __html:
+                        riskFile.scenarios.major && riskFile.scenarios.major[0]
+                          ? riskFile.scenarios.major[0].value
+                          : "",
                     }}
                   />
                   <Typography variant="subtitle2">
@@ -1047,7 +1054,10 @@ export default function ValidationPage() {
                   </Typography>
                   <Box
                     dangerouslySetInnerHTML={{
-                      __html: riskFile.scenarios.extreme ? riskFile.scenarios.extreme[0].value : "",
+                      __html:
+                        riskFile.scenarios.extreme && riskFile.scenarios.extreme[0]
+                          ? riskFile.scenarios.extreme[0].value
+                          : "",
                     }}
                   />
                 </Box>

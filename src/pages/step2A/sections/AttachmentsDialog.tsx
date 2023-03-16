@@ -105,7 +105,7 @@ export default function AttachmentsDialog({
             : {}),
           ...(directAnalysis
             ? {
-                "cr4de_direct_analysis@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${directAnalysis.cr4de_bnradirectanalysisid})`,
+                "cr4de_directanalysis@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${directAnalysis.cr4de_bnradirectanalysisid})`,
               }
             : {}),
         },
@@ -240,7 +240,7 @@ export default function AttachmentsDialog({
                         sx={{ maxHeight: 160, overflowY: "scroll", width: "100%", mt: 2, border: "1px solid #eee" }}
                       >
                         {allAttachments.map((a) => (
-                          <ListItem disablePadding>
+                          <ListItem key={a.cr4de_bnraattachmentid} disablePadding>
                             <ListItemButton onClick={() => handleAddPreviousSource(a)}>
                               <ListItemText primary={a.cr4de_name} />
                             </ListItemButton>

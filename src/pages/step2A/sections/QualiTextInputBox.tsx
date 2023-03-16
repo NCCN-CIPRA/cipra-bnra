@@ -70,6 +70,12 @@ export default function QualiTextInputBox({
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [removingAttachment, setRemovingAttachment] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
+  const valueRef = useRef<string | null | undefined>("");
+
+  const handleUpdateValue = (newValue: string | null | undefined) => {
+    valueRef.current = newValue;
+    if (setUpdatedValue) setUpdatedValue(newValue);
+  };
 
   const setNoCommentConfirmed = () => {
     setNoComment(true);
@@ -79,10 +85,10 @@ export default function QualiTextInputBox({
   };
 
   const handleNoComment = () => {
-    if (initialValue !== null || initialValue === "") {
-      setConfirmDialog(true);
-    } else {
+    if (valueRef.current === null || valueRef.current == undefined || valueRef.current.trim() === "") {
       setNoCommentConfirmed();
+    } else {
+      setConfirmDialog(true);
     }
   };
 
@@ -145,7 +151,7 @@ export default function QualiTextInputBox({
           debounceInterval={debounceInterval}
           onSave={onSave}
           onBlur={onBlur}
-          setUpdatedValue={setUpdatedValue}
+          setUpdatedValue={handleUpdateValue}
         />
       )}
 

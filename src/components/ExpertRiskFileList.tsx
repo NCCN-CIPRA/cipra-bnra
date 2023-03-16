@@ -95,7 +95,6 @@ function RiskFileList({
   };
 
   const getValidationTooltip = (p: DVParticipation<unknown, DVRiskFile>) => {
-    console.log(p.cr4de_risk_file);
     if (
       p.cr4de_risk_file.cr4de_step2a_enabled ||
       (p.cr4de_risk_file.cr4de_validation_silent_procedure_until &&
@@ -126,7 +125,6 @@ function RiskFileList({
   };
 
   const getActiveStep = (p: DVParticipation<unknown, DVRiskFile>) => {
-    console.log(p.cr4de_risk_file);
     if (p.cr4de_risk_file.cr4de_step2a_enabled) {
       return 1;
     }

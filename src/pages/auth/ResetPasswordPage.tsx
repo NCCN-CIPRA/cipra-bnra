@@ -67,7 +67,6 @@ export default function ResetPasswordPage() {
 
     return true;
   };
-  console.log(searchParams.get("code") || "");
 
   const handleResetPassword = async () => {
     setLoading(true);

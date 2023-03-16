@@ -30,7 +30,7 @@ export function DIValueStack({ field, value }: { field: DirectImpactField; value
             <Trans i18nKey={"learning.impact.alternatives"}>Alternative values:</Trans>
           </Typography>
           {field.alternatives.map((a) => (
-            <Stack direction="row" spacing={1}>
+            <Stack key={a.name[0]} direction="row" spacing={1}>
               <Typography variant="body2" sx={{ fontSize: 12 }}>
                 {t(a.name[0], a.name[1])}:
               </Typography>

@@ -99,7 +99,7 @@ export default function SaCalculator({
               <FormControl>
                 <InputLabel id="demo-simple-select-label">Age</InputLabel>
                 <Select
-                  //  value={age}
+                  value={10}
                   label="Age"
                   // onChange={handleChange}
                 >

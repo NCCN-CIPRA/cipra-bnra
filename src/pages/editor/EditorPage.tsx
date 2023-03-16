@@ -158,44 +158,36 @@ export default function EditorPage() {
   const unprocessedFeedback = (): { [key: string]: DVValidation<unknown, DVContact>[] } => {
     if (validations === null) return {};
 
-    return {
-      ...({
-        Definition: validations.filter(
-          (v) => v.cr4de_definition_feedback !== null && v.cr4de_definition_feedback_response === null
-        ),
-      } || {}),
-      ...({
-        "Historical Events": validations.filter(
-          (v) => v.cr4de_historical_events_feedback !== null && v.cr4de_historical_events_feedback_response === null
-        ),
-      } || {}),
-      ...({
-        "Intensity Parameters": validations.filter(
-          (v) =>
-            v.cr4de_intensity_parameters_feedback !== null && v.cr4de_intensity_parameters_feedback_response === null
-        ),
-      } || {}),
-      ...({
-        "Scenarios/Horizon Analysis": validations.filter(
-          (v) => v.cr4de_scenarios_feedback !== null && v.cr4de_scenarios_feedback_response === null
-        ),
-      } || {}),
-      ...({
-        Causes: validations.filter(
-          (v) => v.cr4de_causes_feedback !== null && v.cr4de_causes_feedback_response === null
-        ),
-      } || {}),
-      ...({
-        Effects: validations.filter(
-          (v) => v.cr4de_effects_feedback !== null && v.cr4de_effects_feedback_response === null
-        ),
-      } || {}),
-      ...({
-        "Catalysing Effects": validations.filter(
-          (v) => v.cr4de_catalysing_effects_feedback !== null && v.cr4de_catalysing_effects_feedback_response === null
-        ),
-      } || {}),
+    const filteredValidations = {
+      Definition: validations.filter(
+        (v) => v.cr4de_definition_feedback !== null && v.cr4de_definition_feedback_response === null
+      ),
+      "Historical Events": validations.filter(
+        (v) => v.cr4de_historical_events_feedback !== null && v.cr4de_historical_events_feedback_response === null
+      ),
+      "Intensity Parameters": validations.filter(
+        (v) => v.cr4de_intensity_parameters_feedback !== null && v.cr4de_intensity_parameters_feedback_response === null
+      ),
+      "Scenarios/Horizon Analysis": validations.filter(
+        (v) => v.cr4de_scenarios_feedback !== null && v.cr4de_scenarios_feedback_response === null
+      ),
+      Causes: validations.filter((v) => v.cr4de_causes_feedback !== null && v.cr4de_causes_feedback_response === null),
+      Effects: validations.filter(
+        (v) => v.cr4de_effects_feedback !== null && v.cr4de_effects_feedback_response === null
+      ),
+      "Catalysing Effects": validations.filter(
+        (v) => v.cr4de_catalysing_effects_feedback !== null && v.cr4de_catalysing_effects_feedback_response === null
+      ),
     };
+
+    return Object.entries(filteredValidations).reduce((acc, [key, validations]) => {
+      if (validations.length <= 0) return acc;
+
+      return {
+        ...acc,
+        [key]: validations,
+      };
+    }, {});
   };
 
   const [isSaving, setIsSaving] = useState(false);

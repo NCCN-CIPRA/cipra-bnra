@@ -19,8 +19,17 @@ const unwrapScenario = (scenario: string, parameters: IntensityParameter[]) => {
   } catch (e) {
     // Old HTML format
     const json = tableToJson(scenario);
-
+    console.log(json, parameters);
     if (!json) return [];
+
+    if (parameters.length <= 0)
+      return [
+        {
+          name: "Capacity",
+          description: "Actor capacity",
+          value: json[0][0],
+        },
+      ];
 
     return parameters.map((p, i) => ({
       ...p,
