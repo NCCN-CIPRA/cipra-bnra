@@ -25,6 +25,8 @@ export enum DataTable {
   DIRECT_ANALYSIS,
   CASCADE_ANALYSIS,
 
+  FEEDBACK,
+
   ATTACHMENT,
 
   TRANSLATIONS,

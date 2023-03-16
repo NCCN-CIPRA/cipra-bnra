@@ -34,7 +34,7 @@ import ScenariosTable from "../../components/ScenariosTable";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import Attachments from "../../components/Attachments";
-import FeedbackList from "./FeedbackList";
+import ValidationList from "./ValidationList";
 import { DVValidation } from "../../types/dataverse/DVValidation";
 import { DVContact } from "../../types/dataverse/DVContact";
 import ParticipationTable from "../../components/ParticipationTable";
@@ -44,6 +44,8 @@ import { Trans } from "react-i18next";
 import { addDays } from "../../functions/days";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import useProcess from "../../hooks/useProcess";
+import FeedbackList from "./FeedbackList";
+import { DVFeedback } from "../../types/dataverse/DVFeedback";
 
 export interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -97,6 +99,9 @@ export default function EditorPage() {
   const { data: validations, getData: getValidations } = useLazyRecords<DVValidation<undefined, DVContact>>({
     table: DataTable.VALIDATION,
   });
+  const { data: feedbacks, getData: getFeedback } = useLazyRecords<DVFeedback<DVContact>>({
+    table: DataTable.FEEDBACK,
+  });
 
   const { data: riskFile, reloadData: reloadRiskFile } = useRecord<ProcessedRiskFile>({
     table: DataTable.RISK_FILE,
@@ -142,6 +147,10 @@ export default function EditorPage() {
       if (!validations)
         getValidations({
           query: `$filter=_cr4de_riskfile_value eq ${rf.cr4de_riskfilesid}&$expand=cr4de_expert`,
+        });
+      if (!feedbacks)
+        getFeedback({
+          query: `$filter=_cr4de_risk_file_value eq ${rf.cr4de_riskfilesid} and cr4de_step eq 'VALIDATION'&$expand=cr4de_contact`,
         });
     },
   });
@@ -284,7 +293,7 @@ export default function EditorPage() {
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="definition" feedbackRefs={feedbackRefs} />
+                <ValidationList validations={validations} field="definition" feedbackRefs={feedbackRefs} />
               </Box>
             </Attachments>
           </Box>
@@ -323,7 +332,7 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <FeedbackList validations={validations} field="historical_events" feedbackRefs={feedbackRefs} />
+                  <ValidationList validations={validations} field="historical_events" feedbackRefs={feedbackRefs} />
                 </Box>
               </Attachments>
             </Box>
@@ -359,7 +368,7 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <FeedbackList validations={validations} field="intensity_parameters" feedbackRefs={feedbackRefs} />
+                  <ValidationList validations={validations} field="intensity_parameters" feedbackRefs={feedbackRefs} />
                 </Box>
               </Attachments>
             </Box>
@@ -406,7 +415,7 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <FeedbackList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
+                  <ValidationList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
                 </Box>
               </Attachments>
             </Box>
@@ -470,7 +479,7 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <FeedbackList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
+                  <ValidationList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
                 </Box>
               </Attachments>
             </Box>
@@ -521,7 +530,7 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <FeedbackList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
+                  <ValidationList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
                 </Box>
               </Attachments>
             </Box>
@@ -542,6 +551,8 @@ export default function EditorPage() {
           getEffects={getEffects}
           getAttachments={getAttachments}
         />
+
+        {feedbacks && <FeedbackList feedbacks={feedbacks} />}
       </Container>
 
       <Dialog open={validationProcessedDialogOpen} onClose={() => setValidationProcessedDialogOpen(false)}>

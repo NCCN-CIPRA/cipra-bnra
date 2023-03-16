@@ -44,6 +44,8 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
       response = await api.getDirectAnalyses<T>(o.query);
     } else if (o.table === DataTable.CASCADE_ANALYSIS) {
       response = await api.getCascadeAnalyses<T>(o.query);
+    } else if (o.table === DataTable.FEEDBACK) {
+      response = await api.getFeedbacks<T>(o.query);
     } else if (o.table === DataTable.ATTACHMENT) {
       response = await api.getAttachments<T>(o.query);
     } else {

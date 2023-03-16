@@ -6,7 +6,7 @@ import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import TransferList from "../../components/TransferList";
 import Attachments from "../../components/Attachments";
-import FeedbackList from "./FeedbackList";
+import FeedbackList from "./ValidationList";
 import useAPI from "../../hooks/useAPI";
 import { DVValidation } from "../../types/dataverse/DVValidation";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";

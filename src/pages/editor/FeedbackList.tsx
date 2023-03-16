@@ -1,154 +1,137 @@
-import { MutableRefObject, useEffect, useState } from "react";
-import { useTheme } from "@mui/material/styles";
-import { Box, MobileStepper, Button, Typography } from "@mui/material";
-import {
-  DVValidation,
-  ValidationEditableFields,
-  ValidationResponseEditableFields,
-} from "../../types/dataverse/DVValidation";
+import { Box, Button, Divider, MobileStepper, Paper, Rating, Stack, Typography, useTheme } from "@mui/material";
+import { useState } from "react";
+import { DVContact } from "../../types/dataverse/DVContact";
+import { DVFeedback } from "../../types/dataverse/DVFeedback";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-import { DVContact } from "../../types/dataverse/DVContact";
-import TextInputBox from "../../components/TextInputBox";
-import useAPI from "../../hooks/useAPI";
+import { Trans } from "react-i18next";
 
-export default function FeedbackList({
-  validations,
-  field,
-  feedbackRefs,
-}: {
-  validations: DVValidation<undefined, DVContact>[] | null;
-  field: string;
-  feedbackRefs: MutableRefObject<Partial<DVValidation<unknown, unknown>>[]>;
-}) {
+export default function FeedbackList({ feedbacks }: { feedbacks: DVFeedback<DVContact>[] }) {
   const theme = useTheme();
-  const api = useAPI();
 
   const [activeStep, setActiveStep] = useState(0);
-  const [response, setResponse] = useState<string | null>(
-    validations
-      ? validations[activeStep][`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]
-      : null
-  );
-  const [refreshResponseBox, setRefreshResponseBox] = useState(false);
 
-  useEffect(() => {
-    if (!validations) return;
-
-    setResponse(validations[activeStep][`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]);
-  }, [validations, field, activeStep]);
-
-  useEffect(() => {
-    if (refreshResponseBox) setRefreshResponseBox(false);
-  }, [refreshResponseBox]);
-
-  const fieldValidations = validations?.filter(
-    (v) => v[`cr4de_${field}_feedback` as keyof ValidationEditableFields] != null
-  );
-
-  if (fieldValidations == null) return null;
+  if (!feedbacks[activeStep]) return null;
 
   const handleNext = async () => {
-    handleSaveResponse();
-    setRefreshResponseBox(true);
-    setActiveStep((activeStep + 1) % fieldValidations.length);
+    setActiveStep((activeStep + 1) % feedbacks.length);
   };
   const handleBack = async () => {
-    handleSaveResponse();
-    setRefreshResponseBox(true);
-    setActiveStep((activeStep - 1) % fieldValidations.length);
-  };
-
-  const handleSaveResponse = async () => {
-    if (!validations) return;
-
-    const feedbackRef = feedbackRefs.current.find(
-      (r) => r.cr4de_bnravalidationid === validations[activeStep].cr4de_bnravalidationid
-    );
-
-    if (
-      feedbackRef &&
-      response !== feedbackRef[`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]
-    ) {
-      api.updateValidation(validations[activeStep].cr4de_bnravalidationid, {
-        [`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]: response,
-      });
-
-      delete feedbackRef[`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields];
-    }
-  };
-
-  const handleUpdateResponse = (newValue: string | null | undefined) => {
-    if (!validations) return;
-
-    setResponse(newValue || null);
-
-    const feedbackRef = feedbackRefs.current.find(
-      (r) => r.cr4de_bnravalidationid === validations[activeStep].cr4de_bnravalidationid
-    );
-
-    if (feedbackRef) {
-      feedbackRef[`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields] = newValue;
-    } else {
-      feedbackRefs.current.push({
-        cr4de_bnravalidationid: validations[activeStep].cr4de_bnravalidationid,
-        [`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]: newValue,
-      });
-    }
+    setActiveStep((activeStep - 1) % feedbacks.length);
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", mx: 1 }}>
-      <Typography variant="subtitle2" color="primary">
-        Expert validations
-      </Typography>
-      {fieldValidations.length <= 0 ? (
-        <Typography variant="caption">No expert feedback received..</Typography>
-      ) : (
-        <>
-          <Typography variant="caption">{fieldValidations[activeStep]?.cr4de_expert.emailaddress1} wrote:</Typography>
-          <Box
-            width="100%"
-            dangerouslySetInnerHTML={{
-              __html: fieldValidations[activeStep][
-                `cr4de_${field}_feedback` as keyof ValidationEditableFields
-              ] as string,
-            }}
-          />
-          {!refreshResponseBox && (
-            <TextInputBox
-              id={`${fieldValidations[activeStep].cr4de_bnravalidationid}_${field}`}
-              limitedOptions
-              initialValue={
-                fieldValidations[activeStep][
-                  `cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields
-                ]
-              }
-              onSave={handleSaveResponse}
-              setUpdatedValue={handleUpdateResponse}
-            />
+    <Paper>
+      <Box p={2} my={4}>
+        <Typography variant="h6" color="primary" sx={{ flex: 1 }}>
+          Expert Feedback
+        </Typography>
+        <Divider sx={{ mb: 1 }} />
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
+          {feedbacks.length <= 0 ? (
+            <Typography variant="caption">No expert feedback received..</Typography>
+          ) : (
+            <>
+              <Typography variant="subtitle2">{feedbacks[activeStep].cr4de_contact?.emailaddress1}</Typography>
+
+              <Stack direction="column" spacing={3}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Box sx={{ flex: 1 }} />
+                  <Box sx={{ width: 160, display: "flex", mr: 5 }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        transform: "translateX(-5px)",
+                        width: "50px",
+                        textAlign: "center",
+                        display: "inline-block",
+                      }}
+                    >
+                      <Trans i18nKey="feedback.dialog.dontagree">Do not agree</Trans>
+                    </Typography>
+                    <Box sx={{ flex: 1 }} />
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        transform: "translateX(5px)",
+                        width: "50px",
+                        textAlign: "center",
+                        display: "inline-block",
+                      }}
+                    >
+                      <Trans i18nKey="feedback.dialog.agree">Totally agree</Trans>
+                    </Typography>
+                  </Box>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                    <Trans i18nKey="feedback.dialog.q1">It was clear what was expected of me</Trans>
+                  </Typography>
+                  <Box sx={{ width: 160, mr: 5, textAlign: "center", pt: "5px" }}>
+                    <Rating size="large" value={feedbacks[activeStep].cr4de_q1} onChange={(event, newValue) => {}} />
+                  </Box>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                    <Trans i18nKey="feedback.dialog.q2">
+                      The subject was in line with my personal expertise and/or interests
+                    </Trans>
+                  </Typography>
+                  <Box sx={{ width: 160, mr: 5, textAlign: "center", pt: "5px" }}>
+                    <Rating size="large" value={feedbacks[activeStep].cr4de_q2} onChange={(event, newValue) => {}} />
+                  </Box>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                    <Trans i18nKey="feedback.dialog.q3">
+                      I understand the necessity of this step in the BNRA process
+                    </Trans>
+                  </Typography>
+                  <Box sx={{ width: 160, mr: 5, textAlign: "center", pt: "5px" }}>
+                    <Rating size="large" value={feedbacks[activeStep].cr4de_q3} onChange={(event, newValue) => {}} />
+                  </Box>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                    <Trans i18nKey="feedback.dialog.q4">
+                      The time and/or effort required of me for this step was as expected
+                    </Trans>
+                  </Typography>
+                  <Box sx={{ width: 160, mr: 5, textAlign: "center", pt: "5px" }}>
+                    <Rating size="large" value={feedbacks[activeStep].cr4de_q4} onChange={(event, newValue) => {}} />
+                  </Box>
+                </Stack>
+              </Stack>
+
+              <Box sx={{ my: 4 }}>
+                <Typography variant="body2">
+                  {feedbacks[activeStep].cr4de_quali_validation || "No quali comment"}
+                </Typography>
+              </Box>
+
+              <MobileStepper
+                variant="dots"
+                steps={feedbacks.length}
+                position="static"
+                activeStep={activeStep}
+                sx={{ width: 400, flexGrow: 1, alignSelf: "center" }}
+                nextButton={
+                  <Button size="small" onClick={handleNext} disabled={activeStep >= feedbacks.length - 1}>
+                    Next
+                    {theme.direction === "rtl" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+                  </Button>
+                }
+                backButton={
+                  <Button size="small" onClick={handleBack} disabled={activeStep <= 0}>
+                    {theme.direction === "rtl" ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+                    Back
+                  </Button>
+                }
+              />
+            </>
           )}
-          <MobileStepper
-            variant="dots"
-            steps={fieldValidations.length}
-            position="static"
-            activeStep={activeStep}
-            sx={{ width: 400, flexGrow: 1, alignSelf: "center" }}
-            nextButton={
-              <Button size="small" onClick={handleNext} disabled={activeStep >= fieldValidations.length - 1}>
-                Next
-                {theme.direction === "rtl" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-              </Button>
-            }
-            backButton={
-              <Button size="small" onClick={handleBack} disabled={activeStep <= 0}>
-                {theme.direction === "rtl" ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-                Back
-              </Button>
-            }
-          />
-        </>
-      )}
-    </Box>
+        </Box>
+      </Box>
+    </Paper>
   );
 }
