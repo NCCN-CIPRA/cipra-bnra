@@ -27,4 +27,6 @@ export interface DVParticipation<
   _cr4de_cascade_analysis_value: string | null;
   cr4de_cascade_analysis: CascadeAnalysisType;
   cr4de_cascade_analysis_finished: boolean | null;
+
+  createdon: Date;
 }

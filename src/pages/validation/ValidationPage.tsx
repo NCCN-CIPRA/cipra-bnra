@@ -131,7 +131,7 @@ export default function ValidationPage() {
         getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${processedRiskFile.cr4de_riskfilesid}` });
     },
   });
-  console.log(riskFile?.scenarios);
+
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveFields = async (fields: Partial<{ [key in keyof DVValidation]: string | null }>) => {
