@@ -5,6 +5,7 @@ export interface GetRecordsParams<T> {
   table: DataTable;
   query?: string;
   transformResult?: (result: any) => T[];
+  saveOptions?: boolean;
   onComplete?: (result: T[]) => Promise<void>;
 }
 
@@ -25,10 +26,13 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<T[] | null>(null);
+  const [lastOptions, setLastOptions] = useState<GetRecordsParams<T>>(options);
 
   const getData = async (lazyOptions?: Partial<GetRecordsParams<T>>) => {
     let response;
-    const o = { ...options, ...lazyOptions };
+    const o = { ...lastOptions, ...lazyOptions };
+
+    if (o.saveOptions) setLastOptions(o);
 
     if (o.table === DataTable.CONTACT) {
       response = await api.getContacts<T>(o.query);

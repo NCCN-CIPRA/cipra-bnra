@@ -98,6 +98,7 @@ export default function EditorPage() {
   });
   const { data: validations, getData: getValidations } = useLazyRecords<DVValidation<undefined, DVContact>>({
     table: DataTable.VALIDATION,
+    saveOptions: true,
   });
   const { data: feedbacks, getData: getFeedback } = useLazyRecords<DVFeedback<DVContact>>({
     table: DataTable.FEEDBACK,
@@ -285,7 +286,12 @@ export default function EditorPage() {
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <ValidationList validations={validations} field="definition" feedbackRefs={feedbackRefs} />
+                <ValidationList
+                  validations={validations}
+                  field="definition"
+                  feedbackRefs={feedbackRefs}
+                  reloadValidations={getValidations}
+                />
               </Box>
             </Attachments>
           </Box>
@@ -324,7 +330,12 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <ValidationList validations={validations} field="historical_events" feedbackRefs={feedbackRefs} />
+                  <ValidationList
+                    validations={validations}
+                    field="historical_events"
+                    feedbackRefs={feedbackRefs}
+                    reloadValidations={getValidations}
+                  />
                 </Box>
               </Attachments>
             </Box>
@@ -360,7 +371,12 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <ValidationList validations={validations} field="intensity_parameters" feedbackRefs={feedbackRefs} />
+                  <ValidationList
+                    validations={validations}
+                    field="intensity_parameters"
+                    feedbackRefs={feedbackRefs}
+                    reloadValidations={getValidations}
+                  />
                 </Box>
               </Attachments>
             </Box>
@@ -407,7 +423,12 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <ValidationList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
+                  <ValidationList
+                    validations={validations}
+                    field="scenarios"
+                    feedbackRefs={feedbackRefs}
+                    reloadValidations={getValidations}
+                  />
                 </Box>
               </Attachments>
             </Box>
@@ -471,7 +492,12 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <ValidationList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
+                  <ValidationList
+                    validations={validations}
+                    field="scenarios"
+                    feedbackRefs={feedbackRefs}
+                    reloadValidations={getValidations}
+                  />
                 </Box>
               </Attachments>
             </Box>
@@ -522,7 +548,12 @@ export default function EditorPage() {
                 }
               >
                 <Box sx={{ mx: 0, my: 4 }}>
-                  <ValidationList validations={validations} field="scenarios" feedbackRefs={feedbackRefs} />
+                  <ValidationList
+                    validations={validations}
+                    field="scenarios"
+                    feedbackRefs={feedbackRefs}
+                    reloadValidations={getValidations}
+                  />
                 </Box>
               </Attachments>
             </Box>
@@ -542,6 +573,7 @@ export default function EditorPage() {
           getAllCauses={getAllCauses}
           getEffects={getEffects}
           getAttachments={getAttachments}
+          getValidations={getValidations}
         />
 
         {feedbacks && <FeedbackList feedbacks={feedbacks} />}

@@ -1,6 +1,18 @@
 import { MutableRefObject, useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
-import { Box, MobileStepper, Button, Typography } from "@mui/material";
+import {
+  Box,
+  MobileStepper,
+  Button,
+  Typography,
+  Stack,
+  Stepper,
+  Step,
+  StepButton,
+  StepLabel,
+  StepIconProps,
+  setRef,
+} from "@mui/material";
 import {
   DVValidation,
   ValidationEditableFields,
@@ -11,15 +23,61 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import { DVContact } from "../../types/dataverse/DVContact";
 import TextInputBox from "../../components/TextInputBox";
 import useAPI from "../../hooks/useAPI";
+import { styled } from "@mui/material/styles";
+
+const StepIconRoot = styled("div")<{ ownerState: { active?: boolean; completed?: boolean; error?: boolean } }>(
+  ({ theme, ownerState }) => ({
+    color: theme.palette.mode === "dark" ? theme.palette.grey[700] : "#eaeaf0",
+    display: "flex",
+    height: 22,
+    alignItems: "center",
+    ...(ownerState.completed && {
+      color: theme.palette.primary.main,
+    }),
+    ...(ownerState.error && {
+      color: theme.palette.error.main,
+    }),
+
+    ...(ownerState.active
+      ? {
+          "& .QontoStepIcon-circle": {
+            width: 14,
+            height: 14,
+            borderRadius: "50%",
+            backgroundColor: "currentColor",
+          },
+        }
+      : {
+          "& .QontoStepIcon-circle": {
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            backgroundColor: "currentColor",
+          },
+        }),
+  })
+);
+
+function StepIcon(props: StepIconProps) {
+  const { active, completed, error, className } = props;
+
+  return (
+    <StepIconRoot ownerState={{ active, completed, error }} className={className}>
+      <div className="QontoStepIcon-circle" />
+    </StepIconRoot>
+  );
+}
 
 export default function ValidationList({
   validations,
   field,
   feedbackRefs,
+  reloadValidations,
 }: {
   validations: DVValidation<undefined, DVContact>[] | null;
   field: string;
   feedbackRefs: MutableRefObject<Partial<DVValidation<unknown, unknown>>[]>;
+  reloadValidations: () => Promise<void>;
 }) {
   const theme = useTheme();
   const api = useAPI();
@@ -58,6 +116,11 @@ export default function ValidationList({
     setRefreshResponseBox(true);
     setActiveStep((activeStep - 1) % fieldValidations.length);
   };
+  const handleMove = async (step: number) => {
+    handleSaveResponse();
+    setRefreshResponseBox(true);
+    setActiveStep(step);
+  };
 
   const handleSaveResponse = async () => {
     if (!validations) return;
@@ -66,13 +129,11 @@ export default function ValidationList({
       (r) => r.cr4de_bnravalidationid === validations[activeStep].cr4de_bnravalidationid
     );
 
-    if (
-      feedbackRef &&
-      response !== feedbackRef[`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]
-    ) {
-      api.updateValidation(validations[activeStep].cr4de_bnravalidationid, {
+    if (feedbackRef) {
+      await api.updateValidation(validations[activeStep].cr4de_bnravalidationid, {
         [`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]: response,
       });
+      await reloadValidations();
 
       delete feedbackRef[`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields];
     }
@@ -128,7 +189,32 @@ export default function ValidationList({
               setUpdatedValue={handleUpdateResponse}
             />
           )}
-          <MobileStepper
+          <Stack direction="row" justifyContent="space-between" width="500px" sx={{ margin: "auto" }}>
+            <Button size="small" onClick={handleBack} disabled={activeStep <= 0}>
+              {theme.direction === "rtl" ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+              Back
+            </Button>
+            <Stepper nonLinear activeStep={activeStep}>
+              {fieldValidations.map((v, i) => (
+                <Step
+                  key={v.cr4de_bnravalidationid}
+                  completed={v[`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields] !== null}
+                >
+                  <StepButton sx={{ p: 0 }} onClick={() => handleMove(i)}>
+                    <StepLabel
+                      StepIconComponent={StepIcon}
+                      error={v[`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields] === null}
+                    ></StepLabel>
+                  </StepButton>
+                </Step>
+              ))}
+            </Stepper>
+            <Button size="small" onClick={handleNext} disabled={activeStep >= fieldValidations.length - 1}>
+              Next
+              {theme.direction === "rtl" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+            </Button>
+          </Stack>
+          {/* <MobileStepper
             variant="dots"
             steps={fieldValidations.length}
             position="static"
@@ -146,7 +232,7 @@ export default function ValidationList({
                 Back
               </Button>
             }
-          />
+          /> */}
         </>
       )}
     </Box>

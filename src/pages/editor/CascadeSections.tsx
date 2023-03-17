@@ -28,6 +28,7 @@ function CascadeSections({
   getAllCauses,
   getEffects,
   getAttachments,
+  getValidations,
 }: {
   riskFile: DVRiskFile | null;
   otherHazards: SmallRisk[] | null;
@@ -44,6 +45,7 @@ function CascadeSections({
   getAllCauses: ({ query }: { query: string }) => Promise<void>;
   getEffects: ({ query }: { query: string }) => Promise<void>;
   getAttachments: ({ query }: { query: string }) => Promise<void>;
+  getValidations: () => Promise<void>;
 }) {
   const api = useAPI();
 
@@ -203,7 +205,12 @@ function CascadeSections({
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="causes" feedbackRefs={feedbackRefs} />
+                <FeedbackList
+                  validations={validations}
+                  field="causes"
+                  feedbackRefs={feedbackRefs}
+                  reloadValidations={getValidations}
+                />
               </Box>
             </Attachments>
           </Box>
@@ -279,7 +286,12 @@ function CascadeSections({
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="effects" feedbackRefs={feedbackRefs} />
+                <FeedbackList
+                  validations={validations}
+                  field="effects"
+                  feedbackRefs={feedbackRefs}
+                  reloadValidations={getValidations}
+                />
               </Box>
             </Attachments>
           </Box>
@@ -354,7 +366,12 @@ function CascadeSections({
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="effects" feedbackRefs={feedbackRefs} />
+                <FeedbackList
+                  validations={validations}
+                  field="effects"
+                  feedbackRefs={feedbackRefs}
+                  reloadValidations={getValidations}
+                />
               </Box>
             </Attachments>
           </Box>
@@ -430,7 +447,12 @@ function CascadeSections({
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="effects" feedbackRefs={feedbackRefs} />
+                <FeedbackList
+                  validations={validations}
+                  field="effects"
+                  feedbackRefs={feedbackRefs}
+                  reloadValidations={getValidations}
+                />
               </Box>
             </Attachments>
           </Box>
@@ -513,7 +535,12 @@ function CascadeSections({
               }
             >
               <Box sx={{ mx: 0, my: 4 }}>
-                <FeedbackList validations={validations} field="catalysing_effects" feedbackRefs={feedbackRefs} />
+                <FeedbackList
+                  validations={validations}
+                  field="catalysing_effects"
+                  feedbackRefs={feedbackRefs}
+                  reloadValidations={getValidations}
+                />
               </Box>
             </Attachments>
           </Box>
