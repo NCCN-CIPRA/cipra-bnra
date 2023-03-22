@@ -68,7 +68,9 @@ export function DPSlider({
                     },
                   }}
                 >
-                  <Typography variant="body2">DP{value + 1}</Typography>
+                  <Typography id={`step2A-dp-mark-${value}`} variant="body2">
+                    DP{value + 1}
+                  </Typography>
                 </Tooltip>
               ),
           }))}

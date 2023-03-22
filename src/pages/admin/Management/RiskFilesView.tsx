@@ -23,9 +23,10 @@ const SPECIAL_FILTERS = {
   MY_RISK_FILES_BACKUP: false,
   EXPERTS_ONLY: false,
   REGISTERED_ONLY: false,
-  REMINDER: false,
   DONE_1: false,
   NOT_DONE_1: false,
+  PROBLEMATIC: false,
+  SHOW_TEST: false,
 };
 
 export default function RiskFilesView({
@@ -108,6 +109,16 @@ export default function RiskFilesView({
       );
     }
 
+    if (specialFilters.PROBLEMATIC) {
+      runningFilter = runningFilter.filter(
+        (rf) => rf.participants.filter((p) => p.cr4de_role === "expert" && p.cr4de_validation_finished).length < 2
+      );
+    }
+
+    if (!specialFilters.SHOW_TEST) {
+      runningFilter = runningFilter.filter((rf) => rf.cr4de_title.indexOf("Test") < 0);
+    }
+
     setFilteredRiskFiles(runningFilter);
   };
 
@@ -188,9 +199,9 @@ export default function RiskFilesView({
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
               <FormControlLabel
-                control={<Checkbox checked={specialFilters.REMINDER} />}
+                control={<Checkbox checked={specialFilters.PROBLEMATIC} />}
                 label="Show only problematic risk files"
-                onClick={() => toggleSpecialFilter("REMINDER")}
+                onClick={() => toggleSpecialFilter("PROBLEMATIC")}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
@@ -198,6 +209,13 @@ export default function RiskFilesView({
                 control={<Checkbox checked={specialFilters.DONE_1} />}
                 label="Show risk files ready for validation processing"
                 onClick={() => toggleSpecialFilter("DONE_1")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControlLabel
+                control={<Checkbox checked={specialFilters.SHOW_TEST} />}
+                label="Show test risks"
+                onClick={() => toggleSpecialFilter("SHOW_TEST")}
               />
             </Grid>
           </Grid>

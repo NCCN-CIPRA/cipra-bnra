@@ -1,7 +1,7 @@
 import { Trans } from "react-i18next";
 import { Box, Typography, Stack, Button } from "@mui/material";
 
-export default function Introduction() {
+export default function Introduction({ onRunTutorial }: { onRunTutorial: () => void }) {
   return (
     <Box style={{ position: "relative" }}>
       <Box sx={{ mb: 2, ml: 1 }}>
@@ -36,7 +36,7 @@ export default function Introduction() {
           </Trans>
         </Typography>
         <Box sx={{ textAlign: "center", mt: 4 }}>
-          <Button variant="contained">
+          <Button variant="contained" onClick={onRunTutorial}>
             <Trans i18nKey="2A.introduction.button.tutorial">Show Application Tutorial</Trans>
           </Button>
         </Box>

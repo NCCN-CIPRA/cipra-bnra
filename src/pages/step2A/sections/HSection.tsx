@@ -1,4 +1,4 @@
-import { Box, IconButton, Paper, Stack, Typography, Tooltip } from "@mui/material";
+import { Box, IconButton, Paper, Stack, Typography, Tooltip, Button } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
 import TextInputBox from "../../../components/TextInputBox";
 import { DirectImpactField } from "../../learning/QuantitativeScales/DI";
@@ -18,12 +18,14 @@ export default function HSection({
   attachments,
   onOpenSourceDialog,
   onReloadAttachments,
+  onOpenEffects,
 }: {
   fieldsRef: ScenarioInput;
   inputErrors: (keyof ScenarioInput)[];
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   onReloadAttachments: () => Promise<void>;
+  onOpenEffects: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -51,8 +53,13 @@ export default function HSection({
           impact of an <i>Earthquake</i>, the impact due to a possible <i>Dam failure</i> should not be considered. This
           possibility will be explored when estimating the conditional probabilities in the following phase.
         </Trans>
+        <Box sx={{ marginLeft: -1 }}>
+          <Button color="warning" onClick={onOpenEffects}>
+            <Trans i18nKey="button.showConsequences">Show Potential Consequences</Trans>
+          </Button>
+        </Box>
       </Alert>
-      <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
+      <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }} id="step2A-h-quantitative-box">
         <Typography variant="subtitle2">
           <Trans i18nKey="2A.h.quanti.ha.title">Ha - Fatalities</Trans>
         </Typography>
@@ -69,7 +76,7 @@ export default function HSection({
             <Trans i18nKey="2A.h.quanti.hb.title">Hb - Injured / sick people</Trans>
           </Typography>
           <Tooltip title={t("button.di.calculator.tooltip", "Calculate the damage scale with weights")}>
-            <IconButton onClick={() => setHbCalculatorOpen(true)}>
+            <IconButton onClick={() => setHbCalculatorOpen(true)} id="step2A-hb-calculator">
               <CalculateIcon />
             </IconButton>
           </Tooltip>

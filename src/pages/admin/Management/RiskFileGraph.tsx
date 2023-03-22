@@ -11,6 +11,9 @@ interface RFBucket {
   date: number;
   notStarted: number;
   started: number;
+  moreThan2Done: number;
+  twoLeft: number;
+  oneLeft: number;
   validationComplete: number;
   silenceProcedureStarted: number;
   step2AStarted: number;
@@ -66,6 +69,26 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
               </Typography>
             </td>
           </tr>
+          <tr>
+            <td>
+              <Typography variant="body1">% Validation Acceptable:</Typography>
+            </td>
+            <td>
+              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2 }}>
+                {Math.round(
+                  (1000 *
+                    (payload[0].value +
+                      payload[1].value +
+                      payload[2].value +
+                      payload[3].value +
+                      payload[4].value +
+                      payload[5].value)) /
+                    payload.reduce((tot, p) => tot + p.value, 0)
+                ) / 10}
+                %
+              </Typography>
+            </td>
+          </tr>
         </tbody>
       </table>
     </Box>
@@ -79,13 +102,12 @@ export default function RiskFileGraph({
 }) {
   const [riskFileBuckets, setRiskFileBuckets] = useState<RFBucket[]>([]);
   const [firstDate, setFirstDate] = useState<number>(Date.now());
-  const [lastDate, setLastDate] = useState<number>(Date.now());
+  const [lastDate, setLastDate] = useState<number>(addDays(new Date(), 1).getTime());
 
   useEffect(() => {
     const riskFiles: { [key: string]: DVParticipation<SelectableContact, DVRiskFile, DVValidation>[] } = {};
 
     let firstDateCalc = firstDate;
-    let lastDateCalc = lastDate;
 
     participations.forEach((p) => {
       if (!p._cr4de_risk_file_value) return;
@@ -97,18 +119,11 @@ export default function RiskFileGraph({
       if (p.cr4de_validation?.createdon && new Date(p.cr4de_validation.createdon).getTime() < firstDateCalc) {
         firstDateCalc = new Date(p.cr4de_validation.createdon).getTime();
       }
-
-      if (
-        p.cr4de_risk_file.cr4de_validation_silent_procedure_until &&
-        new Date(p.cr4de_risk_file.cr4de_validation_silent_procedure_until).getTime() > lastDateCalc
-      )
-        lastDateCalc = new Date(p.cr4de_risk_file.cr4de_validation_silent_procedure_until).getTime();
     });
 
     setFirstDate(firstDateCalc);
-    setLastDate(lastDateCalc);
 
-    let currentDate = firstDateCalc;
+    let currentDate = addDays(new Date(firstDateCalc), -1).getTime();
     const dates = [];
 
     do {
@@ -116,6 +131,9 @@ export default function RiskFileGraph({
         date: currentDate,
         notStarted: 0,
         started: 0,
+        moreThan2Done: 0,
+        twoLeft: 0,
+        oneLeft: 0,
         validationComplete: 0,
         silenceProcedureStarted: 0,
         step2AStarted: 0,
@@ -124,12 +142,12 @@ export default function RiskFileGraph({
       currentDate = addDays(new Date(currentDate), 1).getTime();
     } while (currentDate <= lastDate);
 
-    for (let rf of Object.values(riskFiles)) {
+    for (let participations of Object.values(riskFiles)) {
       for (let i = 0; i < dates.length; i++) {
         const d = dates[i];
 
         if (
-          rf.some(
+          participations.some(
             (p) =>
               p.cr4de_risk_file?.cr4de_validation_silent_procedure_until &&
               new Date(p.cr4de_risk_file.cr4de_validation_silent_procedure_until).getTime() <= d.date
@@ -137,7 +155,7 @@ export default function RiskFileGraph({
         ) {
           dates[i].step2AStarted++;
         } else if (
-          rf.some(
+          participations.some(
             (p) =>
               p.cr4de_risk_file?.cr4de_validation_silent_procedure_until &&
               addDays(new Date(p.cr4de_risk_file.cr4de_validation_silent_procedure_until), -14).getTime() <= d.date
@@ -145,7 +163,7 @@ export default function RiskFileGraph({
         ) {
           dates[i].silenceProcedureStarted++;
         } else if (
-          rf.every(
+          participations.every(
             (p) =>
               p.cr4de_role !== "expert" ||
               (p.cr4de_validation_finished_on && new Date(p.cr4de_validation_finished_on).getTime() <= d.date)
@@ -153,15 +171,68 @@ export default function RiskFileGraph({
         ) {
           dates[i].validationComplete++;
         } else if (
-          rf.some(
+          participations.filter(
             (p) =>
-              p.cr4de_role !== "expert" ||
-              (p.cr4de_validation !== null && new Date(p.cr4de_validation.createdon).getTime() <= d.date)
-          )
+              p.cr4de_role === "expert" &&
+              (p.cr4de_validation_finished_on === null ||
+                (p.cr4de_validation_finished_on && new Date(p.cr4de_validation_finished_on).getTime() > d.date))
+          ).length === 1 &&
+          participations.filter(
+            (p) =>
+              p.cr4de_role === "expert" &&
+              p.cr4de_validation_finished_on !== null &&
+              new Date(p.cr4de_validation_finished_on).getTime() <= d.date
+          ).length >= 2
+        ) {
+          dates[i].oneLeft++;
+        } else if (
+          participations.filter(
+            (p) =>
+              p.cr4de_role === "expert" &&
+              (p.cr4de_validation_finished_on === null ||
+                (p.cr4de_validation_finished_on && new Date(p.cr4de_validation_finished_on).getTime() > d.date))
+          ).length === 2 &&
+          participations.filter(
+            (p) =>
+              p.cr4de_role === "expert" &&
+              p.cr4de_validation_finished_on !== null &&
+              new Date(p.cr4de_validation_finished_on).getTime() <= d.date
+          ).length >= 2
+        ) {
+          dates[i].twoLeft++;
+        } else if (
+          participations.filter(
+            (p) =>
+              p.cr4de_role === "expert" &&
+              p.cr4de_validation_finished_on !== null &&
+              new Date(p.cr4de_validation_finished_on).getTime() <= d.date
+          ).length >= 2
+        ) {
+          dates[i].moreThan2Done++;
+        } else if (
+          participations.filter(
+            (p) =>
+              p.cr4de_role === "expert" &&
+              p.cr4de_validation !== null &&
+              new Date(p.cr4de_validation.createdon).getTime() <= d.date
+          ).length >= 1 &&
+          participations.filter((p) => p.cr4de_role === "expert").length > 0
         ) {
           dates[i].started++;
         } else {
           dates[i].notStarted++;
+          if (i >= dates.length - 1)
+            console.log(
+              new Date(d.date),
+              participations[0].cr4de_risk_file.cr4de_title,
+              participations,
+              participations.filter(
+                (p) =>
+                  p.cr4de_role === "expert" &&
+                  (p.cr4de_validation_finished_on === null ||
+                    new Date(p.cr4de_validation_finished_on).getTime() > d.date)
+              ).length
+            );
         }
       }
     }
@@ -197,32 +268,63 @@ export default function RiskFileGraph({
           stackId="1"
           stroke="#ffa600"
           fill="#ffa600"
-          name="Step 2A Started"
+          name="Step 2A started"
         />
         <Area
           type="monotone"
           dataKey="silenceProcedureStarted"
           stackId="1"
-          stroke="#ff6e54"
-          fill="#ff6e54"
-          name="Silence Procedure Started"
+          stroke="#ff7c43"
+          fill="#ff7c43"
+          name="Silence procedure started"
         />
         <Area
           type="monotone"
           dataKey="validationComplete"
           stackId="1"
-          stroke="#dd5182"
-          fill="#dd5182"
-          name="All Validations Finished"
+          stroke="#f95d6a"
+          fill="#f95d6a"
+          name="All validations finished"
         />
-        <Area type="monotone" dataKey="started" stackId="1" stroke="#955196" fill="#955196" name="Validation Started" />
+        <Area
+          type="monotone"
+          dataKey="oneLeft"
+          stackId="1"
+          stroke="#d45087"
+          fill="#d45087"
+          name="1 validation left, 2 or more done"
+        />
+        <Area
+          type="monotone"
+          dataKey="twoLeft"
+          stackId="1"
+          stroke="#a05195"
+          fill="#a05195"
+          name="2 validations left, 2 or more done"
+        />
+        <Area
+          type="monotone"
+          dataKey="moreThan2Done"
+          stackId="1"
+          stroke="#665191"
+          fill="#665191"
+          name="> 2 validations left, 2 or more done"
+        />
+        <Area
+          type="monotone"
+          dataKey="started"
+          stackId="1"
+          stroke="#2f4b7c"
+          fill="#2f4b7c"
+          name="> 2 validations left, less than 2 done"
+        />
         <Area
           type="monotone"
           dataKey="notStarted"
           stackId="1"
           stroke="#003f5c"
           fill="#003f5c"
-          name="Validation Not Started"
+          name="Validation not started"
         />
       </AreaChart>
     </>

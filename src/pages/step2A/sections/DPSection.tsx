@@ -45,7 +45,7 @@ export default function DPSection({
         </Trans>
       </Alert>
 
-      <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
+      <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }} id="step2A-dp-quantitative-box">
         <Typography variant="subtitle2">
           <Trans i18nKey="2A.dp.quanti.dp.title">DP - Direct Probability</Trans>
         </Typography>
@@ -65,6 +65,7 @@ export default function DPSection({
       </Typography>
 
       <QualiTextInputBox
+        id="step2A-dp-quali-box"
         error={inputErrors.indexOf("cr4de_dp_quali") >= 0}
         initialValue={fieldsRef.cr4de_dp_quali || ""}
         onSave={(newValue) => {

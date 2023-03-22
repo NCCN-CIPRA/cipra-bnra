@@ -30,6 +30,9 @@ import AttachmentsDialog from "../sections/AttachmentsDialog";
 import useRecords from "../../../hooks/useRecords";
 import { DataTable } from "../../../hooks/useAPI";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
+import CausesSidebar from "../information/CausesSidebar";
+import EffectsSidebar from "../information/EffectsSidebar";
 
 export function validateScenarioInputs(inputs: ScenarioInput): (keyof ScenarioInput)[] {
   return Object.entries(inputs).reduce((acc, [fieldName, value]) => {
@@ -42,6 +45,8 @@ export function validateScenarioInputs(inputs: ScenarioInput): (keyof ScenarioIn
 export default function ScenarioAnalysis({
   step,
   riskFile,
+  causes,
+  effects,
   directAnalysis,
   scenarioName,
   inputRef,
@@ -49,6 +54,8 @@ export default function ScenarioAnalysis({
 }: {
   step: Step;
   riskFile: DVRiskFile;
+  causes: DVRiskCascade<DVRiskFile, unknown>[] | null;
+  effects: DVRiskCascade<unknown, DVRiskFile>[] | null;
   directAnalysis: DVDirectAnalysis<any>;
   scenarioName: keyof Scenarios;
   inputRef: RefObject<ScenarioInputs>;
@@ -60,6 +67,8 @@ export default function ScenarioAnalysis({
 
   const [sourceDialogOpen, setSourceDialogOpen] = useState<string | null>(null);
   const [existingSource, setExistingSource] = useState<DVAttachment | undefined>(undefined);
+  const [causesOpen, setCausesOpen] = useState(false);
+  const [effectsOpen, setEffectsOpen] = useState(true);
 
   const { data: attachments, reloadData: reloadAttachments } = useRecords<DVAttachment<unknown, DVAttachment>>({
     table: DataTable.ATTACHMENT,
@@ -106,7 +115,7 @@ export default function ScenarioAnalysis({
         <Typography variant="body2">
           <Trans i18nKey="2A.quanti.info.2">The scenario under review is the following</Trans>
         </Typography>
-        <Box sx={{ px: 2 }}>
+        <Box sx={{ px: 2 }} id="step2A-scenario-description">
           <TableContainer ref={ref} component={Paper}>
             <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
               <TableHead>
@@ -174,6 +183,7 @@ export default function ScenarioAnalysis({
         }
         onOpenSourceDialog={handleOpenSourceDialog(`cr4de_di_quali_h${SCENARIO_SUFFIX[scenarioName]}`)}
         onReloadAttachments={reloadAttachments}
+        onOpenEffects={() => setEffectsOpen(true)}
       />
 
       <SSection
@@ -182,6 +192,7 @@ export default function ScenarioAnalysis({
         attachments={
           attachments?.filter((a) => a.cr4de_field === `cr4de_di_quali_s${SCENARIO_SUFFIX[scenarioName]}`) ?? null
         }
+        effects={effects}
         onOpenSourceDialog={handleOpenSourceDialog(`cr4de_di_quali_s${SCENARIO_SUFFIX[scenarioName]}`)}
         onReloadAttachments={reloadAttachments}
       />
@@ -217,6 +228,10 @@ export default function ScenarioAnalysis({
         onOpenSourceDialog={handleOpenSourceDialog(`cr4de_cross_border_impact_quali${SCENARIO_SUFFIX[scenarioName]}`)}
         onReloadAttachments={reloadAttachments}
       />
+
+      <CausesSidebar width={400} causes={causes} open={causesOpen} setOpen={setCausesOpen} />
+
+      <EffectsSidebar width={400} effects={effects} open={effectsOpen} setOpen={setEffectsOpen} />
 
       <AttachmentsDialog
         field={sourceDialogOpen ?? ""}

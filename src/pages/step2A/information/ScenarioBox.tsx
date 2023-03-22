@@ -35,7 +35,10 @@ export default function ScenarioBox({
 
   return (
     <Fade in={visible}>
-      <Box sx={{ position: "fixed", top: 72, left: 0, width: "100%", zIndex: 1000 }}>
+      <Box
+        sx={{ position: "fixed", top: 72, left: 0, width: "100%", zIndex: 1000 }}
+        id="step2A-scenario-description-scroll"
+      >
         <Container>
           <Accordion
             disableGutters
@@ -44,7 +47,7 @@ export default function ScenarioBox({
             onChange={(event: React.SyntheticEvent, isExpanded: boolean) => setCollapsed(!isExpanded)}
           >
             <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
+              expandIcon={<ExpandMoreIcon id="step2A-scenario-description-collapse" />}
               aria-controls="panel1a-content"
               id="panel1a-header"
               sx={{ backgroundColor: `${color}66`, borderTopLeftRadius: 4, borderTopRightRadius: 4 }}

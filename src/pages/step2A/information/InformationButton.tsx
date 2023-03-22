@@ -6,14 +6,26 @@ import ArticleIcon from "@mui/icons-material/Article";
 import HubIcon from "@mui/icons-material/Hub";
 import CategoryIcon from "@mui/icons-material/Category";
 import InfoIcon from "@mui/icons-material/Info";
+import HelpIcon from "@mui/icons-material/Help";
 import { useTranslation } from "react-i18next";
 import openInNewTab from "../../../functions/openInNewTab";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 
-export default function InformationButton({ riskFile }: { riskFile: DVRiskFile | undefined }) {
+export default function InformationButton({
+  riskFile,
+  onRunTutorial,
+}: {
+  riskFile: DVRiskFile | undefined;
+  onRunTutorial: () => void;
+}) {
   const { t } = useTranslation();
 
   const actions = [
+    {
+      icon: <HelpIcon />,
+      name: t("speeddial.tutorial", "Play Tutorial"),
+      onClick: onRunTutorial,
+    },
     {
       icon: <CategoryIcon />,
       name: t("speeddial.scales", "Quantitative Scales"),

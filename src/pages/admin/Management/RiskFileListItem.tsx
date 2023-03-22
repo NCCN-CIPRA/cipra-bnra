@@ -74,7 +74,10 @@ export default function RiskFileListItem({
               }}
             />
           </ListItemIcon>
-          <ListItemText primary={riskFile.cr4de_title} secondary={riskFile.cr4de_risk_type} />
+          <ListItemText
+            primary={`${riskFile.cr4de_hazard_id} - ${riskFile.cr4de_title}`}
+            secondary={riskFile.cr4de_risk_type}
+          />
         </ListItemButton>
       </ListItem>
       {riskFile.participants && riskFile.participants.length > 0 && (

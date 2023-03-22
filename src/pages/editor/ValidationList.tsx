@@ -82,27 +82,29 @@ export default function ValidationList({
   const theme = useTheme();
   const api = useAPI();
 
+  const fieldValidations = validations?.filter(
+    (v) => v[`cr4de_${field}_feedback` as keyof ValidationEditableFields] != null
+  );
+
   const [activeStep, setActiveStep] = useState(0);
   const [response, setResponse] = useState<string | null>(
-    validations
-      ? validations[activeStep][`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]
+    fieldValidations
+      ? fieldValidations[activeStep][`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]
       : null
   );
   const [refreshResponseBox, setRefreshResponseBox] = useState(false);
 
   useEffect(() => {
-    if (!validations) return;
+    if (!fieldValidations) return;
 
-    setResponse(validations[activeStep][`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]);
+    setResponse(
+      fieldValidations[activeStep][`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]
+    );
   }, [validations, field, activeStep]);
 
   useEffect(() => {
     if (refreshResponseBox) setRefreshResponseBox(false);
   }, [refreshResponseBox]);
-
-  const fieldValidations = validations?.filter(
-    (v) => v[`cr4de_${field}_feedback` as keyof ValidationEditableFields] != null
-  );
 
   if (fieldValidations == null) return null;
 
@@ -123,14 +125,14 @@ export default function ValidationList({
   };
 
   const handleSaveResponse = async () => {
-    if (!validations) return;
+    if (!fieldValidations) return;
 
     const feedbackRef = feedbackRefs.current.find(
-      (r) => r.cr4de_bnravalidationid === validations[activeStep].cr4de_bnravalidationid
+      (r) => r.cr4de_bnravalidationid === fieldValidations[activeStep].cr4de_bnravalidationid
     );
 
     if (feedbackRef) {
-      await api.updateValidation(validations[activeStep].cr4de_bnravalidationid, {
+      await api.updateValidation(fieldValidations[activeStep].cr4de_bnravalidationid, {
         [`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]: response,
       });
       await reloadValidations();
@@ -140,19 +142,19 @@ export default function ValidationList({
   };
 
   const handleUpdateResponse = (newValue: string | null | undefined) => {
-    if (!validations) return;
+    if (!fieldValidations) return;
 
     setResponse(newValue || null);
 
     const feedbackRef = feedbackRefs.current.find(
-      (r) => r.cr4de_bnravalidationid === validations[activeStep].cr4de_bnravalidationid
+      (r) => r.cr4de_bnravalidationid === fieldValidations[activeStep].cr4de_bnravalidationid
     );
 
     if (feedbackRef) {
       feedbackRef[`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields] = newValue;
     } else {
       feedbackRefs.current.push({
-        cr4de_bnravalidationid: validations[activeStep].cr4de_bnravalidationid,
+        cr4de_bnravalidationid: fieldValidations[activeStep].cr4de_bnravalidationid,
         [`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]: newValue,
       });
     }
@@ -214,25 +216,6 @@ export default function ValidationList({
               {theme.direction === "rtl" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
             </Button>
           </Stack>
-          {/* <MobileStepper
-            variant="dots"
-            steps={fieldValidations.length}
-            position="static"
-            activeStep={activeStep}
-            sx={{ width: 400, flexGrow: 1, alignSelf: "center" }}
-            nextButton={
-              <Button size="small" onClick={handleNext} disabled={activeStep >= fieldValidations.length - 1}>
-                Next
-                {theme.direction === "rtl" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-              </Button>
-            }
-            backButton={
-              <Button size="small" onClick={handleBack} disabled={activeStep <= 0}>
-                {theme.direction === "rtl" ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-                Back
-              </Button>
-            }
-          /> */}
         </>
       )}
     </Box>

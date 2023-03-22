@@ -37,6 +37,7 @@ import SurveyDialog from "../../components/SurveyDialog";
 import { AuthPageContext } from "../AuthPage";
 import { FeedbackStep } from "../../types/dataverse/DVFeedback";
 import Introduction from "./steps/Introduction";
+import Step2ATutorial from "./information/Step2ATutorial";
 
 type RouteParams = {
   step2A_id: string;
@@ -48,7 +49,7 @@ const step2Name = {
   [STEPS.EXTREME]: "extreme" as keyof Scenarios,
 };
 
-const transitionDelay = 1000;
+const transitionDelay = 500;
 
 const DRAWER_WIDTH = 360;
 
@@ -68,6 +69,7 @@ export default function Step2APage() {
 
   const [finishedDialogOpen, setFinishedDialogOpen] = useState(false);
   const [surveyDialogOpen, setSurveyDialogOpen] = useState(false);
+  const [runTutorial, setRunTutorial] = useState(false);
 
   const inputRef = useRef<ScenarioInputs | null>(null);
   const [inputErrors, setInputErrors] = useState<ScenarioErrors>({
@@ -106,10 +108,10 @@ export default function Step2APage() {
     query: "$expand=cr4de_risk_file",
     onComplete: async (step2A) => {
       loadCauses({
-        query: `$filter=_cr4de_effect_hazard_value eq ${step2A._cr4de_risk_file_value}&$expand=cr4de_cause_hazard($select=cr4de_title)`,
+        query: `$filter=_cr4de_effect_hazard_value eq ${step2A._cr4de_risk_file_value}&$expand=cr4de_cause_hazard($select=cr4de_title,cr4de_hazard_id)`,
       });
       loadEffects({
-        query: `$filter=_cr4de_cause_hazard_value eq ${step2A._cr4de_risk_file_value}&$expand=cr4de_effect_hazard($select=cr4de_title)`,
+        query: `$filter=_cr4de_cause_hazard_value eq ${step2A._cr4de_risk_file_value}&$expand=cr4de_effect_hazard($select=cr4de_title,cr4de_hazard_id)`,
       });
 
       inputRef.current = {
@@ -150,8 +152,10 @@ export default function Step2APage() {
 
   const transitionTo = (newStep: STEPS) => {
     setFade(false);
+    console.log("START FADEOUT");
 
     const timer = setTimeout(() => {
+      console.log("START FADEIN");
       setActiveStep(newStep);
       setFade(true);
       setIsSaving(false);
@@ -278,7 +282,7 @@ export default function Step2APage() {
                 <CircularProgress />
               </Box>
             )}
-            {activeStep === STEPS.INTRODUCTION && <Introduction />}
+            {activeStep === STEPS.INTRODUCTION && <Introduction onRunTutorial={() => setRunTutorial(true)} />}
             {activeStep === STEPS.CONSIDERABLE && step2A?.cr4de_risk_file && (
               <Box>
                 <Box sx={{ mb: 2, ml: 1 }}>
@@ -289,6 +293,8 @@ export default function Step2APage() {
                 <ScenarioAnalysis
                   step={stepNames[STEPS.CONSIDERABLE]}
                   riskFile={step2A.cr4de_risk_file}
+                  causes={causes}
+                  effects={effects}
                   directAnalysis={step2A}
                   scenarioName="considerable"
                   inputRef={inputRef}
@@ -306,6 +312,8 @@ export default function Step2APage() {
                 <ScenarioAnalysis
                   step={stepNames[STEPS.MAJOR]}
                   riskFile={step2A.cr4de_risk_file}
+                  causes={causes}
+                  effects={effects}
                   directAnalysis={step2A}
                   scenarioName="major"
                   inputRef={inputRef}
@@ -323,6 +331,8 @@ export default function Step2APage() {
                 <ScenarioAnalysis
                   step={stepNames[STEPS.EXTREME]}
                   riskFile={step2A.cr4de_risk_file}
+                  causes={causes}
+                  effects={effects}
                   directAnalysis={step2A}
                   scenarioName="extreme"
                   inputRef={inputRef}
@@ -343,7 +353,7 @@ export default function Step2APage() {
           </Box>
         </Fade>
       </Container>
-      <InformationButton riskFile={step2A?.cr4de_risk_file} />
+      <InformationButton riskFile={step2A?.cr4de_risk_file} onRunTutorial={() => setRunTutorial(true)} />
       <Box
         sx={{
           display: "flex",
@@ -370,20 +380,16 @@ export default function Step2APage() {
           setCurrentStep={setCurrentStep}
         />
 
-        {activeStep !== STEPS.REVIEW && (
-          <Button id="next-button" disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={next}>
-            <Trans i18nKey="button.next">Next</Trans>
+        <Box id="step2A-next-buttons">
+          {activeStep !== STEPS.REVIEW && (
+            <Button disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={next}>
+              <Trans i18nKey="button.next">Next</Trans>
+            </Button>
+          )}
+          <Button disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={() => setFinishedDialogOpen(true)}>
+            <Trans i18nKey="button.saveandexit">Save & exit</Trans>
           </Button>
-        )}
-        <Button
-          id="next-button"
-          disabled={isSaving}
-          color="primary"
-          sx={{ mr: 1 }}
-          onClick={() => setFinishedDialogOpen(true)}
-        >
-          <Trans i18nKey="button.saveandexit">Save & exit</Trans>
-        </Button>
+        </Box>
       </Box>
 
       <Dialog open={finishedDialogOpen} onClose={() => setFinishedDialogOpen(false)}>
@@ -458,6 +464,8 @@ export default function Step2APage() {
           </>
         )}
       </Dialog>
+
+      <Step2ATutorial run={runTutorial} setRun={setRunTutorial} setStep={transitionTo} />
 
       {step2A && (
         <SurveyDialog

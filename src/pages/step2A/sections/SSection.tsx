@@ -10,17 +10,21 @@ import { ReactNode, useState } from "react";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import SaCalculator from "./SaCalculator";
+import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 
 export default function SSection({
   fieldsRef,
   inputErrors,
   attachments,
+  effects,
   onOpenSourceDialog,
   onReloadAttachments,
 }: {
   fieldsRef: ScenarioInput;
   inputErrors: (keyof ScenarioInput)[];
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
+  effects: DVRiskCascade<unknown, DVRiskFile>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   onReloadAttachments: () => Promise<void>;
 }) {
@@ -64,6 +68,7 @@ export default function SSection({
           </Tooltip>
           <SaCalculator
             open={SaCalculatorOpen}
+            effects={effects || []}
             onClose={() => setSaCalculatorOpen(false)}
             onApply={(newValue, qualiInput) => {
               handleChangeDIValue(newValue, Sa);

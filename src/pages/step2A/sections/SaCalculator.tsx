@@ -17,11 +17,15 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Alert,
+  AlertTitle,
 } from "@mui/material";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import { Trans, useTranslation } from "react-i18next";
 import CloseIcon from "@mui/icons-material/Close";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
+import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 
 const SCALE_TO_SLIDER = {
   Sa0: 0,
@@ -47,6 +51,15 @@ const generateQualiInput = (shortfalls: { id: number; service: string; amount: n
 `;
 };
 
+const getCorrespondingEffects = (
+  shortfall: keyof typeof SERVICE_WEIGHTS,
+  effects: DVRiskCascade<unknown, DVRiskFile>[]
+) => {
+  const riskFileIds = CORRESPONDING_RISK_FILES[shortfall];
+
+  return effects.filter((e) => riskFileIds.indexOf(e._cr4de_effect_hazard_value) >= 0);
+};
+
 const SERVICE_WEIGHTS = {
   "Basic foodstuffs": 1,
   Electricity: 0.5,
@@ -66,18 +79,46 @@ const SERVICE_WEIGHTS = {
   "Waste management": 0.1,
 };
 
+const CORRESPONDING_RISK_FILES: { [key in keyof typeof SERVICE_WEIGHTS]: string[] } = {
+  "Basic foodstuffs": ["cf58db5b-aa6c-ed11-9561-000d3adf7089"],
+  Electricity: ["b958db5b-aa6c-ed11-9561-000d3adf7089", "ba58db5b-aa6c-ed11-9561-000d3adf7089"],
+  "Financial services": ["c158db5b-aa6c-ed11-9561-000d3adf7089"],
+  "First responders communication": ["ca58db5b-aa6c-ed11-9561-000d3adf7089"],
+  Fuel: ["bb58db5b-aa6c-ed11-9561-000d3adf7089"],
+  Government: ["c858db5b-aa6c-ed11-9561-000d3adf7089"],
+  Heating: [],
+  Media: [],
+  "Medical emergency service": ["c058db5b-aa6c-ed11-9561-000d3adf7089"],
+  Medicine: ["c658db5b-aa6c-ed11-9561-000d3adf7089"],
+  "Non-emergency medical care": ["c058db5b-aa6c-ed11-9561-000d3adf7089"],
+  "Postal and courier services": ["cd58db5b-aa6c-ed11-9561-000d3adf7089"],
+  "Potable water": ["c758db5b-aa6c-ed11-9561-000d3adf7089"],
+  Telecommunications: ["c458db5b-aa6c-ed11-9561-000d3adf7089"],
+  Transport: [
+    "bc58db5b-aa6c-ed11-9561-000d3adf7089",
+    "bd58db5b-aa6c-ed11-9561-000d3adf7089",
+    "c258db5b-aa6c-ed11-9561-000d3adf7089",
+    "c358db5b-aa6c-ed11-9561-000d3adf7089",
+  ],
+  "Waste management": ["c558db5b-aa6c-ed11-9561-000d3adf7089", "ce58db5b-aa6c-ed11-9561-000d3adf7089"],
+};
+
 export default function SaCalculator({
   open,
+  effects,
   onClose,
   onApply,
 }: {
   open: boolean;
+  effects: DVRiskCascade<unknown, DVRiskFile>[];
   onClose: () => void;
   onApply: (scale: string, quali?: string) => void;
 }) {
   const { t } = useTranslation();
 
-  const [shortfalls, setShortfalls] = useState([{ id: 0, service: "", amount: 0, duration: 0 }]);
+  const [shortfalls, setShortfalls] = useState<
+    { id: number; service: keyof typeof SERVICE_WEIGHTS | ""; amount: number; duration: number }[]
+  >([{ id: 0, service: "", amount: 0, duration: 0 }]);
 
   const [scale, setScale] = useState<keyof typeof SCALE_TO_SLIDER>("Sa0");
   const [includeQuali, setIncludeQuali] = useState(false);
@@ -110,7 +151,7 @@ export default function SaCalculator({
     else setShortfalls(shortfalls.filter((s) => s.id !== id));
   };
 
-  const handleChangeService = (id: number, service: string) => {
+  const handleChangeService = (id: number, service: keyof typeof SERVICE_WEIGHTS) => {
     setShortfalls(
       shortfalls.map((s) => {
         if (s.id !== id) return s;
@@ -149,6 +190,11 @@ export default function SaCalculator({
     );
   };
 
+  const overlappingEffects = shortfalls.reduce<DVRiskCascade<unknown, DVRiskFile>[]>(
+    (acc, s) => (s.service === "" ? acc : [...acc, ...getCorrespondingEffects(s.service, effects)]),
+    []
+  );
+
   return (
     <Slide direction="up" in={open}>
       <Card
@@ -185,86 +231,108 @@ export default function SaCalculator({
                 corresponding scale for Hb.
               </Trans>
             </Typography>
+            {overlappingEffects.length > 0 && (
+              <Alert severity="warning">
+                <AlertTitle>
+                  <Trans i18nKey="calculator.sa.cascade.warning.title">Attention!</Trans>
+                </AlertTitle>
+                <Trans i18nKey="calculator.sa.cascade.warning.body">
+                  You have selected a service which is also present in the potential consequences of this risk file.
+                  Please be aware that you are currently analyzing the <b>direct</b> impact and should not take into
+                  account the effects of cascade risks.
+                </Trans>
+                <Trans i18nKey="calculator.sa.cascade.warning.cascades">
+                  The following cascade risks have been identified as potential consequences:
+                </Trans>
+                <ul>
+                  {overlappingEffects.map((o) => (
+                    <li>{`${o.cr4de_effect_hazard.cr4de_hazard_id} - ${o.cr4de_effect_hazard.cr4de_title}`}</li>
+                  ))}
+                </ul>
+              </Alert>
+            )}
             {shortfalls.map((s) => (
-              <Stack key={s.id} direction="row" spacing={2}>
-                <FormControl sx={{ width: "100%" }}>
-                  <InputLabel>Shortfall</InputLabel>
-                  <Select
-                    value={s.service}
-                    label="Shortfall"
-                    onChange={(e) => handleChangeService(s.id, e.target.value as string)}
-                    MenuProps={{ sx: { zIndex: 4001 } }}
-                  >
-                    <MenuItem value={"Basic foodstuffs"}>
-                      <Trans i18nKey="calculator.sa.food">Basic foodstuffs</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Electricity"}>
-                      <Trans i18nKey="calculator.sa.electricity">Electricity</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Financial services"}>
-                      <Trans i18nKey="calculator.sa.financial">Financial services</Trans>
-                    </MenuItem>
-                    <MenuItem value={"First responders communication"}>
-                      <Trans i18nKey="calculator.sa.firstResponder">First responders communication</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Fuel"}>
-                      <Trans i18nKey="calculator.sa.fuel">Fuel</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Government"}>
-                      <Trans i18nKey="calculator.sa.government">Government</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Heating"}>
-                      <Trans i18nKey="calculator.sa.heating">Heating</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Media"}>
-                      <Trans i18nKey="calculator.sa.media">Media</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Medical emergency service"}>
-                      <Trans i18nKey="calculator.sa.emergency">Medical emergency service</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Medicine"}>
-                      <Trans i18nKey="calculator.sa.medicine">Medicine</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Non-emergency medical care"}>
-                      <Trans i18nKey="calculator.sa.care">Non-emergency medical care</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Postal and courier services"}>
-                      <Trans i18nKey="calculator.sa.post">Postal and courier services</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Potable water"}>
-                      <Trans i18nKey="calculator.sa.water">Potable water</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Telecommunications"}>
-                      <Trans i18nKey="calculator.sa.telecommunications">Telecommunications</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Transport"}>
-                      <Trans i18nKey="calculator.sa.transport">Transport</Trans>
-                    </MenuItem>
-                    <MenuItem value={"Waste management"}>
-                      <Trans i18nKey="calculator.sa.waste">Waste management</Trans>
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-                <TextField
-                  label={t("calculator.sa.numberOfPeople", "# people")}
-                  variant="outlined"
-                  type="number"
-                  value={s.amount}
-                  onChange={(e) => handleChangeAmount(s.id, parseInt(e.target.value, 10))}
-                  sx={{ width: 250 }}
-                />
-                <TextField
-                  label={t("calculator.sa.duration", "Duration (days)")}
-                  variant="outlined"
-                  type="number"
-                  value={s.duration}
-                  onChange={(e) => handleChangeDuration(s.id, parseInt(e.target.value, 10))}
-                  sx={{ width: 250 }}
-                />
-                <IconButton onClick={() => removeShortfall(s.id)} color="error">
-                  <RemoveCircleOutlineIcon />
-                </IconButton>
-              </Stack>
+              <>
+                <Stack key={s.id} direction="row" spacing={2}>
+                  <FormControl sx={{ width: "100%" }}>
+                    <InputLabel>Shortfall</InputLabel>
+                    <Select
+                      value={s.service}
+                      label="Shortfall"
+                      onChange={(e) => handleChangeService(s.id, e.target.value as keyof typeof SERVICE_WEIGHTS)}
+                      MenuProps={{ sx: { zIndex: 4001 } }}
+                    >
+                      <MenuItem value={"Basic foodstuffs"}>
+                        <Trans i18nKey="calculator.sa.food">Basic foodstuffs</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Electricity"}>
+                        <Trans i18nKey="calculator.sa.electricity">Electricity</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Financial services"}>
+                        <Trans i18nKey="calculator.sa.financial">Financial services</Trans>
+                      </MenuItem>
+                      <MenuItem value={"First responders communication"}>
+                        <Trans i18nKey="calculator.sa.firstResponder">First responders communication</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Fuel"}>
+                        <Trans i18nKey="calculator.sa.fuel">Fuel</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Government"}>
+                        <Trans i18nKey="calculator.sa.government">Government</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Heating"}>
+                        <Trans i18nKey="calculator.sa.heating">Heating</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Media"}>
+                        <Trans i18nKey="calculator.sa.media">Media</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Medical emergency service"}>
+                        <Trans i18nKey="calculator.sa.emergency">Medical emergency service</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Medicine"}>
+                        <Trans i18nKey="calculator.sa.medicine">Medicine</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Non-emergency medical care"}>
+                        <Trans i18nKey="calculator.sa.care">Non-emergency medical care</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Postal and courier services"}>
+                        <Trans i18nKey="calculator.sa.post">Postal and courier services</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Potable water"}>
+                        <Trans i18nKey="calculator.sa.water">Potable water</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Telecommunications"}>
+                        <Trans i18nKey="calculator.sa.telecommunications">Telecommunications</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Transport"}>
+                        <Trans i18nKey="calculator.sa.transport">Transport</Trans>
+                      </MenuItem>
+                      <MenuItem value={"Waste management"}>
+                        <Trans i18nKey="calculator.sa.waste">Waste management</Trans>
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+                  <TextField
+                    label={t("calculator.sa.numberOfPeople", "# people")}
+                    variant="outlined"
+                    type="number"
+                    value={s.amount}
+                    onChange={(e) => handleChangeAmount(s.id, parseInt(e.target.value, 10))}
+                    sx={{ width: 250 }}
+                  />
+                  <TextField
+                    label={t("calculator.sa.duration", "Duration (days)")}
+                    variant="outlined"
+                    type="number"
+                    value={s.duration}
+                    onChange={(e) => handleChangeDuration(s.id, parseInt(e.target.value, 10))}
+                    sx={{ width: 250 }}
+                  />
+                  <IconButton onClick={() => removeShortfall(s.id)} color="error">
+                    <RemoveCircleOutlineIcon />
+                  </IconButton>
+                </Stack>
+              </>
             ))}
 
             <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }} spacing={2}>

@@ -158,7 +158,7 @@ export default function TranslationsPage() {
 
   const { data: translations, reloadData } = useRecords<DVTranslation>({
     table: DataTable.TRANSLATIONS,
-    query: "$orderby=cr4de_name",
+    query: "$orderby=createdon",
     // REMOVE DOUBLES
     // onComplete: async (data) => {
     //   const col: { [key: string]: DVTranslation[] } = {};
