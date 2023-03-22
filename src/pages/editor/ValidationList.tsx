@@ -88,14 +88,14 @@ export default function ValidationList({
 
   const [activeStep, setActiveStep] = useState(0);
   const [response, setResponse] = useState<string | null>(
-    fieldValidations
+    fieldValidations && fieldValidations.length > 0
       ? fieldValidations[activeStep][`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]
       : null
   );
   const [refreshResponseBox, setRefreshResponseBox] = useState(false);
 
   useEffect(() => {
-    if (!fieldValidations) return;
+    if (!fieldValidations || fieldValidations.length <= 0) return;
 
     setResponse(
       fieldValidations[activeStep][`cr4de_${field}_feedback_response` as keyof ValidationResponseEditableFields]
