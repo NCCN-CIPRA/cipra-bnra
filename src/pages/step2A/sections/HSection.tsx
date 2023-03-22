@@ -76,7 +76,7 @@ export default function HSection({
             <Trans i18nKey="2A.h.quanti.hb.title">Hb - Injured / sick people</Trans>
           </Typography>
           <Tooltip title={t("button.di.calculator.tooltip", "Calculate the damage scale with weights")}>
-            <IconButton onClick={() => setHbCalculatorOpen(true)} id="step2A-hb-calculator">
+            <IconButton onClick={() => setHbCalculatorOpen(true)} id="step2A-hb-calculator-button">
               <CalculateIcon />
             </IconButton>
           </Tooltip>

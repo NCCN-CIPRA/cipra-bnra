@@ -10,10 +10,12 @@ export default function Step2ATutorial({
   run,
   setRun,
   setStep,
+  handleSetSpeeddialOpen,
 }: {
   run: boolean;
   setRun: (r: boolean) => void;
   setStep: (step: STEPS) => void;
+  handleSetSpeeddialOpen: (open: boolean) => void;
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -33,7 +35,6 @@ export default function Step2ATutorial({
           </Typography>
         </Box>
       ),
-      styles: { options: { width: 600 } },
     },
     {
       target: "#step2A-progress-bar",
@@ -62,13 +63,12 @@ export default function Step2ATutorial({
           </ul>
         </Box>
       ),
-      styles: { options: { width: 800 } },
     },
     {
       target: "#step2A-next-buttons",
       placement: "top",
       content: (
-        <Box sx={{ textAlign: "left" }}>
+        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="2A.tutorial.3.1">
               The <b>NEXT</b> button will save your input on the current page and navigate to the next section.
@@ -82,7 +82,6 @@ export default function Step2ATutorial({
           </Typography>
         </Box>
       ),
-      styles: { options: { width: 600 } },
     },
     {
       target: "body",
@@ -107,7 +106,6 @@ export default function Step2ATutorial({
           </Typography>
         </Box>
       ),
-      styles: { options: { width: 600 } },
     },
     {
       target: "#step2A-scenario-description-scroll",
@@ -115,13 +113,12 @@ export default function Step2ATutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.5.3">
+            <Trans i18nKey="2A.tutorial.6.3">
               This box will stay visible at the top of the page when you scroll down for easy reference during analysis.
             </Trans>
           </Typography>
         </Box>
       ),
-      styles: { options: { width: 600 } },
     },
     {
       target: "#step2A-scenario-description-collapse",
@@ -129,13 +126,12 @@ export default function Step2ATutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.6.1">
-              If the box takes up too much of your screen, you may click here to collapse it.
+            <Trans i18nKey="2A.tutorial.7.1">
+              If the box takes up too much space of your screen, you may click here to collapse it.
             </Trans>
           </Typography>
         </Box>
       ),
-      styles: { options: { width: 600 } },
     },
     {
       target: "#step2A-dp-quantitative-box",
@@ -143,14 +139,13 @@ export default function Step2ATutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.7.1">
-              The sliders allow you to input your estimations for different parameters. This one is for the{" "}
+            <Trans i18nKey="2A.tutorial.8.1">
+              The sliders allows you to input your estimations for different parameters. This one is for the{" "}
               <b>direct</b> probability.
             </Trans>
           </Typography>
         </Box>
       ),
-      styles: { options: { width: 600 } },
     },
     {
       target: "#step2A-dp-mark-1",
@@ -158,13 +153,12 @@ export default function Step2ATutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.8.1">
+            <Trans i18nKey="2A.tutorial.9.1">
               If you hover over the scales, the corresponding threshold values are shown.
             </Trans>
           </Typography>
         </Box>
       ),
-      styles: { options: { width: 600 } },
       disableOverlay: true,
     },
     {
@@ -173,13 +167,12 @@ export default function Step2ATutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.9.1">
+            <Trans i18nKey="2A.tutorial.10.1">
               These textboxes should be used to explain the reasoning for the quantitative estimation above.
             </Trans>
           </Typography>
         </Box>
       ),
-      styles: { options: { width: 600 } },
     },
     {
       target: "#step2A-h-quantitative-box",
@@ -187,34 +180,18 @@ export default function Step2ATutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.10.1">
+            <Trans i18nKey="2A.tutorial.11.1">
               The impact scales usually have multiple damage indicators, in this case 3.
             </Trans>
           </Typography>
         </Box>
       ),
-      styles: { options: { width: 600 } },
     },
     {
-      target: "#step2A-hb-calculator",
+      target: "#step2A-hb-calculator-button",
       placement: "bottom",
       content: (
-        <Box sx={{ textAlign: "left" }}>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.11.1">
-              Some damage indicators require a more complex calculation with weights for different types of damage. To
-              help you with this calculation, a calculator is provided which can be accessed by clicking this button
-            </Trans>
-          </Typography>
-        </Box>
-      ),
-      styles: { options: { width: 600 } },
-    },
-    {
-      target: "body",
-      placement: "bottom",
-      content: (
-        <Box sx={{ textAlign: "left" }}>
+        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="2A.tutorial.12.1">
               Some damage indicators require a more complex calculation with weights for different types of damage. To
@@ -223,13 +200,94 @@ export default function Step2ATutorial({
           </Typography>
         </Box>
       ),
-      styles: { options: { width: 600 } },
+    },
+    {
+      target: "#step2A-hb-calculator",
+      placement: "auto",
+      content: (
+        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="2A.tutorial.13.1">
+              This calculator requires you to input rough number for the number of "severe", "moderate" and "minor"
+              unjuries and automatically calculates the corresponding scale. When you click apply, the slider is also
+              moved automatically to the right value.
+            </Trans>
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      target: "#step2A-hb-calculator-include",
+      placement: "auto",
+      content: (
+        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="2A.tutorial.14.1">
+              If you enable this checkbox, the underlying calculation will automatically be added to the qualitative
+              explanation field for you.
+            </Trans>
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      target: "#step2A-information-button",
+      placement: "auto",
+      content: (
+        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="2A.tutorial.15.1">
+              Finally, this button allows you to view some extra information, including:
+            </Trans>
+          </Typography>
+          <ul>
+            <li>
+              <Typography variant="body1" my={2}>
+                <Trans i18nKey="2A.tutorial.15.1">The original risk file (opens in new tab)</Trans>
+              </Typography>
+            </li>
+            <li>
+              <Typography variant="body1" my={2}>
+                <Trans i18nKey="2A.tutorial.15.1">
+                  An overview of all quantitative scales, threshold values, etc. on the information portal (opens in a
+                  new tab)
+                </Trans>
+              </Typography>
+            </li>
+            <li>
+              <Typography variant="body1" my={2}>
+                <Trans i18nKey="2A.tutorial.15.1">Play this tutorial</Trans>
+              </Typography>
+            </li>
+          </ul>
+        </Box>
+      ),
+    },
+    {
+      target: "body",
+      placement: "center",
+      content: (
+        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="2A.tutorial.16.1">
+              Your input will be automatically saved every 10 seconds, when you move between section and when you press
+              "Save & Exit".
+            </Trans>
+          </Typography>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="2A.tutorial.16.1">Good luck!</Trans>
+          </Typography>
+        </Box>
+      ),
     },
   ];
 
   const handleTutorialCallback = (data: CallBackProps) => {
     const { action, index, status, type, lifecycle } = data;
-    console.log(data);
+    if (index === 0 && lifecycle === LIFECYCLE.INIT) {
+      handleSetSpeeddialOpen(false);
+    }
+
     if (action === ACTIONS.NEXT && index === 2 && lifecycle === LIFECYCLE.COMPLETE) {
       setStep(STEPS.CONSIDERABLE);
       setRun(false);
@@ -275,9 +333,24 @@ export default function Step2ATutorial({
     }
 
     if (action === ACTIONS.NEXT && index === 11 && lifecycle === LIFECYCLE.COMPLETE) {
-      const calculatorButton = document.getElementById("step2A-hb-calculator");
+      const calculatorButton = document.getElementById("step2A-hb-calculator-button");
 
       if (calculatorButton) calculatorButton.click();
+    }
+
+    if (action === ACTIONS.NEXT && index === 13 && lifecycle === LIFECYCLE.COMPLETE) {
+      const calculatorCloseButton = document.getElementById("step2A-hb-calculator-close-button");
+
+      if (calculatorCloseButton) calculatorCloseButton.click();
+      handleSetSpeeddialOpen(true);
+    }
+
+    if (action === ACTIONS.NEXT && index === 14 && lifecycle === LIFECYCLE.COMPLETE) {
+      handleSetSpeeddialOpen(false);
+    }
+
+    if (action === ACTIONS.NEXT && index === 15 && lifecycle === LIFECYCLE.COMPLETE) {
+      setStep(STEPS.INTRODUCTION);
     }
 
     // @ts-ignore-next-line
@@ -293,16 +366,6 @@ export default function Step2ATutorial({
     }
   };
 
-  const handleSkipCallback = (data: CallBackProps) => {
-    const { action, index, status, type } = data;
-
-    // @ts-ignore-next-line
-    if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND, STATUS.SKIPPED, STATUS.FINISHED].includes(type)) {
-      // Update state to advance the tour
-      setStepIndex(0);
-    }
-  };
-
   return (
     <>
       <Joyride
@@ -314,9 +377,16 @@ export default function Step2ATutorial({
         styles={{
           options: {
             primaryColor: theme.palette.primary.main,
-            zIndex: 1500,
+            zIndex: 5000,
           },
         }}
+        // floaterProps={{
+        //   styles: {
+        //     floaterWithComponent: {
+        //       maxWidth: 600,
+        //     },
+        //   },
+        // }}
         callback={handleTutorialCallback}
         scrollOffset={500}
         // disableScrolling={true},

@@ -70,6 +70,7 @@ export default function Step2APage() {
   const [finishedDialogOpen, setFinishedDialogOpen] = useState(false);
   const [surveyDialogOpen, setSurveyDialogOpen] = useState(false);
   const [runTutorial, setRunTutorial] = useState(false);
+  const [openSpeedDial, setOpenSpeedDial] = useState(false);
 
   const inputRef = useRef<ScenarioInputs | null>(null);
   const [inputErrors, setInputErrors] = useState<ScenarioErrors>({
@@ -353,7 +354,11 @@ export default function Step2APage() {
           </Box>
         </Fade>
       </Container>
-      <InformationButton riskFile={step2A?.cr4de_risk_file} onRunTutorial={() => setRunTutorial(true)} />
+      <InformationButton
+        riskFile={step2A?.cr4de_risk_file}
+        forceOpen={openSpeedDial}
+        onRunTutorial={() => setRunTutorial(true)}
+      />
       <Box
         sx={{
           display: "flex",
@@ -465,7 +470,12 @@ export default function Step2APage() {
         )}
       </Dialog>
 
-      <Step2ATutorial run={runTutorial} setRun={setRunTutorial} setStep={transitionTo} />
+      <Step2ATutorial
+        run={runTutorial}
+        setRun={setRunTutorial}
+        setStep={transitionTo}
+        handleSetSpeeddialOpen={setOpenSpeedDial}
+      />
 
       {step2A && (
         <SurveyDialog

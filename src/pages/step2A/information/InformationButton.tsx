@@ -10,15 +10,28 @@ import HelpIcon from "@mui/icons-material/Help";
 import { useTranslation } from "react-i18next";
 import openInNewTab from "../../../functions/openInNewTab";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { useEffect, useState } from "react";
 
 export default function InformationButton({
   riskFile,
+  forceOpen,
   onRunTutorial,
 }: {
   riskFile: DVRiskFile | undefined;
+  forceOpen: boolean;
   onRunTutorial: () => void;
 }) {
   const { t } = useTranslation();
+
+  const [open, setOpen] = useState(false);
+  console.log(forceOpen);
+  useEffect(() => {
+    console.log(forceOpen);
+    setOpen(forceOpen);
+  }, [forceOpen]);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   const actions = [
     {
@@ -31,7 +44,6 @@ export default function InformationButton({
       name: t("speeddial.scales", "Quantitative Scales"),
       onClick: () => riskFile && openInNewTab("/learning/quantitative-categories", "Quantitative Categories"),
     },
-    // { icon: <HubIcon />, name: t("speeddial.bwotie", "Bowtie Diagram") },
     {
       icon: <ArticleIcon />,
       name: t("speeddial.riskFile", "Risk File"),
@@ -39,7 +51,15 @@ export default function InformationButton({
     },
   ];
   return (
-    <SpeedDial ariaLabel="SpeedDial basic example" sx={{ position: "fixed", bottom: 72, left: 16 }} icon={<InfoIcon />}>
+    <SpeedDial
+      ariaLabel="SpeedDial basic example"
+      sx={{ position: "fixed", bottom: 72, left: 16 }}
+      icon={<InfoIcon />}
+      id="step2A-information-button"
+      onClose={handleClose}
+      onOpen={handleOpen}
+      open={open}
+    >
       {actions.map((action) => (
         <SpeedDialAction key={action.name} icon={action.icon} tooltipTitle={action.name} onClick={action.onClick} />
       ))}

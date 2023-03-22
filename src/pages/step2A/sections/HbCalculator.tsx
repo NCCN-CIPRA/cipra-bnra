@@ -68,7 +68,11 @@ export default function HbCalculator({
 
   return (
     <Slide direction="up" in={open}>
-      <Card sx={{ position: "fixed", bottom: 72, right: 16, zIndex: 4000, width: 600 }} elevation={5}>
+      <Card
+        sx={{ position: "fixed", bottom: 72, right: 16, zIndex: 4000, width: 600 }}
+        elevation={5}
+        id="step2A-hb-calculator"
+      >
         <CardHeader
           avatar={
             <Avatar>
@@ -135,11 +139,12 @@ export default function HbCalculator({
             <FormControlLabel
               label={t("calculator.include", "Include calculation in qualitative input.")}
               control={<Checkbox checked={includeQuali} onChange={(e) => setIncludeQuali(e.target.checked)} />}
+              id="step2A-hb-calculator-include"
             />
           </Stack>
         </CardContent>
         <CardActions sx={{ justifyContent: "flex-end" }}>
-          <Button color="error" onClick={onClose}>
+          <Button color="error" onClick={onClose} id="step2A-hb-calculator-close-button">
             <Trans i18nKey="calculator.close">Close</Trans>
           </Button>
           <Button
