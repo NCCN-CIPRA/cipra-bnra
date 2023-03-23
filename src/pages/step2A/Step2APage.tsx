@@ -249,6 +249,14 @@ export default function Step2APage() {
     }
   }, [activeStep]);
 
+  useEffect(() => {
+    const autosaveTimer = setTimeout(() => {
+      handleSave();
+    }, 10000);
+
+    return () => clearTimeout(autosaveTimer);
+  }, []);
+
   const drawerWidth = DRAWER_WIDTH;
 
   return (
