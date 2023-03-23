@@ -7,7 +7,11 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CheckIcon from "@mui/icons-material/Check";
 import { Scenarios } from "../../../functions/scenarios";
 
-const isScenarioComplete = (input: ScenarioInput) => Object.values(input).every((v) => v !== null);
+const isScenarioComplete = (input: ScenarioInput, riskType: string | undefined) => {
+  if (riskType === "Malicious Man-made Risk") return input.cr4de_dp_quanti !== null && input.cr4de_dp_quali !== null;
+
+  return Object.values(input).every((v) => v !== null);
+};
 const isScenarioEmpty = (input: ScenarioInput) => Object.values(input).every((v) => v === null);
 
 const enum STATUS {
@@ -66,12 +70,14 @@ export default function Progress({
   goToStep,
   inputRef,
   inputErrors,
+  riskType,
   setCurrentStep,
 }: {
   activeStep: STEPS;
   goToStep(step: STEPS): void;
   inputRef: RefObject<ScenarioInputs>;
   inputErrors: ScenarioErrors;
+  riskType: string | undefined;
   setCurrentStep: (s: STEPS) => void;
 }) {
   const { t } = useTranslation();
@@ -82,21 +88,21 @@ export default function Progress({
     if (inputRef.current) {
       let currentStep;
 
-      if (isScenarioComplete(inputRef.current.extreme)) {
+      if (isScenarioComplete(inputRef.current.extreme, riskType)) {
         steps[3] = STATUS.DONE;
         steps[4] = STATUS.DOING;
 
         currentStep = STEPS.REVIEW;
       }
 
-      if (isScenarioComplete(inputRef.current.major)) {
+      if (isScenarioComplete(inputRef.current.major, riskType)) {
         steps[2] = STATUS.DONE;
         if (steps[3] === STATUS.NOT_STARTED) steps[3] = STATUS.DOING;
 
         currentStep = currentStep || STEPS.EXTREME;
       }
 
-      if (isScenarioComplete(inputRef.current.considerable)) {
+      if (isScenarioComplete(inputRef.current.considerable, riskType)) {
         steps[1] = STATUS.DONE;
         if (steps[2] === STATUS.NOT_STARTED) steps[2] = STATUS.DOING;
 

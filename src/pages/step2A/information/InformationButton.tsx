@@ -24,9 +24,8 @@ export default function InformationButton({
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
-  console.log(forceOpen);
+
   useEffect(() => {
-    console.log(forceOpen);
     setOpen(forceOpen);
   }, [forceOpen]);
 

@@ -31,9 +31,28 @@ import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { useNavigate } from "react-router-dom";
 import useAPI from "../hooks/useAPI";
 import useLoggedInUser from "../hooks/useLoggedInUser";
+import SkipNextIcon from "@mui/icons-material/SkipNext";
 
 export interface FinishableRiskFile extends DVRiskFile {
   finished?: boolean;
+}
+
+function EmergingRisks2AIcon({}) {
+  return (
+    <Box
+      sx={{
+        backgroundColor: "rgb(0, 164, 154)",
+        borderRadius: "50%",
+        width: 24,
+        height: 24,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <SkipNextIcon sx={{ color: "white", fontSize: 20 }} />
+    </Box>
+  );
 }
 
 function RiskFileList({
@@ -112,7 +131,9 @@ function RiskFileList({
   };
 
   const getStep2ATooltip = (p: DVParticipation<unknown, DVRiskFile>) => {
-    if (p.cr4de_risk_file.cr4de_step2a_enabled) {
+    if (p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk") {
+      return t("riskFile.steps.2A.notNeeded", 'Step 2A is skipped for "Emerging Risks"');
+    } else if (p.cr4de_risk_file.cr4de_step2a_enabled) {
       if (p.cr4de_direct_analysis_finished)
         return t("riskFile.steps.2A.complete", "You have completed step 2A for this Risk File.");
       else return t("riskFile.steps.2A.progress", "Step 2A can now be completed.");
@@ -166,9 +187,19 @@ function RiskFileList({
                             </StepLabel>
                           </Tooltip>
                         </Step>
-                        <Step>
+                        <Step
+                          completed={
+                            p.cr4de_direct_analysis_finished ||
+                            p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ||
+                            false
+                          }
+                        >
                           <Tooltip title={getStep2ATooltip(p)}>
-                            <StepLabel>
+                            <StepLabel
+                              StepIconComponent={
+                                p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? EmergingRisks2AIcon : undefined
+                              }
+                            >
                               <Trans i18nKey="riskFile.steps.2A.name">Analysis A</Trans>
                             </StepLabel>
                           </Tooltip>

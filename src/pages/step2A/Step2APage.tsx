@@ -30,14 +30,16 @@ import Stack from "@mui/material/Stack";
 import { stepNames, STEPS } from "./Steps";
 import { getScenarioInputs, getTrueInputs, ScenarioInput, ScenarioInputs } from "./fields";
 import SavingOverlay from "./SavingOverlay";
-import Review from "./steps/Review";
-import ScenarioAnalysis, { validateScenarioInputs } from "./steps/ScenarioAnalysis";
+import Review from "./standard/Review";
+import ScenarioAnalysis, { validateScenarioInputs } from "./standard/ScenarioAnalysis";
 import { Scenarios } from "../../functions/scenarios";
 import SurveyDialog from "../../components/SurveyDialog";
 import { AuthPageContext } from "../AuthPage";
 import { FeedbackStep } from "../../types/dataverse/DVFeedback";
-import Introduction from "./steps/Introduction";
+import Introduction from "./standard/Introduction";
 import Step2ATutorial from "./information/Step2ATutorial";
+import Standard from "./standard/Standard";
+import ManMade from "./manmade/ManMade";
 
 type RouteParams = {
   step2A_id: string;
@@ -153,10 +155,8 @@ export default function Step2APage() {
 
   const transitionTo = (newStep: STEPS) => {
     setFade(false);
-    console.log("START FADEOUT");
 
     const timer = setTimeout(() => {
-      console.log("START FADEIN");
       setActiveStep(newStep);
       setFade(true);
       setIsSaving(false);
@@ -174,9 +174,12 @@ export default function Step2APage() {
 
     if (activeStep === STEPS.REVIEW) {
       const errors = {
-        [STEPS.CONSIDERABLE]: validateScenarioInputs(inputRef.current.considerable),
-        [STEPS.MAJOR]: validateScenarioInputs(inputRef.current.major),
-        [STEPS.EXTREME]: validateScenarioInputs(inputRef.current.extreme),
+        [STEPS.CONSIDERABLE]: validateScenarioInputs(
+          inputRef.current.considerable,
+          step2A?.cr4de_risk_file.cr4de_risk_type
+        ),
+        [STEPS.MAJOR]: validateScenarioInputs(inputRef.current.major, step2A?.cr4de_risk_file.cr4de_risk_type),
+        [STEPS.EXTREME]: validateScenarioInputs(inputRef.current.extreme, step2A?.cr4de_risk_file.cr4de_risk_type),
       };
 
       if (Object.values(errors).some((e) => e.length > 0)) {
@@ -201,7 +204,10 @@ export default function Step2APage() {
     // Validate if we are going to the next step or if we are on a previous step
     if (to > currentStep || activeStep !== currentStep) {
       if (inputRef.current && activeStep !== STEPS.INTRODUCTION && activeStep !== STEPS.REVIEW && activeStep !== null) {
-        const errors = validateScenarioInputs(inputRef.current[step2Name[activeStep]]);
+        const errors = validateScenarioInputs(
+          inputRef.current[step2Name[activeStep]],
+          step2A?.cr4de_risk_file.cr4de_risk_type
+        );
 
         await handleSave(errors.length <= 0);
 
@@ -278,78 +284,32 @@ export default function Step2APage() {
         <SavingOverlay visible={isSaving} drawerWidth={drawerWidth} />
         <Fade in={fade} timeout={transitionDelay}>
           <Box sx={{ mt: 6, mb: 16 }}>
-            {activeStep === null && (
+            {(activeStep === null || !step2A) && (
               <Box sx={{ mt: 32, textAlign: "center" }}>
                 <CircularProgress />
               </Box>
             )}
-            {activeStep === STEPS.INTRODUCTION && <Introduction onRunTutorial={() => setRunTutorial(true)} />}
-            {activeStep === STEPS.CONSIDERABLE && step2A?.cr4de_risk_file && (
-              <Box>
-                <Box sx={{ mb: 2, ml: 1 }}>
-                  <Typography variant="h4">
-                    <Trans i18nKey="2A.considerable.title">Considerable Scenario</Trans>
-                  </Typography>
-                </Box>
-                <ScenarioAnalysis
-                  step={stepNames[STEPS.CONSIDERABLE]}
-                  riskFile={step2A.cr4de_risk_file}
-                  causes={causes}
-                  effects={effects}
-                  directAnalysis={step2A}
-                  scenarioName="considerable"
-                  inputRef={inputRef}
-                  inputErrors={inputErrors[STEPS.CONSIDERABLE]}
-                />
-              </Box>
+            {step2A && step2A.cr4de_risk_file.cr4de_risk_type === "Standard Risk" && (
+              <Standard
+                activeStep={activeStep}
+                step2A={step2A}
+                causes={causes}
+                effects={effects}
+                inputRef={inputRef}
+                inputErrors={inputErrors}
+                setRunTutorial={setRunTutorial}
+              />
             )}
-            {activeStep === STEPS.MAJOR && step2A?.cr4de_risk_file && (
-              <Box>
-                <Box sx={{ mb: 2, ml: 1 }}>
-                  <Typography variant="h4">
-                    <Trans i18nKey="2A.major.title">Major Scenario</Trans>
-                  </Typography>
-                </Box>
-                <ScenarioAnalysis
-                  step={stepNames[STEPS.MAJOR]}
-                  riskFile={step2A.cr4de_risk_file}
-                  causes={causes}
-                  effects={effects}
-                  directAnalysis={step2A}
-                  scenarioName="major"
-                  inputRef={inputRef}
-                  inputErrors={inputErrors[STEPS.MAJOR]}
-                />
-              </Box>
-            )}
-            {activeStep === STEPS.EXTREME && step2A?.cr4de_risk_file && (
-              <Box>
-                <Box sx={{ mb: 2, ml: 1 }}>
-                  <Typography variant="h4">
-                    <Trans i18nKey="2A.extreme.title">Extreme Scenario</Trans>
-                  </Typography>
-                </Box>
-                <ScenarioAnalysis
-                  step={stepNames[STEPS.EXTREME]}
-                  riskFile={step2A.cr4de_risk_file}
-                  causes={causes}
-                  effects={effects}
-                  directAnalysis={step2A}
-                  scenarioName="extreme"
-                  inputRef={inputRef}
-                  inputErrors={inputErrors[STEPS.EXTREME]}
-                />
-              </Box>
-            )}
-            {inputRef.current && activeStep === STEPS.REVIEW && step2A && (
-              <Box>
-                <Box sx={{ mb: 2, ml: 1 }}>
-                  <Typography variant="h4">
-                    <Trans i18nKey="2A.review.title">Review your answers</Trans>
-                  </Typography>
-                </Box>
-                <Review inputs={inputRef.current} inputErrors={inputErrors} />
-              </Box>
+            {step2A && step2A.cr4de_risk_file.cr4de_risk_type === "Malicious Man-made Risk" && (
+              <ManMade
+                activeStep={activeStep}
+                step2A={step2A}
+                causes={causes}
+                effects={effects}
+                inputRef={inputRef}
+                inputErrors={inputErrors}
+                setRunTutorial={setRunTutorial}
+              />
             )}
           </Box>
         </Fade>
@@ -382,6 +342,7 @@ export default function Step2APage() {
           goToStep={goToStep}
           inputRef={inputRef}
           inputErrors={inputErrors}
+          riskType={step2A?.cr4de_risk_file.cr4de_risk_type}
           setCurrentStep={setCurrentStep}
         />
 

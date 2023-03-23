@@ -80,6 +80,10 @@ export default function Step2ATutorial({
               this button to pause your analysis and continue at a later time.
             </Trans>
           </Typography>
+          <Trans i18nKey="2A.tutorial.3.3">
+            Your input will be automatically saved every 10 seconds, when you move between section and when you press
+            "Save & Exit".
+          </Trans>
         </Box>
       ),
     },
@@ -243,12 +247,12 @@ export default function Step2ATutorial({
           <ul>
             <li>
               <Typography variant="body1" my={2}>
-                <Trans i18nKey="2A.tutorial.15.1">The original risk file (opens in new tab)</Trans>
+                <Trans i18nKey="2A.tutorial.15.2">The original risk file (opens in new tab)</Trans>
               </Typography>
             </li>
             <li>
               <Typography variant="body1" my={2}>
-                <Trans i18nKey="2A.tutorial.15.1">
+                <Trans i18nKey="2A.tutorial.15.3">
                   An overview of all quantitative scales, threshold values, etc. on the information portal (opens in a
                   new tab)
                 </Trans>
@@ -256,7 +260,7 @@ export default function Step2ATutorial({
             </li>
             <li>
               <Typography variant="body1" my={2}>
-                <Trans i18nKey="2A.tutorial.15.1">Play this tutorial</Trans>
+                <Trans i18nKey="2A.tutorial.15.4">Play this tutorial</Trans>
               </Typography>
             </li>
           </ul>
@@ -268,12 +272,6 @@ export default function Step2ATutorial({
       placement: "center",
       content: (
         <Box sx={{ textAlign: "left", maxWidth: 600 }}>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.16.1">
-              Your input will be automatically saved every 10 seconds, when you move between section and when you press
-              "Save & Exit".
-            </Trans>
-          </Typography>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="2A.tutorial.16.1">Good luck!</Trans>
           </Typography>

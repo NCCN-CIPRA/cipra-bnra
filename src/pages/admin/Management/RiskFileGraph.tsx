@@ -221,18 +221,6 @@ export default function RiskFileGraph({
           dates[i].started++;
         } else {
           dates[i].notStarted++;
-          if (i >= dates.length - 1)
-            console.log(
-              new Date(d.date),
-              participations[0].cr4de_risk_file.cr4de_title,
-              participations,
-              participations.filter(
-                (p) =>
-                  p.cr4de_role === "expert" &&
-                  (p.cr4de_validation_finished_on === null ||
-                    new Date(p.cr4de_validation_finished_on).getTime() > d.date)
-              ).length
-            );
         }
       }
     }

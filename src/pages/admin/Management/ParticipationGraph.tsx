@@ -155,7 +155,6 @@ export default function ParticipationGraph({
         } else if (p.validationCompletedDate && d.date >= p.validationCompletedDate) {
           dates[i].completed++;
         } else if (p.validationModifiedDate && d.date >= p.validationModifiedDate) {
-          if (i >= dates.length - 1) console.log(p);
           dates[i].modified++;
         } else if (p.validationCreatedDate && d.date >= p.validationCreatedDate) {
           dates[i].created++;
