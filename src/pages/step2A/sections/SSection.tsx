@@ -1,4 +1,4 @@
-import { Box, Paper, Stack, Typography, Tooltip, IconButton, Alert } from "@mui/material";
+import { Box, Paper, Stack, Typography, Tooltip, IconButton, Alert, Button } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
 import TextInputBox from "../../../components/TextInputBox";
 import { DirectImpactField } from "../../learning/QuantitativeScales/DI";
@@ -20,6 +20,7 @@ export default function SSection({
   effects,
   onOpenSourceDialog,
   onReloadAttachments,
+  onOpenEffects,
 }: {
   fieldsRef: ScenarioInput;
   inputErrors: (keyof ScenarioInput)[];
@@ -27,6 +28,7 @@ export default function SSection({
   effects: DVRiskCascade<unknown, DVRiskFile>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   onReloadAttachments: () => Promise<void>;
+  onOpenEffects: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -55,6 +57,11 @@ export default function SSection({
           should not be considered. This possibility will be explored when estimating the conditional probabilities in
           the following phase.
         </Trans>
+        <Box sx={{ marginLeft: -1 }}>
+          <Button color="warning" onClick={onOpenEffects}>
+            <Trans i18nKey="button.showConsequences">Show Potential Consequences</Trans>
+          </Button>
+        </Box>
       </Alert>
       <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
         <Box sx={{ display: "flex" }}>

@@ -16,6 +16,7 @@ interface RFBucket {
   oneLeft: number;
   validationComplete: number;
   silenceProcedureStarted: number;
+  consensusMeeting: number;
   step2AStarted: number;
 }
 
@@ -62,7 +63,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
             <td>
               <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
                 {Math.round(
-                  (1000 * (payload[0].value + payload[1].value + payload[2].value)) /
+                  (1000 * (payload[0].value + payload[1].value + payload[2].value + payload[3].value)) /
                     payload.reduce((tot, p) => tot + p.value, 0)
                 ) / 10}
                 %
@@ -82,7 +83,8 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
                       payload[2].value +
                       payload[3].value +
                       payload[4].value +
-                      payload[5].value)) /
+                      payload[5].value +
+                      payload[6].value)) /
                     payload.reduce((tot, p) => tot + p.value, 0)
                 ) / 10}
                 %
@@ -136,6 +138,7 @@ export default function RiskFileGraph({
         oneLeft: 0,
         validationComplete: 0,
         silenceProcedureStarted: 0,
+        consensusMeeting: 0,
         step2AStarted: 0,
       });
 
@@ -155,10 +158,23 @@ export default function RiskFileGraph({
         ) {
           dates[i].step2AStarted++;
         } else if (
+          participations.every(
+            (p) =>
+              p.cr4de_role !== "expert" ||
+              (p.cr4de_validation_finished_on && new Date(p.cr4de_validation_finished_on).getTime() <= d.date)
+          ) &&
           participations.some(
             (p) =>
-              p.cr4de_risk_file?.cr4de_validation_silent_procedure_until &&
-              addDays(new Date(p.cr4de_risk_file.cr4de_validation_silent_procedure_until), -14).getTime() <= d.date
+              p.cr4de_risk_file?.cr4de_validations_processed &&
+              !p.cr4de_risk_file?.cr4de_validation_silent_procedure_until
+          )
+        ) {
+          dates[i].consensusMeeting++;
+        } else if (
+          participations.some(
+            (p) =>
+              p.cr4de_risk_file?.cr4de_validation_silent_procedure_until != null &&
+              addDays(new Date(p.cr4de_risk_file?.cr4de_validation_silent_procedure_until), -14).getTime() <= d.date
           )
         ) {
           dates[i].silenceProcedureStarted++;
@@ -213,10 +229,15 @@ export default function RiskFileGraph({
           participations.filter(
             (p) =>
               p.cr4de_role === "expert" &&
-              p.cr4de_validation !== null &&
-              new Date(p.cr4de_validation.createdon).getTime() <= d.date
-          ).length >= 1 &&
-          participations.filter((p) => p.cr4de_role === "expert").length > 0
+              p.cr4de_validation_finished_on !== null &&
+              new Date(p.cr4de_validation_finished_on).getTime() <= d.date
+          ).length < 2 &&
+          participations.filter(
+            (p) =>
+              p.cr4de_role === "expert" &&
+              p.cr4de_validation_finished_on !== null &&
+              new Date(p.cr4de_validation_finished_on).getTime() <= d.date
+          ).length > 0
         ) {
           dates[i].started++;
         } else {
@@ -268,6 +289,14 @@ export default function RiskFileGraph({
         />
         <Area
           type="monotone"
+          dataKey="consensusMeeting"
+          stackId="1"
+          stroke="#ff7c43"
+          fill="#ff7c43"
+          name="Awaiting consensus meeting"
+        />
+        <Area
+          type="monotone"
           dataKey="validationComplete"
           stackId="1"
           stroke="#f95d6a"
@@ -304,7 +333,7 @@ export default function RiskFileGraph({
           stackId="1"
           stroke="#2f4b7c"
           fill="#2f4b7c"
-          name="> 2 validations left, less than 2 done"
+          name="less than 2 validations done"
         />
         <Area
           type="monotone"

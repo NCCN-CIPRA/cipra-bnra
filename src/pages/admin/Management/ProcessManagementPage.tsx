@@ -50,7 +50,7 @@ export default function ProcessManagementPage() {
       api.getContacts(),
       api.getInvitations(),
       api.getParticipants<DVParticipation<undefined, DVRiskFile, DVValidation>>(
-        "$expand=cr4de_risk_file($select=cr4de_hazard_id,cr4de_title,cr4de_risk_type),cr4de_validation"
+        "$expand=cr4de_risk_file,cr4de_validation"
       ),
     ]);
 

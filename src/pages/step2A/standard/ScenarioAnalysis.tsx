@@ -180,6 +180,7 @@ export default function ScenarioAnalysis({
         }
         onOpenSourceDialog={handleOpenSourceDialog(`cr4de_dp_quali${SCENARIO_SUFFIX[scenarioName]}`)}
         onReloadAttachments={reloadAttachments}
+        onOpenCauses={() => setCausesOpen(true)}
       />
 
       <HSection
@@ -202,6 +203,7 @@ export default function ScenarioAnalysis({
         effects={effects}
         onOpenSourceDialog={handleOpenSourceDialog(`cr4de_di_quali_s${SCENARIO_SUFFIX[scenarioName]}`)}
         onReloadAttachments={reloadAttachments}
+        onOpenEffects={() => setEffectsOpen(true)}
       />
 
       <ESection
@@ -212,6 +214,7 @@ export default function ScenarioAnalysis({
         }
         onOpenSourceDialog={handleOpenSourceDialog(`cr4de_di_quali_e${SCENARIO_SUFFIX[scenarioName]}`)}
         onReloadAttachments={reloadAttachments}
+        onOpenEffects={() => setEffectsOpen(true)}
       />
 
       <FSection
@@ -222,6 +225,7 @@ export default function ScenarioAnalysis({
         }
         onOpenSourceDialog={handleOpenSourceDialog(`cr4de_di_quali_f${SCENARIO_SUFFIX[scenarioName]}`)}
         onReloadAttachments={reloadAttachments}
+        onOpenEffects={() => setEffectsOpen(true)}
       />
 
       <CBSection

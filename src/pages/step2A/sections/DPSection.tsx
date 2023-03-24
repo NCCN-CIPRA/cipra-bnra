@@ -14,12 +14,14 @@ export default function DPSection({
 
   onOpenSourceDialog,
   onReloadAttachments,
+  onOpenCauses,
 }: {
   fieldsRef: ScenarioInput;
   inputErrors: (keyof ScenarioInput)[];
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   onReloadAttachments: () => Promise<void>;
+  onOpenCauses: () => void;
 }) {
   const handleChangeDPValue = (newValue: string | null) => {
     fieldsRef.cr4de_dp_quanti = newValue;
@@ -43,6 +45,11 @@ export default function DPSection({
           considered. This possibility will be explored when estimating the conditional probabilities in the following
           phase.
         </Trans>
+        <Box sx={{ marginLeft: -1 }}>
+          <Button color="warning" onClick={onOpenCauses}>
+            <Trans i18nKey="button.showConsequences">Show Potential Causes</Trans>
+          </Button>
+        </Box>
       </Alert>
 
       <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }} id="step2A-dp-quantitative-box">

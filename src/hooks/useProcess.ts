@@ -36,7 +36,7 @@ export default function useProcess(): ProcessManager {
 
       return api.updateRiskFile(rf.cr4de_riskfilesid, {
         cr4de_validations_processed: true,
-        cr4de_validation_silent_procedure_until: addDays(new Date(), 7),
+        cr4de_validation_silent_procedure_until: addDays(new Date(), 14),
       });
     },
     finishSilenceProcedure: async function (rf: DVRiskFile) {

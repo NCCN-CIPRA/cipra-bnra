@@ -29,7 +29,12 @@ export default function GraphView({
       }
     });
 
-    setExpertParticipants(participations.filter((p) => !analists[p._cr4de_contact_value]));
+    setExpertParticipants(
+      participations.filter(
+        (p) =>
+          !analists[p._cr4de_contact_value] && p.cr4de_risk_file && p.cr4de_risk_file.cr4de_title.indexOf("Test") < 0
+      )
+    );
   }, [participations]);
 
   if (!expertParticipants) return null;

@@ -79,7 +79,7 @@ export default function ExpertGraph({
 }) {
   const [expertBuckets, setExpertBuckets] = useState<ExpertBucket[]>([]);
   const [firstDate, setFirstDate] = useState<number>(new Date(2023, 1, 12).getTime());
-  const [lastDate, setLastDate] = useState<number>(Date.now());
+  const [lastDate, setLastDate] = useState<number>(addDays(new Date(), 1).getTime());
 
   useEffect(() => {
     const experts: { [key: string]: DVParticipation<SelectableContact, DVRiskFile, DVValidation>[] } = {};

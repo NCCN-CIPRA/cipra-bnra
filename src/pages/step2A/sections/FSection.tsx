@@ -1,4 +1,4 @@
-import { Alert, Box, Paper, Stack, Typography } from "@mui/material";
+import { Alert, Box, Paper, Stack, Typography, Button } from "@mui/material";
 import { Trans } from "react-i18next";
 import TextInputBox from "../../../components/TextInputBox";
 import { DirectImpactField } from "../../learning/QuantitativeScales/DI";
@@ -15,12 +15,14 @@ export default function FSection({
   attachments,
   onOpenSourceDialog,
   onReloadAttachments,
+  onOpenEffects,
 }: {
   fieldsRef: ScenarioInput;
   inputErrors: (keyof ScenarioInput)[];
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   onReloadAttachments: () => Promise<void>;
+  onOpenEffects: () => void;
 }) {
   const handleChangeDIValue = (newValue: string | null, field: DirectImpactField) => {
     fieldsRef[`cr4de_di_quanti_${field.prefix.toLowerCase()}` as keyof ScenarioInput] = newValue;
@@ -44,6 +46,11 @@ export default function FSection({
           <i>Failure of electricity supply</i> should not be considered. This possibility will be explored when
           estimating the conditional probabilities in the following phase.
         </Trans>
+        <Box sx={{ marginLeft: -1 }}>
+          <Button color="warning" onClick={onOpenEffects}>
+            <Trans i18nKey="button.showConsequences">Show Potential Consequences</Trans>
+          </Button>
+        </Box>
       </Alert>
       <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }}>
         <Typography variant="subtitle2">
