@@ -19,6 +19,7 @@ import {
   Tooltip,
   Backdrop,
   CircularProgress,
+  StepButton,
 } from "@mui/material";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import getCategoryColor from "../functions/getCategoryColor";
@@ -72,7 +73,13 @@ function RiskFileList({
   const handleClick = (p: DVParticipation<undefined, DVRiskFile>) => async () => {
     if (!participations) return;
 
-    if (p.cr4de_risk_file.cr4de_step2a_enabled) {
+    if (
+      p.cr4de_risk_file.cr4de_step2b_enabled &&
+      p.cr4de_direct_analysis_finished &&
+      p._cr4de_direct_analysis_value !== null
+    ) {
+      navigate(`/step2B/${p._cr4de_direct_analysis_value}`);
+    } else if (p.cr4de_risk_file.cr4de_step2a_enabled) {
       if (p._cr4de_direct_analysis_value === null) {
         setIsLoading(true);
 
@@ -145,7 +152,23 @@ function RiskFileList({
     }
   };
 
+  const getStep2BTooltip = (p: DVParticipation<unknown, DVRiskFile>) => {
+    if (p.cr4de_risk_file.cr4de_step2b_enabled) {
+      if (p.cr4de_cascade_analysis_finished)
+        return t("riskFile.steps.2B.complete", "You have completed step 2B for this Risk File.");
+      else return t("riskFile.steps.2B.progress", "Step 2B can now be completed.");
+    } else {
+      return t(
+        "riskFile.steps.2B.notyet",
+        "This step cannot be started yet, we will contact you when it becomes available"
+      );
+    }
+  };
+
   const getActiveStep = (p: DVParticipation<unknown, DVRiskFile>) => {
+    if (p.cr4de_risk_file.cr4de_step2b_enabled) {
+      return 2;
+    }
     if (p.cr4de_risk_file.cr4de_step2a_enabled) {
       return 1;
     }
@@ -180,40 +203,86 @@ function RiskFileList({
                     />
                     <ListItemText sx={{ width: "550px", flexGrow: 0 }}>
                       <Stepper activeStep={getActiveStep(p)} alternativeLabel sx={{ width: "550px" }}>
-                        <Step completed={p.cr4de_validation_finished || false}>
+                        <Step completed={Boolean(p.cr4de_validation_finished)}>
                           <Tooltip title={getValidationTooltip(p)}>
-                            <StepLabel>
-                              <Trans i18nKey="riskFile.steps.1.name">Identification</Trans>
-                            </StepLabel>
+                            <StepButton
+                              disabled={false}
+                              onClick={(e) => {
+                                if (p._cr4de_validation_value) {
+                                  e.stopPropagation();
+                                  navigate(`/validation/${p._cr4de_validation_value}`);
+                                }
+                              }}
+                            >
+                              <StepLabel>
+                                <Trans i18nKey="riskFile.steps.1.name">Identification</Trans>
+                              </StepLabel>
+                            </StepButton>
                           </Tooltip>
                         </Step>
                         <Step
-                          completed={
+                          completed={Boolean(
                             p.cr4de_direct_analysis_finished ||
-                            p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ||
-                            false
-                          }
+                              (p.cr4de_validation_finished && p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk")
+                          )}
                         >
                           <Tooltip title={getStep2ATooltip(p)}>
-                            <StepLabel
-                              StepIconComponent={
-                                p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? EmergingRisks2AIcon : undefined
-                              }
+                            <StepButton
+                              disabled={false}
+                              onClick={async (e) => {
+                                if (p._cr4de_direct_analysis_value) {
+                                  e.stopPropagation();
+                                  navigate(`/step2A/${p._cr4de_direct_analysis_value}`);
+                                } else if (user?.admin) {
+                                  e.stopPropagation();
+                                  setIsLoading(true);
+
+                                  const newDirectAnalysis = await api.createDirectAnalysis({
+                                    "cr4de_expert@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${p._cr4de_contact_value})`,
+                                    "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${p._cr4de_risk_file_value})`,
+                                  });
+
+                                  await api.updateParticipant(p.cr4de_bnraparticipationid, {
+                                    "cr4de_direct_analysis@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${newDirectAnalysis.id})`,
+                                  });
+
+                                  navigate(`/step2A/${newDirectAnalysis.id}`);
+
+                                  setIsLoading(false);
+                                }
+                              }}
                             >
-                              <Trans i18nKey="riskFile.steps.2A.name">Analysis A</Trans>
-                            </StepLabel>
+                              <StepLabel
+                                StepIconComponent={
+                                  p.cr4de_validation_finished && p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk"
+                                    ? EmergingRisks2AIcon
+                                    : undefined
+                                }
+                              >
+                                <Trans i18nKey="riskFile.steps.2A.name">Analysis A</Trans>
+                              </StepLabel>
+                            </StepButton>
                           </Tooltip>
                         </Step>
-                        <Step>
-                          <Tooltip
-                            title={t(
-                              "riskFile.steps.2B.notyet",
-                              "This step cannot be started yet, we will contact you when it becomes available"
-                            )}
-                          >
-                            <StepLabel>
-                              <Trans i18nKey="riskFile.steps.2B.name">Analysis B</Trans>
-                            </StepLabel>
+                        <Step completed={Boolean(p.cr4de_cascade_analysis_finished)}>
+                          <Tooltip title={getStep2BTooltip(p)}>
+                            <StepButton
+                              disabled={false}
+                              onClick={(e) => {
+                                if (
+                                  p._cr4de_direct_analysis_value &&
+                                  p.cr4de_risk_file.cr4de_step2b_enabled &&
+                                  p.cr4de_direct_analysis_finished
+                                ) {
+                                  e.stopPropagation();
+                                  navigate(`/step2B/${p._cr4de_direct_analysis_value}`);
+                                }
+                              }}
+                            >
+                              <StepLabel>
+                                <Trans i18nKey="riskFile.steps.2B.name">Analysis B</Trans>
+                              </StepLabel>
+                            </StepButton>
                           </Tooltip>
                         </Step>
                         <Step>

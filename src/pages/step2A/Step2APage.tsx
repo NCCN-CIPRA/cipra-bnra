@@ -29,7 +29,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import { stepNames, STEPS } from "./Steps";
 import { getScenarioInputs, getTrueInputs, ScenarioInput, ScenarioInputs } from "./fields";
-import SavingOverlay from "./SavingOverlay";
+import SavingOverlay from "../../components/SavingOverlay";
 import Review from "./standard/Review";
 import ScenarioAnalysis, { validateScenarioInputs } from "./standard/ScenarioAnalysis";
 import { Scenarios } from "../../functions/scenarios";
@@ -40,6 +40,7 @@ import Introduction from "./standard/Introduction";
 import Step2ATutorial from "./information/Step2ATutorial";
 import Standard from "./standard/Standard";
 import ManMade from "./manmade/ManMade";
+import useProcess from "../../hooks/useProcess";
 
 type RouteParams = {
   step2A_id: string;
@@ -61,6 +62,7 @@ export default function Step2APage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const api = useAPI();
+  const process = useProcess();
   const { user } = useOutletContext<AuthPageContext>();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -289,7 +291,7 @@ export default function Step2APage() {
             </Button>
           </DialogActions>
         </Dialog>
-        <SavingOverlay visible={isSaving} drawerWidth={drawerWidth} />
+        <SavingOverlay visible={isSaving} />
         <Fade in={fade} timeout={transitionDelay}>
           <Box sx={{ mt: 6, mb: 16 }}>
             {(activeStep === null || !step2A) && (
@@ -395,11 +397,8 @@ export default function Step2APage() {
                     `$filter=_cr4de_contact_value eq ${user.contactid} and _cr4de_direct_analysis_value eq ${step2A.cr4de_bnradirectanalysisid}`
                   );
                   if (participants.length >= 0) {
-                    api.updateParticipant(participants[0].cr4de_bnraparticipationid, {
-                      cr4de_direct_analysis_finished: true,
-                      cr4de_direct_analysis_finished_on: new Date(),
-                    });
-                    api.finishStep(step2A._cr4de_risk_file_value, user.contactid, "2A");
+                    await process.finishStep2A(step2A.cr4de_risk_file, participants[0]);
+                    await api.finishStep(step2A._cr4de_risk_file_value, user.contactid, "2A");
                   }
                 }}
               >

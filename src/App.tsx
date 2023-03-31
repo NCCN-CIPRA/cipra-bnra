@@ -29,6 +29,7 @@ import ErrorPage from "./pages/ErrorPage";
 import Step2APage from "./pages/step2A/Step2APage";
 import ProcessManagementPage from "./pages/admin/Management/ProcessManagementPage";
 import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
+import Step2BPage from "./pages/step2B/Step2BPage";
 
 function App() {
   useEffect(() => {
@@ -104,6 +105,10 @@ function App() {
                 {
                   path: "/step2A/:step2A_id",
                   element: <Step2APage />,
+                },
+                {
+                  path: "/step2B/:step2A_id",
+                  element: <Step2BPage />,
                 },
 
                 {

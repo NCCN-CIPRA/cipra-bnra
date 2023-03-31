@@ -1,5 +1,6 @@
 import { Trans } from "react-i18next";
 import { Box, Typography, Stack, Button } from "@mui/material";
+import openInNewTab from "../../../functions/openInNewTab";
 
 export default function Introduction({ onRunTutorial }: { onRunTutorial: () => void }) {
   return (
@@ -21,6 +22,17 @@ export default function Introduction({ onRunTutorial }: { onRunTutorial: () => v
             cross-border effects. Risk cascades and catalyzing effects will be left until the next step (Analysis B).
           </Trans>
         </Typography>
+        <Typography variant="body2">
+          <Trans i18nKey="2A.introduction.info.portal.1">
+            For a better understanding of the hows and whys of this step, please view the corresponding explanation
+            videos in the information portal by clicking the button below
+          </Trans>
+        </Typography>
+        <Box sx={{ textAlign: "center", mt: 4, mb: 8 }}>
+          <Button variant="contained" onClick={() => openInNewTab("/learning/tools-validation", "_blank")}>
+            <Trans i18nKey="2A.introduction.button.infoportal">Open Information Portal</Trans>
+          </Button>
+        </Box>
         <Typography variant="body2">
           <Trans i18nKey="2A.introduction.info.3">
             The application is divided into 3 main parts; 1 for each scenario (Considerable, Major, Extreme), visible

@@ -27,6 +27,7 @@ function TextInputBox({
   initialValue,
   limitedOptions,
   debounceInterval = 5000,
+  disabled = false,
 
   onSave,
   onBlur,
@@ -37,6 +38,7 @@ function TextInputBox({
   initialValue: string | null;
   limitedOptions?: boolean;
   debounceInterval?: number;
+  disabled?: boolean | null;
 
   onSave?: (newValue: string | null) => void;
   onBlur?: () => void;
@@ -75,6 +77,7 @@ function TextInputBox({
       id={id}
       height={height}
       value={innerValue}
+      disabled={Boolean(disabled)}
       onValueChanged={(e) => {
         setInnerValue(e.value);
 

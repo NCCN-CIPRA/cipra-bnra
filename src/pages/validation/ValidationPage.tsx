@@ -317,6 +317,20 @@ export default function ValidationPage() {
   return (
     <>
       <Container sx={{ pb: 8 }} id="risk-file-container">
+        {riskFile?.cr4de_validations_processed && (
+          <Alert severity="info" sx={{ mb: 4 }}>
+            <AlertTitle>
+              <Trans i18nKey="validation.closed.title">Identification Finished</Trans>
+            </AlertTitle>
+            <Typography variant="caption">
+              <Trans i18nKey="validation.closed.body">
+                The identification step has been closed for this risk file and you will no longer be able to change your
+                feedback. If you have any additional comments, please contact{" "}
+                <a href="mailto:cipra.bnra@nccn.fgov.be">cipra.bnra@nccn.fgov.be</a> directly via e-mail.
+              </Trans>
+            </Typography>
+          </Alert>
+        )}
         <Paper>
           <Box p={2} my={4} id="definition-container">
             <HelpButton
@@ -398,6 +412,7 @@ export default function ValidationPage() {
                 initialValue={validation.cr4de_definition_feedback}
                 onSave={handleSaveField("cr4de_definition_feedback")}
                 setUpdatedValue={handleSetFieldUpdate("cr4de_definition_feedback")}
+                disabled={riskFile?.cr4de_validations_processed}
               />
             ) : (
               <Skeleton variant="rectangular" width="100%" height="300px" />
@@ -508,6 +523,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_historical_events_feedback}
+                  disabled={riskFile?.cr4de_validations_processed}
                   onSave={handleSaveField("cr4de_historical_events_feedback")}
                   setUpdatedValue={handleSetFieldUpdate("cr4de_historical_events_feedback")}
                 />
@@ -692,6 +708,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_intensity_parameters_feedback}
+                  disabled={riskFile?.cr4de_validations_processed}
                   onSave={handleSaveField("cr4de_intensity_parameters_feedback")}
                   setUpdatedValue={handleSetFieldUpdate("cr4de_intensity_parameters_feedback")}
                 />
@@ -846,6 +863,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_scenarios_feedback}
+                  disabled={riskFile?.cr4de_validations_processed}
                   onSave={handleSaveField("cr4de_scenarios_feedback")}
                   setUpdatedValue={handleSetFieldUpdate("cr4de_scenarios_feedback")}
                 />
@@ -1078,6 +1096,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_scenarios_feedback}
+                  disabled={riskFile?.cr4de_validations_processed}
                   onSave={handleSaveField("cr4de_scenarios_feedback")}
                   setUpdatedValue={handleSetFieldUpdate("cr4de_scenarios_feedback")}
                 />
@@ -1247,6 +1266,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_scenarios_feedback}
+                  disabled={riskFile?.cr4de_validations_processed}
                   onSave={handleSaveField("cr4de_scenarios_feedback")}
                   setUpdatedValue={handleSetFieldUpdate("cr4de_scenarios_feedback")}
                 />
@@ -1479,6 +1499,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_causes_feedback}
+                  disabled={riskFile?.cr4de_validations_processed}
                   onSave={handleSaveField("cr4de_causes_feedback")}
                   setUpdatedValue={handleSetFieldUpdate("cr4de_causes_feedback")}
                 />
@@ -1661,6 +1682,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_effects_feedback}
+                  disabled={riskFile?.cr4de_validations_processed}
                   onSave={handleSaveField("cr4de_effects_feedback")}
                   setUpdatedValue={handleSetFieldUpdate("cr4de_effects_feedback")}
                 />
@@ -1890,6 +1912,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_effects_feedback}
+                  disabled={riskFile?.cr4de_validations_processed}
                   onSave={handleSaveField("cr4de_effects_feedback")}
                   setUpdatedValue={handleSetFieldUpdate("cr4de_effects_feedback")}
                 />
@@ -2036,6 +2059,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_effects_feedback}
+                  disabled={riskFile?.cr4de_validations_processed}
                   onSave={handleSaveField("cr4de_effects_feedback")}
                   setUpdatedValue={handleSetFieldUpdate("cr4de_effects_feedback")}
                 />
@@ -2238,6 +2262,7 @@ export default function ValidationPage() {
               {validation ? (
                 <TextInputBox
                   initialValue={validation.cr4de_catalysing_effects_feedback}
+                  disabled={riskFile?.cr4de_validations_processed}
                   onSave={handleSaveField("cr4de_catalysing_effects_feedback")}
                   setUpdatedValue={handleSetFieldUpdate("cr4de_catalysing_effects_feedback")}
                 />
@@ -2332,7 +2357,12 @@ export default function ValidationPage() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFinishedDialogOpen(false)}>
+          <Button
+            onClick={() => {
+              setFinishedDialogOpen(false);
+              navigate("/overview");
+            }}
+          >
             <Trans i18nKey="validation.dialog.cancel">No, I am not finished</Trans>
           </Button>
           <Button

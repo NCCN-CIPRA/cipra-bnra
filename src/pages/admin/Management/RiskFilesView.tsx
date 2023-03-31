@@ -73,16 +73,26 @@ export default function RiskFilesView({
       );
     }
 
-    if (specialFilters.MY_RISK_FILES) {
+    if (specialFilters.MY_RISK_FILES && !specialFilters.MY_RISK_FILES_BACKUP) {
       runningFilter = runningFilter.filter((rf) =>
         rf.participants.some((p) => p.cr4de_contact.emailaddress1 === user?.emailaddress1 && p.cr4de_role === "analist")
       );
     }
 
-    if (specialFilters.MY_RISK_FILES_BACKUP) {
+    if (specialFilters.MY_RISK_FILES_BACKUP && !specialFilters.MY_RISK_FILES) {
       runningFilter = runningFilter.filter((rf) =>
         rf.participants.some(
           (p) => p.cr4de_contact.emailaddress1 === user?.emailaddress1 && p.cr4de_role === "analist_2"
+        )
+      );
+    }
+
+    if (specialFilters.MY_RISK_FILES && specialFilters.MY_RISK_FILES_BACKUP) {
+      runningFilter = runningFilter.filter((rf) =>
+        rf.participants.some(
+          (p) =>
+            p.cr4de_contact.emailaddress1 === user?.emailaddress1 &&
+            (p.cr4de_role === "analist" || p.cr4de_role === "analist_2")
         )
       );
     }
@@ -104,8 +114,10 @@ export default function RiskFilesView({
     }
 
     if (specialFilters.DONE_1) {
-      runningFilter = runningFilter.filter((rf) =>
-        rf.participants.filter((p) => p.cr4de_role === "expert").every((p) => p.cr4de_validation_finished)
+      runningFilter = runningFilter.filter(
+        (rf) =>
+          rf.participants.filter((p) => p.cr4de_role === "expert").every((p) => p.cr4de_validation_finished) &&
+          !rf.cr4de_validation_silent_procedure_until
       );
     }
 
@@ -207,7 +219,7 @@ export default function RiskFilesView({
             <Grid item xs={12} sm={6} md={4}>
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.DONE_1} />}
-                label="Show risk files ready for validation processing"
+                label="Show only risk files ready for validation processing"
                 onClick={() => toggleSpecialFilter("DONE_1")}
               />
             </Grid>

@@ -1,6 +1,6 @@
 import TextInputBox from "../../components/TextInputBox";
 import { Paper } from "@mui/material";
-import SavingOverlay from "./SavingOverlay";
+import SavingOverlay from "../../components/SavingOverlay";
 
 export default function QualitativeAnalysis({
   initialValue,

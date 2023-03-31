@@ -2,8 +2,7 @@ export interface DVParticipation<
   ContactType = unknown,
   RiskFileType = unknown,
   ValidationType = unknown,
-  DirectAnalysisType = unknown,
-  CascadeAnalysisType = unknown
+  DirectAnalysisType = unknown
 > {
   cr4de_bnraparticipationid: string;
 
@@ -23,10 +22,10 @@ export interface DVParticipation<
   _cr4de_direct_analysis_value: string | null;
   cr4de_direct_analysis: DirectAnalysisType;
   cr4de_direct_analysis_finished: boolean | null;
+  cr4de_direct_analysis_finished_on: Date | null;
 
-  _cr4de_cascade_analysis_value: string | null;
-  cr4de_cascade_analysis: CascadeAnalysisType;
   cr4de_cascade_analysis_finished: boolean | null;
+  cr4de_cascade_analysis_finished_on: Date | null;
 
   createdon: Date;
 }

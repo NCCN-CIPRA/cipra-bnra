@@ -786,6 +786,7 @@ export default function useAPI(): API {
       );
     },
     finishStep: async function (riskFileId: string, contactId: string, step: string): Promise<void> {
+      // Send an email to CIPRA analists
       await authFetch(
         "https://prod-233.westeurope.logic.azure.com:443/workflows/9ca84342adac4c8192391b17507e8a93/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KvQCYydJbAMruMqSy7Psc3U6pqDXC8QehNcDwzGS3QY",
         {

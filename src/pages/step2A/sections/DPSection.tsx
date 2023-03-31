@@ -47,7 +47,7 @@ export default function DPSection({
         </Trans>
         <Box sx={{ marginLeft: -1 }}>
           <Button color="warning" onClick={onOpenCauses}>
-            <Trans i18nKey="button.showConsequences">Show Potential Causes</Trans>
+            <Trans i18nKey="button.showCauses">Show Potential Causes</Trans>
           </Button>
         </Box>
       </Alert>

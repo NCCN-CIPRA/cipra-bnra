@@ -1,4 +1,4 @@
-import { Box, IconButton, Paper, Stack, Typography, Tooltip, Button } from "@mui/material";
+import { Box, IconButton, Paper, Stack, Typography, Tooltip, Button, Alert } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
 import TextInputBox from "../../../components/TextInputBox";
 import { DirectImpactField } from "../../learning/QuantitativeScales/DI";
@@ -10,7 +10,6 @@ import { ReactNode, useState } from "react";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import HbCalculator from "./HbCalculator";
-import { Alert } from "@mui/lab";
 
 export default function HSection({
   fieldsRef,
