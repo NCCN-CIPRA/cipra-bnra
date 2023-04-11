@@ -154,11 +154,11 @@ export default function ScenarioAnalysis({
               <Box sx={{ mb: 8 }}>
                 <Typography variant="subtitle2">{c.cr4de_cause_hazard.cr4de_title}</Typography>
 
-                <Stack direction="row">
+                <Stack direction="column">
                   {scenarioNames.map((scenarioName, i) => {
                     return (
-                      <Stack direction="column" sx={{ px: 2, pt: 2, mb: 4 }} id="step2A-scenario-description">
-                        <TableContainer ref={ref} component={Paper} sx={{ width: "50%" }}>
+                      <Stack direction="row" sx={{ px: 2, pt: 2, mb: 4 }} id="step2A-scenario-description">
+                        <TableContainer ref={ref} component={Paper} sx={{}}>
                           <Table size="small" aria-label="a dense table">
                             <TableHead>
                               <TableRow>

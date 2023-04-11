@@ -714,7 +714,7 @@ export default function EditorPage() {
           onClick={async () => {
             await handleSave();
 
-            if (participants && participants.filter((p) => p.cr4de_validation_finished).length >= 2) {
+            if (participants && participants.filter((p) => p.cr4de_validation_finished).length >= 1) {
               if (Object.keys(unprocessedFeedback()).length > 0) {
                 setValidationNotProcessedDialogOpen(true);
               } else {
