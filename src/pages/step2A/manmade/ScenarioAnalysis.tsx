@@ -164,6 +164,16 @@ export default function ScenarioAnalysis({
           scenario={scenario}
           color={step.color || "#FFE699"}
         />
+        <Alert severity="info" sx={{ mt: 2, mb: 0 }}>
+          <Typography variant="body2">
+            <Trans i18nKey="2A.quali.required">
+              Attention, il est nécessaire de remplir tous les champs du scénario avant de pouvoir passer à l’étape
+              suivante. Bien qu’il soit important pour nous de disposer d’une justification quant à la valeur de
+              motivation que vous avez choisie, si vous ne souhaitez pas nous fournir de justification textuelle, nous
+              vous invitons à cliquer sur le bouton <i>PAS DE COMMENTAIRES</i>.
+            </Trans>
+          </Typography>
+        </Alert>
       </Stack>
 
       <MSection

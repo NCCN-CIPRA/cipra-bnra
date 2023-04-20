@@ -31,19 +31,27 @@ export default function MSection({
         <Trans i18nKey="2A.m.title">Motivation</Trans>
       </Typography>
 
-      <Typography variant="body2">
+      <Typography variant="body2" paragraph>
         <Trans i18nKey="2A.m.quanti.info.1">
           Please select a quantitative estimation below for the motivation of the current actor capabilities.
         </Trans>
       </Typography>
-      {/* <Alert severity="warning">
-        <Trans i18nKey="2A.dp.quanti.info.2">
-          In this step, you should only estimate the <b>direct</b> probability. For example, when estimating the direct
-          probability of a <i>Dam failure</i>, the possibility that a dam fails due to an earthquake should not be
-          considered. This possibility will be explored when estimating the conditional probabilities in the following
-          phase.
+
+      <Typography variant="body2" paragraph>
+        <Trans i18nKey="2A.m.quanti.info.2">
+          La motivation est un paramètre qui reflète l'imprévisibilité des acteurs et qui a pour vocation d’exprimer la
+          volonté d’un groupe d’acteurs donné de perpétrer une attaque sur le territoire belge selon ses capacités,
+          indépendamment de la réussite de cette attaque. On entend par <i>motivation</i>, la{" "}
+          <b>probabilité que l’acteur mène une attaque selon ses capacités au cours des trois prochaines années</b>.
         </Trans>
-      </Alert> */}
+      </Typography>
+      <Typography variant="body2" paragraph>
+        <Trans i18nKey="2A.m.quanti.info.3">
+          Lorsque plusieurs acteurs ont été identifiés au sein d’un même niveau de capacité, nous vous invitons à
+          encoder dans l’application la valeur correspondant à l’acteur ayant la motivation la plus importante. Vous
+          pouvez donner des informations plus détaillées à ce sujet dans le champ textuel ci-dessous.
+        </Trans>
+      </Typography>
 
       <Box component={Paper} sx={{ mx: 2, p: 2, mb: 4 }} id="step2A-m-quantitative-box">
         <Typography variant="subtitle2">

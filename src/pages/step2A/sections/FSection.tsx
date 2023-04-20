@@ -39,6 +39,12 @@ export default function FSection({
           impact of the current intensity scenarios.
         </Trans>
       </Typography>
+      <Typography variant="body2">
+        <Trans i18nKey="2A.f.quanti.info.12">
+          Economic effects and damages are counted as financial asset damages (Fa), and the reduction of economic
+          performance (Fb).
+        </Trans>
+      </Typography>
       <Alert severity="warning">
         <Box sx={{ mt: 0, mb: 1 }}>
           <Trans i18nKey="2A.f.quanti.info.2">
