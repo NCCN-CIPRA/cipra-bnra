@@ -40,12 +40,21 @@ export default function FSection({
         </Trans>
       </Typography>
       <Alert severity="warning">
-        <Trans i18nKey="2A.f.quanti.info.2">
-          In this step, you should only estimate the <b>direct</b> financial impact. For example, when estimating the
-          direct impact of an <i>Earthquake</i>, the financial impact due to a possible
-          <i>Failure of electricity supply</i> should not be considered. This possibility will be explored when
-          estimating the conditional probabilities in the following phase.
-        </Trans>
+        <Box sx={{ mt: 0, mb: 1 }}>
+          <Trans i18nKey="2A.f.quanti.info.2">
+            In this step, you should only estimate the <b>direct</b> financial impact. For example, when estimating the
+            direct impact of an <i>Earthquake</i>, the financial impact due to a possible
+            <i>Failure of electricity supply</i> should not be considered. This possibility will be explored when
+            estimating the conditional probabilities in the following phase.
+          </Trans>
+        </Box>
+        <Box sx={{ mt: 0, mb: 1 }}>
+          <Trans i18nKey="2A.h.quanti.info.3">
+            En cliquant sur le bouton <i>MONTRER LES CONSÉQUENCES POSSIBLES</i>, vous pouvez afficher les risques du
+            catalogue de la BNRA qui ont été identifiés lors de l’étape 1 comme étant des conséquences du risque à
+            évaluer et qui ne doivent dès lors, pas être pris en compte dans l’estimation de l’impact humain direct.
+          </Trans>
+        </Box>
         <Box sx={{ marginLeft: -1 }}>
           <Button color="warning" onClick={onOpenEffects}>
             <Trans i18nKey="button.showConsequences">Show Potential Consequences</Trans>

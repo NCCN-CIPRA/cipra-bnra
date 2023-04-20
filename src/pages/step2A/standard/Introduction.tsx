@@ -42,6 +42,15 @@ export default function Introduction({ onRunTutorial }: { onRunTutorial: () => v
           </Trans>
         </Typography>
         <Typography variant="body2">
+          <Trans i18nKey="2A.introduction.info.31">
+            Binnen de 3 hooddelen zal u gevraagd worden om de directe waarschijnlijkheid en de directe impacten van de
+            intensiteitsscenario’s van het bestudeerde risico kwantitatief in te schatten en deze vervolgens kwalitatief
+            te onderbouwen. U kunt de kwantitatieve schalen oproepen via de “informatie” knop die u terugvindt links
+            onderaan uw scherm. Hierop vindt u naast de waarden gekoppeld aan de verschillende klassen (0 – 5) ook een
+            beschrijving terug van de verschillende in te schatten parameters en verklarende concrete voorbeelden.
+          </Trans>
+        </Typography>
+        <Typography variant="body2">
           <Trans i18nKey="2A.introduction.info.4">
             If you would like a tutorial on how to use the application, press the button below. Otherwise press the{" "}
             <b>Next</b> button on the bottom-right to continue to part 2

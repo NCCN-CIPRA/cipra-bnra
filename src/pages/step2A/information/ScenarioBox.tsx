@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { IntensityParameter } from "../../../functions/intensityParameters";
 import { useState } from "react";
+import { Trans } from "react-i18next";
 
 export default function ScenarioBox({
   title,
@@ -52,16 +53,20 @@ export default function ScenarioBox({
               id="panel1a-header"
               sx={{ backgroundColor: `${color}66`, borderTopLeftRadius: 4, borderTopRightRadius: 4 }}
             >
-              <Typography sx={{ fontWeight: "bold" }}>{title}</Typography>
+              <Typography sx={{ fontWeight: "bold" }}>
+                {title} <Trans i18nKey="2A.scenario.title">Scenario</Trans>
+              </Typography>
             </AccordionSummary>
             <AccordionDetails sx={{ p: 0 }}>
               <TableContainer sx={{}}>
                 <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
                   <TableHead>
                     <TableRow sx={{ backgroundColor: theme.palette.action.hover }}>
-                      <TableCell sx={{ whiteSpace: "nowrap", pr: 6 }}>Parameter</TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap", pr: 6 }}>
+                        <Trans i18nKey="2A.scenario.parameter">Parameter</Trans>
+                      </TableCell>
                       <TableCell width="100%" sx={{}}>
-                        Value
+                        <Trans i18nKey="2A.scenario.value">Value</Trans>
                       </TableCell>
                     </TableRow>
                   </TableHead>

@@ -39,12 +39,29 @@ export default function DPSection({
         </Trans>
       </Typography>
       <Alert severity="warning">
-        <Trans i18nKey="2A.dp.quanti.info.2">
-          In this step, you should only estimate the <b>direct</b> probability. For example, when estimating the direct
-          probability of a <i>Dam failure</i>, the possibility that a dam fails due to an earthquake should not be
-          considered. This possibility will be explored when estimating the conditional probabilities in the following
-          phase.
-        </Trans>
+        <Box sx={{ mt: 0, mb: 1 }}>
+          <Trans i18nKey="2A.dp.quanti.info.2">
+            In this step, you should only estimate the <b>direct</b> probability. For example, when estimating the
+            direct probability of a <i>Dam failure</i>, the possibility that a dam fails due to an earthquake should not
+            be considered. This possibility will be explored when estimating the conditional probabilities in the
+            following phase.
+          </Trans>
+        </Box>
+        <Box sx={{ mt: 0, mb: 1 }}>
+          <Trans i18nKey="2A.dp.quanti.info.3">
+            Bijvoorbeeld, bij het inschatten van de directe waarschijnlijkheid van een <i>Dam failure</i> moet de
+            mogelijkheid dat een dam faalt ten gevolge van een aardbeving buiten beschouwing worden gelaten. Dit zal
+            worden ingeschat in fase 2B van de BNRA. Hier dient gekeken te worden naar alle elementen die bijvoorbeeld
+            een dam failure kunnen veroorzaken, en die niet werden opgenomen als mogelijke oorzaken in de BNRA.
+          </Trans>
+        </Box>
+        <Box sx={{ mt: 0, mb: 1 }}>
+          <Trans i18nKey="2A.dp.quanti.info.4">
+            Door op de knop <i>TOON POTENTIËLE OORZAKEN</i> te klikken, kunt u de risico's in de BNRA-catalogus
+            weergeven die in stap 1 zijn geïdentificeerd als oorzaken van het te beoordelen risico en die daarom{" "}
+            <b>niet</b> moeten worden opgenomen in de inschatting van de directe waarschijnlijkheids.
+          </Trans>
+        </Box>
         <Box sx={{ marginLeft: -1 }}>
           <Button color="warning" onClick={onOpenCauses}>
             <Trans i18nKey="button.showCauses">Show Potential Causes</Trans>

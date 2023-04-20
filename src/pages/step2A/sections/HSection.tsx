@@ -46,12 +46,37 @@ export default function HSection({
           the current intensity scenarios.
         </Trans>
       </Typography>
-      <Alert severity="warning">
-        <Trans i18nKey="2A.h.quanti.info.2">
-          In this step, you should only estimate the <b>direct</b> human impact. For example, when estimating the direct
-          impact of an <i>Earthquake</i>, the impact due to a possible <i>Dam failure</i> should not be considered. This
-          possibility will be explored when estimating the conditional probabilities in the following phase.
+      <Typography variant="body2">
+        <Trans i18nKey="2A.dp.quanti.info.12">
+          Les indicateurs de l'échelle d'impact humain cherchent à évaluer les effets d'un risque sur les vies (Ha),
+          l'intégrité physique et la santé mentale (Hb) du grand public et sur les personnes qui ont besoin d'assistance
+          à la suite de l'événement (Hc).
         </Trans>
+      </Typography>
+      <Typography variant="body2">
+        <Trans i18nKey="2A.dp.quanti.info.13">
+          Pour rappel, l’indicateur de dommages relatif à l'intégrité physique et la santé mentale du grand public (Hb)
+          utilise des coefficients de pondération. Pour vous aider à calculer la valeur finale de cet indicateur, nous
+          avons mis à votre disposition un outil de calcul. Vous pouvez y accéder en cliquant sur le bouton en forme de
+          calculatrice qui apparait à votre écran.
+        </Trans>
+      </Typography>
+      <Alert severity="warning">
+        <Box sx={{ mt: 0, mb: 1 }}>
+          <Trans i18nKey="2A.h.quanti.info.2">
+            In this step, you should only estimate the <b>direct</b> human impact. For example, when estimating the
+            direct impact of an <i>Earthquake</i>, the impact due to a possible <i>Dam failure</i> should not be
+            considered. This possibility will be explored when estimating the conditional probabilities in the following
+            phase.
+          </Trans>
+        </Box>
+        <Box sx={{ mt: 0, mb: 1 }}>
+          <Trans i18nKey="2A.h.quanti.info.3">
+            En cliquant sur le bouton <i>MONTRER LES CONSÉQUENCES POSSIBLES</i>, vous pouvez afficher les risques du
+            catalogue de la BNRA qui ont été identifiés lors de l’étape 1 comme étant des conséquences du risque à
+            évaluer et qui ne doivent dès lors, pas être pris en compte dans l’estimation de l’impact humain direct.
+          </Trans>
+        </Box>
         <Box sx={{ marginLeft: -1 }}>
           <Button color="warning" onClick={onOpenEffects}>
             <Trans i18nKey="button.showConsequences">Show Potential Consequences</Trans>
@@ -119,15 +144,16 @@ export default function HSection({
           Please use the field below to explain your reasoning for the quantitative estimations given in the previous
           section.
         </Trans>
-      </Typography>{" "}
+      </Typography>
       <Typography variant="caption">
         <Trans i18nKey="2A.h.quali.info.2">
           Example: <i>Heatwaves</i> cause dehydration, heat stroke and exhaustion, which have a significant negative
           impact on health. They lead to increased mortality and morbidity, especially in vulnerable groups (young
           children and the elderly). For a considerable scenario, we can expect between 1000 and 1500 people to die
-          (mainly aged 85 years or more).
+          (mainly aged 85 years or more) based on data from the 2022 heatwave in Belgium (source).
         </Trans>
       </Typography>
+
       <QualiTextInputBox
         error={inputErrors.indexOf("cr4de_di_quali_h") >= 0}
         initialValue={fieldsRef.cr4de_di_quali_h || ""}

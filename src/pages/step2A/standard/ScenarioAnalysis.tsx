@@ -115,21 +115,20 @@ export default function ScenarioAnalysis({
           </Alert>
         )}
         <Typography variant="body2">
-          <Trans i18nKey={`2A.quanti.info.${scenarioName}.1`}>
+          <Trans i18nKey={`2A.STD.quanti.info.${scenarioName}.1`}>
             Explanation about filling in the direct analysis for the scenario
           </Trans>
-        </Typography>
-        <Typography variant="body2">
-          <Trans i18nKey="2A.quanti.info.2">The scenario under review is the following</Trans>
         </Typography>
         <Box sx={{ px: 2 }} id="step2A-scenario-description">
           <TableContainer ref={ref} component={Paper}>
             <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
               <TableHead>
                 <TableRow sx={{ backgroundColor: theme.palette.action.hover }}>
-                  <TableCell sx={{ whiteSpace: "nowrap", pr: 6 }}>Parameter</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap", pr: 6 }}>
+                    <Trans i18nKey="2A.scenario.parameter">Parameter</Trans>
+                  </TableCell>
                   <TableCell width="100%" sx={{}}>
-                    Value
+                    <Trans i18nKey="2A.scenario.value">Value</Trans>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -170,6 +169,16 @@ export default function ScenarioAnalysis({
           scenario={scenario}
           color={step.color || "#FFE699"}
         />
+        <Alert severity="info" sx={{ mt: 2, mb: 0 }}>
+          <Typography variant="body2">
+            <Trans i18nKey="2A.quali.required">
+              Attention, il est nécessaire de remplir tous les champs du scénario avant de pouvoir passer à l’étape
+              suivante. Bien qu’il soit important pour nous de disposer d’une justification quant à la valeur de
+              motivation que vous avez choisie, si vous ne souhaitez pas nous fournir de justification textuelle, nous
+              vous invitons à cliquer sur le bouton <i>PAS DE COMMENTAIRES</i>.
+            </Trans>
+          </Typography>
+        </Alert>
       </Stack>
 
       <DPSection

@@ -30,6 +30,7 @@ import useBreadcrumbs from "../../../hooks/useBreadcrumbs";
 import GraphView from "./GraphView";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import { DVValidation } from "../../../types/dataverse/DVValidation";
+import PrioritiesView from "./PrioritiesView";
 
 export default function ProcessManagementPage() {
   const api = useAPI();
@@ -222,6 +223,7 @@ export default function ProcessManagementPage() {
               <Tab label="Group By Contact" value="contacts" />
               <Tab label="Group By Risk File" value="riskFiles" />
               <Tab label="Lovely Graphs" value="graphs" />
+              <Tab label="Consensus Meeting Priorities" value="priorities" />
             </TabList>
           </Box>
           <TabPanel value="contacts" sx={{ padding: 0 }}>
@@ -264,6 +266,17 @@ export default function ProcessManagementPage() {
             <List dense>
               {participations ? (
                 <GraphView participations={participations} />
+              ) : (
+                <Box sx={{ m: 4, textAlign: "center" }}>
+                  <CircularProgress />
+                </Box>
+              )}
+            </List>
+          </TabPanel>
+          <TabPanel value="priorities">
+            <List dense>
+              {riskFiles ? (
+                <PrioritiesView baseRiskFiles={riskFiles} />
               ) : (
                 <Box sx={{ m: 4, textAlign: "center" }}>
                   <CircularProgress />

@@ -41,13 +41,37 @@ export default function ESection({
           impact of the current intensity scenarios.
         </Trans>
       </Typography>
-      <Alert severity="warning">
-        <Trans i18nKey="2A.e.quanti.info.2">
-          In this step, you should only estimate the <b>direct</b> environmental impact. For example, when estimating
-          the direct impact of an <i>Earthquake</i>, the environmental impact due to a possible <i>Dam failure</i>
-          should not be considered. This possibility will be explored when estimating the conditional probabilities in
-          the following phase.
+      <Typography variant="body2">
+        <Trans i18nKey="2A.e.quanti.info.12">
+          Les indicateurs de l'échelle d'impact environnemental cherchent à évaluer les impacts d’un risque aux
+          écosystèmes et/ou ses effets négatifs sur les services écosystémiques (Ea). On considère qu’un écosystème est
+          endommagé si, par exemple, l'équilibre naturel est considérablement perturbé ou si la fertilité du sol est
+          fortement compromise (exemple : forte pollution chimique des eaux de surface).
         </Trans>
+      </Typography>
+      <Typography variant="body2">
+        <Trans i18nKey="2A.e.quanti.info.13">
+          L'unité de mesure de cet indicateur est la superficie x année (km² x année). Elle est calculée en multipliant
+          la zone affectée par le nombre d'années que dure l'effet néfaste. Si une zone est sous l'influence de
+          plusieurs effets, elle n'est comptée qu'une seule fois.
+        </Trans>
+      </Typography>
+      <Alert severity="warning">
+        <Box sx={{ mt: 0, mb: 1 }}>
+          <Trans i18nKey="2A.e.quanti.info.2">
+            In this step, you should only estimate the <b>direct</b> environmental impact. For example, when estimating
+            the direct impact of an <i>Earthquake</i>, the environmental impact due to a possible <i>Dam failure</i>
+            should not be considered. This possibility will be explored when estimating the conditional probabilities in
+            the following phase.
+          </Trans>
+        </Box>
+        <Box sx={{ mt: 0, mb: 1 }}>
+          <Trans i18nKey="2A.h.quanti.info.3">
+            En cliquant sur le bouton <i>MONTRER LES CONSÉQUENCES POSSIBLES</i>, vous pouvez afficher les risques du
+            catalogue de la BNRA qui ont été identifiés lors de l’étape 1 comme étant des conséquences du risque à
+            évaluer et qui ne doivent dès lors, pas être pris en compte dans l’estimation de l’impact humain direct.
+          </Trans>
+        </Box>
         <Box sx={{ marginLeft: -1 }}>
           <Button color="warning" onClick={onOpenEffects}>
             <Trans i18nKey="button.showConsequences">Show Potential Consequences</Trans>

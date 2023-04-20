@@ -109,7 +109,7 @@ export default function ScenarioAnalysis({
           </Alert>
         )}
         <Typography variant="body2">
-          <Trans i18nKey={`2A.quanti.info.${scenarioName}.1`}>
+          <Trans i18nKey={`2A.MM.quanti.info.${scenarioName}.1`}>
             Explanation about filling in the direct analysis for the scenario
           </Trans>
         </Typography>

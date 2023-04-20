@@ -116,7 +116,7 @@ export default function RiskFilesView({
     if (specialFilters.DONE_1) {
       runningFilter = runningFilter.filter(
         (rf) =>
-          rf.participants.filter((p) => p.cr4de_role === "expert").every((p) => p.cr4de_validation_finished) &&
+          rf.participants.filter((p) => p.cr4de_role === "expert" && p.cr4de_validation_finished).length > 1 &&
           !rf.cr4de_validation_silent_procedure_until
       );
     }

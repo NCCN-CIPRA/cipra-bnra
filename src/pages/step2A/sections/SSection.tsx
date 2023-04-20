@@ -50,13 +50,59 @@ export default function SSection({
           of the current intensity scenarios.
         </Trans>
       </Typography>
-      <Alert severity="warning">
-        <Trans i18nKey="2A.s.quanti.info.2">
-          In this step, you should only estimate the <b>direct</b> societal impact. For example, when estimating the
-          direct impact of an <i>Earthquake</i>, the impact due to a possible <i>Failure of electricity supply</i>{" "}
-          should not be considered. This possibility will be explored when estimating the conditional probabilities in
-          the following phase.
+      <Typography variant="body2">
+        <Trans i18nKey="2A.s.quanti.info.12">
+          On entend par impact direct, les impacts d’un incident qui ne peuvent être attribués aux effets cascades
+          (risques conséquents) dans le catalogue de risques de la BNRA.
         </Trans>
+      </Typography>
+      <Typography variant="body2">
+        <Trans i18nKey="2A.s.quanti.info.13">
+          Les indicateurs de l'échelle d'impact humain cherchent à évaluer les effets d’un risque :
+        </Trans>
+      </Typography>
+      <ul>
+        <li>
+          <Typography variant="body2">
+            <Trans i18nKey="2A.s.quanti.info.14">
+              sur la population belge, par exemple par le biais de perturbations de la fourniture de biens essentiels
+              (Sa), d'une atteinte à l'ordre public et la sécurité intérieure (Sb).
+            </Trans>
+          </Typography>
+        </li>
+        <li>
+          <Typography variant="body2">
+            <Trans i18nKey="2A.s.quanti.info.15">
+              sur l'État par le biais d’une atteinte à la réputation de la Belgique à l'étranger (Sc) ou d’une perte de
+              confiance en l'État et/ou de ses valeurs ou d’un disfonctionnement de l’Etat (Sd).
+            </Trans>
+          </Typography>
+        </li>
+      </ul>
+      <Typography variant="body2">
+        <Trans i18nKey="2A.s.quanti.info.17">
+          Pour rappel, l’indicateur de dommages relatif à la perturbation de la fourniture de biens essentiels (Sa),
+          utilise des coefficients de pondération. Pour vous aider à calculer la valeur finale de cet indicateur, nous
+          avons mis à votre disposition un outil de calcul. Vous pouvez y accéder en cliquant sur le bouton en forme de
+          calculatrice qui apparait à votre écran.
+        </Trans>
+      </Typography>
+      <Alert severity="warning">
+        <Box sx={{ mt: 0, mb: 1 }}>
+          <Trans i18nKey="2A.s.quanti.info.2">
+            In this step, you should only estimate the <b>direct</b> societal impact. For example, when estimating the
+            direct impact of an <i>Earthquake</i>, the impact due to a possible <i>Failure of electricity supply</i>{" "}
+            should not be considered. This possibility will be explored when estimating the conditional probabilities in
+            the following phase.
+          </Trans>
+        </Box>
+        <Box sx={{ mt: 0, mb: 1 }}>
+          <Trans i18nKey="2A.h.quanti.info.3">
+            En cliquant sur le bouton <i>MONTRER LES CONSÉQUENCES POSSIBLES</i>, vous pouvez afficher les risques du
+            catalogue de la BNRA qui ont été identifiés lors de l’étape 1 comme étant des conséquences du risque à
+            évaluer et qui ne doivent dès lors, pas être pris en compte dans l’estimation de l’impact humain direct.
+          </Trans>
+        </Box>
         <Box sx={{ marginLeft: -1 }}>
           <Button color="warning" onClick={onOpenEffects}>
             <Trans i18nKey="button.showConsequences">Show Potential Consequences</Trans>

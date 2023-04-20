@@ -17,6 +17,21 @@ export default function Review({ inputs, inputErrors }: { inputs: ScenarioInputs
         </Alert>
       )}
 
+      <Typography variant="body1" paragraph>
+        <Trans i18nKey="2A.review.info.1">
+          Sur cette page, vous trouverez un aperçu de l’ensemble de vos évaluations et de vos commentaires. Cet aperçu
+          vous permet de vérifier la cohérence de vos inputs avant de clôturer l’étape 2A.
+        </Trans>
+      </Typography>
+
+      <Typography variant="body1" paragraph sx={{ mb: 6 }}>
+        <Trans i18nKey="2A.review.info.2">
+          Quand vous estimez que vous avez terminé cette étape, nous vous invitons à cliquer sur le bouton “sauvegarder
+          et quitter” puis “oui, j’ai fini”. Nous recevrons alors une notification automatique et vous pourrez alors
+          débuter la deuxième partie de l’étape 2.
+        </Trans>
+      </Typography>
+
       <Typography variant="h6">
         <Trans i18nkey="2A.review.dp.title">Direct Probability</Trans>
       </Typography>
