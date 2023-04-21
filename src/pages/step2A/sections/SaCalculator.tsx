@@ -117,8 +117,15 @@ export default function SaCalculator({
   const { t } = useTranslation();
 
   const [shortfalls, setShortfalls] = useState<
-    { id: number; service: keyof typeof SERVICE_WEIGHTS | ""; amount: number; duration: number }[]
-  >([{ id: 0, service: "", amount: 0, duration: 0 }]);
+    {
+      id: number;
+      service: keyof typeof SERVICE_WEIGHTS | "";
+      amount: number;
+      duration: number;
+      amountDisplay: string;
+      durationDisplay: string;
+    }[]
+  >([{ id: 0, service: "", amount: 0, duration: 0, amountDisplay: "0", durationDisplay: "0" }]);
 
   const [scale, setScale] = useState<keyof typeof SCALE_TO_SLIDER>("Sa0");
   const [includeQuali, setIncludeQuali] = useState(false);
@@ -141,13 +148,29 @@ export default function SaCalculator({
   const addShortfall = () => {
     setShortfalls([
       ...shortfalls,
-      { id: shortfalls[shortfalls.length - 1].id + 1, service: "", amount: 0, duration: 0 },
+      {
+        id: shortfalls[shortfalls.length - 1].id + 1,
+        service: "",
+        amount: 0,
+        duration: 0,
+        amountDisplay: "0",
+        durationDisplay: "0",
+      },
     ]);
   };
 
   const removeShortfall = (id: number) => {
     if (shortfalls.length <= 1)
-      setShortfalls([{ id: shortfalls[shortfalls.length - 1].id + 1, service: "", amount: 0, duration: 0 }]);
+      setShortfalls([
+        {
+          id: shortfalls[shortfalls.length - 1].id + 1,
+          service: "",
+          amount: 0,
+          duration: 0,
+          amountDisplay: "0",
+          durationDisplay: "0",
+        },
+      ]);
     else setShortfalls(shortfalls.filter((s) => s.id !== id));
   };
 
@@ -164,27 +187,29 @@ export default function SaCalculator({
     );
   };
 
-  const handleChangeAmount = (id: number, amount: number) => {
+  const handleChangeAmount = (id: number, amount: string) => {
     setShortfalls(
       shortfalls.map((s) => {
         if (s.id !== id) return s;
 
         return {
           ...s,
-          amount,
+          amount: isNaN(parseInt(amount, 10)) ? 0 : parseInt(amount, 10),
+          amountDisplay: amount,
         };
       })
     );
   };
 
-  const handleChangeDuration = (id: number, duration: number) => {
+  const handleChangeDuration = (id: number, duration: string) => {
     setShortfalls(
       shortfalls.map((s) => {
         if (s.id !== id) return s;
 
         return {
           ...s,
-          duration,
+          duration: isNaN(parseInt(duration, 10)) ? 0 : parseInt(duration, 10),
+          durationDisplay: duration,
         };
       })
     );
@@ -316,16 +341,16 @@ export default function SaCalculator({
                     label={t("calculator.sa.numberOfPeople", "# people")}
                     variant="outlined"
                     type="number"
-                    value={s.amount}
-                    onChange={(e) => handleChangeAmount(s.id, parseInt(e.target.value, 10))}
+                    value={s.amountDisplay}
+                    onChange={(e) => handleChangeAmount(s.id, e.target.value)}
                     sx={{ width: 250 }}
                   />
                   <TextField
                     label={t("calculator.sa.duration", "Duration (days)")}
                     variant="outlined"
                     type="number"
-                    value={s.duration}
-                    onChange={(e) => handleChangeDuration(s.id, parseInt(e.target.value, 10))}
+                    value={s.durationDisplay}
+                    onChange={(e) => handleChangeDuration(s.id, e.target.value)}
                     sx={{ width: 250 }}
                   />
                   <IconButton onClick={() => removeShortfall(s.id)} color="error">
@@ -341,11 +366,11 @@ export default function SaCalculator({
               </Button>
             </Stack>
           </Stack>
-          <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-            <Typography variant="body1">
+          <Stack direction="row" justifyContent="space-between" alignItems="justify-content" sx={{ mt: 4, mb: 2 }}>
+            <Typography variant="body1" fontWeight="bold">
               <Trans i18nKey="calculator.result">Resulting Scale:</Trans>
             </Typography>
-            <Typography variant="body2" fontWeight="bold">
+            <Typography variant="body1" fontWeight="bold">
               {scale}
             </Typography>
           </Stack>

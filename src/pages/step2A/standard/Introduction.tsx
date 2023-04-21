@@ -29,7 +29,7 @@ export default function Introduction({ onRunTutorial }: { onRunTutorial: () => v
           </Trans>
         </Typography>
         <Box sx={{ textAlign: "center", mt: 4, mb: 8 }}>
-          <Button variant="contained" onClick={() => openInNewTab("/learning/tools-validation", "_blank")}>
+          <Button variant="contained" onClick={() => openInNewTab("/learning/tools-analysisA", "_blank")}>
             <Trans i18nKey="2A.introduction.button.infoportal">Open Information Portal</Trans>
           </Button>
         </Box>

@@ -27,7 +27,7 @@ const SCALE_TO_SLIDER = {
   Hb5: 5,
 };
 
-const generateQualiInput = (severe: number, moderate: number, minor: number) => {
+const generateQualiInput = (severe: string, moderate: string, minor: string) => {
   return `
   <p>
 Severe injuries and illnesses: ${severe}<br />
@@ -48,15 +48,19 @@ export default function HbCalculator({
 }) {
   const { t } = useTranslation();
 
-  const [severe, setSevere] = useState(0);
-  const [moderate, setModerate] = useState(0);
-  const [minor, setMinor] = useState(0);
+  const [severe, setSevere] = useState("0");
+  const [moderate, setModerate] = useState("0");
+  const [minor, setMinor] = useState("0");
 
   const [scale, setScale] = useState<keyof typeof SCALE_TO_SLIDER>("Hb0");
   const [includeQuali, setIncludeQuali] = useState(false);
 
   useEffect(() => {
-    const total = severe + 0.1 * moderate + 0.01 * minor;
+    const s = isNaN(parseInt(severe, 10)) ? 0 : parseInt(severe, 10);
+    const mo = isNaN(parseInt(moderate, 10)) ? 0 : parseInt(moderate, 10);
+    const mi = isNaN(parseInt(minor, 10)) ? 0 : parseInt(minor, 10);
+
+    const total = s + 0.1 * mo + 0.01 * mi;
 
     if (total === 0) setScale("Hb0");
     else if (total < 100) setScale("Hb1");
@@ -104,7 +108,7 @@ export default function HbCalculator({
               variant="standard"
               type="number"
               value={severe}
-              onChange={(e) => setSevere(e.target.value === "" ? 0 : parseInt(e.target.value, 10))}
+              onChange={(e) => setSevere(e.target.value)}
             />
             <TextField
               label={t("calculator.hb.moderate", "People with moderate injuries or illnesses")}
@@ -115,7 +119,7 @@ export default function HbCalculator({
               variant="standard"
               type="number"
               value={moderate}
-              onChange={(e) => setModerate(e.target.value === "" ? 0 : parseInt(e.target.value, 10))}
+              onChange={(e) => setModerate(e.target.value)}
             />
             <TextField
               label={t("calculator.hb.minor", "People with minor injuries or illnesses")}
@@ -126,13 +130,13 @@ export default function HbCalculator({
               variant="standard"
               type="number"
               value={minor}
-              onChange={(e) => setMinor(e.target.value === "" ? 0 : parseInt(e.target.value, 10))}
+              onChange={(e) => setMinor(e.target.value)}
             />
             <Stack direction="row" justifyContent="space-between">
-              <Typography variant="body1">
+              <Typography variant="body1" fontWeight="bold">
                 <Trans i18nKey="calculator.result">Resulting Scale:</Trans>
               </Typography>
-              <Typography variant="body2" fontWeight="bold">
+              <Typography variant="body1" fontWeight="bold">
                 {scale}
               </Typography>
             </Stack>

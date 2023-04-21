@@ -77,7 +77,7 @@ function TextInputBox({
       id={id}
       height={height}
       value={innerValue}
-      disabled={Boolean(disabled)}
+      readOnly={Boolean(disabled)}
       onValueChanged={(e) => {
         setInnerValue(e.value);
 

@@ -69,7 +69,19 @@ export default function LearningSideBar({
   ];
   const toolPages = [
     { title: t("learning.tools.validation", "Risk File Validation"), id: "tools-validation" },
-    { title: t("learning.tools.analysisA", "Risk Analysis A"), id: "tools-analysisA", letter: "A", disabled: true },
+    { title: t("learning.tools.analysisA", "Risk Analysis A"), id: "tools-analysisA", letter: "A" },
+    {
+      title: t("learning.tools.analysisAStandard", "Standard Risks"),
+      id: "tools-analysisA-standard",
+      letter: "AS",
+      inset: true,
+    },
+    {
+      title: t("learning.tools.analysisAManMade", "Malicious Actors"),
+      id: "tools-analysisA-manmade",
+      letter: "AM",
+      inset: true,
+    },
     { title: t("learning.tools.analysisB", "Risk Analysis B"), id: "tools-analysisB", letter: "B", disabled: true },
     { title: t("learning.tools.consensus", "Consensus"), id: "tools-consensus", disabled: true },
   ];
@@ -148,7 +160,7 @@ export default function LearningSideBar({
               <ListItemButton component={Link} to={`/learning/${id}`}>
                 <ListItemText
                   secondary={title}
-                  sx={{ opacity: open ? 1 : 0, ml: 2 }}
+                  sx={{ opacity: open ? 1 : 0, ml: inset ? 4 : 2 }}
                   secondaryTypographyProps={pageName === id ? { fontWeight: "bold", color: "primary" } : {}}
                 />
               </ListItemButton>
@@ -194,7 +206,7 @@ export default function LearningSideBar({
               <ListItemButton component={Link} to={`/learning/${id}`}>
                 <ListItemText
                   secondary={title}
-                  sx={{ opacity: open ? 1 : 0, ml: 2 }}
+                  sx={{ opacity: open ? 1 : 0, ml: inset ? 4 : 2 }}
                   secondaryTypographyProps={pageName === id ? { fontWeight: "bold", color: "primary" } : {}}
                 />
               </ListItemButton>
@@ -234,13 +246,13 @@ export default function LearningSideBar({
             />
           </ListItem>
         )}
-        {toolPages.map(({ title, id, letter, disabled }, index) => (
+        {toolPages.map(({ title, id, letter, disabled, inset }, index) => (
           <ListItem key={id} disablePadding sx={{ display: "block", whiteSpace: "normal" }}>
             {open ? (
               <ListItemButton component={Link} to={`/learning/${id}`} disabled={disabled}>
                 <ListItemText
                   secondary={title}
-                  sx={{ opacity: open ? 1 : 0, ml: 2 }}
+                  sx={{ opacity: open ? 1 : 0, ml: inset ? 4 : 2 }}
                   secondaryTypographyProps={pageName === id ? { fontWeight: "bold", color: "primary" } : {}}
                 />
               </ListItemButton>

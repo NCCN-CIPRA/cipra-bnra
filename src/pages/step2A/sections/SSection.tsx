@@ -138,6 +138,8 @@ export default function SSection({
         <DISlider
           field={Sa}
           initialValue={fieldsRef.cr4de_di_quanti_sa}
+          overrideValue={SaOverride}
+          resetOverrideValue={() => setSaOverride(undefined)}
           error={inputErrors.indexOf("cr4de_di_quanti_sa") >= 0}
           onChange={handleChangeDIValue}
         />
