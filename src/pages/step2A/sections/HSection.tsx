@@ -6,7 +6,7 @@ import { Ha, Hb, Hc } from "../../learning/QuantitativeScales/H";
 import { ScenarioInput } from "../fields";
 import { DISlider } from "./QuantitativeMarks";
 import QualiTextInputBox from "./QualiTextInputBox";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import HbCalculator from "./HbCalculator";
@@ -30,10 +30,17 @@ export default function HSection({
 
   const [HbCalculatorOpen, setHbCalculatorOpen] = useState(false);
   const [HbOverride, setHbOverride] = useState<string | undefined>(undefined);
+  const [HbQualiOverride, setHbQualiOverride] = useState<boolean>(false);
 
   const handleChangeDIValue = (newValue: string | null, field: DirectImpactField) => {
     fieldsRef[`cr4de_di_quanti_${field.prefix.toLowerCase()}` as keyof ScenarioInput] = newValue;
   };
+
+  useEffect(() => {
+    if (HbQualiOverride) {
+      setHbQualiOverride(false);
+    }
+  }, [HbQualiOverride]);
 
   return (
     <Stack sx={{}} rowGap={2}>
@@ -113,7 +120,12 @@ export default function HSection({
               setHbCalculatorOpen(false);
 
               if (qualiInput) {
-                fieldsRef.cr4de_di_quali_h += qualiInput;
+                if (fieldsRef.cr4de_di_quali_h === null) {
+                  fieldsRef.cr4de_di_quali_h = qualiInput;
+                } else {
+                  fieldsRef.cr4de_di_quali_h += qualiInput;
+                }
+                setHbQualiOverride(true);
               }
             }}
           />
@@ -154,18 +166,20 @@ export default function HSection({
         </Trans>
       </Typography>
 
-      <QualiTextInputBox
-        error={inputErrors.indexOf("cr4de_di_quali_h") >= 0}
-        initialValue={fieldsRef.cr4de_di_quali_h || ""}
-        onSave={(newValue) => {
-          if (!fieldsRef) return null;
-          fieldsRef.cr4de_di_quali_h = newValue;
-        }}
-        debounceInterval={100}
-        attachments={attachments}
-        onOpenSourceDialog={onOpenSourceDialog}
-        onReloadAttachments={onReloadAttachments}
-      />
+      {!HbQualiOverride && (
+        <QualiTextInputBox
+          error={inputErrors.indexOf("cr4de_di_quali_h") >= 0}
+          initialValue={fieldsRef.cr4de_di_quali_h || ""}
+          onSave={(newValue) => {
+            if (!fieldsRef) return null;
+            fieldsRef.cr4de_di_quali_h = newValue;
+          }}
+          debounceInterval={100}
+          attachments={attachments}
+          onOpenSourceDialog={onOpenSourceDialog}
+          onReloadAttachments={onReloadAttachments}
+        />
+      )}
     </Stack>
   );
 }

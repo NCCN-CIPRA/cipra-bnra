@@ -41,6 +41,7 @@ import Step2ATutorial from "./information/Step2ATutorial";
 import Standard from "./standard/Standard";
 import ManMade from "./manmade/ManMade";
 import useProcess from "../../hooks/useProcess";
+import Step2ATutorialMM from "./information/Step2ATutorialMM";
 
 type RouteParams = {
   step2A_id: string;
@@ -438,12 +439,23 @@ export default function Step2APage() {
         )}
       </Dialog>
 
-      <Step2ATutorial
-        run={runTutorial}
-        setRun={setRunTutorial}
-        setStep={transitionTo}
-        handleSetSpeeddialOpen={setOpenSpeedDial}
-      />
+      {step2A && step2A.cr4de_risk_file.cr4de_risk_type === "Standard Risk" && (
+        <Step2ATutorial
+          run={runTutorial}
+          setRun={setRunTutorial}
+          setStep={transitionTo}
+          handleSetSpeeddialOpen={setOpenSpeedDial}
+        />
+      )}
+
+      {step2A && step2A.cr4de_risk_file.cr4de_risk_type === "Malicious Man-made Risk" && (
+        <Step2ATutorialMM
+          run={runTutorial}
+          setRun={setRunTutorial}
+          setStep={transitionTo}
+          handleSetSpeeddialOpen={setOpenSpeedDial}
+        />
+      )}
 
       {step2A && (
         <SurveyDialog

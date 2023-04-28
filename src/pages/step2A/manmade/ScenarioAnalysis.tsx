@@ -17,7 +17,7 @@ import { DISlider, DPSlider } from "../sections/QuantitativeMarks";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { getScenarioInputs, ScenarioInput, ScenarioInputs, SCENARIO_SUFFIX } from "../fields";
 import TextInputBox from "../../../components/TextInputBox";
-import ScenarioBox from "../information/ScenarioBox";
+import ScenarioBox from "../information/ScenarioBoxMM";
 import { useInView } from "react-intersection-observer";
 import DPSection from "../sections/DPSection";
 import HSection from "../sections/HSection";
@@ -113,17 +113,13 @@ export default function ScenarioAnalysis({
             Explanation about filling in the direct analysis for the scenario
           </Trans>
         </Typography>
-        <Typography variant="body2">
-          <Trans i18nKey="2A.quanti.info.2">The scenario under review is the following</Trans>
-        </Typography>
         <Box sx={{ px: 2 }} id="step2A-scenario-description">
           <TableContainer ref={ref} component={Paper}>
             <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
               <TableHead>
                 <TableRow sx={{ backgroundColor: theme.palette.action.hover }}>
-                  <TableCell sx={{ whiteSpace: "nowrap", pr: 6 }}>Parameter</TableCell>
-                  <TableCell width="100%" sx={{}}>
-                    Value
+                  <TableCell sx={{ whiteSpace: "nowrap", pr: 6 }}>
+                    <Trans i18nKey="2A.MM.scenario.decsription">Actor Group Description</Trans>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -148,10 +144,14 @@ export default function ScenarioAnalysis({
                           />
                         }
                       >
-                        <Box>{p.name}</Box>
+                        <Box
+                          sx={{ p: 0, m: 0 }}
+                          dangerouslySetInnerHTML={{
+                            __html: p.value,
+                          }}
+                        />
                       </Tooltip>
                     </TableCell>
-                    <TableCell>{p.value}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

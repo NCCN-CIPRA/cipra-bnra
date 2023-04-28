@@ -3,6 +3,10 @@ import { Trans } from "react-i18next";
 import { ScenarioInput, ScenarioInputs } from "../fields";
 import { NO_COMMENT } from "../sections/QualiTextInputBox";
 import { STEPS, stepNames } from "../Steps";
+import { DPValueStack } from "../../learning/QuantitativeScales/P";
+import { DIValueStack, DirectImpactField } from "../../learning/QuantitativeScales/DI";
+import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
+import { MValueStack } from "../../learning/QuantitativeScales/M";
 
 export interface ScenariosInput {
   [STEPS.CONSIDERABLE]: string | null | undefined;
@@ -33,7 +37,85 @@ const QualiGridItem = ({ input }: { input: string | null }) => {
   );
 };
 
-export default function ScenarioTable({ inputs, fields }: { inputs: ScenarioInputs; fields: (keyof ScenarioInput)[] }) {
+const QuantiGridItem = ({
+  inputs,
+  field,
+  manmade = false,
+}: {
+  inputs: ScenarioInput;
+  field: keyof ScenarioInput | DirectImpactField;
+  manmade?: Boolean;
+}) => {
+  if (typeof field === "object") {
+    const fieldName = `cr4de_di_quanti_${field.prefix.toLowerCase()}` as keyof ScenarioInput;
+
+    if (inputs[fieldName]) {
+      return (
+        <Grid item xs={4} sx={{ p: 1, borderRight: "1px solid #eee", textAlign: "center" }}>
+          <Tooltip
+            title={<DIValueStack field={field} value={parseInt(inputs[fieldName]?.slice(2) || "0", 10)} />}
+            PopperProps={{
+              sx: {
+                [`& .${tooltipClasses.tooltip}`]: {
+                  maxWidth: "none",
+                },
+              },
+            }}
+          >
+            <Typography variant="body2">{inputs[fieldName] || "(No input)"}</Typography>
+          </Tooltip>
+        </Grid>
+      );
+    }
+
+    return (
+      <Grid item xs={4} sx={{ p: 1, borderRight: "1px solid #eee", textAlign: "center" }}>
+        <Typography variant="body2">{inputs[fieldName] || "(No input)"}</Typography>
+      </Grid>
+    );
+  }
+
+  if (inputs[field]) {
+    const ValueStack = manmade ? (
+      <MValueStack value={parseInt(inputs[field]?.slice(1) || "1", 10)} />
+    ) : (
+      <DPValueStack value={parseInt(inputs[field]?.slice(2) || "1", 10) - 1} />
+    );
+
+    return (
+      <Grid item xs={4} sx={{ p: 1, borderRight: "1px solid #eee", textAlign: "center" }}>
+        <Tooltip
+          title={ValueStack}
+          PopperProps={{
+            sx: {
+              [`& .${tooltipClasses.tooltip}`]: {
+                maxWidth: "none",
+              },
+            },
+          }}
+        >
+          <Typography variant="body2">{inputs[field] || "(No input)"}</Typography>
+        </Tooltip>
+      </Grid>
+    );
+  }
+
+  return (
+    <Grid item xs={4} sx={{ p: 1, borderRight: "1px solid #eee", textAlign: "center" }}>
+      <Typography variant="body2">{inputs[field] || "(No input)"}</Typography>
+    </Grid>
+  );
+};
+
+export default function ScenarioTable({
+  inputs,
+  fields,
+  manmade = false,
+}: {
+  inputs: ScenarioInputs;
+  fields: (keyof ScenarioInput | DirectImpactField)[];
+  manmade?: Boolean;
+}) {
   return (
     <Stack direction="column" component={Paper} sx={{ overflow: "hidden", mt: 2, mb: 8 }}>
       <Grid container direction="row">
@@ -60,7 +142,7 @@ export default function ScenarioTable({ inputs, fields }: { inputs: ScenarioInpu
         </Grid>
       </Grid>
       {fields.map((field) =>
-        field.indexOf("quali") >= 0 ? (
+        typeof field === "string" && field.indexOf("quali") >= 0 ? (
           <Grid container direction="row" sx={{ borderTop: "1px solid #eee" }}>
             <QualiGridItem input={inputs.considerable[field]} />
             <QualiGridItem input={inputs.major[field]} />
@@ -68,15 +150,9 @@ export default function ScenarioTable({ inputs, fields }: { inputs: ScenarioInpu
           </Grid>
         ) : (
           <Grid container direction="row" sx={{ borderTop: "1px solid #eee" }}>
-            <Grid item xs={4} sx={{ p: 1, borderRight: "1px solid #eee", textAlign: "center" }}>
-              <Typography variant="body2">{inputs.considerable[field] || "(No input)"}</Typography>
-            </Grid>
-            <Grid item xs={4} sx={{ p: 1, borderRight: "1px solid #eee", textAlign: "center" }}>
-              <Typography variant="body2">{inputs.major[field] || "(No input)"}</Typography>
-            </Grid>
-            <Grid item xs={4} sx={{ p: 1, borderRight: "1px solid #eee", textAlign: "center" }}>
-              <Typography variant="body2">{inputs.extreme[field] || "(No input)"}</Typography>
-            </Grid>
+            <QuantiGridItem inputs={inputs.considerable} field={field} manmade={manmade} />
+            <QuantiGridItem inputs={inputs.major} field={field} manmade={manmade} />
+            <QuantiGridItem inputs={inputs.extreme} field={field} manmade={manmade} />
           </Grid>
         )
       )}

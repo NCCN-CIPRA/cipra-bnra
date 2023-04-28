@@ -28,13 +28,7 @@ const SCALE_TO_SLIDER = {
 };
 
 const generateQualiInput = (severe: string, moderate: string, minor: string) => {
-  return `
-  <p>
-Severe injuries and illnesses: ${severe}<br />
-Moderate injuries and illnesses: ${moderate}<br />
-Minor injuries and illnesses: ${minor}
-</p>
-`;
+  return `<b>Calculation Results:</b><p>Severe injuries and illnesses: ${severe}<br />Moderate injuries and illnesses: ${moderate}<br />Minor injuries and illnesses: ${minor}</p>`;
 };
 
 export default function HbCalculator({

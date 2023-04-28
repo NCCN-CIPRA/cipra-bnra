@@ -231,13 +231,40 @@ export default function LearningOverviewPage({}) {
                     </ListItemIcon>
                     <ListItemText primary={t("learning.tools.analysisAManMade", "Malicious Actors")} />
                   </ListItemButton>
-
-                  <ListItemButton component={RouterLink} to="/learning/tools-analysisB" disabled>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/tools-analysisB-standard"
+                    sx={{ ml: 3.5 }}
+                    disabled
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.tools.analysisB", "Risk Analysis B")} />
+                    <ListItemText primary={t("learning.tools.analysisBStandard", "2B - Standard Risks")} />
                   </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/tools-analysisA-manmade"
+                    sx={{ ml: 3.5 }}
+                    disabled
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.tools.analysisBManMade", "2B - Malicious Actors")} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/tools-analysisB-emerging"
+                    sx={{ ml: 3.5 }}
+                    disabled
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t("learning.tools.analysisBEmerging", "2B - Emerging Risks")} />
+                  </ListItemButton>
+
                   <ListItemButton component={RouterLink} to="/learning/tools-consensus" disabled>
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />

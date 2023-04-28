@@ -37,14 +37,14 @@ const SCALE_TO_SLIDER = {
 };
 
 const generateQualiInput = (shortfalls: { id: number; service: string; amount: number; duration: number }[]) => {
-  return `
+  return `<b>Calculation Results:</b><br />
   <p>
   ${shortfalls
     .filter((s) => SERVICE_WEIGHTS[s.service as keyof typeof SERVICE_WEIGHTS])
     .map((s) => {
-      return `${s.service}: ${SERVICE_WEIGHTS[s.service as keyof typeof SERVICE_WEIGHTS]} x ${s.amount} people x ${
-        s.duration
-      } days`;
+      return `<u>${s.service}:</u> ${SERVICE_WEIGHTS[s.service as keyof typeof SERVICE_WEIGHTS]} (weight) x ${
+        s.amount
+      } people x ${s.duration} days`;
     })
     .join("<br />")}
 </p>

@@ -6,7 +6,7 @@ import { Sa, Sb, Sc, Sd } from "../../learning/QuantitativeScales/S";
 import { ScenarioInput } from "../fields";
 import { DISlider } from "./QuantitativeMarks";
 import QualiTextInputBox from "./QualiTextInputBox";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import SaCalculator from "./SaCalculator";
@@ -34,10 +34,17 @@ export default function SSection({
 
   const [SaCalculatorOpen, setSaCalculatorOpen] = useState(false);
   const [SaOverride, setSaOverride] = useState<string | undefined>(undefined);
+  const [SaQualiOverride, setSaQualiOverride] = useState<boolean>(false);
 
   const handleChangeDIValue = (newValue: string | null, field: DirectImpactField) => {
     fieldsRef[`cr4de_di_quanti_${field.prefix.toLowerCase()}` as keyof ScenarioInput] = newValue;
   };
+
+  useEffect(() => {
+    if (SaQualiOverride) {
+      setSaQualiOverride(false);
+    }
+  }, [SaQualiOverride]);
 
   return (
     <Stack sx={{}} rowGap={2}>
@@ -129,7 +136,12 @@ export default function SSection({
               setSaCalculatorOpen(false);
 
               if (qualiInput) {
-                fieldsRef.cr4de_di_quali_s += qualiInput;
+                if (fieldsRef.cr4de_di_quali_s === null) {
+                  fieldsRef.cr4de_di_quali_s = qualiInput;
+                } else {
+                  fieldsRef.cr4de_di_quali_s += qualiInput;
+                }
+                setSaQualiOverride(true);
               }
             }}
           />
@@ -193,18 +205,20 @@ export default function SSection({
           in the state.
         </Trans>
       </Typography>
-      <QualiTextInputBox
-        error={inputErrors.indexOf("cr4de_di_quali_s") >= 0}
-        initialValue={fieldsRef.cr4de_di_quali_s || ""}
-        onSave={(newValue) => {
-          if (!fieldsRef) return null;
-          fieldsRef.cr4de_di_quali_s = newValue;
-        }}
-        debounceInterval={100}
-        attachments={attachments}
-        onOpenSourceDialog={onOpenSourceDialog}
-        onReloadAttachments={onReloadAttachments}
-      />
+      {!SaQualiOverride && (
+        <QualiTextInputBox
+          error={inputErrors.indexOf("cr4de_di_quali_s") >= 0}
+          initialValue={fieldsRef.cr4de_di_quali_s || ""}
+          onSave={(newValue) => {
+            if (!fieldsRef) return null;
+            fieldsRef.cr4de_di_quali_s = newValue;
+          }}
+          debounceInterval={100}
+          attachments={attachments}
+          onOpenSourceDialog={onOpenSourceDialog}
+          onReloadAttachments={onReloadAttachments}
+        />
+      )}
     </Stack>
   );
 }

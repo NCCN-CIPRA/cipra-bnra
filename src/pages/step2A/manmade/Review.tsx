@@ -36,7 +36,7 @@ export default function Review({ inputs, inputErrors }: { inputs: ScenarioInputs
         <Trans i18nkey="2A.review.m.title">Motivation</Trans>
       </Typography>
 
-      <ScenarioTable inputs={inputs} fields={["cr4de_dp_quali", "cr4de_dp_quanti"]} />
+      <ScenarioTable inputs={inputs} fields={["cr4de_dp_quali", "cr4de_dp_quanti"]} manmade />
     </Stack>
   );
 }
