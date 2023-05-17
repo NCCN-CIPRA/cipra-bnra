@@ -14,10 +14,12 @@ export default function ParticipationStepper({
 
   if (contact.msdyn_portaltermsagreementdate !== null) activeStep++;
   if (participation.cr4de_validation_finished) activeStep++;
+  if (participation.cr4de_direct_analysis_finished) activeStep++;
 
+  console.log(activeStep);
   return (
     <Stepper activeStep={activeStep} alternativeLabel sx={{ width: "550px" }}>
-      <Step completed={activeStep > 0}>
+      <Step active={activeStep === 0} completed={activeStep > 0}>
         <Tooltip
           title={
             activeStep > 0
@@ -28,7 +30,7 @@ export default function ParticipationStepper({
           <StepLabel icon={"0"}></StepLabel>
         </Tooltip>
       </Step>
-      <Step completed={activeStep > 1}>
+      <Step active={activeStep === 1} completed={activeStep > 1}>
         <Tooltip
           title={
             activeStep > 1
@@ -39,16 +41,16 @@ export default function ParticipationStepper({
           <StepLabel icon={1}></StepLabel>
         </Tooltip>
       </Step>
-      {participation.cr4de_risk_file.cr4de_risk_type === "Standard Risk" ? (
+      {participation.cr4de_risk_file.cr4de_risk_type !== "Emerging Risk" ? (
         <>
-          <Step completed={activeStep > 2}>
+          <Step active={activeStep === 2} completed={activeStep > 2}>
             <Tooltip
               title={activeStep > 2 ? "The expert has finished step 2A" : "The expert has not yet finished step 2A"}
             >
               <StepLabel icon={"2A"}></StepLabel>
             </Tooltip>
           </Step>
-          <Step completed={activeStep > 3}>
+          <Step active={activeStep === 3} completed={activeStep > 3}>
             <Tooltip
               title={activeStep > 3 ? "The expert has finished step 2B" : "The expert has not yet finished step 2B"}
             >
@@ -58,19 +60,19 @@ export default function ParticipationStepper({
         </>
       ) : (
         <>
-          <Step completed={activeStep > 2}>
+          <Step active={activeStep === 3} completed={activeStep > 3} disabled>
+            <StepLabel icon={"/"}></StepLabel>
+          </Step>
+          <Step active={activeStep === 3} completed={activeStep > 3}>
             <Tooltip
-              title={activeStep > 2 ? "The expert has finished step 2" : "The expert has not yet finished step 2"}
+              title={activeStep > 3 ? "The expert has finished step 2" : "The expert has not yet finished step 2"}
             >
               <StepLabel icon={"2"}></StepLabel>
             </Tooltip>
           </Step>
-          <Step completed={activeStep > 3} disabled>
-            <StepLabel icon={"/"}></StepLabel>
-          </Step>
         </>
       )}
-      <Step completed={activeStep > 4}>
+      <Step active={activeStep === 4} completed={activeStep > 4}>
         <Tooltip
           title={
             activeStep > 4

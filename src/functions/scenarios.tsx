@@ -1,11 +1,27 @@
 import { IntensityParameter } from "./intensityParameters";
 import tableToJson from "./tableToJson";
 
+export enum SCENARIOS {
+  CONSIDERABLE = "considerable",
+  MAJOR = "major",
+  EXTREME = "extreme",
+}
+
 export interface Scenarios {
   considerable: IntensityParameter<string>[];
   major: IntensityParameter<string>[];
   extreme: IntensityParameter<string>[];
 }
+
+export const SCENARIO_PARAMS = {
+  [SCENARIOS.CONSIDERABLE]: {
+    titleI18N: "2A.progress.considerable.title",
+    titleDefault: "Considerable",
+    color: "#9DC3E6",
+  },
+  [SCENARIOS.MAJOR]: { titleI18N: "2A.progress.major.title", titleDefault: "Major", color: "#FFE699" },
+  [SCENARIOS.EXTREME]: { titleI18N: "2A.progress.extreme.title", titleDefault: "Extreme", color: "#F47C7C" },
+};
 
 const noScenarios = {
   considerable: [],

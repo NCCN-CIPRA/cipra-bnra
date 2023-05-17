@@ -256,7 +256,15 @@ export default function EditorPage() {
     <>
       <Container sx={{ pb: 8 }}>
         {riskFile && participants && (
-          <ParticipationTable riskFile={riskFile} participants={participants} reloadParticipants={getParticipants} />
+          <ParticipationTable
+            riskFile={riskFile}
+            participants={participants}
+            reloadParticipants={() =>
+              getParticipants({
+                query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}&$expand=cr4de_contact`,
+              })
+            }
+          />
         )}
 
         <Paper>

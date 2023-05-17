@@ -61,11 +61,11 @@ const getSize = (rf: RiskFile) => {
   if (rf.cr4de_risk_type === "Standard Risk") size += 18;
   else if (rf.cr4de_risk_type === "Malicious Man-made Risk") {
     size += 3;
-    size += 3 * rf.effectsList.length;
+    size += rf.effectsList.length;
   } else {
     size += rf.effectsList.length;
   }
-  size += 3 * rf.causesList.length;
+  size += rf.causesList.length;
 
   return size;
 };

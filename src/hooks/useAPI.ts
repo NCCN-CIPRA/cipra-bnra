@@ -93,6 +93,7 @@ export interface API {
 
   getCascadeAnalyses<T = DVCascadeAnalysis>(query?: string): Promise<T[]>;
   getCascadeAnalysis<T = DVCascadeAnalysis>(id: string, query?: string): Promise<T>;
+  createCascadeAnalysis(fields: object): Promise<CreateResponse>;
   updateCascadeAnalysis(id: string, fields: object): Promise<void>;
   deleteCascadeAnalysis(id: string): Promise<void>;
 
@@ -528,6 +529,18 @@ export default function useAPI(): API {
       );
 
       return (await response.json()) as T;
+    },
+    createCascadeAnalysis: async function (fields: object): Promise<CreateResponse> {
+      const response = await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises`, {
+        method: "POST",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+
+      return { id: response.headers.get("entityId") as string };
     },
     updateCascadeAnalysis: async function (id: string, fields: object): Promise<void> {
       await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises(${id})`, {

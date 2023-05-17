@@ -1,64 +1,60 @@
 import { Stack, Typography } from "@mui/material";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
-export const DPRows = [
-  "learning.probability.returnPeriod",
-  "learning.probability.3yearLikelihood",
-  "learning.probability.10yearLikelihood",
-  "learning.probability.qualitative",
-];
+export type ConditionalProbabilityField = {
+  prefix: string;
+  title: string[];
+  intervals: string[][];
+  unit: string[];
+  alternatives?: {
+    intervals: string[][];
+    name: string[];
+  }[];
+};
 
-export const DP1 = [
-  "learning.probability.rp.1",
-  "learning.probability.3yl.1",
-  "learning.probability.10yl.1",
-  "learning.probability.q.1",
-];
-export const DP2 = [
-  "learning.probability.rp.2",
-  "learning.probability.3yl.2",
-  "learning.probability.10yl.2",
-  "learning.probability.q.2",
-];
-export const DP3 = [
-  "learning.probability.rp.3",
-  "learning.probability.3yl.3",
-  "learning.probability.10yl.3",
-  "learning.probability.q.3",
-];
-export const DP4 = [
-  "learning.probability.rp.4",
-  "learning.probability.3yl.4",
-  "learning.probability.10yl.4",
-  "learning.probability.q.4",
-];
-export const DP5 = [
-  "learning.probability.rp.5",
-  "learning.probability.3yl.5",
-  "learning.probability.10yl.5",
-  "learning.probability.q.5",
-];
+export const CP: ConditionalProbabilityField = {
+  prefix: "CP",
+  title: ["learning.cp.title", "CP - Conditional Probability"],
+  unit: ["learning.cp.footer", "Unit: probability of cascade effect occuring"],
+  intervals: [
+    ["learning.cp.0", "0%"],
+    ["learning.cp.1", "< 1%"],
+    ["learning.cp.2", "1% – 10%"],
+    ["learning.cp.3", "10% – 50%"],
+    ["learning.cp.4", "50% – 90%"],
+    ["learning.cp.5", "> 90%"],
+  ],
+};
 
-export const DPs = [DP1, DP2, DP3, DP4, DP5];
+export function CPValueStack({ value }: { value: number }) {
+  const { t } = useTranslation();
 
-export const DPValueStack = ({ value }: { value: number }) => {
-  if (value < 0) return null;
+  if (!CP.intervals[value]) return null;
 
   return (
-    <Stack sx={{ width: 500 }} spacing={1}>
-      <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", mr: 1, pb: 1, fontWeight: "bold" }}>
-        {`DP${value + 1}`}
+    <Stack direction="column" spacing={1}>
+      <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", mr: 1, fontWeight: "bold" }}>
+        {`${CP.prefix}${value}`}
       </Typography>
-      {DPRows.map((r, ri) => (
-        <Stack key={r} direction="row">
-          <Typography variant="body2" sx={{ whiteSpace: "nowrap", mr: 1, fontWeight: "bold" }}>
-            <Trans i18nKey={r} />:{" "}
+      <Typography variant="body2">{t(CP.intervals[value][0], CP.intervals[value][1])}</Typography>
+      <Typography variant="caption">{t(CP.unit[0], CP.unit[1])}</Typography>
+      {CP.alternatives && (
+        <Stack direction="column" sx={{ pt: 2 }}>
+          <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", mr: 1, fontWeight: "bold", fontSize: 12, pb: 1 }}>
+            <Trans i18nKey={"learning.impact.alternatives"}>Alternative values:</Trans>
           </Typography>
-          <Typography variant="caption" sx={{ whiteSpace: "normal" }}>
-            <Trans i18nKey={DPs[value][ri]} />
-          </Typography>
+          {CP.alternatives.map((a) => (
+            <Stack key={a.name[0]} direction="row" spacing={1}>
+              <Typography variant="body2" sx={{ fontSize: 12 }}>
+                {t(a.name[0], a.name[1])}:
+              </Typography>
+              <Typography variant="caption" sx={{ fontSize: 12, fontWeight: "bold" }}>
+                {t(a.intervals[value][0], a.intervals[value][1])}
+              </Typography>
+            </Stack>
+          ))}
         </Stack>
-      ))}
+      )}
     </Stack>
   );
-};
+}

@@ -80,7 +80,14 @@ function RiskFileList({
     ) {
       navigate(`/step2B/${p._cr4de_direct_analysis_value}`);
     } else if (p.cr4de_risk_file.cr4de_step2a_enabled) {
-      if (p._cr4de_direct_analysis_value === null) {
+      if (p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk") {
+        window.alert(
+          t(
+            "riskFile.steps.2A.emerging",
+            "The Analysis A step is not available for Emerging Risks. We will contact you when the Analysis B step becomes available."
+          )
+        );
+      } else if (p._cr4de_direct_analysis_value === null) {
         setIsLoading(true);
 
         const newDirectAnalysis = await api.createDirectAnalysis({
@@ -203,7 +210,9 @@ function RiskFileList({
                     />
                     <ListItemText sx={{ width: "550px", flexGrow: 0 }}>
                       <Stepper activeStep={getActiveStep(p)} alternativeLabel sx={{ width: "550px" }}>
-                        <Step completed={Boolean(p.cr4de_validation_finished)}>
+                        <Step
+                          completed={Boolean(p.cr4de_validation_finished || p.cr4de_risk_file.cr4de_step2a_enabled)}
+                        >
                           <Tooltip title={getValidationTooltip(p)}>
                             <StepButton
                               disabled={false}
@@ -223,12 +232,18 @@ function RiskFileList({
                         <Step
                           completed={Boolean(
                             p.cr4de_direct_analysis_finished ||
-                              (p.cr4de_validation_finished && p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk")
+                              (p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" &&
+                                p.cr4de_risk_file.cr4de_step2b_enabled)
                           )}
                         >
                           <Tooltip title={getStep2ATooltip(p)}>
                             <StepButton
                               disabled={false}
+                              icon={
+                                p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? (
+                                  <EmergingRisks2AIcon />
+                                ) : undefined
+                              }
                               onClick={async (e) => {
                                 if (p._cr4de_direct_analysis_value) {
                                   e.stopPropagation();
@@ -252,13 +267,7 @@ function RiskFileList({
                                 }
                               }}
                             >
-                              <StepLabel
-                                StepIconComponent={
-                                  p.cr4de_validation_finished && p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk"
-                                    ? EmergingRisks2AIcon
-                                    : undefined
-                                }
-                              >
+                              <StepLabel>
                                 <Trans i18nKey="riskFile.steps.2A.name">Analysis A</Trans>
                               </StepLabel>
                             </StepButton>

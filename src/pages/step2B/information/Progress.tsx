@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import { RefObject, useEffect, useState } from "react";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CheckIcon from "@mui/icons-material/Check";
-import { stepNames, STEPS } from "../../step2A/Steps";
+import { stepNames, STEPS } from "../Steps";
+import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 
 const enum STATUS {
   DONE,
@@ -54,12 +55,18 @@ export default function Progress({
   activeStep,
   goToStep,
   riskType,
-  setCurrentStep,
+  causes,
+  catalysingEffects,
+  causeIndex,
+  catalysingEffectIndex,
 }: {
   activeStep: STEPS;
   goToStep(step: STEPS): void;
   riskType: string | undefined;
-  setCurrentStep: (s: STEPS) => void;
+  causes: DVRiskCascade[] | undefined;
+  catalysingEffects: DVRiskCascade[] | undefined;
+  causeIndex: string | null;
+  catalysingEffectIndex: string | null;
 }) {
   const { t } = useTranslation();
 
@@ -83,7 +90,19 @@ export default function Progress({
                   </StepButton>
                 )}
                 {(stepName === activeStep || status === STATUS.NOT_STARTED) && (
-                  <StepLabel>{t(stepNames[stepName].titleI18N, stepNames[stepName].titleDefault)}</StepLabel>
+                  <StepLabel>
+                    {t(stepNames[stepName].titleI18N, stepNames[stepName].titleDefault)}
+                    {stepName === STEPS.CAUSES &&
+                      stepName === activeStep &&
+                      causes &&
+                      causeIndex &&
+                      ` (${causeIndex}/${causes.length})`}
+                    {stepName === STEPS.CATALYSING_EFFECTS &&
+                      stepName === activeStep &&
+                      catalysingEffects &&
+                      catalysingEffectIndex &&
+                      ` (${catalysingEffectIndex}/${catalysingEffects.length})`}
+                  </StepLabel>
                 )}
               </>
             </Tooltip>
