@@ -11,14 +11,15 @@ import { SelectableContact } from "./Selectables";
 import RiskFileGraph from "./RiskFileGraph";
 import ExpertGraph from "./ExpertGraph";
 import { useEffect, useState } from "react";
+import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 
 export default function GraphView({
   participations,
 }: {
-  participations: DVParticipation<SelectableContact, DVRiskFile, DVValidation>[];
+  participations: DVParticipation<SelectableContact, DVRiskFile, DVValidation, DVDirectAnalysis>[];
 }) {
   const [expertParticipants, setExpertParticipants] = useState<
-    DVParticipation<SelectableContact, DVRiskFile, DVValidation>[] | null
+    DVParticipation<SelectableContact, DVRiskFile, DVValidation, DVDirectAnalysis>[] | null
   >(null);
 
   useEffect(() => {

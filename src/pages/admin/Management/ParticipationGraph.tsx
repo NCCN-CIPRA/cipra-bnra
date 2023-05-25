@@ -20,6 +20,11 @@ import {
   VALIDATION_EDITABLE_FIELDS,
 } from "../../../types/dataverse/DVValidation";
 import { SelectableContact, SelectableRiskFile } from "./Selectables";
+import {
+  DIRECT_ANALYSIS_EDITABLE_FIELDS,
+  DVDirectAnalysis,
+  DirectAnalysisEditableFields,
+} from "../../../types/dataverse/DVDirectAnalysis";
 
 interface Bucket {
   date: number;
@@ -32,6 +37,11 @@ const isValidationEmpty = (input: ValidationEditableFields) =>
   VALIDATION_EDITABLE_FIELDS.every((fieldName) => input[fieldName] === null);
 const isValidationComplete = (input: ValidationEditableFields) =>
   VALIDATION_EDITABLE_FIELDS.every((fieldName) => input[fieldName] !== null);
+
+const isStep2AEmpty = (input: DirectAnalysisEditableFields) =>
+  DIRECT_ANALYSIS_EDITABLE_FIELDS.every((fieldName) => input[fieldName] === null);
+const isStep2AComplete = (input: DirectAnalysisEditableFields) =>
+  DIRECT_ANALYSIS_EDITABLE_FIELDS.every((fieldName) => input[fieldName] !== null);
 
 const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any[]; label?: any } = {}) => {
   if (!payload || payload.length <= 0) return <div></div>;
@@ -76,8 +86,41 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
             <td>
               <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
                 {Math.round(
-                  (1000 * (payload[0].value + payload[1].value + payload[2].value)) /
+                  (1000 *
+                    (payload[0].value + payload[1].value + payload[2].value + payload[3].value + payload[4].value)) /
                     payload.reduce((tot, p) => tot + p.value, 0)
+                ) / 10}
+                %
+              </Typography>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Typography variant="body1" sx={{ pt: 2 }}>
+                % Step 2A Started:
+              </Typography>
+            </td>
+            <td>
+              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
+                {Math.round(
+                  (1000 * (payload[0].value + payload[1].value + payload[2].value)) /
+                    (payload[0].value + payload[1].value + payload[2].value + payload[3].value + payload[4].value)
+                ) / 10}
+                %
+              </Typography>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Typography variant="body1" sx={{ pt: 0 }}>
+                % Step 2A Finished:
+              </Typography>
+            </td>
+            <td>
+              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 0 }}>
+                {Math.round(
+                  (1000 * (payload[0].value + payload[1].value)) /
+                    (payload[0].value + payload[1].value + payload[2].value + payload[3].value + payload[4].value)
                 ) / 10}
                 %
               </Typography>
@@ -92,14 +135,26 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
 export default function ParticipationGraph({
   participations,
 }: {
-  participations: DVParticipation<SelectableContact, DVRiskFile, DVValidation>[];
+  participations: DVParticipation<SelectableContact, DVRiskFile, DVValidation, DVDirectAnalysis>[];
 }) {
   const [participationBuckets, setParticipationBuckets] = useState<Bucket[]>([]);
   const [firstDate, setFirstDate] = useState<number>(Date.now());
   const [lastDate, setLastDate] = useState<number>(Date.now());
-
+  console.log(participations.filter((p) => p._cr4de_direct_analysis_value !== null));
   useEffect(() => {
     const datedPs = participations.map((p) => ({
+      step2AFinishedDate: p.cr4de_direct_analysis_finished_on
+        ? new Date(p.cr4de_direct_analysis_finished_on).getTime()
+        : null,
+      step2ACompletedDate:
+        p.cr4de_direct_analysis && isStep2AComplete(p.cr4de_direct_analysis)
+          ? new Date(p.cr4de_direct_analysis.modifiedon).getTime()
+          : null,
+      step2AModifiedDate:
+        p.cr4de_direct_analysis && !isStep2AEmpty(p.cr4de_direct_analysis)
+          ? new Date(p.cr4de_direct_analysis.modifiedon).getTime()
+          : null,
+      step2ACreatedDate: p.cr4de_direct_analysis ? new Date(p.cr4de_direct_analysis.createdon).getTime() : null,
       validationFinishedDate: p.cr4de_validation_finished_on
         ? new Date(p.cr4de_validation_finished_on).getTime()
         : null,
@@ -137,10 +192,11 @@ export default function ParticipationGraph({
         date: currentDate,
         notStarted: 0,
         registered: 0,
+        validated: 0,
         created: 0,
         modified: 0,
         completed: 0,
-        validated: 0,
+        step2A: 0,
       });
 
       currentDate = addDays(new Date(currentDate), 1).getTime();
@@ -150,14 +206,16 @@ export default function ParticipationGraph({
       for (let i = 0; i < dates.length; i++) {
         const d = dates[i];
 
-        if (p.validationFinishedDate && d.date >= p.validationFinishedDate) {
-          dates[i].validated++;
-        } else if (p.validationCompletedDate && d.date >= p.validationCompletedDate) {
+        if (p.step2AFinishedDate && d.date >= p.step2AFinishedDate) {
+          dates[i].step2A++;
+        } else if (p.step2ACompletedDate && d.date >= p.step2ACompletedDate) {
           dates[i].completed++;
-        } else if (p.validationModifiedDate && d.date >= p.validationModifiedDate) {
+        } else if (p.step2AModifiedDate && d.date >= p.step2AModifiedDate) {
           dates[i].modified++;
-        } else if (p.validationCreatedDate && d.date >= p.validationCreatedDate) {
+        } else if (p.step2ACreatedDate && d.date >= p.step2ACreatedDate) {
           dates[i].created++;
+        } else if (p.validationFinishedDate && d.date >= p.validationFinishedDate) {
+          dates[i].validated++;
         } else if (p.registrationDate && d.date >= p.registrationDate) {
           dates[i].registered++;
         } else if (p.addedDate && d.date >= p.addedDate) {
@@ -193,14 +251,7 @@ export default function ParticipationGraph({
         />
         <YAxis />
         <Tooltip content={<CustomTooltip />} />
-        <Area
-          type="monotone"
-          dataKey="validated"
-          stackId="1"
-          stroke="#ffa600"
-          fill="#ffa600"
-          name="Finished validation"
-        />
+        <Area type="monotone" dataKey="step2A" stackId="1" stroke="#ffa600" fill="#ffa600" name="Finished step 2A" />
         <Area
           type="monotone"
           dataKey="completed"
@@ -213,20 +264,21 @@ export default function ParticipationGraph({
           type="monotone"
           dataKey="modified"
           stackId="1"
-          stroke="#dd5182"
-          fill="#dd5182"
+          stroke="#ff6e54"
+          fill="#ff6e54"
           name="Filled in at least 1 field"
         />
         <Area
           type="monotone"
           dataKey="created"
           stackId="1"
-          stroke="#955196"
-          fill="#955196"
+          stroke="#dd5182"
+          fill="#dd5182"
           name="Looked at the risk file"
         />
+        <Area type="monotone" dataKey="validated" stackId="1" stroke="#955196" fill="#955196" name="Validated" />
         <Area type="monotone" dataKey="registered" stackId="1" stroke="#444e86" fill="#444e86" name="Registered" />
-        <Area type="monotone" dataKey="notStarted" stackId="1" stroke="#003f5c" fill="#003f5c" name="Not registerd" />
+        <Area type="monotone" dataKey="notStarted" stackId="1" stroke="#003f5c" fill="#003f5c" name="Not registered" />
       </AreaChart>
     </>
   );

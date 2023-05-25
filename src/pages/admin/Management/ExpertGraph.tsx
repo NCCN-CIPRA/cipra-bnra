@@ -15,13 +15,15 @@ interface ExpertBucket {
   date: number;
   invited: number;
   registered: number;
-  firstLook: number;
-  firstValidation: number;
   validationFinished: number;
+  step2AFinished: number;
 }
 
 const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any[]; label?: any } = {}) => {
   if (!payload || payload.length <= 0) return <div></div>;
+
+  const l = payload.length - 1;
+  const total = payload.reduce((tot, p) => tot + p.value, 0);
 
   return (
     <Box sx={{ borderRadius: 4, backgroundColor: "rgba(255,255,255,.9)", p: 2 }}>
@@ -50,19 +52,49 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
             </td>
             <td>
               <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
-                {payload.reduce((tot, p) => tot + p.value, 0)}
+                {total}
               </Typography>
             </td>
           </tr>
           <tr>
             <td>
               <Typography variant="body1" sx={{ pt: 2 }}>
-                % Brave Experten:
+                Registration Retention:
               </Typography>
             </td>
             <td>
               <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
-                {Math.round((1000 * payload[0].value) / payload.reduce((tot, p) => tot + p.value, 0)) / 10}%
+                {Math.round((1000 * (total - payload[l].value)) / total) / 10}%
+              </Typography>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Typography variant="body1" sx={{ pt: 0 }}>
+                Validation Retention:
+              </Typography>
+            </td>
+            <td>
+              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 0 }}>
+                {Math.round((1000 * (total - payload[l].value - payload[l - 1].value)) / (total - payload[l].value)) /
+                  10}
+                %
+              </Typography>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Typography variant="body1" sx={{ pt: 0 }}>
+                Step 2A Retention:
+              </Typography>
+            </td>
+            <td>
+              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 0 }}>
+                {Math.round(
+                  (1000 * (total - payload[l].value - payload[l - 1].value - payload[l - 2].value)) /
+                    (total - payload[l].value - payload[l - 1].value)
+                ) / 10}
+                %
               </Typography>
             </td>
           </tr>
@@ -95,16 +127,15 @@ export default function ExpertGraph({
     });
 
     let currentDate = firstDateCalc;
-    const dates = [];
+    const dates: ExpertBucket[] = [];
 
     do {
       dates.push({
         date: currentDate,
         invited: 0,
         registered: 0,
-        firstLook: 0,
-        firstValidation: 0,
         validationFinished: 0,
+        step2AFinished: 0,
       });
 
       currentDate = addDays(new Date(currentDate), 1).getTime();
@@ -115,21 +146,16 @@ export default function ExpertGraph({
         const d = dates[i];
 
         if (
+          e.every(
+            (p) =>
+              p.cr4de_direct_analysis_finished_on && new Date(p.cr4de_direct_analysis_finished_on).getTime() <= d.date
+          )
+        ) {
+          dates[i].step2AFinished++;
+        } else if (
           e.every((p) => p.cr4de_validation_finished_on && new Date(p.cr4de_validation_finished_on).getTime() <= d.date)
         ) {
           dates[i].validationFinished++;
-        } else if (
-          e.some((p) => p.cr4de_validation_finished_on && new Date(p.cr4de_validation_finished_on).getTime() <= d.date)
-        ) {
-          dates[i].firstValidation++;
-        } else if (
-          e.some(
-            (p) =>
-              p.cr4de_risk_file?.cr4de_validation_silent_procedure_until &&
-              addDays(new Date(p.cr4de_risk_file.cr4de_validation_silent_procedure_until), -14).getTime() <= d.date
-          )
-        ) {
-          dates[i].firstLook++;
         } else if (
           e.some(
             (p) =>
@@ -138,11 +164,7 @@ export default function ExpertGraph({
           )
         ) {
           dates[i].registered++;
-        } else if (
-          e.some((p) =>
-            p.cr4de_contact?.invitations?.some((i) => new Date(i.cr4de_laatstverzonden).getTime() <= d.date)
-          )
-        ) {
+        } else {
           dates[i].invited++;
         }
       }
@@ -175,27 +197,19 @@ export default function ExpertGraph({
         <Tooltip content={<CustomTooltip />} />
         <Area
           type="monotone"
-          dataKey="validationFinished"
+          dataKey="step2AFinished"
           stackId="1"
           stroke="#ffa600"
           fill="#ffa600"
-          name="Finished validating all risk files"
+          name="Finished step 2A"
         />
         <Area
           type="monotone"
-          dataKey="firstValidation"
+          dataKey="validationFinished"
           stackId="1"
           stroke="#ff6e54"
           fill="#ff6e54"
-          name="Finished validating first risk file"
-        />
-        <Area
-          type="monotone"
-          dataKey="firstLook"
-          stackId="1"
-          stroke="#dd5182"
-          fill="#dd5182"
-          name="First look at a risk file"
+          name="Finished validation step"
         />
         <Area type="monotone" dataKey="registered" stackId="1" stroke="#955196" fill="#955196" name="Registered" />
         <Area type="monotone" dataKey="invited" stackId="1" stroke="#003f5c" fill="#003f5c" name="Invitation sent" />

@@ -31,6 +31,7 @@ import GraphView from "./GraphView";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import { DVValidation } from "../../../types/dataverse/DVValidation";
 import PrioritiesView from "./PrioritiesView";
+import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 
 export default function ProcessManagementPage() {
   const api = useAPI();
@@ -40,7 +41,7 @@ export default function ProcessManagementPage() {
   const [contacts, setContacts] = useState<SelectableContact[] | null>(null);
   const [riskFiles, setRiskFiles] = useState<SelectableRiskFile[] | null>(null);
   const [participations, setParticipations] = useState<
-    DVParticipation<SelectableContact, DVRiskFile, DVValidation>[] | null
+    DVParticipation<SelectableContact, DVRiskFile, DVValidation, DVDirectAnalysis>[] | null
   >(null);
   const [allSelected, setAllSelected] = useState(false);
 
@@ -50,8 +51,8 @@ export default function ProcessManagementPage() {
     const [rawContacts, invitations, participations] = await Promise.all([
       api.getContacts(),
       api.getInvitations(),
-      api.getParticipants<DVParticipation<undefined, DVRiskFile, DVValidation>>(
-        "$expand=cr4de_risk_file,cr4de_validation"
+      api.getParticipants<DVParticipation<undefined, DVRiskFile, DVValidation, DVDirectAnalysis>>(
+        "$expand=cr4de_risk_file,cr4de_validation,cr4de_direct_analysis"
       ),
     ]);
 
@@ -63,7 +64,7 @@ export default function ProcessManagementPage() {
       return acc;
     }, {});
     const participationsDict = participations.reduce(
-      (acc: { [key: string]: DVParticipation<undefined, DVRiskFile, DVValidation>[] }, p) => {
+      (acc: { [key: string]: DVParticipation<undefined, DVRiskFile, DVValidation, DVDirectAnalysis>[] }, p) => {
         if (!acc[p._cr4de_contact_value]) acc[p._cr4de_contact_value] = [];
 
         acc[p._cr4de_contact_value].push(p);
@@ -73,7 +74,7 @@ export default function ProcessManagementPage() {
       {}
     );
     const participationsRFDict = participations.reduce(
-      (acc: { [key: string]: DVParticipation<undefined, DVRiskFile, DVValidation>[] }, p) => {
+      (acc: { [key: string]: DVParticipation<undefined, DVRiskFile, DVValidation, DVDirectAnalysis>[] }, p) => {
         if (!p._cr4de_risk_file_value) return acc;
 
         if (!acc[p._cr4de_risk_file_value]) acc[p._cr4de_risk_file_value] = [];

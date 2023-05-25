@@ -15,8 +15,8 @@ export function DPSlider({
   error?: boolean;
   onChange: (value: string | null) => void;
 }) {
-  const [value, setValue] = useState(initialValue ? parseInt(initialValue.replace("DP", ""), 10) : -1);
-
+  const [value, setValue] = useState(initialValue ? parseInt(initialValue.replace("DP", ""), 10) - 1 : -1);
+  console.log(initialValue, value);
   const handleChangeValue = (event: Event, newValue: number | number[]) => {
     if (newValue < 0) {
       onChange(null);
