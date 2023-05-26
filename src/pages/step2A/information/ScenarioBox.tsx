@@ -80,7 +80,7 @@ export default function ScenarioBox({
                           },
                         }}
                       >
-                        <TableCell sx={{ maxWidth: 200, mr: 6 }}>
+                        <TableCell sx={{ width: "30%", mr: 6 }}>
                           <Tooltip
                             title={
                               <Box
