@@ -131,6 +131,8 @@ export default function useAPI(): API {
         navigate("/auth");
 
         throw new Error("Not Authenticated");
+      } else if (response.status === 404) {
+        throw new Error("Not Found");
       }
 
       return response;

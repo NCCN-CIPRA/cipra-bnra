@@ -126,6 +126,11 @@ export default function Step2APage() {
         extreme: getScenarioInputs(step2A, "extreme"),
       };
     },
+    onError: async (errorCode) => {
+      if (errorCode === 404) {
+        navigate("/overview");
+      }
+    },
   });
 
   const handleSave = async (showLoader = true) => {

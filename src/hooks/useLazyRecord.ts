@@ -7,6 +7,7 @@ export interface GetRecordParams<T> {
   query?: string;
   transformResult?: (result: any) => T;
   onComplete?: (result: T) => Promise<void>;
+  onError?: (errorCode: number) => Promise<void>;
 }
 
 /**
@@ -33,19 +34,31 @@ export default function useLazyRecord<T>(options: GetRecordParams<T>) {
     let response;
     const o = { ...options, ...lazyOptions };
 
-    if (o.table === DataTable.RISK_FILE) {
-      response = await api.getRiskFile<T>(o.id, o.query);
-    } else if (o.table === DataTable.RISK_CASCADE) {
-      response = await api.getRiskCascade<T>(o.id, o.query);
-    } else if (o.table === DataTable.VALIDATION) {
-      response = await api.getValidation<T>(o.id, o.query);
-    } else if (o.table === DataTable.DIRECT_ANALYSIS) {
-      response = await api.getDirectAnalysis<T>(o.id, o.query);
-    } else if (o.table === DataTable.CASCADE_ANALYSIS) {
-      response = await api.getCascadeAnalysis<T>(o.id, o.query);
-    } else {
-      // (o.table === DataTable.PAGE) {
-      response = await api.getPage<T>(o.id, o.query);
+    try {
+      if (o.table === DataTable.RISK_FILE) {
+        response = await api.getRiskFile<T>(o.id, o.query);
+      } else if (o.table === DataTable.RISK_CASCADE) {
+        response = await api.getRiskCascade<T>(o.id, o.query);
+      } else if (o.table === DataTable.VALIDATION) {
+        response = await api.getValidation<T>(o.id, o.query);
+      } else if (o.table === DataTable.DIRECT_ANALYSIS) {
+        response = await api.getDirectAnalysis<T>(o.id, o.query);
+      } else if (o.table === DataTable.CASCADE_ANALYSIS) {
+        response = await api.getCascadeAnalysis<T>(o.id, o.query);
+      } else {
+        // (o.table === DataTable.PAGE) {
+        response = await api.getPage<T>(o.id, o.query);
+      }
+    } catch (e: any) {
+      if (e.message === "Not Found") {
+        setData(null);
+        setLoading(false);
+
+        if (o.onError) await o.onError(404);
+
+        return;
+      }
+      throw e;
     }
 
     const result = o.transformResult ? o.transformResult(response) : response;
