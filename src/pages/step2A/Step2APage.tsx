@@ -249,13 +249,13 @@ export default function Step2APage() {
   };
 
   useEffect(() => {
-    if (activeStep === null) {
+    if (activeStep === null && step2A) {
       const searchParamStep = searchParams.get("step");
       if (searchParamStep && parseInt(searchParamStep, 10) in STEPS) {
         transitionTo(parseInt(searchParamStep, 10) as STEPS);
       } else transitionTo(STEPS.INTRODUCTION);
     }
-  }, [activeStep]);
+  }, [activeStep, step2A]);
 
   useEffect(() => {
     const autosaveTimer = setTimeout(() => {
