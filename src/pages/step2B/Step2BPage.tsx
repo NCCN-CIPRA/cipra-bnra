@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useReducer } from "react";
 import {
   Box,
   Button,
@@ -11,6 +11,7 @@ import {
   DialogContentText,
   DialogActions,
   DialogTitle,
+  Tooltip,
 } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
@@ -32,7 +33,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import useRecords from "../../hooks/useRecords";
 import { AuthPageContext } from "../AuthPage";
 import { SCENARIOS } from "../../functions/scenarios";
-import { CascadeAnalysisInput, getCascadeInput } from "../../functions/cascades";
+import { CascadeAnalysisInput, getCascadeField, getCascadeInput } from "../../functions/cascades";
 
 type RouteParams = {
   step2A_id: string;
@@ -51,15 +52,15 @@ export default function ({}) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
-  const [fade, setFade] = useState(true);
+  const [fadeIn, setFadeIn] = useState(true);
   const [activeStep, setActiveStep] = useState<STEPS | null>(null);
   const [cascadeIndex, setCascadeIndex] = useState(parseInt(searchParams.get("index") || "1", 10) - 1);
   const [activeCauseScenario, setActiveCauseScenario] = useState(SCENARIOS.CONSIDERABLE);
   const [activeEffectScenario, setActiveEffectScenario] = useState(SCENARIOS.CONSIDERABLE);
 
-  const [causes, setCauses] = useState<DVRiskCascade[] | null>(null);
-  const [catalysingEffects, setCatalysingEffects] = useState<DVRiskCascade[] | null>(null);
-  const [cascade, setCascade] = useState<DVRiskCascade<DVRiskFile> | null>(null);
+  const [causes, setCauses] = useState<DVRiskCascade<DVRiskFile, DVRiskFile>[] | null>(null);
+  const [catalysingEffects, setCatalysingEffects] = useState<DVRiskCascade<DVRiskFile, DVRiskFile>[] | null>(null);
+  const [cascade, setCascade] = useState<DVRiskCascade<DVRiskFile, DVRiskFile> | null>(null);
   const [cascadeAnalysis, setCascadeAnalysis] = useState<DVCascadeAnalysis | null>(null);
 
   const step2BInput = useRef<CascadeAnalysisInput | null>(null);
@@ -68,14 +69,15 @@ export default function ({}) {
   const [surveyDialogOpen, setSurveyDialogOpen] = useState(false);
   const [runTutorial, setRunTutorial] = useState(false);
   const [openSpeedDial, setOpenSpeedDial] = useState(false);
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const {
     data: cascades,
     loading: loadingCascades,
     getData: loadCascades,
-  } = useLazyRecords<DVRiskCascade<DVRiskFile>>({
+  } = useLazyRecords<DVRiskCascade<DVRiskFile, DVRiskFile>>({
     table: DataTable.RISK_CASCADE,
-    transformResult: (result: DVRiskCascade<DVRiskFile>[]) => {
+    transformResult: (result: DVRiskCascade<DVRiskFile, DVRiskFile>[]) => {
       return result.sort((a, b) => a.cr4de_cause_hazard.cr4de_title.localeCompare(b.cr4de_cause_hazard.cr4de_title));
     },
   });
@@ -100,7 +102,7 @@ export default function ({}) {
     query: "$expand=cr4de_risk_file",
     onComplete: async (step2A) => {
       loadCascades({
-        query: `$filter=_cr4de_effect_hazard_value eq ${step2A._cr4de_risk_file_value}&$expand=cr4de_cause_hazard`,
+        query: `$filter=_cr4de_effect_hazard_value eq ${step2A._cr4de_risk_file_value}&$expand=cr4de_cause_hazard,cr4de_effect_hazard($select=cr4de_title)`,
       });
       load2B({
         query: `$filter=_cr4de_expert_value eq ${user?.contactid} and _cr4de_risk_file_value eq ${step2A._cr4de_risk_file_value}`,
@@ -108,13 +110,48 @@ export default function ({}) {
     },
   });
 
+  const findOrCreateCascadeAnalysis = async function (iCascade: DVRiskCascade<DVRiskFile>) {
+    if (step2A && step2B) {
+      let iCascadeAnalysis = step2B.find(
+        (s) => iCascade && s._cr4de_cascade_value === iCascade.cr4de_bnrariskcascadeid
+      );
+
+      if (!iCascadeAnalysis) {
+        await api.createCascadeAnalysis({
+          "cr4de_expert@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+          "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${step2A._cr4de_risk_file_value})`,
+          "cr4de_cascade@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${iCascade.cr4de_bnrariskcascadeid})`,
+        });
+
+        await load2B();
+
+        iCascadeAnalysis = step2B.find((s) => iCascade && s._cr4de_cascade_value === iCascade.cr4de_bnrariskcascadeid);
+      }
+
+      return iCascadeAnalysis || null;
+    }
+
+    return null;
+  };
+
+  const updateStep2BInput = async function (iCascade: DVRiskCascade<DVRiskFile>) {
+    const iCascadeAnalysis = await findOrCreateCascadeAnalysis(iCascade);
+
+    if (iCascadeAnalysis) {
+      setCascadeAnalysis(iCascadeAnalysis);
+      step2BInput.current = getCascadeInput(iCascadeAnalysis);
+    }
+  };
+
+  // Split the cascades into causes and catalyzing effects
+  // Set the current viewed cascade based on the "Active Step" and "Cascade Index" parameters (initialized by URL)
   useEffect(() => {
     if (cascades) {
       const iCauses = cascades && cascades.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type !== "Emerging Risk");
       const iCatalysingEffects =
         cascades && cascades.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk");
 
-      let iCascade: DVRiskCascade<DVRiskFile> | null = null;
+      let iCascade: DVRiskCascade<DVRiskFile, DVRiskFile> | null = null;
       if (activeStep === STEPS.CAUSES) iCascade = iCauses && iCauses[cascadeIndex];
       else if (activeStep === STEPS.CATALYSING_EFFECTS)
         iCascade = iCatalysingEffects && iCatalysingEffects[cascadeIndex];
@@ -123,18 +160,11 @@ export default function ({}) {
       setCatalysingEffects(iCatalysingEffects);
       setCascade(iCascade);
 
-      if (step2B) {
-        const iCascadeAnalysis = step2B.find(
-          (s) => iCascade && s._cr4de_risk_file_value === iCascade._cr4de_effect_hazard_value
-        );
-
-        if (iCascadeAnalysis) {
-          setCascadeAnalysis(iCascadeAnalysis);
-          step2BInput.current = getCascadeInput(iCascadeAnalysis);
-        }
+      if (iCascade) {
+        updateStep2BInput(iCascade);
       }
     }
-  }, [cascades, cascadeIndex, activeStep, step2B]);
+  }, [cascades, cascadeIndex, activeStep, step2A, step2B]);
 
   async function handleSave() {
     if (!cascadeAnalysis || !step2BInput.current) return;
@@ -164,11 +194,11 @@ export default function ({}) {
   ]);
 
   const transitionTo = (newStep: STEPS) => {
-    setFade(false);
+    setFadeIn(false);
 
     const timer = setTimeout(() => {
       setActiveStep(newStep);
-      setFade(true);
+      setFadeIn(true);
       setIsSaving(false);
       window.scrollTo(0, 0);
       setSearchParams({
@@ -205,13 +235,13 @@ export default function ({}) {
       navigate("/overview");
       //   }
     } else if (activeStep === STEPS.INTRODUCTION) {
-      if (!step2B.find((s) => s._cr4de_risk_file_value === causes[0]._cr4de_effect_hazard_value)) {
-        await createCascadeAnalysis(causes[0]);
-      }
-
       if (causes && causes.length > 0) {
+        await findOrCreateCascadeAnalysis(causes[0]);
+
         transitionTo(STEPS.CAUSES);
       } else if (catalysingEffects && catalysingEffects.length > 0) {
+        await findOrCreateCascadeAnalysis(catalysingEffects[0]);
+
         transitionTo(STEPS.CATALYSING_EFFECTS);
       } else {
         transitionTo(STEPS.REVIEW);
@@ -225,20 +255,31 @@ export default function ({}) {
 
         if (!nextCascade) {
           if (catalysingEffects && catalysingEffects.length > 0) {
+            await findOrCreateCascadeAnalysis(catalysingEffects[0]);
+
             transitionTo(STEPS.CATALYSING_EFFECTS);
           } else {
             transitionTo(STEPS.REVIEW);
           }
         } else {
-          if (!step2B.find((s) => s._cr4de_risk_file_value === nextCascade._cr4de_effect_hazard_value)) {
-            await createCascadeAnalysis(nextCascade);
-          }
+          setFadeIn(false);
+          setIsSaving(true);
 
           setCascadeIndex(nextCascadeIndex);
           setSearchParams({
             step: searchParams.get("step") || "1",
             index: (nextCascadeIndex + 1).toString(),
           });
+
+          // window.scroll({ top: 0, left: 0, behavior: "smooth" });
+
+          setTimeout(async () => {
+            await updateStep2BInput(nextCascade);
+            setActiveCauseScenario(SCENARIOS.CONSIDERABLE);
+            setActiveEffectScenario(SCENARIOS.CONSIDERABLE);
+
+            setIsSaving(false);
+          }, transitionDelay);
         }
       }
     } else {
@@ -246,22 +287,7 @@ export default function ({}) {
     }
   };
 
-  const createCascadeAnalysis = async (cascade: DVRiskCascade) => {
-    setIsLoading(true);
-
-    await api.createCascadeAnalysis({
-      "cr4de_expert@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
-      "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${cascade._cr4de_effect_hazard_value})`,
-      "cr4de_cascade@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${cascade.cr4de_bnrariskcascadeid})`,
-    });
-
-    await load2B();
-
-    setIsLoading(false);
-  };
-
   const previous = async () => {
-    console.log(step2B, causes, catalysingEffects, activeStep);
     if (!step2B || !causes || !catalysingEffects) return;
 
     // if (activeStep === STEPS.REVIEW) {
@@ -275,21 +301,33 @@ export default function ({}) {
       handleSave();
 
       if (!handlePreviousCascade()) {
+        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+
         const previousCascadeIndex = cascadeIndex - 1;
         const previousCascade = causes[previousCascadeIndex];
 
         if (!previousCascade) {
           transitionTo(STEPS.INTRODUCTION);
         } else {
-          if (!step2B.find((s) => s._cr4de_risk_file_value === previousCascade._cr4de_effect_hazard_value)) {
-            await createCascadeAnalysis(previousCascade);
-          }
+          setFadeIn(false);
+          setIsSaving(true);
 
           setCascadeIndex(previousCascadeIndex);
           setSearchParams({
             step: searchParams.get("step") || "1",
             index: (previousCascadeIndex + 1).toString(),
           });
+
+          // window.scrollTo({ top: 0, behavior: "smooth" });
+
+          setTimeout(async () => {
+            await updateStep2BInput(previousCascade);
+
+            setActiveCauseScenario(SCENARIOS.EXTREME);
+            setActiveEffectScenario(SCENARIOS.EXTREME);
+
+            setIsSaving(false);
+          }, transitionDelay);
         }
       }
     }
@@ -304,9 +342,6 @@ export default function ({}) {
         setActiveCauseScenario(SCENARIOS.CONSIDERABLE);
         setActiveEffectScenario(SCENARIOS.EXTREME);
       } else {
-        setActiveCauseScenario(SCENARIOS.CONSIDERABLE);
-        setActiveEffectScenario(SCENARIOS.CONSIDERABLE);
-
         return false;
       }
     } else if (activeCauseScenario === SCENARIOS.CONSIDERABLE) {
@@ -327,9 +362,6 @@ export default function ({}) {
         setActiveCauseScenario(SCENARIOS.EXTREME);
         setActiveEffectScenario(SCENARIOS.MAJOR);
       } else {
-        setActiveCauseScenario(SCENARIOS.EXTREME);
-        setActiveEffectScenario(SCENARIOS.EXTREME);
-
         return false;
       }
     } else if (activeCauseScenario === SCENARIOS.MAJOR) {
@@ -341,6 +373,12 @@ export default function ({}) {
     return true;
   }
 
+  const handleChangeScenario = (causeScenario: SCENARIOS | null, effectScenario: SCENARIOS | null) => {
+    if (causeScenario) setActiveCauseScenario(causeScenario);
+    if (effectScenario) setActiveEffectScenario(effectScenario);
+  };
+
+  // Transition to the step in the URL parameters after first loading the page
   useEffect(() => {
     if (activeStep === null) {
       const searchParamStep = searchParams.get("step");
@@ -351,6 +389,7 @@ export default function ({}) {
     }
   }, [activeStep]);
 
+  // Auto-save after 10s of inactivity
   useEffect(() => {
     const autosaveTimer = setTimeout(() => {
       handleSave();
@@ -358,6 +397,12 @@ export default function ({}) {
 
     return () => clearTimeout(autosaveTimer);
   }, []);
+
+  useEffect(() => {
+    if (fadeIn) {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }
+  }, [fadeIn]);
 
   return (
     <>
@@ -392,7 +437,7 @@ export default function ({}) {
       </Container>
 
       <SavingOverlay visible={isSaving} />
-      <Fade in={fade} timeout={transitionDelay}>
+      <Fade in={fadeIn} timeout={transitionDelay} mountOnEnter unmountOnExit>
         <Box sx={{ mt: 6, mb: 16 }}>
           {!step2A && (
             <Box sx={{ mt: 32, textAlign: "center" }}>
@@ -402,6 +447,8 @@ export default function ({}) {
           {step2A && step2A.cr4de_risk_file.cr4de_risk_type === "Standard Risk" && (
             <Standard
               activeStep={activeStep}
+              causes={causes}
+              catalysingEffects={catalysingEffects}
               cascade={cascade}
               cascadeIndex={cascadeIndex}
               step2A={step2A}
@@ -410,9 +457,19 @@ export default function ({}) {
               activeCauseScenario={activeCauseScenario}
               activeEffectScenario={activeEffectScenario}
               setRunTutorial={setRunTutorial}
-              setStep2BInput={(input) => (step2BInput.current = input)}
+              setStep2BInput={(input, update) => {
+                step2BInput.current = input;
+
+                if (update) {
+                  forceUpdate();
+                }
+              }}
               onNext={next}
               onPrevious={previous}
+              onChangeScenario={handleChangeScenario}
+              onUnmount={() => {
+                setFadeIn(true);
+              }}
             />
           )}
           {/* {step2A && step2A.cr4de_risk_file.cr4de_risk_type === "Malicious Man-made Risk" && (
@@ -459,9 +516,30 @@ export default function ({}) {
 
         <Box id="step2A-next-buttons">
           {activeStep !== STEPS.REVIEW && (
-            <Button disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={next}>
-              <Trans i18nKey="button.next">Next</Trans>
-            </Button>
+            <Tooltip
+              title={
+                step2BInput.current &&
+                step2BInput.current[getCascadeField(activeCauseScenario, activeEffectScenario)] != null
+                  ? t("2B.doneButton.continue", "Continue")
+                  : t("2B.doneButton.selectValue", "Please select a value before continuing")
+              }
+            >
+              <span>
+                <Button
+                  disabled={
+                    isSaving ||
+                    ((activeStep === STEPS.CAUSES || activeStep === STEPS.CATALYSING_EFFECTS) &&
+                      (!step2BInput.current ||
+                        step2BInput.current[getCascadeField(activeCauseScenario, activeEffectScenario)] == null))
+                  }
+                  color="primary"
+                  sx={{ mr: 1 }}
+                  onClick={next}
+                >
+                  <Trans i18nKey="button.next">Next</Trans>
+                </Button>
+              </span>
+            </Tooltip>
           )}
           <Button disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={() => setFinishedDialogOpen(true)}>
             <Trans i18nKey="button.saveandexit">Save & exit</Trans>

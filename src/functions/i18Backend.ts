@@ -50,17 +50,17 @@ class DataverseBackend implements Module {
   async create(languages: string[], namespace: string, key: string, fallbackValue: string) {
     if (languages[0] !== "en") return;
 
-    fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnratranslations`, {
-      method: "POST",
-      headers: {
-        __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        cr4de_name: key,
-        [`cr4de_${languages[0]}`]: fallbackValue,
-      }),
-    });
+    // fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnratranslations`, {
+    //   method: "POST",
+    //   headers: {
+    //     __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     cr4de_name: key,
+    //     [`cr4de_${languages[0]}`]: fallbackValue,
+    //   }),
+    // });
   }
 }
 

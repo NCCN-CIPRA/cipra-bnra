@@ -24,6 +24,8 @@ import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import useLoggedInUser from "../../../hooks/useLoggedInUser";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import { useOutletContext } from "react-router-dom";
+import { AuthPageContext } from "../../AuthPage";
 
 export default function AttachmentsDialog({
   field,
@@ -44,7 +46,7 @@ export default function AttachmentsDialog({
 }) {
   const { t } = useTranslation();
   const api = useAPI();
-  const { user } = useLoggedInUser();
+  const { user } = useOutletContext<AuthPageContext>();
 
   const inputRef = useRef<HTMLInputElement>(null);
 

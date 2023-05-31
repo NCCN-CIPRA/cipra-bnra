@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Tooltip,
@@ -14,6 +15,7 @@ import {
   Button,
   Slide,
   IconButton,
+  Link,
 } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -42,6 +44,9 @@ import useLoggedInUser from "../../../hooks/useLoggedInUser";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import TextInputBox from "../../../components/TextInputBox";
 import { CascadeAnalysisInput, getCascadeField } from "../../../functions/cascades";
+import CascadeMatrix from "../information/CascadeMatrix";
+import QualiTextInputBox from "../../step2A/sections/QualiTextInputBox";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 
 const TRANSITION_MS = 1000;
 const TRANSITION_S = "1s";
@@ -50,7 +55,19 @@ function FadedScenario({ scenario }: { scenario: SCENARIOS }) {
   const { t } = useTranslation();
 
   return (
-    <TableContainer component={Paper} sx={{ width: 115, opacity: 0.5 }}>
+    <TableContainer
+      component={Paper}
+      sx={{
+        width: 115,
+        opacity: 0.5,
+        cursor: "pointer",
+        transition: "all .3s ease",
+        "&:hover": {
+          opacity: 0.8,
+          boxShadow: 10,
+        },
+      }}
+    >
       <Table size="small">
         <TableHead>
           <TableRow>
@@ -183,26 +200,38 @@ function FullScenario({
 
 export default function CascadeAnalysis({
   riskFile,
+  causes,
   cascade,
   cascadeIndex,
   step2B,
   step2BInput,
   activeCauseScenario,
   activeEffectScenario,
+  attachments,
   setStep2BInput,
   onNext,
   onPrevious,
+  onChangeScenario,
+  onUnmount,
+  onOpenSourceDialog,
+  onReloadAttachments,
 }: {
   riskFile: DVRiskFile;
-  cascade: DVRiskCascade<DVRiskFile>;
+  causes: DVRiskCascade[];
+  cascade: DVRiskCascade<DVRiskFile, DVRiskFile>;
   cascadeIndex: number;
   step2B: DVCascadeAnalysis;
   step2BInput: CascadeAnalysisInput;
   activeCauseScenario: SCENARIOS;
   activeEffectScenario: SCENARIOS;
-  setStep2BInput: (input: CascadeAnalysisInput) => void;
+  attachments: DVAttachment<unknown, DVAttachment>[] | null;
+  setStep2BInput: (input: CascadeAnalysisInput, update?: boolean) => void;
   onNext: () => Promise<void>;
   onPrevious: () => Promise<void>;
+  onChangeScenario: (causeScenario: SCENARIOS | null, effectScenario: SCENARIOS | null) => void;
+  onUnmount: () => void;
+  onOpenSourceDialog: (existingSource?: DVAttachment) => void;
+  onReloadAttachments: () => Promise<void>;
 }) {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -211,7 +240,12 @@ export default function CascadeAnalysis({
   const [qualiInput, setQualiInput] = useState<string | null | undefined>(step2B.cr4de_quali_cascade);
   const qualiRef = useRef<HTMLDivElement | null>(null);
 
-  const cp = (input[getCascadeField(activeCauseScenario, activeEffectScenario)] as number) || -1;
+  const field = getCascadeField(activeCauseScenario, activeEffectScenario);
+  const cp = input[field] == null ? -1 : (input[field] as number);
+
+  useEffect(() => {
+    return onUnmount;
+  }, []);
 
   const causeScenarios = unwrapScenarios(
     unwrapParameters(cascade.cr4de_cause_hazard.cr4de_intensity_parameters),
@@ -262,6 +296,25 @@ export default function CascadeAnalysis({
     <Box sx={{ mx: "123px" }}>
       <Container>
         <Stack direction="column">
+          <Typography variant="h6" sx={{ mb: 4 }}>
+            <Tooltip title={t("2B.cause.openRiskFile", "Click to open the risk file for this risk in a new tab")}>
+              <Link
+                to={`/learning/risk/${cascade.cr4de_cause_hazard.cr4de_riskfilesid}`}
+                component={RouterLink}
+                target="_blank"
+              >
+                {cascade.cr4de_cause_hazard.cr4de_title}
+              </Link>
+            </Tooltip>{" "}
+            <Trans i18nKey="2B.causes.description">causes a</Trans>{" "}
+            <Tooltip title={t("2B.cause.openRiskFile", "Click to open the risk file for this risk in a new tab")}>
+              <Link to={`/learning/risk/${riskFile.cr4de_riskfilesid}`} component={RouterLink} target="_blank">
+                {riskFile.cr4de_title}
+              </Link>
+            </Tooltip>{" "}
+            ({cascadeIndex + 1}/{causes.length})
+          </Typography>
+
           <Box sx={{ position: "relative" }}>
             <Box
               sx={{
@@ -271,6 +324,7 @@ export default function CascadeAnalysis({
                 top: activeCauseScenario === SCENARIOS.EXTREME ? "90px" : "0px",
                 opacity: activeCauseScenario === SCENARIOS.CONSIDERABLE ? 0 : 1,
               }}
+              onClick={() => onChangeScenario(SCENARIOS.CONSIDERABLE, null)}
             >
               <FadedScenario scenario={SCENARIOS.CONSIDERABLE} />
             </Box>
@@ -284,6 +338,7 @@ export default function CascadeAnalysis({
                   "-131px",
                 opacity: activeCauseScenario === SCENARIOS.MAJOR ? 0 : 1,
               }}
+              onClick={() => onChangeScenario(SCENARIOS.MAJOR, null)}
             >
               <FadedScenario scenario={SCENARIOS.MAJOR} />
             </Box>
@@ -295,6 +350,7 @@ export default function CascadeAnalysis({
                 top: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "90px" : "0px",
                 opacity: activeCauseScenario === SCENARIOS.EXTREME ? 0 : 1,
               }}
+              onClick={() => onChangeScenario(SCENARIOS.EXTREME, null)}
             >
               <FadedScenario scenario={SCENARIOS.EXTREME} />
             </Box>
@@ -305,6 +361,7 @@ export default function CascadeAnalysis({
                 left: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "0px" : "-131px",
                 width: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "100%" : 115,
                 transition: `all ${TRANSITION_S} ease`,
+                pointerEvents: "none",
               }}
             >
               <FullScenario
@@ -325,6 +382,7 @@ export default function CascadeAnalysis({
                   "calc(100% + 16px)",
                 width: activeCauseScenario === SCENARIOS.MAJOR ? "100%" : 115,
                 transition: `all ${TRANSITION_S} ease`,
+                pointerEvents: "none",
               }}
             >
               <FullScenario
@@ -342,6 +400,7 @@ export default function CascadeAnalysis({
                 left: (activeCauseScenario === SCENARIOS.EXTREME && "0px") || "calc(100% + 16px)",
                 width: activeCauseScenario === SCENARIOS.EXTREME ? "100%" : 115,
                 transition: `all ${TRANSITION_S} ease`,
+                pointerEvents: "none",
               }}
             >
               <FullScenario
@@ -438,9 +497,18 @@ export default function CascadeAnalysis({
                   ...step2BInput,
                   [getCascadeField(activeCauseScenario, activeEffectScenario)]: 5 - (v as number),
                 };
+                const newParentInput = {
+                  ...step2BInput,
+                  [getCascadeField(activeCauseScenario, activeEffectScenario)]:
+                    5 - (v as number) < 0 ? null : 5 - (v as number),
+                };
 
                 setInput(newInput);
-                setStep2BInput(newInput);
+                setStep2BInput(
+                  newParentInput,
+                  step2BInput[getCascadeField(activeCauseScenario, activeEffectScenario)] == null ||
+                    5 - (v as number) < 0
+                );
               }}
               min={0}
               max={6}
@@ -502,6 +570,7 @@ export default function CascadeAnalysis({
                 top: activeEffectScenario === SCENARIOS.EXTREME ? "90px" : "0px",
                 opacity: activeEffectScenario === SCENARIOS.CONSIDERABLE ? 0 : 1,
               }}
+              onClick={() => onChangeScenario(null, SCENARIOS.CONSIDERABLE)}
             >
               <FadedScenario scenario={SCENARIOS.CONSIDERABLE} />
             </Box>
@@ -515,6 +584,7 @@ export default function CascadeAnalysis({
                   "-131px",
                 opacity: activeEffectScenario === SCENARIOS.MAJOR ? 0 : 1,
               }}
+              onClick={() => onChangeScenario(null, SCENARIOS.MAJOR)}
             >
               <FadedScenario scenario={SCENARIOS.MAJOR} />
             </Box>
@@ -526,6 +596,7 @@ export default function CascadeAnalysis({
                 top: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "90px" : "0px",
                 opacity: activeEffectScenario === SCENARIOS.EXTREME ? 0 : 1,
               }}
+              onClick={() => onChangeScenario(null, SCENARIOS.EXTREME)}
             >
               <FadedScenario scenario={SCENARIOS.EXTREME} />
             </Box>
@@ -536,6 +607,7 @@ export default function CascadeAnalysis({
                 left: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "0px" : "-131px",
                 width: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "100%" : 115,
                 transition: `all ${TRANSITION_S} ease`,
+                pointerEvents: "none",
               }}
             >
               <FullScenario
@@ -556,6 +628,7 @@ export default function CascadeAnalysis({
                   "calc(100% + 16px)",
                 width: activeEffectScenario === SCENARIOS.MAJOR ? "100%" : 115,
                 transition: `all ${TRANSITION_S} ease`,
+                pointerEvents: "none",
               }}
             >
               <FullScenario
@@ -573,6 +646,7 @@ export default function CascadeAnalysis({
                 left: (activeEffectScenario === SCENARIOS.EXTREME && "0px") || "calc(100% + 16px)",
                 width: activeEffectScenario === SCENARIOS.EXTREME ? "100%" : 115,
                 transition: `all ${TRANSITION_S} ease`,
+                pointerEvents: "none",
               }}
             >
               <FullScenario
@@ -593,8 +667,31 @@ export default function CascadeAnalysis({
               />
             </AutoHeight>
           </Box>
-          <Box ref={qualiRef} sx={{ marginTop: 10, marginBottom: 3 }}>
-            <TextInputBox
+
+          <Box sx={{ margin: "auto", marginTop: 4, maxWidth: 600, width: "100%" }}>
+            <CascadeMatrix cascade={cascade} step2B={step2B} />
+          </Box>
+
+          <Stack direction="column" sx={{ marginTop: 10 }}>
+            <Typography variant="body2" paragraph>
+              <Trans i18nKey="2B.causes.quali.1">
+                Veuillez utiliser le champ ci-dessous pour développer votre raisonnement concernant l'estimation
+                quantitative donnée dans la section précédente. Vous pouvez par exemple justifier ces valeurs en citant
+                des faits historiques ou les résultats d'études. Si possible, ajoutez des références bibliographiques
+                pour étayer vos arguments.
+              </Trans>
+            </Typography>
+            <Typography variant="body2" paragraph>
+              <Trans i18nKey="2B.causes.quali.2">
+                Attention, ce champ doit être complété une seule fois pour chaque relation de cause à effet. Vous pouvez
+                ajouter des précisions concernant les 9 estimations de la probabilité conditionnelle dans le même champ
+                textuel.
+              </Trans>
+            </Typography>
+          </Stack>
+
+          <Box ref={qualiRef} sx={{ marginTop: 2, marginBottom: 3, bgcolor: "white" }}>
+            <QualiTextInputBox
               id="quali-input"
               initialValue={qualiInput || ""}
               onSave={(v) => {
@@ -605,6 +702,9 @@ export default function CascadeAnalysis({
                 setQualiInput(v || null);
               }}
               debounceInterval={500}
+              attachments={attachments}
+              onOpenSourceDialog={onOpenSourceDialog}
+              onReloadAttachments={onReloadAttachments}
             />
           </Box>
         </Stack>

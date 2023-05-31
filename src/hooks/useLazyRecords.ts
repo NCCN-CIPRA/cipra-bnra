@@ -24,6 +24,7 @@ export interface GetRecordsParams<T> {
 export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
   const api = useAPI();
 
+  const [hasRun, setHasRun] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<T[] | null>(null);
   const [lastOptions, setLastOptions] = useState<GetRecordsParams<T>>(options);
@@ -33,6 +34,8 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
     const o = { ...lastOptions, ...lazyOptions };
 
     if (o.saveOptions) setLastOptions(o);
+
+    setHasRun(true);
 
     if (o.table === DataTable.CONTACT) {
       response = await api.getContacts<T>(o.query);
@@ -66,5 +69,5 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
     setLoading(false);
   };
 
-  return { loading, data, getData };
+  return { hasRun, loading, data, getData };
 }
