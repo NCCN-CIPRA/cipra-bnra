@@ -54,9 +54,14 @@ export interface DirectAnalysisEditableFields {
   cr4de_cross_border_impact_quali_c: string | null;
   cr4de_cross_border_impact_quali_m: string | null;
   cr4de_cross_border_impact_quali_e: string | null;
+
+  cr4de_dp50_quali: string | null;
+  cr4de_dp50_quanti_c: string | null;
+  cr4de_dp50_quanti_m: string | null;
+  cr4de_dp50_quanti_e: string | null;
 }
 
-export interface DVDirectAnalysis<RiskFileType = undefined> extends DirectAnalysisEditableFields {
+export interface DVDirectAnalysis<RiskFileType = unknown> extends DirectAnalysisEditableFields {
   cr4de_bnradirectanalysisid: string;
 
   cr4de_expert: string;

@@ -70,7 +70,7 @@ export function getScenarioInputs(directAnalysis: DVDirectAnalysis<unknown>, sce
   else suffix = "_e";
 
   return Object.keys(directAnalysis).reduce((scenarioInputs, directAnalysisField) => {
-    if (!directAnalysisField.endsWith(suffix)) return scenarioInputs;
+    if (!directAnalysisField.endsWith(suffix) || directAnalysisField.indexOf("dp50") >= 0) return scenarioInputs;
 
     return {
       ...scenarioInputs,

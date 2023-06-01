@@ -471,6 +471,32 @@ export default function CascadeAnalysis({
                 </span>
               </Tooltip>
             </Box>
+            <Box
+              sx={{
+                position: "absolute",
+                width: 300,
+                right: "calc(50% - 200px)",
+                textAlign: "right",
+              }}
+            >
+              <Tooltip
+                title={
+                  cp < 0
+                    ? t("2B.doneButton.selectValue", "Please select a value before continuing")
+                    : t("2B.doneButton.continue", "Continue")
+                }
+              >
+                <span>
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowForwardIcon sx={{ marginLeft: "8px", marginRight: "-4px" }} />}
+                    sx={{ padding: "9px 5px", minWidth: "auto", borderRadius: "19px" }}
+                    disabled={cp < 0}
+                    onClick={handleNext}
+                  />
+                </span>
+              </Tooltip>
+            </Box>
             <Slider
               sx={{
                 '& input[type="range"]': {
@@ -533,32 +559,6 @@ export default function CascadeAnalysis({
                     ),
                 }))}
             />
-            <Box
-              sx={{
-                position: "absolute",
-                width: 300,
-                right: "calc(50% - 200px)",
-                textAlign: "right",
-              }}
-            >
-              <Tooltip
-                title={
-                  cp < 0
-                    ? t("2B.doneButton.selectValue", "Please select a value before continuing")
-                    : t("2B.doneButton.continue", "Continue")
-                }
-              >
-                <span>
-                  <Button
-                    variant="outlined"
-                    startIcon={<ArrowForwardIcon sx={{ marginLeft: "8px", marginRight: "-4px" }} />}
-                    sx={{ padding: "9px 5px", minWidth: "auto", borderRadius: "19px" }}
-                    disabled={cp < 0}
-                    onClick={handleNext}
-                  />
-                </span>
-              </Tooltip>
-            </Box>
           </Stack>
 
           <Box sx={{ position: "relative" }}>
@@ -690,7 +690,7 @@ export default function CascadeAnalysis({
             </Typography>
           </Stack>
 
-          <Box ref={qualiRef} sx={{ marginTop: 2, marginBottom: 3, bgcolor: "white" }}>
+          <Box ref={qualiRef} sx={{ marginTop: 2, marginBottom: 3 }}>
             <QualiTextInputBox
               id="quali-input"
               initialValue={qualiInput || ""}

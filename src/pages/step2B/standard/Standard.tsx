@@ -19,11 +19,13 @@ import useRecords from "../../../hooks/useRecords";
 import { DataTable } from "../../../hooks/useAPI";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import AttachmentsDialog from "../information/AttachmentsDialog";
+import ClimateChangeAnalysis from "./ClimateChangeAnalysis";
 
 export default function Standard({
   activeStep,
   causes,
   catalysingEffects,
+  climateChange,
   cascade,
   cascadeIndex,
   step2A,
@@ -41,6 +43,7 @@ export default function Standard({
   activeStep: STEPS | null;
   causes: DVRiskCascade[] | null;
   catalysingEffects: DVRiskCascade[] | null;
+  climateChange: DVRiskCascade<DVRiskFile, DVRiskFile> | null;
   cascade: DVRiskCascade<DVRiskFile, DVRiskFile> | null;
   cascadeIndex: number;
   step2A: DVDirectAnalysis<DVRiskFile>;
@@ -162,15 +165,34 @@ export default function Standard({
           />
         </Box>
       )}
+      {activeStep === STEPS.CLIMATE_CHANGE && step2A.cr4de_risk_file && climateChange && (
+        <Box>
+          <Container>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="h4">
+                <Trans i18nKey="2B.climateChange.title">Climate Change</Trans>
+              </Typography>
+            </Box>
+          </Container>
+          <ClimateChangeAnalysis
+            riskFile={step2A.cr4de_risk_file}
+            cascade={climateChange}
+            step2A={step2A}
+            attachments={attachments}
+            onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
+            onReloadAttachments={loadAttachments}
+          />
+        </Box>
+      )}
       {activeStep === STEPS.CATALYSING_EFFECTS &&
         step2A.cr4de_risk_file &&
-        causes &&
+        catalysingEffects &&
         cascade &&
         step2B &&
         step2BInput && (
           <Box>
             <Container>
-              <Box sx={{ mb: 2, ml: 1 }}>
+              <Box sx={{ mb: 2 }}>
                 <Typography variant="h4">
                   <Trans i18nKey="2B.catalysingEffects.title">Catalysing Effects</Trans>
                 </Typography>
@@ -178,7 +200,7 @@ export default function Standard({
             </Container>
             <CascadeAnalysis
               riskFile={step2A.cr4de_risk_file}
-              causes={causes}
+              causes={catalysingEffects}
               cascade={cascade}
               cascadeIndex={cascadeIndex}
               step2B={step2B}

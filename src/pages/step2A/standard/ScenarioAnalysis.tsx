@@ -101,7 +101,7 @@ export default function ScenarioAnalysis({
     setSourceDialogOpen(field);
     setExistingSource(existingSource);
   };
-
+  console.log(inputErrors);
   return (
     <Stack sx={{ mx: 1 }} rowGap={8}>
       <Stack rowGap={2}>
