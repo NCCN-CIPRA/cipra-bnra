@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { DPRows, DPs, DPValueStack } from "../../learning/QuantitativeScales/P";
 import { Box, Stack, Typography, Slider, Alert } from "@mui/material";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
-import { Trans } from "react-i18next";
-
-import "./DP50Slider.css";
+import { Trans, useTranslation } from "react-i18next";
+import TornadoIcon from "@mui/icons-material/Tornado";
 
 export function DP50Slider({
   id,
@@ -19,15 +18,12 @@ export function DP50Slider({
   error?: boolean;
   onChange: (value: string | null) => void;
 }) {
+  const { t } = useTranslation();
   const [value, setValue] = useState(parseInt((initialDP50Value || DPValue).replace("DP", ""), 10) - 1);
   const dp = parseInt(DPValue.replace("DP", ""), 10) - 1;
 
-  const handleChangeValue = (event: Event, newValues: number | number[]) => {
-    if (!Array.isArray(newValues)) return;
-
-    let newValue;
-    if (newValues[0] !== dp) newValue = newValues[0];
-    else newValue = newValues[1];
+  const handleChangeValue = (event: Event, newValue: number | number[]) => {
+    if (Array.isArray(newValue)) return;
 
     const t = `DP${(newValue as number) + 1}`;
 
@@ -36,15 +32,8 @@ export function DP50Slider({
     setValue(newValue);
   };
 
-  useEffect(() => {
-    if (dp > value) {
-      document.querySelector(".MuiSlider-thumb[data-index='0']");
-    } else {
-    }
-  }, [value]);
-
   return (
-    <Box id={`DP50-slider-${id}`} sx={{ mx: 2, mt: 2 }}>
+    <Box id={`DP50-slider-${id}`} sx={{ mx: 2, mt: 3, position: "relative" }}>
       {error && (
         <Alert severity="error" sx={{ mb: 2, ml: -2 }}>
           <Typography>
@@ -54,8 +43,21 @@ export function DP50Slider({
           </Typography>
         </Alert>
       )}
+      <Tooltip title={t("2B.DP50.originalValue", "The original DP value selected in the previous step.")}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: -18,
+            left: `calc(${dp * 25}% - 15px)`,
+            width: 30,
+            height: 30,
+          }}
+        >
+          <TornadoIcon color="secondary" sx={{ fontSize: 30 }} />
+        </Box>
+      </Tooltip>
       <Slider
-        value={dp > value ? [value, dp] : [dp, value]}
+        value={value}
         onChange={handleChangeValue}
         valueLabelDisplay="auto"
         disableSwap

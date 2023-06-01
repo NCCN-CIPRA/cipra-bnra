@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, MutableRefObject } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
@@ -171,6 +171,7 @@ export default function ClimateChangeAnalysis({
   riskFile,
   cascade,
   step2A,
+  step2AInput,
   attachments,
   onOpenSourceDialog,
   onReloadAttachments,
@@ -178,6 +179,7 @@ export default function ClimateChangeAnalysis({
   riskFile: DVRiskFile;
   cascade: DVRiskCascade<DVRiskFile, DVRiskFile>;
   step2A: DVDirectAnalysis;
+  step2AInput: MutableRefObject<string | null>;
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   onReloadAttachments: () => Promise<void>;
@@ -211,13 +213,18 @@ export default function ClimateChangeAnalysis({
               parameters={effectScenarios.considerable}
               visible
             />
+            <Box component={Paper} sx={{ mt: 2, p: 2, mb: 4 }} id="step2A-dp-quantitative-box">
+              <Typography variant="subtitle2">
+                <Trans i18nKey="2B.dp50.quanti.title">DP50 - Direct Probability in 50 years</Trans>
+              </Typography>
 
-            <DP50Slider
-              id="considerable"
-              DPValue={step2A.cr4de_dp_quanti_c || "DP1"}
-              initialDP50Value={step2A.cr4de_dp50_quanti_c}
-              onChange={handleChange("cr4de_dp50_quanti_c")}
-            />
+              <DP50Slider
+                id="considerable"
+                DPValue={step2A.cr4de_dp_quanti_c || "DP1"}
+                initialDP50Value={step2A.cr4de_dp50_quanti_c}
+                onChange={handleChange("cr4de_dp50_quanti_c")}
+              />
+            </Box>
           </Box>
           <Box sx={{ mb: 4 }}>
             <FullScenario
@@ -228,12 +235,18 @@ export default function ClimateChangeAnalysis({
               visible
             />
 
-            <DP50Slider
-              id="major"
-              DPValue={step2A.cr4de_dp_quanti_m || "DP1"}
-              initialDP50Value={step2A.cr4de_dp50_quanti_m}
-              onChange={handleChange("cr4de_dp50_quanti_m")}
-            />
+            <Box component={Paper} sx={{ mt: 2, p: 2, mb: 4 }} id="step2A-dp-quantitative-box">
+              <Typography variant="subtitle2">
+                <Trans i18nKey="2B.dp50.quanti.title">DP50 - Direct Probability in 50 years</Trans>
+              </Typography>
+
+              <DP50Slider
+                id="major"
+                DPValue={step2A.cr4de_dp_quanti_m || "DP1"}
+                initialDP50Value={step2A.cr4de_dp50_quanti_m}
+                onChange={handleChange("cr4de_dp50_quanti_m")}
+              />
+            </Box>
           </Box>
           <Box sx={{}}>
             <FullScenario
@@ -244,12 +257,18 @@ export default function ClimateChangeAnalysis({
               visible
             />
 
-            <DP50Slider
-              id="extreme"
-              DPValue={step2A.cr4de_dp_quanti_e || "DP1"}
-              initialDP50Value={step2A.cr4de_dp50_quanti_e}
-              onChange={handleChange("cr4de_dp50_quanti_e")}
-            />
+            <Box component={Paper} sx={{ mt: 2, p: 2, mb: 4 }} id="step2A-dp-quantitative-box">
+              <Typography variant="subtitle2" sx={{ mb: 2 }}>
+                <Trans i18nKey="2B.dp50.quanti.title">DP50 - Direct Probability in 50 years</Trans>
+              </Typography>
+
+              <DP50Slider
+                id="extreme"
+                DPValue={step2A.cr4de_dp_quanti_e || "DP1"}
+                initialDP50Value={step2A.cr4de_dp50_quanti_e}
+                onChange={handleChange("cr4de_dp50_quanti_e")}
+              />
+            </Box>
           </Box>
 
           <Stack direction="column" sx={{ marginTop: 10 }}>
@@ -264,8 +283,11 @@ export default function ClimateChangeAnalysis({
           <Box sx={{ marginTop: 2, marginBottom: 3 }}>
             <QualiTextInputBox
               id="quali-input"
-              initialValue={""}
+              initialValue={step2A.cr4de_dp50_quali}
               onSave={(v) => {}}
+              setUpdatedValue={(newValue) => {
+                step2AInput.current = newValue || null;
+              }}
               debounceInterval={500}
               attachments={attachments}
               onOpenSourceDialog={onOpenSourceDialog}

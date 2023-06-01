@@ -34,6 +34,8 @@ import useRecords from "../../hooks/useRecords";
 import { AuthPageContext } from "../AuthPage";
 import { SCENARIOS } from "../../functions/scenarios";
 import { CascadeAnalysisInput, getCascadeField, getCascadeInput } from "../../functions/cascades";
+import SurveyDialog from "../../components/SurveyDialog";
+import { FeedbackStep } from "../../types/dataverse/DVFeedback";
 
 type RouteParams = {
   step2A_id: string;
@@ -64,6 +66,7 @@ export default function ({}) {
   const [cascade, setCascade] = useState<DVRiskCascade<DVRiskFile, DVRiskFile> | null>(null);
   const [cascadeAnalysis, setCascadeAnalysis] = useState<DVCascadeAnalysis | null>(null);
 
+  const step2AInput = useRef<string | null>(null);
   const step2BInput = useRef<CascadeAnalysisInput | null>(null);
 
   const [finishedDialogOpen, setFinishedDialogOpen] = useState(false);
@@ -152,13 +155,27 @@ export default function ({}) {
   };
 
   const updateStep2BInput = async function (iCascade: DVRiskCascade<DVRiskFile>) {
-    console.log("updateStep2BInput");
     const iCascadeAnalysis = await findOrCreateCascadeAnalysis(iCascade);
-    console.log(iCascadeAnalysis);
+
     if (iCascadeAnalysis) {
       setCascadeAnalysis(iCascadeAnalysis);
       step2BInput.current = getCascadeInput(iCascadeAnalysis);
     }
+  };
+
+  const hasNextStep = () => {
+    const hasCatalysing = catalysingEffects && catalysingEffects.length > 0;
+    const hasClimateChange = Boolean(climateChange);
+    const hasCauses = causes && causes.length > 0;
+
+    if (activeStep === STEPS.INTRODUCTION) {
+      return hasCauses || hasClimateChange || hasCatalysing;
+    } else if (activeStep === STEPS.CAUSES) {
+      return hasClimateChange || hasCatalysing;
+    } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+      return hasCatalysing;
+    }
+    return false;
   };
 
   // Split the cascades into causes and catalyzing effects
@@ -194,25 +211,33 @@ export default function ({}) {
   }, [cascades, cascadeIndex, activeStep, step2A, step2B]);
 
   async function handleSave() {
-    if (!cascadeAnalysis || !step2BInput.current) return;
+    if (activeStep === STEPS.CAUSES || activeStep === STEPS.CATALYSING_EFFECTS) {
+      if (!cascadeAnalysis || !step2BInput.current) return;
 
-    api
-      .updateCascadeAnalysis(cascadeAnalysis.cr4de_bnracascadeanalysisid, {
-        cr4de_c2c: step2BInput.current.cr4de_c2c != null ? `CP${step2BInput.current.cr4de_c2c}` : null,
-        cr4de_c2m: step2BInput.current.cr4de_c2m != null ? `CP${step2BInput.current.cr4de_c2m}` : null,
-        cr4de_c2e: step2BInput.current.cr4de_c2e != null ? `CP${step2BInput.current.cr4de_c2e}` : null,
-        cr4de_m2c: step2BInput.current.cr4de_m2c != null ? `CP${step2BInput.current.cr4de_m2c}` : null,
-        cr4de_m2m: step2BInput.current.cr4de_m2m != null ? `CP${step2BInput.current.cr4de_m2m}` : null,
-        cr4de_m2e: step2BInput.current.cr4de_m2e != null ? `CP${step2BInput.current.cr4de_m2e}` : null,
-        cr4de_e2c: step2BInput.current.cr4de_e2c != null ? `CP${step2BInput.current.cr4de_e2c}` : null,
-        cr4de_e2m: step2BInput.current.cr4de_e2m != null ? `CP${step2BInput.current.cr4de_e2m}` : null,
-        cr4de_e2e: step2BInput.current.cr4de_e2e != null ? `CP${step2BInput.current.cr4de_e2e}` : null,
-        cr4de_quali_cascade:
-          !step2BInput.current.cr4de_quali_cascade || step2BInput.current.cr4de_quali_cascade === null
-            ? null
-            : step2BInput.current.cr4de_quali_cascade,
-      })
-      .then(() => load2B());
+      api
+        .updateCascadeAnalysis(cascadeAnalysis.cr4de_bnracascadeanalysisid, {
+          cr4de_c2c: step2BInput.current.cr4de_c2c != null ? `CP${step2BInput.current.cr4de_c2c}` : null,
+          cr4de_c2m: step2BInput.current.cr4de_c2m != null ? `CP${step2BInput.current.cr4de_c2m}` : null,
+          cr4de_c2e: step2BInput.current.cr4de_c2e != null ? `CP${step2BInput.current.cr4de_c2e}` : null,
+          cr4de_m2c: step2BInput.current.cr4de_m2c != null ? `CP${step2BInput.current.cr4de_m2c}` : null,
+          cr4de_m2m: step2BInput.current.cr4de_m2m != null ? `CP${step2BInput.current.cr4de_m2m}` : null,
+          cr4de_m2e: step2BInput.current.cr4de_m2e != null ? `CP${step2BInput.current.cr4de_m2e}` : null,
+          cr4de_e2c: step2BInput.current.cr4de_e2c != null ? `CP${step2BInput.current.cr4de_e2c}` : null,
+          cr4de_e2m: step2BInput.current.cr4de_e2m != null ? `CP${step2BInput.current.cr4de_e2m}` : null,
+          cr4de_e2e: step2BInput.current.cr4de_e2e != null ? `CP${step2BInput.current.cr4de_e2e}` : null,
+          cr4de_quali_cascade:
+            !step2BInput.current.cr4de_quali_cascade || step2BInput.current.cr4de_quali_cascade === null
+              ? null
+              : step2BInput.current.cr4de_quali_cascade,
+        })
+        .then(() => load2B());
+    } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+      if (!climateChange || !step2A) return;
+
+      api.updateDirectAnalysis(step2A?.cr4de_bnradirectanalysisid, {
+        cr4de_dp50_quali: step2AInput.current,
+      });
+    }
   }
 
   usePageTitle(t("step2B.pageTitle", "BNRA 2023 - 2026 Risk Analysis B"));
@@ -275,7 +300,7 @@ export default function ({}) {
           } else if (catalysingEffects && catalysingEffects.length > 0) {
             await findOrCreateCascadeAnalysis(catalysingEffects[0]);
 
-            setCascadeIndex(1);
+            setCascadeIndex(0);
             transitionTo(STEPS.CATALYSING_EFFECTS);
           } else {
             finish();
@@ -304,15 +329,13 @@ export default function ({}) {
     } else if (activeStep === STEPS.CLIMATE_CHANGE) {
       handleSave();
 
-      if (!handleNextCascade()) {
-        if (catalysingEffects && catalysingEffects.length > 0) {
-          await findOrCreateCascadeAnalysis(catalysingEffects[0]);
+      if (catalysingEffects && catalysingEffects.length > 0) {
+        await findOrCreateCascadeAnalysis(catalysingEffects[0]);
 
-          setCascadeIndex(1);
-          transitionTo(STEPS.CATALYSING_EFFECTS);
-        } else {
-          finish();
-        }
+        setCascadeIndex(0);
+        transitionTo(STEPS.CATALYSING_EFFECTS);
+      } else {
+        finish();
       }
     } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
       handleSave();
@@ -551,6 +574,7 @@ export default function ({}) {
               cascadeIndex={cascadeIndex}
               step2A={step2A}
               step2B={cascadeAnalysis}
+              step2AInput={step2AInput}
               step2BInput={step2BInput.current}
               activeCauseScenario={activeCauseScenario}
               activeEffectScenario={activeEffectScenario}
@@ -614,7 +638,7 @@ export default function ({}) {
         />
 
         <Box id="step2A-next-buttons">
-          {activeStep !== STEPS.REVIEW && (
+          {hasNextStep() && (
             <Tooltip
               title={
                 step2BInput.current &&
@@ -627,7 +651,7 @@ export default function ({}) {
                 <Button
                   disabled={
                     isSaving ||
-                    ((activeStep === STEPS.CAUSES || activeStep === STEPS.CATALYSING_EFFECTS) &&
+                    (activeStep === STEPS.CAUSES &&
                       (!step2BInput.current ||
                         step2BInput.current[getCascadeField(activeCauseScenario, activeEffectScenario)] == null))
                   }
@@ -647,35 +671,82 @@ export default function ({}) {
       </Box>
 
       <Dialog open={finishedDialogOpen} onClose={() => setFinishedDialogOpen(false)}>
-        <>
-          <DialogTitle>
-            <Trans i18nKey="2A.exitDialog.title">Would you like to exit step 2A?</Trans>
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              <Trans i18nKey="2A.exitDialog.helpText">
-                Your progress will be saved and you may return at a later time to continue where you left of.
-              </Trans>
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setFinishedDialogOpen(false)}>
-              <Trans i18nKey="2A.exitDialog.cancel">No, stay here</Trans>
-            </Button>
-            <Button
-              onClick={async () => {
-                if (!step2A) return;
+        {step2B && cascades && step2B.length >= cascades.length ? (
+          <>
+            <DialogTitle>
+              <Trans i18nKey="2B.finishedDialog.title">Are you finished with step 2B?</Trans>
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                <Trans i18nKey="2B.finishedDialog.helpText">
+                  Even if you indicate that you are finished, you can still return at a later time to make changes until
+                  the end of step 2B for this risk file.
+                </Trans>
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setFinishedDialogOpen(false)}>
+                <Trans i18nKey="2A.finishedDialog.cancel">No, I am not finished</Trans>
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!step2A) return;
 
-                // handleSave();
+                  setFinishedDialogOpen(false);
+                  setSurveyDialogOpen(true);
 
-                navigate("/overview");
-              }}
-            >
-              <Trans i18nKey="2A.exitDialog.finish">Yes, return to my risks</Trans>
-            </Button>
-          </DialogActions>
-        </>
+                  const participants = await api.getParticipants(
+                    `$filter=_cr4de_contact_value eq ${user.contactid} and _cr4de_direct_analysis_value eq ${step2A.cr4de_bnradirectanalysisid}`
+                  );
+                  if (participants.length >= 0) {
+                    // await process.finishStep2A(step2A.cr4de_risk_file, participants[0]);
+                    await api.finishStep(step2A._cr4de_risk_file_value, user.contactid, "2B");
+                  }
+                }}
+              >
+                <Trans i18nKey="2A.finishedDialog.finish">Yes, I am finished</Trans>
+              </Button>
+            </DialogActions>
+          </>
+        ) : (
+          <>
+            <DialogTitle>
+              <Trans i18nKey="2B.exitDialog.title">Would you like to exit step 2B?</Trans>
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                <Trans i18nKey="2B.exitDialog.helpText">
+                  Your progress will be saved and you may return at a later time to continue where you left of.
+                </Trans>
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setFinishedDialogOpen(false)}>
+                <Trans i18nKey="2B.exitDialog.cancel">No, stay here</Trans>
+              </Button>
+              <Button
+                onClick={async () => {
+                  navigate("/overview");
+                }}
+              >
+                <Trans i18nKey="2A.exitDialog.finish">Yes, return to my risks</Trans>
+              </Button>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
+
+      {step2A && (
+        <SurveyDialog
+          open={surveyDialogOpen}
+          riskFile={step2A?.cr4de_risk_file}
+          step={FeedbackStep.STEP_2A}
+          onClose={() => {
+            setSurveyDialogOpen(false);
+            navigate("/overview");
+          }}
+        />
+      )}
     </>
   );
 }

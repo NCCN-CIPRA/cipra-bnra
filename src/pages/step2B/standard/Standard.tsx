@@ -5,7 +5,7 @@ import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import Introduction from "./Introduction";
-import { useEffect, useState } from "react";
+import { useEffect, useState, MutableRefObject } from "react";
 import { stepNames, STEPS } from "../Steps";
 import ScenarioAnalysis from "./ScenarioAnalysis";
 import CascadeAnalysis from "./CascadeAnalysis";
@@ -20,6 +20,7 @@ import { DataTable } from "../../../hooks/useAPI";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import AttachmentsDialog from "../information/AttachmentsDialog";
 import ClimateChangeAnalysis from "./ClimateChangeAnalysis";
+import CatalysingEffectsAnalysis from "./CatalysingEffectsnalysis";
 
 export default function Standard({
   activeStep,
@@ -30,6 +31,7 @@ export default function Standard({
   cascadeIndex,
   step2A,
   step2B,
+  step2AInput,
   step2BInput,
   activeCauseScenario,
   activeEffectScenario,
@@ -48,6 +50,7 @@ export default function Standard({
   cascadeIndex: number;
   step2A: DVDirectAnalysis<DVRiskFile>;
   step2B: DVCascadeAnalysis | null;
+  step2AInput: MutableRefObject<string | null>;
   step2BInput: CascadeAnalysisInput | null;
   activeCauseScenario: SCENARIOS;
   activeEffectScenario: SCENARIOS;
@@ -178,6 +181,7 @@ export default function Standard({
             riskFile={step2A.cr4de_risk_file}
             cascade={climateChange}
             step2A={step2A}
+            step2AInput={step2AInput}
             attachments={attachments}
             onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
             onReloadAttachments={loadAttachments}
@@ -198,7 +202,7 @@ export default function Standard({
                 </Typography>
               </Box>
             </Container>
-            <CascadeAnalysis
+            <CatalysingEffectsAnalysis
               riskFile={step2A.cr4de_risk_file}
               causes={catalysingEffects}
               cascade={cascade}
