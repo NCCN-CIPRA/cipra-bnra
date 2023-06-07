@@ -1,4 +1,4 @@
-import { Alert, Box, CircularProgress, Container, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Container, Stack, Typography } from "@mui/material";
 import { Trans } from "react-i18next";
 import { SCENARIOS, Scenarios } from "../../../functions/scenarios";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
@@ -21,6 +21,7 @@ import useLazyRecords from "../../../hooks/useLazyRecords";
 import AttachmentsDialog from "../information/AttachmentsDialog";
 import ClimateChangeAnalysis from "./ClimateChangeAnalysis";
 import CatalysingEffectsAnalysis from "./CatalysingEffectsnalysis";
+import CascadeTutorial from "../information/CascadeTutorial";
 
 export default function Standard({
   activeStep,
@@ -35,6 +36,8 @@ export default function Standard({
   step2BInput,
   activeCauseScenario,
   activeEffectScenario,
+  qualiError,
+  runTutorial,
   setRunTutorial,
   setStep2BInput,
   onNext,
@@ -54,6 +57,8 @@ export default function Standard({
   step2BInput: CascadeAnalysisInput | null;
   activeCauseScenario: SCENARIOS;
   activeEffectScenario: SCENARIOS;
+  qualiError: boolean;
+  runTutorial: boolean;
   setRunTutorial: (run: boolean) => void;
   setStep2BInput: (input: CascadeAnalysisInput, update?: boolean) => void;
   onNext: () => Promise<void>;
@@ -103,6 +108,11 @@ export default function Standard({
                   causaux et des risques conséquents.
                 </Trans>
               </Typography>
+              <Box sx={{ textAlign: "center", mt: 1, mb: 4 }}>
+                <Button variant="contained" onClick={() => setRunTutorial(true)}>
+                  <Trans i18nKey="2B.introduction.button.tutorial.part">Show Tutorial for this page</Trans>
+                </Button>
+              </Box>
               <Typography variant="body2" paragraph>
                 <Trans i18nKey="2B.causes.intro.2">
                   Notez que chaque relation de cause à effet avec 3 scénarios d'intensité (considérable, majeure,
@@ -158,6 +168,7 @@ export default function Standard({
             activeEffectScenario={activeEffectScenario}
             step2BInput={step2BInput}
             setStep2BInput={setStep2BInput}
+            qualiError={qualiError}
             onNext={onNext}
             onPrevious={onPrevious}
             onChangeScenario={onChangeScenario}
@@ -179,9 +190,9 @@ export default function Standard({
           </Container>
           <ClimateChangeAnalysis
             riskFile={step2A.cr4de_risk_file}
-            cascade={climateChange}
             step2A={step2A}
             step2AInput={step2AInput}
+            qualiError={qualiError}
             attachments={attachments}
             onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
             onReloadAttachments={loadAttachments}
@@ -212,6 +223,7 @@ export default function Standard({
               activeEffectScenario={activeEffectScenario}
               step2BInput={step2BInput}
               setStep2BInput={setStep2BInput}
+              qualiError={qualiError}
               onNext={onNext}
               onPrevious={onPrevious}
               onChangeScenario={onChangeScenario}
@@ -233,6 +245,8 @@ export default function Standard({
           onSaved={() => loadAttachments()}
         />
       )}
+
+      {activeStep === STEPS.CAUSES && <CascadeTutorial run={runTutorial} setRun={setRunTutorial} />}
     </>
   );
 }

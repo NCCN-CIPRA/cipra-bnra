@@ -169,17 +169,17 @@ function FullScenario({
 
 export default function ClimateChangeAnalysis({
   riskFile,
-  cascade,
   step2A,
   step2AInput,
+  qualiError,
   attachments,
   onOpenSourceDialog,
   onReloadAttachments,
 }: {
   riskFile: DVRiskFile;
-  cascade: DVRiskCascade<DVRiskFile, DVRiskFile>;
   step2A: DVDirectAnalysis;
   step2AInput: MutableRefObject<string | null>;
+  qualiError: boolean;
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   onReloadAttachments: () => Promise<void>;
@@ -290,6 +290,7 @@ export default function ClimateChangeAnalysis({
               }}
               debounceInterval={500}
               attachments={attachments}
+              error={qualiError}
               onOpenSourceDialog={onOpenSourceDialog}
               onReloadAttachments={onReloadAttachments}
             />

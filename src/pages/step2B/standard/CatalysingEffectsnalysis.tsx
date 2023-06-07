@@ -207,6 +207,7 @@ export default function CatalysingEffectsAnalysis({
   step2BInput,
   activeCauseScenario,
   activeEffectScenario,
+  qualiError,
   attachments,
   setStep2BInput,
   onNext,
@@ -224,6 +225,7 @@ export default function CatalysingEffectsAnalysis({
   step2BInput: CascadeAnalysisInput;
   activeCauseScenario: SCENARIOS;
   activeEffectScenario: SCENARIOS;
+  qualiError: boolean;
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   setStep2BInput: (input: CascadeAnalysisInput, update?: boolean) => void;
   onNext: () => Promise<void>;
@@ -336,6 +338,7 @@ export default function CatalysingEffectsAnalysis({
                 setQualiInput(v || null);
               }}
               debounceInterval={500}
+              error={qualiError}
               attachments={attachments}
               onOpenSourceDialog={onOpenSourceDialog}
               onReloadAttachments={onReloadAttachments}

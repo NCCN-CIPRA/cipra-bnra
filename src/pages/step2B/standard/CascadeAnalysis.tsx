@@ -207,6 +207,7 @@ export default function CascadeAnalysis({
   step2BInput,
   activeCauseScenario,
   activeEffectScenario,
+  qualiError,
   attachments,
   setStep2BInput,
   onNext,
@@ -224,6 +225,7 @@ export default function CascadeAnalysis({
   step2BInput: CascadeAnalysisInput;
   activeCauseScenario: SCENARIOS;
   activeEffectScenario: SCENARIOS;
+  qualiError: boolean;
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   setStep2BInput: (input: CascadeAnalysisInput, update?: boolean) => void;
   onNext: () => Promise<void>;
@@ -295,8 +297,9 @@ export default function CascadeAnalysis({
   return (
     <Box sx={{ mx: "123px" }}>
       <Container>
-        <Stack direction="column">
-          <Typography variant="h6" sx={{ mb: 4 }}>
+        <Stack direction="column" sx={{ position: "relative" }}>
+          <Box sx={{ position: "absolute", top: -72 }} id="cascade-title" />
+          <Typography variant="h6" sx={{ mb: 4 }} id="cascade-title-text">
             <Tooltip title={t("2B.cause.openRiskFile", "Click to open the risk file for this risk in a new tab")}>
               <Link
                 to={`/learning/risk/${cascade.cr4de_cause_hazard.cr4de_riskfilesid}`}
@@ -315,357 +318,383 @@ export default function CascadeAnalysis({
             ({cascadeIndex + 1}/{causes.length})
           </Typography>
 
-          <Box sx={{ position: "relative" }}>
-            <Box
-              sx={{
-                position: "absolute",
-                transition: `all ${TRANSITION_S} ease`,
-                left: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "calc(50% - 57.5px)" : "-131px",
-                top: activeCauseScenario === SCENARIOS.EXTREME ? "90px" : "0px",
-                opacity: activeCauseScenario === SCENARIOS.CONSIDERABLE ? 0 : 1,
-              }}
-              onClick={() => onChangeScenario(SCENARIOS.CONSIDERABLE, null)}
-            >
-              <FadedScenario scenario={SCENARIOS.CONSIDERABLE} />
+          <Box id="analysis-box">
+            <Box sx={{ position: "relative" }}>
+              <Box
+                sx={{
+                  position: "absolute",
+                  transition: `all ${TRANSITION_S} ease`,
+                  left: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "calc(50% - 57.5px)" : "-131px",
+                  top: activeCauseScenario === SCENARIOS.EXTREME ? "90px" : "0px",
+                  opacity: activeCauseScenario === SCENARIOS.CONSIDERABLE ? 0 : 1,
+                }}
+                onClick={() => onChangeScenario(SCENARIOS.CONSIDERABLE, null)}
+              >
+                <FadedScenario scenario={SCENARIOS.CONSIDERABLE} />
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  transition: `all ${TRANSITION_S} ease`,
+                  left:
+                    (activeCauseScenario === SCENARIOS.CONSIDERABLE && "calc(100% + 16px)") ||
+                    (activeCauseScenario === SCENARIOS.MAJOR && "calc(50% - 57.5px)") ||
+                    "-131px",
+                  opacity: activeCauseScenario === SCENARIOS.MAJOR ? 0 : 1,
+                }}
+                onClick={() => onChangeScenario(SCENARIOS.MAJOR, null)}
+              >
+                <FadedScenario scenario={SCENARIOS.MAJOR} />
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  transition: `all ${TRANSITION_S} ease`,
+                  right: activeCauseScenario === SCENARIOS.EXTREME ? "calc(50% - 57.5px)" : "-131px",
+                  top: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "90px" : "0px",
+                  opacity: activeCauseScenario === SCENARIOS.EXTREME ? 0 : 1,
+                }}
+                onClick={() => onChangeScenario(SCENARIOS.EXTREME, null)}
+              >
+                <FadedScenario scenario={SCENARIOS.EXTREME} />
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "0px" : "-131px",
+                  width: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "100%" : 115,
+                  transition: `all ${TRANSITION_S} ease`,
+                  pointerEvents: "none",
+                }}
+              >
+                <FullScenario
+                  riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
+                  title={cascade.cr4de_cause_hazard.cr4de_title}
+                  scenario={SCENARIOS.CONSIDERABLE}
+                  parameters={causeScenarios.considerable}
+                  visible={activeCauseScenario === SCENARIOS.CONSIDERABLE}
+                />
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left:
+                    (activeCauseScenario === SCENARIOS.EXTREME && "-131px") ||
+                    (activeCauseScenario === SCENARIOS.MAJOR && "0px") ||
+                    "calc(100% + 16px)",
+                  width: activeCauseScenario === SCENARIOS.MAJOR ? "100%" : 115,
+                  transition: `all ${TRANSITION_S} ease`,
+                  pointerEvents: "none",
+                }}
+              >
+                <FullScenario
+                  riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
+                  title={cascade.cr4de_cause_hazard.cr4de_title}
+                  scenario={SCENARIOS.MAJOR}
+                  parameters={causeScenarios.major}
+                  visible={activeCauseScenario === SCENARIOS.MAJOR}
+                />
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: (activeCauseScenario === SCENARIOS.EXTREME && "0px") || "calc(100% + 16px)",
+                  width: activeCauseScenario === SCENARIOS.EXTREME ? "100%" : 115,
+                  transition: `all ${TRANSITION_S} ease`,
+                  pointerEvents: "none",
+                }}
+              >
+                <FullScenario
+                  riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
+                  title={cascade.cr4de_cause_hazard.cr4de_title}
+                  scenario={SCENARIOS.EXTREME}
+                  parameters={causeScenarios.extreme}
+                  visible={activeCauseScenario === SCENARIOS.EXTREME}
+                />
+              </Box>
+              <Box id="cause-scenario">
+                <AutoHeight toggle={activeCauseScenario} toggle2={cascade} duration={TRANSITION_S}>
+                  <FullScenario
+                    riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
+                    title={cascade.cr4de_cause_hazard.cr4de_title}
+                    scenario={activeCauseScenario}
+                    parameters={causeScenarios[activeCauseScenario]}
+                    visible={true}
+                  />
+                </AutoHeight>
+              </Box>
             </Box>
-            <Box
-              sx={{
-                position: "absolute",
-                transition: `all ${TRANSITION_S} ease`,
-                left:
-                  (activeCauseScenario === SCENARIOS.CONSIDERABLE && "calc(100% + 16px)") ||
-                  (activeCauseScenario === SCENARIOS.MAJOR && "calc(50% - 57.5px)") ||
-                  "-131px",
-                opacity: activeCauseScenario === SCENARIOS.MAJOR ? 0 : 1,
-              }}
-              onClick={() => onChangeScenario(SCENARIOS.MAJOR, null)}
-            >
-              <FadedScenario scenario={SCENARIOS.MAJOR} />
-            </Box>
-            <Box
-              sx={{
-                position: "absolute",
-                transition: `all ${TRANSITION_S} ease`,
-                right: activeCauseScenario === SCENARIOS.EXTREME ? "calc(50% - 57.5px)" : "-131px",
-                top: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "90px" : "0px",
-                opacity: activeCauseScenario === SCENARIOS.EXTREME ? 0 : 1,
-              }}
-              onClick={() => onChangeScenario(SCENARIOS.EXTREME, null)}
-            >
-              <FadedScenario scenario={SCENARIOS.EXTREME} />
-            </Box>
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "0px" : "-131px",
-                width: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "100%" : 115,
-                transition: `all ${TRANSITION_S} ease`,
-                pointerEvents: "none",
-              }}
-            >
-              <FullScenario
-                riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
-                title={cascade.cr4de_cause_hazard.cr4de_title}
-                scenario={SCENARIOS.CONSIDERABLE}
-                parameters={causeScenarios.considerable}
-                visible={activeCauseScenario === SCENARIOS.CONSIDERABLE}
-              />
-            </Box>
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left:
-                  (activeCauseScenario === SCENARIOS.EXTREME && "-131px") ||
-                  (activeCauseScenario === SCENARIOS.MAJOR && "0px") ||
-                  "calc(100% + 16px)",
-                width: activeCauseScenario === SCENARIOS.MAJOR ? "100%" : 115,
-                transition: `all ${TRANSITION_S} ease`,
-                pointerEvents: "none",
-              }}
-            >
-              <FullScenario
-                riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
-                title={cascade.cr4de_cause_hazard.cr4de_title}
-                scenario={SCENARIOS.MAJOR}
-                parameters={causeScenarios.major}
-                visible={activeCauseScenario === SCENARIOS.MAJOR}
-              />
-            </Box>
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: (activeCauseScenario === SCENARIOS.EXTREME && "0px") || "calc(100% + 16px)",
-                width: activeCauseScenario === SCENARIOS.EXTREME ? "100%" : 115,
-                transition: `all ${TRANSITION_S} ease`,
-                pointerEvents: "none",
-              }}
-            >
-              <FullScenario
-                riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
-                title={cascade.cr4de_cause_hazard.cr4de_title}
-                scenario={SCENARIOS.EXTREME}
-                parameters={causeScenarios.extreme}
-                visible={activeCauseScenario === SCENARIOS.EXTREME}
-              />
-            </Box>
-            <AutoHeight toggle={activeCauseScenario} toggle2={cascade} duration={TRANSITION_S}>
-              <FullScenario
-                riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
-                title={cascade.cr4de_cause_hazard.cr4de_title}
-                scenario={activeCauseScenario}
-                parameters={causeScenarios[activeCauseScenario]}
-                visible={true}
-              />
-            </AutoHeight>
-          </Box>
 
-          <Stack
-            direction="row"
-            sx={{ height: 200, my: 4, display: "flex", justifyContent: "center", alignItems: "center" }}
-          >
-            <Typography
-              variant="subtitle2"
+            <Stack
+              direction="row"
               sx={{
-                position: "absolute",
-                width: 300,
-                left: "calc(50% - 350px)",
-                textAlign: "right",
+                height: 200,
+                my: 4,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                position: "relative",
               }}
             >
-              Kans dat de cascade zich voordoet:
-            </Typography>
-            <Box
-              sx={{
-                position: "absolute",
-                width: 64,
-                left: "calc(50% - 370px)",
-              }}
-            >
-              <Tooltip title={t("2B.doneButton.back", "Go back")}>
-                <span>
-                  <Button
-                    variant="outlined"
-                    startIcon={<ArrowBackIcon sx={{ marginLeft: "8px", marginRight: "-4px" }} />}
-                    sx={{
-                      padding: "9px 5px",
-                      minWidth: "auto",
-                      borderRadius: "19px",
-                      opacity:
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  bottom: 0,
+                  left: "calc(50% - 300px)",
+                  right: "calc(50% - 230px)",
+                }}
+                id="cpx-slider"
+              />
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  position: "absolute",
+                  width: 300,
+                  left: "calc(50% - 350px)",
+                  textAlign: "right",
+                }}
+              >
+                <Trans i18nKey="2B.cp.title">Kans dat de cascade zich voordoet:</Trans>
+              </Typography>
+              <Box
+                sx={{
+                  position: "absolute",
+                  width: 64,
+                  left: "calc(50% - 370px)",
+                }}
+              >
+                <Tooltip title={t("2B.doneButton.back", "Go back")}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      startIcon={<ArrowBackIcon sx={{ marginLeft: "8px", marginRight: "-4px" }} />}
+                      sx={{
+                        padding: "9px 5px",
+                        minWidth: "auto",
+                        borderRadius: "19px",
+                        opacity:
+                          cascadeIndex <= 0 &&
+                          activeCauseScenario === SCENARIOS.CONSIDERABLE &&
+                          activeEffectScenario === SCENARIOS.CONSIDERABLE
+                            ? 0
+                            : 1,
+                        transition: "opacity .5s ease",
+                      }}
+                      disabled={
                         cascadeIndex <= 0 &&
                         activeCauseScenario === SCENARIOS.CONSIDERABLE &&
                         activeEffectScenario === SCENARIOS.CONSIDERABLE
-                          ? 0
-                          : 1,
-                      transition: "opacity .5s ease",
-                    }}
-                    disabled={
-                      cascadeIndex <= 0 &&
-                      activeCauseScenario === SCENARIOS.CONSIDERABLE &&
-                      activeEffectScenario === SCENARIOS.CONSIDERABLE
-                    }
-                    onClick={onPrevious}
-                  />
-                </span>
-              </Tooltip>
-            </Box>
-            <Box
-              sx={{
-                position: "absolute",
-                width: 300,
-                right: "calc(50% - 200px)",
-                textAlign: "right",
-              }}
-            >
-              <Tooltip
-                title={
-                  cp < 0
-                    ? t("2B.doneButton.selectValue", "Please select a value before continuing")
-                    : t("2B.doneButton.continue", "Continue")
-                }
+                      }
+                      onClick={onPrevious}
+                    />
+                  </span>
+                </Tooltip>
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  width: 300,
+                  right: "calc(50% - 200px)",
+                  textAlign: "right",
+                }}
               >
-                <span>
-                  <Button
-                    variant="outlined"
-                    startIcon={<ArrowForwardIcon sx={{ marginLeft: "8px", marginRight: "-4px" }} />}
-                    sx={{ padding: "9px 5px", minWidth: "auto", borderRadius: "19px" }}
-                    disabled={cp < 0}
-                    onClick={handleNext}
+                {(activeCauseScenario !== SCENARIOS.EXTREME || activeEffectScenario !== SCENARIOS.EXTREME) && (
+                  <Tooltip
+                    title={
+                      cp < 0
+                        ? t("2B.doneButton.selectValue", "Please select a value before continuing")
+                        : t("2B.doneButton.continue", "Continue")
+                    }
+                  >
+                    <span>
+                      <Button
+                        variant="outlined"
+                        startIcon={<ArrowForwardIcon sx={{ marginLeft: "8px", marginRight: "-4px" }} />}
+                        sx={{ padding: "9px 5px", minWidth: "auto", borderRadius: "19px" }}
+                        disabled={cp < 0}
+                        onClick={handleNext}
+                        className="next-button"
+                      />
+                    </span>
+                  </Tooltip>
+                )}
+              </Box>
+              <Slider
+                sx={{
+                  '& input[type="range"]': {
+                    WebkitAppearance: "slider-vertical",
+                  },
+                  "& .MuiSlider-rail": {
+                    width: 8,
+                    top: "-2%",
+                  },
+                  "& .MuiSlider-track": {
+                    width: 4,
+                    border: "4px solid #fafafa",
+                    bottom: "-4% !important",
+                  },
+                  "& .MuiSlider-thumb": {
+                    width: 26,
+                    height: 26,
+                  },
+                }}
+                orientation="vertical"
+                value={5 - cp}
+                onChange={(e, v) => {
+                  const newInput = {
+                    ...step2BInput,
+                    [getCascadeField(activeCauseScenario, activeEffectScenario)]: 5 - (v as number),
+                  };
+                  const newParentInput = {
+                    ...step2BInput,
+                    [getCascadeField(activeCauseScenario, activeEffectScenario)]:
+                      5 - (v as number) < 0 ? null : 5 - (v as number),
+                  };
+
+                  setInput(newInput);
+                  setStep2BInput(
+                    newParentInput,
+                    step2BInput[getCascadeField(activeCauseScenario, activeEffectScenario)] == null ||
+                      5 - (v as number) < 0
+                  );
+                }}
+                min={0}
+                max={6}
+                aria-label="Conditional Probability"
+                valueLabelDisplay="off"
+                onKeyDown={preventHorizontalKeyboardNavigation}
+                track="inverted"
+                components={{ Thumb: ArrowThumbComponent }}
+                marks={Array(7)
+                  .fill(undefined)
+                  .map((_, value) => ({
+                    value: value,
+                    label:
+                      value >= 6 ? (
+                        <Typography variant="body2">
+                          <Trans i18nKey="2A.slider.none">-</Trans>
+                        </Typography>
+                      ) : (
+                        <Typography id={`step2A-dp-mark-${5 - value}`} variant="body2">
+                          <b>CP{5 - value}:</b> {t(CP.intervals[5 - value][0], CP.intervals[5 - value][1])}
+                        </Typography>
+                      ),
+                  }))}
+              />
+            </Stack>
+
+            <Box sx={{ position: "relative" }}>
+              <Box
+                sx={{
+                  position: "absolute",
+                  transition: `all ${TRANSITION_S} ease`,
+                  left: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "calc(50% - 57.5px)" : "-131px",
+                  top: activeEffectScenario === SCENARIOS.EXTREME ? "90px" : "0px",
+                  opacity: activeEffectScenario === SCENARIOS.CONSIDERABLE ? 0 : 1,
+                }}
+                onClick={() => onChangeScenario(null, SCENARIOS.CONSIDERABLE)}
+              >
+                <FadedScenario scenario={SCENARIOS.CONSIDERABLE} />
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  transition: `all ${TRANSITION_S} ease`,
+                  left:
+                    (activeEffectScenario === SCENARIOS.CONSIDERABLE && "calc(100% + 16px)") ||
+                    (activeEffectScenario === SCENARIOS.MAJOR && "calc(50% - 57.5px)") ||
+                    "-131px",
+                  opacity: activeEffectScenario === SCENARIOS.MAJOR ? 0 : 1,
+                }}
+                onClick={() => onChangeScenario(null, SCENARIOS.MAJOR)}
+              >
+                <FadedScenario scenario={SCENARIOS.MAJOR} />
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  transition: `all ${TRANSITION_S} ease`,
+                  right: activeEffectScenario === SCENARIOS.EXTREME ? "calc(50% - 57.5px)" : "-131px",
+                  top: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "90px" : "0px",
+                  opacity: activeEffectScenario === SCENARIOS.EXTREME ? 0 : 1,
+                }}
+                onClick={() => onChangeScenario(null, SCENARIOS.EXTREME)}
+              >
+                <FadedScenario scenario={SCENARIOS.EXTREME} />
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "0px" : "-131px",
+                  width: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "100%" : 115,
+                  transition: `all ${TRANSITION_S} ease`,
+                  pointerEvents: "none",
+                }}
+              >
+                <FullScenario
+                  riskType={riskFile.cr4de_risk_type}
+                  title={riskFile.cr4de_title}
+                  scenario={SCENARIOS.CONSIDERABLE}
+                  parameters={effectScenarios.considerable}
+                  visible={activeEffectScenario === SCENARIOS.CONSIDERABLE}
+                />
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left:
+                    (activeEffectScenario === SCENARIOS.EXTREME && "-131px") ||
+                    (activeEffectScenario === SCENARIOS.MAJOR && "0px") ||
+                    "calc(100% + 16px)",
+                  width: activeEffectScenario === SCENARIOS.MAJOR ? "100%" : 115,
+                  transition: `all ${TRANSITION_S} ease`,
+                  pointerEvents: "none",
+                }}
+              >
+                <FullScenario
+                  riskType={riskFile.cr4de_risk_type}
+                  title={riskFile.cr4de_title}
+                  scenario={SCENARIOS.MAJOR}
+                  parameters={effectScenarios.major}
+                  visible={activeEffectScenario === SCENARIOS.MAJOR}
+                />
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: (activeEffectScenario === SCENARIOS.EXTREME && "0px") || "calc(100% + 16px)",
+                  width: activeEffectScenario === SCENARIOS.EXTREME ? "100%" : 115,
+                  transition: `all ${TRANSITION_S} ease`,
+                  pointerEvents: "none",
+                }}
+              >
+                <FullScenario
+                  riskType={riskFile.cr4de_risk_type}
+                  title={riskFile.cr4de_title}
+                  scenario={SCENARIOS.EXTREME}
+                  parameters={effectScenarios.extreme}
+                  visible={activeEffectScenario === SCENARIOS.EXTREME}
+                />
+              </Box>
+              <Box id="effect-scenario">
+                <AutoHeight toggle={activeEffectScenario} toggle2={cascade} duration={TRANSITION_S}>
+                  <FullScenario
+                    riskType={riskFile.cr4de_risk_type}
+                    title={riskFile.cr4de_title}
+                    scenario={activeEffectScenario}
+                    parameters={effectScenarios[activeEffectScenario]}
+                    visible={true}
                   />
-                </span>
-              </Tooltip>
+                </AutoHeight>
+              </Box>
             </Box>
-            <Slider
-              sx={{
-                '& input[type="range"]': {
-                  WebkitAppearance: "slider-vertical",
-                },
-                "& .MuiSlider-rail": {
-                  width: 8,
-                  top: "-2%",
-                },
-                "& .MuiSlider-track": {
-                  width: 4,
-                  border: "4px solid #fafafa",
-                  bottom: "-4% !important",
-                },
-                "& .MuiSlider-thumb": {
-                  width: 26,
-                  height: 26,
-                },
-              }}
-              orientation="vertical"
-              value={5 - cp}
-              onChange={(e, v) => {
-                const newInput = {
-                  ...step2BInput,
-                  [getCascadeField(activeCauseScenario, activeEffectScenario)]: 5 - (v as number),
-                };
-                const newParentInput = {
-                  ...step2BInput,
-                  [getCascadeField(activeCauseScenario, activeEffectScenario)]:
-                    5 - (v as number) < 0 ? null : 5 - (v as number),
-                };
-
-                setInput(newInput);
-                setStep2BInput(
-                  newParentInput,
-                  step2BInput[getCascadeField(activeCauseScenario, activeEffectScenario)] == null ||
-                    5 - (v as number) < 0
-                );
-              }}
-              min={0}
-              max={6}
-              aria-label="Conditional Probability"
-              valueLabelDisplay="off"
-              onKeyDown={preventHorizontalKeyboardNavigation}
-              track="inverted"
-              components={{ Thumb: ArrowThumbComponent }}
-              marks={Array(7)
-                .fill(undefined)
-                .map((_, value) => ({
-                  value: value,
-                  label:
-                    value >= 6 ? (
-                      <Typography variant="body2">
-                        <Trans i18nKey="2A.slider.none">-</Trans>
-                      </Typography>
-                    ) : (
-                      <Typography id={`step2A-dp-mark-${5 - value}`} variant="body2">
-                        <b>CP{5 - value}:</b> {t(CP.intervals[5 - value][0], CP.intervals[5 - value][1])}
-                      </Typography>
-                    ),
-                }))}
-            />
-          </Stack>
-
-          <Box sx={{ position: "relative" }}>
-            <Box
-              sx={{
-                position: "absolute",
-                transition: `all ${TRANSITION_S} ease`,
-                left: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "calc(50% - 57.5px)" : "-131px",
-                top: activeEffectScenario === SCENARIOS.EXTREME ? "90px" : "0px",
-                opacity: activeEffectScenario === SCENARIOS.CONSIDERABLE ? 0 : 1,
-              }}
-              onClick={() => onChangeScenario(null, SCENARIOS.CONSIDERABLE)}
-            >
-              <FadedScenario scenario={SCENARIOS.CONSIDERABLE} />
-            </Box>
-            <Box
-              sx={{
-                position: "absolute",
-                transition: `all ${TRANSITION_S} ease`,
-                left:
-                  (activeEffectScenario === SCENARIOS.CONSIDERABLE && "calc(100% + 16px)") ||
-                  (activeEffectScenario === SCENARIOS.MAJOR && "calc(50% - 57.5px)") ||
-                  "-131px",
-                opacity: activeEffectScenario === SCENARIOS.MAJOR ? 0 : 1,
-              }}
-              onClick={() => onChangeScenario(null, SCENARIOS.MAJOR)}
-            >
-              <FadedScenario scenario={SCENARIOS.MAJOR} />
-            </Box>
-            <Box
-              sx={{
-                position: "absolute",
-                transition: `all ${TRANSITION_S} ease`,
-                right: activeEffectScenario === SCENARIOS.EXTREME ? "calc(50% - 57.5px)" : "-131px",
-                top: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "90px" : "0px",
-                opacity: activeEffectScenario === SCENARIOS.EXTREME ? 0 : 1,
-              }}
-              onClick={() => onChangeScenario(null, SCENARIOS.EXTREME)}
-            >
-              <FadedScenario scenario={SCENARIOS.EXTREME} />
-            </Box>
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "0px" : "-131px",
-                width: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "100%" : 115,
-                transition: `all ${TRANSITION_S} ease`,
-                pointerEvents: "none",
-              }}
-            >
-              <FullScenario
-                riskType={riskFile.cr4de_risk_type}
-                title={riskFile.cr4de_title}
-                scenario={SCENARIOS.CONSIDERABLE}
-                parameters={effectScenarios.considerable}
-                visible={activeEffectScenario === SCENARIOS.CONSIDERABLE}
-              />
-            </Box>
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left:
-                  (activeEffectScenario === SCENARIOS.EXTREME && "-131px") ||
-                  (activeEffectScenario === SCENARIOS.MAJOR && "0px") ||
-                  "calc(100% + 16px)",
-                width: activeEffectScenario === SCENARIOS.MAJOR ? "100%" : 115,
-                transition: `all ${TRANSITION_S} ease`,
-                pointerEvents: "none",
-              }}
-            >
-              <FullScenario
-                riskType={riskFile.cr4de_risk_type}
-                title={riskFile.cr4de_title}
-                scenario={SCENARIOS.MAJOR}
-                parameters={effectScenarios.major}
-                visible={activeEffectScenario === SCENARIOS.MAJOR}
-              />
-            </Box>
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: (activeEffectScenario === SCENARIOS.EXTREME && "0px") || "calc(100% + 16px)",
-                width: activeEffectScenario === SCENARIOS.EXTREME ? "100%" : 115,
-                transition: `all ${TRANSITION_S} ease`,
-                pointerEvents: "none",
-              }}
-            >
-              <FullScenario
-                riskType={riskFile.cr4de_risk_type}
-                title={riskFile.cr4de_title}
-                scenario={SCENARIOS.EXTREME}
-                parameters={effectScenarios.extreme}
-                visible={activeEffectScenario === SCENARIOS.EXTREME}
-              />
-            </Box>
-            <AutoHeight toggle={activeEffectScenario} toggle2={cascade} duration={TRANSITION_S}>
-              <FullScenario
-                riskType={riskFile.cr4de_risk_type}
-                title={riskFile.cr4de_title}
-                scenario={activeEffectScenario}
-                parameters={effectScenarios[activeEffectScenario]}
-                visible={true}
-              />
-            </AutoHeight>
           </Box>
 
           <Box sx={{ margin: "auto", marginTop: 4, maxWidth: 600, width: "100%" }}>
@@ -702,6 +731,7 @@ export default function CascadeAnalysis({
                 setQualiInput(v || null);
               }}
               debounceInterval={500}
+              error={qualiError}
               attachments={attachments}
               onOpenSourceDialog={onOpenSourceDialog}
               onReloadAttachments={onReloadAttachments}

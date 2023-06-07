@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useReducer } from "react";
 import {
   Box,
   Button,
-  Paper,
   Fade,
   Container,
   Typography,
@@ -10,8 +9,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  DialogTitle,
-  Tooltip,
 } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
@@ -21,21 +18,22 @@ import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { useNavigate, useOutletContext, useParams, useSearchParams } from "react-router-dom";
 import useAPI, { DataTable } from "../../hooks/useAPI";
-import Progress from "./information/Progress";
-import SavingOverlay from "../../components/SavingOverlay";
 import useRecord from "../../hooks/useRecord";
 import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import Standard from "./standard/Standard";
 import { STEPS } from "./Steps";
 import useLazyRecords from "../../hooks/useLazyRecords";
-import useLoggedInUser from "../../hooks/useLoggedInUser";
 import CircularProgress from "@mui/material/CircularProgress";
-import useRecords from "../../hooks/useRecords";
 import { AuthPageContext } from "../AuthPage";
 import { SCENARIOS } from "../../functions/scenarios";
-import { CascadeAnalysisInput, getCascadeField, getCascadeInput } from "../../functions/cascades";
+import { CascadeAnalysisInput, getCascadeInput } from "../../functions/cascades";
 import SurveyDialog from "../../components/SurveyDialog";
 import { FeedbackStep } from "../../types/dataverse/DVFeedback";
+import InformationButton from "./information/InformationButton";
+import QuickNavSidebar from "./information/QuickNavSidebar";
+import FinishDialog from "./information/FinishDialog";
+import BottomBar from "./information/BottomBar";
+import { Step2BErrors, validateStep2B } from "./information/validateInput";
 
 type RouteParams = {
   step2A_id: string;
@@ -51,12 +49,11 @@ export default function ({}) {
   const navigate = useNavigate();
   const api = useAPI();
 
-  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [fadeIn, setFadeIn] = useState(true);
   const [activeStep, setActiveStep] = useState<STEPS | null>(null);
-  const [cascadeIndex, setCascadeIndex] = useState(parseInt(searchParams.get("index") || "1", 10) - 1);
+  const [cascadeIndex, setCascadeIndex] = useState(parseInt(searchParams.get("index") || "0", 10));
   const [activeCauseScenario, setActiveCauseScenario] = useState(SCENARIOS.CONSIDERABLE);
   const [activeEffectScenario, setActiveEffectScenario] = useState(SCENARIOS.CONSIDERABLE);
 
@@ -68,11 +65,14 @@ export default function ({}) {
 
   const step2AInput = useRef<string | null>(null);
   const step2BInput = useRef<CascadeAnalysisInput | null>(null);
+  const [inputErrors, setInputErrors] = useState<Step2BErrors | null>(null);
+  const [qualiError, setQualiError] = useState(false);
 
   const [finishedDialogOpen, setFinishedDialogOpen] = useState(false);
   const [surveyDialogOpen, setSurveyDialogOpen] = useState(false);
   const [runTutorial, setRunTutorial] = useState(false);
   const [openSpeedDial, setOpenSpeedDial] = useState(false);
+  const [quickNavOpen, setQuickNavOpen] = useState(false);
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const {
@@ -82,7 +82,12 @@ export default function ({}) {
   } = useLazyRecords<DVRiskCascade<DVRiskFile, DVRiskFile>>({
     table: DataTable.RISK_CASCADE,
     transformResult: (result: DVRiskCascade<DVRiskFile, DVRiskFile>[]) => {
-      return result.sort((a, b) => a.cr4de_cause_hazard.cr4de_title.localeCompare(b.cr4de_cause_hazard.cr4de_title));
+      return result.sort((a, b) => {
+        if (a.cr4de_cause_hazard.cr4de_subjective_importance !== b.cr4de_cause_hazard.cr4de_subjective_importance) {
+          return a.cr4de_cause_hazard.cr4de_subjective_importance - b.cr4de_cause_hazard.cr4de_subjective_importance;
+        }
+        return a.cr4de_cause_hazard.cr4de_hazard_id.localeCompare(b.cr4de_cause_hazard.cr4de_hazard_id);
+      });
     },
   });
 
@@ -96,7 +101,6 @@ export default function ({}) {
   } = useLazyRecords<DVCascadeAnalysis>({
     table: DataTable.CASCADE_ANALYSIS,
     onComplete: async (results) => {
-      console.log("onComplete");
       if (cascadeIndex && causes && catalysingEffects) {
         let iCascade: DVRiskCascade<DVRiskFile, DVRiskFile> | null = null;
         if (activeStep === STEPS.CAUSES) iCascade = causes && causes[cascadeIndex];
@@ -240,15 +244,12 @@ export default function ({}) {
     }
   }
 
-  usePageTitle(t("step2B.pageTitle", "BNRA 2023 - 2026 Risk Analysis B"));
-  useBreadcrumbs([
-    { name: t("bnra.shortName"), url: "/" },
-    { name: t("step2B.breadcrumb", "Risk Analysis B"), url: "/overview" },
-    step2A ? { name: step2A.cr4de_risk_file?.cr4de_title, url: "" } : null,
-  ]);
-
-  const transitionTo = (newStep: STEPS) => {
+  const handleTransitionTo = (newStep: STEPS, newIndex: number = 0) => {
     setFadeIn(false);
+
+    if (newIndex !== cascadeIndex) {
+      handleChangeCascade(newIndex);
+    }
 
     const timer = setTimeout(() => {
       setActiveStep(newStep);
@@ -257,7 +258,7 @@ export default function ({}) {
       window.scrollTo(0, 0);
       setSearchParams({
         step: newStep.toString(),
-        ...(newStep === STEPS.CAUSES || newStep === STEPS.CATALYSING_EFFECTS ? { index: "1" } : {}),
+        ...(newStep === STEPS.CAUSES || newStep === STEPS.CATALYSING_EFFECTS ? { index: newIndex.toString() } : {}),
       });
     }, transitionDelay);
 
@@ -266,113 +267,101 @@ export default function ({}) {
 
   const finish = () => {};
 
-  const next = async () => {
+  const handleNext = async () => {
     if (!step2B || causes === null || catalysingEffects === null) return;
+
+    setQualiError(false);
 
     if (activeStep === STEPS.INTRODUCTION) {
       if (causes && causes.length > 0) {
         await findOrCreateCascadeAnalysis(causes[0]);
 
-        transitionTo(STEPS.CAUSES);
+        handleTransitionTo(STEPS.CAUSES);
       } else if (climateChange) {
         await findOrCreateCascadeAnalysis(climateChange);
 
-        transitionTo(STEPS.CLIMATE_CHANGE);
+        handleTransitionTo(STEPS.CLIMATE_CHANGE);
       } else if (catalysingEffects && catalysingEffects.length > 0) {
         await findOrCreateCascadeAnalysis(catalysingEffects[0]);
 
-        transitionTo(STEPS.CATALYSING_EFFECTS);
+        handleTransitionTo(STEPS.CATALYSING_EFFECTS);
       } else {
         finish();
       }
     } else if (activeStep === STEPS.CAUSES) {
       handleSave();
 
-      if (!handleNextCascade()) {
-        const nextCascadeIndex = cascadeIndex + 1;
-        const nextCascade = causes[nextCascadeIndex];
+      if (!handleNextCascadeScenario()) {
+        if (step2BInput.current?.cr4de_quali_cascade === null || step2BInput.current?.cr4de_quali_cascade === "") {
+          setQualiError(true);
 
-        if (!nextCascade) {
+          return;
+        }
+
+        const nextCascadeIndex = cascadeIndex + 1;
+
+        if (nextCascadeIndex >= causes.length) {
           if (climateChange) {
             await findOrCreateCascadeAnalysis(climateChange);
 
-            transitionTo(STEPS.CLIMATE_CHANGE);
+            handleTransitionTo(STEPS.CLIMATE_CHANGE);
           } else if (catalysingEffects && catalysingEffects.length > 0) {
             await findOrCreateCascadeAnalysis(catalysingEffects[0]);
 
             setCascadeIndex(0);
-            transitionTo(STEPS.CATALYSING_EFFECTS);
+            handleTransitionTo(STEPS.CATALYSING_EFFECTS);
           } else {
             finish();
           }
         } else {
-          setFadeIn(false);
-          setIsSaving(true);
-
-          setCascadeIndex(nextCascadeIndex);
-          setSearchParams({
-            step: searchParams.get("step") || STEPS.CAUSES.toString(),
-            index: (nextCascadeIndex + 1).toString(),
-          });
-
-          // window.scroll({ top: 0, left: 0, behavior: "smooth" });
-
-          setTimeout(async () => {
-            await updateStep2BInput(nextCascade);
-            setActiveCauseScenario(SCENARIOS.CONSIDERABLE);
-            setActiveEffectScenario(SCENARIOS.CONSIDERABLE);
-
-            setIsSaving(false);
-          }, transitionDelay);
+          handleChangeCascade(nextCascadeIndex);
         }
+      } else {
+        document.getElementById("cascade-title")?.scrollIntoView({ behavior: "smooth" });
       }
     } else if (activeStep === STEPS.CLIMATE_CHANGE) {
       handleSave();
+
+      if (step2AInput.current === null || step2AInput.current === "") {
+        setQualiError(true);
+
+        return;
+      }
 
       if (catalysingEffects && catalysingEffects.length > 0) {
         await findOrCreateCascadeAnalysis(catalysingEffects[0]);
 
         setCascadeIndex(0);
-        transitionTo(STEPS.CATALYSING_EFFECTS);
+        handleTransitionTo(STEPS.CATALYSING_EFFECTS);
       } else {
         finish();
       }
     } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
       handleSave();
 
-      const nextCascadeIndex = cascadeIndex + 1;
-      const nextCascade = catalysingEffects[nextCascadeIndex];
+      if (step2BInput.current?.cr4de_quali_cascade === null || step2BInput.current?.cr4de_quali_cascade === "") {
+        setQualiError(true);
 
-      if (!nextCascade) {
+        return;
+      }
+
+      const nextCascadeIndex = cascadeIndex + 1;
+
+      if (nextCascadeIndex >= catalysingEffects.length) {
         if (climateChange) {
           await findOrCreateCascadeAnalysis(climateChange);
 
-          transitionTo(STEPS.CLIMATE_CHANGE);
+          handleTransitionTo(STEPS.CLIMATE_CHANGE);
         } else {
           finish();
         }
       } else {
-        setFadeIn(false);
-        setIsSaving(true);
-
-        setCascadeIndex(nextCascadeIndex);
-        setSearchParams({
-          step: searchParams.get("step") || STEPS.CATALYSING_EFFECTS.toString(),
-          index: (nextCascadeIndex + 1).toString(),
-        });
-
-        // window.scroll({ top: 0, left: 0, behavior: "smooth" });
-
-        setTimeout(async () => {
-          await updateStep2BInput(nextCascade);
-
-          setIsSaving(false);
-        }, transitionDelay);
+        handleChangeCascade(nextCascadeIndex);
       }
     }
   };
 
-  const previous = async () => {
+  const handlePrevious = async () => {
     if (!step2B || !causes || !catalysingEffects) return;
 
     // if (activeStep === STEPS.REVIEW) {
@@ -385,14 +374,14 @@ export default function ({}) {
     if (activeStep === STEPS.CAUSES) {
       handleSave();
 
-      if (!handlePreviousCascade()) {
+      if (!handlePreviousCascadeScenario()) {
         window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
 
         const previousCascadeIndex = cascadeIndex - 1;
         const previousCascade = causes[previousCascadeIndex];
 
         if (!previousCascade) {
-          transitionTo(STEPS.INTRODUCTION);
+          handleTransitionTo(STEPS.INTRODUCTION);
         } else {
           setFadeIn(false);
           setIsSaving(true);
@@ -400,7 +389,7 @@ export default function ({}) {
           setCascadeIndex(previousCascadeIndex);
           setSearchParams({
             step: searchParams.get("step") || "1",
-            index: (previousCascadeIndex + 1).toString(),
+            index: previousCascadeIndex.toString(),
           });
 
           // window.scrollTo({ top: 0, behavior: "smooth" });
@@ -418,14 +407,14 @@ export default function ({}) {
     } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
       handleSave();
 
-      if (!handlePreviousCascade()) {
+      if (!handlePreviousCascadeScenario()) {
         window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
 
         const previousCascadeIndex = cascadeIndex - 1;
         const previousCascade = causes[previousCascadeIndex];
 
         if (!previousCascade) {
-          transitionTo(STEPS.CAUSES);
+          handleTransitionTo(STEPS.CAUSES);
 
           setCascadeIndex(causes.length - 1);
         } else {
@@ -435,7 +424,7 @@ export default function ({}) {
           setCascadeIndex(previousCascadeIndex);
           setSearchParams({
             step: searchParams.get("step") || "2",
-            index: (previousCascadeIndex + 1).toString(),
+            index: previousCascadeIndex.toString(),
           });
 
           // window.scrollTo({ top: 0, behavior: "smooth" });
@@ -453,7 +442,7 @@ export default function ({}) {
     }
   };
 
-  function handleNextCascade(): Boolean {
+  function handleNextCascadeScenario(): Boolean {
     if (activeCauseScenario === SCENARIOS.EXTREME) {
       if (activeEffectScenario === SCENARIOS.CONSIDERABLE) {
         setActiveCauseScenario(SCENARIOS.CONSIDERABLE);
@@ -473,7 +462,7 @@ export default function ({}) {
     return true;
   }
 
-  function handlePreviousCascade() {
+  function handlePreviousCascadeScenario() {
     if (activeCauseScenario === SCENARIOS.CONSIDERABLE) {
       if (activeEffectScenario === SCENARIOS.MAJOR) {
         setActiveCauseScenario(SCENARIOS.EXTREME);
@@ -498,16 +487,54 @@ export default function ({}) {
     if (effectScenario) setActiveEffectScenario(effectScenario);
   };
 
+  const handleChangeCascade = (newCascadeIndex: number) => {
+    const newCascade = cascades && cascades[newCascadeIndex];
+    if (!newCascade) return;
+
+    setFadeIn(false);
+
+    setSearchParams({
+      step: searchParams.get("step") || STEPS.CAUSES.toString(),
+      index: newCascadeIndex.toString(),
+    });
+
+    // window.scroll({ top: 0, left: 0, behavior: "smooth" });
+
+    setTimeout(async () => {
+      setIsSaving(true);
+      setCascadeIndex(newCascadeIndex);
+      await updateStep2BInput(newCascade);
+      setActiveCauseScenario(SCENARIOS.CONSIDERABLE);
+      setActiveEffectScenario(SCENARIOS.CONSIDERABLE);
+
+      setIsSaving(false);
+    }, transitionDelay);
+  };
+
   // Transition to the step in the URL parameters after first loading the page
   useEffect(() => {
     if (activeStep === null) {
       const searchParamStep = searchParams.get("step");
 
       if (searchParamStep && parseInt(searchParamStep, 10) in STEPS) {
-        transitionTo(parseInt(searchParamStep, 10) as STEPS);
-      } else transitionTo(STEPS.INTRODUCTION);
+        handleTransitionTo(parseInt(searchParamStep, 10) as STEPS);
+      } else handleTransitionTo(STEPS.INTRODUCTION);
     }
   }, [activeStep]);
+
+  useEffect(() => {
+    const searchParamStep = searchParams.get("step");
+    const searchParamIndex = searchParams.get("index");
+
+    if (activeStep && searchParamStep && parseInt(searchParamStep, 10) !== activeStep) {
+      handleTransitionTo(
+        parseInt(searchParamStep, 10) as STEPS,
+        searchParamIndex ? parseInt(searchParamIndex, 10) : undefined
+      );
+    } else if (cascadeIndex !== null && searchParamIndex && parseInt(searchParamIndex, 10) !== cascadeIndex) {
+      handleChangeCascade(parseInt(searchParamIndex, 10));
+    }
+  }, [searchParams]);
 
   // Auto-save after 10s of inactivity
   useEffect(() => {
@@ -523,6 +550,13 @@ export default function ({}) {
       window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     }
   }, [fadeIn]);
+
+  usePageTitle(t("step2B.pageTitle", "BNRA 2023 - 2026 Risk Analysis B"));
+  useBreadcrumbs([
+    { name: t("bnra.shortName"), url: "/" },
+    { name: t("step2B.breadcrumb", "Risk Analysis B"), url: "/overview" },
+    step2A ? { name: step2A.cr4de_risk_file?.cr4de_title, url: "" } : null,
+  ]);
 
   return (
     <>
@@ -556,10 +590,9 @@ export default function ({}) {
         </Dialog>
       </Container>
 
-      <SavingOverlay visible={isSaving} />
       <Fade in={fadeIn} timeout={transitionDelay} mountOnEnter unmountOnExit>
         <Box sx={{ mt: 6, mb: 16 }}>
-          {!step2A && (
+          {(!step2A || isSaving) && (
             <Box sx={{ mt: 32, textAlign: "center" }}>
               <CircularProgress />
             </Box>
@@ -578,6 +611,8 @@ export default function ({}) {
               step2BInput={step2BInput.current}
               activeCauseScenario={activeCauseScenario}
               activeEffectScenario={activeEffectScenario}
+              qualiError={qualiError}
+              runTutorial={runTutorial}
               setRunTutorial={setRunTutorial}
               setStep2BInput={(input, update) => {
                 step2BInput.current = input;
@@ -586,155 +621,94 @@ export default function ({}) {
                   forceUpdate();
                 }
               }}
-              onNext={next}
-              onPrevious={previous}
+              onNext={handleNext}
+              onPrevious={handlePrevious}
               onChangeScenario={handleChangeScenario}
               onUnmount={() => {
                 setFadeIn(true);
               }}
             />
           )}
-          {/* {step2A && step2A.cr4de_risk_file.cr4de_risk_type === "Malicious Man-made Risk" && (
-              <ManMade
-                activeStep={activeStep}
-                step2A={step2A}
-                causes={causes}
-                effects={effects}
-                inputRef={inputRef}
-                inputErrors={inputErrors}
-                setRunTutorial={setRunTutorial}
-              />
-            )} */}
         </Box>
       </Fade>
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          p: 1,
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1001,
-        }}
-        component={Paper}
-        elevation={5}
-      >
-        <Button id="back-button" disabled={isSaving} color="secondary" onClick={previous}>
-          <Trans i18nKey="button.back">Back</Trans>
-        </Button>
+      <InformationButton
+        riskFile={step2A?.cr4de_risk_file}
+        forceOpen={openSpeedDial}
+        onRunTutorial={() => setRunTutorial(true)}
+      />
 
-        <Progress
-          activeStep={activeStep || 0}
-          goToStep={transitionTo}
-          riskType={step2A?.cr4de_risk_file.cr4de_risk_type}
-          causes={causes || []}
-          causeIndex={activeStep === STEPS.CAUSES ? (cascadeIndex + 1).toString() : null}
-          catalysingEffects={catalysingEffects || []}
-          catalysingEffectIndex={activeStep === STEPS.CATALYSING_EFFECTS ? (cascadeIndex + 1).toString() : null}
-          hasClimateChange={Boolean(climateChange)}
+      {step2A && causes !== null && catalysingEffects !== null && (
+        <QuickNavSidebar
+          step2A={step2A}
+          causes={causes}
+          climateChange={climateChange}
+          catalysingEffects={catalysingEffects}
+          open={quickNavOpen}
+          setOpen={setQuickNavOpen}
         />
+      )}
 
-        <Box id="step2A-next-buttons">
-          {hasNextStep() && (
-            <Tooltip
-              title={
-                step2BInput.current &&
-                step2BInput.current[getCascadeField(activeCauseScenario, activeEffectScenario)] != null
-                  ? t("2B.doneButton.continue", "Continue")
-                  : t("2B.doneButton.selectValue", "Please select a value before continuing")
+      <BottomBar
+        step2A={step2A}
+        causes={causes}
+        climateChange={climateChange}
+        catalysingEffects={catalysingEffects}
+        cascadeIndex={cascadeIndex}
+        activeStep={activeStep}
+        activeCauseScenario={activeCauseScenario}
+        activeEffectScenario={activeEffectScenario}
+        isSaving={isSaving}
+        hasNextStep={hasNextStep()}
+        step2BInput={step2BInput}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+        onGoToStep={handleTransitionTo}
+        onFinish={() => {
+          setQualiError(false);
+          if (!hasNextStep()) {
+            if (activeStep === STEPS.CAUSES) {
+              if (
+                step2BInput.current?.cr4de_quali_cascade === null ||
+                step2BInput.current?.cr4de_quali_cascade === ""
+              ) {
+                setQualiError(true);
+
+                return;
               }
-            >
-              <span>
-                <Button
-                  disabled={
-                    isSaving ||
-                    (activeStep === STEPS.CAUSES &&
-                      (!step2BInput.current ||
-                        step2BInput.current[getCascadeField(activeCauseScenario, activeEffectScenario)] == null))
-                  }
-                  color="primary"
-                  sx={{ mr: 1 }}
-                  onClick={next}
-                >
-                  <Trans i18nKey="button.next">Next</Trans>
-                </Button>
-              </span>
-            </Tooltip>
-          )}
-          <Button disabled={isSaving} color="primary" sx={{ mr: 1 }} onClick={() => setFinishedDialogOpen(true)}>
-            <Trans i18nKey="button.saveandexit">Save & exit</Trans>
-          </Button>
-        </Box>
-      </Box>
+            } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+              if (step2AInput.current === null || step2AInput.current === "") {
+                setQualiError(true);
 
-      <Dialog open={finishedDialogOpen} onClose={() => setFinishedDialogOpen(false)}>
-        {step2B && cascades && step2B.length >= cascades.length ? (
-          <>
-            <DialogTitle>
-              <Trans i18nKey="2B.finishedDialog.title">Are you finished with step 2B?</Trans>
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                <Trans i18nKey="2B.finishedDialog.helpText">
-                  Even if you indicate that you are finished, you can still return at a later time to make changes until
-                  the end of step 2B for this risk file.
-                </Trans>
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setFinishedDialogOpen(false)}>
-                <Trans i18nKey="2A.finishedDialog.cancel">No, I am not finished</Trans>
-              </Button>
-              <Button
-                onClick={async () => {
-                  if (!step2A) return;
+                return;
+              }
+            } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
+              handleSave();
 
-                  setFinishedDialogOpen(false);
-                  setSurveyDialogOpen(true);
+              if (
+                step2BInput.current?.cr4de_quali_cascade === null ||
+                step2BInput.current?.cr4de_quali_cascade === ""
+              ) {
+                setQualiError(true);
 
-                  const participants = await api.getParticipants(
-                    `$filter=_cr4de_contact_value eq ${user.contactid} and _cr4de_direct_analysis_value eq ${step2A.cr4de_bnradirectanalysisid}`
-                  );
-                  if (participants.length >= 0) {
-                    // await process.finishStep2A(step2A.cr4de_risk_file, participants[0]);
-                    await api.finishStep(step2A._cr4de_risk_file_value, user.contactid, "2B");
-                  }
-                }}
-              >
-                <Trans i18nKey="2A.finishedDialog.finish">Yes, I am finished</Trans>
-              </Button>
-            </DialogActions>
-          </>
-        ) : (
-          <>
-            <DialogTitle>
-              <Trans i18nKey="2B.exitDialog.title">Would you like to exit step 2B?</Trans>
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                <Trans i18nKey="2B.exitDialog.helpText">
-                  Your progress will be saved and you may return at a later time to continue where you left of.
-                </Trans>
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setFinishedDialogOpen(false)}>
-                <Trans i18nKey="2B.exitDialog.cancel">No, stay here</Trans>
-              </Button>
-              <Button
-                onClick={async () => {
-                  navigate("/overview");
-                }}
-              >
-                <Trans i18nKey="2A.exitDialog.finish">Yes, return to my risks</Trans>
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
+                return;
+              }
+            }
+          }
+          setInputErrors(validateStep2B(step2A, step2B, causes, climateChange, catalysingEffects));
+          setFinishedDialogOpen(true);
+        }}
+      />
+
+      {step2A && (
+        <FinishDialog
+          step2A={step2A}
+          finishedDialogOpen={finishedDialogOpen}
+          inputErrors={inputErrors}
+          setFinishedDialogOpen={setFinishedDialogOpen}
+          setSurveyDialogOpen={setSurveyDialogOpen}
+        />
+      )}
 
       {step2A && (
         <SurveyDialog

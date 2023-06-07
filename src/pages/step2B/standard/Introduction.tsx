@@ -1,5 +1,6 @@
 import { Trans } from "react-i18next";
 import { Box, Typography, Stack, Button, Container } from "@mui/material";
+import openInNewTab from "../../../functions/openInNewTab";
 
 export default function Introduction({ onRunTutorial }: { onRunTutorial: () => void }) {
   return (
@@ -23,16 +24,60 @@ export default function Introduction({ onRunTutorial }: { onRunTutorial: () => v
             </Trans>
           </Typography>
           <Typography variant="body2">
-            <Trans i18nKey="2B.introduction.info.3">
-              If you would like a tutorial on how to use the application, press the button below. Otherwise press the{" "}
-              <b>Next</b> button on the bottom-right to continue to part 2
+            <Trans i18nKey="2B.introduction.info.portal.1">
+              For a better understanding of the hows and whys of this step, please view the corresponding explanation
+              videos in the information portal by clicking the button below
             </Trans>
           </Typography>
-          <Box sx={{ textAlign: "center", mt: 4 }}>
-            <Button variant="contained" onClick={onRunTutorial}>
-              <Trans i18nKey="2B.introduction.button.tutorial">Show Application Tutorial</Trans>
+          <Box sx={{ textAlign: "center", mt: 4, mb: 8 }}>
+            <Button variant="contained" onClick={() => openInNewTab("/learning/tools-analysisB", "_blank")}>
+              <Trans i18nKey="2A.introduction.button.infoportal">Open Information Portal</Trans>
             </Button>
           </Box>
+          <Typography variant="body2">
+            <Trans i18nKey="2B.introduction.info.4">
+              The application is divided into 3 main parts; causes, climate change and catalysing effects, visible
+              below. If any of these is not applicable for your risk (e.g. because your risk is not affected by climate
+              change), the corresponding step may not be visible.
+            </Trans>
+          </Typography>
+          <Typography variant="body2">
+            <Trans i18nKey="2B.introduction.info.5.1">
+              Each part will ask you to analyze the connection between your risk and other risks within the BNRA risk
+              catalogue:
+            </Trans>
+          </Typography>
+          <ul>
+            <li>
+              <Typography variant="body2">
+                <Trans i18nKey="2B.introduction.info.5.2">
+                  <b>Causes:</b> You will be asked to estimate the conditional probability of another risk causing this
+                  risk
+                </Trans>
+              </Typography>
+            </li>
+            <li>
+              <Typography variant="body2">
+                <Trans i18nKey="2B.introduction.info.5.3">
+                  <b>Climate change:</b> You will be asked to estimate the effect of climate change on your risk in the
+                  next 50 years
+                </Trans>
+              </Typography>
+            </li>
+            <li>
+              <Typography variant="body2">
+                <Trans i18nKey="2B.introduction.info.5.4">
+                  <b>Catalyzing effects:</b> You will be asked to qualitatively describe the potential catalyzing
+                  effects of an emerging risk on your risk in the future
+                </Trans>
+              </Typography>
+            </li>
+          </ul>
+          <Typography variant="body2">
+            <Trans i18nKey="2B.introduction.info.6">
+              Each part will provide a tutorial specific to that page to guide you through the process.
+            </Trans>
+          </Typography>
         </Stack>
       </Box>
     </Container>

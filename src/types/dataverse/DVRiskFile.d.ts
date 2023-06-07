@@ -20,6 +20,8 @@ export interface DVRiskFile extends RiskFileEditableFields {
   cr4de_risk_type: string;
   cr4de_risk_category: string;
 
+  cr4de_subjective_importance: number;
+
   cr4de_dp_quali: string | null;
   cr4de_di_quali_h: string | null;
   cr4de_di_quali_s: string | null;

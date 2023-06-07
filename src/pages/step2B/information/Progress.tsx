@@ -5,6 +5,7 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CheckIcon from "@mui/icons-material/Check";
 import { stepNames, STEPS } from "../Steps";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
+import { Step2BErrors } from "./validateInput";
 
 const enum STATUS {
   DONE,
@@ -153,67 +154,6 @@ export default function Progress({
             )}
           </Step>
         )}
-        {/* {steps
-          .filter((status: STATUS, stepName: STEPS) => {
-            if (stepName === STEPS.CATALYSING_EFFECTS && catalysingEffects && catalysingEffects.length <= 0)
-              return false;
-            if (stepName === STEPS.CLIMATE_CHANGE && hasClimateChange !== null && !hasClimateChange) return false;
-
-            return true;
-          })
-          .map((status: STATUS, stepName: STEPS) => (
-            <Step key={stepName} completed={status === STATUS.DONE}>
-              <Tooltip title={t(stepNames[stepName].titleI18N, stepNames[stepName].titleDefault)}>
-                <>
-                  {stepName !== activeStep && status === STATUS.DONE && (
-                    <StepButton color="secondary" onClick={() => goToStep(stepName)} icon={<DoneStepIcon />}>
-                      {t(stepNames[stepName].titleI18N, stepNames[stepName].titleDefault)}
-                      {stepName === STEPS.CAUSES &&
-                        stepName === activeStep &&
-                        causes &&
-                        causes.length > 0 &&
-                        ` (${causes.length})`}
-                      {stepName === STEPS.CATALYSING_EFFECTS &&
-                        stepName === activeStep &&
-                        catalysingEffects &&
-                        catalysingEffects.length > 0 &&
-                        ` (${catalysingEffects.length})`}
-                    </StepButton>
-                  )}
-                  {stepName !== activeStep && status === STATUS.DOING && (
-                    <StepButton onClick={() => goToStep(stepName)} icon={<DoingStepIcon />}>
-                      {t(stepNames[stepName].titleI18N, stepNames[stepName].titleDefault)}
-                      {stepName === STEPS.CAUSES &&
-                        stepName === activeStep &&
-                        causes &&
-                        causes.length > 0 &&
-                        ` (${causes.length})`}
-                      {stepName === STEPS.CATALYSING_EFFECTS &&
-                        stepName === activeStep &&
-                        catalysingEffects &&
-                        catalysingEffects.length > 0 &&
-                        ` (${catalysingEffects.length})`}
-                    </StepButton>
-                  )}
-                  {(stepName === activeStep || status === STATUS.NOT_STARTED) && (
-                    <StepLabel>
-                      {t(stepNames[stepName].titleI18N, stepNames[stepName].titleDefault)}
-                      {stepName === STEPS.CAUSES &&
-                        stepName === activeStep &&
-                        causes &&
-                        causeIndex &&
-                        ` (${causeIndex}/${causes.length})`}
-                      {stepName === STEPS.CATALYSING_EFFECTS &&
-                        stepName === activeStep &&
-                        catalysingEffects &&
-                        catalysingEffectIndex &&
-                        ` (${catalysingEffectIndex}/${catalysingEffects.length})`}
-                    </StepLabel>
-                  )}
-                </>
-              </Tooltip>
-            </Step>
-          ))} */}
       </Stepper>
     </Box>
   );

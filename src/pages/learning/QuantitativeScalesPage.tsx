@@ -35,6 +35,7 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import { DP1, DP2, DP3, DP4, DP5 } from "./QuantitativeScales/P";
+import * as DP50 from "./QuantitativeScales/P2050";
 
 const drawerWidth = 320;
 
@@ -139,6 +140,7 @@ export default function QuantitativeScalesPage({}) {
               sx={{ mt: 8 }}
             >
               <Tab value="p" label={t("learning.probability.text.title", "Waarschijnlijkheid")} />
+              <Tab value="p2050" label={t("learning.probability2050.text.title", "Waarschijnlijkheid in 2050")} />
               <Tab value="m" label={t("learning.motivation.text.title", "Motivatie")} />
               <Tab value="cp" label={t("learning.cp.text.title", "Voorwaardelijke Kans")} />
               <Tab value="i" label={t("learning.impact.text.title", "Impact")} />
@@ -241,6 +243,118 @@ export default function QuantitativeScalesPage({}) {
                       <TableRow>
                         <TableCell>DP1</TableCell>
                         {DP1.map((c) => (
+                          <TableCell>{t(c)}</TableCell>
+                        ))}
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            </TabPanel>
+
+            <TabPanel value="p2050">
+              <Box sx={{ mb: 4 }}>
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="learning.probability2050.text.introduction.1">
+                      For estimating the probability of a risk scenario, the following 3 measures are proposed:
+                    </Trans>
+                  </Typography>
+                  <ul>
+                    <li>
+                      <Typography variant="body2">
+                        <Trans i18nKey="learning.probability2050.text.introduction.2">
+                          The return period, i.e. the timespan expressed in years during which statistical computations
+                          or estimates expect a given event to occur at least once on average. It is expressed as
+                          occurring once every x years.
+                        </Trans>
+                      </Typography>
+                    </li>
+                    <li>
+                      <Typography variant="body2">
+                        <Trans i18nKey="learning.probability2050.text.introduction.3">
+                          The 3 year likelihood, i.e. the probability of a given event occurring at least once during
+                          the next 3 years. Always takes a value between 0 and 100%.
+                        </Trans>
+                      </Typography>
+                    </li>
+                    <li>
+                      <Typography variant="body2">
+                        <Trans i18nKey="learning.probability2050.text.introduction.4">
+                          The 10 year likelihood, i.e. the probability of a given event occurring at least once during
+                          the next 10 years. Always takes a value between 0 and 100%.
+                        </Trans>
+                      </Typography>
+                    </li>
+                    <li>
+                      <Typography variant="body2">
+                        <Trans i18nKey="learning.probability2050.text.introduction.5">A qualitative description</Trans>
+                      </Typography>
+                    </li>
+                  </ul>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="learning.probability2050.text.introduction.6">
+                      All these measures are essentially equivalent; they just use different scales. The assessment is
+                      based on five probability classes shown in the table below.
+                    </Trans>
+                  </Typography>
+                </Box>
+
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <Trans i18nKey="learning.scales.classCode">Class Code</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.returnPeriod">Return Period</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.3yearLikelihood">3 Year Likelihood</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.10yearLikelihood">10 Year Likelihood</Trans>
+                        </TableCell>
+                        <TableCell>
+                          <Trans i18nKey="learning.probability.qualitative">Qualitative Description</Trans>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>DP2050-5</TableCell>
+                        {DP50.DP5.map((c) => (
+                          <TableCell>{t(c)}</TableCell>
+                        ))}
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>DP2050-4</TableCell>
+                        {DP50.DP4.map((c) => (
+                          <TableCell>{t(c)}</TableCell>
+                        ))}
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>DP2050-3</TableCell>
+                        {DP50.DP3.map((c) => (
+                          <TableCell>{t(c)}</TableCell>
+                        ))}
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>DP2050-2</TableCell>
+                        {DP50.DP2.map((c) => (
+                          <TableCell>{t(c)}</TableCell>
+                        ))}
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>DP2050-1</TableCell>
+                        {DP50.DP1.map((c) => (
+                          <TableCell>{t(c)}</TableCell>
+                        ))}
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>DP2050-0</TableCell>
+                        {DP50.DP0.map((c) => (
                           <TableCell>{t(c)}</TableCell>
                         ))}
                       </TableRow>
@@ -434,7 +548,12 @@ export default function QuantitativeScalesPage({}) {
                     </Trans>
                   </Typography>
 
-                  <Typography variant="h6" paragraph>
+                  <Typography
+                    variant="h6"
+                    paragraph
+                    onClick={() => setCollapsed({ ...collapsed, ha: !collapsed.ha })}
+                    sx={{ cursor: "pointer", transition: "opacity .3s ease", "&:hover": { opacity: 0.8 } }}
+                  >
                     <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, ha: !collapsed.ha })}>
                       {collapsed.ha ? <ExpandMoreIcon /> : <ChevronRightIcon />}
                     </IconButton>
@@ -497,7 +616,12 @@ export default function QuantitativeScalesPage({}) {
                     </Grow>
                   </Box>
 
-                  <Typography variant="h6" paragraph>
+                  <Typography
+                    variant="h6"
+                    paragraph
+                    onClick={() => setCollapsed({ ...collapsed, hb: !collapsed.hb })}
+                    sx={{ cursor: "pointer", transition: "opacity .3s ease", "&:hover": { opacity: 0.8 } }}
+                  >
                     <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, hb: !collapsed.hb })}>
                       {collapsed.hb ? <ExpandMoreIcon /> : <ChevronRightIcon />}
                     </IconButton>
@@ -661,7 +785,12 @@ export default function QuantitativeScalesPage({}) {
                     </Grow>
                   </Box>
 
-                  <Typography variant="h6" paragraph>
+                  <Typography
+                    variant="h6"
+                    paragraph
+                    onClick={() => setCollapsed({ ...collapsed, hc: !collapsed.hc })}
+                    sx={{ cursor: "pointer", transition: "opacity .3s ease", "&:hover": { opacity: 0.8 } }}
+                  >
                     <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, hc: !collapsed.hc })}>
                       {collapsed.hc ? <ExpandMoreIcon /> : <ChevronRightIcon />}
                     </IconButton>
@@ -763,7 +892,12 @@ export default function QuantitativeScalesPage({}) {
                     </Trans>
                   </Typography>
 
-                  <Typography variant="h6" paragraph>
+                  <Typography
+                    variant="h6"
+                    paragraph
+                    onClick={() => setCollapsed({ ...collapsed, sa: !collapsed.sa })}
+                    sx={{ cursor: "pointer", transition: "opacity .3s ease", "&:hover": { opacity: 0.8 } }}
+                  >
                     <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, sa: !collapsed.sa })}>
                       {collapsed.sa ? <ExpandMoreIcon /> : <ChevronRightIcon />}
                     </IconButton>
@@ -921,7 +1055,12 @@ export default function QuantitativeScalesPage({}) {
                     </Grow>
                   </Box>
 
-                  <Typography variant="h6" paragraph>
+                  <Typography
+                    variant="h6"
+                    paragraph
+                    onClick={() => setCollapsed({ ...collapsed, sb: !collapsed.sb })}
+                    sx={{ cursor: "pointer", transition: "opacity .3s ease", "&:hover": { opacity: 0.8 } }}
+                  >
                     <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, sb: !collapsed.sb })}>
                       {collapsed.sb ? <ExpandMoreIcon /> : <ChevronRightIcon />}
                     </IconButton>
@@ -1000,7 +1139,12 @@ export default function QuantitativeScalesPage({}) {
                     </Grow>
                   </Box>
 
-                  <Typography variant="h6" paragraph>
+                  <Typography
+                    variant="h6"
+                    paragraph
+                    onClick={() => setCollapsed({ ...collapsed, sc: !collapsed.sc })}
+                    sx={{ cursor: "pointer", transition: "opacity .3s ease", "&:hover": { opacity: 0.8 } }}
+                  >
                     <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, sc: !collapsed.sc })}>
                       {collapsed.sc ? <ExpandMoreIcon /> : <ChevronRightIcon />}
                     </IconButton>
@@ -1120,7 +1264,12 @@ export default function QuantitativeScalesPage({}) {
                     </Grow>
                   </Box>
 
-                  <Typography variant="h6" paragraph>
+                  <Typography
+                    variant="h6"
+                    paragraph
+                    onClick={() => setCollapsed({ ...collapsed, sd: !collapsed.sd })}
+                    sx={{ cursor: "pointer", transition: "opacity .3s ease", "&:hover": { opacity: 0.8 } }}
+                  >
                     <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, sd: !collapsed.sd })}>
                       {collapsed.sd ? <ExpandMoreIcon /> : <ChevronRightIcon />}
                     </IconButton>
@@ -1256,7 +1405,12 @@ export default function QuantitativeScalesPage({}) {
                     </Trans>
                   </Typography>
 
-                  <Typography variant="h6" paragraph>
+                  <Typography
+                    variant="h6"
+                    paragraph
+                    onClick={() => setCollapsed({ ...collapsed, ea: !collapsed.ea })}
+                    sx={{ cursor: "pointer", transition: "opacity .3s ease", "&:hover": { opacity: 0.8 } }}
+                  >
                     <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, ea: !collapsed.ea })}>
                       {collapsed.ea ? <ExpandMoreIcon /> : <ChevronRightIcon />}
                     </IconButton>
@@ -1376,7 +1530,12 @@ export default function QuantitativeScalesPage({}) {
                     </Trans>
                   </Typography>
 
-                  <Typography variant="h6" paragraph>
+                  <Typography
+                    variant="h6"
+                    paragraph
+                    onClick={() => setCollapsed({ ...collapsed, fa: !collapsed.fa })}
+                    sx={{ cursor: "pointer", transition: "opacity .3s ease", "&:hover": { opacity: 0.8 } }}
+                  >
                     <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, fa: !collapsed.fa })}>
                       {collapsed.fa ? <ExpandMoreIcon /> : <ChevronRightIcon />}
                     </IconButton>
@@ -1481,7 +1640,12 @@ export default function QuantitativeScalesPage({}) {
                     </Grow>
                   </Box>
 
-                  <Typography variant="h6" paragraph>
+                  <Typography
+                    variant="h6"
+                    paragraph
+                    onClick={() => setCollapsed({ ...collapsed, fb: !collapsed.fb })}
+                    sx={{ cursor: "pointer", transition: "opacity .3s ease", "&:hover": { opacity: 0.8 } }}
+                  >
                     <IconButton sx={{ ml: -2 }} onClick={() => setCollapsed({ ...collapsed, fb: !collapsed.fb })}>
                       {collapsed.fb ? <ExpandMoreIcon /> : <ChevronRightIcon />}
                     </IconButton>

@@ -24,7 +24,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
 
   const l = payload.length - 1;
   const total = payload.reduce((tot, p) => tot + p.value, 0);
-
+  console.log(total, payload);
   return (
     <Box sx={{ borderRadius: 4, backgroundColor: "rgba(255,255,255,.9)", p: 2 }}>
       <Typography variant="subtitle2">{new Date(label).toISOString().slice(0, 10)}</Typography>
