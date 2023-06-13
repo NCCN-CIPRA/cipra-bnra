@@ -46,7 +46,7 @@ export const DP5 = [
   "learning.probability2050.q.5",
 ];
 
-export const DPs = [DP1, DP2, DP3, DP4, DP5];
+export const DPs = [DP0, DP1, DP2, DP3, DP4, DP5];
 
 export const DPValueStack = ({ value }: { value: number }) => {
   if (value < 0) return null;
@@ -54,7 +54,7 @@ export const DPValueStack = ({ value }: { value: number }) => {
   return (
     <Stack sx={{ width: 500 }} spacing={1}>
       <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", mr: 1, pb: 1, fontWeight: "bold" }}>
-        {`DP2050-${value + 1}`}
+        {`DP2050-${value}`}
       </Typography>
       {DPRows.map((r, ri) => (
         <Stack key={r} direction="row">

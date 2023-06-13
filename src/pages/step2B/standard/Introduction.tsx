@@ -35,47 +35,55 @@ export default function Introduction({ onRunTutorial }: { onRunTutorial: () => v
             </Button>
           </Box>
           <Typography variant="body2">
-            <Trans i18nKey="2B.introduction.info.4">
-              The application is divided into 3 main parts; causes, climate change and catalysing effects, visible
-              below. If any of these is not applicable for your risk (e.g. because your risk is not affected by climate
-              change), the corresponding step may not be visible.
-            </Trans>
-          </Typography>
-          <Typography variant="body2">
-            <Trans i18nKey="2B.introduction.info.5.1">
-              Each part will ask you to analyze the connection between your risk and other risks within the BNRA risk
-              catalogue:
-            </Trans>
+            <Trans i18nKey="2B.introduction.info.4">The application is divided into 3 main parts;</Trans>
           </Typography>
           <ul>
             <li>
               <Typography variant="body2">
-                <Trans i18nKey="2B.introduction.info.5.2">
-                  <b>Causes:</b> You will be asked to estimate the conditional probability of another risk causing this
-                  risk
+                <Trans i18nKey="2B.introduction.info.5">
+                  Dans la première section, intitulée{" "}
+                  <b>
+                    <i>causes</i>
+                  </b>
+                  , il vous sera demandé d'estimer quantitativement les probabilités conditionnelles des scénarios
+                  d'intensité du risque standard étudié, puis de les justifier qualitativement.
                 </Trans>
               </Typography>
             </li>
             <li>
               <Typography variant="body2">
-                <Trans i18nKey="2B.introduction.info.5.3">
-                  <b>Climate change:</b> You will be asked to estimate the effect of climate change on your risk in the
-                  next 50 years
+                <Trans i18nKey="2B.introduction.info.6">
+                  Dans la deuxième section, intitulée{" "}
+                  <b>
+                    <i>changement climatique</i>
+                  </b>
+                  , il vous sera demandé d'estimer quantitativement les effets du changement climatique sur la
+                  probabilité directe des scénarios d'intensité du risque standard étudié, puis de les justifier
+                  qualitativement.
                 </Trans>
               </Typography>
             </li>
             <li>
               <Typography variant="body2">
-                <Trans i18nKey="2B.introduction.info.5.4">
-                  <b>Catalyzing effects:</b> You will be asked to qualitatively describe the potential catalyzing
-                  effects of an emerging risk on your risk in the future
+                <Trans i18nKey="2B.introduction.info.7">
+                  Dans la troisième section intitulée{" "}
+                  <b>
+                    <i>effets catalyseurs</i>
+                  </b>
+                  , il vous sera demandé de décrire qualitativement comment le risque standard étudié peut être affecté
+                  par un risque émergent.
                 </Trans>
               </Typography>
             </li>
           </ul>
           <Typography variant="body2">
-            <Trans i18nKey="2B.introduction.info.6">
-              Each part will provide a tutorial specific to that page to guide you through the process.
+            <Trans i18nKey="2B.introduction.info.8">
+              Attention, pour rappel, lors de l'étape 1 de la BNRA vous avez identifié les relations de cause à effet
+              entre le risque standard étudié et les autres risques du catalogue de la BNRA ainsi que les risques
+              émergents qui peuvent avoir un effet catalyseur sur le risque standard étudié. Les champs à remplir lors
+              de cette étape dépendent des liens qui ont été identifiés lors de l'étape 1. Par exemple, si aucun risque
+              émergent n'a été identifié comme ayant un effet catalyseur sur le risque standard étudié, vous ne verrez
+              pas apparaitre cette section dans l'application.
             </Trans>
           </Typography>
         </Stack>

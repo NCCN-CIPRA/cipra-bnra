@@ -30,7 +30,7 @@ import { CascadeAnalysisInput, getCascadeInput } from "../../functions/cascades"
 import SurveyDialog from "../../components/SurveyDialog";
 import { FeedbackStep } from "../../types/dataverse/DVFeedback";
 import InformationButton from "./information/InformationButton";
-import QuickNavSidebar from "./information/QuickNavSidebar";
+import QuickNavSidebar, { OPEN_STATE } from "./information/QuickNavSidebar";
 import FinishDialog from "./information/FinishDialog";
 import BottomBar from "./information/BottomBar";
 import { Step2BErrors, validateStep2B } from "./information/validateInput";
@@ -72,7 +72,7 @@ export default function ({}) {
   const [surveyDialogOpen, setSurveyDialogOpen] = useState(false);
   const [runTutorial, setRunTutorial] = useState(false);
   const [openSpeedDial, setOpenSpeedDial] = useState(false);
-  const [quickNavOpen, setQuickNavOpen] = useState(false);
+  const [quickNavOpen, setQuickNavOpen] = useState(OPEN_STATE.CLOSED);
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const {
@@ -175,7 +175,11 @@ export default function ({}) {
     if (activeStep === STEPS.INTRODUCTION) {
       return hasCauses || hasClimateChange || hasCatalysing;
     } else if (activeStep === STEPS.CAUSES) {
-      return hasClimateChange || hasCatalysing;
+      if (hasClimateChange || hasCatalysing) return true;
+
+      if (causes && cascadeIndex < causes?.length - 1) return true;
+
+      return activeCauseScenario !== SCENARIOS.EXTREME || activeEffectScenario !== SCENARIOS.EXTREME;
     } else if (activeStep === STEPS.CLIMATE_CHANGE) {
       return hasCatalysing;
     }
@@ -364,80 +368,50 @@ export default function ({}) {
   const handlePrevious = async () => {
     if (!step2B || !causes || !catalysingEffects) return;
 
-    // if (activeStep === STEPS.REVIEW) {
-    //   setCascadeIndex(catalysingEffects.length - 1);
-    //   setSearchParams({
-    //     step: searchParams.get("step") || "1",
-    //     index: catalysingEffects.length.toString(),
-    //   });
-    // } else
     if (activeStep === STEPS.CAUSES) {
       handleSave();
 
       if (!handlePreviousCascadeScenario()) {
-        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-
         const previousCascadeIndex = cascadeIndex - 1;
-        const previousCascade = causes[previousCascadeIndex];
 
-        if (!previousCascade) {
+        if (previousCascadeIndex < 0) {
           handleTransitionTo(STEPS.INTRODUCTION);
         } else {
-          setFadeIn(false);
-          setIsSaving(true);
-
-          setCascadeIndex(previousCascadeIndex);
-          setSearchParams({
-            step: searchParams.get("step") || "1",
-            index: previousCascadeIndex.toString(),
-          });
-
-          // window.scrollTo({ top: 0, behavior: "smooth" });
-
-          setTimeout(async () => {
-            await updateStep2BInput(previousCascade);
-
-            setActiveCauseScenario(SCENARIOS.EXTREME);
-            setActiveEffectScenario(SCENARIOS.EXTREME);
-
-            setIsSaving(false);
-          }, transitionDelay);
+          handleChangeCascade(previousCascadeIndex);
         }
+      } else {
+        document.getElementById("cascade-title")?.scrollIntoView({ behavior: "smooth" });
+      }
+    } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+      handleSave();
+
+      if (causes && causes.length > 0) {
+        await findOrCreateCascadeAnalysis(causes[causes.length - 1]);
+
+        handleTransitionTo(STEPS.CAUSES, causes.length - 1);
+      } else {
+        handleTransitionTo(STEPS.INTRODUCTION);
       }
     } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
       handleSave();
 
-      if (!handlePreviousCascadeScenario()) {
-        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+      const previousCascadeIndex = cascadeIndex - 1;
 
-        const previousCascadeIndex = cascadeIndex - 1;
-        const previousCascade = causes[previousCascadeIndex];
+      if (previousCascadeIndex < 0) {
+        if (climateChange) {
+          await findOrCreateCascadeAnalysis(climateChange);
 
-        if (!previousCascade) {
-          handleTransitionTo(STEPS.CAUSES);
+          handleTransitionTo(STEPS.CLIMATE_CHANGE);
+        } else if (causes && causes.length > 0) {
+          await findOrCreateCascadeAnalysis(causes[causes.length - 1]);
 
           setCascadeIndex(causes.length - 1);
+          handleTransitionTo(STEPS.CAUSES);
         } else {
-          setFadeIn(false);
-          setIsSaving(true);
-
-          setCascadeIndex(previousCascadeIndex);
-          setSearchParams({
-            step: searchParams.get("step") || "2",
-            index: previousCascadeIndex.toString(),
-          });
-
-          // window.scrollTo({ top: 0, behavior: "smooth" });
-
-          setTimeout(async () => {
-            await updateStep2BInput(previousCascade);
-
-            setActiveCauseScenario(SCENARIOS.EXTREME);
-            setActiveEffectScenario(SCENARIOS.EXTREME);
-
-            setIsSaving(false);
-          }, transitionDelay);
+          handleTransitionTo(STEPS.INTRODUCTION);
         }
+      } else {
+        handleChangeCascade(previousCascadeIndex);
       }
     }
   };
@@ -621,12 +595,14 @@ export default function ({}) {
                   forceUpdate();
                 }
               }}
+              onSave={handleSave}
               onNext={handleNext}
               onPrevious={handlePrevious}
               onChangeScenario={handleChangeScenario}
               onUnmount={() => {
                 setFadeIn(true);
               }}
+              onShowCauses={() => setQuickNavOpen(OPEN_STATE.CAUSES)}
             />
           )}
         </Box>
@@ -644,6 +620,7 @@ export default function ({}) {
           causes={causes}
           climateChange={climateChange}
           catalysingEffects={catalysingEffects}
+          hasCauses={activeStep === STEPS.CLIMATE_CHANGE}
           open={quickNavOpen}
           setOpen={setQuickNavOpen}
         />

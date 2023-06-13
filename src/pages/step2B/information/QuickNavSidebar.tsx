@@ -26,6 +26,12 @@ import { STEPS } from "../Steps";
 
 const drawerWidth = 400;
 
+export enum OPEN_STATE {
+  CLOSED,
+  QUICKNAV,
+  CAUSES,
+}
+
 const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerWidth,
   transition: theme.transitions.create("width", {
@@ -71,6 +77,7 @@ export default function QuickNavSidebar({
   causes,
   climateChange,
   catalysingEffects,
+  hasCauses,
   open,
   setOpen,
 }: {
@@ -78,82 +85,122 @@ export default function QuickNavSidebar({
   causes: DVRiskCascade<DVRiskFile>[];
   climateChange: DVRiskCascade<DVRiskFile> | null;
   catalysingEffects: DVRiskCascade<DVRiskFile>[];
-  open: boolean;
-  setOpen: (open: boolean) => void;
+  hasCauses: boolean;
+  open: OPEN_STATE;
+  setOpen: (open: OPEN_STATE) => void;
 }) {
   const navigate = useNavigate();
 
   return (
     // <Slide appear={open}>
-    <Drawer open={open} variant="permanent" anchor="right" id="quicknav-drawer" className={open ? "open" : "closed"}>
+    <Drawer
+      open={open !== OPEN_STATE.CLOSED}
+      variant="permanent"
+      anchor="right"
+      id="quicknav-drawer"
+      className={open ? "open" : "closed"}
+    >
       <Toolbar />
       <Stack direction="row" sx={{ position: "fixed", top: 72, marginLeft: 1, alignItems: "center" }} spacing={2}>
-        <IconButton onClick={() => setOpen(!open)} sx={{}} id="quicknav-drawer-button">
-          {open ? <KeyboardDoubleArrowRightIcon /> : <KeyboardDoubleArrowLeftIcon />}
+        <IconButton
+          onClick={() => setOpen(open === OPEN_STATE.CLOSED ? OPEN_STATE.QUICKNAV : OPEN_STATE.CLOSED)}
+          sx={{}}
+          id="quicknav-drawer-button"
+        >
+          {open !== OPEN_STATE.CLOSED ? <KeyboardDoubleArrowRightIcon /> : <KeyboardDoubleArrowLeftIcon />}
         </IconButton>
-        <Typography variant="h6">
-          <Trans i18nKey="2B.quicknav.title">Quick Navigation</Trans>
-        </Typography>
+        {open === OPEN_STATE.QUICKNAV && (
+          <Typography variant="h6">
+            <Trans i18nKey="2B.quicknav.title">Quick Navigation</Trans>
+          </Typography>
+        )}
+        {open === OPEN_STATE.CAUSES && (
+          <Typography variant="h6">
+            <Trans i18nKey="2B.sidebar.causes">Quick Navigation</Trans>
+          </Typography>
+        )}
       </Stack>
-      {causes && (
-        <Box sx={{ pl: 2.5, mt: 8, overflow: "hidden", transition: "opacity .3s ease", opacity: open ? 1 : 0 }}>
-          <Typography variant="subtitle2">
-            <Trans i18nKey="2B.sidebar.causes">Potential Causes</Trans>
-          </Typography>
-          <List dense sx={{}}>
-            {causes.map((c, i) => (
-              <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding>
-                <ListItemButton
-                  sx={{ pointerEvents: open ? "auto" : "none" }}
-                  onClick={() => {
-                    navigate(`/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CAUSES}&index=${i}`);
-                    setOpen(false);
-                  }}
-                >
-                  <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+      {open === OPEN_STATE.QUICKNAV && (
+        <>
+          {causes && (
+            <Box sx={{ pl: 2.5, mt: 8, overflow: "hidden", transition: "opacity .3s ease", opacity: open ? 1 : 0 }}>
+              <Typography variant="subtitle2">
+                <Trans i18nKey="2B.sidebar.causes">Potential Causes</Trans>
+              </Typography>
+              <List dense sx={{}}>
+                {causes.map((c, i) => (
+                  <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding>
+                    <ListItemButton
+                      sx={{ pointerEvents: open ? "auto" : "none" }}
+                      onClick={() => {
+                        navigate(`/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CAUSES}&index=${i}`);
+                        setOpen(OPEN_STATE.CLOSED);
+                      }}
+                    >
+                      <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          )}
+          {(climateChange || catalysingEffects) && (
+            <Box sx={{ pl: 2.5, mt: 4, overflow: "hidden", transition: "opacity .3s ease", opacity: open ? 1 : 0 }}>
+              <Typography variant="subtitle2">
+                <Trans i18nKey="2B.sidebar.catalysingEffects">Catalysing Effects</Trans>
+              </Typography>
+              <List dense sx={{}}>
+                {climateChange && (
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      onClick={() => {
+                        navigate(`/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CLIMATE_CHANGE}`);
+                        setOpen(OPEN_STATE.CLOSED);
+                      }}
+                    >
+                      <ListItemText primary={climateChange.cr4de_cause_hazard.cr4de_title} />
+                    </ListItemButton>
+                  </ListItem>
+                )}
+                {catalysingEffects.map((c, i) => (
+                  <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding>
+                    <ListItemButton
+                      onClick={() => {
+                        navigate(
+                          `/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CATALYSING_EFFECTS}&index=${i}`
+                        );
+                        setOpen(OPEN_STATE.CLOSED);
+                      }}
+                    >
+                      <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          )}
+        </>
+      )}
+      {open === OPEN_STATE.CAUSES && (
+        <Box sx={{ pl: 2.5, mt: 6, overflow: "hidden", transition: "opacity .3s ease", opacity: open ? 1 : 0 }}>
+          {causes && (
+            <List>
+              {causes.map((c) => (
+                <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding>
+                  <ListItemButton
+                    onClick={() => openInNewTab(`/learning/risk/${c.cr4de_cause_hazard.cr4de_riskfilesid}`)}
+                  >
+                    <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          )}
         </Box>
       )}
-      {(climateChange || catalysingEffects) && (
-        <Box sx={{ pl: 2.5, mt: 4, overflow: "hidden", transition: "opacity .3s ease", opacity: open ? 1 : 0 }}>
-          <Typography variant="subtitle2">
-            <Trans i18nKey="2B.sidebar.catalysingEffects">Catalysing Effects</Trans>
-          </Typography>
-          <List dense sx={{}}>
-            {climateChange && (
-              <ListItem disablePadding>
-                <ListItemButton
-                  onClick={() => {
-                    navigate(`/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CLIMATE_CHANGE}`);
-                    setOpen(false);
-                  }}
-                >
-                  <ListItemText primary={climateChange.cr4de_cause_hazard.cr4de_title} />
-                </ListItemButton>
-              </ListItem>
-            )}
-            {catalysingEffects.map((c, i) => (
-              <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding>
-                <ListItemButton
-                  onClick={() => {
-                    navigate(
-                      `/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CATALYSING_EFFECTS}&index=${i}`
-                    );
-                    setOpen(false);
-                  }}
-                >
-                  <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      )}
-      <Typography
-        variant="h6"
+      <Stack
+        direction="row"
+        spacing={6}
         sx={{
           position: "absolute",
           top: 48,
@@ -162,15 +209,19 @@ export default function QuickNavSidebar({
           marginTop: "50px !important",
           marginLeft: "20px !important",
           transformOrigin: "left",
-          opacity: open ? 0 : 1,
+          opacity: open !== OPEN_STATE.CLOSED ? 0 : 1,
           transition: "opacity .3s ease",
           cursor: "pointer",
-          zIndex: open ? -1 : 1000,
+          zIndex: open !== OPEN_STATE.CLOSED ? -1 : 1000,
         }}
-        onClick={() => setOpen(true)}
       >
-        <Trans i18nKey="2B.quicknav.title">Quick Navigation</Trans>
-      </Typography>
+        <Typography variant="h6" onClick={() => setOpen(OPEN_STATE.CAUSES)}>
+          <Trans i18nKey="2B.quicknav.causes">Potential Causes</Trans>
+        </Typography>
+        <Typography variant="h6" onClick={() => setOpen(OPEN_STATE.QUICKNAV)}>
+          <Trans i18nKey="2B.quicknav.title">Quick Navigation</Trans>
+        </Typography>
+      </Stack>
     </Drawer>
     // </Slide>
   );

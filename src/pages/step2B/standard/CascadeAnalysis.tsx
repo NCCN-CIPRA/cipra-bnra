@@ -210,6 +210,7 @@ export default function CascadeAnalysis({
   qualiError,
   attachments,
   setStep2BInput,
+  onSave,
   onNext,
   onPrevious,
   onChangeScenario,
@@ -228,6 +229,7 @@ export default function CascadeAnalysis({
   qualiError: boolean;
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   setStep2BInput: (input: CascadeAnalysisInput, update?: boolean) => void;
+  onSave: () => Promise<void>;
   onNext: () => Promise<void>;
   onPrevious: () => Promise<void>;
   onChangeScenario: (causeScenario: SCENARIOS | null, effectScenario: SCENARIOS | null) => void;
@@ -562,6 +564,9 @@ export default function CascadeAnalysis({
                       5 - (v as number) < 0
                   );
                 }}
+                onChangeCommitted={() => {
+                  onSave();
+                }}
                 min={0}
                 max={6}
                 aria-label="Conditional Probability"
@@ -696,6 +701,16 @@ export default function CascadeAnalysis({
               </Box>
             </Box>
           </Box>
+
+          <Stack direction="column" sx={{ marginTop: 10 }}>
+            <Typography variant="body2" paragraph>
+              <Trans i18nKey="2B.causes.summary.1">
+                Dans le tableau ci-dessous, vous trouverez, pour chaque lien de cause à effet, un aperçu de l’ensemble
+                de vos évaluation quantitatives. Cet aperçu se met à jour automatiquement. Il vous permet de vérifier la
+                cohérence de vos évaluations.
+              </Trans>
+            </Typography>
+          </Stack>
 
           <Box sx={{ margin: "auto", marginTop: 4, maxWidth: 600, width: "100%" }}>
             <CascadeMatrix cascade={cascade} step2B={step2B} />

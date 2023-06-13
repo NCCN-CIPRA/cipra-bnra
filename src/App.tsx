@@ -13,8 +13,8 @@ import RiskPage from "./pages/learning/RiskPage";
 
 import "./App.css";
 import BasePage from "./pages/BasePage";
-import EditorIntroPage from "./pages/editor/EditorIntroPage";
-import EditorPage from "./pages/editor/EditorPage";
+import EditorIntroPage from "./pages/riskFile/EditorIntroPage";
+import EditorPage from "./pages/riskFile/EditorPage";
 import LearningOverviewPage from "./pages/learning/LearningOverviewPage";
 import OverviewPage from "./pages/main/OverviewPage";
 import AuthPage from "./pages/AuthPage";
@@ -30,6 +30,7 @@ import Step2APage from "./pages/step2A/Step2APage";
 import ProcessManagementPage from "./pages/admin/Management/ProcessManagementPage";
 import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
 import Step2BPage from "./pages/step2B/Step2BPage";
+import RiskFilePage from "./pages/riskFile/RiskFilePage";
 
 function App() {
   useEffect(() => {
@@ -91,6 +92,15 @@ function App() {
                 {
                   path: "/hazards/:risk_file_id",
                   element: <EditorPage />,
+                },
+
+                {
+                  path: "/risks",
+                  element: <EditorIntroPage />,
+                },
+                {
+                  path: "/risks/:risk_file_id",
+                  element: <RiskFilePage />,
                 },
 
                 {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DPRows, DPs, DPValueStack } from "../../learning/QuantitativeScales/P";
+import { DPRows, DPs, DPValueStack } from "../../learning/QuantitativeScales/P2050";
 import { Box, Stack, Typography, Slider, Alert } from "@mui/material";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { Trans, useTranslation } from "react-i18next";
@@ -48,7 +48,7 @@ export function DP50Slider({
           sx={{
             position: "absolute",
             top: -18,
-            left: `calc(${dp * 25}% - 15px)`,
+            left: `calc(${(dp + 1) * 20}% - 15px)`,
             width: 30,
             height: 30,
           }}
@@ -63,7 +63,7 @@ export function DP50Slider({
         disableSwap
         step={1}
         min={0}
-        max={4}
+        max={5}
         valueLabelFormat={(value: number) => <DPValueStack value={value} />}
         marks={Array(6)
           .fill(undefined)
@@ -82,7 +82,7 @@ export function DP50Slider({
                 }}
               >
                 <Typography id={`step2A-dp-mark-${value}`} variant="body2">
-                  DP{value + 1}
+                  DP2050-{value}
                 </Typography>
               </Tooltip>
             ),

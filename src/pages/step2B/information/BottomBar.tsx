@@ -73,7 +73,7 @@ export default function BottomBar({
       component={Paper}
       elevation={5}
     >
-      <Button id="back-button" disabled={isSaving} color="secondary" onClick={onPrevious}>
+      <Button id="back-button" disabled={isSaving} color="primary" onClick={onPrevious}>
         <Trans i18nKey="button.back">Back</Trans>
       </Button>
 

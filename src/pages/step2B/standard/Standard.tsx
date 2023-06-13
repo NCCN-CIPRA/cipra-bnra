@@ -1,5 +1,5 @@
-import { Alert, Box, Button, CircularProgress, Container, Stack, Typography } from "@mui/material";
-import { Trans } from "react-i18next";
+import { Alert, Box, Tooltip, Button, Link, Container, Stack, Typography } from "@mui/material";
+import { Trans, useTranslation } from "react-i18next";
 import { SCENARIOS, Scenarios } from "../../../functions/scenarios";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
@@ -9,7 +9,7 @@ import { useEffect, useState, MutableRefObject } from "react";
 import { stepNames, STEPS } from "../Steps";
 import ScenarioAnalysis from "./ScenarioAnalysis";
 import CascadeAnalysis from "./CascadeAnalysis";
-import { useSearchParams } from "react-router-dom";
+import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import { useUnmountEffect } from "framer-motion";
@@ -40,13 +40,15 @@ export default function Standard({
   runTutorial,
   setRunTutorial,
   setStep2BInput,
+  onSave,
   onNext,
   onPrevious,
   onChangeScenario,
   onUnmount,
+  onShowCauses,
 }: {
   activeStep: STEPS | null;
-  causes: DVRiskCascade[] | null;
+  causes: DVRiskCascade<DVRiskFile>[] | null;
   catalysingEffects: DVRiskCascade[] | null;
   climateChange: DVRiskCascade<DVRiskFile, DVRiskFile> | null;
   cascade: DVRiskCascade<DVRiskFile, DVRiskFile> | null;
@@ -61,11 +63,14 @@ export default function Standard({
   runTutorial: boolean;
   setRunTutorial: (run: boolean) => void;
   setStep2BInput: (input: CascadeAnalysisInput, update?: boolean) => void;
+  onSave: () => Promise<void>;
   onNext: () => Promise<void>;
   onPrevious: () => Promise<void>;
   onChangeScenario: (causeScenario: SCENARIOS | null, effectScenario: SCENARIOS | null) => void;
   onUnmount: () => void;
+  onShowCauses: () => void;
 }) {
+  const { t } = useTranslation();
   const [sourceDialogOpen, setSourceDialogOpen] = useState<string | null>(null);
   const [existingSource, setExistingSource] = useState<DVAttachment | undefined>(undefined);
 
@@ -123,19 +128,26 @@ export default function Standard({
                 <Trans i18nKey="2B.causes.intro.3">
                   Veuillez sélectionner ci-dessous une estimation quantitative de la probabilité conditionnelle que le
                   scénario d'intensité actuellement étudié se produise au cours de la période 2023-2026, en conséquence
-                  d’un autre risque de la BNRA.
+                  d'un autre risque de la BNRA.
+                </Trans>
+              </Typography>
+              <Typography variant="body2" paragraph>
+                <Trans i18nKey="2B.causes.intro.4">
+                  Vous pouvez naviguer entre les différents scénarios d'intensité soit en cliquant directement sur les
+                  scénarios d'intensité d'intérêt, soit en cliquant sur la flèche à droite des classes de probabilité
+                  conditionnelles.
                 </Trans>
               </Typography>
               <Alert severity="info" sx={{ mt: 2, mb: 0 }}>
                 <Typography variant="body2">
                   <Trans i18nKey="2B.causes.info.1">
                     Attention, il est nécessaire d'évaluer toutes les probabilités conditionnelles et de remplir tous
-                    les champs concernant chaque relation de cause à effet avant de pouvoir passer à l’étape suivante.
+                    les champs concernant chaque relation de cause à effet avant de pouvoir passer à l'étape suivante.
                   </Trans>
                 </Typography>
                 <Typography variant="body2">
                   <Trans i18nKey="2B.causes.info.2">
-                    Bien qu’il soit important pour nous de disposer d’une justification quant à la valeur quantitative
+                    Bien qu'il soit important pour nous de disposer d'une justification quant à la valeur quantitative
                     que vous avez choisie, si vous ne souhaitez pas nous fournir de justification textuelle, nous vous
                     invitons à cliquer sur le bouton PAS DE COMMENTAIRES.
                   </Trans>
@@ -169,6 +181,7 @@ export default function Standard({
             step2BInput={step2BInput}
             setStep2BInput={setStep2BInput}
             qualiError={qualiError}
+            onSave={onSave}
             onNext={onNext}
             onPrevious={onPrevious}
             onChangeScenario={onChangeScenario}
@@ -184,12 +197,21 @@ export default function Standard({
           <Container>
             <Box sx={{ mb: 2 }}>
               <Typography variant="h4">
-                <Trans i18nKey="2B.climateChange.title">Climate Change</Trans>
+                <Tooltip title={t("2B.cause.openRiskFile", "Click to open the risk file for this risk in a new tab")}>
+                  <Link
+                    to={`/learning/risk/${climateChange.cr4de_cause_hazard.cr4de_riskfilesid}`}
+                    component={RouterLink}
+                    target="_blank"
+                  >
+                    <Trans i18nKey="2B.climateChange.title">Climate Change</Trans>
+                  </Link>
+                </Tooltip>
               </Typography>
             </Box>
           </Container>
           <ClimateChangeAnalysis
             riskFile={step2A.cr4de_risk_file}
+            onShowCauses={onShowCauses}
             step2A={step2A}
             step2AInput={step2AInput}
             qualiError={qualiError}
