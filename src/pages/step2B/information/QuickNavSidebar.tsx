@@ -215,9 +215,11 @@ export default function QuickNavSidebar({
           zIndex: open !== OPEN_STATE.CLOSED ? -1 : 1000,
         }}
       >
-        <Typography variant="h6" onClick={() => setOpen(OPEN_STATE.CAUSES)}>
-          <Trans i18nKey="2B.quicknav.causes">Potential Causes</Trans>
-        </Typography>
+        {hasCauses && (
+          <Typography variant="h6" onClick={() => setOpen(OPEN_STATE.CAUSES)}>
+            <Trans i18nKey="2B.quicknav.causes">Potential Causes</Trans>
+          </Typography>
+        )}
         <Typography variant="h6" onClick={() => setOpen(OPEN_STATE.QUICKNAV)}>
           <Trans i18nKey="2B.quicknav.title">Quick Navigation</Trans>
         </Typography>

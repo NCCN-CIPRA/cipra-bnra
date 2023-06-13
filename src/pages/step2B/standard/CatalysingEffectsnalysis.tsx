@@ -216,6 +216,7 @@ export default function CatalysingEffectsAnalysis({
   onUnmount,
   onOpenSourceDialog,
   onReloadAttachments,
+  setRunTutorial,
 }: {
   riskFile: DVRiskFile;
   causes: DVRiskCascade[];
@@ -234,6 +235,7 @@ export default function CatalysingEffectsAnalysis({
   onUnmount: () => void;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   onReloadAttachments: () => Promise<void>;
+  setRunTutorial: (run: boolean) => void;
 }) {
   const theme = useTheme();
   const { t } = useTranslation();

@@ -712,7 +712,7 @@ export default function CascadeAnalysis({
             </Typography>
           </Stack>
 
-          <Box sx={{ margin: "auto", marginTop: 4, maxWidth: 600, width: "100%" }}>
+          <Box sx={{ margin: "auto", marginTop: 4, maxWidth: 600, width: "100%" }} id="cascade-summary-matrix">
             <CascadeMatrix cascade={cascade} step2B={step2B} />
           </Box>
 

@@ -155,13 +155,13 @@ export default function CascadeTutorial({ run, setRun }: { run: boolean; setRun:
       disableBeacon: true,
     },
     {
-      target: "#step2A-dp-mark-1",
-      placement: "bottom",
+      target: "#cascade-summary-matrix",
+      placement: "top",
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.9.1">
-              If you hover over the scales, the corresponding threshold values are shown.
+            <Trans i18nKey="2B.tutorial.9.1">
+              Deze tabel toon een overzicht van alle waardes die u gekozen hebt voor de huidige cascade
             </Trans>
           </Typography>
         </Box>
@@ -170,120 +170,14 @@ export default function CascadeTutorial({ run, setRun }: { run: boolean; setRun:
       disableBeacon: true,
     },
     {
-      target: "#step2A-dp-quali-box",
+      target: "#quali-input",
       placement: "bottom",
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.10.1">
-              These textboxes should be used to explain the reasoning for the quantitative estimation above.
+            <Trans i18nKey="2B.tutorial.10.1">
+              Ten slotte kan u in dit tekstveld een kwalitatieve verklaring opgeven voor de eerder gekozen waardes.
             </Trans>
-          </Typography>
-        </Box>
-      ),
-      disableBeacon: true,
-    },
-    {
-      target: "#step2A-h-quantitative-box",
-      placement: "bottom",
-      content: (
-        <Box sx={{ textAlign: "left" }}>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.11.1">
-              The impact scales usually have multiple damage indicators, in this case 3.
-            </Trans>
-          </Typography>
-        </Box>
-      ),
-      disableBeacon: true,
-    },
-    {
-      target: "#step2A-hb-calculator-button",
-      placement: "bottom",
-      content: (
-        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.12.1">
-              Some damage indicators require a more complex calculation with weights for different types of damage. To
-              help you with this calculation, a calculator is provided which can be accessed by clicking this button
-            </Trans>
-          </Typography>
-        </Box>
-      ),
-      disableBeacon: true,
-    },
-    {
-      target: "#step2A-hb-calculator",
-      placement: "auto",
-      content: (
-        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.13.1">
-              This calculator requires you to input rough number for the number of "severe", "moderate" and "minor"
-              unjuries and automatically calculates the corresponding scale. When you click apply, the slider is also
-              moved automatically to the right value.
-            </Trans>
-          </Typography>
-        </Box>
-      ),
-      disableBeacon: true,
-    },
-    {
-      target: "#step2A-hb-calculator-include",
-      placement: "auto",
-      content: (
-        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.14.1">
-              If you enable this checkbox, the underlying calculation will automatically be added to the qualitative
-              explanation field for you.
-            </Trans>
-          </Typography>
-        </Box>
-      ),
-      disableBeacon: true,
-    },
-    {
-      target: "#step2A-information-button",
-      placement: "auto",
-      content: (
-        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.15.1">
-              Finally, this button allows you to view some extra information, including:
-            </Trans>
-          </Typography>
-          <ul>
-            <li>
-              <Typography variant="body1" my={2}>
-                <Trans i18nKey="2A.tutorial.15.2">The original risk file (opens in new tab)</Trans>
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body1" my={2}>
-                <Trans i18nKey="2A.tutorial.15.3">
-                  An overview of all quantitative scales, threshold values, etc. on the information portal (opens in a
-                  new tab)
-                </Trans>
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body1" my={2}>
-                <Trans i18nKey="2A.tutorial.15.4">Play this tutorial</Trans>
-              </Typography>
-            </li>
-          </ul>
-        </Box>
-      ),
-      disableBeacon: true,
-    },
-    {
-      target: "body",
-      placement: "center",
-      content: (
-        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="2A.tutorial.16.1">Good luck!</Trans>
           </Typography>
         </Box>
       ),
@@ -403,7 +297,7 @@ export default function CascadeTutorial({ run, setRun }: { run: boolean; setRun:
         //   },
         // }}
         callback={handleTutorialCallback}
-        scrollOffset={500}
+        scrollOffset={100}
         // disableScrolling={true},
         locale={{
           back: t("button.back", "Back"),
@@ -413,7 +307,7 @@ export default function CascadeTutorial({ run, setRun }: { run: boolean; setRun:
           skip: t("button.skip", "Skip"),
         }}
         tooltipComponent={TourTooltip}
-        disableScrolling={true}
+        disableScrolling={stepIndex <= 7}
       />
     </>
   );

@@ -144,6 +144,7 @@ export default function ClimateChangeAnalysis({
   onOpenSourceDialog,
   onReloadAttachments,
   onShowCauses,
+  setRunTutorial,
 }: {
   riskFile: DVRiskFile;
   step2A: DVDirectAnalysis;
@@ -153,6 +154,7 @@ export default function ClimateChangeAnalysis({
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   onReloadAttachments: () => Promise<void>;
   onShowCauses: () => void;
+  setRunTutorial: (run: boolean) => void;
 }) {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -183,6 +185,11 @@ export default function ClimateChangeAnalysis({
               climatique.
             </Trans>
           </Typography>
+          <Box sx={{ textAlign: "center", mt: 1, mb: 4 }}>
+            <Button variant="contained" onClick={() => setRunTutorial(true)}>
+              <Trans i18nKey="2B.introduction.button.tutorial.part">Show Tutorial for this page</Trans>
+            </Button>
+          </Box>
           <Typography variant="body2" paragraph>
             <Trans i18nKey="2B.climateChange.intro.2">
               Pour ce faire, nous vous demandons de réévaluer la probabilité d'occurrence directe de chacun de ces
@@ -248,7 +255,7 @@ export default function ClimateChangeAnalysis({
               </Trans>
             </Typography>
           </Alert>
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: 4 }} id="considerable-scenario">
             <FullScenario
               riskType={riskFile.cr4de_risk_type}
               title={riskFile.cr4de_title}

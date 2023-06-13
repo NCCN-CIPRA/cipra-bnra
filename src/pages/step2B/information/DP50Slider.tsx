@@ -52,6 +52,7 @@ export function DP50Slider({
             width: 30,
             height: 30,
           }}
+          className="original-dp-value"
         >
           <TornadoIcon color="secondary" sx={{ fontSize: 30 }} />
         </Box>

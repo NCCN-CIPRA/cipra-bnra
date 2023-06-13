@@ -22,6 +22,8 @@ import AttachmentsDialog from "../information/AttachmentsDialog";
 import ClimateChangeAnalysis from "./ClimateChangeAnalysis";
 import CatalysingEffectsAnalysis from "./CatalysingEffectsnalysis";
 import CascadeTutorial from "../information/CascadeTutorial";
+import CCTutorial from "../information/CCTutorial";
+import CatalysingTutorial from "../information/CatalysingTutorial";
 
 export default function Standard({
   activeStep,
@@ -74,6 +76,8 @@ export default function Standard({
   const [sourceDialogOpen, setSourceDialogOpen] = useState<string | null>(null);
   const [existingSource, setExistingSource] = useState<DVAttachment | undefined>(undefined);
 
+  const [sliderOverride, setSliderOverride] = useState<number | null | undefined>(undefined);
+
   const {
     data: attachments,
     hasRun: attachmentsFetched,
@@ -85,6 +89,11 @@ export default function Standard({
   const handleOpenSourceDialog = (field: string) => (existingSource?: DVAttachment) => {
     setSourceDialogOpen(field);
     setExistingSource(existingSource);
+  };
+
+  const handleChangeSlider = (value: number | null) => {
+    setSliderOverride(value);
+    setTimeout(() => setSliderOverride(undefined), 1000);
   };
 
   useEffect(() => {
@@ -196,7 +205,7 @@ export default function Standard({
         <Box>
           <Container>
             <Box sx={{ mb: 2 }}>
-              <Typography variant="h4">
+              <Typography variant="h4" id="cc-title">
                 <Tooltip title={t("2B.cause.openRiskFile", "Click to open the risk file for this risk in a new tab")}>
                   <Link
                     to={`/learning/risk/${climateChange.cr4de_cause_hazard.cr4de_riskfilesid}`}
@@ -218,6 +227,7 @@ export default function Standard({
             attachments={attachments}
             onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
             onReloadAttachments={loadAttachments}
+            setRunTutorial={setRunTutorial}
           />
         </Box>
       )}
@@ -253,6 +263,7 @@ export default function Standard({
               attachments={attachments}
               onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
               onReloadAttachments={loadAttachments}
+              setRunTutorial={setRunTutorial}
             />
           </Box>
         )}
@@ -269,6 +280,8 @@ export default function Standard({
       )}
 
       {activeStep === STEPS.CAUSES && <CascadeTutorial run={runTutorial} setRun={setRunTutorial} />}
+      {activeStep === STEPS.CLIMATE_CHANGE && <CCTutorial run={runTutorial} setRun={setRunTutorial} />}
+      {activeStep === STEPS.CATALYSING_EFFECTS && <CatalysingTutorial run={runTutorial} setRun={setRunTutorial} />}
     </>
   );
 }
