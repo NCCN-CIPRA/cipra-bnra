@@ -634,6 +634,7 @@ export default function ({}) {
           hasCauses={activeStep === STEPS.CLIMATE_CHANGE}
           open={quickNavOpen}
           setOpen={setQuickNavOpen}
+          onTransitionTo={handleTransitionTo}
         />
       )}
 

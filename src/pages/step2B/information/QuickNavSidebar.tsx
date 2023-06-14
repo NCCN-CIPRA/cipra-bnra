@@ -80,6 +80,7 @@ export default function QuickNavSidebar({
   hasCauses,
   open,
   setOpen,
+  onTransitionTo,
 }: {
   step2A: DVDirectAnalysis;
   causes: DVRiskCascade<DVRiskFile>[];
@@ -88,9 +89,8 @@ export default function QuickNavSidebar({
   hasCauses: boolean;
   open: OPEN_STATE;
   setOpen: (open: OPEN_STATE) => void;
+  onTransitionTo: (newStep: STEPS, newIndex: number) => void;
 }) {
-  const navigate = useNavigate();
-
   return (
     // <Slide appear={open}>
     <Drawer
@@ -133,7 +133,7 @@ export default function QuickNavSidebar({
                     <ListItemButton
                       sx={{ pointerEvents: open ? "auto" : "none" }}
                       onClick={() => {
-                        navigate(`/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CAUSES}&index=${i}`);
+                        onTransitionTo(STEPS.CAUSES, i);
                         setOpen(OPEN_STATE.CLOSED);
                       }}
                     >
@@ -154,7 +154,7 @@ export default function QuickNavSidebar({
                   <ListItem disablePadding>
                     <ListItemButton
                       onClick={() => {
-                        navigate(`/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CLIMATE_CHANGE}`);
+                        onTransitionTo(STEPS.CLIMATE_CHANGE, 0);
                         setOpen(OPEN_STATE.CLOSED);
                       }}
                     >
@@ -166,9 +166,7 @@ export default function QuickNavSidebar({
                   <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding>
                     <ListItemButton
                       onClick={() => {
-                        navigate(
-                          `/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CATALYSING_EFFECTS}&index=${i}`
-                        );
+                        onTransitionTo(STEPS.CATALYSING_EFFECTS, i);
                         setOpen(OPEN_STATE.CLOSED);
                       }}
                     >
