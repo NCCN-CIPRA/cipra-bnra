@@ -1,4 +1,4 @@
-import { useState, MutableRefObject } from "react";
+import { useEffect, MutableRefObject } from "react";
 import { Box, Tooltip, Paper, Container, Alert, Typography, Stack, Button } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -145,6 +145,7 @@ export default function ClimateChangeAnalysis({
   onReloadAttachments,
   onShowCauses,
   setRunTutorial,
+  onUnmount,
 }: {
   riskFile: DVRiskFile;
   step2A: DVDirectAnalysis;
@@ -155,10 +156,15 @@ export default function ClimateChangeAnalysis({
   onReloadAttachments: () => Promise<void>;
   onShowCauses: () => void;
   setRunTutorial: (run: boolean) => void;
+  onUnmount: () => void;
 }) {
   const theme = useTheme();
   const { t } = useTranslation();
   const api = useAPI();
+
+  useEffect(() => {
+    return onUnmount;
+  }, []);
 
   const effectScenarios = unwrapScenarios(
     unwrapParameters(riskFile.cr4de_intensity_parameters),

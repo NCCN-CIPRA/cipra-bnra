@@ -110,7 +110,6 @@ export default function ({}) {
         let iCascadeAnalysis = results.find(
           (s) => iCascade && s._cr4de_cascade_value === iCascade.cr4de_bnrariskcascadeid
         );
-
         if (iCascadeAnalysis) setCascadeAnalysis(iCascadeAnalysis);
       }
     },
@@ -201,22 +200,25 @@ export default function ({}) {
       const iClimateChange =
         cascades && cascades.find((c) => c.cr4de_cause_hazard.cr4de_title.indexOf("Climate Change") >= 0);
 
-      let iCascade: DVRiskCascade<DVRiskFile, DVRiskFile> | null = null;
-      if (activeStep === STEPS.CAUSES) iCascade = iCauses && iCauses[cascadeIndex];
-      else if (activeStep === STEPS.CLIMATE_CHANGE && iClimateChange) iCascade = iClimateChange;
-      else if (activeStep === STEPS.CATALYSING_EFFECTS)
-        iCascade = iCatalysingEffects && iCatalysingEffects[cascadeIndex];
-
       setCauses(iCauses);
       setCatalysingEffects(iCatalysingEffects);
       setClimateChange(iClimateChange || null);
-      setCascade(iCascade);
-
-      if (iCascade) {
-        updateStep2BInput(iCascade);
-      }
     }
-  }, [cascades, cascadeIndex, activeStep, step2A, step2B]);
+  }, [cascades]);
+
+  useEffect(() => {
+    let iCascade: DVRiskCascade<DVRiskFile, DVRiskFile> | null = null;
+
+    if (causes && activeStep === STEPS.CAUSES) iCascade = causes && causes[cascadeIndex];
+    else if (climateChange && activeStep === STEPS.CLIMATE_CHANGE && climateChange) iCascade = climateChange;
+    else if (catalysingEffects && activeStep === STEPS.CATALYSING_EFFECTS) iCascade = catalysingEffects[cascadeIndex];
+
+    setCascade(iCascade);
+
+    if (iCascade) {
+      updateStep2BInput(iCascade);
+    }
+  }, [causes, climateChange, catalysingEffects, cascadeIndex, activeStep, step2A, step2B]);
 
   async function handleSave() {
     if (activeStep === STEPS.CAUSES || activeStep === STEPS.CATALYSING_EFFECTS) {
@@ -248,22 +250,23 @@ export default function ({}) {
     }
   }
 
-  const handleTransitionTo = (newStep: STEPS, newIndex: number = 0) => {
+  const handleTransitionTo = (newStep: STEPS, newIndex: number = 0, forceFadeIn = false) => {
     setFadeIn(false);
 
     if (newIndex !== cascadeIndex) {
-      handleChangeCascade(newIndex);
+      handleChangeCascade(newStep, newIndex);
     }
 
     const timer = setTimeout(() => {
       setActiveStep(newStep);
-      setFadeIn(true);
       setIsSaving(false);
       window.scrollTo(0, 0);
       setSearchParams({
         step: newStep.toString(),
         ...(newStep === STEPS.CAUSES || newStep === STEPS.CATALYSING_EFFECTS ? { index: newIndex.toString() } : {}),
       });
+
+      if (forceFadeIn) setFadeIn(true);
     }, transitionDelay);
 
     return () => clearTimeout(timer);
@@ -278,15 +281,15 @@ export default function ({}) {
 
     if (activeStep === STEPS.INTRODUCTION) {
       if (causes && causes.length > 0) {
-        await findOrCreateCascadeAnalysis(causes[0]);
+        setCascadeAnalysis(await findOrCreateCascadeAnalysis(causes[0]));
 
         handleTransitionTo(STEPS.CAUSES);
       } else if (climateChange) {
-        await findOrCreateCascadeAnalysis(climateChange);
+        setCascadeAnalysis(await findOrCreateCascadeAnalysis(climateChange));
 
         handleTransitionTo(STEPS.CLIMATE_CHANGE);
       } else if (catalysingEffects && catalysingEffects.length > 0) {
-        await findOrCreateCascadeAnalysis(catalysingEffects[0]);
+        setCascadeAnalysis(await findOrCreateCascadeAnalysis(catalysingEffects[0]));
 
         handleTransitionTo(STEPS.CATALYSING_EFFECTS);
       } else {
@@ -306,11 +309,11 @@ export default function ({}) {
 
         if (nextCascadeIndex >= causes.length) {
           if (climateChange) {
-            await findOrCreateCascadeAnalysis(climateChange);
+            setCascadeAnalysis(await findOrCreateCascadeAnalysis(climateChange));
 
             handleTransitionTo(STEPS.CLIMATE_CHANGE);
           } else if (catalysingEffects && catalysingEffects.length > 0) {
-            await findOrCreateCascadeAnalysis(catalysingEffects[0]);
+            setCascadeAnalysis(await findOrCreateCascadeAnalysis(catalysingEffects[0]));
 
             setCascadeIndex(0);
             handleTransitionTo(STEPS.CATALYSING_EFFECTS);
@@ -318,7 +321,7 @@ export default function ({}) {
             finish();
           }
         } else {
-          handleChangeCascade(nextCascadeIndex);
+          handleChangeCascade(activeStep, nextCascadeIndex);
         }
       } else {
         document.getElementById("cascade-title")?.scrollIntoView({ behavior: "smooth" });
@@ -333,7 +336,7 @@ export default function ({}) {
       }
 
       if (catalysingEffects && catalysingEffects.length > 0) {
-        await findOrCreateCascadeAnalysis(catalysingEffects[0]);
+        setCascadeAnalysis(await findOrCreateCascadeAnalysis(catalysingEffects[0]));
 
         setCascadeIndex(0);
         handleTransitionTo(STEPS.CATALYSING_EFFECTS);
@@ -353,14 +356,14 @@ export default function ({}) {
 
       if (nextCascadeIndex >= catalysingEffects.length) {
         if (climateChange) {
-          await findOrCreateCascadeAnalysis(climateChange);
+          setCascadeAnalysis(await findOrCreateCascadeAnalysis(climateChange));
 
           handleTransitionTo(STEPS.CLIMATE_CHANGE);
         } else {
           finish();
         }
       } else {
-        handleChangeCascade(nextCascadeIndex);
+        handleChangeCascade(activeStep, nextCascadeIndex);
       }
     }
   };
@@ -377,7 +380,7 @@ export default function ({}) {
         if (previousCascadeIndex < 0) {
           handleTransitionTo(STEPS.INTRODUCTION);
         } else {
-          handleChangeCascade(previousCascadeIndex);
+          handleChangeCascade(activeStep, previousCascadeIndex);
         }
       } else {
         document.getElementById("cascade-title")?.scrollIntoView({ behavior: "smooth" });
@@ -386,7 +389,7 @@ export default function ({}) {
       handleSave();
 
       if (causes && causes.length > 0) {
-        await findOrCreateCascadeAnalysis(causes[causes.length - 1]);
+        setCascadeAnalysis(await findOrCreateCascadeAnalysis(causes[causes.length - 1]));
 
         handleTransitionTo(STEPS.CAUSES, causes.length - 1);
       } else {
@@ -399,11 +402,11 @@ export default function ({}) {
 
       if (previousCascadeIndex < 0) {
         if (climateChange) {
-          await findOrCreateCascadeAnalysis(climateChange);
+          setCascadeAnalysis(await findOrCreateCascadeAnalysis(climateChange));
 
           handleTransitionTo(STEPS.CLIMATE_CHANGE);
         } else if (causes && causes.length > 0) {
-          await findOrCreateCascadeAnalysis(causes[causes.length - 1]);
+          setCascadeAnalysis(await findOrCreateCascadeAnalysis(causes[causes.length - 1]));
 
           setCascadeIndex(causes.length - 1);
           handleTransitionTo(STEPS.CAUSES);
@@ -411,7 +414,7 @@ export default function ({}) {
           handleTransitionTo(STEPS.INTRODUCTION);
         }
       } else {
-        handleChangeCascade(previousCascadeIndex);
+        handleChangeCascade(activeStep, previousCascadeIndex);
       }
     }
   };
@@ -461,8 +464,13 @@ export default function ({}) {
     if (effectScenario) setActiveEffectScenario(effectScenario);
   };
 
-  const handleChangeCascade = (newCascadeIndex: number) => {
-    const newCascade = cascades && cascades[newCascadeIndex];
+  const handleChangeCascade = (newStep: STEPS, newCascadeIndex: number) => {
+    let newCascade: DVRiskCascade<DVRiskFile, DVRiskFile> | null = null;
+
+    if (newStep === STEPS.CAUSES) newCascade = causes && causes[newCascadeIndex];
+    if (newStep === STEPS.CLIMATE_CHANGE) newCascade = climateChange;
+    if (newStep === STEPS.CATALYSING_EFFECTS) newCascade = catalysingEffects && catalysingEffects[newCascadeIndex];
+
     if (!newCascade) return;
 
     setFadeIn(false);
@@ -477,9 +485,10 @@ export default function ({}) {
     setTimeout(async () => {
       setIsSaving(true);
       setCascadeIndex(newCascadeIndex);
-      await updateStep2BInput(newCascade);
       setActiveCauseScenario(SCENARIOS.CONSIDERABLE);
       setActiveEffectScenario(SCENARIOS.CONSIDERABLE);
+
+      if (newCascade) await updateStep2BInput(newCascade);
 
       setIsSaving(false);
     }, transitionDelay);
@@ -491,24 +500,26 @@ export default function ({}) {
       const searchParamStep = searchParams.get("step");
 
       if (searchParamStep && parseInt(searchParamStep, 10) in STEPS) {
-        handleTransitionTo(parseInt(searchParamStep, 10) as STEPS);
-      } else handleTransitionTo(STEPS.INTRODUCTION);
+        handleTransitionTo(parseInt(searchParamStep, 10) as STEPS, undefined, true);
+      } else handleTransitionTo(STEPS.INTRODUCTION, undefined, true);
     }
   }, [activeStep]);
 
-  useEffect(() => {
-    const searchParamStep = searchParams.get("step");
-    const searchParamIndex = searchParams.get("index");
+  // useEffect(() => {
+  //   const searchParamStep = searchParams.get("step");
+  //   const searchParamIndex = searchParams.get("index");
 
-    if (activeStep && searchParamStep && parseInt(searchParamStep, 10) !== activeStep) {
-      handleTransitionTo(
-        parseInt(searchParamStep, 10) as STEPS,
-        searchParamIndex ? parseInt(searchParamIndex, 10) : undefined
-      );
-    } else if (cascadeIndex !== null && searchParamIndex && parseInt(searchParamIndex, 10) !== cascadeIndex) {
-      handleChangeCascade(parseInt(searchParamIndex, 10));
-    }
-  }, [searchParams]);
+  //   if (activeStep && searchParamStep && parseInt(searchParamStep, 10) !== activeStep) {
+  //     console.log("useEffect A");
+  //     handleTransitionTo(
+  //       parseInt(searchParamStep, 10) as STEPS,
+  //       searchParamIndex ? parseInt(searchParamIndex, 10) : undefined
+  //     );
+  //   } else if (cascadeIndex !== null && searchParamIndex && parseInt(searchParamIndex, 10) !== cascadeIndex) {
+  //     console.log("useEffect B");
+  //     handleChangeCascade(parseInt(searchParamIndex, 10));
+  //   }
+  // }, [searchParams]);
 
   // Auto-save after 10s of inactivity
   useEffect(() => {

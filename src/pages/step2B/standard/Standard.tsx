@@ -76,7 +76,7 @@ export default function Standard({
   const [sourceDialogOpen, setSourceDialogOpen] = useState<string | null>(null);
   const [existingSource, setExistingSource] = useState<DVAttachment | undefined>(undefined);
 
-  const [sliderOverride, setSliderOverride] = useState<number | null | undefined>(undefined);
+  const [prevStep2B, setPrevStep2B] = useState(step2B);
 
   const {
     data: attachments,
@@ -91,19 +91,15 @@ export default function Standard({
     setExistingSource(existingSource);
   };
 
-  const handleChangeSlider = (value: number | null) => {
-    setSliderOverride(value);
-    setTimeout(() => setSliderOverride(undefined), 1000);
-  };
-
   useEffect(() => {
-    if (step2B && !attachmentsFetched) {
+    if (step2B && step2B.cr4de_bnracascadeanalysisid !== prevStep2B?.cr4de_bnracascadeanalysisid) {
       loadAttachments({
         query: `$filter=_cr4de_cascadeanalysis_value eq '${step2B.cr4de_bnracascadeanalysisid}'&$expand=cr4de_referencedSource`,
         saveOptions: true,
       });
+      setPrevStep2B(step2B);
     }
-  }, [step2B]);
+  }, [step2B, prevStep2B]);
 
   return (
     <>
@@ -228,6 +224,7 @@ export default function Standard({
             onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
             onReloadAttachments={loadAttachments}
             setRunTutorial={setRunTutorial}
+            onUnmount={onUnmount}
           />
         </Box>
       )}

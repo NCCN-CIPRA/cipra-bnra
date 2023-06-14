@@ -66,7 +66,7 @@ export function DP50Slider({
         min={0}
         max={5}
         valueLabelFormat={(value: number) => <DPValueStack value={value} />}
-        marks={Array(6)
+        marks={Array(7)
           .fill(undefined)
           .map((_, i) => i - 1)
           .map((value) => ({
