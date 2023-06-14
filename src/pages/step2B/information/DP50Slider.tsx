@@ -15,19 +15,23 @@ export function DP50Slider({
   id: string;
   DPValue: string;
   initialDP50Value: string | null;
-  error?: boolean;
+  error?: boolean | null;
   onChange: (value: string | null) => void;
 }) {
   const { t } = useTranslation();
-  const [value, setValue] = useState(parseInt((initialDP50Value || DPValue).replace("DP", ""), 10) - 1);
+  const [value, setValue] = useState(parseInt((initialDP50Value || "-1").replace("DP", ""), 10));
   const dp = parseInt(DPValue.replace("DP", ""), 10) - 1;
 
   const handleChangeValue = (event: Event, newValue: number | number[]) => {
     if (Array.isArray(newValue)) return;
 
-    const t = `DP${(newValue as number) + 1}`;
+    if (newValue < 0) {
+      onChange(null);
+    } else {
+      const t = `DP${newValue}`;
 
-    onChange(t);
+      onChange(t);
+    }
 
     setValue(newValue);
   };
@@ -37,7 +41,7 @@ export function DP50Slider({
       {error && (
         <Alert severity="error" sx={{ mb: 2, ml: -2 }}>
           <Typography>
-            <Trans i18nKey="2A.error.p.quanti.required">
+            <Trans i18nKey="2B.error.p2050.quanti.required">
               Please make an estimation of the probability, even if you are unsure.
             </Trans>
           </Typography>
@@ -47,8 +51,8 @@ export function DP50Slider({
         <Box
           sx={{
             position: "absolute",
-            top: -18,
-            left: `calc(${(dp + 1) * 20}% - 15px)`,
+            top: error ? 53 : -18,
+            left: `calc(${(dp + 2) * 16.67}% - 15px)`,
             width: 30,
             height: 30,
           }}
@@ -63,7 +67,7 @@ export function DP50Slider({
         valueLabelDisplay="auto"
         disableSwap
         step={1}
-        min={0}
+        min={-1}
         max={5}
         valueLabelFormat={(value: number) => <DPValueStack value={value} />}
         marks={Array(7)
@@ -71,22 +75,27 @@ export function DP50Slider({
           .map((_, i) => i - 1)
           .map((value) => ({
             value,
-            label: (
-              <Tooltip
-                title={<DPValueStack value={value} />}
-                PopperProps={{
-                  sx: {
-                    [`& .${tooltipClasses.tooltip}`]: {
-                      maxWidth: "none",
-                    },
-                  },
-                }}
-              >
-                <Typography id={`step2A-dp-mark-${value}`} variant="body2">
-                  DP2050-{value}
+            label:
+              value < 0 ? (
+                <Typography variant="body2">
+                  <Trans i18nKey="2A.slider.none">-</Trans>
                 </Typography>
-              </Tooltip>
-            ),
+              ) : (
+                <Tooltip
+                  title={<DPValueStack value={value} />}
+                  PopperProps={{
+                    sx: {
+                      [`& .${tooltipClasses.tooltip}`]: {
+                        maxWidth: "none",
+                      },
+                    },
+                  }}
+                >
+                  <Typography id={`step2A-dp-mark-${value}`} variant="body2">
+                    DP2050-{value}
+                  </Typography>
+                </Tooltip>
+              ),
           }))}
       />
     </Box>

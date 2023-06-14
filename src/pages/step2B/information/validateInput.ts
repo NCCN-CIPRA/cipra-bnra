@@ -1,9 +1,15 @@
+import { CascadeAnalysisInput } from "../../../functions/cascades";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { CCInput } from "../standard/ClimateChangeAnalysis";
 
 type Step2BError = [DVRiskCascade<DVRiskFile>, number, any];
+
+type BaseCascadeAnalysisInput = {
+  [K in keyof CascadeAnalysisInput]: any;
+}[keyof CascadeAnalysisInput];
 
 export interface Step2BErrors {
   causes?: Step2BError[];
@@ -12,8 +18,10 @@ export interface Step2BErrors {
 }
 
 export function validateStep2B(
-  step2A: DVDirectAnalysis | null,
-  step2B: DVCascadeAnalysis[] | null,
+  step2A: CCInput | null,
+  step2B: BaseCascadeAnalysisInput[] | null,
+  currentCascade: DVRiskCascade | null,
+  lastInput: BaseCascadeAnalysisInput | null,
   causes: DVRiskCascade<DVRiskFile>[] | null,
   climateChange: DVRiskCascade<DVRiskFile> | null,
   catalysingEffects: DVRiskCascade<DVRiskFile>[] | null
@@ -23,7 +31,10 @@ export function validateStep2B(
   const errors: { causes?: any; climateChange?: any; catalysingEffects?: any } = {};
 
   const causeErrors = causes.reduce((e, cause, i) => {
-    const input = step2B.find((s) => s._cr4de_cascade_value === cause.cr4de_bnrariskcascadeid);
+    const input =
+      currentCascade && currentCascade.cr4de_bnrariskcascadeid === cause.cr4de_bnrariskcascadeid
+        ? lastInput
+        : step2B.find((s) => s._cr4de_cascade_value === cause.cr4de_bnrariskcascadeid);
 
     if (!input) return [...e, [cause, i, null]] as Step2BError[];
     else {
@@ -36,6 +47,7 @@ export function validateStep2B(
 
     return e;
   }, [] as Step2BError[]);
+
   if (Object.keys(causeErrors).length > 0) {
     errors.causes = causeErrors;
   }
@@ -49,7 +61,10 @@ export function validateStep2B(
   }
 
   const catalysingErrors = catalysingEffects.reduce((e, ce, i) => {
-    const input = step2B.find((s) => s._cr4de_cascade_value === ce.cr4de_bnrariskcascadeid);
+    const input =
+      currentCascade && currentCascade.cr4de_bnrariskcascadeid === ce.cr4de_bnrariskcascadeid
+        ? lastInput
+        : step2B.find((s) => s._cr4de_cascade_value === ce.cr4de_bnrariskcascadeid);
 
     if (!input) return [...e, [ce, i, null]] as Step2BError[];
     else {
@@ -69,8 +84,8 @@ export function validateStep2B(
   return errors;
 }
 
-function getInputFieldsWithErrorsCC(input: DVDirectAnalysis) {
-  const fields: (keyof DVDirectAnalysis)[] = [
+export function getInputFieldsWithErrorsCC(input: CCInput) {
+  const fields: (keyof CCInput)[] = [
     "cr4de_dp50_quali",
     "cr4de_dp50_quanti_c",
     "cr4de_dp50_quanti_m",
@@ -89,8 +104,8 @@ function getInputFieldsWithErrorsCC(input: DVDirectAnalysis) {
   }, {});
 }
 
-function getInputFieldsWithErrors(input: DVCascadeAnalysis) {
-  const fields: (keyof DVCascadeAnalysis)[] = [
+function getInputFieldsWithErrors(input: CascadeAnalysisInput) {
+  const fields: (keyof CascadeAnalysisInput)[] = [
     "cr4de_c2c",
     "cr4de_c2m",
     "cr4de_c2e",

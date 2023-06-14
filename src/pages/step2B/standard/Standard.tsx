@@ -19,7 +19,7 @@ import useRecords from "../../../hooks/useRecords";
 import { DataTable } from "../../../hooks/useAPI";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import AttachmentsDialog from "../information/AttachmentsDialog";
-import ClimateChangeAnalysis from "./ClimateChangeAnalysis";
+import ClimateChangeAnalysis, { CCInput } from "./ClimateChangeAnalysis";
 import CatalysingEffectsAnalysis from "./CatalysingEffectsnalysis";
 import CascadeTutorial from "../information/CascadeTutorial";
 import CCTutorial from "../information/CCTutorial";
@@ -39,7 +39,9 @@ export default function Standard({
   activeCauseScenario,
   activeEffectScenario,
   qualiError,
+  quantiErrors,
   runTutorial,
+  visible,
   setRunTutorial,
   setStep2BInput,
   onSave,
@@ -57,12 +59,14 @@ export default function Standard({
   cascadeIndex: number;
   step2A: DVDirectAnalysis<DVRiskFile>;
   step2B: DVCascadeAnalysis | null;
-  step2AInput: MutableRefObject<string | null>;
+  step2AInput: CCInput | null;
   step2BInput: CascadeAnalysisInput | null;
   activeCauseScenario: SCENARIOS;
   activeEffectScenario: SCENARIOS;
   qualiError: boolean;
+  quantiErrors: boolean[] | null;
   runTutorial: boolean;
+  visible: boolean;
   setRunTutorial: (run: boolean) => void;
   setStep2BInput: (input: CascadeAnalysisInput, update?: boolean) => void;
   onSave: () => Promise<void>;
@@ -76,7 +80,7 @@ export default function Standard({
   const [sourceDialogOpen, setSourceDialogOpen] = useState<string | null>(null);
   const [existingSource, setExistingSource] = useState<DVAttachment | undefined>(undefined);
 
-  const [prevStep2B, setPrevStep2B] = useState(step2B);
+  const [prevStep2B, setPrevStep2B] = useState<DVCascadeAnalysis | null>(null);
 
   const {
     data: attachments,
@@ -92,14 +96,14 @@ export default function Standard({
   };
 
   useEffect(() => {
-    if (step2B && step2B.cr4de_bnracascadeanalysisid !== prevStep2B?.cr4de_bnracascadeanalysisid) {
+    if (step2B && step2B.cr4de_bnracascadeanalysisid !== prevStep2B?.cr4de_bnracascadeanalysisid && visible) {
       loadAttachments({
         query: `$filter=_cr4de_cascadeanalysis_value eq '${step2B.cr4de_bnracascadeanalysisid}'&$expand=cr4de_referencedSource`,
         saveOptions: true,
       });
       setPrevStep2B(step2B);
     }
-  }, [step2B, prevStep2B]);
+  }, [step2B, prevStep2B, visible]);
 
   return (
     <>
@@ -220,6 +224,7 @@ export default function Standard({
             step2A={step2A}
             step2AInput={step2AInput}
             qualiError={qualiError}
+            quantiErrors={quantiErrors}
             attachments={attachments}
             onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
             onReloadAttachments={loadAttachments}

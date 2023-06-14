@@ -33,12 +33,14 @@ export default function FinishDialog({
   inputErrors,
   setFinishedDialogOpen,
   setSurveyDialogOpen,
+  onTransitionTo,
 }: {
   step2A: DVDirectAnalysis;
   finishedDialogOpen: boolean;
   inputErrors: Step2BErrors | null;
   setFinishedDialogOpen: (open: boolean) => void;
   setSurveyDialogOpen: (open: boolean) => void;
+  onTransitionTo: (newStep: STEPS, newIndex: number) => void;
 }) {
   const api = useAPI();
   const navigate = useNavigate();
@@ -108,7 +110,7 @@ export default function FinishDialog({
                       <ListItem>
                         <ListItemButton
                           onClick={() => {
-                            navigate(`/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CAUSES}&index=${e[1]}`);
+                            onTransitionTo(STEPS.CAUSES, e[1]);
                             setFinishedDialogOpen(false);
                           }}
                         >
@@ -120,7 +122,7 @@ export default function FinishDialog({
                     <ListItem>
                       <ListItemButton
                         onClick={() => {
-                          navigate(`/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CLIMATE_CHANGE}`);
+                          onTransitionTo(STEPS.CLIMATE_CHANGE, 0);
                           setFinishedDialogOpen(false);
                         }}
                       >
@@ -132,9 +134,7 @@ export default function FinishDialog({
                     Object.values(inputErrors.catalysingEffects).map((e) => (
                       <ListItem
                         onClick={() => {
-                          navigate(
-                            `/step2B/${step2A.cr4de_bnradirectanalysisid}?step=${STEPS.CATALYSING_EFFECTS}&index=${e[1]}`
-                          );
+                          onTransitionTo(STEPS.CATALYSING_EFFECTS, 0);
                           setFinishedDialogOpen(false);
                         }}
                       >

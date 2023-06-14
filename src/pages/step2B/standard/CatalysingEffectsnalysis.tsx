@@ -237,64 +237,13 @@ export default function CatalysingEffectsAnalysis({
   onReloadAttachments: () => Promise<void>;
   setRunTutorial: (run: boolean) => void;
 }) {
-  const theme = useTheme();
   const { t } = useTranslation();
-  const api = useAPI();
-  const [input, setInput] = useState(step2BInput);
   const [qualiInput, setQualiInput] = useState<string | null | undefined>(step2B.cr4de_quali_cascade);
   const qualiRef = useRef<HTMLDivElement | null>(null);
-
-  const field = getCascadeField(activeCauseScenario, activeEffectScenario);
-  const cp = input[field] == null ? -1 : (input[field] as number);
 
   useEffect(() => {
     return onUnmount;
   }, []);
-
-  const causeScenarios = unwrapScenarios(
-    unwrapParameters(cascade.cr4de_cause_hazard.cr4de_intensity_parameters),
-    cascade.cr4de_cause_hazard.cr4de_scenario_considerable,
-    cascade.cr4de_cause_hazard.cr4de_scenario_major,
-    cascade.cr4de_cause_hazard.cr4de_scenario_extreme
-  );
-
-  const effectScenarios = unwrapScenarios(
-    unwrapParameters(riskFile.cr4de_intensity_parameters),
-    riskFile.cr4de_scenario_considerable,
-    riskFile.cr4de_scenario_major,
-    riskFile.cr4de_scenario_extreme
-  );
-
-  function preventHorizontalKeyboardNavigation(event: React.KeyboardEvent) {
-    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-      event.preventDefault();
-    }
-  }
-
-  function handleNext() {
-    if (
-      activeCauseScenario === SCENARIOS.EXTREME &&
-      activeEffectScenario === SCENARIOS.EXTREME &&
-      (!qualiInput || qualiInput === "") &&
-      qualiRef.current
-    ) {
-      qualiRef.current.scrollIntoView();
-    } else {
-      onNext();
-    }
-  }
-
-  interface AirbnbThumbComponentProps extends React.HTMLAttributes<unknown> {}
-
-  function ArrowThumbComponent(props: AirbnbThumbComponentProps) {
-    const { children, ...other } = props;
-    return (
-      <SliderThumb {...other}>
-        {children}
-        <KeyboardArrowDownIcon sx={{ color: "white" }} />
-      </SliderThumb>
-    );
-  }
 
   return (
     <Box sx={{ mx: "123px" }}>
@@ -389,11 +338,14 @@ export default function CatalysingEffectsAnalysis({
               id="quali-input"
               initialValue={qualiInput || ""}
               onSave={(v) => {
-                setStep2BInput({
-                  ...step2BInput,
-                  cr4de_quali_cascade: v || null,
-                });
-                setQualiInput(v || null);
+                if (!step2BInput) return;
+
+                step2BInput.cr4de_quali_cascade = v || null;
+              }}
+              setUpdatedValue={(newValue) => {
+                if (!step2BInput) return;
+
+                step2BInput.cr4de_quali_cascade = newValue || null;
               }}
               debounceInterval={500}
               error={qualiError}

@@ -48,7 +48,7 @@ export default function CCTutorial({ run, setRun }: { run: boolean; setRun: (r: 
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.climateChange.2.1">
+            <Trans i18nKey="2B.tutorial.climateChange.21.1">
               Voor elk intensiteitsscenario moet een nieuwe waarde opgegeven worden.
             </Trans>
           </Typography>

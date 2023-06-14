@@ -34,6 +34,7 @@ import QuickNavSidebar, { OPEN_STATE } from "./information/QuickNavSidebar";
 import FinishDialog from "./information/FinishDialog";
 import BottomBar from "./information/BottomBar";
 import { Step2BErrors, validateStep2B } from "./information/validateInput";
+import { CCInput } from "./standard/ClimateChangeAnalysis";
 
 type RouteParams = {
   step2A_id: string;
@@ -63,10 +64,11 @@ export default function ({}) {
   const [cascade, setCascade] = useState<DVRiskCascade<DVRiskFile, DVRiskFile> | null>(null);
   const [cascadeAnalysis, setCascadeAnalysis] = useState<DVCascadeAnalysis | null>(null);
 
-  const step2AInput = useRef<string | null>(null);
+  const step2AInput = useRef<CCInput | null>(null);
   const step2BInput = useRef<CascadeAnalysisInput | null>(null);
   const [inputErrors, setInputErrors] = useState<Step2BErrors | null>(null);
   const [qualiError, setQualiError] = useState(false);
+  const [ccErrors, setCCErrors] = useState<boolean[] | null>(null);
 
   const [finishedDialogOpen, setFinishedDialogOpen] = useState(false);
   const [surveyDialogOpen, setSurveyDialogOpen] = useState(false);
@@ -123,6 +125,12 @@ export default function ({}) {
     id: routeParams.step2A_id,
     query: "$expand=cr4de_risk_file",
     onComplete: async (step2A) => {
+      step2AInput.current = {
+        cr4de_dp50_quanti_c: step2A.cr4de_dp50_quanti_c,
+        cr4de_dp50_quanti_m: step2A.cr4de_dp50_quanti_m,
+        cr4de_dp50_quanti_e: step2A.cr4de_dp50_quanti_e,
+        cr4de_dp50_quali: step2A.cr4de_dp50_quali,
+      };
       loadCascades({
         query: `$filter=_cr4de_effect_hazard_value eq ${step2A._cr4de_risk_file_value}&$expand=cr4de_cause_hazard,cr4de_effect_hazard($select=cr4de_title)`,
       });
@@ -242,10 +250,13 @@ export default function ({}) {
         })
         .then(() => load2B());
     } else if (activeStep === STEPS.CLIMATE_CHANGE) {
-      if (!climateChange || !step2A) return;
+      if (!climateChange || !step2A || !step2AInput.current) return;
 
       api.updateDirectAnalysis(step2A?.cr4de_bnradirectanalysisid, {
-        cr4de_dp50_quali: step2AInput.current,
+        cr4de_dp50_quanti_c: step2AInput.current.cr4de_dp50_quanti_c,
+        cr4de_dp50_quanti_m: step2AInput.current.cr4de_dp50_quanti_m,
+        cr4de_dp50_quanti_e: step2AInput.current.cr4de_dp50_quanti_e,
+        cr4de_dp50_quali: step2AInput.current.cr4de_dp50_quali,
       });
     }
   }
@@ -253,7 +264,7 @@ export default function ({}) {
   const handleTransitionTo = (newStep: STEPS, newIndex: number = 0, forceFadeIn = false) => {
     setFadeIn(false);
 
-    if (newIndex !== cascadeIndex) {
+    if (activeStep !== newStep || newIndex !== cascadeIndex) {
       handleChangeCascade(newStep, newIndex);
     }
 
@@ -278,6 +289,7 @@ export default function ({}) {
     if (!step2B || causes === null || catalysingEffects === null) return;
 
     setQualiError(false);
+    setCCErrors(null);
 
     if (activeStep === STEPS.INTRODUCTION) {
       if (causes && causes.length > 0) {
@@ -329,7 +341,26 @@ export default function ({}) {
     } else if (activeStep === STEPS.CLIMATE_CHANGE) {
       handleSave();
 
-      if (step2AInput.current === null || step2AInput.current === "") {
+      if (
+        step2AInput.current &&
+        (step2AInput.current.cr4de_dp50_quanti_c === null ||
+          step2AInput.current.cr4de_dp50_quanti_m === null ||
+          step2AInput.current.cr4de_dp50_quanti_e === null)
+      ) {
+        setCCErrors([
+          step2AInput.current.cr4de_dp50_quanti_c === null,
+          step2AInput.current.cr4de_dp50_quanti_m === null,
+          step2AInput.current.cr4de_dp50_quanti_e === null,
+        ]);
+
+        return;
+      }
+
+      if (
+        step2AInput.current === null ||
+        step2AInput.current.cr4de_dp50_quali === null ||
+        step2AInput.current.cr4de_dp50_quali === ""
+      ) {
         setQualiError(true);
 
         return;
@@ -592,12 +623,14 @@ export default function ({}) {
               cascadeIndex={cascadeIndex}
               step2A={step2A}
               step2B={cascadeAnalysis}
-              step2AInput={step2AInput}
+              step2AInput={step2AInput.current}
               step2BInput={step2BInput.current}
               activeCauseScenario={activeCauseScenario}
               activeEffectScenario={activeEffectScenario}
               qualiError={qualiError}
+              quantiErrors={ccErrors}
               runTutorial={runTutorial}
+              visible={fadeIn}
               setRunTutorial={setRunTutorial}
               setStep2BInput={(input, update) => {
                 step2BInput.current = input;
@@ -655,8 +688,12 @@ export default function ({}) {
         onGoToStep={handleTransitionTo}
         onFinish={() => {
           setQualiError(false);
+          setCCErrors(null);
+
           if (!hasNextStep()) {
             if (activeStep === STEPS.CAUSES) {
+              handleSave();
+
               if (
                 step2BInput.current?.cr4de_quali_cascade === null ||
                 step2BInput.current?.cr4de_quali_cascade === ""
@@ -666,7 +703,13 @@ export default function ({}) {
                 return;
               }
             } else if (activeStep === STEPS.CLIMATE_CHANGE) {
-              if (step2AInput.current === null || step2AInput.current === "") {
+              handleSave();
+
+              if (
+                step2AInput.current === null ||
+                step2AInput.current.cr4de_dp50_quali === null ||
+                step2AInput.current.cr4de_dp50_quali === ""
+              ) {
                 setQualiError(true);
 
                 return;
@@ -684,7 +727,17 @@ export default function ({}) {
               }
             }
           }
-          setInputErrors(validateStep2B(step2A, step2B, causes, climateChange, catalysingEffects));
+          setInputErrors(
+            validateStep2B(
+              step2AInput.current,
+              step2B,
+              cascade,
+              step2BInput.current,
+              causes,
+              climateChange,
+              catalysingEffects
+            )
+          );
           setFinishedDialogOpen(true);
         }}
       />
@@ -696,6 +749,7 @@ export default function ({}) {
           inputErrors={inputErrors}
           setFinishedDialogOpen={setFinishedDialogOpen}
           setSurveyDialogOpen={setSurveyDialogOpen}
+          onTransitionTo={handleTransitionTo}
         />
       )}
 
