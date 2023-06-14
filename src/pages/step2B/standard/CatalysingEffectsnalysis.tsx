@@ -238,7 +238,7 @@ export default function CatalysingEffectsAnalysis({
   setRunTutorial: (run: boolean) => void;
 }) {
   const { t } = useTranslation();
-  const [qualiInput, setQualiInput] = useState<string | null | undefined>(step2B.cr4de_quali_cascade);
+  const [qualiInput, setQualiInput] = useState<string | null | undefined>(step2BInput.cr4de_quali_cascade);
   const qualiRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {

@@ -241,7 +241,7 @@ export default function CascadeAnalysis({
   const { t } = useTranslation();
   const api = useAPI();
   const [input, setInput] = useState(step2BInput);
-  const [qualiInput, setQualiInput] = useState<string | null | undefined>(step2B.cr4de_quali_cascade);
+  const [qualiInput, setQualiInput] = useState<string | null | undefined>(step2BInput.cr4de_quali_cascade);
   const qualiRef = useRef<HTMLDivElement | null>(null);
 
   const field = getCascadeField(activeCauseScenario, activeEffectScenario);

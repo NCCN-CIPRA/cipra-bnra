@@ -360,7 +360,7 @@ export default function ClimateChangeAnalysis({
           <Box sx={{ marginTop: 2, marginBottom: 3 }}>
             <QualiTextInputBox
               id="quali-input"
-              initialValue={step2A.cr4de_dp50_quali}
+              initialValue={step2AInput.cr4de_dp50_quali}
               onSave={(v) => {
                 if (!step2AInput) return;
 
