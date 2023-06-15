@@ -3,7 +3,6 @@ export enum STEPS {
   CAUSES,
   CLIMATE_CHANGE,
   CATALYSING_EFFECTS,
-  REVIEW,
 }
 
 export type Step = {
@@ -29,5 +28,13 @@ export const stepNames: { [key in STEPS]: Step } = {
     titleDefault: "Catalysing Effects",
     // color: "#FFE699",
   },
-  [STEPS.REVIEW]: { titleI18N: "2B.progress.review.title", titleDefault: "Review" },
+};
+
+export const manmadeStepNames: { [key in STEPS]: Step } = {
+  ...stepNames,
+  [STEPS.CAUSES]: {
+    titleI18N: "2B.progress.potentialAttacks.title",
+    titleDefault: "Potential Attack Scenarios",
+    // color: "#9DC3E6",
+  },
 };

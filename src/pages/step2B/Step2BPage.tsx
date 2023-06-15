@@ -96,11 +96,7 @@ export default function ({}) {
   /**
    * Retrieve the cascade analysis record from the database that corresponds to the participant
    */
-  const {
-    data: step2B,
-    loading: loading2B,
-    getData: load2B,
-  } = useLazyRecords<DVCascadeAnalysis>({
+  const { data: step2B, getData: load2B } = useLazyRecords<DVCascadeAnalysis>({
     table: DataTable.CASCADE_ANALYSIS,
     onComplete: async (results) => {
       if (cascadeIndex && causes && catalysingEffects) {
@@ -653,6 +649,7 @@ export default function ({}) {
       </Fade>
 
       <InformationButton
+        activeStep={activeStep}
         riskFile={step2A?.cr4de_risk_file}
         forceOpen={openSpeedDial}
         onRunTutorial={() => setRunTutorial(true)}

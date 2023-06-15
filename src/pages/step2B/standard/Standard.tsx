@@ -7,7 +7,6 @@ import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import Introduction from "./Introduction";
 import { useEffect, useState, MutableRefObject } from "react";
 import { stepNames, STEPS } from "../Steps";
-import ScenarioAnalysis from "./ScenarioAnalysis";
 import CascadeAnalysis from "./CascadeAnalysis";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { DVContact } from "../../../types/dataverse/DVContact";

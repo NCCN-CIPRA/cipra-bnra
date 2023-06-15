@@ -26,6 +26,7 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
 
   const [hasRun, setHasRun] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [data, setData] = useState<T[] | null>(null);
   const [lastOptions, setLastOptions] = useState<GetRecordsParams<T>>(options);
 
@@ -36,6 +37,7 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
     if (o.saveOptions) setLastOptions(o);
 
     setHasRun(true);
+    setIsFetching(true);
 
     if (o.table === DataTable.CONTACT) {
       response = await api.getContacts<T>(o.query);
@@ -67,7 +69,8 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
     if (o.onComplete) o.onComplete(result);
 
     setLoading(false);
+    setIsFetching(false);
   };
 
-  return { hasRun, loading, data, getData };
+  return { hasRun, loading, isFetching, data, getData };
 }

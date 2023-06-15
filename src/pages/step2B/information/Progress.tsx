@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { RefObject, useEffect, useState } from "react";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CheckIcon from "@mui/icons-material/Check";
-import { stepNames, STEPS } from "../Steps";
+import { manmadeStepNames, stepNames, STEPS } from "../Steps";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { Step2BErrors } from "./validateInput";
 
@@ -75,6 +75,12 @@ export default function Progress({
 
   const [steps, setSteps] = useState(Array(4).fill(STATUS.NOT_STARTED));
 
+  let causesStepLabel;
+  if (riskType === "Standard Risk")
+    causesStepLabel = t(stepNames[STEPS.CAUSES].titleI18N, stepNames[STEPS.CAUSES].titleDefault);
+  else if (riskType === "Malicious Man-made Risk")
+    causesStepLabel = t(manmadeStepNames[STEPS.CAUSES].titleI18N, manmadeStepNames[STEPS.CAUSES].titleDefault);
+
   return (
     <Box sx={{ flex: "1 1 auto", mx: 12, pt: 0.5 }} id="step2A-progress-bar">
       <Stepper nonLinear activeStep={activeStep}>
@@ -89,12 +95,11 @@ export default function Progress({
             </StepButton>
           )}
         </Step>
-        {causes && causes.length > 0 && (
+        {causes && causes.length > 0 && riskType === "Standard Risk" && (
           <Step completed={activeStep > STEPS.CAUSES}>
             {activeStep < STEPS.CAUSES && (
               <StepLabel>
-                {t(stepNames[STEPS.CAUSES].titleI18N, stepNames[STEPS.CAUSES].titleDefault)}{" "}
-                {causes && causes.length > 0 && ` (${causes.length})`}
+                {} {causes && causes.length > 0 && ` (${causes.length})`}
               </StepLabel>
             )}
             {activeStep === STEPS.CAUSES && (

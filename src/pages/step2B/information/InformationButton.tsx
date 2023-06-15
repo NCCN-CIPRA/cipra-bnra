@@ -11,12 +11,15 @@ import { useTranslation } from "react-i18next";
 import openInNewTab from "../../../functions/openInNewTab";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { useEffect, useState } from "react";
+import { STEPS } from "../Steps";
 
 export default function InformationButton({
+  activeStep,
   riskFile,
   forceOpen,
   onRunTutorial,
 }: {
+  activeStep: STEPS | null;
   riskFile: DVRiskFile | undefined;
   forceOpen: boolean;
   onRunTutorial: () => void;
@@ -33,11 +36,15 @@ export default function InformationButton({
   const handleClose = () => setOpen(false);
 
   const actions = [
-    {
-      icon: <HelpIcon />,
-      name: t("speeddial.tutorial", "Play Tutorial"),
-      onClick: onRunTutorial,
-    },
+    ...(activeStep === STEPS.INTRODUCTION || activeStep === STEPS.CATALYSING_EFFECTS
+      ? []
+      : [
+          {
+            icon: <HelpIcon />,
+            name: t("speeddial.tutorial", "Play Tutorial"),
+            onClick: onRunTutorial,
+          },
+        ]),
     {
       icon: <CategoryIcon />,
       name: t("speeddial.scales", "Quantitative Scales"),

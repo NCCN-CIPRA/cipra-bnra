@@ -68,10 +68,17 @@ export function validateStep2B(
 
     if (!input) return [...e, [ce, i, null]] as Step2BError[];
     else {
-      const fieldErrors = getInputFieldsWithErrors(input);
-
-      if (Object.keys(fieldErrors).length > 0) {
-        return [...e, [ce, i, fieldErrors]] as Step2BError[];
+      if (input.cr4de_quali_cascade === null || input.cr4de_quali_cascade === "") {
+        return [
+          ...e,
+          [
+            ce,
+            i,
+            {
+              cr4de_quali_cascade: null,
+            },
+          ],
+        ] as Step2BError[];
       }
     }
 
