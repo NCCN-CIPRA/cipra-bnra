@@ -231,12 +231,7 @@ export default function LearningOverviewPage({}) {
                     </ListItemIcon>
                     <ListItemText primary={t("learning.tools.analysisAManMade", "Malicious Actors")} />
                   </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/tools-analysisB-standard"
-                    sx={{ ml: 3.5 }}
-                    disabled
-                  >
+                  <ListItemButton component={RouterLink} to="/learning/tools-analysisB-standard" sx={{ ml: 3.5 }}>
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
@@ -263,13 +258,6 @@ export default function LearningOverviewPage({}) {
                       <ChevronRightIcon />
                     </ListItemIcon>
                     <ListItemText primary={t("learning.tools.analysisBEmerging", "2B - Emerging Risks")} />
-                  </ListItemButton>
-
-                  <ListItemButton component={RouterLink} to="/learning/tools-consensus" disabled>
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t("learning.tools.consensus", "Consensus")} />
                   </ListItemButton>
                 </List>
               </Item>

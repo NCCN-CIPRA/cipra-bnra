@@ -73,8 +73,6 @@ export default function Progress({
 }) {
   const { t } = useTranslation();
 
-  const [steps, setSteps] = useState(Array(4).fill(STATUS.NOT_STARTED));
-
   let causesStepLabel;
   if (riskType === "Standard Risk")
     causesStepLabel = t(stepNames[STEPS.CAUSES].titleI18N, stepNames[STEPS.CAUSES].titleDefault);

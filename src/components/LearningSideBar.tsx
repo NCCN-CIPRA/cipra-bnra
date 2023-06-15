@@ -69,21 +69,39 @@ export default function LearningSideBar({
   ];
   const toolPages = [
     { title: t("learning.tools.validation", "Risk File Validation"), id: "tools-validation" },
-    { title: t("learning.tools.analysisA", "Risk Analysis A"), id: "tools-analysisA", letter: "A" },
+    { title: t("learning.tools.analysis", "Risk Analysis"), id: "tools-analysisA", letter: "A" },
     {
-      title: t("learning.tools.analysisAStandard", "Standard Risks"),
+      title: t("learning.tools.analysisAStandard", "2A - Standard Risks"),
       id: "tools-analysisA-standard",
       letter: "AS",
       inset: true,
     },
     {
-      title: t("learning.tools.analysisAManMade", "Malicious Actors"),
+      title: t("learning.tools.analysisAManMade", "2A - Malicious Actors"),
       id: "tools-analysisA-manmade",
       letter: "AM",
       inset: true,
     },
-    { title: t("learning.tools.analysisB", "Risk Analysis B"), id: "tools-analysisB", letter: "B", disabled: true },
-    { title: t("learning.tools.consensus", "Consensus"), id: "tools-consensus", disabled: true },
+    {
+      title: t("learning.tools.analysisBStandard", "2B - Standard Risks"),
+      id: "tools-analysisB-standard",
+      letter: "BS",
+      inset: true,
+    },
+    {
+      title: t("learning.tools.analysisBManmade", "2B - Malicious Actors"),
+      id: "tools-analysisB-manmade",
+      letter: "BM",
+      inset: true,
+      disabled: true,
+    },
+    {
+      title: t("learning.tools.analysisBEmerging", "2B - Emerging Risks"),
+      id: "tools-analysisB-emerging",
+      letter: "BE",
+      inset: true,
+      disabled: true,
+    },
   ];
 
   const openedMixin = (theme: Theme): CSSObject => ({
