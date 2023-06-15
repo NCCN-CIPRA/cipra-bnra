@@ -123,11 +123,21 @@ export default function QuickNavSidebar({
       {open === OPEN_STATE.QUICKNAV && (
         <>
           {causes && (
-            <Box sx={{ pl: 2.5, mt: 8, overflow: "hidden", transition: "opacity .3s ease", opacity: open ? 1 : 0 }}>
+            <Box
+              sx={{
+                pl: 2.5,
+                mt: 8,
+                overflow: "hidden",
+                transition: "opacity .3s ease",
+                opacity: open ? 1 : 0,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
               <Typography variant="subtitle2">
                 <Trans i18nKey="2B.sidebar.causes">Potential Causes</Trans>
               </Typography>
-              <List dense sx={{}}>
+              <List dense sx={{ overflowY: "scroll" }}>
                 {causes.map((c, i) => (
                   <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding>
                     <ListItemButton
@@ -145,11 +155,21 @@ export default function QuickNavSidebar({
             </Box>
           )}
           {(climateChange || catalysingEffects) && (
-            <Box sx={{ pl: 2.5, mt: 4, overflow: "hidden", transition: "opacity .3s ease", opacity: open ? 1 : 0 }}>
+            <Box
+              sx={{
+                pl: 2.5,
+                mt: 4,
+                overflow: "hidden",
+                transition: "opacity .3s ease",
+                opacity: open ? 1 : 0,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
               <Typography variant="subtitle2">
                 <Trans i18nKey="2B.sidebar.catalysingEffects">Catalysing Effects</Trans>
               </Typography>
-              <List dense sx={{}}>
+              <List dense sx={{ overflowY: "scroll" }}>
                 {climateChange && (
                   <ListItem disablePadding>
                     <ListItemButton

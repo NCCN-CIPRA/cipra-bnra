@@ -34,56 +34,81 @@ export default function Introduction({ onRunTutorial }: { onRunTutorial: () => v
               <Trans i18nKey="2A.introduction.button.infoportal">Open Information Portal</Trans>
             </Button>
           </Box>
+          <Stack direction="column">
+            <Typography variant="body2">
+              <Trans i18nKey="2B.introduction.info.4">The application is divided into 3 main parts;</Trans>
+            </Typography>
+            <ul>
+              <li>
+                <Typography variant="body2">
+                  <Trans i18nKey="2B.introduction.info.5">
+                    Dans la première section, intitulée{" "}
+                    <b>
+                      <i>causes</i>
+                    </b>
+                    , il vous sera demandé d'estimer quantitativement les probabilités conditionnelles des scénarios
+                    d'intensité du risque standard étudié, puis de les justifier qualitativement.
+                  </Trans>
+                </Typography>
+              </li>
+              <li>
+                <Typography variant="body2">
+                  <Trans i18nKey="2B.introduction.info.6">
+                    Dans la deuxième section, intitulée{" "}
+                    <b>
+                      <i>changement climatique</i>
+                    </b>
+                    , il vous sera demandé d'estimer quantitativement les effets du changement climatique sur la
+                    probabilité directe des scénarios d'intensité du risque standard étudié, puis de les justifier
+                    qualitativement.
+                  </Trans>
+                </Typography>
+              </li>
+              <li>
+                <Typography variant="body2">
+                  <Trans i18nKey="2B.introduction.info.7">
+                    Dans la troisième section intitulée{" "}
+                    <b>
+                      <i>effets catalyseurs</i>
+                    </b>
+                    , il vous sera demandé de décrire qualitativement comment le risque standard étudié peut être
+                    affecté par un risque émergent.
+                  </Trans>
+                </Typography>
+              </li>
+            </ul>
+          </Stack>
+          <Stack direction="column">
+            <Typography variant="body2">
+              <Trans i18nKey="2B.introduction.info.9.1">
+                Opgelet ! We herinneren u er graag aan dat u tijdens stap 1 van deze BNRA:
+              </Trans>
+            </Typography>
+            <ul>
+              <li>
+                <Typography variant="body2">
+                  <Trans i18nKey="2B.introduction.info.9.2">
+                    oorzaak- en gevolgrelaties hebt geïdentificeerd tussen het standaard risico dat wordt bestudeerd en
+                    de andere risico’s aanwezig in de BNRA-catalogus, evenals
+                  </Trans>
+                </Typography>
+              </li>
+              <li>
+                <Typography variant="body2">
+                  <Trans i18nKey="2B.introduction.info.9.3">
+                    opkomende risico’s hebt geïdentificeerd die een katalyserend effect kunnen hebben op het standaard
+                    risico dat wordt bestudeerd.
+                  </Trans>
+                </Typography>
+              </li>
+            </ul>
+          </Stack>
           <Typography variant="body2">
-            <Trans i18nKey="2B.introduction.info.4">The application is divided into 3 main parts;</Trans>
-          </Typography>
-          <ul>
-            <li>
-              <Typography variant="body2">
-                <Trans i18nKey="2B.introduction.info.5">
-                  Dans la première section, intitulée{" "}
-                  <b>
-                    <i>causes</i>
-                  </b>
-                  , il vous sera demandé d'estimer quantitativement les probabilités conditionnelles des scénarios
-                  d'intensité du risque standard étudié, puis de les justifier qualitativement.
-                </Trans>
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body2">
-                <Trans i18nKey="2B.introduction.info.6">
-                  Dans la deuxième section, intitulée{" "}
-                  <b>
-                    <i>changement climatique</i>
-                  </b>
-                  , il vous sera demandé d'estimer quantitativement les effets du changement climatique sur la
-                  probabilité directe des scénarios d'intensité du risque standard étudié, puis de les justifier
-                  qualitativement.
-                </Trans>
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body2">
-                <Trans i18nKey="2B.introduction.info.7">
-                  Dans la troisième section intitulée{" "}
-                  <b>
-                    <i>effets catalyseurs</i>
-                  </b>
-                  , il vous sera demandé de décrire qualitativement comment le risque standard étudié peut être affecté
-                  par un risque émergent.
-                </Trans>
-              </Typography>
-            </li>
-          </ul>
-          <Typography variant="body2">
-            <Trans i18nKey="2B.introduction.info.8">
-              Attention, pour rappel, lors de l'étape 1 de la BNRA vous avez identifié les relations de cause à effet
-              entre le risque standard étudié et les autres risques du catalogue de la BNRA ainsi que les risques
-              émergents qui peuvent avoir un effet catalyseur sur le risque standard étudié. Les champs à remplir lors
-              de cette étape dépendent des liens qui ont été identifiés lors de l'étape 1. Par exemple, si aucun risque
-              émergent n'a été identifié comme ayant un effet catalyseur sur le risque standard étudié, vous ne verrez
-              pas apparaitre cette section dans l'application.
+            <Trans i18nKey="2B.introduction.info.9.4">
+              De velden die in deze Risico Analyse B moeten worden ingevuld, hangen af van bovenvermelde linken die
+              tijdens stap 1 werden geïdentificeerd en gevalideerd. Als er bijvoorbeeld geen opkomende risico's werden
+              geïdentificeerd die een katalyserend effect hebben op het bestudeerde standaard risico, zal u de delen
+              “Climate Change” en “Katalyserende effecten” niet zien in deze toepassing.
             </Trans>
           </Typography>
         </Stack>

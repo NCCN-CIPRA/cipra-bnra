@@ -95,23 +95,21 @@ export default function Progress({
             </StepButton>
           )}
         </Step>
-        {causes && causes.length > 0 && riskType === "Standard Risk" && (
+        {causes && causes.length > 0 && (
           <Step completed={activeStep > STEPS.CAUSES}>
             {activeStep < STEPS.CAUSES && (
               <StepLabel>
-                {} {causes && causes.length > 0 && ` (${causes.length})`}
+                {causesStepLabel} {causes && causes.length > 0 && ` (${causes.length})`}
               </StepLabel>
             )}
             {activeStep === STEPS.CAUSES && (
               <StepLabel>
-                {t(stepNames[STEPS.CAUSES].titleI18N, stepNames[STEPS.CAUSES].titleDefault)}{" "}
-                {causes && causeIndex && ` (${causeIndex}/${causes.length})`}
+                {causesStepLabel} {causes && causeIndex && ` (${causeIndex}/${causes.length})`}
               </StepLabel>
             )}
             {activeStep > STEPS.CAUSES && (
               <StepButton color="secondary" onClick={() => goToStep(STEPS.CAUSES)} icon={<DoneStepIcon />}>
-                {t(stepNames[STEPS.CAUSES].titleI18N, stepNames[STEPS.CAUSES].titleDefault)}{" "}
-                {causes && causes.length > 0 && ` (${causes.length})`}
+                {causesStepLabel} {causes && causes.length > 0 && ` (${causes.length})`}
               </StepButton>
             )}
           </Step>
