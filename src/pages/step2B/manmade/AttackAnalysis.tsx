@@ -371,8 +371,8 @@ export default function AttackAnalysis({
                 }}
               >
                 <FullScenario
-                  riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
-                  title={cascade.cr4de_cause_hazard.cr4de_title}
+                  riskType={riskFile.cr4de_risk_type}
+                  title={riskFile.cr4de_title}
                   scenario={SCENARIOS.CONSIDERABLE}
                   parameters={causeScenarios.considerable}
                   visible={activeCauseScenario === SCENARIOS.CONSIDERABLE}
@@ -392,8 +392,8 @@ export default function AttackAnalysis({
                 }}
               >
                 <FullScenario
-                  riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
-                  title={cascade.cr4de_cause_hazard.cr4de_title}
+                  riskType={riskFile.cr4de_risk_type}
+                  title={riskFile.cr4de_title}
                   scenario={SCENARIOS.MAJOR}
                   parameters={causeScenarios.major}
                   visible={activeCauseScenario === SCENARIOS.MAJOR}
@@ -410,8 +410,8 @@ export default function AttackAnalysis({
                 }}
               >
                 <FullScenario
-                  riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
-                  title={cascade.cr4de_cause_hazard.cr4de_title}
+                  riskType={riskFile.cr4de_risk_type}
+                  title={riskFile.cr4de_title}
                   scenario={SCENARIOS.EXTREME}
                   parameters={causeScenarios.extreme}
                   visible={activeCauseScenario === SCENARIOS.EXTREME}
@@ -420,8 +420,8 @@ export default function AttackAnalysis({
               <Box id="cause-scenario">
                 <AutoHeight toggle={activeCauseScenario} toggle2={cascade} duration={TRANSITION_S}>
                   <FullScenario
-                    riskType={cascade.cr4de_cause_hazard.cr4de_risk_type}
-                    title={cascade.cr4de_cause_hazard.cr4de_title}
+                    riskType={riskFile.cr4de_risk_type}
+                    title={riskFile.cr4de_title}
                     scenario={activeCauseScenario}
                     parameters={causeScenarios[activeCauseScenario]}
                     visible={true}
@@ -642,8 +642,8 @@ export default function AttackAnalysis({
                 }}
               >
                 <FullScenario
-                  riskType={riskFile.cr4de_risk_type}
-                  title={riskFile.cr4de_title}
+                  riskType={cascade.cr4de_effect_hazard.cr4de_risk_type}
+                  title={cascade.cr4de_effect_hazard.cr4de_title}
                   scenario={SCENARIOS.CONSIDERABLE}
                   parameters={effectScenarios.considerable}
                   visible={activeEffectScenario === SCENARIOS.CONSIDERABLE}
@@ -663,8 +663,8 @@ export default function AttackAnalysis({
                 }}
               >
                 <FullScenario
-                  riskType={riskFile.cr4de_risk_type}
-                  title={riskFile.cr4de_title}
+                  riskType={cascade.cr4de_effect_hazard.cr4de_risk_type}
+                  title={cascade.cr4de_effect_hazard.cr4de_title}
                   scenario={SCENARIOS.MAJOR}
                   parameters={effectScenarios.major}
                   visible={activeEffectScenario === SCENARIOS.MAJOR}
@@ -681,8 +681,8 @@ export default function AttackAnalysis({
                 }}
               >
                 <FullScenario
-                  riskType={riskFile.cr4de_risk_type}
-                  title={riskFile.cr4de_title}
+                  riskType={cascade.cr4de_effect_hazard.cr4de_risk_type}
+                  title={cascade.cr4de_effect_hazard.cr4de_title}
                   scenario={SCENARIOS.EXTREME}
                   parameters={effectScenarios.extreme}
                   visible={activeEffectScenario === SCENARIOS.EXTREME}
@@ -691,8 +691,8 @@ export default function AttackAnalysis({
               <Box id="effect-scenario">
                 <AutoHeight toggle={activeEffectScenario} toggle2={cascade} duration={TRANSITION_S}>
                   <FullScenario
-                    riskType={riskFile.cr4de_risk_type}
-                    title={riskFile.cr4de_title}
+                    riskType={cascade.cr4de_effect_hazard.cr4de_risk_type}
+                    title={cascade.cr4de_effect_hazard.cr4de_title}
                     scenario={activeEffectScenario}
                     parameters={effectScenarios[activeEffectScenario]}
                     visible={true}
@@ -713,7 +713,7 @@ export default function AttackAnalysis({
           </Stack>
 
           <Box sx={{ margin: "auto", marginTop: 4, maxWidth: 600, width: "100%" }} id="cascade-summary-matrix">
-            <CascadeMatrix cascade={cascade} step2B={step2B} />
+            {/* <CascadeMatrix cascade={cascade} step2B={step2B} /> */}
           </Box>
 
           <Stack direction="column" sx={{ marginTop: 10 }}>

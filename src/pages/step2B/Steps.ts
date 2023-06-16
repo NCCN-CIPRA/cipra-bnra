@@ -38,3 +38,12 @@ export const manmadeStepNames: { [key in STEPS]: Step } = {
     // color: "#9DC3E6",
   },
 };
+
+export const emergingStepNames: { [key in STEPS]: Step } = {
+  ...stepNames,
+  [STEPS.CAUSES]: {
+    titleI18N: "2B.progress.catalyzedRisks.title",
+    titleDefault: "Catalyzed Risks",
+    // color: "#9DC3E6",
+  },
+};

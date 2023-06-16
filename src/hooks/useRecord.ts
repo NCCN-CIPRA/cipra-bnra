@@ -14,7 +14,7 @@ import useLazyRecord, { GetRecordParams } from "./useLazyRecord";
  * }
  */
 export default function useRecord<T>(options: GetRecordParams<T>) {
-  const { loading, data, getData } = useLazyRecord<T>(options);
+  const { loading, isFetching, data, getData } = useLazyRecord<T>(options);
 
   const [_fired, setFired] = useState(false);
 
@@ -32,5 +32,5 @@ export default function useRecord<T>(options: GetRecordParams<T>) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options.id]);
 
-  return { loading, data, reloadData: getData };
+  return { loading, isFetching, data, reloadData: getData };
 }

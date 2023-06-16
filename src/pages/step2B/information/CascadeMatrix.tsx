@@ -1,6 +1,6 @@
 import Grid from "@mui/material/Unstable_Grid2";
 import { styled, Box, Typography, useTheme, Tooltip } from "@mui/material";
-import { getCascadeField } from "../../../functions/cascades";
+import { CascadeAnalysisInput, getCascadeField } from "../../../functions/cascades";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
@@ -55,18 +55,22 @@ const CPX = ({ value }: { value: string | null }) => {
 };
 
 export default function CascadeMatrix({
-  cascade,
-  step2B,
+  cause,
+  effect,
+  cascadeAnalysis,
+  onChangeScenario,
 }: {
-  cascade: DVRiskCascade<DVRiskFile, DVRiskFile>;
-  step2B: DVCascadeAnalysis;
+  cause: DVRiskFile;
+  effect: DVRiskFile;
+  cascadeAnalysis: DVCascadeAnalysis;
+  onChangeScenario: (causeScenario: SCENARIOS, effectScenario: SCENARIOS) => void;
 }) {
   const theme = useTheme();
   return (
     <Grid container spacing={1}>
       <Grid xs={4.5}></Grid>
       <Grid xs={7.5}>
-        <Tooltip title={cascade.cr4de_effect_hazard.cr4de_title}>
+        <Tooltip title={cause.cr4de_title}>
           <Box sx={{ padding: theme.spacing(1), textAlign: "center" }}>
             <Typography variant="h6">
               <Trans i18nKey="2B.effect">Effect</Trans>
@@ -76,7 +80,7 @@ export default function CascadeMatrix({
       </Grid>
 
       <Grid xs={4.5}>
-        <Tooltip title={cascade.cr4de_cause_hazard.cr4de_title}>
+        <Tooltip title={effect.cr4de_title}>
           <Box sx={{ padding: theme.spacing(1), textAlign: "center" }}>
             <Typography variant="h6">
               <Trans i18nKey="2B.cause">Cause</Trans>
@@ -97,40 +101,60 @@ export default function CascadeMatrix({
       <Grid xs={4.5}>
         <ScenarioBox scenario={SCENARIOS.CONSIDERABLE} />
       </Grid>
-      <Grid xs={2.5}>
-        <CPX value={step2B[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.CONSIDERABLE)]} />
+      <Grid
+        xs={2.5}
+        sx={{ cursor: "pointer" }}
+        onClick={() => onChangeScenario(SCENARIOS.CONSIDERABLE, SCENARIOS.CONSIDERABLE)}
+      >
+        <CPX value={cascadeAnalysis[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.CONSIDERABLE)]} />
       </Grid>
-      <Grid xs={2.5}>
-        <CPX value={step2B[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR)]} />
+      <Grid
+        xs={2.5}
+        sx={{ cursor: "pointer" }}
+        onClick={() => onChangeScenario(SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR)}
+      >
+        <CPX value={cascadeAnalysis[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR)]} />
       </Grid>
-      <Grid xs={2.5}>
-        <CPX value={step2B[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.EXTREME)]} />
+      <Grid
+        xs={2.5}
+        sx={{ cursor: "pointer" }}
+        onClick={() => onChangeScenario(SCENARIOS.CONSIDERABLE, SCENARIOS.EXTREME)}
+      >
+        <CPX value={cascadeAnalysis[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.EXTREME)]} />
       </Grid>
 
       <Grid xs={4.5}>
         <ScenarioBox scenario={SCENARIOS.MAJOR} />
       </Grid>
-      <Grid xs={2.5}>
-        <CPX value={step2B[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.CONSIDERABLE)]} />
+      <Grid
+        xs={2.5}
+        sx={{ cursor: "pointer" }}
+        onClick={() => onChangeScenario(SCENARIOS.MAJOR, SCENARIOS.CONSIDERABLE)}
+      >
+        <CPX value={cascadeAnalysis[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.CONSIDERABLE)]} />
       </Grid>
-      <Grid xs={2.5}>
-        <CPX value={step2B[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.MAJOR)]} />
+      <Grid xs={2.5} sx={{ cursor: "pointer" }} onClick={() => onChangeScenario(SCENARIOS.MAJOR, SCENARIOS.MAJOR)}>
+        <CPX value={cascadeAnalysis[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.MAJOR)]} />
       </Grid>
-      <Grid xs={2.5}>
-        <CPX value={step2B[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.EXTREME)]} />
+      <Grid xs={2.5} sx={{ cursor: "pointer" }} onClick={() => onChangeScenario(SCENARIOS.MAJOR, SCENARIOS.EXTREME)}>
+        <CPX value={cascadeAnalysis[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.EXTREME)]} />
       </Grid>
 
       <Grid xs={4.5}>
         <ScenarioBox scenario={SCENARIOS.EXTREME} />
       </Grid>
-      <Grid xs={2.5}>
-        <CPX value={step2B[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.CONSIDERABLE)]} />
+      <Grid
+        xs={2.5}
+        sx={{ cursor: "pointer" }}
+        onClick={() => onChangeScenario(SCENARIOS.EXTREME, SCENARIOS.CONSIDERABLE)}
+      >
+        <CPX value={cascadeAnalysis[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.CONSIDERABLE)]} />
       </Grid>
-      <Grid xs={2.5}>
-        <CPX value={step2B[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.MAJOR)]} />
+      <Grid xs={2.5} sx={{ cursor: "pointer" }} onClick={() => onChangeScenario(SCENARIOS.EXTREME, SCENARIOS.MAJOR)}>
+        <CPX value={cascadeAnalysis[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.MAJOR)]} />
       </Grid>
-      <Grid xs={2.5}>
-        <CPX value={step2B[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.EXTREME)]} />
+      <Grid xs={2.5} sx={{ cursor: "pointer" }} onClick={() => onChangeScenario(SCENARIOS.EXTREME, SCENARIOS.EXTREME)}>
+        <CPX value={cascadeAnalysis[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.EXTREME)]} />
       </Grid>
     </Grid>
   );

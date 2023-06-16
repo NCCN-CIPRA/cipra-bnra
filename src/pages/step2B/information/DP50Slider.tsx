@@ -10,13 +10,15 @@ export function DP50Slider({
   DPValue,
   initialDP50Value,
   error,
-  onChange,
+  onChange = (v) => {},
+  onSave = (v) => {},
 }: {
   id: string;
   DPValue: string;
   initialDP50Value: string | null;
   error?: boolean | null;
-  onChange: (value: string | null) => void;
+  onChange?: (value: string | null) => void;
+  onSave?: (value: string | null) => void;
 }) {
   const { t } = useTranslation();
   const [value, setValue] = useState(parseInt((initialDP50Value || "-1").replace("DP", ""), 10));
@@ -64,6 +66,7 @@ export function DP50Slider({
       <Slider
         value={value}
         onChange={handleChangeValue}
+        onChangeCommitted={() => onSave(value < 0 ? null : `DP${value}`)}
         valueLabelDisplay="auto"
         disableSwap
         step={1}

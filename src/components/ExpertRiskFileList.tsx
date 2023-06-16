@@ -21,7 +21,7 @@ import {
   CircularProgress,
   StepButton,
 } from "@mui/material";
-import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
 import getCategoryColor from "../functions/getCategoryColor";
 import SearchIcon from "@mui/icons-material/Search";
 import CheckCircleOutlineIcon from "@mui/icons-material/TaskAlt";
@@ -79,6 +79,23 @@ function RiskFileList({
       p._cr4de_direct_analysis_value !== null
     ) {
       navigate(`/step2B/${p._cr4de_direct_analysis_value}`);
+    } else if (p.cr4de_risk_file.cr4de_step2b_enabled && p.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.EMERGING) {
+      if (p._cr4de_direct_analysis_value === null) {
+        setIsLoading(true);
+
+        const newDirectAnalysis = await api.createDirectAnalysis({
+          "cr4de_expert@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${p._cr4de_contact_value})`,
+          "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${p._cr4de_risk_file_value})`,
+        });
+
+        await api.updateParticipant(p.cr4de_bnraparticipationid, {
+          "cr4de_direct_analysis@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${newDirectAnalysis.id})`,
+        });
+
+        navigate(`/step2B/${newDirectAnalysis.id}`);
+
+        setIsLoading(false);
+      }
     } else if (p.cr4de_risk_file.cr4de_step2a_enabled) {
       if (p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk") {
         window.alert(
@@ -211,7 +228,11 @@ function RiskFileList({
                     <ListItemText sx={{ width: "550px", flexGrow: 0 }}>
                       <Stepper activeStep={getActiveStep(p)} alternativeLabel sx={{ width: "550px" }}>
                         <Step
-                          completed={Boolean(p.cr4de_validation_finished || p.cr4de_risk_file.cr4de_step2a_enabled)}
+                          completed={Boolean(
+                            p.cr4de_validation_finished ||
+                              p.cr4de_risk_file.cr4de_step2a_enabled ||
+                              p.cr4de_risk_file.cr4de_step2b_enabled
+                          )}
                         >
                           <Tooltip title={getValidationTooltip(p)}>
                             <StepButton

@@ -1,10 +1,11 @@
 import { Trans } from "react-i18next";
 import { Box, Typography, Stack, Button, Container } from "@mui/material";
 import openInNewTab from "../../../functions/openInNewTab";
+import InformationButton from "../information/InformationButton";
 
-export default function Introduction({ onRunTutorial }: { onRunTutorial: () => void }) {
+export default function Introduction({}: {}) {
   return (
-    <Container>
+    <Container sx={{ pb: 12 }}>
       <Box style={{ position: "relative" }}>
         <Box sx={{ mb: 2, ml: 1 }}>
           <Typography variant="h5">
@@ -30,7 +31,7 @@ export default function Introduction({ onRunTutorial }: { onRunTutorial: () => v
             </Trans>
           </Typography>
           <Box sx={{ textAlign: "center", mt: 4, mb: 8 }}>
-            <Button variant="contained" onClick={() => openInNewTab("/learning/tools-analysisB", "_blank")}>
+            <Button variant="contained" onClick={() => openInNewTab("/learning/tools-analysisB-standard", "_blank")}>
               <Trans i18nKey="2A.introduction.button.infoportal">Open Information Portal</Trans>
             </Button>
           </Box>
@@ -113,6 +114,8 @@ export default function Introduction({ onRunTutorial }: { onRunTutorial: () => v
           </Typography>
         </Stack>
       </Box>
+
+      <InformationButton showTutorial={false} />
     </Container>
   );
 }

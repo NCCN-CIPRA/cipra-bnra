@@ -77,7 +77,7 @@ export default function BottomBar({
         <Trans i18nKey="button.back">Back</Trans>
       </Button>
 
-      <Progress
+      {/* <Progress
         activeStep={activeStep || 0}
         goToStep={onGoToStep}
         riskType={step2A?.cr4de_risk_file.cr4de_risk_type}
@@ -86,7 +86,7 @@ export default function BottomBar({
         catalysingEffects={catalysingEffects || []}
         catalysingEffectIndex={activeStep === STEPS.CATALYSING_EFFECTS ? (cascadeIndex + 1).toString() : null}
         hasClimateChange={Boolean(climateChange)}
-      />
+      /> */}
 
       <Box id="step2A-next-buttons">
         {hasNextStep && (

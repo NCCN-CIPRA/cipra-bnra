@@ -13,7 +13,7 @@ import useLazyRecords, { GetRecordsParams } from "./useLazyRecords";
  * }
  */
 export default function useRecords<T>(options: GetRecordsParams<T>) {
-  const { loading, data, getData } = useLazyRecords<T>(options);
+  const { loading, isFetching, data, getData } = useLazyRecords<T>(options);
 
   const [_fired, setFired] = useState(false);
 
@@ -24,5 +24,5 @@ export default function useRecords<T>(options: GetRecordsParams<T>) {
     setFired(true);
   }, [_fired, getData]);
 
-  return { loading, data, reloadData: getData };
+  return { loading, isFetching, data, reloadData: getData };
 }

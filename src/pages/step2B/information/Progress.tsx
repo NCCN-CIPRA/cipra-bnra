@@ -3,15 +3,23 @@ import { useTranslation } from "react-i18next";
 import { RefObject, useEffect, useState } from "react";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CheckIcon from "@mui/icons-material/Check";
-import { manmadeStepNames, stepNames, STEPS } from "../Steps";
+import { emergingStepNames, manmadeStepNames, stepNames, STEPS } from "../Steps";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { Step2BErrors } from "./validateInput";
+import { RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 
 const enum STATUS {
   DONE,
   DOING,
   ERROR,
   NOT_STARTED,
+}
+
+interface PROGRESS_STEP {
+  id: number;
+  title: string;
+  activeSuffix?: string;
+  inactiveSuffix?: string;
 }
 
 function DoingStepIcon({}) {
@@ -53,108 +61,36 @@ function DoneStepIcon({}) {
 }
 
 export default function Progress({
+  steps,
   activeStep,
   goToStep,
-  riskType,
-  causes,
-  catalysingEffects,
-  causeIndex,
-  catalysingEffectIndex,
-  hasClimateChange,
 }: {
-  activeStep: STEPS;
-  goToStep(step: STEPS): void;
-  riskType: string | undefined;
-  causes: DVRiskCascade[] | undefined;
-  catalysingEffects: DVRiskCascade[] | undefined;
-  causeIndex: string | null;
-  catalysingEffectIndex: string | null;
-  hasClimateChange: boolean | null;
+  steps: PROGRESS_STEP[];
+  activeStep: number;
+  goToStep(step: number): void;
 }) {
-  const { t } = useTranslation();
-
-  let causesStepLabel;
-  if (riskType === "Standard Risk")
-    causesStepLabel = t(stepNames[STEPS.CAUSES].titleI18N, stepNames[STEPS.CAUSES].titleDefault);
-  else if (riskType === "Malicious Man-made Risk")
-    causesStepLabel = t(manmadeStepNames[STEPS.CAUSES].titleI18N, manmadeStepNames[STEPS.CAUSES].titleDefault);
-
   return (
     <Box sx={{ flex: "1 1 auto", mx: 12, pt: 0.5 }} id="step2A-progress-bar">
       <Stepper nonLinear activeStep={activeStep}>
-        <Step completed={activeStep > STEPS.INTRODUCTION}>
-          {activeStep === STEPS.INTRODUCTION ? (
-            <StepLabel>
-              {t(stepNames[STEPS.INTRODUCTION].titleI18N, stepNames[STEPS.INTRODUCTION].titleDefault)}
-            </StepLabel>
-          ) : (
-            <StepButton onClick={() => goToStep(STEPS.INTRODUCTION)} icon={<DoneStepIcon />}>
-              {t(stepNames[STEPS.INTRODUCTION].titleI18N, stepNames[STEPS.INTRODUCTION].titleDefault)}
-            </StepButton>
-          )}
-        </Step>
-        {causes && causes.length > 0 && (
-          <Step completed={activeStep > STEPS.CAUSES}>
-            {activeStep < STEPS.CAUSES && (
+        {steps.map((s, i) => (
+          <Step key={s.id} completed={activeStep > s.id}>
+            {activeStep === s.id && (
               <StepLabel>
-                {causesStepLabel} {causes && causes.length > 0 && ` (${causes.length})`}
+                {s.title} {s.activeSuffix || ""}
               </StepLabel>
             )}
-            {activeStep === STEPS.CAUSES && (
-              <StepLabel>
-                {causesStepLabel} {causes && causeIndex && ` (${causeIndex}/${causes.length})`}
-              </StepLabel>
-            )}
-            {activeStep > STEPS.CAUSES && (
-              <StepButton color="secondary" onClick={() => goToStep(STEPS.CAUSES)} icon={<DoneStepIcon />}>
-                {causesStepLabel} {causes && causes.length > 0 && ` (${causes.length})`}
+            {activeStep > s.id && (
+              <StepButton onClick={() => goToStep(s.id)} icon={<DoneStepIcon />}>
+                {s.title} {s.inactiveSuffix || ""}
               </StepButton>
             )}
-          </Step>
-        )}
-        {hasClimateChange && (
-          <Step completed={activeStep > STEPS.CLIMATE_CHANGE}>
-            {activeStep < STEPS.CLIMATE_CHANGE && (
+            {activeStep < s.id && (
               <StepLabel>
-                {t(stepNames[STEPS.CLIMATE_CHANGE].titleI18N, stepNames[STEPS.CLIMATE_CHANGE].titleDefault)}
+                {s.title} {s.inactiveSuffix || ""}
               </StepLabel>
-            )}
-            {activeStep === STEPS.CLIMATE_CHANGE && (
-              <StepLabel>
-                {t(stepNames[STEPS.CLIMATE_CHANGE].titleI18N, stepNames[STEPS.CLIMATE_CHANGE].titleDefault)}
-              </StepLabel>
-            )}
-            {activeStep > STEPS.CLIMATE_CHANGE && (
-              <StepButton color="secondary" onClick={() => goToStep(STEPS.CLIMATE_CHANGE)} icon={<DoneStepIcon />}>
-                {t(stepNames[STEPS.CLIMATE_CHANGE].titleI18N, stepNames[STEPS.CLIMATE_CHANGE].titleDefault)}
-              </StepButton>
             )}
           </Step>
-        )}
-        {catalysingEffects && catalysingEffects.length > 0 && (
-          <Step completed={activeStep > STEPS.CATALYSING_EFFECTS}>
-            {activeStep < STEPS.CATALYSING_EFFECTS && (
-              <StepLabel>
-                {t(stepNames[STEPS.CATALYSING_EFFECTS].titleI18N, stepNames[STEPS.CATALYSING_EFFECTS].titleDefault)}{" "}
-                {catalysingEffects && catalysingEffects.length > 0 && ` (${catalysingEffects.length})`}
-              </StepLabel>
-            )}
-            {activeStep === STEPS.CATALYSING_EFFECTS && (
-              <StepLabel>
-                {t(stepNames[STEPS.CATALYSING_EFFECTS].titleI18N, stepNames[STEPS.CATALYSING_EFFECTS].titleDefault)}{" "}
-                {catalysingEffects &&
-                  catalysingEffectIndex &&
-                  ` (${catalysingEffectIndex}/${catalysingEffects.length})`}
-              </StepLabel>
-            )}
-            {activeStep > STEPS.CATALYSING_EFFECTS && (
-              <StepButton color="secondary" onClick={() => goToStep(STEPS.CATALYSING_EFFECTS)} icon={<DoneStepIcon />}>
-                {t(stepNames[STEPS.CATALYSING_EFFECTS].titleI18N, stepNames[STEPS.CATALYSING_EFFECTS].titleDefault)}{" "}
-                {catalysingEffects && catalysingEffects.length > 0 && ` (${catalysingEffects.length})`}
-              </StepButton>
-            )}
-          </Step>
-        )}
+        ))}
       </Stepper>
     </Box>
   );

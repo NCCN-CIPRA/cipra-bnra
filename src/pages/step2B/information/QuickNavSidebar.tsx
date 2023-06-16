@@ -17,12 +17,13 @@ import {
 import { Trans } from "react-i18next";
 import openInNewTab from "../../../functions/openInNewTab";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { useNavigate } from "react-router-dom";
 import { STEPS } from "../Steps";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 const drawerWidth = 400;
 
@@ -82,9 +83,9 @@ export default function QuickNavSidebar({
   setOpen,
   onTransitionTo,
 }: {
-  step2A: DVDirectAnalysis;
-  causes: DVRiskCascade<DVRiskFile>[];
-  climateChange: DVRiskCascade<DVRiskFile> | null;
+  step2A: DVDirectAnalysis<DVRiskFile>;
+  causes: DVRiskCascade<DVRiskFile, SmallRisk>[];
+  climateChange: DVRiskCascade<DVRiskFile> | null | undefined;
   catalysingEffects: DVRiskCascade<DVRiskFile>[];
   hasCauses: boolean;
   open: OPEN_STATE;
@@ -134,9 +135,21 @@ export default function QuickNavSidebar({
                 flexDirection: "column",
               }}
             >
-              <Typography variant="subtitle2">
-                <Trans i18nKey="2B.sidebar.causes">Potential Causes</Trans>
-              </Typography>
+              {step2A.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.STANDARD && (
+                <Typography variant="subtitle2">
+                  <Trans i18nKey="2B.sidebar.causes">Potential Causes</Trans>
+                </Typography>
+              )}
+              {step2A.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.MANMADE && (
+                <Typography variant="subtitle2">
+                  <Trans i18nKey="2B.sidebar.attacks">Potential Attacks</Trans>
+                </Typography>
+              )}
+              {step2A.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.EMERGING && (
+                <Typography variant="subtitle2">
+                  <Trans i18nKey="2B.sidebar.catalyzed">Catalyzed Risks</Trans>
+                </Typography>
+              )}
               <List dense sx={{ overflowY: "scroll" }}>
                 {causes.map((c, i) => (
                   <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding>
@@ -147,7 +160,13 @@ export default function QuickNavSidebar({
                         setOpen(OPEN_STATE.CLOSED);
                       }}
                     >
-                      <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
+                      <ListItemText
+                        primary={
+                          step2A.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.STANDARD
+                            ? c.cr4de_cause_hazard.cr4de_title
+                            : c.cr4de_effect_hazard.cr4de_title
+                        }
+                      />
                     </ListItemButton>
                   </ListItem>
                 ))}

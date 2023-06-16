@@ -93,7 +93,7 @@ export default function ManMade({
     setSourceDialogOpen(field);
     setExistingSource(existingSource);
   };
-  console.log(effects, cascade);
+  // console.log(effects, cascade);
   useEffect(() => {
     if (step2B && step2B.cr4de_bnracascadeanalysisid !== prevStep2B?.cr4de_bnracascadeanalysisid && visible) {
       loadAttachments({
@@ -217,7 +217,7 @@ export default function ManMade({
               </Typography>
             </Box>
           </Container>
-          <ClimateChangeAnalysis
+          {/* <ClimateChangeAnalysis
             riskFile={step2A.cr4de_risk_file}
             onShowCauses={onShowCauses}
             step2A={step2A}
@@ -229,7 +229,7 @@ export default function ManMade({
             onReloadAttachments={loadAttachments}
             setRunTutorial={setRunTutorial}
             onUnmount={onUnmount}
-          />
+          /> */}
         </Box>
       )}
       {activeStep === STEPS.CATALYSING_EFFECTS &&
@@ -246,7 +246,7 @@ export default function ManMade({
                 </Typography>
               </Box>
             </Container>
-            <CatalysingEffectsAnalysis
+            {/* <CatalysingEffectsAnalysis
               riskFile={step2A.cr4de_risk_file}
               causes={catalysingEffects}
               cascade={cascade}
@@ -265,7 +265,7 @@ export default function ManMade({
               onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
               onReloadAttachments={loadAttachments}
               setRunTutorial={setRunTutorial}
-            />
+            /> */}
           </Box>
         )}
       {step2A && step2B && (

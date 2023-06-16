@@ -14,37 +14,31 @@ import { useEffect, useState } from "react";
 import { STEPS } from "../Steps";
 
 export default function InformationButton({
-  activeStep,
+  showTutorial,
   riskFile,
-  forceOpen,
-  onRunTutorial,
+  onRunTutorial = () => {},
 }: {
-  activeStep: STEPS | null;
-  riskFile: DVRiskFile | undefined;
-  forceOpen: boolean;
-  onRunTutorial: () => void;
+  showTutorial: boolean;
+  riskFile?: DVRiskFile;
+  onRunTutorial?: () => void;
 }) {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    setOpen(forceOpen);
-  }, [forceOpen]);
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   const actions = [
-    ...(activeStep === STEPS.INTRODUCTION || activeStep === STEPS.CATALYSING_EFFECTS
-      ? []
-      : [
+    ...(showTutorial
+      ? [
           {
             icon: <HelpIcon />,
             name: t("speeddial.tutorial", "Play Tutorial"),
             onClick: onRunTutorial,
           },
-        ]),
+        ]
+      : []),
     {
       icon: <CategoryIcon />,
       name: t("speeddial.scales", "Quantitative Scales"),

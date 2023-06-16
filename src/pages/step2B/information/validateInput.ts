@@ -2,7 +2,7 @@ import { CascadeAnalysisInput } from "../../../functions/cascades";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import { CCInput } from "../standard/ClimateChangeAnalysis";
 
 type Step2BError = [DVRiskCascade<DVRiskFile>, number, any];
@@ -17,81 +17,85 @@ export interface Step2BErrors {
   catalysingEffects?: Step2BError[];
 }
 
-export function validateStep2B(
-  step2A: CCInput | null,
-  step2B: BaseCascadeAnalysisInput[] | null,
-  currentCascade: DVRiskCascade | null,
-  lastInput: BaseCascadeAnalysisInput | null,
-  causes: DVRiskCascade<DVRiskFile>[] | null,
-  climateChange: DVRiskCascade<DVRiskFile> | null,
-  catalysingEffects: DVRiskCascade<DVRiskFile>[] | null
-) {
-  if (causes === null || catalysingEffects === null || step2A === null || step2B === null) return null;
+export function causeAnalysisComplete(cascadeAnalysis: DVCascadeAnalysis) {
+  return Object.keys(getCauseFieldsWithErrors(cascadeAnalysis)).length <= 0;
+}
 
-  const errors: { causes?: any; climateChange?: any; catalysingEffects?: any } = {};
+export function validateStep2B(step2A: DVDirectAnalysis, step2B: DVCascadeAnalysis<DVRiskCascade<DVRiskFile>>[]) {
+  let errors: Step2BErrors = {
+    causes: [],
+    climateChange: undefined,
+    catalysingEffects: [],
+  };
 
-  const causeErrors = causes.reduce((e, cause, i) => {
-    const input =
-      currentCascade && currentCascade.cr4de_bnrariskcascadeid === cause.cr4de_bnrariskcascadeid
-        ? lastInput
-        : step2B.find((s) => s._cr4de_cascade_value === cause.cr4de_bnrariskcascadeid);
+  const cascadesDone: any = {};
 
-    if (!input) return [...e, [cause, i, null]] as Step2BError[];
-    else {
-      const fieldErrors = getInputFieldsWithErrors(input);
+  errors = step2B.reduce((e, s) => {
+    if (cascadesDone[s.cr4de_cascade.cr4de_bnrariskcascadeid]) return e;
+
+    cascadesDone[s.cr4de_cascade.cr4de_bnrariskcascadeid] = true;
+
+    if (s.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.STANDARD) {
+      const fieldErrors = getCauseFieldsWithErrors(s);
 
       if (Object.keys(fieldErrors).length > 0) {
-        return [...e, [cause, i, fieldErrors]] as Step2BError[];
-      }
-    }
-
-    return e;
-  }, [] as Step2BError[]);
-
-  if (Object.keys(causeErrors).length > 0) {
-    errors.causes = causeErrors;
-  }
-
-  if (climateChange) {
-    const climateChangeErrors = getInputFieldsWithErrorsCC(step2A);
-
-    if (Object.keys(climateChangeErrors).length > 0) {
-      errors.climateChange = [climateChange, 0, climateChangeErrors];
-    }
-  }
-
-  const catalysingErrors = catalysingEffects.reduce((e, ce, i) => {
-    const input =
-      currentCascade && currentCascade.cr4de_bnrariskcascadeid === ce.cr4de_bnrariskcascadeid
-        ? lastInput
-        : step2B.find((s) => s._cr4de_cascade_value === ce.cr4de_bnrariskcascadeid);
-
-    if (!input) return [...e, [ce, i, null]] as Step2BError[];
-    else {
-      if (input.cr4de_quali_cascade === null || input.cr4de_quali_cascade === "") {
-        return [
+        return {
           ...e,
-          [
-            ce,
-            i,
-            {
-              cr4de_quali_cascade: null,
-            },
+          causes: [
+            ...(e.causes || []),
+            [
+              s.cr4de_cascade,
+              step2B
+                .filter((i) => i.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.STANDARD)
+                .indexOf(s),
+              fieldErrors,
+            ],
           ],
-        ] as Step2BError[];
+        } as Step2BErrors;
+      }
+    } else if (s.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING) {
+      if (s.cr4de_cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0) {
+        const climateChangeErrors = getCCFieldsWithErrors(step2A);
+
+        if (Object.keys(climateChangeErrors).length > 0) {
+          return { ...e, climateChange: [s.cr4de_cascade, 0, climateChangeErrors] as Step2BError };
+        }
+      } else {
+        const fieldErrors = getCatalysingFieldsWithErrors(s);
+
+        if (Object.keys(fieldErrors).length > 0) {
+          return {
+            ...e,
+            catalysingEffects: [
+              ...(e.catalysingEffects || []),
+              [
+                s.cr4de_cascade,
+                step2B
+                  .filter(
+                    (i) =>
+                      i.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING &&
+                      i.cr4de_cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
+                  )
+                  .indexOf(s),
+                fieldErrors,
+              ],
+            ],
+          } as Step2BErrors;
+        }
       }
     }
 
     return e;
-  }, [] as Step2BError[]);
-  if (Object.keys(catalysingErrors).length > 0) {
-    errors.catalysingEffects = catalysingErrors;
-  }
+  }, errors as Step2BErrors);
+
+  if (errors.causes && errors.causes.length <= 0) delete errors.causes;
+  if (errors.catalysingEffects && errors.catalysingEffects.length <= 0) delete errors.catalysingEffects;
+  if (!errors.climateChange) delete errors.climateChange;
 
   return errors;
 }
 
-export function getInputFieldsWithErrorsCC(input: CCInput) {
+export function getCCFieldsWithErrors(input: DVDirectAnalysis) {
   const fields: (keyof CCInput)[] = [
     "cr4de_dp50_quali",
     "cr4de_dp50_quanti_c",
@@ -108,24 +112,24 @@ export function getInputFieldsWithErrorsCC(input: CCInput) {
     }
 
     return acc;
-  }, {});
+  }, {} as { [key in keyof DVDirectAnalysis]: any });
 }
 
-function getInputFieldsWithErrors(input: CascadeAnalysisInput) {
-  const fields: (keyof CascadeAnalysisInput)[] = [
-    "cr4de_c2c",
-    "cr4de_c2m",
-    "cr4de_c2e",
-    "cr4de_m2c",
-    "cr4de_m2m",
-    "cr4de_m2e",
-    "cr4de_e2c",
-    "cr4de_e2m",
-    "cr4de_e2e",
-    "cr4de_quali_cascade",
-  ];
+const CAUSE_FIELDS: (keyof DVCascadeAnalysis)[] = [
+  "cr4de_c2c",
+  "cr4de_c2m",
+  "cr4de_c2e",
+  "cr4de_m2c",
+  "cr4de_m2m",
+  "cr4de_m2e",
+  "cr4de_e2c",
+  "cr4de_e2m",
+  "cr4de_e2e",
+  "cr4de_quali_cascade",
+];
 
-  return fields.reduce((acc, f) => {
+export function getCauseFieldsWithErrors(input: DVCascadeAnalysis): { [key in keyof DVCascadeAnalysis]: any } {
+  return CAUSE_FIELDS.reduce((acc, f) => {
     if (input[f] === null || input[f] === "") {
       return {
         ...acc,
@@ -134,5 +138,14 @@ function getInputFieldsWithErrors(input: CascadeAnalysisInput) {
     }
 
     return acc;
-  }, {});
+  }, {} as { [key in keyof DVCascadeAnalysis]: any });
+}
+
+export function getCatalysingFieldsWithErrors(input: DVCascadeAnalysis): { [key in keyof DVCascadeAnalysis]: any } {
+  if (input.cr4de_quali_cascade === null || input.cr4de_quali_cascade === "")
+    return {
+      cr4de_quali_cascade: null,
+    } as { [key in keyof DVCascadeAnalysis]: any };
+
+  return {} as { [key in keyof DVCascadeAnalysis]: any };
 }

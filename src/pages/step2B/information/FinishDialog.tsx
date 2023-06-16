@@ -1,15 +1,12 @@
 import {
-  Box,
   Button,
-  Paper,
-  Fade,
-  Container,
   Typography,
   Dialog,
   DialogContent,
   DialogContentText,
   DialogActions,
   DialogTitle,
+  CircularProgress,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -49,7 +46,19 @@ export default function FinishDialog({
 
   return (
     <Dialog open={finishedDialogOpen} onClose={() => setFinishedDialogOpen(false)}>
-      {inputErrors && Object.keys(inputErrors).length <= 0 ? (
+      {inputErrors === null && (
+        <>
+          <DialogTitle>
+            <Trans i18nKey="2B.finishedDialog.validateTitle">Validating Input</Trans>
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText sx={{ textAlign: "center" }}>
+              <CircularProgress />
+            </DialogContentText>
+          </DialogContent>
+        </>
+      )}
+      {inputErrors !== null && Object.keys(inputErrors).length <= 0 && (
         <>
           <DialogTitle>
             <Trans i18nKey="2B.finishedDialog.title">Are you finished with step 2B?</Trans>
@@ -86,7 +95,8 @@ export default function FinishDialog({
             </Button>
           </DialogActions>
         </>
-      ) : (
+      )}
+      {inputErrors !== null && Object.keys(inputErrors).length > 0 && (
         <>
           <DialogTitle>
             <Trans i18nKey="2B.exitDialog.title">Would you like to exit step 2B?</Trans>

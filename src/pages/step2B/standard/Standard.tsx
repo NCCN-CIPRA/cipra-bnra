@@ -1,288 +1,420 @@
-import { Alert, Box, Tooltip, Button, Link, Container, Stack, Typography } from "@mui/material";
-import { Trans, useTranslation } from "react-i18next";
-import { SCENARIOS, Scenarios } from "../../../functions/scenarios";
+import { useState, useEffect } from "react";
+
+import { STEPS } from "./Steps";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
-import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { Box, CircularProgress, Fade } from "@mui/material";
+import { CrossFade } from "../../../components/CrossFade";
 import Introduction from "./Introduction";
-import { useEffect, useState, MutableRefObject } from "react";
-import { stepNames, STEPS } from "../Steps";
-import CascadeAnalysis from "./CascadeAnalysis";
-import { Link as RouterLink, useSearchParams } from "react-router-dom";
-import { DVContact } from "../../../types/dataverse/DVContact";
-import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
-import { useUnmountEffect } from "framer-motion";
-import { CascadeAnalysisInput } from "../../../functions/cascades";
-import { DVAttachment } from "../../../types/dataverse/DVAttachment";
-import useRecords from "../../../hooks/useRecords";
-import { DataTable } from "../../../hooks/useAPI";
+import BottomBar from "./BottomBar";
 import useLazyRecords from "../../../hooks/useLazyRecords";
-import AttachmentsDialog from "../information/AttachmentsDialog";
-import ClimateChangeAnalysis, { CCInput } from "./ClimateChangeAnalysis";
+import useRecords from "../../../hooks/useRecords";
+import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
+import useAPI, { DataTable } from "../../../hooks/useAPI";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import { useOutletContext, useSearchParams } from "react-router-dom";
+import CascadeAnalysis from "./CascadeAnalysis";
+import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
+import { AuthPageContext } from "../../AuthPage";
+import {
+  getCCFieldsWithErrors,
+  getCatalysingFieldsWithErrors,
+  getCauseFieldsWithErrors,
+} from "../information/validateInput";
+import { useTranslation } from "react-i18next";
+import ClimateChangeAnalysis from "./ClimateChangeAnalysis";
+import QuickNavSidebar, { OPEN_STATE } from "../information/QuickNavSidebar";
 import CatalysingEffectsAnalysis from "./CatalysingEffectsnalysis";
-import CascadeTutorial from "../information/CascadeTutorial";
-import CCTutorial from "../information/CCTutorial";
-import CatalysingTutorial from "../information/CatalysingTutorial";
 
 export default function Standard({
-  activeStep,
-  causes,
-  catalysingEffects,
-  climateChange,
-  cascade,
-  cascadeIndex,
-  step2A,
-  step2B,
-  step2AInput,
-  step2BInput,
-  activeCauseScenario,
-  activeEffectScenario,
-  qualiError,
-  quantiErrors,
-  runTutorial,
-  visible,
-  setRunTutorial,
-  setStep2BInput,
-  onSave,
-  onNext,
-  onPrevious,
-  onChangeScenario,
-  onUnmount,
-  onShowCauses,
+  directAnalysis,
+  isFetchingDirectAnalysis,
+  reloadDirectAnalysis,
+  onFinish,
 }: {
-  activeStep: STEPS | null;
-  causes: DVRiskCascade<DVRiskFile>[] | null;
-  catalysingEffects: DVRiskCascade[] | null;
-  climateChange: DVRiskCascade<DVRiskFile, DVRiskFile> | null;
-  cascade: DVRiskCascade<DVRiskFile, DVRiskFile> | null;
-  cascadeIndex: number;
-  step2A: DVDirectAnalysis<DVRiskFile>;
-  step2B: DVCascadeAnalysis | null;
-  step2AInput: CCInput | null;
-  step2BInput: CascadeAnalysisInput | null;
-  activeCauseScenario: SCENARIOS;
-  activeEffectScenario: SCENARIOS;
-  qualiError: boolean;
-  quantiErrors: boolean[] | null;
-  runTutorial: boolean;
-  visible: boolean;
-  setRunTutorial: (run: boolean) => void;
-  setStep2BInput: (input: CascadeAnalysisInput, update?: boolean) => void;
-  onSave: () => Promise<void>;
-  onNext: () => Promise<void>;
-  onPrevious: () => Promise<void>;
-  onChangeScenario: (causeScenario: SCENARIOS | null, effectScenario: SCENARIOS | null) => void;
-  onUnmount: () => void;
-  onShowCauses: () => void;
+  directAnalysis: DVDirectAnalysis<DVRiskFile>;
+  isFetchingDirectAnalysis: boolean;
+  reloadDirectAnalysis: () => Promise<void>;
+  onFinish: () => Promise<void>;
 }) {
+  const api = useAPI();
   const { t } = useTranslation();
-  const [sourceDialogOpen, setSourceDialogOpen] = useState<string | null>(null);
-  const [existingSource, setExistingSource] = useState<DVAttachment | undefined>(undefined);
+  const { user } = useOutletContext<AuthPageContext>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeStep, setActiveStep] = useState<STEPS | null>(null);
 
-  const [prevStep2B, setPrevStep2B] = useState<DVCascadeAnalysis | null>(null);
+  const [causes, setCauses] = useState<DVRiskCascade<DVRiskFile, SmallRisk>[] | null>(null);
+  const [climateChange, setClimateChange] = useState<DVRiskCascade<DVRiskFile, SmallRisk> | null | undefined>(null);
+  const [catalysingEffects, setCatalysingEffects] = useState<DVRiskCascade<DVRiskFile, SmallRisk>[] | null>(null);
+  const [cascadeIndex1, setCascadeIndex1] = useState<number | null>(null);
+  const [cascadeIndex2, setCascadeIndex2] = useState<number | null>(null);
+  const [visibleCascade, setVisibleCascade] = useState<number | null>(null);
+  const [cascadeAnalysis1, setCascadeAnalysis1] = useState<DVCascadeAnalysis | null>(null);
+  const [cascadeAnalysis2, setCascadeAnalysis2] = useState<DVCascadeAnalysis | null>(null);
 
-  const {
-    data: attachments,
-    hasRun: attachmentsFetched,
-    getData: loadAttachments,
-  } = useLazyRecords<DVAttachment<unknown, DVAttachment>>({
-    table: DataTable.ATTACHMENT,
+  const [quantiErrors, setQuantiErrors] = useState<boolean[] | null>(null);
+  const [qualiError, setQualiError] = useState(false);
+  const [quickNavOpen, setQuickNavOpen] = useState(OPEN_STATE.CLOSED);
+
+  useRecords<DVRiskCascade<DVRiskFile, SmallRisk>>({
+    table: DataTable.RISK_CASCADE,
+    query: `$filter=_cr4de_effect_hazard_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_cause_hazard,cr4de_effect_hazard($select=cr4de_hazard_id,cr4de_title,cr4de_risk_type)`,
+    transformResult: (result: DVRiskCascade<DVRiskFile, SmallRisk>[]) => {
+      return result.sort((a, b) => {
+        if (a.cr4de_cause_hazard.cr4de_subjective_importance !== b.cr4de_cause_hazard.cr4de_subjective_importance) {
+          return a.cr4de_cause_hazard.cr4de_subjective_importance - b.cr4de_cause_hazard.cr4de_subjective_importance;
+        }
+        return a.cr4de_cause_hazard.cr4de_hazard_id.localeCompare(b.cr4de_cause_hazard.cr4de_hazard_id);
+      });
+    },
+    onComplete: async (result: DVRiskCascade<DVRiskFile, SmallRisk>[]) => {
+      const iCauses = result.filter((c) => c.cr4de_cause_hazard.cr4de_risk_type !== "Emerging Risk");
+      const iCatalysingEffects = result.filter(
+        (c) =>
+          c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk" &&
+          c.cr4de_cause_hazard.cr4de_title.indexOf("Climate Change") < 0
+      );
+      const iClimateChange = result.find((c) => c.cr4de_cause_hazard.cr4de_title.indexOf("Climate Change") >= 0);
+
+      setCauses(iCauses);
+      setCatalysingEffects(iCatalysingEffects);
+      setClimateChange(iClimateChange);
+    },
   });
 
-  const handleOpenSourceDialog = (field: string) => (existingSource?: DVAttachment) => {
-    setSourceDialogOpen(field);
-    setExistingSource(existingSource);
+  const isLoading = activeStep === null || causes === null || climateChange === null || catalysingEffects === null;
+  const cascadeIndex = visibleCascade === 1 ? cascadeIndex1 || 0 : cascadeIndex2 || 0;
+  const setCascadeIndex = (newIndex: number) => {
+    if (visibleCascade === 1) {
+      setCascadeIndex2(newIndex);
+      setCascadeAnalysis2(null);
+      setVisibleCascade(2);
+    } else {
+      setCascadeIndex1(newIndex);
+      setCascadeAnalysis1(null);
+      setVisibleCascade(1);
+    }
   };
+  let cascade: DVRiskCascade | undefined;
+  if (!isLoading) {
+    if (activeStep === STEPS.CAUSES) cascade = causes[cascadeIndex];
+    else if (activeStep === STEPS.CLIMATE_CHANGE) cascade = climateChange;
+    else if (activeStep == STEPS.CATALYSING_EFFECTS) cascade = catalysingEffects[cascadeIndex];
+  }
+  const cascadeAnalysis = visibleCascade === 1 ? cascadeAnalysis1 : cascadeAnalysis2;
+
+  const { getData: loadCascadeAnalysis, isFetching: fetchingCascadeAnalysis } = useLazyRecords<DVCascadeAnalysis>({
+    table: DataTable.CASCADE_ANALYSIS,
+  });
 
   useEffect(() => {
-    if (step2B && step2B.cr4de_bnracascadeanalysisid !== prevStep2B?.cr4de_bnracascadeanalysisid && visible) {
-      loadAttachments({
-        query: `$filter=_cr4de_cascadeanalysis_value eq '${step2B.cr4de_bnracascadeanalysisid}'&$expand=cr4de_referencedSource`,
+    if (isLoading) return;
+
+    if (cascade && (!cascadeAnalysis || cascade.cr4de_bnrariskcascadeid !== cascadeAnalysis._cr4de_cascade_value))
+      loadCascadeAnalysis({
+        query: `$orderby=createdon&$filter=_cr4de_expert_value eq ${user?.contactid} and _cr4de_risk_file_value eq ${directAnalysis._cr4de_risk_file_value} and _cr4de_cascade_value eq ${cascade.cr4de_bnrariskcascadeid}`,
+        onComplete: async (result) => {
+          if (isLoading || !cascade) return;
+
+          if (result === null || result.length <= 0) {
+            await api.createCascadeAnalysis({
+              "cr4de_expert@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+              "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${directAnalysis._cr4de_risk_file_value})`,
+              "cr4de_cascade@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${cascade.cr4de_bnrariskcascadeid})`,
+            });
+            await loadCascadeAnalysis();
+          } else {
+            if (visibleCascade === 1) setCascadeAnalysis1(result[0]);
+            else setCascadeAnalysis2(result[0]);
+          }
+        },
         saveOptions: true,
       });
-      setPrevStep2B(step2B);
+  }, [causes, climateChange, catalysingEffects, activeStep, visibleCascade]);
+
+  useEffect(() => {
+    const newStep: STEPS = parseInt(searchParams.get("step") || STEPS.INTRODUCTION.toString(), 10) as STEPS;
+    const newIndex = parseInt(searchParams.get("index") || "0", 10);
+
+    if (newStep !== activeStep) {
+      setActiveStep(newStep);
+      setCascadeIndex(newIndex);
+    } else if (newIndex !== cascadeIndex) {
+      setCascadeIndex(newIndex);
+
+      window.scrollTo({
+        behavior: "smooth",
+        top: window.scrollY + (document.getElementById("cascade-title")?.getBoundingClientRect().top || 0),
+      });
     }
-  }, [step2B, prevStep2B, visible]);
+  }, [searchParams]);
+
+  useEffect(() => {
+    setTimeout(
+      () =>
+        window.scrollTo({
+          behavior: "smooth",
+          top: 0,
+        }),
+      1000
+    );
+  }, [activeStep]);
+
+  const handleChangeStep = (newStep: STEPS, newIndex: number = 0) => {
+    setSearchParams({
+      step: newStep.toString(),
+      index: newIndex.toString(),
+    });
+  };
+
+  const hasNextStep = () => {
+    if (isLoading) return false;
+
+    const hasCauses = Boolean(causes && causes.length > 0);
+    const hasClimateChange = Boolean(climateChange);
+    const hasCatalysing = Boolean(catalysingEffects && catalysingEffects.length > 0);
+
+    if (activeStep === STEPS.INTRODUCTION) {
+      return hasCauses || hasClimateChange || hasCatalysing;
+    } else if (activeStep === STEPS.CAUSES) {
+      return hasClimateChange || hasCatalysing;
+    } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+      return hasCatalysing;
+    }
+    return false;
+  };
+
+  const handleNextStep = () => {
+    if (isLoading) return false;
+
+    const hasCauses = Boolean(causes && causes.length > 0);
+    const hasClimateChange = Boolean(climateChange);
+    const hasCatalysing = Boolean(catalysingEffects && catalysingEffects.length > 0);
+
+    if (hasMissingValues()) return;
+
+    if (activeStep === STEPS.INTRODUCTION) {
+      if (hasCauses) handleChangeStep(STEPS.CAUSES);
+      else if (hasClimateChange) handleChangeStep(STEPS.CLIMATE_CHANGE);
+      else if (hasCatalysing) handleChangeStep(STEPS.CATALYSING_EFFECTS);
+    } else if (activeStep === STEPS.CAUSES) {
+      if (cascadeIndex < causes.length - 1) {
+        handleChangeStep(STEPS.CAUSES, cascadeIndex + 1);
+      } else {
+        if (hasClimateChange) handleChangeStep(STEPS.CLIMATE_CHANGE);
+        else if (hasCatalysing) handleChangeStep(STEPS.CATALYSING_EFFECTS);
+      }
+    } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+      if (hasCatalysing) handleChangeStep(STEPS.CATALYSING_EFFECTS);
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (isLoading) return false;
+
+    const hasCauses = Boolean(causes && causes.length > 0);
+    const hasClimateChange = Boolean(climateChange);
+    const hasCatalysing = Boolean(catalysingEffects && catalysingEffects.length > 0);
+
+    if (activeStep === STEPS.CAUSES) {
+      if (cascadeIndex > 0) {
+        handleChangeStep(STEPS.CAUSES, cascadeIndex - 1);
+      } else {
+        handleChangeStep(STEPS.INTRODUCTION);
+      }
+    } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+      if (hasCauses) handleChangeStep(STEPS.CAUSES, causes.length - 1);
+    } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
+      if (hasClimateChange) handleChangeStep(STEPS.CLIMATE_CHANGE);
+      else if (hasCauses) handleChangeStep(STEPS.CAUSES, causes.length - 1);
+    }
+  };
+
+  const hasMissingValues = () => {
+    setQuantiErrors(null);
+    setQualiError(false);
+
+    if (activeStep === STEPS.CAUSES) {
+      if (!cascadeAnalysis) return true;
+
+      const errors = getCauseFieldsWithErrors(cascadeAnalysis);
+
+      if (Object.keys(errors).length <= 0) return false;
+      else if (errors.cr4de_quali_cascade === null) {
+        setQualiError(true);
+        return true;
+      } else {
+        setQuantiErrors([true]);
+        return true;
+      }
+    } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+      if (!directAnalysis) return true;
+
+      const errors = getCCFieldsWithErrors(directAnalysis);
+
+      if (Object.keys(errors).length <= 0) return false;
+      else if (errors.cr4de_dp50_quali === null) {
+        setQualiError(true);
+        return true;
+      } else {
+        setQuantiErrors([
+          errors.cr4de_dp50_quanti_c === null,
+          errors.cr4de_dp50_quanti_m === null,
+          errors.cr4de_dp50_quanti_e === null,
+        ]);
+        return true;
+      }
+    } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
+      if (!cascadeAnalysis) return true;
+
+      const errors = getCatalysingFieldsWithErrors(cascadeAnalysis);
+
+      if (Object.keys(errors).length <= 0) return false;
+      else if (errors.cr4de_quali_cascade === null) {
+        setQualiError(true);
+        return true;
+      }
+    }
+  };
+
+  const handleFinish = () => {
+    if (!hasNextStep() && hasMissingValues()) return;
+
+    onFinish();
+  };
 
   return (
     <>
-      {activeStep === STEPS.INTRODUCTION && <Introduction onRunTutorial={() => setRunTutorial(true)} />}
-      {activeStep === STEPS.CAUSES && step2A.cr4de_risk_file && causes && cascade && step2B && step2BInput && (
-        <Box>
-          <Container>
-            <Stack direction="column" sx={{ mb: 2, ml: 0 }}>
-              <Typography variant="h4">
-                <Trans i18nKey="2B.causes.title">Cause</Trans>
-              </Typography>
-              <Typography variant="body2" paragraph sx={{ mt: 2 }}>
-                <Trans i18nKey="2B.causes.intro.1">
-                  Cette page vous permet d'évaluer, pour chaque relation de cause à effet identifiée dans l'étape 1 de
-                  la BNRA, les probabilités conditionnelles entre les différents scénarios d'intensité des risques
-                  causaux et des risques conséquents.
-                </Trans>
-              </Typography>
-              <Box sx={{ textAlign: "center", mt: 1, mb: 4 }}>
-                <Button variant="contained" onClick={() => setRunTutorial(true)}>
-                  <Trans i18nKey="2B.introduction.button.tutorial.part">Show Tutorial for this page</Trans>
-                </Button>
-              </Box>
-              <Typography variant="body2" paragraph>
-                <Trans i18nKey="2B.causes.intro.2">
-                  Notez que chaque relation de cause à effet avec 3 scénarios d'intensité (considérable, majeure,
-                  extrême) nécessite 9 estimations de la probabilité conditionnelle.
-                </Trans>
-              </Typography>
-              <Typography variant="body2" paragraph>
-                <Trans i18nKey="2B.causes.intro.3">
-                  Veuillez sélectionner ci-dessous une estimation quantitative de la probabilité conditionnelle que le
-                  scénario d'intensité actuellement étudié se produise au cours de la période 2023-2026, en conséquence
-                  d'un autre risque de la BNRA.
-                </Trans>
-              </Typography>
-              <Typography variant="body2" paragraph>
-                <Trans i18nKey="2B.causes.intro.4">
-                  Vous pouvez naviguer entre les différents scénarios d'intensité soit en cliquant directement sur les
-                  scénarios d'intensité d'intérêt, soit en cliquant sur la flèche à droite des classes de probabilité
-                  conditionnelles.
-                </Trans>
-              </Typography>
-              <Alert severity="info" sx={{ mt: 2, mb: 0 }}>
-                <Typography variant="body2">
-                  <Trans i18nKey="2B.causes.info.1">
-                    Attention, il est nécessaire d'évaluer toutes les probabilités conditionnelles et de remplir tous
-                    les champs concernant chaque relation de cause à effet avant de pouvoir passer à l'étape suivante.
-                  </Trans>
-                </Typography>
-                <Typography variant="body2">
-                  <Trans i18nKey="2B.causes.info.2">
-                    Bien qu'il soit important pour nous de disposer d'une justification quant à la valeur quantitative
-                    que vous avez choisie, si vous ne souhaitez pas nous fournir de justification textuelle, nous vous
-                    invitons à cliquer sur le bouton PAS DE COMMENTAIRES.
-                  </Trans>
-                </Typography>
-              </Alert>
-              <Alert severity="warning" sx={{ mt: 2, mb: 0 }}>
-                <Typography variant="body2">
-                  <Trans i18nKey="2B.causes.warning.1">
-                    Dans cette étape, il convient d'estimer uniquement la probabilité conditionnelle.
-                  </Trans>
-                </Typography>
-                <Typography variant="body2">
-                  <Trans i18nKey="2B.causes.warning.2">
-                    Par exemple, lors de l'estimation de la probabilité conditionnelle d'une Dam failure suite à un
-                    tremblement de terre, il faut uniquement prendre en compte la possibilité d'une défaillance d'un
-                    barrage due à un tremblement de terre. Tous les autres éléments qui pourraient provoquer une rupture
-                    de barrage doivent être exclus.
-                  </Trans>
-                </Typography>
-              </Alert>
-            </Stack>
-          </Container>
-          <CascadeAnalysis
-            riskFile={step2A.cr4de_risk_file}
-            causes={causes}
-            cascade={cascade}
-            cascadeIndex={cascadeIndex}
-            step2B={step2B}
-            activeCauseScenario={activeCauseScenario}
-            activeEffectScenario={activeEffectScenario}
-            step2BInput={step2BInput}
-            setStep2BInput={setStep2BInput}
-            qualiError={qualiError}
-            onSave={onSave}
-            onNext={onNext}
-            onPrevious={onPrevious}
-            onChangeScenario={onChangeScenario}
-            onUnmount={onUnmount}
-            attachments={attachments}
-            onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
-            onReloadAttachments={loadAttachments}
-          />
-        </Box>
-      )}
-      {activeStep === STEPS.CLIMATE_CHANGE && step2A.cr4de_risk_file && climateChange && (
-        <Box>
-          <Container>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="h4" id="cc-title">
-                <Tooltip title={t("2B.cause.openRiskFile", "Click to open the risk file for this risk in a new tab")}>
-                  <Link
-                    to={`/learning/risk/${climateChange.cr4de_cause_hazard.cr4de_riskfilesid}`}
-                    component={RouterLink}
-                    target="_blank"
-                  >
-                    <Trans i18nKey="2B.climateChange.title">Climate Change</Trans>
-                  </Link>
-                </Tooltip>
-              </Typography>
-            </Box>
-          </Container>
-          <ClimateChangeAnalysis
-            riskFile={step2A.cr4de_risk_file}
-            onShowCauses={onShowCauses}
-            step2A={step2A}
-            step2AInput={step2AInput}
-            qualiError={qualiError}
-            quantiErrors={quantiErrors}
-            attachments={attachments}
-            onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
-            onReloadAttachments={loadAttachments}
-            setRunTutorial={setRunTutorial}
-            onUnmount={onUnmount}
-          />
-        </Box>
-      )}
-      {activeStep === STEPS.CATALYSING_EFFECTS &&
-        step2A.cr4de_risk_file &&
-        catalysingEffects &&
-        cascade &&
-        step2B &&
-        step2BInput && (
-          <Box>
-            <Container>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="h4">
-                  <Trans i18nKey="2B.catalysingEffects.title">Catalysing Effects</Trans>
-                </Typography>
-              </Box>
-            </Container>
-            <CatalysingEffectsAnalysis
-              riskFile={step2A.cr4de_risk_file}
-              causes={catalysingEffects}
-              cascade={cascade}
-              cascadeIndex={cascadeIndex}
-              step2B={step2B}
-              activeCauseScenario={activeCauseScenario}
-              activeEffectScenario={activeEffectScenario}
-              step2BInput={step2BInput}
-              setStep2BInput={setStep2BInput}
-              qualiError={qualiError}
-              onNext={onNext}
-              onPrevious={onPrevious}
-              onChangeScenario={onChangeScenario}
-              onUnmount={onUnmount}
-              attachments={attachments}
-              onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
-              onReloadAttachments={loadAttachments}
-              setRunTutorial={setRunTutorial}
-            />
-          </Box>
-        )}
-      {step2A && step2B && (
-        <AttachmentsDialog
-          field={sourceDialogOpen ?? ""}
-          riskFile={step2A.cr4de_risk_file}
-          cascadeAnalysis={step2B}
-          open={sourceDialogOpen !== null}
-          existingSource={existingSource}
-          onClose={() => setSourceDialogOpen(null)}
-          onSaved={() => loadAttachments()}
+      <Box sx={{ mt: 6 }}>
+        <CrossFade
+          components={[
+            {
+              in: isLoading,
+              component: (
+                <Box sx={{ mt: 32, textAlign: "center" }}>
+                  <CircularProgress />
+                </Box>
+              ),
+            },
+            {
+              in: activeStep === STEPS.INTRODUCTION,
+              component: <Introduction />,
+            },
+            {
+              in: activeStep === STEPS.CAUSES && visibleCascade === 1,
+              component: !isLoading && cascadeIndex1 !== null && (
+                <CascadeAnalysis
+                  directAnalysis={directAnalysis}
+                  cascadeAnalysis={cascadeAnalysis1}
+                  cascade={causes[cascadeIndex1]}
+                  cause={causes[cascadeIndex1].cr4de_cause_hazard}
+                  effect={directAnalysis.cr4de_risk_file}
+                  index={cascadeIndex1}
+                  count={causes.length}
+                  quantiErrors={quantiErrors}
+                  qualiError={qualiError}
+                  reloadCascadeAnalysis={loadCascadeAnalysis}
+                />
+              ),
+            },
+            {
+              in: activeStep === STEPS.CAUSES && visibleCascade === 2,
+              component: !isLoading && cascadeIndex2 !== null && (
+                <CascadeAnalysis
+                  directAnalysis={directAnalysis}
+                  cascadeAnalysis={cascadeAnalysis2}
+                  cascade={causes[cascadeIndex2]}
+                  cause={causes[cascadeIndex2].cr4de_cause_hazard}
+                  effect={directAnalysis.cr4de_risk_file}
+                  index={cascadeIndex2}
+                  count={causes.length}
+                  quantiErrors={quantiErrors}
+                  qualiError={qualiError}
+                  reloadCascadeAnalysis={loadCascadeAnalysis}
+                />
+              ),
+            },
+            {
+              in: activeStep === STEPS.CLIMATE_CHANGE,
+              component: climateChange && (
+                <ClimateChangeAnalysis
+                  directAnalysis={directAnalysis}
+                  cascadeAnalysis={cascadeAnalysis}
+                  cascade={climateChange}
+                  quantiErrors={quantiErrors}
+                  qualiError={qualiError}
+                  onShowCauses={() => setQuickNavOpen(OPEN_STATE.CAUSES)}
+                  reloadDirectAnalysis={reloadDirectAnalysis}
+                  reloadCascadeAnalysis={loadCascadeAnalysis}
+                />
+              ),
+            },
+            {
+              in: activeStep === STEPS.CATALYSING_EFFECTS && visibleCascade === 1,
+              component: !isLoading && cascadeIndex1 !== null && (
+                <CatalysingEffectsAnalysis
+                  directAnalysis={directAnalysis}
+                  cascadeAnalysis={cascadeAnalysis1}
+                  cause={causes[cascadeIndex1].cr4de_cause_hazard}
+                  effect={directAnalysis.cr4de_risk_file}
+                  index={cascadeIndex1}
+                  count={causes.length}
+                  qualiError={qualiError}
+                  reloadCascadeAnalysis={loadCascadeAnalysis}
+                />
+              ),
+            },
+            {
+              in: activeStep === STEPS.CATALYSING_EFFECTS && visibleCascade === 2,
+              component: !isLoading && cascadeIndex2 !== null && (
+                <CatalysingEffectsAnalysis
+                  directAnalysis={directAnalysis}
+                  cascadeAnalysis={cascadeAnalysis2}
+                  cause={causes[cascadeIndex2].cr4de_cause_hazard}
+                  effect={directAnalysis.cr4de_risk_file}
+                  index={cascadeIndex2}
+                  count={causes.length}
+                  qualiError={qualiError}
+                  reloadCascadeAnalysis={loadCascadeAnalysis}
+                />
+              ),
+            },
+          ]}
+        />
+      </Box>
+
+      {directAnalysis && causes !== null && catalysingEffects !== null && (
+        <QuickNavSidebar
+          step2A={directAnalysis}
+          causes={causes}
+          climateChange={climateChange}
+          catalysingEffects={catalysingEffects}
+          hasCauses={activeStep === STEPS.CLIMATE_CHANGE}
+          open={quickNavOpen}
+          setOpen={setQuickNavOpen}
+          onTransitionTo={handleChangeStep}
         />
       )}
 
-      {activeStep === STEPS.CAUSES && <CascadeTutorial run={runTutorial} setRun={setRunTutorial} />}
-      {activeStep === STEPS.CLIMATE_CHANGE && <CCTutorial run={runTutorial} setRun={setRunTutorial} />}
-      {activeStep === STEPS.CATALYSING_EFFECTS && <CatalysingTutorial run={runTutorial} setRun={setRunTutorial} />}
+      <Fade in={!isLoading}>
+        <Box>
+          {!isLoading && (
+            <BottomBar
+              activeStep={activeStep}
+              causes={causes.length}
+              climateChange={climateChange !== undefined}
+              catalysingEffects={catalysingEffects.length}
+              cascadeIndex={cascadeIndex + 1}
+              hasNextStep={hasNextStep()}
+              nextStepDisabled={isFetchingDirectAnalysis || fetchingCascadeAnalysis}
+              onNext={handleNextStep}
+              onPrevious={handlePreviousStep}
+              onGoToStep={handleChangeStep}
+              onFinish={handleFinish}
+            />
+          )}
+        </Box>
+      </Fade>
     </>
   );
 }
