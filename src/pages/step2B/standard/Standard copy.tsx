@@ -19,7 +19,7 @@ import { DataTable } from "../../../hooks/useAPI";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import AttachmentsDialog from "../information/AttachmentsDialog";
 import ClimateChangeAnalysis, { CCInput } from "./ClimateChangeAnalysis";
-import CatalysingEffectsAnalysis from "./CatalysingEffectsnalysis";
+import CatalysingEffectsAnalysis from "./CatalysingEffectsAnalysis";
 import CascadeTutorial from "../information/CascadeTutorial";
 import CCTutorial from "../information/CCTutorial";
 import CatalysingTutorial from "../information/CatalysingTutorial";

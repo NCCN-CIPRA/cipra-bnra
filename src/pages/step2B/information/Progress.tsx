@@ -71,9 +71,9 @@ export default function Progress({
 }) {
   return (
     <Box sx={{ flex: "1 1 auto", mx: 12, pt: 0.5 }} id="step2A-progress-bar">
-      <Stepper nonLinear activeStep={activeStep}>
+      <Stepper nonLinear>
         {steps.map((s, i) => (
-          <Step key={s.id} completed={activeStep > s.id}>
+          <Step key={s.id} active={activeStep === s.id} completed={activeStep > s.id}>
             {activeStep === s.id && (
               <StepLabel>
                 {s.title} {s.activeSuffix || ""}

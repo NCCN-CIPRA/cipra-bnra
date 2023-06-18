@@ -24,7 +24,7 @@ import {
 import { useTranslation } from "react-i18next";
 import ClimateChangeAnalysis from "./ClimateChangeAnalysis";
 import QuickNavSidebar, { OPEN_STATE } from "../information/QuickNavSidebar";
-import CatalysingEffectsAnalysis from "./CatalysingEffectsnalysis";
+import CatalysingEffectsAnalysis from "./CatalysingEffectsAnalysis";
 
 export default function Standard({
   directAnalysis,
@@ -46,11 +46,8 @@ export default function Standard({
   const [causes, setCauses] = useState<DVRiskCascade<DVRiskFile, SmallRisk>[] | null>(null);
   const [climateChange, setClimateChange] = useState<DVRiskCascade<DVRiskFile, SmallRisk> | null | undefined>(null);
   const [catalysingEffects, setCatalysingEffects] = useState<DVRiskCascade<DVRiskFile, SmallRisk>[] | null>(null);
-  const [cascadeIndex1, setCascadeIndex1] = useState<number | null>(null);
-  const [cascadeIndex2, setCascadeIndex2] = useState<number | null>(null);
-  const [visibleCascade, setVisibleCascade] = useState<number | null>(null);
-  const [cascadeAnalysis1, setCascadeAnalysis1] = useState<DVCascadeAnalysis | null>(null);
-  const [cascadeAnalysis2, setCascadeAnalysis2] = useState<DVCascadeAnalysis | null>(null);
+  const [cascadeIndex, setCascadeIndex] = useState<number | null>(null);
+  const [cascadeAnalysis, setCascadeAnalysis] = useState<DVCascadeAnalysis | null>(null);
 
   const [quantiErrors, setQuantiErrors] = useState<boolean[] | null>(null);
   const [qualiError, setQualiError] = useState(false);
@@ -82,55 +79,59 @@ export default function Standard({
     },
   });
 
-  const isLoading = activeStep === null || causes === null || climateChange === null || catalysingEffects === null;
-  const cascadeIndex = visibleCascade === 1 ? cascadeIndex1 || 0 : cascadeIndex2 || 0;
-  const setCascadeIndex = (newIndex: number) => {
-    if (visibleCascade === 1) {
-      setCascadeIndex2(newIndex);
-      setCascadeAnalysis2(null);
-      setVisibleCascade(2);
-    } else {
-      setCascadeIndex1(newIndex);
-      setCascadeAnalysis1(null);
-      setVisibleCascade(1);
-    }
-  };
-  let cascade: DVRiskCascade | undefined;
+  const isLoading =
+    activeStep === null ||
+    causes === null ||
+    climateChange === null ||
+    catalysingEffects === null ||
+    cascadeIndex === null;
+  let cascade: DVRiskCascade<DVRiskFile, SmallRisk> | null | undefined = null;
   if (!isLoading) {
     if (activeStep === STEPS.CAUSES) cascade = causes[cascadeIndex];
     else if (activeStep === STEPS.CLIMATE_CHANGE) cascade = climateChange;
-    else if (activeStep == STEPS.CATALYSING_EFFECTS) cascade = catalysingEffects[cascadeIndex];
+    else if (activeStep === STEPS.CATALYSING_EFFECTS) cascade = catalysingEffects[cascadeIndex];
   }
-  const cascadeAnalysis = visibleCascade === 1 ? cascadeAnalysis1 : cascadeAnalysis2;
 
-  const { getData: loadCascadeAnalysis, isFetching: fetchingCascadeAnalysis } = useLazyRecords<DVCascadeAnalysis>({
+  const {
+    data: step2B,
+    getData: loadCascadeAnalyses,
+    isFetching: fetchingCascadeAnalysis,
+  } = useLazyRecords<DVCascadeAnalysis>({
     table: DataTable.CASCADE_ANALYSIS,
   });
 
-  useEffect(() => {
-    if (isLoading) return;
+  const onCompleteCascadeAnalysis = async (result: DVCascadeAnalysis<unknown>[]) => {
+    if (!cascade) return;
 
-    if (cascade && (!cascadeAnalysis || cascade.cr4de_bnrariskcascadeid !== cascadeAnalysis._cr4de_cascade_value))
-      loadCascadeAnalysis({
-        query: `$orderby=createdon&$filter=_cr4de_expert_value eq ${user?.contactid} and _cr4de_risk_file_value eq ${directAnalysis._cr4de_risk_file_value} and _cr4de_cascade_value eq ${cascade.cr4de_bnrariskcascadeid}`,
-        onComplete: async (result) => {
-          if (isLoading || !cascade) return;
+    const resultCascadeAnalysis =
+      result?.find((r) => cascade && r._cr4de_cascade_value === cascade.cr4de_bnrariskcascadeid) ?? null;
 
-          if (result === null || result.length <= 0) {
-            await api.createCascadeAnalysis({
-              "cr4de_expert@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
-              "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${directAnalysis._cr4de_risk_file_value})`,
-              "cr4de_cascade@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${cascade.cr4de_bnrariskcascadeid})`,
-            });
-            await loadCascadeAnalysis();
-          } else {
-            if (visibleCascade === 1) setCascadeAnalysis1(result[0]);
-            else setCascadeAnalysis2(result[0]);
-          }
-        },
+    if (!resultCascadeAnalysis) {
+      await api.createCascadeAnalysis({
+        "cr4de_expert@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+        "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${directAnalysis._cr4de_risk_file_value})`,
+        "cr4de_cascade@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${cascade.cr4de_bnrariskcascadeid})`,
+      });
+      await loadCascadeAnalyses({
+        query: `$orderby=createdon&$filter=_cr4de_expert_value eq ${user?.contactid} and _cr4de_risk_file_value eq ${directAnalysis._cr4de_risk_file_value}`,
+        onComplete: onCompleteCascadeAnalysis,
         saveOptions: true,
       });
-  }, [causes, climateChange, catalysingEffects, activeStep, visibleCascade]);
+    } else {
+      setCascadeAnalysis(resultCascadeAnalysis);
+    }
+  };
+
+  useEffect(() => {
+    if (!cascade) return;
+
+    if (cascade && (!cascadeAnalysis || cascade.cr4de_bnrariskcascadeid !== cascadeAnalysis._cr4de_cascade_value))
+      loadCascadeAnalyses({
+        query: `$orderby=createdon&$filter=_cr4de_expert_value eq ${user?.contactid} and _cr4de_risk_file_value eq ${directAnalysis._cr4de_risk_file_value}`,
+        onComplete: onCompleteCascadeAnalysis,
+        saveOptions: true,
+      });
+  }, [cascade]);
 
   useEffect(() => {
     const newStep: STEPS = parseInt(searchParams.get("step") || STEPS.INTRODUCTION.toString(), 10) as STEPS;
@@ -139,26 +140,24 @@ export default function Standard({
     if (newStep !== activeStep) {
       setActiveStep(newStep);
       setCascadeIndex(newIndex);
-    } else if (newIndex !== cascadeIndex) {
-      setCascadeIndex(newIndex);
 
+      setTimeout(
+        () =>
+          window.scrollTo({
+            behavior: "smooth",
+            top: 0,
+          }),
+        1000
+      );
+    } else if (newIndex !== cascadeIndex) {
       window.scrollTo({
         behavior: "smooth",
         top: window.scrollY + (document.getElementById("cascade-title")?.getBoundingClientRect().top || 0),
       });
+
+      setTimeout(() => setCascadeIndex(newIndex), 500);
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    setTimeout(
-      () =>
-        window.scrollTo({
-          behavior: "smooth",
-          top: 0,
-        }),
-      1000
-    );
-  }, [activeStep]);
 
   const handleChangeStep = (newStep: STEPS, newIndex: number = 0) => {
     setSearchParams({
@@ -177,9 +176,11 @@ export default function Standard({
     if (activeStep === STEPS.INTRODUCTION) {
       return hasCauses || hasClimateChange || hasCatalysing;
     } else if (activeStep === STEPS.CAUSES) {
-      return hasClimateChange || hasCatalysing;
+      return Boolean((causes && causes.length > 0) || hasClimateChange || hasCatalysing);
     } else if (activeStep === STEPS.CLIMATE_CHANGE) {
       return hasCatalysing;
+    } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
+      return Boolean(catalysingEffects && catalysingEffects.length > 0);
     }
     return false;
   };
@@ -206,6 +207,10 @@ export default function Standard({
       }
     } else if (activeStep === STEPS.CLIMATE_CHANGE) {
       if (hasCatalysing) handleChangeStep(STEPS.CATALYSING_EFFECTS);
+    } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
+      if (cascadeIndex < catalysingEffects.length - 1) {
+        handleChangeStep(STEPS.CATALYSING_EFFECTS, cascadeIndex + 1);
+      }
     }
   };
 
@@ -217,16 +222,15 @@ export default function Standard({
     const hasCatalysing = Boolean(catalysingEffects && catalysingEffects.length > 0);
 
     if (activeStep === STEPS.CAUSES) {
-      if (cascadeIndex > 0) {
-        handleChangeStep(STEPS.CAUSES, cascadeIndex - 1);
-      } else {
-        handleChangeStep(STEPS.INTRODUCTION);
-      }
+      if (cascadeIndex > 0) handleChangeStep(STEPS.CAUSES, cascadeIndex - 1);
+      else handleChangeStep(STEPS.INTRODUCTION);
     } else if (activeStep === STEPS.CLIMATE_CHANGE) {
       if (hasCauses) handleChangeStep(STEPS.CAUSES, causes.length - 1);
     } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
-      if (hasClimateChange) handleChangeStep(STEPS.CLIMATE_CHANGE);
+      if (cascadeIndex > 0) handleChangeStep(STEPS.CATALYSING_EFFECTS, cascadeIndex - 1);
+      else if (hasClimateChange) handleChangeStep(STEPS.CLIMATE_CHANGE);
       else if (hasCauses) handleChangeStep(STEPS.CAUSES, causes.length - 1);
+      else handleChangeStep(STEPS.INTRODUCTION);
     }
   };
 
@@ -240,11 +244,11 @@ export default function Standard({
       const errors = getCauseFieldsWithErrors(cascadeAnalysis);
 
       if (Object.keys(errors).length <= 0) return false;
-      else if (errors.cr4de_quali_cascade === null) {
-        setQualiError(true);
+      else if (Object.keys(errors).length > 1 || errors.cr4de_quali_cascade === undefined) {
+        setTimeout(() => setQuantiErrors([true]), 500);
         return true;
       } else {
-        setQuantiErrors([true]);
+        setTimeout(() => setQualiError(true), 500);
         return true;
       }
     } else if (activeStep === STEPS.CLIMATE_CHANGE) {
@@ -253,15 +257,19 @@ export default function Standard({
       const errors = getCCFieldsWithErrors(directAnalysis);
 
       if (Object.keys(errors).length <= 0) return false;
-      else if (errors.cr4de_dp50_quali === null) {
-        setQualiError(true);
+      else if (Object.keys(errors).length > 1 || errors.cr4de_dp50_quali === undefined) {
+        setTimeout(
+          () =>
+            setQuantiErrors([
+              errors.cr4de_dp50_quanti_c === null,
+              errors.cr4de_dp50_quanti_m === null,
+              errors.cr4de_dp50_quanti_e === null,
+            ]),
+          500
+        );
         return true;
       } else {
-        setQuantiErrors([
-          errors.cr4de_dp50_quanti_c === null,
-          errors.cr4de_dp50_quanti_m === null,
-          errors.cr4de_dp50_quanti_e === null,
-        ]);
+        setTimeout(() => setQualiError(true), 500);
         return true;
       }
     } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
@@ -271,7 +279,7 @@ export default function Standard({
 
       if (Object.keys(errors).length <= 0) return false;
       else if (errors.cr4de_quali_cascade === null) {
-        setQualiError(true);
+        setTimeout(() => setQualiError(true), 500);
         return true;
       }
     }
@@ -297,45 +305,26 @@ export default function Standard({
               ),
             },
             {
-              in: activeStep === STEPS.INTRODUCTION,
+              in: !isLoading && activeStep === STEPS.INTRODUCTION,
               component: <Introduction />,
             },
             {
-              in: activeStep === STEPS.CAUSES && visibleCascade === 1,
-              component: !isLoading && cascadeIndex1 !== null && (
+              in: !isLoading && activeStep === STEPS.CAUSES,
+              component: !isLoading && cascadeIndex !== null && (
                 <CascadeAnalysis
                   directAnalysis={directAnalysis}
-                  cascadeAnalysis={cascadeAnalysis1}
-                  cascade={causes[cascadeIndex1]}
-                  cause={causes[cascadeIndex1].cr4de_cause_hazard}
-                  effect={directAnalysis.cr4de_risk_file}
-                  index={cascadeIndex1}
+                  cascadeAnalysis={cascadeAnalysis}
+                  cascade={causes[cascadeIndex]}
+                  index={cascadeIndex}
                   count={causes.length}
                   quantiErrors={quantiErrors}
                   qualiError={qualiError}
-                  reloadCascadeAnalysis={loadCascadeAnalysis}
+                  reloadCascadeAnalysis={loadCascadeAnalyses}
                 />
               ),
             },
             {
-              in: activeStep === STEPS.CAUSES && visibleCascade === 2,
-              component: !isLoading && cascadeIndex2 !== null && (
-                <CascadeAnalysis
-                  directAnalysis={directAnalysis}
-                  cascadeAnalysis={cascadeAnalysis2}
-                  cascade={causes[cascadeIndex2]}
-                  cause={causes[cascadeIndex2].cr4de_cause_hazard}
-                  effect={directAnalysis.cr4de_risk_file}
-                  index={cascadeIndex2}
-                  count={causes.length}
-                  quantiErrors={quantiErrors}
-                  qualiError={qualiError}
-                  reloadCascadeAnalysis={loadCascadeAnalysis}
-                />
-              ),
-            },
-            {
-              in: activeStep === STEPS.CLIMATE_CHANGE,
+              in: !isLoading && activeStep === STEPS.CLIMATE_CHANGE,
               component: climateChange && (
                 <ClimateChangeAnalysis
                   directAnalysis={directAnalysis}
@@ -345,37 +334,21 @@ export default function Standard({
                   qualiError={qualiError}
                   onShowCauses={() => setQuickNavOpen(OPEN_STATE.CAUSES)}
                   reloadDirectAnalysis={reloadDirectAnalysis}
-                  reloadCascadeAnalysis={loadCascadeAnalysis}
+                  reloadCascadeAnalysis={loadCascadeAnalyses}
                 />
               ),
             },
             {
-              in: activeStep === STEPS.CATALYSING_EFFECTS && visibleCascade === 1,
-              component: !isLoading && cascadeIndex1 !== null && (
+              in: !isLoading && activeStep === STEPS.CATALYSING_EFFECTS,
+              component: !isLoading && cascadeIndex !== null && (
                 <CatalysingEffectsAnalysis
                   directAnalysis={directAnalysis}
-                  cascadeAnalysis={cascadeAnalysis1}
-                  cause={causes[cascadeIndex1].cr4de_cause_hazard}
-                  effect={directAnalysis.cr4de_risk_file}
-                  index={cascadeIndex1}
-                  count={causes.length}
+                  cascadeAnalysis={cascadeAnalysis}
+                  cascade={catalysingEffects[cascadeIndex]}
+                  index={cascadeIndex}
+                  count={catalysingEffects.length}
                   qualiError={qualiError}
-                  reloadCascadeAnalysis={loadCascadeAnalysis}
-                />
-              ),
-            },
-            {
-              in: activeStep === STEPS.CATALYSING_EFFECTS && visibleCascade === 2,
-              component: !isLoading && cascadeIndex2 !== null && (
-                <CatalysingEffectsAnalysis
-                  directAnalysis={directAnalysis}
-                  cascadeAnalysis={cascadeAnalysis2}
-                  cause={causes[cascadeIndex2].cr4de_cause_hazard}
-                  effect={directAnalysis.cr4de_risk_file}
-                  index={cascadeIndex2}
-                  count={causes.length}
-                  qualiError={qualiError}
-                  reloadCascadeAnalysis={loadCascadeAnalysis}
+                  reloadCascadeAnalysis={loadCascadeAnalyses}
                 />
               ),
             },
@@ -386,6 +359,7 @@ export default function Standard({
       {directAnalysis && causes !== null && catalysingEffects !== null && (
         <QuickNavSidebar
           step2A={directAnalysis}
+          step2B={step2B || []}
           causes={causes}
           climateChange={climateChange}
           catalysingEffects={catalysingEffects}

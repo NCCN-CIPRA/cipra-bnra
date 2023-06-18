@@ -83,7 +83,7 @@ export default function ClimateChangeAnalysis({
   }, [quantiErrors]);
 
   useEffect(() => {
-    if (qualiError) {
+    if (qualiError && !quantiErrors) {
       window.scrollTo({
         behavior: "smooth",
         top: window.scrollY + (document.getElementById("quali-input")?.getBoundingClientRect().top || 0),

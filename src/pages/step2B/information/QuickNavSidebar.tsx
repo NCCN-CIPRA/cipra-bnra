@@ -13,6 +13,7 @@ import {
   CSSObject,
   styled,
   Stack,
+  ListItemIcon,
 } from "@mui/material";
 import { Trans } from "react-i18next";
 import openInNewTab from "../../../functions/openInNewTab";
@@ -24,6 +25,9 @@ import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { useNavigate } from "react-router-dom";
 import { STEPS } from "../Steps";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import CheckIcon from "@mui/icons-material/Check";
+import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
+import { getCCFieldsWithErrors, getCatalysingFieldsWithErrors, getCauseFieldsWithErrors } from "./validateInput";
 
 const drawerWidth = 400;
 
@@ -75,6 +79,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" 
 
 export default function QuickNavSidebar({
   step2A,
+  step2B,
   causes,
   climateChange,
   catalysingEffects,
@@ -84,6 +89,7 @@ export default function QuickNavSidebar({
   onTransitionTo,
 }: {
   step2A: DVDirectAnalysis<DVRiskFile>;
+  step2B: DVCascadeAnalysis[];
   causes: DVRiskCascade<DVRiskFile, SmallRisk>[];
   climateChange: DVRiskCascade<DVRiskFile> | null | undefined;
   catalysingEffects: DVRiskCascade<DVRiskFile>[];
@@ -160,6 +166,17 @@ export default function QuickNavSidebar({
                         setOpen(OPEN_STATE.CLOSED);
                       }}
                     >
+                      {step2B.find(
+                        (a) =>
+                          a._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
+                          Object.keys(getCauseFieldsWithErrors(a)).length <= 0
+                      ) ? (
+                        <ListItemIcon sx={{ minWidth: 32, ml: -2 }}>
+                          <CheckIcon color="primary" />
+                        </ListItemIcon>
+                      ) : (
+                        <ListItemIcon sx={{ minWidth: 32, ml: -2 }}></ListItemIcon>
+                      )}
                       <ListItemText
                         primary={
                           step2A.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.STANDARD
@@ -197,6 +214,13 @@ export default function QuickNavSidebar({
                         setOpen(OPEN_STATE.CLOSED);
                       }}
                     >
+                      {Object.keys(getCCFieldsWithErrors(step2A)).length <= 0 ? (
+                        <ListItemIcon sx={{ minWidth: 32, ml: -2 }}>
+                          <CheckIcon color="primary" />
+                        </ListItemIcon>
+                      ) : (
+                        <ListItemIcon sx={{ minWidth: 32, ml: -2 }}></ListItemIcon>
+                      )}
                       <ListItemText primary={climateChange.cr4de_cause_hazard.cr4de_title} />
                     </ListItemButton>
                   </ListItem>
@@ -209,6 +233,17 @@ export default function QuickNavSidebar({
                         setOpen(OPEN_STATE.CLOSED);
                       }}
                     >
+                      {step2B.find(
+                        (a) =>
+                          a._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
+                          Object.keys(getCatalysingFieldsWithErrors(a)).length <= 0
+                      ) ? (
+                        <ListItemIcon sx={{ minWidth: 32, ml: -2 }}>
+                          <CheckIcon color="primary" />
+                        </ListItemIcon>
+                      ) : (
+                        <ListItemIcon sx={{ minWidth: 32, ml: -2 }}></ListItemIcon>
+                      )}
                       <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
                     </ListItemButton>
                   </ListItem>

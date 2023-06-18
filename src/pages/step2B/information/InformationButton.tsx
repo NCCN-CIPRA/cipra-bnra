@@ -42,7 +42,7 @@ export default function InformationButton({
     {
       icon: <CategoryIcon />,
       name: t("speeddial.scales", "Quantitative Scales"),
-      onClick: () => riskFile && openInNewTab("/learning/quantitative-categories", "Quantitative Categories"),
+      onClick: () => openInNewTab("/learning/quantitative-categories", "Quantitative Categories"),
     },
   ];
 
