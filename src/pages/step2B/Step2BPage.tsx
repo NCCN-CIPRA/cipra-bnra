@@ -28,6 +28,8 @@ import { FeedbackStep } from "../../types/dataverse/DVFeedback";
 import FinishDialog from "./information/FinishDialog";
 import { Step2BErrors, validateStep2B } from "./information/validateInput";
 import { CrossFade } from "../../components/CrossFade";
+import ManMade from "./manmade/ManMade";
+import Emerging from "./emerging/Emerging";
 
 type RouteParams = {
   step2A_id: string;
@@ -77,11 +79,14 @@ export default function ({}) {
     setFinishedDialogOpen(true);
     setInputErrors(null);
 
+    const cascades = await api.getRiskCascades<DVRiskCascade<DVRiskFile>>(
+      `$filter=_cr4de_effect_hazard_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_cause_hazard,cr4de_effect_hazard($select=cr4de_hazard_id,cr4de_title,cr4de_risk_type)`
+    );
     const step2B = await api.getCascadeAnalyses<DVCascadeAnalysis<DVRiskCascade<DVRiskFile>>>(
       `$orderby=createdon&$filter=_cr4de_expert_value eq ${user?.contactid} and _cr4de_risk_file_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_cascade($select=cr4de_cause_hazard;$expand=cr4de_cause_hazard($select=cr4de_title,cr4de_risk_type))`
     );
 
-    setInputErrors(validateStep2B(directAnalysis, step2B));
+    setInputErrors(validateStep2B(cascades, directAnalysis, step2B));
   };
 
   usePageTitle(t("step2B.pageTitle", "BNRA 2023 - 2026 Risk Analysis B"));
@@ -137,6 +142,28 @@ export default function ({}) {
             in: Boolean(directAnalysis && riskType === RISK_TYPE.STANDARD),
             component: directAnalysis && (
               <Standard
+                directAnalysis={directAnalysis}
+                isFetchingDirectAnalysis={isFetchingDirectAnalysis}
+                reloadDirectAnalysis={reloadDirectAnalysis}
+                onFinish={handleFinish}
+              />
+            ),
+          },
+          {
+            in: Boolean(directAnalysis && riskType === RISK_TYPE.MANMADE),
+            component: directAnalysis && (
+              <ManMade
+                directAnalysis={directAnalysis}
+                isFetchingDirectAnalysis={isFetchingDirectAnalysis}
+                reloadDirectAnalysis={reloadDirectAnalysis}
+                onFinish={handleFinish}
+              />
+            ),
+          },
+          {
+            in: Boolean(directAnalysis && riskType === RISK_TYPE.EMERGING),
+            component: directAnalysis && (
+              <Emerging
                 directAnalysis={directAnalysis}
                 isFetchingDirectAnalysis={isFetchingDirectAnalysis}
                 reloadDirectAnalysis={reloadDirectAnalysis}

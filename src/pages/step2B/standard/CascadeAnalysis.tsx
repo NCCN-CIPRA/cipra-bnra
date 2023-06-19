@@ -420,7 +420,7 @@ const AnalysisSection = ({
               left: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "0px" : "-131px",
               width: activeCauseScenario === SCENARIOS.CONSIDERABLE ? "100%" : 115,
               transition: `all ${TRANSITION_S} ease`,
-              pointerEvents: "none",
+              pointerEvents: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "all" : "none",
             }}
           >
             <FullScenario
@@ -441,7 +441,7 @@ const AnalysisSection = ({
                 "calc(100% + 16px)",
               width: activeCauseScenario === SCENARIOS.MAJOR ? "100%" : 115,
               transition: `all ${TRANSITION_S} ease`,
-              pointerEvents: "none",
+              pointerEvents: activeEffectScenario === SCENARIOS.MAJOR ? "all" : "none",
             }}
           >
             <FullScenario
@@ -459,7 +459,7 @@ const AnalysisSection = ({
               left: (activeCauseScenario === SCENARIOS.EXTREME && "0px") || "calc(100% + 16px)",
               width: activeCauseScenario === SCENARIOS.EXTREME ? "100%" : 115,
               transition: `all ${TRANSITION_S} ease`,
-              pointerEvents: "none",
+              pointerEvents: activeEffectScenario === SCENARIOS.EXTREME ? "all" : "none",
             }}
           >
             <FullScenario
@@ -470,7 +470,7 @@ const AnalysisSection = ({
               visible={activeCauseScenario === SCENARIOS.EXTREME}
             />
           </Box>
-          <Box id="cause-scenario">
+          <Box id="cause-scenario" sx={{ pointerEvents: "none" }}>
             <AutoHeight toggle={activeCauseScenario} toggle2={cascade} duration={TRANSITION_S}>
               <FullScenario
                 riskType={cause.cr4de_risk_type}
@@ -541,7 +541,7 @@ const AnalysisSection = ({
               left: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "0px" : "-131px",
               width: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "100%" : 115,
               transition: `all ${TRANSITION_S} ease`,
-              pointerEvents: "none",
+              pointerEvents: activeEffectScenario === SCENARIOS.CONSIDERABLE ? "all" : "none",
             }}
           >
             <FullScenario
@@ -562,7 +562,7 @@ const AnalysisSection = ({
                 "calc(100% + 16px)",
               width: activeEffectScenario === SCENARIOS.MAJOR ? "100%" : 115,
               transition: `all ${TRANSITION_S} ease`,
-              pointerEvents: "none",
+              pointerEvents: activeEffectScenario === SCENARIOS.MAJOR ? "all" : "none",
             }}
           >
             <FullScenario
@@ -580,7 +580,7 @@ const AnalysisSection = ({
               left: (activeEffectScenario === SCENARIOS.EXTREME && "0px") || "calc(100% + 16px)",
               width: activeEffectScenario === SCENARIOS.EXTREME ? "100%" : 115,
               transition: `all ${TRANSITION_S} ease`,
-              pointerEvents: "none",
+              pointerEvents: activeEffectScenario === SCENARIOS.EXTREME ? "all" : "none",
             }}
           >
             <FullScenario
@@ -591,7 +591,7 @@ const AnalysisSection = ({
               visible={activeEffectScenario === SCENARIOS.EXTREME}
             />
           </Box>
-          <Box id="effect-scenario">
+          <Box id="effect-scenario" sx={{ pointerEvents: "none" }}>
             <AutoHeight toggle={activeEffectScenario} toggle2={cascade} duration={TRANSITION_S}>
               <FullScenario
                 riskType={effect.cr4de_risk_type}

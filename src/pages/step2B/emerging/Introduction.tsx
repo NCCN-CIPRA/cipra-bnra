@@ -2,7 +2,7 @@ import { Trans } from "react-i18next";
 import { Box, Typography, Stack, Button, Container } from "@mui/material";
 import openInNewTab from "../../../functions/openInNewTab";
 
-export default function Introduction({ onRunTutorial }: { onRunTutorial: () => void }) {
+export default function Introduction({}: {}) {
   return (
     <Container>
       <Box style={{ position: "relative" }}>

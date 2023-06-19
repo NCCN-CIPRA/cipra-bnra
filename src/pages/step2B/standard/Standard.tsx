@@ -176,11 +176,11 @@ export default function Standard({
     if (activeStep === STEPS.INTRODUCTION) {
       return hasCauses || hasClimateChange || hasCatalysing;
     } else if (activeStep === STEPS.CAUSES) {
-      return Boolean((causes && causes.length > 0) || hasClimateChange || hasCatalysing);
+      return Boolean(cascadeIndex < causes.length - 1 || hasClimateChange || hasCatalysing);
     } else if (activeStep === STEPS.CLIMATE_CHANGE) {
       return hasCatalysing;
     } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
-      return Boolean(catalysingEffects && catalysingEffects.length > 0);
+      return Boolean(catalysingEffects && cascadeIndex < catalysingEffects.length - 1);
     }
     return false;
   };

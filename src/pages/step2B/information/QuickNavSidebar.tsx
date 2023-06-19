@@ -96,7 +96,7 @@ export default function QuickNavSidebar({
   hasCauses: boolean;
   open: OPEN_STATE;
   setOpen: (open: OPEN_STATE) => void;
-  onTransitionTo: (newStep: STEPS, newIndex: number) => void;
+  onTransitionTo: (newStep: number, newIndex: number) => void;
 }) {
   return (
     // <Slide appear={open}>
@@ -254,9 +254,20 @@ export default function QuickNavSidebar({
         </>
       )}
       {open === OPEN_STATE.CAUSES && (
-        <Box sx={{ pl: 2.5, mt: 6, overflow: "hidden", transition: "opacity .3s ease", opacity: open ? 1 : 0 }}>
+        <Box
+          sx={{
+            pl: 2.5,
+            mt: 6,
+            overflow: "hidden",
+            transition: "opacity .3s ease",
+            opacity: open ? 1 : 0,
+            pb: 4,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           {causes && (
-            <List>
+            <List dense sx={{ overflowY: "scroll" }}>
               {causes.map((c) => (
                 <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding>
                   <ListItemButton

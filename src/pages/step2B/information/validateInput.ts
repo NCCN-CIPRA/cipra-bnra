@@ -21,72 +21,113 @@ export function causeAnalysisComplete(cascadeAnalysis: DVCascadeAnalysis) {
   return Object.keys(getCauseFieldsWithErrors(cascadeAnalysis)).length <= 0;
 }
 
-export function validateStep2B(step2A: DVDirectAnalysis, step2B: DVCascadeAnalysis<DVRiskCascade<DVRiskFile>>[]) {
+export function validateStep2B(
+  cascades: DVRiskCascade<DVRiskFile>[],
+  step2A: DVDirectAnalysis,
+  step2B: DVCascadeAnalysis<DVRiskCascade<DVRiskFile>>[]
+) {
   let errors: Step2BErrors = {
     causes: [],
     climateChange: undefined,
     catalysingEffects: [],
   };
 
-  const cascadesDone: any = {};
-
-  errors = step2B.reduce((e, s) => {
-    if (cascadesDone[s.cr4de_cascade.cr4de_bnrariskcascadeid]) return e;
-
-    cascadesDone[s.cr4de_cascade.cr4de_bnrariskcascadeid] = true;
-
-    if (s.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.STANDARD) {
-      const fieldErrors = getCauseFieldsWithErrors(s);
-
-      if (Object.keys(fieldErrors).length > 0) {
-        return {
-          ...e,
-          causes: [
-            ...(e.causes || []),
-            [
-              s.cr4de_cascade,
-              step2B
-                .filter((i) => i.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.STANDARD)
-                .indexOf(s),
-              fieldErrors,
-            ],
-          ],
-        } as Step2BErrors;
+  errors = cascades
+    .sort((a, b) => {
+      if (a.cr4de_cause_hazard.cr4de_subjective_importance !== b.cr4de_cause_hazard.cr4de_subjective_importance) {
+        return a.cr4de_cause_hazard.cr4de_subjective_importance - b.cr4de_cause_hazard.cr4de_subjective_importance;
       }
-    } else if (s.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING) {
-      if (s.cr4de_cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0) {
-        const climateChangeErrors = getCCFieldsWithErrors(step2A);
+      return a.cr4de_cause_hazard.cr4de_hazard_id.localeCompare(b.cr4de_cause_hazard.cr4de_hazard_id);
+    })
+    .reduce((e, c) => {
+      const s = step2B.find((cascadeAnalysis) => c.cr4de_bnrariskcascadeid === cascadeAnalysis._cr4de_cascade_value);
 
-        if (Object.keys(climateChangeErrors).length > 0) {
-          return { ...e, climateChange: [s.cr4de_cascade, 0, climateChangeErrors] as Step2BError };
-        }
-      } else {
-        const fieldErrors = getCatalysingFieldsWithErrors(s);
+      if (c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.STANDARD) {
+        if (!s)
+          return {
+            ...e,
+            causes: [
+              ...(e.causes || []),
+              [c, cascades.filter((i) => i.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.STANDARD).indexOf(c), null],
+            ],
+          } as Step2BErrors;
+
+        const fieldErrors = getCauseFieldsWithErrors(s);
 
         if (Object.keys(fieldErrors).length > 0) {
           return {
             ...e,
-            catalysingEffects: [
-              ...(e.catalysingEffects || []),
+            causes: [
+              ...(e.causes || []),
               [
                 s.cr4de_cascade,
                 step2B
-                  .filter(
-                    (i) =>
-                      i.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING &&
-                      i.cr4de_cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
-                  )
+                  .filter((i) => i.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.STANDARD)
                   .indexOf(s),
                 fieldErrors,
               ],
             ],
           } as Step2BErrors;
         }
-      }
-    }
+      } else if (c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING) {
+        if (c.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0) {
+          if (!s)
+            return {
+              ...e,
+              climateChange: [c, 0, null],
+            } as Step2BErrors;
 
-    return e;
-  }, errors as Step2BErrors);
+          const climateChangeErrors = getCCFieldsWithErrors(step2A);
+
+          if (Object.keys(climateChangeErrors).length > 0) {
+            return { ...e, climateChange: [s.cr4de_cascade, 0, climateChangeErrors] as Step2BError };
+          }
+        } else {
+          if (!s)
+            return {
+              ...e,
+              catalysingEffects: [
+                ...(e.catalysingEffects || []),
+                [
+                  c,
+                  cascades
+                    .filter(
+                      (i) =>
+                        i.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING &&
+                        i.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
+                    )
+                    .indexOf(c),
+                  null,
+                ],
+              ],
+            } as Step2BErrors;
+
+          const fieldErrors = getCatalysingFieldsWithErrors(s);
+
+          if (Object.keys(fieldErrors).length > 0) {
+            return {
+              ...e,
+              catalysingEffects: [
+                ...(e.catalysingEffects || []),
+                [
+                  s.cr4de_cascade,
+                  step2B
+                    .filter(
+                      (i) =>
+                        i.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING &&
+                        i.cr4de_cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
+                    )
+                    .indexOf(s),
+                  fieldErrors,
+                ],
+              ],
+            } as Step2BErrors;
+          }
+        }
+      }
+
+      return e;
+    }, errors as Step2BErrors);
 
   if (errors.causes && errors.causes.length <= 0) delete errors.causes;
   if (errors.catalysingEffects && errors.catalysingEffects.length <= 0) delete errors.catalysingEffects;

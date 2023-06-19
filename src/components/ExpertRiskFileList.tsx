@@ -95,6 +95,8 @@ function RiskFileList({
         navigate(`/step2B/${newDirectAnalysis.id}`);
 
         setIsLoading(false);
+      } else {
+        navigate(`/step2B/${p._cr4de_direct_analysis_value}`);
       }
     } else if (p.cr4de_risk_file.cr4de_step2a_enabled) {
       if (p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk") {
@@ -190,7 +192,10 @@ function RiskFileList({
   };
 
   const getActiveStep = (p: DVParticipation<unknown, DVRiskFile>) => {
-    if (p.cr4de_direct_analysis_finished && p.cr4de_risk_file.cr4de_step2b_enabled) {
+    if (
+      p.cr4de_risk_file.cr4de_step2b_enabled &&
+      (p.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.EMERGING || p.cr4de_direct_analysis_finished)
+    ) {
       return 2;
     }
     if (p.cr4de_risk_file.cr4de_step2a_enabled) {

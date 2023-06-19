@@ -1,4 +1,4 @@
-import { Alert, Box, Tooltip, Button, Link, Container, Stack, Typography } from "@mui/material";
+import { Fade, Box, CircularProgress, Button, Link, Container, Stack, Typography } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
 import { SCENARIOS, Scenarios } from "../../../functions/scenarios";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
@@ -6,16 +6,16 @@ import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import Introduction from "./Introduction";
 import { useEffect, useState, MutableRefObject } from "react";
-import { stepNames, STEPS } from "../Steps";
+import { stepNames, STEPS } from "./Steps";
 import AttackAnalysis from "./AttackAnalysis";
-import { Link as RouterLink, useSearchParams } from "react-router-dom";
+import { Link as RouterLink, useOutletContext, useSearchParams } from "react-router-dom";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import { useUnmountEffect } from "framer-motion";
 import { CascadeAnalysisInput } from "../../../functions/cascades";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import useRecords from "../../../hooks/useRecords";
-import { DataTable } from "../../../hooks/useAPI";
+import useAPI, { DataTable } from "../../../hooks/useAPI";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import AttachmentsDialog from "../information/AttachmentsDialog";
 import ClimateChangeAnalysis, { CCInput } from "../standard/ClimateChangeAnalysis";
@@ -23,266 +23,390 @@ import CatalysingEffectsAnalysis from "../standard/CatalysingEffectsAnalysis";
 import CascadeTutorial from "../information/CascadeTutorial";
 import CCTutorial from "../information/CCTutorial";
 import CatalysingTutorial from "../information/CatalysingTutorial";
+import { AuthPageContext } from "../../AuthPage";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import QuickNavSidebar, { OPEN_STATE } from "../information/QuickNavSidebar";
+import { CrossFade } from "../../../components/CrossFade";
+import {
+  getCCFieldsWithErrors,
+  getCatalysingFieldsWithErrors,
+  getCauseFieldsWithErrors,
+} from "../information/validateInput";
+import BottomBar from "./BottomBar";
 
 export default function ManMade({
-  activeStep,
-  effects,
-  catalysingEffects,
-  climateChange,
-  cascade,
-  cascadeIndex,
-  step2A,
-  step2B,
-  step2AInput,
-  step2BInput,
-  activeCauseScenario,
-  activeEffectScenario,
-  qualiError,
-  quantiErrors,
-  runTutorial,
-  visible,
-  setRunTutorial,
-  setStep2BInput,
-  onSave,
-  onNext,
-  onPrevious,
-  onChangeScenario,
-  onUnmount,
-  onShowCauses,
+  directAnalysis,
+  isFetchingDirectAnalysis,
+  reloadDirectAnalysis,
+  onFinish,
 }: {
-  activeStep: STEPS | null;
-  effects: DVRiskCascade<DVRiskFile>[] | null;
-  catalysingEffects: DVRiskCascade[] | null;
-  climateChange: DVRiskCascade<DVRiskFile, DVRiskFile> | null;
-  cascade: DVRiskCascade<DVRiskFile, DVRiskFile> | null;
-  cascadeIndex: number;
-  step2A: DVDirectAnalysis<DVRiskFile>;
-  step2B: DVCascadeAnalysis | null;
-  step2AInput: CCInput | null;
-  step2BInput: CascadeAnalysisInput | null;
-  activeCauseScenario: SCENARIOS;
-  activeEffectScenario: SCENARIOS;
-  qualiError: boolean;
-  quantiErrors: boolean[] | null;
-  runTutorial: boolean;
-  visible: boolean;
-  setRunTutorial: (run: boolean) => void;
-  setStep2BInput: (input: CascadeAnalysisInput, update?: boolean) => void;
-  onSave: () => Promise<void>;
-  onNext: () => Promise<void>;
-  onPrevious: () => Promise<void>;
-  onChangeScenario: (causeScenario: SCENARIOS | null, effectScenario: SCENARIOS | null) => void;
-  onUnmount: () => void;
-  onShowCauses: () => void;
+  directAnalysis: DVDirectAnalysis<DVRiskFile>;
+  isFetchingDirectAnalysis: boolean;
+  reloadDirectAnalysis: () => Promise<void>;
+  onFinish: () => Promise<void>;
 }) {
+  const api = useAPI();
   const { t } = useTranslation();
-  const [sourceDialogOpen, setSourceDialogOpen] = useState<string | null>(null);
-  const [existingSource, setExistingSource] = useState<DVAttachment | undefined>(undefined);
+  const { user } = useOutletContext<AuthPageContext>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeStep, setActiveStep] = useState<STEPS | null>(null);
 
-  const [prevStep2B, setPrevStep2B] = useState<DVCascadeAnalysis | null>(null);
+  const [climateChange, setClimateChange] = useState<DVRiskCascade<DVRiskFile, DVRiskFile> | null | undefined>(null);
+  const [catalysingEffects, setCatalysingEffects] = useState<DVRiskCascade<DVRiskFile, DVRiskFile>[] | null>(null);
+  const [cascadeIndex, setCascadeIndex] = useState<number | null>(null);
+  const [cascadeAnalysis, setCascadeAnalysis] = useState<DVCascadeAnalysis | null>(null);
 
-  const {
-    data: attachments,
-    hasRun: attachmentsFetched,
-    getData: loadAttachments,
-  } = useLazyRecords<DVAttachment<unknown, DVAttachment>>({
-    table: DataTable.ATTACHMENT,
+  const [quantiErrors, setQuantiErrors] = useState<boolean[] | null>(null);
+  const [qualiError, setQualiError] = useState(false);
+  const [quickNavOpen, setQuickNavOpen] = useState(OPEN_STATE.CLOSED);
+
+  const { data: attacks, reloadData: reloadAttacks } = useRecords<DVRiskCascade<DVRiskFile, DVRiskFile>>({
+    table: DataTable.RISK_CASCADE,
+    query: `$filter=_cr4de_cause_hazard_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_effect_hazard`,
+    transformResult: (result: DVRiskCascade<DVRiskFile, DVRiskFile>[]) => {
+      return result.sort((a, b) => {
+        if (a.cr4de_effect_hazard.cr4de_subjective_importance !== b.cr4de_effect_hazard.cr4de_subjective_importance) {
+          return a.cr4de_effect_hazard.cr4de_subjective_importance - b.cr4de_effect_hazard.cr4de_subjective_importance;
+        }
+        return a.cr4de_effect_hazard.cr4de_hazard_id.localeCompare(b.cr4de_effect_hazard.cr4de_hazard_id);
+      });
+    },
   });
 
-  const handleOpenSourceDialog = (field: string) => (existingSource?: DVAttachment) => {
-    setSourceDialogOpen(field);
-    setExistingSource(existingSource);
-  };
-  // console.log(effects, cascade);
-  useEffect(() => {
-    if (step2B && step2B.cr4de_bnracascadeanalysisid !== prevStep2B?.cr4de_bnracascadeanalysisid && visible) {
-      loadAttachments({
-        query: `$filter=_cr4de_cascadeanalysis_value eq '${step2B.cr4de_bnracascadeanalysisid}'&$expand=cr4de_referencedSource`,
+  useRecords<DVRiskCascade<DVRiskFile, DVRiskFile>>({
+    table: DataTable.RISK_CASCADE,
+    query: `$filter=_cr4de_effect_hazard_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_cause_hazard`,
+    transformResult: (result: DVRiskCascade<DVRiskFile, DVRiskFile>[]) => {
+      return result.sort((a, b) => {
+        if (a.cr4de_cause_hazard.cr4de_subjective_importance !== b.cr4de_cause_hazard.cr4de_subjective_importance) {
+          return a.cr4de_cause_hazard.cr4de_subjective_importance - b.cr4de_cause_hazard.cr4de_subjective_importance;
+        }
+        return a.cr4de_cause_hazard.cr4de_hazard_id.localeCompare(b.cr4de_cause_hazard.cr4de_hazard_id);
+      });
+    },
+    onComplete: async (result: DVRiskCascade<DVRiskFile, DVRiskFile>[]) => {
+      const iCatalysingEffects = result.filter(
+        (c) =>
+          c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk" &&
+          c.cr4de_cause_hazard.cr4de_title.indexOf("Climate change") < 0
+      );
+      const iClimateChange = result.find((c) => c.cr4de_cause_hazard.cr4de_title.indexOf("Climate change") >= 0);
+
+      setCatalysingEffects(iCatalysingEffects);
+      setClimateChange(iClimateChange);
+    },
+  });
+
+  const isLoading =
+    activeStep === null ||
+    attacks === null ||
+    climateChange === null ||
+    catalysingEffects === null ||
+    cascadeIndex === null;
+  let cascade: DVRiskCascade<DVRiskFile, DVRiskFile> | null | undefined = null;
+  if (!isLoading) {
+    if (activeStep === STEPS.ATTACKS) cascade = attacks[cascadeIndex];
+    else if (activeStep === STEPS.CLIMATE_CHANGE) cascade = climateChange;
+    else if (activeStep === STEPS.CATALYSING_EFFECTS) cascade = catalysingEffects[cascadeIndex];
+  }
+
+  const {
+    data: step2B,
+    getData: loadCascadeAnalyses,
+    isFetching: fetchingCascadeAnalysis,
+  } = useLazyRecords<DVCascadeAnalysis>({
+    table: DataTable.CASCADE_ANALYSIS,
+  });
+
+  const onCompleteCascadeAnalysis = async (result: DVCascadeAnalysis<unknown>[]) => {
+    if (!cascade) return;
+
+    const resultCascadeAnalysis =
+      result?.find((r) => cascade && r._cr4de_cascade_value === cascade.cr4de_bnrariskcascadeid) ?? null;
+
+    if (!resultCascadeAnalysis) {
+      await api.createCascadeAnalysis({
+        "cr4de_expert@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+        "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${directAnalysis._cr4de_risk_file_value})`,
+        "cr4de_cascade@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${cascade.cr4de_bnrariskcascadeid})`,
+      });
+      await loadCascadeAnalyses({
+        query: `$orderby=createdon&$filter=_cr4de_expert_value eq ${user?.contactid} and _cr4de_risk_file_value eq ${directAnalysis._cr4de_risk_file_value}`,
+        onComplete: onCompleteCascadeAnalysis,
         saveOptions: true,
       });
-      setPrevStep2B(step2B);
+    } else {
+      setCascadeAnalysis(resultCascadeAnalysis);
     }
-  }, [step2B, prevStep2B, visible]);
+  };
+
+  useEffect(() => {
+    if (!cascade) return;
+
+    if (cascade && (!cascadeAnalysis || cascade.cr4de_bnrariskcascadeid !== cascadeAnalysis._cr4de_cascade_value))
+      loadCascadeAnalyses({
+        query: `$orderby=createdon&$filter=_cr4de_expert_value eq ${user?.contactid} and _cr4de_risk_file_value eq ${directAnalysis._cr4de_risk_file_value}`,
+        onComplete: onCompleteCascadeAnalysis,
+        saveOptions: true,
+      });
+  }, [cascade]);
+
+  useEffect(() => {
+    const newStep: STEPS = parseInt(searchParams.get("step") || STEPS.INTRODUCTION.toString(), 10) as STEPS;
+    const newIndex = parseInt(searchParams.get("index") || "0", 10);
+
+    if (newStep !== activeStep) {
+      setActiveStep(newStep);
+      setCascadeIndex(newIndex);
+
+      setTimeout(
+        () =>
+          window.scrollTo({
+            behavior: "smooth",
+            top: 0,
+          }),
+        1000
+      );
+    } else if (newIndex !== cascadeIndex) {
+      window.scrollTo({
+        behavior: "smooth",
+        top: window.scrollY + (document.getElementById("cascade-title")?.getBoundingClientRect().top || 0),
+      });
+
+      setTimeout(() => setCascadeIndex(newIndex), 500);
+    }
+  }, [searchParams]);
+
+  const handleChangeStep = (newStep: STEPS, newIndex: number = 0) => {
+    setSearchParams({
+      step: newStep.toString(),
+      index: newIndex.toString(),
+    });
+  };
+
+  const hasNextStep = () => {
+    if (isLoading) return false;
+
+    const hasAttacks = Boolean(attacks && attacks.length > 0);
+    const hasClimateChange = Boolean(climateChange);
+    const hasCatalysing = Boolean(catalysingEffects && catalysingEffects.length > 0);
+
+    if (activeStep === STEPS.INTRODUCTION) {
+      return hasAttacks || hasClimateChange || hasCatalysing;
+    } else if (activeStep === STEPS.ATTACKS) {
+      return Boolean((attacks && cascadeIndex < attacks.length - 1) || hasClimateChange || hasCatalysing);
+    } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+      return hasCatalysing;
+    } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
+      return Boolean(catalysingEffects && cascadeIndex < catalysingEffects.length - 1);
+    }
+    return false;
+  };
+
+  const handleNextStep = () => {
+    if (isLoading) return false;
+
+    const hasCauses = Boolean(attacks && attacks.length > 0);
+    const hasClimateChange = Boolean(climateChange);
+    const hasCatalysing = Boolean(catalysingEffects && catalysingEffects.length > 0);
+
+    if (hasMissingValues()) return;
+
+    if (activeStep === STEPS.INTRODUCTION) {
+      if (hasCauses) handleChangeStep(STEPS.ATTACKS);
+      else if (hasClimateChange) handleChangeStep(STEPS.CLIMATE_CHANGE);
+      else if (hasCatalysing) handleChangeStep(STEPS.CATALYSING_EFFECTS);
+    } else if (activeStep === STEPS.ATTACKS) {
+      if (cascadeIndex < attacks.length - 1) {
+        handleChangeStep(STEPS.ATTACKS, cascadeIndex + 1);
+      } else {
+        if (hasClimateChange) handleChangeStep(STEPS.CLIMATE_CHANGE);
+        else if (hasCatalysing) handleChangeStep(STEPS.CATALYSING_EFFECTS);
+      }
+    } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+      if (hasCatalysing) handleChangeStep(STEPS.CATALYSING_EFFECTS);
+    } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
+      if (cascadeIndex < catalysingEffects.length - 1) {
+        handleChangeStep(STEPS.CATALYSING_EFFECTS, cascadeIndex + 1);
+      }
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (isLoading) return false;
+
+    const hasCauses = Boolean(attacks && attacks.length > 0);
+    const hasClimateChange = Boolean(climateChange);
+    const hasCatalysing = Boolean(catalysingEffects && catalysingEffects.length > 0);
+
+    if (activeStep === STEPS.ATTACKS) {
+      if (cascadeIndex > 0) handleChangeStep(STEPS.ATTACKS, cascadeIndex - 1);
+      else handleChangeStep(STEPS.INTRODUCTION);
+    } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+      if (hasCauses) handleChangeStep(STEPS.ATTACKS, attacks.length - 1);
+    } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
+      if (cascadeIndex > 0) handleChangeStep(STEPS.CATALYSING_EFFECTS, cascadeIndex - 1);
+      else if (hasClimateChange) handleChangeStep(STEPS.CLIMATE_CHANGE);
+      else if (hasCauses) handleChangeStep(STEPS.ATTACKS, attacks.length - 1);
+      else handleChangeStep(STEPS.INTRODUCTION);
+    }
+  };
+
+  const hasMissingValues = () => {
+    setQuantiErrors(null);
+    setQualiError(false);
+
+    if (activeStep === STEPS.ATTACKS) {
+      if (!cascadeAnalysis) return true;
+
+      const errors = getCauseFieldsWithErrors(cascadeAnalysis);
+
+      if (Object.keys(errors).length <= 0) return false;
+      else if (Object.keys(errors).length > 1 || errors.cr4de_quali_cascade === undefined) {
+        setTimeout(() => setQuantiErrors([true]), 500);
+        return true;
+      } else {
+        setTimeout(() => setQualiError(true), 500);
+        return true;
+      }
+    } else if (activeStep === STEPS.CLIMATE_CHANGE) {
+      if (!directAnalysis) return true;
+
+      const errors = getCCFieldsWithErrors(directAnalysis);
+
+      if (Object.keys(errors).length <= 0) return false;
+      else if (Object.keys(errors).length > 1 || errors.cr4de_dp50_quali === undefined) {
+        setTimeout(
+          () =>
+            setQuantiErrors([
+              errors.cr4de_dp50_quanti_c === null,
+              errors.cr4de_dp50_quanti_m === null,
+              errors.cr4de_dp50_quanti_e === null,
+            ]),
+          500
+        );
+        return true;
+      } else {
+        setTimeout(() => setQualiError(true), 500);
+        return true;
+      }
+    } else if (activeStep === STEPS.CATALYSING_EFFECTS) {
+      if (!cascadeAnalysis) return true;
+
+      const errors = getCatalysingFieldsWithErrors(cascadeAnalysis);
+
+      if (Object.keys(errors).length <= 0) return false;
+      else if (errors.cr4de_quali_cascade === null) {
+        setTimeout(() => setQualiError(true), 500);
+        return true;
+      }
+    }
+  };
+
+  const handleFinish = () => {
+    if (!hasNextStep() && hasMissingValues()) return;
+
+    onFinish();
+  };
 
   return (
     <>
-      {activeStep === STEPS.INTRODUCTION && <Introduction onRunTutorial={() => setRunTutorial(true)} />}
-      {activeStep === STEPS.CAUSES && step2A.cr4de_risk_file && effects && cascade && step2B && step2BInput && (
-        <Box>
-          <Container>
-            <Stack direction="column" sx={{ mb: 2, ml: 0 }}>
-              <Typography variant="h4">
-                <Trans i18nKey="2B.causes.title">Cause</Trans>
-              </Typography>
-              <Typography variant="body2" paragraph sx={{ mt: 2 }}>
-                <Trans i18nKey="2B.causes.intro.1">
-                  Cette page vous permet d'évaluer, pour chaque relation de cause à effet identifiée dans l'étape 1 de
-                  la BNRA, les probabilités conditionnelles entre les différents scénarios d'intensité des risques
-                  causaux et des risques conséquents.
-                </Trans>
-              </Typography>
-              <Box sx={{ textAlign: "center", mt: 1, mb: 4 }}>
-                <Button variant="contained" onClick={() => setRunTutorial(true)}>
-                  <Trans i18nKey="2B.introduction.button.tutorial.part">Show Tutorial for this page</Trans>
-                </Button>
-              </Box>
-              <Typography variant="body2" paragraph>
-                <Trans i18nKey="2B.causes.intro.2">
-                  Notez que chaque relation de cause à effet avec 3 scénarios d'intensité (considérable, majeure,
-                  extrême) nécessite 9 estimations de la probabilité conditionnelle.
-                </Trans>
-              </Typography>
-              <Typography variant="body2" paragraph>
-                <Trans i18nKey="2B.causes.intro.3">
-                  Veuillez sélectionner ci-dessous une estimation quantitative de la probabilité conditionnelle que le
-                  scénario d'intensité actuellement étudié se produise au cours de la période 2023-2026, en conséquence
-                  d'un autre risque de la BNRA.
-                </Trans>
-              </Typography>
-              <Typography variant="body2" paragraph>
-                <Trans i18nKey="2B.causes.intro.4">
-                  Vous pouvez naviguer entre les différents scénarios d'intensité soit en cliquant directement sur les
-                  scénarios d'intensité d'intérêt, soit en cliquant sur la flèche à droite des classes de probabilité
-                  conditionnelles.
-                </Trans>
-              </Typography>
-              <Alert severity="info" sx={{ mt: 2, mb: 0 }}>
-                <Typography variant="body2">
-                  <Trans i18nKey="2B.causes.info.1">
-                    Attention, il est nécessaire d'évaluer toutes les probabilités conditionnelles et de remplir tous
-                    les champs concernant chaque relation de cause à effet avant de pouvoir passer à l'étape suivante.
-                  </Trans>
-                </Typography>
-                <Typography variant="body2">
-                  <Trans i18nKey="2B.causes.info.2">
-                    Bien qu'il soit important pour nous de disposer d'une justification quant à la valeur quantitative
-                    que vous avez choisie, si vous ne souhaitez pas nous fournir de justification textuelle, nous vous
-                    invitons à cliquer sur le bouton PAS DE COMMENTAIRES.
-                  </Trans>
-                </Typography>
-              </Alert>
-              <Alert severity="warning" sx={{ mt: 2, mb: 0 }}>
-                <Typography variant="body2">
-                  <Trans i18nKey="2B.causes.warning.1">
-                    Dans cette étape, il convient d'estimer uniquement la probabilité conditionnelle.
-                  </Trans>
-                </Typography>
-                <Typography variant="body2">
-                  <Trans i18nKey="2B.causes.warning.2">
-                    Par exemple, lors de l'estimation de la probabilité conditionnelle d'une Dam failure suite à un
-                    tremblement de terre, il faut uniquement prendre en compte la possibilité d'une défaillance d'un
-                    barrage due à un tremblement de terre. Tous les autres éléments qui pourraient provoquer une rupture
-                    de barrage doivent être exclus.
-                  </Trans>
-                </Typography>
-              </Alert>
-            </Stack>
-          </Container>
-          <AttackAnalysis
-            riskFile={step2A.cr4de_risk_file}
-            effects={effects}
-            cascade={cascade}
-            cascadeIndex={cascadeIndex}
-            step2B={step2B}
-            activeCauseScenario={activeCauseScenario}
-            activeEffectScenario={activeEffectScenario}
-            step2BInput={step2BInput}
-            setStep2BInput={setStep2BInput}
-            qualiError={qualiError}
-            onSave={onSave}
-            onNext={onNext}
-            onPrevious={onPrevious}
-            onChangeScenario={onChangeScenario}
-            onUnmount={onUnmount}
-            attachments={attachments}
-            onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
-            onReloadAttachments={loadAttachments}
-          />
-        </Box>
-      )}
-      {activeStep === STEPS.CLIMATE_CHANGE && step2A.cr4de_risk_file && climateChange && (
-        <Box>
-          <Container>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="h4" id="cc-title">
-                <Tooltip title={t("2B.cause.openRiskFile", "Click to open the risk file for this risk in a new tab")}>
-                  <Link
-                    to={`/learning/risk/${climateChange.cr4de_cause_hazard.cr4de_riskfilesid}`}
-                    component={RouterLink}
-                    target="_blank"
-                  >
-                    <Trans i18nKey="2B.climateChange.title">Climate Change</Trans>
-                  </Link>
-                </Tooltip>
-              </Typography>
-            </Box>
-          </Container>
-          {/* <ClimateChangeAnalysis
-            riskFile={step2A.cr4de_risk_file}
-            onShowCauses={onShowCauses}
-            step2A={step2A}
-            step2AInput={step2AInput}
-            qualiError={qualiError}
-            quantiErrors={quantiErrors}
-            attachments={attachments}
-            onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
-            onReloadAttachments={loadAttachments}
-            setRunTutorial={setRunTutorial}
-            onUnmount={onUnmount}
-          /> */}
-        </Box>
-      )}
-      {activeStep === STEPS.CATALYSING_EFFECTS &&
-        step2A.cr4de_risk_file &&
-        catalysingEffects &&
-        cascade &&
-        step2B &&
-        step2BInput && (
-          <Box>
-            <Container>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="h4">
-                  <Trans i18nKey="2B.catalysingEffects.title">Catalysing Effects</Trans>
-                </Typography>
-              </Box>
-            </Container>
-            {/* <CatalysingEffectsAnalysis
-              riskFile={step2A.cr4de_risk_file}
-              causes={catalysingEffects}
-              cascade={cascade}
-              cascadeIndex={cascadeIndex}
-              step2B={step2B}
-              activeCauseScenario={activeCauseScenario}
-              activeEffectScenario={activeEffectScenario}
-              step2BInput={step2BInput}
-              setStep2BInput={setStep2BInput}
-              qualiError={qualiError}
-              onNext={onNext}
-              onPrevious={onPrevious}
-              onChangeScenario={onChangeScenario}
-              onUnmount={onUnmount}
-              attachments={attachments}
-              onOpenSourceDialog={handleOpenSourceDialog("cr4de_quali_cascade")}
-              onReloadAttachments={loadAttachments}
-              setRunTutorial={setRunTutorial}
-            /> */}
-          </Box>
-        )}
-      {step2A && step2B && (
-        <AttachmentsDialog
-          field={sourceDialogOpen ?? ""}
-          riskFile={step2A.cr4de_risk_file}
-          cascadeAnalysis={step2B}
-          open={sourceDialogOpen !== null}
-          existingSource={existingSource}
-          onClose={() => setSourceDialogOpen(null)}
-          onSaved={() => loadAttachments()}
+      <Box sx={{ mt: 6 }}>
+        <CrossFade
+          components={[
+            {
+              in: isLoading,
+              component: (
+                <Box sx={{ mt: 32, textAlign: "center" }}>
+                  <CircularProgress />
+                </Box>
+              ),
+            },
+            {
+              in: !isLoading && activeStep === STEPS.INTRODUCTION,
+              component: <Introduction />,
+            },
+            {
+              in: !isLoading && activeStep === STEPS.ATTACKS,
+              component: !isLoading && cascadeIndex !== null && (
+                <AttackAnalysis
+                  directAnalysis={directAnalysis}
+                  cascadeAnalysis={cascadeAnalysis}
+                  cascade={attacks[cascadeIndex]}
+                  index={cascadeIndex}
+                  count={attacks.length}
+                  quantiErrors={quantiErrors}
+                  qualiError={qualiError}
+                  reloadCascadeAnalysis={loadCascadeAnalyses}
+                />
+              ),
+            },
+            {
+              in: !isLoading && activeStep === STEPS.CLIMATE_CHANGE,
+              component: climateChange && (
+                <ClimateChangeAnalysis
+                  directAnalysis={directAnalysis}
+                  cascadeAnalysis={cascadeAnalysis}
+                  cascade={climateChange}
+                  quantiErrors={quantiErrors}
+                  qualiError={qualiError}
+                  onShowCauses={() => setQuickNavOpen(OPEN_STATE.CAUSES)}
+                  reloadDirectAnalysis={reloadDirectAnalysis}
+                  reloadCascadeAnalysis={loadCascadeAnalyses}
+                />
+              ),
+            },
+            {
+              in: !isLoading && activeStep === STEPS.CATALYSING_EFFECTS,
+              component: !isLoading && cascadeIndex !== null && (
+                <CatalysingEffectsAnalysis
+                  directAnalysis={directAnalysis}
+                  cascadeAnalysis={cascadeAnalysis}
+                  cascade={catalysingEffects[cascadeIndex]}
+                  index={cascadeIndex}
+                  count={catalysingEffects.length}
+                  qualiError={qualiError}
+                  reloadCascadeAnalysis={loadCascadeAnalyses}
+                />
+              ),
+            },
+          ]}
+        />
+      </Box>
+
+      {directAnalysis && attacks !== null && catalysingEffects !== null && (
+        <QuickNavSidebar
+          step2A={directAnalysis}
+          step2B={step2B || []}
+          causes={attacks}
+          climateChange={climateChange}
+          catalysingEffects={catalysingEffects}
+          hasCauses={activeStep === STEPS.CLIMATE_CHANGE}
+          open={quickNavOpen}
+          setOpen={setQuickNavOpen}
+          onTransitionTo={handleChangeStep}
         />
       )}
 
-      {activeStep === STEPS.CAUSES && <CascadeTutorial run={runTutorial} setRun={setRunTutorial} />}
-      {activeStep === STEPS.CLIMATE_CHANGE && <CCTutorial run={runTutorial} setRun={setRunTutorial} />}
-      {activeStep === STEPS.CATALYSING_EFFECTS && <CatalysingTutorial run={runTutorial} setRun={setRunTutorial} />}
+      <Fade in={!isLoading}>
+        <Box>
+          {!isLoading && (
+            <BottomBar
+              activeStep={activeStep}
+              attacks={attacks.length}
+              climateChange={climateChange !== undefined}
+              catalysingEffects={catalysingEffects.length}
+              cascadeIndex={cascadeIndex + 1}
+              hasNextStep={hasNextStep()}
+              nextStepDisabled={isFetchingDirectAnalysis || fetchingCascadeAnalysis}
+              onNext={handleNextStep}
+              onPrevious={handlePreviousStep}
+              onGoToStep={handleChangeStep}
+              onFinish={handleFinish}
+            />
+          )}
+        </Box>
+      </Fade>
     </>
   );
 }
