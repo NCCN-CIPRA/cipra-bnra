@@ -1,4 +1,4 @@
-import { Box, Tooltip, Paper } from "@mui/material";
+import { Box, Tooltip, Paper, Typography } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -121,9 +121,7 @@ export function FullScenario({
           </TableRow>
           <TableRow sx={{ backgroundColor: theme.palette.action.hover }}>
             <TableCell sx={{ whiteSpace: "nowrap", pr: 6 }}>Parameter</TableCell>
-            <TableCell width="100%" sx={{}}>
-              Value
-            </TableCell>
+            <TableCell sx={{}}>Value</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -136,7 +134,7 @@ export function FullScenario({
                 },
               }}
             >
-              <TableCell sx={{ maxWidth: 200, mr: 6 }}>
+              <TableCell sx={{ width: 200, mr: 6 }}>
                 <Tooltip
                   title={
                     <Box
@@ -147,10 +145,14 @@ export function FullScenario({
                     />
                   }
                 >
-                  <Box>{p.name}</Box>
+                  <Box>
+                    <Typography variant="subtitle2">{p.name}</Typography>
+                  </Box>
                 </Tooltip>
               </TableCell>
-              <TableCell>{p.value}</TableCell>
+              <TableCell>
+                <Typography variant="body2">{p.value}</Typography>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

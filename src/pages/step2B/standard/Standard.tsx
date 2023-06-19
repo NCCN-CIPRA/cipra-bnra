@@ -69,9 +69,9 @@ export default function Standard({
       const iCatalysingEffects = result.filter(
         (c) =>
           c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk" &&
-          c.cr4de_cause_hazard.cr4de_title.indexOf("Climate Change") < 0
+          c.cr4de_cause_hazard.cr4de_title.indexOf("Climate change") < 0
       );
-      const iClimateChange = result.find((c) => c.cr4de_cause_hazard.cr4de_title.indexOf("Climate Change") >= 0);
+      const iClimateChange = result.find((c) => c.cr4de_cause_hazard.cr4de_title.indexOf("Climate change") >= 0);
 
       setCauses(iCauses);
       setCatalysingEffects(iCatalysingEffects);

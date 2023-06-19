@@ -190,7 +190,7 @@ function RiskFileList({
   };
 
   const getActiveStep = (p: DVParticipation<unknown, DVRiskFile>) => {
-    if (p.cr4de_risk_file.cr4de_step2b_enabled) {
+    if (p.cr4de_direct_analysis_finished && p.cr4de_risk_file.cr4de_step2b_enabled) {
       return 2;
     }
     if (p.cr4de_risk_file.cr4de_step2a_enabled) {
