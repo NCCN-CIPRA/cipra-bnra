@@ -18,19 +18,19 @@ export default function AttackTutorial({ run, setRun }: { run: boolean; setRun: 
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.causes.1.1">
+            <Trans i18nKey="2B.tutorial.MM.attacks.1.1">
               Tijdens dit onderdeel wordt u gevraagd de voorwaardelijke kansen in te schatten dat een mogelijk
               oorzaakrisico aanleiding zal geven tot het risico onder beschouwing.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.causes.1.2">
+            <Trans i18nKey="2B.tutorial.MM.attacks.1.2">
               We gaan er dus van uit dat het oorzaakrisico reeds heeft plaatsgevonden en zoeken de kans dat het
               gevolgrisico daardoor ook zal plaatsvinden.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.causes.1.3">
+            <Trans i18nKey="2B.tutorial.MM.attacks.1.3">
               Deze kans is uiteraard afhankelijk van het intensiteitsscenario (bv. een extreme sneeuwstorm zou vaker
               aanleiding kunnen geven tot een elektriciteitspanne dan een sneeuwstorm van het aanzienlijk scenario).
               Daarom moet voor elke koppel intensiteitsscenario's een aparte inschatting gemaakt worden.
@@ -46,7 +46,7 @@ export default function AttackTutorial({ run, setRun }: { run: boolean; setRun: 
       content: (
         <Box sx={{ textAlign: "left", maxWidth: 600 }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.3.1">
+            <Trans i18nKey="2B.tutorial.MM.attacks.3.1">
               Om snel tussen verschillende risicocascades te navigeren, kan u deze navigatiebalk gebruiken
             </Trans>
           </Typography>
@@ -60,18 +60,18 @@ export default function AttackTutorial({ run, setRun }: { run: boolean; setRun: 
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.2.1">
+            <Trans i18nKey="2B.tutorial.MM.attacks.2.1">
               De titel toont een tekstuele beschrijven van de risicocascade waarvoor een inschatting gevraagd wordt.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.2.2">
+            <Trans i18nKey="2B.tutorial.MM.attacks.2.2">
               Door te klikken op de naam van een risico's zal de desbetreffende risicofiche geopend worden in een nieuw
               tabblad.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.2.3">
+            <Trans i18nKey="2B.tutorial.MM.attacks.2.3">
               Achter de titel staat hoever u reeds gevorderd bent in de lijst van risicocascades.
             </Trans>
           </Typography>
@@ -85,7 +85,7 @@ export default function AttackTutorial({ run, setRun }: { run: boolean; setRun: 
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.4.1">
+            <Trans i18nKey="2B.tutorial.MM.attacks.4.1">
               De inschattingen van de voorwaardelijke kansen tussen scenario's kunnen hier ingegeven te worden.
             </Trans>
           </Typography>
@@ -99,7 +99,7 @@ export default function AttackTutorial({ run, setRun }: { run: boolean; setRun: 
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.5.1">
+            <Trans i18nKey="2B.tutorial.MM.attacks.5.1">
               Dit is de beschrijving van het veroorzakende risicoscenario dat virtueel heeft plaatsgevonden.
             </Trans>
           </Typography>
@@ -113,7 +113,7 @@ export default function AttackTutorial({ run, setRun }: { run: boolean; setRun: 
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.6.3">En hier wordt het mogelijke gevolgscenario beschreven.</Trans>
+            <Trans i18nKey="2B.tutorial.MM.attacks.6.3">En hier wordt het mogelijke gevolgscenario beschreven.</Trans>
           </Typography>
         </Box>
       ),
@@ -125,7 +125,7 @@ export default function AttackTutorial({ run, setRun }: { run: boolean; setRun: 
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.7.1">
+            <Trans i18nKey="2B.tutorial.MM.attacks.7.1">
               Met deze slider kan je een CPx waarde kiezen die overeenstemt met een bepaald bereik van voorwaardelijke
               kansen
             </Trans>
@@ -140,13 +140,13 @@ export default function AttackTutorial({ run, setRun }: { run: boolean; setRun: 
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.8.1">
+            <Trans i18nKey="2B.tutorial.MM.attacks.8.1">
               Als je een waarde gekozen hebt, kan je op een van deze knoppen drukken om naar het volgende scenario te
               gaan.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.8.2">
+            <Trans i18nKey="2B.tutorial.MM.attacks.8.2">
               De <b>VOLGENDE</b> knop onderaan de pagina doet hetzelfde.
             </Trans>
           </Typography>
@@ -160,7 +160,7 @@ export default function AttackTutorial({ run, setRun }: { run: boolean; setRun: 
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.9.1">
+            <Trans i18nKey="2B.tutorial.MM.attacks.9.1">
               Deze tabel toon een overzicht van alle waardes die u gekozen hebt voor de huidige cascade
             </Trans>
           </Typography>
@@ -175,7 +175,7 @@ export default function AttackTutorial({ run, setRun }: { run: boolean; setRun: 
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="2B.tutorial.10.1">
+            <Trans i18nKey="2B.tutorial.MM.attacks.10.1">
               Ten slotte kan u in dit tekstveld een kwalitatieve verklaring opgeven voor de eerder gekozen waardes.
             </Trans>
           </Typography>

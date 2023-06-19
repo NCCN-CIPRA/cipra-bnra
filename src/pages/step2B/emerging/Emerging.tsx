@@ -254,6 +254,7 @@ export default function Emerging({
           open={quickNavOpen}
           setOpen={setQuickNavOpen}
           onTransitionTo={handleChangeStep}
+          isEmerging={true}
         />
       )}
 

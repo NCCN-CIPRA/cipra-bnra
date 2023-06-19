@@ -18,8 +18,8 @@ import useRecords from "../../../hooks/useRecords";
 import useAPI, { DataTable } from "../../../hooks/useAPI";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import AttachmentsDialog from "../information/AttachmentsDialog";
-import ClimateChangeAnalysis, { CCInput } from "../standard/ClimateChangeAnalysis";
-import CatalysingEffectsAnalysis from "../standard/CatalysingEffectsAnalysis";
+import ClimateChangeAnalysis, { CCInput } from "./ClimateChangeAnalysis";
+import CatalysingEffectsAnalysis from "./CatalysingEffectsAnalysis";
 import CascadeTutorial from "../information/CascadeTutorial";
 import CCTutorial from "../information/CCTutorial";
 import CatalysingTutorial from "../information/CatalysingTutorial";
@@ -88,9 +88,9 @@ export default function ManMade({
       const iCatalysingEffects = result.filter(
         (c) =>
           c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk" &&
-          c.cr4de_cause_hazard.cr4de_title.indexOf("Climate change") < 0
+          c.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
       );
-      const iClimateChange = result.find((c) => c.cr4de_cause_hazard.cr4de_title.indexOf("Climate change") >= 0);
+      const iClimateChange = result.find((c) => c.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0);
 
       setCatalysingEffects(iCatalysingEffects);
       setClimateChange(iClimateChange);
@@ -381,7 +381,7 @@ export default function ManMade({
           causes={attacks}
           climateChange={climateChange}
           catalysingEffects={catalysingEffects}
-          hasCauses={activeStep === STEPS.CLIMATE_CHANGE}
+          hasCauses={false}
           open={quickNavOpen}
           setOpen={setQuickNavOpen}
           onTransitionTo={handleChangeStep}

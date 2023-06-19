@@ -24,6 +24,7 @@ import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArro
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { useNavigate } from "react-router-dom";
 import { STEPS } from "../Steps";
+import { STEPS as EM_STEPS } from "../emerging/Steps";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import CheckIcon from "@mui/icons-material/Check";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
@@ -85,6 +86,7 @@ export default function QuickNavSidebar({
   catalysingEffects,
   hasCauses,
   open,
+  isEmerging = false,
   setOpen,
   onTransitionTo,
 }: {
@@ -92,9 +94,10 @@ export default function QuickNavSidebar({
   step2B: DVCascadeAnalysis[];
   causes: DVRiskCascade<DVRiskFile, SmallRisk>[];
   climateChange: DVRiskCascade<DVRiskFile> | null | undefined;
-  catalysingEffects: DVRiskCascade<DVRiskFile>[];
+  catalysingEffects: DVRiskCascade<SmallRisk, SmallRisk>[];
   hasCauses: boolean;
   open: OPEN_STATE;
+  isEmerging?: boolean;
   setOpen: (open: OPEN_STATE) => void;
   onTransitionTo: (newStep: number, newIndex: number) => void;
 }) {
@@ -129,7 +132,7 @@ export default function QuickNavSidebar({
       </Stack>
       {open === OPEN_STATE.QUICKNAV && (
         <>
-          {causes && (
+          {causes && causes.length > 0 && (
             <Box
               sx={{
                 pl: 2.5,
@@ -194,7 +197,7 @@ export default function QuickNavSidebar({
             <Box
               sx={{
                 pl: 2.5,
-                mt: 4,
+                mt: causes && causes.length > 0 ? 4 : 8,
                 overflow: "hidden",
                 transition: "opacity .3s ease",
                 opacity: open ? 1 : 0,
@@ -225,29 +228,32 @@ export default function QuickNavSidebar({
                     </ListItemButton>
                   </ListItem>
                 )}
-                {catalysingEffects.map((c, i) => (
-                  <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding>
-                    <ListItemButton
-                      onClick={() => {
-                        onTransitionTo(STEPS.CATALYSING_EFFECTS, i);
-                        setOpen(OPEN_STATE.CLOSED);
-                      }}
-                    >
-                      {step2B.find(
-                        (a) =>
-                          a._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
-                          Object.keys(getCatalysingFieldsWithErrors(a)).length <= 0
-                      ) ? (
-                        <ListItemIcon sx={{ minWidth: 32, ml: -2 }}>
-                          <CheckIcon color="primary" />
-                        </ListItemIcon>
-                      ) : (
-                        <ListItemIcon sx={{ minWidth: 32, ml: -2 }}></ListItemIcon>
-                      )}
-                      <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
+                {catalysingEffects &&
+                  catalysingEffects.map((c, i) => (
+                    <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding>
+                      <ListItemButton
+                        onClick={() => {
+                          onTransitionTo(isEmerging ? EM_STEPS.CATALYSING_EFFECTS : STEPS.CATALYSING_EFFECTS, i);
+                          setOpen(OPEN_STATE.CLOSED);
+                        }}
+                      >
+                        {step2B.find(
+                          (a) =>
+                            a._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
+                            Object.keys(getCatalysingFieldsWithErrors(a)).length <= 0
+                        ) ? (
+                          <ListItemIcon sx={{ minWidth: 32, ml: -2 }}>
+                            <CheckIcon color="primary" />
+                          </ListItemIcon>
+                        ) : (
+                          <ListItemIcon sx={{ minWidth: 32, ml: -2 }}></ListItemIcon>
+                        )}
+                        <ListItemText
+                          primary={isEmerging ? c.cr4de_effect_hazard.cr4de_title : c.cr4de_cause_hazard.cr4de_title}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
               </List>
             </Box>
           )}

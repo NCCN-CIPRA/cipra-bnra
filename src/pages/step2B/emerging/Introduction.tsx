@@ -8,23 +8,23 @@ export default function Introduction({}: {}) {
       <Box style={{ position: "relative" }}>
         <Box sx={{ mb: 2, ml: 1 }}>
           <Typography variant="h5">
-            <Trans i18nKey="2B.introduction.title">Introduction</Trans>
+            <Trans i18nKey="2B.EM.introduction.title">Introduction</Trans>
           </Typography>
         </Box>
         <Stack sx={{ mb: 4, ml: 1 }} rowGap={2}>
           <Typography variant="body2">
-            <Trans i18nKey="2B.introduction.info.1">
+            <Trans i18nKey="2B.EM.introduction.info.1">
               Welcome to the third step in the risk analysis process, <b>Risk Analysis B</b>!
             </Trans>
           </Typography>
           <Typography variant="body2">
-            <Trans i18nKey="2B.introduction.info.2">
+            <Trans i18nKey="2B.EM.introduction.info.2">
               In this step we will analyze the indirect probability and indirect impact of the risks, as well as
               catalyzing effects.
             </Trans>
           </Typography>
           <Typography variant="body2">
-            <Trans i18nKey="2B.introduction.info.portal.1">
+            <Trans i18nKey="2B.EM.introduction.info.portal.1">
               For a better understanding of the hows and whys of this step, please view the corresponding explanation
               videos in the information portal by clicking the button below
             </Trans>
@@ -35,12 +35,12 @@ export default function Introduction({}: {}) {
             </Button>
           </Box>
           <Typography variant="body2">
-            <Trans i18nKey="2B.introduction.info.4">The application is divided into 3 main parts;</Trans>
+            <Trans i18nKey="2B.EM.introduction.info.4">The application is divided into 3 main parts;</Trans>
           </Typography>
           <ul>
             <li>
               <Typography variant="body2">
-                <Trans i18nKey="2B.introduction.info.5">
+                <Trans i18nKey="2B.EM.introduction.info.5">
                   Dans la première section, intitulée{" "}
                   <b>
                     <i>causes</i>
@@ -52,7 +52,7 @@ export default function Introduction({}: {}) {
             </li>
             <li>
               <Typography variant="body2">
-                <Trans i18nKey="2B.introduction.info.6">
+                <Trans i18nKey="2B.EM.introduction.info.6">
                   Dans la deuxième section, intitulée{" "}
                   <b>
                     <i>changement climatique</i>
@@ -65,7 +65,7 @@ export default function Introduction({}: {}) {
             </li>
             <li>
               <Typography variant="body2">
-                <Trans i18nKey="2B.introduction.info.7">
+                <Trans i18nKey="2B.EM.introduction.info.7">
                   Dans la troisième section intitulée{" "}
                   <b>
                     <i>effets catalyseurs</i>
@@ -77,7 +77,7 @@ export default function Introduction({}: {}) {
             </li>
           </ul>
           <Typography variant="body2">
-            <Trans i18nKey="2B.introduction.info.8">
+            <Trans i18nKey="2B.EM.introduction.info.8">
               Attention, pour rappel, lors de l'étape 1 de la BNRA vous avez identifié les relations de cause à effet
               entre le risque standard étudié et les autres risques du catalogue de la BNRA ainsi que les risques
               émergents qui peuvent avoir un effet catalyseur sur le risque standard étudié. Les champs à remplir lors

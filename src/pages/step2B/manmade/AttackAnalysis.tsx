@@ -120,10 +120,10 @@ export default function AttackAnalysis({
       <Container>
         <Stack direction="column" sx={{ mb: 2, ml: 0 }}>
           <Typography variant="h4">
-            <Trans i18nKey="2B.causes.title">Cause</Trans>
+            <Trans i18nKey="2B.MM.attacks.title">Cause</Trans>
           </Typography>
           <Typography variant="body2" paragraph sx={{ mt: 2 }}>
-            <Trans i18nKey="2B.causes.intro.1">
+            <Trans i18nKey="2B.MM.attacks.intro.1">
               Cette page vous permet d'évaluer, pour chaque relation de cause à effet identifiée dans l'étape 1 de la
               BNRA, les probabilités conditionnelles entre les différents scénarios d'intensité des risques causaux et
               des risques conséquents.
@@ -135,20 +135,20 @@ export default function AttackAnalysis({
             </Button>
           </Box>
           <Typography variant="body2" paragraph>
-            <Trans i18nKey="2B.causes.intro.2">
+            <Trans i18nKey="2B.MM.attacks.intro.2">
               Notez que chaque relation de cause à effet avec 3 scénarios d'intensité (considérable, majeure, extrême)
               nécessite 9 estimations de la probabilité conditionnelle.
             </Trans>
           </Typography>
           <Typography variant="body2" paragraph>
-            <Trans i18nKey="2B.causes.intro.3">
+            <Trans i18nKey="2B.MM.attacks.intro.3">
               Veuillez sélectionner ci-dessous une estimation quantitative de la probabilité conditionnelle que le
               scénario d'intensité actuellement étudié se produise au cours de la période 2023-2026, en conséquence d'un
               autre risque de la BNRA.
             </Trans>
           </Typography>
           <Typography variant="body2" paragraph>
-            <Trans i18nKey="2B.causes.intro.4">
+            <Trans i18nKey="2B.MM.attacks.intro.4">
               Vous pouvez naviguer entre les différents scénarios d'intensité soit en cliquant directement sur les
               scénarios d'intensité d'intérêt, soit en cliquant sur la flèche à droite des classes de probabilité
               conditionnelles.
@@ -156,13 +156,13 @@ export default function AttackAnalysis({
           </Typography>
           <Alert severity="info" sx={{ mt: 2, mb: 0 }}>
             <Typography variant="body2">
-              <Trans i18nKey="2B.causes.info.1">
+              <Trans i18nKey="2B.MM.attacks.info.1">
                 Attention, il est nécessaire d'évaluer toutes les probabilités conditionnelles et de remplir tous les
                 champs concernant chaque relation de cause à effet avant de pouvoir passer à l'étape suivante.
               </Trans>
             </Typography>
             <Typography variant="body2">
-              <Trans i18nKey="2B.causes.info.2">
+              <Trans i18nKey="2B.MM.attacks.info.2">
                 Bien qu'il soit important pour nous de disposer d'une justification quant à la valeur quantitative que
                 vous avez choisie, si vous ne souhaitez pas nous fournir de justification textuelle, nous vous invitons
                 à cliquer sur le bouton PAS DE COMMENTAIRES.
@@ -171,12 +171,12 @@ export default function AttackAnalysis({
           </Alert>
           <Alert severity="warning" sx={{ mt: 2, mb: 0 }}>
             <Typography variant="body2">
-              <Trans i18nKey="2B.causes.warning.1">
+              <Trans i18nKey="2B.MM.attacks.warning.1">
                 Dans cette étape, il convient d'estimer uniquement la probabilité conditionnelle.
               </Trans>
             </Typography>
             <Typography variant="body2">
-              <Trans i18nKey="2B.causes.warning.2">
+              <Trans i18nKey="2B.MM.attacks.warning.2">
                 Par exemple, lors de l'estimation de la probabilité conditionnelle d'une Dam failure suite à un
                 tremblement de terre, il faut uniquement prendre en compte la possibilité d'une défaillance d'un barrage
                 due à un tremblement de terre. Tous les autres éléments qui pourraient provoquer une rupture de barrage
@@ -388,7 +388,7 @@ const AnalysisSection = ({
             {cause.cr4de_title}
           </Link>
         </Tooltip>{" "}
-        <Trans i18nKey="2B.causes.description">causes a</Trans>{" "}
+        <Trans i18nKey="2B.MM.attacks.description">may attack using a</Trans>{" "}
         <Tooltip title={t("2B.cause.openRiskFile", "Click to open the risk file for this risk in a new tab")}>
           <Link to={`/learning/risk/${effect.cr4de_riskfilesid}`} component={RouterLink} target="_blank">
             {effect.cr4de_title}
@@ -641,7 +641,7 @@ const AnalysisSection = ({
 
       <Stack direction="column" sx={{ marginTop: 10 }}>
         <Typography variant="body2" paragraph>
-          <Trans i18nKey="2B.causes.summary.1">
+          <Trans i18nKey="2B.MM.attacks.summary.1">
             Dans le tableau ci-dessous, vous trouverez, pour chaque lien de cause à effet, un aperçu de l’ensemble de
             vos évaluation quantitatives. Cet aperçu se met à jour automatiquement. Il vous permet de vérifier la
             cohérence de vos évaluations.
@@ -650,7 +650,7 @@ const AnalysisSection = ({
         <ul>
           <li>
             <Typography variant="body2" paragraph>
-              <Trans i18nKey="2B.causes.summary.2">
+              <Trans i18nKey="2B.MM.attacks.summary.2">
                 In de kolomen: Controleer of de opgegeven CPx waardes voor éénzelfde intensiteitsscenario van het
                 gevolgrisico (bv. grootschalig gevolgrisico) <b>gelijk blijven of toenemen</b> met de toenemende
                 intensiteit van het scenario van het oorzaakrisico (van boven naar beneden: aanzienlijk --&gt;
@@ -660,7 +660,7 @@ const AnalysisSection = ({
           </li>
           <li>
             <Typography variant="body2" paragraph>
-              <Trans i18nKey="2B.causes.summary.4">
+              <Trans i18nKey="2B.MM.attacks.summary.4">
                 In de rijen: Controleer of de opgegeven CPx waardes voor éénzelfde intensiteitsscenario van het
                 oorzaakrisico (bv. extreem oorzaakrisico) <b>gelijk blijven of afnemen</b> met de toenemende intensiteit
                 van het scenario van het gevolgrisico (van links naar rechts: aanzienlijk --&gt; grootschalig --&gt;
@@ -691,7 +691,7 @@ const AnalysisSection = ({
 
       <Stack direction="column" sx={{ marginTop: 10 }}>
         <Typography variant="body2" paragraph>
-          <Trans i18nKey="2B.causes.quali.1">
+          <Trans i18nKey="2B.MM.attacks.quali.1">
             Veuillez utiliser le champ ci-dessous pour développer votre raisonnement concernant l'estimation
             quantitative donnée dans la section précédente. Vous pouvez par exemple justifier ces valeurs en citant des
             faits historiques ou les résultats d'études. Si possible, ajoutez des références bibliographiques pour
@@ -699,7 +699,7 @@ const AnalysisSection = ({
           </Trans>
         </Typography>
         <Typography variant="body2" paragraph>
-          <Trans i18nKey="2B.causes.quali.2">
+          <Trans i18nKey="2B.MM.attacks.quali.2">
             Attention, ce champ doit être complété une seule fois pour chaque relation de cause à effet. Vous pouvez
             ajouter des précisions concernant les 9 estimations de la probabilité conditionnelle dans le même champ
             textuel.
