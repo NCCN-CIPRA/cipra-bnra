@@ -8,6 +8,7 @@ export interface ProcessManager {
   organiseValidationConsensus: (rf: DVRiskFile) => Promise<void>;
   startSilenceProcedure: (rf: DVRiskFile) => Promise<void>;
   finishStep2A: (rf: DVRiskFile, participation: DVParticipation) => Promise<void>;
+  finishStep2B: (rf: DVRiskFile, participation: DVParticipation) => Promise<void>;
 }
 
 export default function useProcess(): ProcessManager {
@@ -58,6 +59,30 @@ export default function useProcess(): ProcessManager {
             riskFileId: rf.cr4de_riskfilesid,
             contactId: participation._cr4de_contact_value,
             step: "FINISH_STEP_2A",
+          }),
+        }
+      );
+
+      return;
+    },
+    finishStep2B: async function (rf: DVRiskFile, participation: DVParticipation) {
+      await api.updateParticipant(participation.cr4de_bnraparticipationid, {
+        cr4de_cascade_analysis_finished: true,
+        cr4de_cascade_analysis_finished_on: new Date(),
+      });
+
+      // Move the risk file to the next step if possible
+      await api.authFetch(
+        "https://prod-91.westeurope.logic.azure.com:443/workflows/79ca88049c3644349691202d00a5c58c/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ukcGNlwFwdbgAXj-tTEcT7SDTIvxP288eQqkzvgGdH8",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            riskFileId: rf.cr4de_riskfilesid,
+            contactId: participation._cr4de_contact_value,
+            step: "FINISH_STEP_2B",
           }),
         }
       );

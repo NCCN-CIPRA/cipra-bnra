@@ -12,9 +12,10 @@ export default function ParticipationStepper({
 }) {
   let activeStep = 0;
 
-  if (contact.msdyn_portaltermsagreementdate !== null) activeStep++;
-  if (participation.cr4de_validation_finished) activeStep++;
-  if (participation.cr4de_direct_analysis_finished) activeStep++;
+  if (participation.cr4de_cascade_analysis_finished) activeStep = 4;
+  else if (participation.cr4de_direct_analysis_finished) activeStep = 3;
+  else if (participation.cr4de_validation_finished) activeStep = 2;
+  else if (contact.msdyn_portaltermsagreementdate !== null) activeStep = 1;
 
   console.log(activeStep);
   return (

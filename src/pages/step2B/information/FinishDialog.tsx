@@ -23,6 +23,8 @@ import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { Step2BErrors } from "./validateInput";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { STEPS } from "../Steps";
+import useProcess from "../../../hooks/useProcess";
+import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 
 export default function FinishDialog({
   step2A,
@@ -32,7 +34,7 @@ export default function FinishDialog({
   setSurveyDialogOpen,
   onTransitionTo,
 }: {
-  step2A: DVDirectAnalysis;
+  step2A: DVDirectAnalysis<DVRiskFile>;
   finishedDialogOpen: boolean;
   inputErrors: Step2BErrors | null;
   setFinishedDialogOpen: (open: boolean) => void;
@@ -43,6 +45,7 @@ export default function FinishDialog({
   const navigate = useNavigate();
   const { user } = useOutletContext<AuthPageContext>();
   const theme = useTheme();
+  const process = useProcess();
 
   return (
     <Dialog open={finishedDialogOpen} onClose={() => setFinishedDialogOpen(false)}>
@@ -86,7 +89,7 @@ export default function FinishDialog({
                   `$filter=_cr4de_contact_value eq ${user.contactid} and _cr4de_direct_analysis_value eq ${step2A.cr4de_bnradirectanalysisid}`
                 );
                 if (participants.length >= 0) {
-                  // await process.finishStep2A(step2A.cr4de_risk_file, participants[0]);
+                  await process.finishStep2B(step2A.cr4de_risk_file, participants[0]);
                   await api.finishStep(step2A._cr4de_risk_file_value, user.contactid, "2B");
                 }
               }}
