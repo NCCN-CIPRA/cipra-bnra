@@ -17,6 +17,7 @@ interface ExpertBucket {
   registered: number;
   validationFinished: number;
   step2AFinished: number;
+  step2BFinished: number;
 }
 
 const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any[]; label?: any } = {}) => {
@@ -24,7 +25,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
 
   const l = payload.length - 1;
   const total = payload.reduce((tot, p) => tot + p.value, 0);
-  console.log(total, payload);
+
   return (
     <Box sx={{ borderRadius: 4, backgroundColor: "rgba(255,255,255,.9)", p: 2 }}>
       <Typography variant="subtitle2">{new Date(label).toISOString().slice(0, 10)}</Typography>
@@ -98,6 +99,23 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
               </Typography>
             </td>
           </tr>
+          <tr>
+            <td>
+              <Typography variant="body1" sx={{ pt: 0 }}>
+                Step 2B Retention:
+              </Typography>
+            </td>
+            <td>
+              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 0 }}>
+                {Math.round(
+                  (1000 *
+                    (total - payload[l].value - payload[l - 1].value - payload[l - 2].value - payload[l - 3].value)) /
+                    (total - payload[l].value - payload[l - 1].value)
+                ) / 10}
+                %
+              </Typography>
+            </td>
+          </tr>
         </tbody>
       </table>
     </Box>
@@ -136,6 +154,7 @@ export default function ExpertGraph({
         registered: 0,
         validationFinished: 0,
         step2AFinished: 0,
+        step2BFinished: 0,
       });
 
       currentDate = addDays(new Date(currentDate), 1).getTime();
@@ -146,6 +165,13 @@ export default function ExpertGraph({
         const d = dates[i];
 
         if (
+          e.every(
+            (p) =>
+              p.cr4de_cascade_analysis_finished_on && new Date(p.cr4de_cascade_analysis_finished_on).getTime() <= d.date
+          )
+        ) {
+          dates[i].step2BFinished++;
+        } else if (
           e.every(
             (p) =>
               p.cr4de_direct_analysis_finished_on && new Date(p.cr4de_direct_analysis_finished_on).getTime() <= d.date
@@ -197,21 +223,29 @@ export default function ExpertGraph({
         <Tooltip content={<CustomTooltip />} />
         <Area
           type="monotone"
+          dataKey="step2BFinished"
+          stackId="1"
+          stroke="#d45087"
+          fill="#d45087"
+          name="Finished step 2B"
+        />
+        <Area
+          type="monotone"
           dataKey="step2AFinished"
           stackId="1"
-          stroke="#ffa600"
-          fill="#ffa600"
+          stroke="#a05195"
+          fill="#a05195"
           name="Finished step 2A"
         />
         <Area
           type="monotone"
           dataKey="validationFinished"
           stackId="1"
-          stroke="#ff6e54"
-          fill="#ff6e54"
+          stroke="#665191"
+          fill="#665191"
           name="Finished validation step"
         />
-        <Area type="monotone" dataKey="registered" stackId="1" stroke="#955196" fill="#955196" name="Registered" />
+        <Area type="monotone" dataKey="registered" stackId="1" stroke="#2f4b7c" fill="#2f4b7c" name="Registered" />
         <Area type="monotone" dataKey="invited" stackId="1" stroke="#003f5c" fill="#003f5c" name="Invitation sent" />
       </AreaChart>
     </>

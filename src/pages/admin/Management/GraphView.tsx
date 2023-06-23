@@ -12,6 +12,8 @@ import RiskFileGraph from "./RiskFileGraph";
 import ExpertGraph from "./ExpertGraph";
 import { useEffect, useState } from "react";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
+import { DataTable } from "../../../hooks/useAPI";
+import useRecords from "../../../hooks/useRecords";
 
 export default function GraphView({
   participations,
@@ -21,6 +23,11 @@ export default function GraphView({
   const [expertParticipants, setExpertParticipants] = useState<
     DVParticipation<SelectableContact, DVRiskFile, DVValidation, DVDirectAnalysis>[] | null
   >(null);
+
+  const { data: cascadeAnalyses } = useRecords({
+    table: DataTable.CASCADE_ANALYSIS,
+    query: "$select(_cr4de_direct_anal",
+  });
 
   useEffect(() => {
     const analists: { [key: string]: boolean } = {};

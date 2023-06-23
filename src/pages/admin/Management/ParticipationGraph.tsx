@@ -140,9 +140,15 @@ export default function ParticipationGraph({
   const [participationBuckets, setParticipationBuckets] = useState<Bucket[]>([]);
   const [firstDate, setFirstDate] = useState<number>(Date.now());
   const [lastDate, setLastDate] = useState<number>(Date.now());
-  console.log(participations.filter((p) => p._cr4de_direct_analysis_value !== null));
+
   useEffect(() => {
     const datedPs = participations.map((p) => ({
+      step2BFinishedDate: p.cr4de_cascade_analysis_finished_on
+        ? new Date(p.cr4de_cascade_analysis_finished_on).getTime()
+        : null,
+      step2BStartedDate: p.cr4de_cascade_analysis_finished_on
+        ? new Date(p.cr4de_cascade_analysis_finished_on).getTime()
+        : null,
       step2AFinishedDate: p.cr4de_direct_analysis_finished_on
         ? new Date(p.cr4de_direct_analysis_finished_on).getTime()
         : null,
@@ -193,10 +199,14 @@ export default function ParticipationGraph({
         notStarted: 0,
         registered: 0,
         validated: 0,
-        created: 0,
-        modified: 0,
-        completed: 0,
-        step2A: 0,
+
+        created2A: 0,
+        modified2A: 0,
+        completed2A: 0,
+        step2ADone: 0,
+
+        started2B: 0,
+        step2BDone: 0,
       });
 
       currentDate = addDays(new Date(currentDate), 1).getTime();
@@ -206,14 +216,18 @@ export default function ParticipationGraph({
       for (let i = 0; i < dates.length; i++) {
         const d = dates[i];
 
-        if (p.step2AFinishedDate && d.date >= p.step2AFinishedDate) {
-          dates[i].step2A++;
+        if (p.step2BFinishedDate && d.date >= p.step2BFinishedDate) {
+          dates[i].step2BDone++;
+        } else if (p.step2BStartedDate && d.date >= p.step2BStartedDate) {
+          dates[i].started2B++;
+        } else if (p.step2AFinishedDate && d.date >= p.step2AFinishedDate) {
+          dates[i].step2ADone++;
         } else if (p.step2ACompletedDate && d.date >= p.step2ACompletedDate) {
-          dates[i].completed++;
+          dates[i].completed2A++;
         } else if (p.step2AModifiedDate && d.date >= p.step2AModifiedDate) {
-          dates[i].modified++;
+          dates[i].modified2A++;
         } else if (p.step2ACreatedDate && d.date >= p.step2ACreatedDate) {
-          dates[i].created++;
+          dates[i].created2A++;
         } else if (p.validationFinishedDate && d.date >= p.validationFinishedDate) {
           dates[i].validated++;
         } else if (p.registrationDate && d.date >= p.registrationDate) {
@@ -231,7 +245,7 @@ export default function ParticipationGraph({
 
   return (
     <>
-      <Typography variant="h6">Validations Progress Overview</Typography>
+      <Typography variant="h6">Participations Overview</Typography>
       <AreaChart
         width={1000}
         height={400}
@@ -251,10 +265,19 @@ export default function ParticipationGraph({
         />
         <YAxis />
         <Tooltip content={<CustomTooltip />} />
-        <Area type="monotone" dataKey="step2A" stackId="1" stroke="#ffa600" fill="#ffa600" name="Finished step 2A" />
         <Area
           type="monotone"
-          dataKey="completed"
+          dataKey="step2BDone"
+          stackId="1"
+          stroke="#ffa600"
+          fill="#ffa600"
+          name="Finished step 2B"
+        />
+        <Area type="monotone" dataKey="step2ADone" stackId="1" stroke="#ffa600" fill="#ffa600" name="Started step 2B" />
+        <Area type="monotone" dataKey="started2B" stackId="1" stroke="#ffa600" fill="#ffa600" name="Finished step 2A" />
+        <Area
+          type="monotone"
+          dataKey="completed2A"
           stackId="1"
           stroke="#ff6e54"
           fill="#ff6e54"
@@ -262,7 +285,7 @@ export default function ParticipationGraph({
         />
         <Area
           type="monotone"
-          dataKey="modified"
+          dataKey="modified2A"
           stackId="1"
           stroke="#ff6e54"
           fill="#ff6e54"
@@ -270,7 +293,7 @@ export default function ParticipationGraph({
         />
         <Area
           type="monotone"
-          dataKey="created"
+          dataKey="created2A"
           stackId="1"
           stroke="#dd5182"
           fill="#dd5182"

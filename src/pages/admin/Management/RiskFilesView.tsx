@@ -25,6 +25,8 @@ const SPECIAL_FILTERS = {
   REGISTERED_ONLY: false,
   DONE_1: false,
   NOT_DONE_1: false,
+  DONE_2A: false,
+  DONE_2B: false,
   PROBLEMATIC: false,
   SHOW_TEST: false,
 };
