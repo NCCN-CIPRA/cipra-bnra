@@ -220,7 +220,7 @@ export default function ContactsView({
           </ListItemIcon>
         </Tooltip>
         <Stack direction="column" sx={{ width: "100%", mr: 4 }}>
-          <ContactFilterField filter={filter || ""} setFilter={setFilter} />
+          <ContactFilterField filter={filter || ""} setFilter={setFilter} count={filteredContacts.length} />
           <Grid container sx={{ mt: 1 }} rowGap={2}>
             <Grid item xs={12} sm={6} md={4}>
               <FormControlLabel

@@ -29,7 +29,7 @@ export default function OverviewTab({
         </Grid>
         <Grid xs={3}>
           <Box sx={{ height: 200 }}>
-            <ScoreCard />
+            <ScoreCard width={240} height={200} />
           </Box>
         </Grid>
         <Grid xs={3}>

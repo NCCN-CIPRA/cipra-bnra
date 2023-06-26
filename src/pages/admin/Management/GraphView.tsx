@@ -24,11 +24,6 @@ export default function GraphView({
     DVParticipation<SelectableContact, DVRiskFile, DVValidation, DVDirectAnalysis>[] | null
   >(null);
 
-  const { data: cascadeAnalyses } = useRecords({
-    table: DataTable.CASCADE_ANALYSIS,
-    query: "$select(_cr4de_direct_anal",
-  });
-
   useEffect(() => {
     const analists: { [key: string]: boolean } = {};
     participations.forEach((p) => {

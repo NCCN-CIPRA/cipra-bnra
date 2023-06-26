@@ -1,5 +1,6 @@
 import { Paper } from "@mui/material";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
+import { TEAL } from "./Colors";
 
 const data = [
   {
@@ -42,7 +43,7 @@ export default function ResultCard({}) {
           <PolarGrid />
           <PolarAngleAxis dataKey="subject" />
           <PolarRadiusAxis />
-          <Radar name="Mike" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+          <Radar name="Mike" dataKey="A" stroke={TEAL} fill={TEAL} fillOpacity={0.6} />
         </RadarChart>
       </ResponsiveContainer>
     </Paper>

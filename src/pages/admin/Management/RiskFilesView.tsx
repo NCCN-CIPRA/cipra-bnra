@@ -25,7 +25,11 @@ const SPECIAL_FILTERS = {
   REGISTERED_ONLY: false,
   DONE_1: false,
   NOT_DONE_1: false,
+  NONE_2A: false,
+  ONE_2A: false,
   DONE_2A: false,
+  NONE_2B: false,
+  ONE_2B: false,
   DONE_2B: false,
   PROBLEMATIC: false,
   SHOW_TEST: false,
@@ -116,10 +120,44 @@ export default function RiskFilesView({
     }
 
     if (specialFilters.DONE_1) {
+      runningFilter = runningFilter.filter((rf) =>
+        rf.participants.some((p) => p.cr4de_role === "expert" && p.cr4de_validation_finished)
+      );
+    }
+
+    if (specialFilters.NONE_2A) {
       runningFilter = runningFilter.filter(
-        (rf) =>
-          rf.participants.filter((p) => p.cr4de_role === "expert" && p.cr4de_validation_finished).length > 1 &&
-          !rf.cr4de_validation_silent_procedure_until
+        (rf) => !rf.participants.some((p) => p.cr4de_role === "expert" && p.cr4de_direct_analysis_finished)
+      );
+    }
+
+    if (specialFilters.ONE_2A) {
+      runningFilter = runningFilter.filter((rf) =>
+        rf.participants.some((p) => p.cr4de_role === "expert" && p.cr4de_direct_analysis_finished)
+      );
+    }
+
+    if (specialFilters.DONE_2A) {
+      runningFilter = runningFilter.filter((rf) =>
+        rf.participants.every((p) => p.cr4de_role !== "expert" || p.cr4de_direct_analysis_finished)
+      );
+    }
+
+    if (specialFilters.NONE_2B) {
+      runningFilter = runningFilter.filter(
+        (rf) => !rf.participants.some((p) => p.cr4de_role === "expert" && p.cr4de_cascade_analysis_finished)
+      );
+    }
+
+    if (specialFilters.ONE_2B) {
+      runningFilter = runningFilter.filter((rf) =>
+        rf.participants.some((p) => p.cr4de_role === "expert" && p.cr4de_cascade_analysis_finished)
+      );
+    }
+
+    if (specialFilters.DONE_2B) {
+      runningFilter = runningFilter.filter((rf) =>
+        rf.participants.every((p) => p.cr4de_role !== "expert" || p.cr4de_cascade_analysis_finished)
       );
     }
 
@@ -181,7 +219,7 @@ export default function RiskFilesView({
           </ListItemIcon>
         </Tooltip>
         <Stack direction="column" sx={{ width: "100%", mr: 4 }}>
-          <ContactFilterField filter={filter || ""} setFilter={setFilter} />
+          <ContactFilterField filter={filter || ""} setFilter={setFilter} count={filteredRiskFiles.length} />
           <Grid container sx={{ mt: 1 }} rowGap={2}>
             <Grid item xs={12} sm={6} md={4}>
               <FormControlLabel
@@ -223,6 +261,48 @@ export default function RiskFilesView({
                 control={<Checkbox checked={specialFilters.DONE_1} />}
                 label="Show only risk files ready for validation processing"
                 onClick={() => toggleSpecialFilter("DONE_1")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControlLabel
+                control={<Checkbox checked={specialFilters.NONE_2A} />}
+                label="Step 2A not started"
+                onClick={() => toggleSpecialFilter("NONE_2A")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControlLabel
+                control={<Checkbox checked={specialFilters.ONE_2A} />}
+                label="Step 2A started (at least 1)"
+                onClick={() => toggleSpecialFilter("ONE_2A")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControlLabel
+                control={<Checkbox checked={specialFilters.DONE_2A} />}
+                label="Step 2A finished"
+                onClick={() => toggleSpecialFilter("DONE_2A")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControlLabel
+                control={<Checkbox checked={specialFilters.NONE_2B} />}
+                label="Step 2B not started"
+                onClick={() => toggleSpecialFilter("NONE_2B")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControlLabel
+                control={<Checkbox checked={specialFilters.ONE_2B} />}
+                label="Step 2B started (at least 1)"
+                onClick={() => toggleSpecialFilter("ONE_2B")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControlLabel
+                control={<Checkbox checked={specialFilters.DONE_2B} />}
+                label="Step 2B finished"
+                onClick={() => toggleSpecialFilter("DONE_2B")}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={4}>

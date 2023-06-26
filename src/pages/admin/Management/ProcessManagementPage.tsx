@@ -227,7 +227,7 @@ export default function ProcessManagementPage() {
               <Tab label="Consensus Meeting Priorities" value="priorities" />
             </TabList>
           </Box>
-          <TabPanel value="contacts" sx={{ padding: 0 }}>
+          <TabPanel value="contacts">
             <List dense>
               {contacts ? (
                 <ContactsView

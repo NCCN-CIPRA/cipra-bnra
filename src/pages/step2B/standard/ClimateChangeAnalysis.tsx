@@ -239,7 +239,7 @@ export default function ClimateChangeAnalysis({
                 riskType={directAnalysis.cr4de_risk_file.cr4de_risk_type}
                 title={directAnalysis.cr4de_risk_file.cr4de_title}
                 scenario={SCENARIOS.MAJOR}
-                parameters={effectScenarios.considerable}
+                parameters={effectScenarios.major}
                 visible
               />
 
@@ -262,7 +262,7 @@ export default function ClimateChangeAnalysis({
                 riskType={directAnalysis.cr4de_risk_file.cr4de_risk_type}
                 title={directAnalysis.cr4de_risk_file.cr4de_title}
                 scenario={SCENARIOS.EXTREME}
-                parameters={effectScenarios.considerable}
+                parameters={effectScenarios.extreme}
                 visible
               />
 

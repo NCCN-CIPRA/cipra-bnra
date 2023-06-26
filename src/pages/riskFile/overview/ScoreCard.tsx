@@ -1,14 +1,13 @@
 import { Paper } from "@mui/material";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { R2G, TEAL } from "./Colors";
 
 const RADIAN = Math.PI / 180;
 const data = [
-  { name: "A", value: 80, color: "#ff0000" },
-  { name: "B", value: 45, color: "#00ff00" },
-  { name: "C", value: 25, color: "#0000ff" },
+  { name: "Bad", value: 80, color: R2G.RED },
+  { name: "Fine", value: 45, color: R2G.YELLOW },
+  { name: "Good", value: 25, color: R2G.GREEN },
 ];
-const cx = 150;
-const cy = 200;
 const iR = 50;
 const oR = 100;
 const value = 50;
@@ -46,7 +45,7 @@ const needle = (
   ];
 };
 
-export default function ScoreCard({}) {
+export default function ScoreCard({ width = 244, height = 175 }: { width: number; height: number }) {
   return (
     <Paper sx={{ width: "100%", height: "100%", p: 2 }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -56,8 +55,8 @@ export default function ScoreCard({}) {
             startAngle={180}
             endAngle={0}
             data={data}
-            cx={cx}
-            cy={cy}
+            cx={width / 2}
+            cy={height / 2}
             innerRadius={iR}
             outerRadius={oR}
             fill="#8884d8"
@@ -67,7 +66,7 @@ export default function ScoreCard({}) {
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
-          {needle(value, data, cx, cy, iR, oR, "#d0d000")}
+          {needle(value, data, width / 2, height / 2, iR, oR, TEAL)}
         </PieChart>
       </ResponsiveContainer>
     </Paper>
