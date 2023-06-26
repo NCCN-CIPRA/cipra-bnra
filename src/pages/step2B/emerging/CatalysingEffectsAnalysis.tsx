@@ -282,6 +282,14 @@ function AnalysisSection({
           </li>
           <li>
             <Typography variant="body2">
+              <Trans i18nKey="2B.EM.catalysing.quali.3.21">
+                hoe en in welke mate de ontwikkeling van het bestudeerde opkomende risico, de evolutie van potentieel
+                gekatalyseerde standaard risico’s kan beïnvloeden.
+              </Trans>
+            </Typography>
+          </li>
+          <li>
+            <Typography variant="body2">
               <Trans i18nKey="2B.EM.catalysing.quali.3.3">...</Trans>
             </Typography>
           </li>

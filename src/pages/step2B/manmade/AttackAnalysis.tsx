@@ -170,17 +170,24 @@ export default function AttackAnalysis({
             </Typography>
           </Alert>
           <Alert severity="warning" sx={{ mt: 2, mb: 0 }}>
-            <Typography variant="body2">
+            <Typography variant="body2" paragraph>
               <Trans i18nKey="2B.MM.attacks.warning.1">
                 Dans cette étape, il convient d'estimer uniquement la probabilité conditionnelle.
               </Trans>
             </Typography>
-            <Typography variant="body2">
+            <Typography variant="body2" paragraph>
               <Trans i18nKey="2B.MM.attacks.warning.2">
                 Par exemple, lors de l'estimation de la probabilité conditionnelle d'une Dam failure suite à un
                 tremblement de terre, il faut uniquement prendre en compte la possibilité d'une défaillance d'un barrage
                 due à un tremblement de terre. Tous les autres éléments qui pourraient provoquer une rupture de barrage
                 doivent être exclus.
+              </Trans>
+            </Typography>
+            <Typography variant="body2" paragraph>
+              <Trans i18nKey="2B.MM.attacks.warning.3">
+                Deze voorwaardelijke waarschijnlijkheid houdt geen rekening met de motivatie van de actoren, dit wil
+                zeggen de waarschijnlijkheid dat de actor in de komende drie jaar een aanval zal uitvoeren volgens zijn
+                capaciteiten. De motivatie van de actoren werd immers al ingeschat tijdens stap 2A.
               </Trans>
             </Typography>
           </Alert>
@@ -394,7 +401,7 @@ const AnalysisSection = ({
             {effect.cr4de_title}
           </Link>
         </Tooltip>{" "}
-        ({index + 1}/{count})
+        <Trans i18nKey="2B.MM.attacks.description.suffix">uit</Trans> ({index + 1}/{count})
       </Typography>
 
       {quantiErrors && (

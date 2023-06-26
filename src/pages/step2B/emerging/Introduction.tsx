@@ -37,55 +37,6 @@ export default function Introduction({}: {}) {
           <Typography variant="body2">
             <Trans i18nKey="2B.EM.introduction.info.4">The application is divided into 3 main parts;</Trans>
           </Typography>
-          <ul>
-            <li>
-              <Typography variant="body2">
-                <Trans i18nKey="2B.EM.introduction.info.5">
-                  Dans la première section, intitulée{" "}
-                  <b>
-                    <i>causes</i>
-                  </b>
-                  , il vous sera demandé d'estimer quantitativement les probabilités conditionnelles des scénarios
-                  d'intensité du risque standard étudié, puis de les justifier qualitativement.
-                </Trans>
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body2">
-                <Trans i18nKey="2B.EM.introduction.info.6">
-                  Dans la deuxième section, intitulée{" "}
-                  <b>
-                    <i>changement climatique</i>
-                  </b>
-                  , il vous sera demandé d'estimer quantitativement les effets du changement climatique sur la
-                  probabilité directe des scénarios d'intensité du risque standard étudié, puis de les justifier
-                  qualitativement.
-                </Trans>
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body2">
-                <Trans i18nKey="2B.EM.introduction.info.7">
-                  Dans la troisième section intitulée{" "}
-                  <b>
-                    <i>effets catalyseurs</i>
-                  </b>
-                  , il vous sera demandé de décrire qualitativement comment le risque standard étudié peut être affecté
-                  par un risque émergent.
-                </Trans>
-              </Typography>
-            </li>
-          </ul>
-          <Typography variant="body2">
-            <Trans i18nKey="2B.EM.introduction.info.8">
-              Attention, pour rappel, lors de l'étape 1 de la BNRA vous avez identifié les relations de cause à effet
-              entre le risque standard étudié et les autres risques du catalogue de la BNRA ainsi que les risques
-              émergents qui peuvent avoir un effet catalyseur sur le risque standard étudié. Les champs à remplir lors
-              de cette étape dépendent des liens qui ont été identifiés lors de l'étape 1. Par exemple, si aucun risque
-              émergent n'a été identifié comme ayant un effet catalyseur sur le risque standard étudié, vous ne verrez
-              pas apparaitre cette section dans l'application.
-            </Trans>
-          </Typography>
         </Stack>
       </Box>
     </Container>

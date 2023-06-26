@@ -215,19 +215,19 @@ function AnalysisSection({
 
       <Stack direction="column" sx={{ marginTop: 2 }}>
         <Typography variant="body2" paragraph>
-          <Trans i18nKey="2B.catalysing.quali.1">
+          <Trans i18nKey="2B.MM.catalysing.quali.1">
             Veuillez décrire dans le champ textuel ci-dessous comment le risque standard étudié peut être affecté par
             chaque risque émergent en tenant compte de l'analyse d'horizon validée par les experts évaluant ces risques
             émergents.{" "}
           </Trans>
         </Typography>
         <Typography variant="body2">
-          <Trans i18nKey="2B.catalysing.quali.2">Par exemple, décrivez :</Trans>
+          <Trans i18nKey="2B.MM.catalysing.quali.2">Par exemple, décrivez :</Trans>
         </Typography>
         <ul>
           <li>
             <Typography variant="body2">
-              <Trans i18nKey="2B.catalysing.quali.3.1">
+              <Trans i18nKey="2B.MM.catalysing.quali.3.1">
                 comment et dans quelle mesure l'évolution des risques émergents peut influencer la probabilité
                 d'occurrence directe de ce risque évalué.{" "}
               </Trans>
@@ -235,7 +235,7 @@ function AnalysisSection({
           </li>
           <li>
             <Typography variant="body2">
-              <Trans i18nKey="2B.catalysing.quali.3.2">
+              <Trans i18nKey="2B.MM.catalysing.quali.3.2">
                 comment et dans quelle mesure l'évolution des risques émergents peut influencer les impacts de ce risque
                 évalué.{" "}
               </Trans>
@@ -243,18 +243,18 @@ function AnalysisSection({
           </li>
           <li>
             <Typography variant="body2">
-              <Trans i18nKey="2B.catalysing.quali.3.3">...</Trans>
+              <Trans i18nKey="2B.MM.catalysing.quali.3.3">...</Trans>
             </Typography>
           </li>
         </ul>
         <Typography variant="body2" paragraph>
-          <Trans i18nKey="2B.catalysing.quali.4">
+          <Trans i18nKey="2B.MM.catalysing.quali.4">
             Afin d'évaluer au mieux les effets catalyseurs des risques émergents sur le risque standard évalué, vous
             pouvez consulter via le bouton ci-dessous les estimations que vous avez réalisées lors de l'étape 2A.
           </Trans>
         </Typography>
         <Typography variant="body2" paragraph>
-          <Trans i18nKey="2B.catalysing.quali.5">
+          <Trans i18nKey="2B.MM.catalysing.quali.5">
             Vous pouvez par exemple justifier les effets catalyeurs des risques émergents en citant les résultats
             d'études. Si possible, ajoutez des références bibliographiques pour étayer vos arguments.
           </Trans>

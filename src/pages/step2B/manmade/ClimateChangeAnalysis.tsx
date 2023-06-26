@@ -16,7 +16,7 @@ import AttachmentsDialog from "../information/AttachmentsDialog";
 import { Link as RouterLink } from "react-router-dom";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import InformationButton from "../information/InformationButton";
-import CCTutorial from "../information/CCTutorial";
+import CCTutorial from "./CCTutorial";
 
 const TRANSITION_S = "1s";
 
