@@ -5,7 +5,7 @@ import openInNewTab from "../../../functions/openInNewTab";
 export default function Introduction({}: {}) {
   return (
     <Container>
-      <Box style={{ position: "relative" }}>
+      <Box sx={{ position: "relative", pb: 12 }}>
         <Box sx={{ mb: 2, ml: 1 }}>
           <Typography variant="h5">
             <Trans i18nKey="2B.MM.introduction.title">Introduction</Trans>

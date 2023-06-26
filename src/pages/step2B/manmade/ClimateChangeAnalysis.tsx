@@ -7,7 +7,7 @@ import { Trans, useTranslation } from "react-i18next";
 import QualiTextInputBox from "../../step2A/sections/QualiTextInputBox";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
-import { DP50Slider } from "../information/DP50Slider";
+import { M50Slider } from "./M50Slider";
 import { FullScenario } from "../information/Scenarios";
 import useAPI, { DataTable } from "../../../hooks/useAPI";
 import useLazyRecords from "../../../hooks/useLazyRecords";
@@ -195,7 +195,7 @@ export default function ClimateChangeAnalysis({
                   <Trans i18nKey="2B.MM.dp50.quanti.title">DP50 - Direct Probability in 50 years</Trans>
                 </Typography>
 
-                <DP50Slider
+                <M50Slider
                   id="considerable"
                   DPValue={directAnalysis.cr4de_dp_quanti_c || "DP1"}
                   initialDP50Value={directAnalysis.cr4de_dp50_quanti_c}
@@ -218,7 +218,7 @@ export default function ClimateChangeAnalysis({
                   <Trans i18nKey="2B.MM.dp50.quanti.title">DP50 - Direct Probability in 50 years</Trans>
                 </Typography>
 
-                <DP50Slider
+                <M50Slider
                   id="major"
                   DPValue={directAnalysis.cr4de_dp_quanti_m || "DP1"}
                   initialDP50Value={directAnalysis.cr4de_dp50_quanti_m}
@@ -241,7 +241,7 @@ export default function ClimateChangeAnalysis({
                   <Trans i18nKey="2B.MM.dp50.quanti.title">DP50 - Direct Probability in 50 years</Trans>
                 </Typography>
 
-                <DP50Slider
+                <M50Slider
                   id="extreme"
                   DPValue={directAnalysis.cr4de_dp_quanti_e || "DP1"}
                   initialDP50Value={directAnalysis.cr4de_dp50_quanti_e}
