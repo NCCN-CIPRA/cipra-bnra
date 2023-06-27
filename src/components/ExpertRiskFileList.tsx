@@ -294,7 +294,11 @@ function RiskFileList({
                               }}
                             >
                               <StepLabel>
-                                <Trans i18nKey="riskFile.steps.2A.name">Analysis A</Trans>
+                                {p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? (
+                                  "-"
+                                ) : (
+                                  <Trans i18nKey="riskFile.steps.2A.name">Analysis A</Trans>
+                                )}
                               </StepLabel>
                             </StepButton>
                           </Tooltip>
@@ -303,6 +307,7 @@ function RiskFileList({
                           <Tooltip title={getStep2BTooltip(p)}>
                             <StepButton
                               disabled={false}
+                              icon={p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? "2" : undefined}
                               onClick={(e) => {
                                 if (
                                   p._cr4de_direct_analysis_value &&
@@ -315,7 +320,11 @@ function RiskFileList({
                               }}
                             >
                               <StepLabel>
-                                <Trans i18nKey="riskFile.steps.2B.name">Analysis B</Trans>
+                                {p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? (
+                                  <Trans i18nKey="riskFile.EM.steps.2B.name">Analysis</Trans>
+                                ) : (
+                                  <Trans i18nKey="riskFile.steps.2B.name">Analysis B</Trans>
+                                )}
                               </StepLabel>
                             </StepButton>
                           </Tooltip>
@@ -327,7 +336,7 @@ function RiskFileList({
                               "This step cannot be started yet, we will contact you when it becomes available"
                             )}
                           >
-                            <StepLabel>
+                            <StepLabel icon={p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? "3" : undefined}>
                               <Trans i18nKey="riskFile.steps.3.name">Consensus</Trans>
                             </StepLabel>
                           </Tooltip>

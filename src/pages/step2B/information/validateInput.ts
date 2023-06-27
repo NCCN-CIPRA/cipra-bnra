@@ -5,7 +5,7 @@ import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import { CCInput } from "../standard/ClimateChangeAnalysis";
 
-type Step2BError = [DVRiskCascade<DVRiskFile>, number, any];
+type Step2BError = [DVRiskCascade<DVRiskFile, DVRiskFile>, number, any];
 
 type BaseCascadeAnalysisInput = {
   [K in keyof CascadeAnalysisInput]: any;
@@ -31,7 +31,6 @@ export function validateStep2B(
     climateChange: undefined,
     catalysingEffects: [],
   };
-
   errors = cascades
     .sort((a, b) => {
       if (a.cr4de_cause_hazard.cr4de_subjective_importance !== b.cr4de_cause_hazard.cr4de_subjective_importance) {
@@ -124,6 +123,190 @@ export function validateStep2B(
             } as Step2BErrors;
           }
         }
+      }
+
+      return e;
+    }, errors as Step2BErrors);
+
+  if (errors.causes && errors.causes.length <= 0) delete errors.causes;
+  if (errors.catalysingEffects && errors.catalysingEffects.length <= 0) delete errors.catalysingEffects;
+  if (!errors.climateChange) delete errors.climateChange;
+
+  return errors;
+}
+
+export function validateStep2BMM(
+  attacks: DVRiskCascade<unknown, DVRiskFile>[],
+  catalysingEffect: DVRiskCascade<DVRiskFile>[],
+  step2A: DVDirectAnalysis,
+  step2B: DVCascadeAnalysis<DVRiskCascade<DVRiskFile, DVRiskFile>>[]
+) {
+  const errorsAttacks: Step2BErrors = attacks
+    .sort((a, b) => {
+      if (a.cr4de_effect_hazard.cr4de_subjective_importance !== b.cr4de_effect_hazard.cr4de_subjective_importance) {
+        return a.cr4de_effect_hazard.cr4de_subjective_importance - b.cr4de_effect_hazard.cr4de_subjective_importance;
+      }
+      return a.cr4de_effect_hazard.cr4de_hazard_id.localeCompare(b.cr4de_effect_hazard.cr4de_hazard_id);
+    })
+    .reduce(
+      (e, c) => {
+        const s = step2B.find((cascadeAnalysis) => c.cr4de_bnrariskcascadeid === cascadeAnalysis._cr4de_cascade_value);
+
+        if (!s)
+          return {
+            ...e,
+            causes: [
+              ...(e.causes || []),
+              [c, attacks.filter((i) => i.cr4de_effect_hazard.cr4de_risk_type === RISK_TYPE.STANDARD).indexOf(c), null],
+            ],
+          } as Step2BErrors;
+
+        const fieldErrors = getCauseFieldsWithErrors(s);
+
+        if (Object.keys(fieldErrors).length > 0) {
+          return {
+            ...e,
+            causes: [
+              ...(e.causes || []),
+              [
+                s.cr4de_cascade,
+                step2B
+                  .filter((i) => i.cr4de_cascade.cr4de_effect_hazard.cr4de_risk_type === RISK_TYPE.STANDARD)
+                  .indexOf(s),
+                fieldErrors,
+              ],
+            ],
+          } as Step2BErrors;
+        }
+
+        return e;
+      },
+      {
+        causes: [],
+        climateChange: undefined,
+        catalysingEffects: [],
+      } as Step2BErrors
+    );
+
+  const errorsCatalysing: Step2BErrors = catalysingEffect
+    .sort((a, b) => {
+      if (a.cr4de_cause_hazard.cr4de_subjective_importance !== b.cr4de_cause_hazard.cr4de_subjective_importance) {
+        return a.cr4de_cause_hazard.cr4de_subjective_importance - b.cr4de_cause_hazard.cr4de_subjective_importance;
+      }
+      return a.cr4de_cause_hazard.cr4de_hazard_id.localeCompare(b.cr4de_cause_hazard.cr4de_hazard_id);
+    })
+    .reduce(
+      (e, c) => {
+        const s = step2B.find((cascadeAnalysis) => c.cr4de_bnrariskcascadeid === cascadeAnalysis._cr4de_cascade_value);
+
+        if (!s)
+          return {
+            ...e,
+            catalysingEffects: [
+              ...(e.catalysingEffects || []),
+              [
+                c,
+                catalysingEffect
+                  .filter(
+                    (i) =>
+                      i.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING &&
+                      i.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
+                  )
+                  .indexOf(c),
+                null,
+              ],
+            ],
+          } as Step2BErrors;
+
+        const fieldErrors = getCatalysingFieldsWithErrors(s);
+
+        if (Object.keys(fieldErrors).length > 0) {
+          return {
+            ...e,
+            catalysingEffects: [
+              ...(e.catalysingEffects || []),
+              [
+                s.cr4de_cascade,
+                step2B
+                  .filter(
+                    (i) =>
+                      i.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING &&
+                      i.cr4de_cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
+                  )
+                  .indexOf(s),
+                fieldErrors,
+              ],
+            ],
+          } as Step2BErrors;
+        }
+
+        return e;
+      },
+      {
+        causes: [],
+        climateChange: undefined,
+        catalysingEffects: [],
+      } as Step2BErrors
+    );
+
+  const errors: Step2BErrors = {
+    causes: errorsAttacks.causes,
+    climateChange: undefined,
+    catalysingEffects: errorsCatalysing.catalysingEffects,
+  };
+
+  if (errors.causes && errors.causes.length <= 0) delete errors.causes;
+  if (errors.catalysingEffects && errors.catalysingEffects.length <= 0) delete errors.catalysingEffects;
+  if (!errors.climateChange) delete errors.climateChange;
+
+  return errors;
+}
+
+export function validateStep2BEM(
+  cascades: DVRiskCascade<unknown, DVRiskFile>[],
+  step2A: DVDirectAnalysis,
+  step2B: DVCascadeAnalysis<DVRiskCascade<unknown, DVRiskFile>>[]
+) {
+  let errors: Step2BErrors = {
+    causes: [],
+    climateChange: undefined,
+    catalysingEffects: [],
+  };
+  errors = cascades
+    .sort((a, b) => {
+      if (a.cr4de_effect_hazard.cr4de_subjective_importance !== b.cr4de_effect_hazard.cr4de_subjective_importance) {
+        return a.cr4de_effect_hazard.cr4de_subjective_importance - b.cr4de_effect_hazard.cr4de_subjective_importance;
+      }
+      return a.cr4de_effect_hazard.cr4de_hazard_id.localeCompare(b.cr4de_effect_hazard.cr4de_hazard_id);
+    })
+    .reduce((e, c) => {
+      const s = step2B.find((cascadeAnalysis) => c.cr4de_bnrariskcascadeid === cascadeAnalysis._cr4de_cascade_value);
+
+      if (!s)
+        return {
+          ...e,
+          causes: [
+            ...(e.causes || []),
+            [c, cascades.filter((i) => i.cr4de_effect_hazard.cr4de_risk_type === RISK_TYPE.STANDARD).indexOf(c), null],
+          ],
+        } as Step2BErrors;
+
+      const fieldErrors = getCatalysingFieldsWithErrors(s);
+
+      if (Object.keys(fieldErrors).length > 0) {
+        return {
+          ...e,
+          causes: [
+            ...(e.causes || []),
+            [
+              s.cr4de_cascade,
+              step2B
+                .filter((i) => i.cr4de_cascade.cr4de_effect_hazard.cr4de_risk_type === RISK_TYPE.STANDARD)
+                .indexOf(s),
+              fieldErrors,
+            ],
+          ],
+        } as Step2BErrors;
       }
 
       return e;

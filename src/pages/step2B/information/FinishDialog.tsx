@@ -24,7 +24,7 @@ import { Step2BErrors } from "./validateInput";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { STEPS } from "../Steps";
 import useProcess from "../../../hooks/useProcess";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 
 export default function FinishDialog({
   step2A,
@@ -120,14 +120,16 @@ export default function FinishDialog({
                 <List dense>
                   {inputErrors?.causes &&
                     Object.values(inputErrors.causes).map((e) => (
-                      <ListItem>
+                      <ListItem key={e[0].cr4de_bnrariskcascadeid}>
                         <ListItemButton
                           onClick={() => {
                             onTransitionTo(STEPS.CAUSES, e[1]);
                             setFinishedDialogOpen(false);
                           }}
                         >
-                          {e[0].cr4de_cause_hazard.cr4de_title}
+                          {step2A.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.STANDARD
+                            ? e[0].cr4de_cause_hazard.cr4de_title
+                            : e[0].cr4de_effect_hazard.cr4de_title}
                         </ListItemButton>
                       </ListItem>
                     ))}
@@ -146,6 +148,7 @@ export default function FinishDialog({
                   {inputErrors?.catalysingEffects &&
                     Object.values(inputErrors.catalysingEffects).map((e) => (
                       <ListItem
+                        key={e[0].cr4de_bnrariskcascadeid}
                         onClick={() => {
                           onTransitionTo(STEPS.CATALYSING_EFFECTS, 0);
                           setFinishedDialogOpen(false);

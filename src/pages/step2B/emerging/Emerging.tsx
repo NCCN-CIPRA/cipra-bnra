@@ -3,7 +3,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { SCENARIOS, Scenarios } from "../../../functions/scenarios";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import Introduction from "./Introduction";
 import { useEffect, useState, MutableRefObject } from "react";
 import { stepNames, STEPS } from "./Steps";
@@ -58,12 +58,16 @@ export default function Emerging({
     table: DataTable.RISK_CASCADE,
     query: `$filter=_cr4de_cause_hazard_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_effect_hazard`,
     transformResult: (result: DVRiskCascade<DVRiskFile, DVRiskFile>[]) => {
-      return result.sort((a, b) => {
-        if (a.cr4de_effect_hazard.cr4de_subjective_importance !== b.cr4de_effect_hazard.cr4de_subjective_importance) {
-          return a.cr4de_effect_hazard.cr4de_subjective_importance - b.cr4de_effect_hazard.cr4de_subjective_importance;
-        }
-        return a.cr4de_effect_hazard.cr4de_hazard_id.localeCompare(b.cr4de_effect_hazard.cr4de_hazard_id);
-      });
+      return result
+        .filter((r) => r.cr4de_effect_hazard.cr4de_risk_type !== RISK_TYPE.MANMADE)
+        .sort((a, b) => {
+          if (a.cr4de_effect_hazard.cr4de_subjective_importance !== b.cr4de_effect_hazard.cr4de_subjective_importance) {
+            return (
+              a.cr4de_effect_hazard.cr4de_subjective_importance - b.cr4de_effect_hazard.cr4de_subjective_importance
+            );
+          }
+          return a.cr4de_effect_hazard.cr4de_hazard_id.localeCompare(b.cr4de_effect_hazard.cr4de_hazard_id);
+        });
     },
   });
 

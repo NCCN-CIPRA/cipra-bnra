@@ -68,7 +68,11 @@ export function FullScenario({
           <TableHead>
             <TableRow>
               <TableCell colSpan={100} sx={{ backgroundColor: `${SCENARIO_PARAMS[scenario].color}`, color: "white" }}>
-                <Trans i18nKey="2A.MM.scenario.decsription">Actor Group Description</Trans>
+                <Trans i18nKey="2A.MM.scenario.description.1">
+                  Beschrijving van de groeperingen van deze kwaadwillige actor met
+                </Trans>{" "}
+                {t(SCENARIO_PARAMS[scenario].titleI18N, SCENARIO_PARAMS[scenario].titleDefault).toLowerCase()}{" "}
+                <Trans i18nKey="2A.MM.scenario.description.2">capaciteiten</Trans>
               </TableCell>
             </TableRow>
           </TableHead>

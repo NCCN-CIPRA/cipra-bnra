@@ -26,7 +26,7 @@ import { AuthPageContext } from "../AuthPage";
 import SurveyDialog from "../../components/SurveyDialog";
 import { FeedbackStep } from "../../types/dataverse/DVFeedback";
 import FinishDialog from "./information/FinishDialog";
-import { Step2BErrors, validateStep2B } from "./information/validateInput";
+import { Step2BErrors, validateStep2B, validateStep2BEM, validateStep2BMM } from "./information/validateInput";
 import { CrossFade } from "../../components/CrossFade";
 import ManMade from "./manmade/ManMade";
 import Emerging from "./emerging/Emerging";
@@ -79,14 +79,34 @@ export default function ({}) {
     setFinishedDialogOpen(true);
     setInputErrors(null);
 
-    const cascades = await api.getRiskCascades<DVRiskCascade<DVRiskFile>>(
-      `$filter=_cr4de_effect_hazard_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_cause_hazard,cr4de_effect_hazard($select=cr4de_hazard_id,cr4de_title,cr4de_risk_type)`
-    );
-    const step2B = await api.getCascadeAnalyses<DVCascadeAnalysis<DVRiskCascade<DVRiskFile>>>(
-      `$orderby=createdon&$filter=_cr4de_expert_value eq ${user?.contactid} and _cr4de_risk_file_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_cascade($select=cr4de_cause_hazard;$expand=cr4de_cause_hazard($select=cr4de_title,cr4de_risk_type))`
+    const step2B = await api.getCascadeAnalyses<DVCascadeAnalysis<DVRiskCascade<DVRiskFile, DVRiskFile>>>(
+      `$orderby=createdon&$filter=_cr4de_expert_value eq ${user?.contactid} and _cr4de_risk_file_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_cascade($select=cr4de_cause_hazard;$expand=cr4de_cause_hazard($select=cr4de_title,cr4de_risk_type),cr4de_effect_hazard($select=cr4de_title,cr4de_risk_type))`
     );
 
-    setInputErrors(validateStep2B(cascades, directAnalysis, step2B));
+    if (directAnalysis.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.STANDARD) {
+      const cascades = await api.getRiskCascades<DVRiskCascade<DVRiskFile>>(
+        `$filter=_cr4de_effect_hazard_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_cause_hazard,cr4de_effect_hazard($select=cr4de_hazard_id,cr4de_title,cr4de_risk_type)`
+      );
+
+      setInputErrors(validateStep2B(cascades, directAnalysis, step2B));
+    } else if (directAnalysis.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.MANMADE) {
+      const attacks = await api.getRiskCascades<DVRiskCascade<unknown, DVRiskFile>>(
+        `$filter=_cr4de_cause_hazard_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_effect_hazard`
+      );
+      const catalysingEffects = await api.getRiskCascades<DVRiskCascade<DVRiskFile>>(
+        `$filter=_cr4de_effect_hazard_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_cause_hazard`
+      );
+
+      setInputErrors(validateStep2BMM(attacks, catalysingEffects, directAnalysis, step2B));
+    } else {
+      const cascades = (
+        await api.getRiskCascades<DVRiskCascade<unknown, DVRiskFile>>(
+          `$filter=_cr4de_cause_hazard_value eq ${directAnalysis._cr4de_risk_file_value}&$expand=cr4de_effect_hazard`
+        )
+      ).filter((r) => r.cr4de_effect_hazard.cr4de_risk_type !== RISK_TYPE.MANMADE);
+
+      setInputErrors(validateStep2BEM(cascades, directAnalysis, step2B));
+    }
   };
 
   usePageTitle(t("step2B.pageTitle", "BNRA 2023 - 2026 Risk Analysis B"));
