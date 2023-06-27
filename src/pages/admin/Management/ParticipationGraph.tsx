@@ -146,9 +146,15 @@ export default function ParticipationGraph({
       step2BFinishedDate: p.cr4de_cascade_analysis_finished_on
         ? new Date(p.cr4de_cascade_analysis_finished_on).getTime()
         : null,
-      step2BStartedDate: p.cr4de_cascade_analysis_finished_on
-        ? new Date(p.cr4de_cascade_analysis_finished_on).getTime()
-        : null,
+      step2BStartedDate:
+        p.cr4de_direct_analysis_finished_on && p.cr4de_risk_file.cr4de_step2b_enabled_on
+          ? new Date(
+              Math.max(
+                p.cr4de_direct_analysis_finished_on as unknown as number,
+                p.cr4de_risk_file.cr4de_step2b_enabled_on as unknown as number
+              )
+            ).getTime()
+          : null,
       step2AFinishedDate: p.cr4de_direct_analysis_finished_on
         ? new Date(p.cr4de_direct_analysis_finished_on).getTime()
         : null,

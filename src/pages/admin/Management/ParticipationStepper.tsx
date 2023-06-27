@@ -17,7 +17,6 @@ export default function ParticipationStepper({
   else if (participation.cr4de_validation_finished) activeStep = 2;
   else if (contact.msdyn_portaltermsagreementdate !== null) activeStep = 1;
 
-  console.log(activeStep);
   return (
     <Stepper activeStep={activeStep} alternativeLabel sx={{ width: "550px" }}>
       <Step active={activeStep === 0} completed={activeStep > 0}>

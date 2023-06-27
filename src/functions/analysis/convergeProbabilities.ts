@@ -26,22 +26,14 @@ export default async function convergeProbabilities(
       }
     }
 
-    const deltaTotalProbability = Math.abs(totalProbability - lastTotalProbability);
+    const deltaTotalProbability = Math.abs(totalProbability - lastTotalProbability) / totalProbability;
 
     if (deltaTotalProbability < maxDelta) {
-      log(
-        `Run ${run}: Convergence reached (Total Probability: ${Math.round(1000 * totalProbability) / 1000}, Delta: ${
-          Math.round(1000 * deltaTotalProbability) / 1000
-        })...`
-      );
+      log(`\tRun ${run}: Convergence reached (Delta: ${Math.round(10000 * deltaTotalProbability) / 100}%)...`);
 
       return;
     } else {
-      log(
-        `Run ${run}: Convergence not yet reached (Total Probability: ${
-          Math.round(1000 * totalProbability) / 1000
-        }, Delta: ${Math.round(1000 * deltaTotalProbability) / 1000})...`
-      );
+      log(`\tRun ${run}: Convergence not yet reached (Delta: ${Math.round(10000 * deltaTotalProbability) / 100}%)...`);
       lastTotalProbability = totalProbability;
     }
   }

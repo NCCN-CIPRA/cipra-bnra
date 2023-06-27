@@ -67,8 +67,8 @@ export default function RiskMatrix({ riskFiles }: { riskFiles: any[] | null }) {
       id: rf.cr4de_riskfilesid,
       name: rf.cr4de_title,
       category: rf.cr4de_risk_category,
-      x: rf.calculated.tp,
-      y: rf.calculated.ti || 1,
+      x: rf.calculated.tp || 0.001,
+      y: rf.calculated.ti || 1600000,
       z: 1,
     }));
 
@@ -96,7 +96,7 @@ export default function RiskMatrix({ riskFiles }: { riskFiles: any[] | null }) {
           type="number"
           dataKey="x"
           scale={scaleLog().base(3)}
-          domain={[0.0003, 1]}
+          domain={[0.001, 1]}
           ticks={[0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1]}
           tickFormatter={(v: number) => `${v * 100}%`}
           name="probability"

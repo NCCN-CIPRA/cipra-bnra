@@ -6,7 +6,7 @@ export default function convergeImpacts(
   risks: RiskCalculation[],
   log: (line: string) => void,
   maxRuns: number = 10,
-  maxDelta: number = 1
+  maxDelta: number = 0.001
 ) {
   log("Converging impacts...");
 
@@ -25,22 +25,14 @@ export default function convergeImpacts(
         throw new Error("Error in calculations, impact was NaN");
       }
     }
-    const deltaTotalImpact = Math.abs(totalImpact - lastTotalImpact);
+    const deltaTotalImpact = Math.abs(totalImpact - lastTotalImpact) / totalImpact;
 
     if (deltaTotalImpact < maxDelta) {
-      log(
-        `Run ${run}: Convergence reached (Total impact: ${Math.round(totalImpact)}, Delta: ${Math.round(
-          deltaTotalImpact
-        )})...`
-      );
+      log(`\tRun ${run}: Convergence reached (Delta: ${Math.round(10000 * deltaTotalImpact) / 100}%)...`);
 
       return;
     } else {
-      log(
-        `Run ${run}: Convergence not yet reached (Total Probability: ${Math.round(totalImpact)}, Delta: ${Math.round(
-          deltaTotalImpact
-        )})...`
-      );
+      log(`\tRun ${run}: Convergence not yet reached (Delta: ${Math.round(10000 * deltaTotalImpact) / 100}%)...`);
       lastTotalImpact = totalImpact;
     }
   }

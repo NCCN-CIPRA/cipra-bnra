@@ -8,6 +8,7 @@ import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DataTable } from "../../../hooks/useAPI";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import { useParams } from "react-router-dom";
+import { DVContact } from "../../../types/dataverse/DVContact";
 
 type RouteParams = {
   risk_file_id: string;
@@ -28,9 +29,9 @@ export default function InputManagementTab({
     setValue(newValue);
   };
 
-  const { data: directAnalyses, getData: getDirectAnalyses } = useLazyRecords<DVDirectAnalysis>({
+  const { data: directAnalyses, getData: getDirectAnalyses } = useLazyRecords<DVDirectAnalysis<unknown, DVContact>>({
     table: DataTable.DIRECT_ANALYSIS,
-    query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}`,
+    query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_expert($select=emailaddress1)`,
   });
 
   return (

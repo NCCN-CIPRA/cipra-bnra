@@ -7,6 +7,7 @@ import HomePage from "./pages/main/HomePage";
 import LocalAPI from "./pages/main/LocalAPI";
 import CalculationPage from "./pages/analysis/CalculationPage";
 import RankingPage from "./pages/reporting/RankingPage";
+import RiskReportingPage from "./pages/reporting/RiskPage";
 import ValidationIntroPage from "./pages/validation/ValidationIntroPage";
 import ValidationPage from "./pages/validation/ValidationPage";
 import RiskPage from "./pages/learning/RiskPage";
@@ -136,7 +137,7 @@ function App() {
                 },
                 {
                   path: "/reporting/:risk_id",
-                  element: <RiskPage />,
+                  element: <RiskReportingPage />,
                 },
 
                 { path: "/admin/translations", element: <TranslationsPage /> },

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Container, Typography, Paper, Button, Stack } from "@mui/material";
+import { Container, Typography, Card, CardActions, CardContent, Button, Stack } from "@mui/material";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import useRecords from "../../hooks/useRecords";
@@ -10,6 +10,8 @@ import prepareRiskFiles from "../../functions/analysis/prepareRiskFiles";
 import convergeProbabilities from "../../functions/analysis/convergeProbabilities";
 import convergeImpacts from "../../functions/analysis/convergeImpacts";
 import { RiskCalculation } from "../../types/RiskCalculation";
+import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
+import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 
 interface OtherHazard {
   cr4de_title: string;
@@ -31,16 +33,51 @@ const roundNumberFields = (obj: object) => {
   );
 };
 
+const roundPerc = (v: number) => Math.round(v * 10000) / 100 + "%";
+
 export default function CalculationPage() {
   const api = useAPI();
 
-  const { data: riskFiles } = useRecords<DVRiskFile>({ table: DataTable.RISK_FILE });
-  const { data: cascades } = useRecords<DVRiskCascade<OtherHazard, OtherHazard>>({
+  const {
+    data: riskFiles,
+    isFetching: loadingRiskFiles,
+    reloadData: reloadRiskFiles,
+  } = useRecords<DVRiskFile>({
+    table: DataTable.RISK_FILE,
+    query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_risk_type,${DIRECT_ANALYSIS_QUANTI_FIELDS.join(",")}`,
+  });
+  const {
+    data: cascades,
+    isFetching: loadingCascades,
+    reloadData: reloadCascades,
+  } = useRecords<DVRiskCascade<OtherHazard, OtherHazard>>({
     table: DataTable.RISK_CASCADE,
-    query: "$expand=cr4de_cause_hazard($select=cr4de_title),cr4de_effect_hazard($select=cr4de_title)",
+    query: `$select=_cr4de_cause_hazard_value,_cr4de_effect_hazard_value,${CASCADE_ANALYSIS_QUANTI_FIELDS.join(
+      ","
+    )}&$expand=cr4de_cause_hazard($select=cr4de_title),cr4de_effect_hazard($select=cr4de_title)`,
+  });
+  const {
+    data: directAnalyses,
+    isFetching: loadingDAs,
+    reloadData: reloadDAs,
+  } = useRecords<DVDirectAnalysis>({
+    table: DataTable.DIRECT_ANALYSIS,
+    query: `$select=_cr4de_risk_file_value,cr4de_expert,${DIRECT_ANALYSIS_QUANTI_FIELDS.join(
+      ","
+    )}&$expand=cr4de_risk_file($select=cr4de_riskfilesid),cr4de_expert($select=emailaddress1)`,
+  });
+  const {
+    data: cascadeAnalyses,
+    isFetching: loadingCAs,
+    reloadData: reloadCAs,
+  } = useRecords<DVCascadeAnalysis>({
+    table: DataTable.CASCADE_ANALYSIS,
+    query: `$select=_cr4de_cascade_value,cr4de_expert,${CASCADE_ANALYSIS_QUANTI_FIELDS.join(
+      ","
+    )}&$expand=cr4de_cascade($select=cr4de_bnrariskcascadeid),cr4de_expert($select=emailaddress1)`,
   });
 
-  const [log, setLog] = useState(["Idle..."]);
+  const [log, setLog] = useState<string[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
 
   const [results, setResults] = useState<RiskCalculation[] | null>(null);
@@ -51,6 +88,15 @@ export default function CalculationPage() {
     { name: "Analysis", url: "/analysis" },
     { name: "Calculator", url: "" },
   ]);
+
+  const isLoading = loadingRiskFiles || loadingCascades || loadingDAs || loadingCAs;
+
+  const reloadData = () => {
+    reloadCascades();
+    reloadRiskFiles();
+    reloadDAs();
+    reloadCAs();
+  };
 
   const saveResults = async () => {
     if (!results || isCalculating) return;
@@ -90,13 +136,32 @@ export default function CalculationPage() {
   };
 
   const runCalculations = async () => {
-    if (!riskFiles || !cascades) return;
+    if (!riskFiles || !cascades || !directAnalyses || !cascadeAnalyses) return;
 
     const logLines: string[] = [];
 
     setIsCalculating(true);
 
-    const calculations = await prepareRiskFiles(riskFiles, cascades);
+    const [calculations, daMetrics, caMetrics] = await prepareRiskFiles(
+      riskFiles,
+      cascades,
+      directAnalyses,
+      cascadeAnalyses
+    );
+
+    logLines.push(
+      "Direct Analysis Metrics:",
+      `\t${roundPerc(daMetrics.consensus / daMetrics.total)} consensus values`,
+      `\t${roundPerc(daMetrics.average / daMetrics.total)} averages values`,
+      `\t${roundPerc(daMetrics.missing / daMetrics.total)} missing values`
+    );
+    logLines.push(
+      "Cascade Analysis Metrics:",
+      `\t${roundPerc(caMetrics.consensus / caMetrics.total)} consensus values`,
+      `\t${roundPerc(caMetrics.average / caMetrics.total)} averages values`,
+      `\t${roundPerc(caMetrics.missing / caMetrics.total)} missing values`,
+      " "
+    );
 
     const log = (line: string) => {
       logLines.push(line);
@@ -104,7 +169,9 @@ export default function CalculationPage() {
     };
 
     await convergeProbabilities(calculations, log);
+    log(" ");
     await convergeImpacts(calculations, log);
+    log(" ");
 
     calculations.forEach((c) => {
       c.r = c.ti * c.tp;
@@ -119,37 +186,45 @@ export default function CalculationPage() {
   return (
     <>
       <Container sx={{ mt: 4, pb: 8 }}>
-        <Paper sx={{ p: 2 }}>
-          {(!riskFiles || !cascades) && <Typography variant="body1">Loading Risk Files...</Typography>}
+        <Card>
+          <CardContent sx={{ maxHeight: 500, overflowY: "scroll" }}>
+            <Typography variant="overline">Loading Risk Files...</Typography>
 
-          {riskFiles && cascades && (
-            <>
-              <Typography variant="overline" sx={{ mt: 0, display: "block" }}>
-                Loaded {riskFiles.length} Risk Files
-              </Typography>
-              <Typography variant="overline" sx={{ mb: 2, display: "block" }}>
-                Loaded {cascades.length} Cascades
-              </Typography>
-
-              {log.map((l, i) => (
-                <Typography key={i} variant="overline" sx={{ mt: 0, display: "block" }}>
-                  {l}
+            {riskFiles && cascades && directAnalyses && cascadeAnalyses && (
+              <pre>
+                <Typography variant="overline" sx={{ mt: 0, display: "block" }}>
+                  Loaded {riskFiles.length} Risk Files
                 </Typography>
-              ))}
+                <Typography variant="overline" sx={{ mb: 0, display: "block" }}>
+                  Loaded {cascades.length} Cascades
+                </Typography>
+                <Typography variant="overline" sx={{ mb: 0, display: "block" }}>
+                  Loaded {directAnalyses.length} Direct Analyses
+                </Typography>
+                <Typography variant="overline" sx={{ mb: 2, display: "block" }}>
+                  Loaded {cascadeAnalyses.length} Cascade Analyses
+                </Typography>
 
-              <Stack direction="row">
-                <Button sx={{ mt: 2 }} onClick={runCalculations}>
-                  Start calculation
-                </Button>
-                {results && !isCalculating && (
-                  <Button sx={{ mt: 2 }} onClick={saveResults}>
-                    Save results
-                  </Button>
-                )}
-              </Stack>
-            </>
-          )}
-        </Paper>
+                {log.map((l, i) => (
+                  <Typography key={i} variant="overline" sx={{ mt: 0, display: "block" }}>
+                    {l}
+                  </Typography>
+                ))}
+              </pre>
+            )}
+          </CardContent>
+          <CardActions>
+            <Button disabled={isLoading} onClick={reloadData}>
+              Reload data
+            </Button>
+            <Button disabled={riskFiles === null || cascades === null} onClick={runCalculations}>
+              Start calculation
+            </Button>
+            <Button disabled={results === null || isCalculating} onClick={saveResults}>
+              Save results
+            </Button>
+          </CardActions>
+        </Card>
       </Container>
     </>
   );

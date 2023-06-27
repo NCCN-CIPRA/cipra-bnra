@@ -61,10 +61,11 @@ export interface DirectAnalysisEditableFields {
   cr4de_dp50_quanti_e: string | null;
 }
 
-export interface DVDirectAnalysis<RiskFileType = unknown> extends DirectAnalysisEditableFields {
+export interface DVDirectAnalysis<RiskFileType = unknown, ExpertType = unknown> extends DirectAnalysisEditableFields {
   cr4de_bnradirectanalysisid: string;
 
-  cr4de_expert: string;
+  cr4de_expert: ExpertType;
+  _cr4de_expert_value: string;
   cr4de_risk_file: RiskFileType;
   _cr4de_risk_file_value: string;
 
@@ -129,3 +130,5 @@ export const DIRECT_ANALYSIS_EDITABLE_FIELDS: (keyof DirectAnalysisEditableField
   "cr4de_cross_border_impact_quali_m",
   "cr4de_cross_border_impact_quali_e",
 ];
+
+export const DIRECT_ANALYSIS_QUANTI_FIELDS = DIRECT_ANALYSIS_EDITABLE_FIELDS.filter((f) => f.indexOf("quanti") > 0);
