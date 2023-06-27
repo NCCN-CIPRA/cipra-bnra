@@ -248,12 +248,6 @@ function AnalysisSection({
           </li>
         </ul>
         <Typography variant="body2" paragraph>
-          <Trans i18nKey="2B.catalysing.quali.4">
-            Afin d'évaluer au mieux les effets catalyseurs des risques émergents sur le risque standard évalué, vous
-            pouvez consulter via le bouton ci-dessous les estimations que vous avez réalisées lors de l'étape 2A.
-          </Trans>
-        </Typography>
-        <Typography variant="body2" paragraph>
           <Trans i18nKey="2B.catalysing.quali.5">
             Vous pouvez par exemple justifier les effets catalyeurs des risques émergents en citant les résultats
             d'études. Si possible, ajoutez des références bibliographiques pour étayer vos arguments.

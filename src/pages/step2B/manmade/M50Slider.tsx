@@ -66,12 +66,12 @@ export function M50Slider({
       <Slider
         value={value}
         onChange={handleChangeValue}
-        onChangeCommitted={() => onSave(value < 0 ? null : `DP${value}`)}
+        onChangeCommitted={() => onSave(value < 0 ? null : `M${value}`)}
         valueLabelDisplay="auto"
         disableSwap
         step={1}
         min={-1}
-        max={5}
+        max={3}
         valueLabelFormat={(value: number) => <MValueStack value={value} />}
         marks={Array(7)
           .fill(undefined)
