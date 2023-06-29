@@ -5,7 +5,7 @@ import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import { Trans, useTranslation } from "react-i18next";
 
 const COLORS = {
@@ -73,7 +73,11 @@ export default function CascadeMatrix({
         <Tooltip title={cause.cr4de_title}>
           <Box sx={{ padding: theme.spacing(1), textAlign: "center" }}>
             <Typography variant="h6">
-              <Trans i18nKey="2B.effect">Effect</Trans>
+              {cause.cr4de_risk_type === RISK_TYPE.MANMADE ? (
+                <Trans i18nKey="2B.attack">Attack</Trans>
+              ) : (
+                <Trans i18nKey="2B.effect">Effect</Trans>
+              )}
             </Typography>
           </Box>
         </Tooltip>
@@ -83,7 +87,11 @@ export default function CascadeMatrix({
         <Tooltip title={effect.cr4de_title}>
           <Box sx={{ padding: theme.spacing(1), textAlign: "center" }}>
             <Typography variant="h6">
-              <Trans i18nKey="2B.cause">Cause</Trans>
+              {cause.cr4de_risk_type === RISK_TYPE.MANMADE ? (
+                <Trans i18nKey="2B.actor">Actor</Trans>
+              ) : (
+                <Trans i18nKey="2B.cause">Cause</Trans>
+              )}
             </Typography>
           </Box>
         </Tooltip>

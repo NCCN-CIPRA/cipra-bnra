@@ -44,7 +44,9 @@ export default function CalculationPage() {
     reloadData: reloadRiskFiles,
   } = useRecords<DVRiskFile>({
     table: DataTable.RISK_FILE,
-    query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_risk_type,${DIRECT_ANALYSIS_QUANTI_FIELDS.join(",")}`,
+    query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_risk_type,cr4de_calculated,${DIRECT_ANALYSIS_QUANTI_FIELDS.join(
+      ","
+    )}`,
   });
   const {
     data: cascades,
@@ -99,7 +101,7 @@ export default function CalculationPage() {
   };
 
   const saveResults = async () => {
-    if (!results || isCalculating) return;
+    if (!riskFiles || !results || isCalculating) return;
 
     const innerLog = log;
 
@@ -107,6 +109,12 @@ export default function CalculationPage() {
 
     for (let i = 0; i < results.length; i++) {
       const calculation = results[i];
+
+      const rf = riskFiles.find((r) => r.cr4de_riskfilesid === calculation.riskId);
+
+      if (!rf) continue;
+
+      const previousCalculations = rf.cr4de_calculated ? JSON.parse(rf.cr4de_calculated) : [];
 
       const calculatedFields: any = {
         ...roundNumberFields(calculation),
@@ -125,8 +133,15 @@ export default function CalculationPage() {
       const riskId = calculatedFields.riskId;
       delete calculatedFields.riskId;
 
+      previousCalculations.unshift(calculatedFields);
+      let calculationsString = JSON.stringify(previousCalculations);
+      while (calculationsString.length > 1048576) {
+        delete previousCalculations[previousCalculations.length - 1];
+        calculationsString = JSON.stringify(previousCalculations);
+      }
+
       await api.updateRiskFile(riskId, {
-        cr4de_calculated: JSON.stringify(calculatedFields),
+        cr4de_calculated: calculationsString,
       });
 
       setLog([...innerLog.slice(0, innerLog.length - 1), `Saving calculations (${i + 1}/${results.length})`]);

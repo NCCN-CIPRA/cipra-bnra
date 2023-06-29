@@ -20,6 +20,8 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import InputManagementTab from "./inputManagement/InputManagementTab";
+import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
+import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 
 type RouteParams = {
   risk_file_id: string;
@@ -35,23 +37,57 @@ export default function RiskFilePage({}) {
 
   const [tab, setTab] = useState(0);
 
-  const { data: riskFile, reloadData: reloadRiskFile } = useRecord<DVRiskFile>({
+  const {
+    data: riskFile,
+    reloadData: reloadRiskFile,
+    isFetching: loadingRiskFile,
+  } = useRecord<DVRiskFile>({
     table: DataTable.RISK_FILE,
     id: params.risk_file_id,
   });
-  const { data: otherRisks, reloadData: reloadRiskFiles } = useRecords<SmallRisk>({
+  const {
+    data: otherRisks,
+    reloadData: reloadRiskFiles,
+    isFetching: loadingRiskFiles,
+  } = useRecords<SmallRisk>({
     table: DataTable.RISK_FILE,
     query: `$filter=cr4de_riskfilesid ne ${params.risk_file_id}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`,
   });
 
-  const { data: participants, reloadData: reloadParticipants } = useRecords<DVParticipation<DVContact>>({
+  const {
+    data: participants,
+    reloadData: reloadParticipants,
+    isFetching: loadingParticipants,
+  } = useRecords<DVParticipation<DVContact>>({
     table: DataTable.PARTICIPATION,
     query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_contact`,
   });
 
-  const { data: cascades, reloadData: reloadCascades } = useRecords<DVRiskCascade<SmallRisk, SmallRisk>>({
+  const {
+    data: cascades,
+    reloadData: reloadCascades,
+    isFetching: loadingCascades,
+  } = useRecords<DVRiskCascade<SmallRisk, SmallRisk>>({
     table: DataTable.RISK_CASCADE,
     query: `$filter=_cr4de_cause_hazard_value eq ${params.risk_file_id} or _cr4de_effect_hazard_value eq ${params.risk_file_id}&$expand=cr4de_cause_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition),cr4de_effect_hazard($select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_definition)`,
+  });
+
+  const {
+    data: directAnalyses,
+    reloadData: reloadDirectAnalyses,
+    isFetching: loadingDAs,
+  } = useRecords<DVDirectAnalysis<unknown, DVContact>>({
+    table: DataTable.DIRECT_ANALYSIS,
+    query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_expert($select=emailaddress1)`,
+  });
+
+  const {
+    data: cascadeAnalyses,
+    reloadData: reloadCascadeAnalyses,
+    isFetching: loadingCAs,
+  } = useRecords<DVCascadeAnalysis>({
+    table: DataTable.CASCADE_ANALYSIS,
+    query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_expert($select=emailaddress1)`,
   });
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {

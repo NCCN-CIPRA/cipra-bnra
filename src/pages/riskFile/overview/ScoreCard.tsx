@@ -1,4 +1,4 @@
-import { Paper } from "@mui/material";
+import { Stack, Box, Typography, Paper } from "@mui/material";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { R2G, TEAL } from "./Colors";
 
@@ -22,9 +22,11 @@ const needle = (
   color: string | undefined
 ) => {
   let total = 0;
+
   data.forEach((v: { value: number }) => {
     total += v.value;
   });
+
   const ang = 180.0 * (1 - value / total);
   const length = (iR + 2 * oR) / 3;
   const sin = Math.sin(-RADIAN * ang);
@@ -46,29 +48,52 @@ const needle = (
 };
 
 export default function ScoreCard({ width = 244, height = 175 }: { width: number; height: number }) {
+  const score = 0.7;
+
   return (
-    <Paper sx={{ width: "100%", height: "100%", p: 2 }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart width={300} height={100}>
-          <Pie
-            dataKey="value"
-            startAngle={180}
-            endAngle={0}
-            data={data}
-            cx={width / 2}
-            cy={height / 2}
-            innerRadius={iR}
-            outerRadius={oR}
-            fill="#8884d8"
-            stroke="none"
-          >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          {needle(value, data, width / 2, height / 2, iR, oR, TEAL)}
-        </PieChart>
-      </ResponsiveContainer>
-    </Paper>
+    <Stack component={Paper} sx={{ width: "100%", height: "100%", p: 2, position: "relative" }}>
+      <Box sx={{ flex: 1, overflow: "hidden", mb: 4 }}>
+        <ResponsiveContainer height="200%">
+          <PieChart height={100} width={100}>
+            <Pie
+              dataKey="value"
+              startAngle={180}
+              endAngle={0}
+              data={data}
+              innerRadius="50%"
+              outerRadius="100%"
+              fill={TEAL}
+              stroke="none"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </Box>
+      <Box
+        sx={{ position: "relative", transform: `rotate(${score * 180}deg)`, transformOrigin: "50% calc(100% - 32px)" }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 27,
+            left: "calc(50% - 80px)",
+            width: 0,
+            height: 0,
+            borderBottom: "5px solid transparent",
+            borderTop: "5px solid transparent",
+            borderRight: `85px solid ${TEAL}`,
+            borderBottomRightRadius: 5,
+            borderTopRightRadius: 5,
+            opacity: 0.8,
+          }}
+        />
+      </Box>
+      <Box sx={{ width: "100%", textAlign: "center" }}>
+        <Typography variant="subtitle1">Analysis Reliability</Typography>
+      </Box>
+    </Stack>
   );
 }

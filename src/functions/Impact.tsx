@@ -19,14 +19,18 @@ export function getAbsoluteImpact(scaleString: string | null) {
   return 1000 * scales[scaleString.slice(2)];
 }
 
-export function getImpactScale(absoluteImpact: number, scalePrefix: string) {
-  if (absoluteImpact === 0) return `${scalePrefix}0`;
+export function getImpactScaleNumber(absoluteImpact: number) {
+  if (absoluteImpact === 0) return "0";
 
-  const diffs = Object.entries(scales)
+  const diffs: [string, number][] = Object.entries(scales)
     .sort((a, b) => b[1] - a[1])
     .map((v) => [v[0], Math.abs(Math.log(1000 * v[1]) - Math.log(absoluteImpact))]);
 
   const minDiff = diffs.reduce((min, cur) => (min[1] > cur[1] ? cur : min));
 
-  return `${scalePrefix}${minDiff[0]}`;
+  return minDiff[0];
+}
+
+export function getImpactScale(absoluteImpact: number, scalePrefix: string) {
+  return `${scalePrefix}${getImpactScaleNumber(absoluteImpact)}`;
 }

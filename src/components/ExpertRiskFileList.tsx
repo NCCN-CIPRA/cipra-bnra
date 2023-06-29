@@ -266,9 +266,7 @@ function RiskFileList({
                             <StepButton
                               disabled={false}
                               icon={
-                                p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? (
-                                  <EmergingRisks2AIcon />
-                                ) : undefined
+                                p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? <EmergingRisks2AIcon /> : "2A"
                               }
                               onClick={async (e) => {
                                 if (p._cr4de_direct_analysis_value) {
@@ -307,7 +305,7 @@ function RiskFileList({
                           <Tooltip title={getStep2BTooltip(p)}>
                             <StepButton
                               disabled={false}
-                              icon={p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? "2" : undefined}
+                              icon={p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? "2" : "2B"}
                               onClick={(e) => {
                                 if (
                                   p._cr4de_direct_analysis_value &&
@@ -336,7 +334,7 @@ function RiskFileList({
                               "This step cannot be started yet, we will contact you when it becomes available"
                             )}
                           >
-                            <StepLabel icon={p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk" ? "3" : undefined}>
+                            <StepLabel icon={"3"}>
                               <Trans i18nKey="riskFile.steps.3.name">Consensus</Trans>
                             </StepLabel>
                           </Tooltip>

@@ -89,7 +89,7 @@ export default function ProbabilitySankey({ riskFile }: { riskFile: CalculatedRi
     nodes: [
       { name: riskFile.cr4de_title, category: riskFile.cr4de_risk_category },
       { name: "Direct Probability" },
-      ...riskFile.calculated.causes
+      ...riskFile.calculated[0].causes
         .filter((c) => c.ip > 0)
         .map((c) => ({
           name: c.title,
@@ -97,8 +97,8 @@ export default function ProbabilitySankey({ riskFile }: { riskFile: CalculatedRi
         })),
     ],
     links: [
-      ...(riskFile.calculated.dp > 0 ? [{ source: 1, target: 0, value: riskFile.calculated.dp }] : []),
-      ...riskFile.calculated.causes
+      ...(riskFile.calculated[0].dp > 0 ? [{ source: 1, target: 0, value: riskFile.calculated[0].dp }] : []),
+      ...riskFile.calculated[0].causes
         .filter((e) => e.ip > 0)
         .map((e: any, i: number) => ({
           source: i + 2,
@@ -116,7 +116,7 @@ export default function ProbabilitySankey({ riskFile }: { riskFile: CalculatedRi
       <ResponsiveContainer width="100%" height="100%">
         <Sankey
           data={data}
-          node={<PSankeyNode totalProbability={riskFile.calculated.tp} totalNodes={data.nodes.length} />}
+          node={<PSankeyNode totalProbability={riskFile.calculated[0].tp} totalNodes={data.nodes.length} />}
           link={<PSankeyLink totalNodes={data.nodes.length} />}
           nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
         ></Sankey>

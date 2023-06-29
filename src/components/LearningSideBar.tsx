@@ -93,14 +93,14 @@ export default function LearningSideBar({
       id: "tools-analysisB-manmade",
       letter: "BM",
       inset: true,
-      disabled: true,
+      disabled: false,
     },
     {
       title: t("learning.tools.analysisBEmerging", "2B - Emerging Risks"),
       id: "tools-analysisB-emerging",
       letter: "BE",
       inset: true,
-      disabled: true,
+      disabled: false,
     },
   ];
 

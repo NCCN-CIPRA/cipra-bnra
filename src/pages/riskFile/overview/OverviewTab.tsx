@@ -9,6 +9,7 @@ import ScoreCard from "./ScoreCard";
 import ResultCard from "./ResultCard";
 import HistoryCard from "./HistoryCard";
 import ImportanceCard from "./ImportanceCard";
+import EventTimeline from "./EventTimeline";
 
 export default function OverviewTab({
   riskFile,
@@ -27,31 +28,31 @@ export default function OverviewTab({
         <Grid xs={12} sx={{ mb: 2 }}>
           <RiskFileStepper riskFile={riskFile} participations={participants} />
         </Grid>
-        <Grid xs={3}>
+        <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
             <ScoreCard width={240} height={200} />
           </Box>
         </Grid>
-        <Grid xs={3}>
+        <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <ImportanceCard />
+            <ImportanceCard riskFile={riskFile} />
           </Box>
         </Grid>
-        <Grid xs={3}>
+        <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <ResultCard />
+            <ResultCard riskFile={riskFile} />
           </Box>
         </Grid>
-        <Grid xs={3}>
+        <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <HistoryCard />
+            <HistoryCard riskFile={riskFile} />
           </Box>
         </Grid>
         <Grid xs={12} sx={{ mt: 2 }}>
           <ParticipationTable riskFile={riskFile} participants={participants} reloadParticipants={async () => {}} />
         </Grid>
         <Grid xs={12}>
-          <Box sx={{ height: 150, backgroundColor: "rgba(40, 200, 40, 0.3)", padding: 2 }}>Activity Log</Box>
+          <EventTimeline />
         </Grid>
       </Grid>
     </Container>

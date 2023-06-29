@@ -91,7 +91,7 @@ export default function ImpactSankey({ riskFile }: { riskFile: CalculatedRisk | 
     nodes: [
       { name: riskFile.cr4de_title, category: riskFile.cr4de_risk_category },
       { name: "Direct Impact" },
-      ...riskFile.calculated.effects
+      ...riskFile.calculated[0].effects
         .filter(
           (e) => e.ii_Ha + e.ii_Hb + e.ii_Hc + e.ii_Sa + e.ii_Sb + e.ii_Sc + e.ii_Sd + e.ii_Ea + e.ii_Fa + e.ii_Fb > 0
         )
@@ -101,8 +101,8 @@ export default function ImpactSankey({ riskFile }: { riskFile: CalculatedRisk | 
         })),
     ],
     links: [
-      ...(riskFile.calculated.di > 0 ? [{ source: 0, target: 1, value: riskFile.calculated.di }] : []),
-      ...riskFile.calculated.effects
+      ...(riskFile.calculated[0].di > 0 ? [{ source: 0, target: 1, value: riskFile.calculated[0].di }] : []),
+      ...riskFile.calculated[0].effects
         .filter(
           (e: any, i: number) =>
             e.ii_Ha + e.ii_Hb + e.ii_Hc + e.ii_Sa + e.ii_Sb + e.ii_Sc + e.ii_Sd + e.ii_Ea + e.ii_Fa + e.ii_Fb > 0
@@ -125,7 +125,7 @@ export default function ImpactSankey({ riskFile }: { riskFile: CalculatedRisk | 
       <ResponsiveContainer width="100%" height="100%">
         <Sankey
           data={data}
-          node={<ISankeyNode totalImpact={riskFile.calculated.ti} totalNodes={data.nodes.length} />}
+          node={<ISankeyNode totalImpact={riskFile.calculated[0].ti} totalNodes={data.nodes.length} />}
           link={<ISankeyLink totalNodes={data.nodes.length} />}
           nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
         ></Sankey>

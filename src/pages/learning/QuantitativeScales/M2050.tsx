@@ -5,7 +5,6 @@ export const M = {
   prefix: "M2050-",
   title: ["learning.motivation.title", "M - Motivation"],
   intervals: [
-    ["learning.motivation.rp.0", "0%"],
     ["learning.motivation.rp.1", "< 1%"],
     ["learning.motivation.rp.2", "1% – 50%"],
     ["learning.motivation.rp.3", "50% – 90%"],
@@ -15,7 +14,6 @@ export const M = {
   alternatives: [
     {
       intervals: [
-        ["learning.motivation.q.0", "Motivation is proven to be non-existant"],
         ["learning.motivation.q.1", "No indicators of motivation or action attempts"],
         ["learning.motivation.q.2", "Few indicators of motivation or action attempts"],
         ["learning.motivation.q.3", "Many indicators of motivation or action attempts"],

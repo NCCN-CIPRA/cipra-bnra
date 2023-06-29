@@ -54,7 +54,7 @@ export function M50Slider({
           sx={{
             position: "absolute",
             top: error ? 53 : -18,
-            left: `calc(${((dp || 0) + 2) * 16.67}% - 15px)`,
+            left: `calc(${((dp || 0) + 2) * 25}% - 15px)`,
             width: 30,
             height: 30,
           }}

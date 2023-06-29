@@ -40,8 +40,8 @@ export default function RankingPage() {
 
     sortedResults.sort(
       (a, b) =>
-        ((b.calculated[impactField as keyof RiskCalculation] as number) || 0) -
-        ((a.calculated[impactField as keyof RiskCalculation] as number) || 0)
+        ((b.calculated[0][impactField as keyof RiskCalculation] as number) || 0) -
+        ((a.calculated[0][impactField as keyof RiskCalculation] as number) || 0)
     );
 
     setSortedRisks(sortedResults);
