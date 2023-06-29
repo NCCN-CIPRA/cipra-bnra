@@ -22,6 +22,7 @@ import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import InputManagementTab from "./inputManagement/InputManagementTab";
 import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
+import AnalysisTab from "./analysis/AnalysisTab";
 
 type RouteParams = {
   risk_file_id: string;
@@ -113,6 +114,7 @@ export default function RiskFilePage({}) {
             onUpdateCascades={handleUpdateCascades}
           />
         )}
+        {tab === 2 && <AnalysisTab riskFile={riskFile} />}
         {tab === 3 && <InputManagementTab riskFile={riskFile} participants={participants} />}
       </Box>
       <Paper sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }} elevation={3}>

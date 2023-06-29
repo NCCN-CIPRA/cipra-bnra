@@ -28,7 +28,7 @@ export default function EditorIntroPage() {
           onClick={async (riskFile) => {
             if (!riskFiles) return;
 
-            navigate(`/hazards/${riskFile.cr4de_riskfilesid}`);
+            navigate(`/risks/${riskFile.cr4de_riskfilesid}`);
           }}
         />
       </Container>

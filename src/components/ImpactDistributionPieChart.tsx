@@ -1,6 +1,7 @@
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip, TooltipProps } from "recharts";
 import { Box, Typography } from "@mui/material";
 import { getImpactScale } from "../functions/Impact";
+import { CalculatedRisk } from "../types/CalculatedRisk";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
@@ -30,37 +31,40 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   return null;
 };
 
-export default function ImpactDistributionPieChart({ riskFile }: { riskFile: any }) {
+export default function ImpactDistributionPieChart({ riskFile }: { riskFile: CalculatedRisk | null }) {
   if (!riskFile) return null;
 
   const dataGlobal = [
     {
       name: "Human Impact",
-      value: riskFile.calculated.ti_Ha + riskFile.calculated.ti_Hb + riskFile.calculated.ti_Hc,
+      value: riskFile.calculated[0].ti_Ha + riskFile.calculated[0].ti_Hb + riskFile.calculated[0].ti_Hc,
       color: "#c2000a",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "H",
     },
     {
       name: "Societal Impact",
       value:
-        riskFile.calculated.ti_Sa + riskFile.calculated.ti_Sb + riskFile.calculated.ti_Sc + riskFile.calculated.ti_Sd,
+        riskFile.calculated[0].ti_Sa +
+        riskFile.calculated[0].ti_Sb +
+        riskFile.calculated[0].ti_Sc +
+        riskFile.calculated[0].ti_Sd,
       color: "#a6932d",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "S",
     },
     {
       name: "Environmental Impact",
-      value: riskFile.calculated.ti_Ea,
+      value: riskFile.calculated[0].ti_Ea,
       color: "#488f31",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "E",
     },
     {
       name: "Financial Impact",
-      value: riskFile.calculated.ti_Fa + riskFile.calculated.ti_Fb,
+      value: riskFile.calculated[0].ti_Fa + riskFile.calculated[0].ti_Fb,
       color: "#004c6d",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "F",
     },
   ];
@@ -68,72 +72,72 @@ export default function ImpactDistributionPieChart({ riskFile }: { riskFile: any
   const dataSpecific = [
     {
       name: "Fatalities",
-      value: riskFile.calculated.ti_Ha,
+      value: riskFile.calculated[0].ti_Ha,
       color: "#de6148",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "Ha",
     },
     {
       name: "Injured and sick people",
-      value: riskFile.calculated.ti_Hb,
+      value: riskFile.calculated[0].ti_Hb,
       color: "#f39d87",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "Hb",
     },
     {
       name: "People in need of assistance",
-      value: riskFile.calculated.ti_Hc,
+      value: riskFile.calculated[0].ti_Hc,
       color: "#ffd7cc",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "Hv",
     },
     {
       name: "Supply shortfalls and unmet human needs",
-      value: riskFile.calculated.ti_Sa,
+      value: riskFile.calculated[0].ti_Sa,
       color: "#bca632",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "Sa",
     },
     {
       name: "Diminished public order and domestic security",
-      value: riskFile.calculated.ti_Sb,
+      value: riskFile.calculated[0].ti_Sb,
       color: "#d2ba37",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "Sb",
     },
     {
       name: "Damage to the reputation of Belgium",
-      value: riskFile.calculated.ti_Sc,
+      value: riskFile.calculated[0].ti_Sc,
       color: "#e8ce3d",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "Sc",
     },
     {
       name: "Loss of confidence in or loss of functioning of the state and/or its values",
-      value: riskFile.calculated.ti_Sd,
+      value: riskFile.calculated[0].ti_Sd,
       color: "#ffe342",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "Sd",
     },
     {
       name: "Damaged ecosystems",
-      value: riskFile.calculated.ti_Ea,
+      value: riskFile.calculated[0].ti_Ea,
       color: "#83af70",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "Ea",
     },
     {
       name: "Financial asset damages",
-      value: riskFile.calculated.ti_Fa,
+      value: riskFile.calculated[0].ti_Fa,
       color: "#6996b3",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "Fa",
     },
     {
       name: "Reduction of economic performance",
-      value: riskFile.calculated.ti_Fb,
+      value: riskFile.calculated[0].ti_Fb,
       color: "#c1e7ff",
-      total: riskFile.calculated.ti,
+      total: riskFile.calculated[0].ti,
       scale: "Fb",
     },
   ];
