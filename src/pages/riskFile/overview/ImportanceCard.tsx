@@ -4,10 +4,9 @@ import { TEAL } from "./Colors";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../../types/RiskCalculation";
 import { getImpactScaleNumber } from "../../../functions/Impact";
+import { CalculatedRisk } from "../../../types/CalculatedRisk";
 
-export default function ImportanceCard({ riskFile }: { riskFile: DVRiskFile }) {
-  const calculations: RiskCalculation[] = JSON.parse(riskFile.cr4de_calculated || "[]");
-
+export default function ImportanceCard({ riskFile }: { riskFile: CalculatedRisk }) {
   const data = [
     {
       name: "Subjective Importance",
@@ -15,24 +14,24 @@ export default function ImportanceCard({ riskFile }: { riskFile: DVRiskFile }) {
     },
     {
       name: "Direct Impact",
-      score: calculations.length <= 0 ? 0 : parseFloat(getImpactScaleNumber(calculations[0].ti)) / 5,
+      score: riskFile.calculated.length <= 0 ? 0 : parseFloat(getImpactScaleNumber(riskFile.calculated[0].ti)) / 5,
     },
     {
       name: "Weighted Causes",
-      score: calculations.length <= 0 ? 0 : calculations[0].causes.length / 50.0,
+      score: riskFile.calculated.length <= 0 ? 0 : riskFile.calculated[0].causes.length / 50.0,
     },
     {
       name: "Weighted Effects",
-      score: calculations.length <= 0 ? 0 : calculations[0].effects.length / 50.0,
+      score: riskFile.calculated.length <= 0 ? 0 : riskFile.calculated[0].effects.length / 50.0,
     },
     {
       name: "Total",
       score:
-        ((4 - riskFile.cr4de_subjective_importance) / 3.0 + calculations.length <= 0
+        ((4 - riskFile.cr4de_subjective_importance) / 3.0 + riskFile.calculated.length <= 0
           ? 0
-          : parseFloat(getImpactScaleNumber(calculations[0].ti)) / 5 +
-            calculations[0].effects.length / 50.0 +
-            calculations[0].effects.length / 50.0) / 4,
+          : parseFloat(getImpactScaleNumber(riskFile.calculated[0].ti)) / 5 +
+            riskFile.calculated[0].effects.length / 50.0 +
+            riskFile.calculated[0].effects.length / 50.0) / 4,
     },
   ];
   return (

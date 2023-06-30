@@ -16,6 +16,7 @@ import { getImpactScale } from "../functions/Impact";
 import { NameType } from "recharts/types/component/DefaultTooltipContent";
 import { Typography } from "@mui/material";
 import getCategoryColor from "../functions/getCategoryColor";
+import { CalculatedRisk } from "../types/CalculatedRisk";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   if (active && payload && payload.length) {
@@ -56,19 +57,19 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   return null;
 };
 
-export default function RiskMatrix({ riskFiles }: { riskFiles: any[] | null }) {
+export default function RiskMatrix({ riskFiles }: { riskFiles: CalculatedRisk[] | null }) {
   const navigate = useNavigate();
 
   if (!riskFiles) return null;
 
   const data = riskFiles
-    .filter((rf) => rf.calculated.tp !== 0 || rf.calculated.ti !== 0)
+    .filter((rf) => rf.calculated[0].tp !== 0 || rf.calculated[0].ti !== 0)
     .map((rf) => ({
       id: rf.cr4de_riskfilesid,
       name: rf.cr4de_title,
       category: rf.cr4de_risk_category,
-      x: rf.calculated.tp || 0.001,
-      y: rf.calculated.ti || 1600000,
+      x: rf.calculated[0].tp || 0.001,
+      y: rf.calculated[0].ti || 1600000,
       z: 1,
     }));
 

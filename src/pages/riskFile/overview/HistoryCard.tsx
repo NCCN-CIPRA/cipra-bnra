@@ -4,11 +4,10 @@ import { TEAL } from "./Colors";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../../types/RiskCalculation";
 import { getAbsoluteImpact, getImpactScaleNumber } from "../../../functions/Impact";
+import { CalculatedRisk } from "../../../types/CalculatedRisk";
 
-export default function HistoryCard({ riskFile }: { riskFile: DVRiskFile }) {
-  const calculations: RiskCalculation[] = JSON.parse(riskFile.cr4de_calculated || "[]");
-
-  const data = calculations.reverse().map((c) => ({
+export default function HistoryCard({ riskFile }: { riskFile: CalculatedRisk }) {
+  const data = riskFile.calculated.reverse().map((c) => ({
     time: new Date(c.timestamp),
     risk: parseFloat(getImpactScaleNumber(c.tp * c.ti)),
   }));

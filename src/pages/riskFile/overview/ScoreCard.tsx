@@ -1,6 +1,8 @@
-import { Stack, Box, Typography, Paper } from "@mui/material";
+import { Stack, Box, Typography, Paper, Tooltip } from "@mui/material";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { R2G, TEAL } from "./Colors";
+import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { CalculatedRisk } from "../../../types/CalculatedRisk";
 
 const RADIAN = Math.PI / 180;
 const data = [
@@ -47,7 +49,7 @@ const needle = (
   ];
 };
 
-export default function ScoreCard({ width = 244, height = 175 }: { width: number; height: number }) {
+export default function ScoreCard({ riskFile }: { riskFile: CalculatedRisk }) {
   const score = 0.7;
 
   return (
@@ -75,21 +77,28 @@ export default function ScoreCard({ width = 244, height = 175 }: { width: number
       <Box
         sx={{ position: "relative", transform: `rotate(${score * 180}deg)`, transformOrigin: "50% calc(100% - 32px)" }}
       >
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 27,
-            left: "calc(50% - 80px)",
-            width: 0,
-            height: 0,
-            borderBottom: "5px solid transparent",
-            borderTop: "5px solid transparent",
-            borderRight: `85px solid ${TEAL}`,
-            borderBottomRightRadius: 5,
-            borderTopRightRadius: 5,
-            opacity: 0.8,
-          }}
-        />
+        <Tooltip title="Reliability Score: 10">
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 27,
+              left: "calc(50% - 80px)",
+              width: 0,
+              height: 0,
+              borderBottom: "5px solid transparent",
+              borderTop: "5px solid transparent",
+              borderRight: `85px solid ${TEAL}`,
+              borderBottomRightRadius: 5,
+              borderTopRightRadius: 5,
+              opacity: 0.8,
+              transition: "opacity .3s ease",
+              cursor: "pointer",
+              "&:hover": {
+                opacity: 1,
+              },
+            }}
+          />
+        </Tooltip>
       </Box>
       <Box sx={{ width: "100%", textAlign: "center" }}>
         <Typography variant="subtitle1">Analysis Reliability</Typography>

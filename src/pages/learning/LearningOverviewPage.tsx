@@ -237,7 +237,7 @@ export default function LearningOverviewPage({}) {
                     </ListItemIcon>
                     <ListItemText primary={t("learning.tools.analysisBStandard", "2B - Standard Risks")} />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/tools-analysisA-manmade" sx={{ ml: 3.5 }}>
+                  <ListItemButton component={RouterLink} to="/learning/tools-analysisB-manmade" sx={{ ml: 3.5 }}>
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>

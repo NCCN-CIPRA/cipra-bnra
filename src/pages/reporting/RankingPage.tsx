@@ -22,11 +22,13 @@ export default function RankingPage() {
   const [impactField, setImpactField] = useState("r");
   const { data: riskFiles } = useRecords<CalculatedRisk>({
     table: DataTable.RISK_FILE,
-    transformResult: (results) => {
-      const calculatedResults: CalculatedRisk[] = results.map((r: DVRiskFile) => ({
-        ...r,
-        calculated: JSON.parse(r.cr4de_calculated || "{}") || {},
-      }));
+    transformResult: (results: DVRiskFile[]) => {
+      const calculatedResults: CalculatedRisk[] = results
+        .filter((r) => r.cr4de_risk_category !== "Test")
+        .map((r: DVRiskFile) => ({
+          ...r,
+          calculated: JSON.parse(r.cr4de_calculated || "[]") || [],
+        }));
 
       return calculatedResults;
     },

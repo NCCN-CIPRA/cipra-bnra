@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
@@ -10,6 +11,7 @@ import ResultCard from "./ResultCard";
 import HistoryCard from "./HistoryCard";
 import ImportanceCard from "./ImportanceCard";
 import EventTimeline from "./EventTimeline";
+import { CalculatedRisk } from "../../../types/CalculatedRisk";
 
 export default function OverviewTab({
   riskFile,
@@ -18,7 +20,18 @@ export default function OverviewTab({
   riskFile: DVRiskFile | null;
   participants: DVParticipation<DVContact>[] | null;
 }) {
-  if (!riskFile || !participants) {
+  const [calculatedRisk, setCalculatedRisk] = useState<CalculatedRisk | null>(null);
+
+  useEffect(() => {
+    if (!riskFile) return setCalculatedRisk(null);
+
+    setCalculatedRisk({
+      ...riskFile,
+      calculated: JSON.parse(riskFile.cr4de_calculated || "[]"),
+    });
+  }, [riskFile]);
+
+  if (!calculatedRisk || !participants) {
     return <LoadingTab />;
   }
 
@@ -26,30 +39,34 @@ export default function OverviewTab({
     <Container>
       <Grid container spacing={2}>
         <Grid xs={12} sx={{ mb: 2 }}>
-          <RiskFileStepper riskFile={riskFile} participations={participants} />
+          <RiskFileStepper riskFile={calculatedRisk} participations={participants} />
         </Grid>
         <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <ScoreCard width={240} height={200} />
+            <ScoreCard riskFile={calculatedRisk} />
           </Box>
         </Grid>
         <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <ImportanceCard riskFile={riskFile} />
+            <ImportanceCard riskFile={calculatedRisk} />
           </Box>
         </Grid>
         <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <ResultCard riskFile={riskFile} />
+            <ResultCard riskFile={calculatedRisk} />
           </Box>
         </Grid>
         <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <HistoryCard riskFile={riskFile} />
+            <HistoryCard riskFile={calculatedRisk} />
           </Box>
         </Grid>
         <Grid xs={12} sx={{ mt: 2 }}>
-          <ParticipationTable riskFile={riskFile} participants={participants} reloadParticipants={async () => {}} />
+          <ParticipationTable
+            riskFile={calculatedRisk}
+            participants={participants}
+            reloadParticipants={async () => {}}
+          />
         </Grid>
         <Grid xs={12}>
           <EventTimeline />
