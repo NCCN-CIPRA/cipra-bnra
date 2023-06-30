@@ -9,9 +9,10 @@ import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import prepareRiskFiles from "../../functions/analysis/prepareRiskFiles";
 import convergeProbabilities from "../../functions/analysis/convergeProbabilities";
 import convergeImpacts from "../../functions/analysis/convergeImpacts";
-import { RiskCalculation } from "../../types/RiskCalculation";
 import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
+import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
+import { v4 as uuid } from "uuid";
 
 interface OtherHazard {
   cr4de_title: string;
@@ -107,14 +108,10 @@ export default function CalculationPage() {
 
     setLog([...innerLog, `Saving calculations (0/${results.length})`]);
 
+    const analysisId = uuid();
+
     for (let i = 0; i < results.length; i++) {
       const calculation = results[i];
-
-      const rf = riskFiles.find((r) => r.cr4de_riskfilesid === calculation.riskId);
-
-      if (!rf) continue;
-
-      const previousCalculations = rf.cr4de_calculated ? JSON.parse(rf.cr4de_calculated) : [];
 
       const calculatedFields: any = {
         ...roundNumberFields(calculation),
@@ -133,15 +130,10 @@ export default function CalculationPage() {
       const riskId = calculatedFields.riskId;
       delete calculatedFields.riskId;
 
-      previousCalculations.unshift(calculatedFields);
-      let calculationsString = JSON.stringify(previousCalculations);
-      while (calculationsString.length > 1048576) {
-        delete previousCalculations[previousCalculations.length - 1];
-        calculationsString = JSON.stringify(previousCalculations);
-      }
-
-      await api.updateRiskFile(riskId, {
-        cr4de_calculated: calculationsString,
+      await api.createAnalysisRun({
+        cr4de_analysis_id: analysisId,
+        "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskId})`,
+        cr4de_results: JSON.stringify(calculatedFields),
       });
 
       setLog([...innerLog.slice(0, innerLog.length - 1), `Saving calculations (${i + 1}/${results.length})`]);
@@ -183,9 +175,9 @@ export default function CalculationPage() {
       setLog([...logLines]);
     };
 
-    await convergeProbabilities(calculations, log);
+    await convergeProbabilities(calculations, log, 30);
     log(" ");
-    await convergeImpacts(calculations, log);
+    await convergeImpacts(calculations, log, 30);
     log(" ");
 
     calculations.forEach((c) => {

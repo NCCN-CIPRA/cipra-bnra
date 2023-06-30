@@ -2,7 +2,8 @@ import { Layer, Rectangle, ResponsiveContainer, Sankey, Tooltip } from "recharts
 import { Box, Typography } from "@mui/material";
 import getCategoryColor from "../functions/getCategoryColor";
 import { useNavigate } from "react-router-dom";
-import { CalculatedRisk } from "../types/CalculatedRisk";
+import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
+import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 
 const baseY = 50;
 
@@ -84,14 +85,20 @@ const ISankeyLink = (props: any) => {
   );
 };
 
-export default function ImpactSankey({ riskFile }: { riskFile: CalculatedRisk | null }) {
-  if (!riskFile) return null;
+export default function ImpactSankey({
+  riskFile,
+  calculation,
+}: {
+  riskFile: DVRiskFile | null;
+  calculation: RiskCalculation | null;
+}) {
+  if (!riskFile || !calculation) return null;
 
   const data = {
     nodes: [
       { name: riskFile.cr4de_title, category: riskFile.cr4de_risk_category },
       { name: "Direct Impact" },
-      ...riskFile.calculated[0].effects
+      ...calculation.effects
         .filter(
           (e) => e.ii_Ha + e.ii_Hb + e.ii_Hc + e.ii_Sa + e.ii_Sb + e.ii_Sc + e.ii_Sd + e.ii_Ea + e.ii_Fa + e.ii_Fb > 0
         )
@@ -101,8 +108,8 @@ export default function ImpactSankey({ riskFile }: { riskFile: CalculatedRisk | 
         })),
     ],
     links: [
-      ...(riskFile.calculated[0].di > 0 ? [{ source: 0, target: 1, value: riskFile.calculated[0].di }] : []),
-      ...riskFile.calculated[0].effects
+      ...(calculation.di > 0 ? [{ source: 0, target: 1, value: calculation.di }] : []),
+      ...calculation.effects
         .filter(
           (e: any, i: number) =>
             e.ii_Ha + e.ii_Hb + e.ii_Hc + e.ii_Sa + e.ii_Sb + e.ii_Sc + e.ii_Sd + e.ii_Ea + e.ii_Fa + e.ii_Fb > 0
@@ -125,7 +132,7 @@ export default function ImpactSankey({ riskFile }: { riskFile: CalculatedRisk | 
       <ResponsiveContainer width="100%" height="100%">
         <Sankey
           data={data}
-          node={<ISankeyNode totalImpact={riskFile.calculated[0].ti} totalNodes={data.nodes.length} />}
+          node={<ISankeyNode totalImpact={calculation.ti} totalNodes={data.nodes.length} />}
           link={<ISankeyLink totalNodes={data.nodes.length} />}
           nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
         ></Sankey>

@@ -1,4 +1,4 @@
-import { RiskCalculation } from "../../types/RiskCalculation";
+import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import calculateIndirectProbabilities from "./calculateIndirectProbabilities";
 import calculateTotalProbabilities from "./calculateTotalProbabilities";
 

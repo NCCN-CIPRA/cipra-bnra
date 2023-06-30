@@ -1,4 +1,4 @@
-import { RiskCalculation } from "../../types/RiskCalculation";
+import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 
 export default function calculateTotalProbabilities(risk: RiskCalculation) {
   risk.dp = risk.dp_c + risk.dp_m + risk.dp_e;

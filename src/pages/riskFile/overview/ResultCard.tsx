@@ -11,39 +11,31 @@ import {
 } from "recharts";
 import { TEAL } from "./Colors";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { RiskCalculation } from "../../../types/RiskCalculation";
 import { getImpactScale, getImpactScaleNumber } from "../../../functions/Impact";
 import { getProbabilityScale } from "../../../functions/Probability";
-import { CalculatedRisk } from "../../../types/CalculatedRisk";
+import { DVAnalysisRun, RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
 
-export default function ResultCard({ riskFile }: { riskFile: CalculatedRisk }) {
+export default function ResultCard({ riskFile, calculation }: { riskFile: DVRiskFile; calculation: RiskCalculation }) {
   const data = [
     {
       subject: "Probability",
-      A: getProbabilityScale(riskFile.calculated[0].tp, "DP").slice(-1),
+      A: getProbabilityScale(calculation.tp, "DP").slice(-1),
     },
     {
       subject: "Human Impact",
-      A: getImpactScaleNumber(
-        riskFile.calculated[0].ti_Ha + riskFile.calculated[0].ti_Hb + riskFile.calculated[0].ti_Hc
-      ),
+      A: getImpactScaleNumber(calculation.ti_Ha + calculation.ti_Hb + calculation.ti_Hc),
     },
     {
       subject: "Societal Impact",
-      A: getImpactScaleNumber(
-        riskFile.calculated[0].ti_Sa +
-          riskFile.calculated[0].ti_Sb +
-          riskFile.calculated[0].ti_Sc +
-          riskFile.calculated[0].ti_Sd
-      ),
+      A: getImpactScaleNumber(calculation.ti_Sa + calculation.ti_Sb + calculation.ti_Sc + calculation.ti_Sd),
     },
     {
       subject: "Environmental Impact",
-      A: getImpactScaleNumber(riskFile.calculated[0].ti_Ea),
+      A: getImpactScaleNumber(calculation.ti_Ea),
     },
     {
       subject: "Financial Impact",
-      A: getImpactScaleNumber(riskFile.calculated[0].ti_Fa + riskFile.calculated[0].ti_Fb),
+      A: getImpactScaleNumber(calculation.ti_Fa + calculation.ti_Fb),
     },
   ];
 

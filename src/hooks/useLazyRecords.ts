@@ -1,5 +1,6 @@
 import { useState } from "react";
 import useAPI, { DataTable } from "./useAPI";
+import { DVAnalysisRun } from "../types/dataverse/DVAnalysisRun";
 
 export interface GetRecordsParams<T> {
   table: DataTable;
@@ -57,6 +58,25 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
       response = await api.getFeedbacks<T>(o.query);
     } else if (o.table === DataTable.ATTACHMENT) {
       response = await api.getAttachments<T>(o.query);
+    } else if (o.table === DataTable.ANALYSIS_RUN) {
+      response = await api.getAnalysisRuns<T>(o.query);
+
+      const customTransformResult = o.transformResult;
+
+      o.transformResult = (result: any[]) => {
+        console.log("PARSING", result);
+        const parsedResult = result.map((r) => ({
+          ...r,
+          cr4de_metrics: r.cr4de_metrics != null ? JSON.parse(r.cr4de_metrics) : null,
+          cr4de_results: r.cr4de_results != null ? JSON.parse(r.cr4de_results) : null,
+        }));
+
+        if (customTransformResult) {
+          return customTransformResult(parsedResult);
+        }
+
+        return parsedResult;
+      };
     } else {
       // (o.table === DataTable.TRANSLATIONS) {
       response = await api.getTranslations<T>(o.query);

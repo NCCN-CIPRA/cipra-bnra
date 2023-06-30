@@ -1,4 +1,4 @@
-import { RiskCalculation } from "../../types/RiskCalculation";
+import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import calculateIndirectImpacts from "./calculateIndirectImpacts";
 import calculateTotalImpacts from "./calculateTotalImpacts";
 

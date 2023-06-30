@@ -1,8 +1,8 @@
+import { Quality, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { Quality, RiskCalculation } from "../../types/RiskCalculation";
 import { getAbsoluteImpact } from "../Impact";
 import { getAbsoluteProbability } from "../Probability";
 
@@ -520,7 +520,8 @@ export default async function prepareRiskFiles(
         risk: effect,
         riskId: c._cr4de_effect_hazard_value,
 
-        quality: Quality.CONSENSUS,
+        cascadeQuality: Quality.CONSENSUS,
+        effectQuality: effect.quality,
 
         title: c.cr4de_effect_hazard.cr4de_title,
 
@@ -583,9 +584,10 @@ export default async function prepareRiskFiles(
         ii: 0,
       });
 
-      if (caMetrics.missing > oldMetrics.missing) cause.effects[cause.effects.length - 1].quality = Quality.MISSING;
+      if (caMetrics.missing > oldMetrics.missing)
+        cause.effects[cause.effects.length - 1].cascadeQuality = Quality.MISSING;
       else if (caMetrics.average > oldMetrics.average)
-        cause.effects[cause.effects.length - 1].quality = Quality.AVERAGE;
+        cause.effects[cause.effects.length - 1].cascadeQuality = Quality.AVERAGE;
 
       oldMetrics = { ...caMetrics };
 
@@ -593,7 +595,8 @@ export default async function prepareRiskFiles(
         risk: cause,
         riskId: c._cr4de_cause_hazard_value,
 
-        quality: Quality.CONSENSUS,
+        cascadeQuality: Quality.CONSENSUS,
+        causeQuality: cause.quality,
 
         title: c.cr4de_cause_hazard.cr4de_title,
 
@@ -616,9 +619,10 @@ export default async function prepareRiskFiles(
         ip: 0,
       });
 
-      if (caMetrics.missing > oldMetrics.missing) effect.causes[effect.causes.length - 1].quality = Quality.MISSING;
+      if (caMetrics.missing > oldMetrics.missing)
+        effect.causes[effect.causes.length - 1].cascadeQuality = Quality.MISSING;
       else if (caMetrics.average > oldMetrics.average)
-        effect.causes[effect.causes.length - 1].quality = Quality.AVERAGE;
+        effect.causes[effect.causes.length - 1].cascadeQuality = Quality.AVERAGE;
     });
 
     return resolve([calculations, daMetrics, caMetrics]);

@@ -10,8 +10,44 @@ import LaptopMacIcon from "@mui/icons-material/LaptopMac";
 import HotelIcon from "@mui/icons-material/Hotel";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import { Card, Typography } from "@mui/material";
+import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
+import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
+import { RiskAnalysisResults, RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
+import { DVParticipation } from "../../../types/dataverse/DVParticipation";
+import { useEffect, useState } from "react";
 
-export default function EventTimeline({}: {}) {
+enum EventType {
+  EDIT,
+  INPUT,
+  ANALYSIS,
+  PARTICIPANT,
+  PROCESS,
+}
+
+interface Event {
+  type: EventType;
+  time: Date;
+  title: string;
+}
+
+export default function EventTimeline({
+  riskFile,
+  directAnalyses,
+  cascadeAnalyses,
+  calculations,
+  participants,
+}: {
+  riskFile: DVRiskFile;
+  directAnalyses: DVDirectAnalysis[];
+  cascadeAnalyses: DVCascadeAnalysis[];
+  calculations: RiskAnalysisResults[];
+  participants: DVParticipation[];
+}) {
+  const [events, setEvents] = useState<Event[] | null>(null);
+
+  useEffect(() => {}, [riskFile, directAnalyses, cascadeAnalyses, calculations, participants]);
+
   return (
     <Card>
       <Timeline position="right">

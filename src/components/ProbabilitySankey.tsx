@@ -1,8 +1,9 @@
 import { Layer, Rectangle, ResponsiveContainer, Sankey, Tooltip } from "recharts";
 import { Box, Typography } from "@mui/material";
 import getCategoryColor from "../functions/getCategoryColor";
-import { CalculatedRisk } from "../types/CalculatedRisk";
 import { useNavigate } from "react-router-dom";
+import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 
 const baseY = 50;
 
@@ -82,14 +83,20 @@ const PSankeyLink = (props: any) => {
   );
 };
 
-export default function ProbabilitySankey({ riskFile }: { riskFile: CalculatedRisk | null }) {
-  if (!riskFile) return null;
+export default function ProbabilitySankey({
+  riskFile,
+  calculation,
+}: {
+  riskFile: DVRiskFile | null;
+  calculation: RiskCalculation | null;
+}) {
+  if (!riskFile || !calculation) return null;
 
   const data = {
     nodes: [
       { name: riskFile.cr4de_title, category: riskFile.cr4de_risk_category },
       { name: "Direct Probability" },
-      ...riskFile.calculated[0].causes
+      ...calculation.causes
         .filter((c) => c.ip > 0)
         .map((c) => ({
           name: c.title,
@@ -97,8 +104,8 @@ export default function ProbabilitySankey({ riskFile }: { riskFile: CalculatedRi
         })),
     ],
     links: [
-      ...(riskFile.calculated[0].dp > 0 ? [{ source: 1, target: 0, value: riskFile.calculated[0].dp }] : []),
-      ...riskFile.calculated[0].causes
+      ...(calculation.dp > 0 ? [{ source: 1, target: 0, value: calculation.dp }] : []),
+      ...calculation.causes
         .filter((e) => e.ip > 0)
         .map((e: any, i: number) => ({
           source: i + 2,
@@ -116,7 +123,7 @@ export default function ProbabilitySankey({ riskFile }: { riskFile: CalculatedRi
       <ResponsiveContainer width="100%" height="100%">
         <Sankey
           data={data}
-          node={<PSankeyNode totalProbability={riskFile.calculated[0].tp} totalNodes={data.nodes.length} />}
+          node={<PSankeyNode totalProbability={calculation.tp} totalNodes={data.nodes.length} />}
           link={<PSankeyLink totalNodes={data.nodes.length} />}
           nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
         ></Sankey>

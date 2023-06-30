@@ -23,6 +23,8 @@ import InputManagementTab from "./inputManagement/InputManagementTab";
 import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import AnalysisTab from "./analysis/AnalysisTab";
+import LoadingTab from "./LoadingTab";
+import { RiskAnalysisResults } from "../../types/dataverse/DVAnalysisRun";
 
 type RouteParams = {
   risk_file_id: string;
@@ -91,6 +93,11 @@ export default function RiskFilePage({}) {
     query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_expert($select=emailaddress1)`,
   });
 
+  const { data: calculations, isFetching: loadingCalculations } = useRecords<RiskAnalysisResults>({
+    table: DataTable.ANALYSIS_RUN,
+    query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$top=10`,
+  });
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
   };
@@ -105,8 +112,16 @@ export default function RiskFilePage({}) {
   return (
     <>
       <Box sx={{ mb: 15 }}>
-        {tab === 0 && <OverviewTab riskFile={riskFile} participants={participants} />}
-        {tab === 1 && (
+        {tab === 0 && (
+          <OverviewTab
+            riskFile={riskFile}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            participants={participants}
+            calculations={calculations}
+          />
+        )}
+        {riskFile && tab === 1 && (
           <IdentificationTab
             riskFile={riskFile}
             cascades={cascades}
@@ -114,8 +129,8 @@ export default function RiskFilePage({}) {
             onUpdateCascades={handleUpdateCascades}
           />
         )}
-        {tab === 2 && <AnalysisTab riskFile={riskFile} />}
-        {tab === 3 && <InputManagementTab riskFile={riskFile} participants={participants} />}
+        {riskFile && tab === 2 && <AnalysisTab riskFile={riskFile} calculations={calculations} />}
+        {riskFile && tab === 3 && <InputManagementTab riskFile={riskFile} participants={participants} />}
       </Box>
       <Paper sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }} elevation={3}>
         <BottomNavigation

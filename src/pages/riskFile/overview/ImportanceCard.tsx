@@ -2,11 +2,17 @@ import { Stack, Box, Typography, Paper } from "@mui/material";
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { TEAL } from "./Colors";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { RiskCalculation } from "../../../types/RiskCalculation";
 import { getImpactScaleNumber } from "../../../functions/Impact";
-import { CalculatedRisk } from "../../../types/CalculatedRisk";
+import { DVAnalysisRun, RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
 
-export default function ImportanceCard({ riskFile }: { riskFile: CalculatedRisk }) {
+export default function ImportanceCard({
+  riskFile,
+  calculation,
+}: {
+  riskFile: DVRiskFile;
+  calculation: RiskCalculation | null;
+}) {
+  console.log(calculation);
   const data = [
     {
       name: "Subjective Importance",
@@ -14,24 +20,26 @@ export default function ImportanceCard({ riskFile }: { riskFile: CalculatedRisk 
     },
     {
       name: "Direct Impact",
-      score: riskFile.calculated.length <= 0 ? 0 : parseFloat(getImpactScaleNumber(riskFile.calculated[0].ti)) / 5,
+      score: calculation === null ? 0 : parseFloat(getImpactScaleNumber(calculation.ti)) / 5,
     },
     {
       name: "Weighted Causes",
-      score: riskFile.calculated.length <= 0 ? 0 : riskFile.calculated[0].causes.length / 50.0,
+      score: calculation === null ? 0 : calculation.causes.length / 50.0,
     },
     {
       name: "Weighted Effects",
-      score: riskFile.calculated.length <= 0 ? 0 : riskFile.calculated[0].effects.length / 50.0,
+      score: calculation === null ? 0 : calculation.effects.length / 50.0,
     },
     {
       name: "Total",
       score:
-        ((4 - riskFile.cr4de_subjective_importance) / 3.0 + riskFile.calculated.length <= 0
+        (4 - riskFile.cr4de_subjective_importance) / 3.0 +
+        (calculation === null
           ? 0
-          : parseFloat(getImpactScaleNumber(riskFile.calculated[0].ti)) / 5 +
-            riskFile.calculated[0].effects.length / 50.0 +
-            riskFile.calculated[0].effects.length / 50.0) / 4,
+          : parseFloat(getImpactScaleNumber(calculation.ti)) / 5 +
+            calculation.effects.length / 50.0 +
+            calculation.effects.length / 50.0) /
+          4,
     },
   ];
   return (

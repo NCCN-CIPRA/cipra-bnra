@@ -11,39 +11,44 @@ import RiskMatrix from "../../components/RiskMatrix";
 import { DataTable } from "../../hooks/useAPI";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import useRecords from "../../hooks/useRecords";
-import { RiskCalculation } from "../../types/RiskCalculation";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
-import { CalculatedRisk } from "../../types/CalculatedRisk";
+import { RiskAnalysisResults, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 
 export default function RankingPage() {
   const navigate = useNavigate();
 
   const [impactField, setImpactField] = useState("r");
-  const { data: riskFiles } = useRecords<CalculatedRisk>({
-    table: DataTable.RISK_FILE,
-    transformResult: (results: DVRiskFile[]) => {
-      const calculatedResults: CalculatedRisk[] = results
-        .filter((r) => r.cr4de_risk_category !== "Test")
-        .map((r: DVRiskFile) => ({
-          ...r,
-          calculated: JSON.parse(r.cr4de_calculated || "[]") || [],
-        }));
+  const [sortedRisks, setSortedRisks] = useState<RiskCalculation[] | null>(null);
 
-      return calculatedResults;
-    },
+  const { data } = useRecords<{ [key: string]: DVRiskFile }>({
+    table: DataTable.RISK_FILE,
+    query: "cr4de_risk_category ne 'Test'",
+    transformResult: (results: DVRiskFile[]) => [
+      results.reduce(
+        (acc, r) => ({
+          ...acc,
+          [r.cr4de_riskfilesid]: r,
+        }),
+        {} as { [key: string]: DVRiskFile }
+      ),
+    ],
   });
-  const [sortedRisks, setSortedRisks] = useState<CalculatedRisk[] | null>(null);
+  const riskFiles = data ? data[0] : null;
+
+  const { data: calculations, isFetching: loadingCalculations } = useRecords<RiskAnalysisResults>({
+    table: DataTable.ANALYSIS_RUN,
+  });
 
   useEffect(() => {
-    if (!riskFiles) return;
+    if (!calculations) return;
 
-    const sortedResults = [...riskFiles];
+    const sortedResults = [...calculations].map((c) => c.cr4de_results);
 
     sortedResults.sort(
       (a, b) =>
-        ((b.calculated[0][impactField as keyof RiskCalculation] as number) || 0) -
-        ((a.calculated[0][impactField as keyof RiskCalculation] as number) || 0)
+        ((b[impactField as keyof RiskCalculation] as number) || 0) -
+        ((a[impactField as keyof RiskCalculation] as number) || 0)
     );
 
     setSortedRisks(sortedResults);
@@ -58,7 +63,7 @@ export default function RankingPage() {
   return (
     <Container sx={{ mt: 4, pb: 8 }}>
       <Box mb={4} sx={{ width: "100%", height: "600px" }}>
-        <RiskMatrix riskFiles={sortedRisks} />
+        <RiskMatrix riskFiles={riskFiles} calculations={sortedRisks} />
       </Box>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -123,13 +128,13 @@ export default function RankingPage() {
             {sortedRisks
               ? sortedRisks.map((risk, i) => (
                   <TableRow
-                    key={risk.cr4de_hazard_id}
+                    key={risk.riskId}
                     hover
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
                       cursor: "pointer",
                     }}
-                    onClick={() => navigate(`/reporting/${risk.cr4de_riskfilesid}`)}
+                    onClick={() => navigate(`/reporting/${risk.riskId}`)}
                   >
                     <TableCell
                       component="th"
@@ -143,7 +148,7 @@ export default function RankingPage() {
                       {i + 1}
                     </TableCell>
                     <TableCell component="th" scope="row">
-                      {risk.cr4de_title}
+                      {riskFiles && riskFiles[risk.riskId] && riskFiles[risk.riskId].cr4de_title}
                     </TableCell>
                     <TableCell align="right">
                       {/* {Math.round(100 * (risk.calculated[impactField as keyof RiskCalculation] as number)) / 100} */}

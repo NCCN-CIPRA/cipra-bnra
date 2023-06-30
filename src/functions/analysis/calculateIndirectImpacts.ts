@@ -1,4 +1,4 @@
-import { RiskCalculation } from "../../types/RiskCalculation";
+import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 
 export default function calculateIndirectImpacts(risk: RiskCalculation) {
   risk.effects.forEach((effect) => {

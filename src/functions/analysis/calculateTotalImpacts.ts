@@ -1,4 +1,4 @@
-import { RiskCalculation } from "../../types/RiskCalculation";
+import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 
 export default function calculateTotalImpacts(risk: RiskCalculation) {
   risk.di_Ha = risk.rp_c * risk.di_Ha_c + risk.rp_m * risk.di_Ha_m + risk.rp_e * risk.di_Ha_e;

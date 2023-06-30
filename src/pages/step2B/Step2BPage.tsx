@@ -109,7 +109,13 @@ export default function ({}) {
     }
   };
 
-  usePageTitle(t("step2B.pageTitle", "BNRA 2023 - 2026 Risk Analysis B"));
+  usePageTitle(
+    directAnalysis &&
+      directAnalysis.cr4de_risk_file &&
+      directAnalysis.cr4de_risk_file.cr4de_risk_type !== RISK_TYPE.EMERGING
+      ? t("step2B.pageTitle", "BNRA 2023 - 2026 Risk Analysis B")
+      : t("step2B.EM.pageTitle", "BNRA 2023 - 2026 Risk Analysis")
+  );
   useBreadcrumbs([
     { name: t("bnra.shortName"), url: "/" },
     {

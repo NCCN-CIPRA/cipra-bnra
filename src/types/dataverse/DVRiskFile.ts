@@ -78,8 +78,6 @@ export interface DVRiskFile extends RiskFileEditableFields {
 
   cr4de_cross_border_impact_quali: string | null;
 
-  cr4de_calculated: string | null;
-
   cr4de_validations_processed: boolean | null;
   cr4de_validation_silent_procedure_until: Date | null;
 

@@ -17,10 +17,10 @@ import ProbabilitySankey from "../../components/ProbabilitySankey";
 import useRecord from "../../hooks/useRecord";
 import { DataTable } from "../../hooks/useAPI";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { CalculatedRisk } from "../../types/CalculatedRisk";
-import { RiskCalculation } from "../../types/RiskCalculation";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
+import { RiskAnalysisResults, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
+import useRecords from "../../hooks/useRecords";
 
 const impactFields = [
   { name: "Direct Ha", fieldName: "di_Ha" },
@@ -79,13 +79,14 @@ type RouteParams = {
 export default function RiskPage() {
   const params = useParams() as RouteParams;
 
-  const { data: riskFile } = useRecord<CalculatedRisk>({
+  const { data: riskFile } = useRecord<DVRiskFile>({
     table: DataTable.RISK_FILE,
     id: params.risk_id,
-    transformResult: (result: DVRiskFile) => ({
-      ...result,
-      calculated: JSON.parse(result.cr4de_calculated || "{}"),
-    }),
+  });
+
+  const { data: calculations, isFetching: loadingCalculations } = useRecords<RiskAnalysisResults>({
+    table: DataTable.ANALYSIS_RUN,
+    query: `$filter=_cr4de_risk_file_value eq ${params.risk_id}&$top=10`,
   });
 
   usePageTitle("BNRA 2023 - 2026 Results Overview");
@@ -95,11 +96,13 @@ export default function RiskPage() {
     riskFile ? { name: riskFile.cr4de_title, url: "" } : null,
   ]);
 
+  if (!calculations) return null;
+
   return (
     <Container sx={{ mt: 4, pb: 8 }}>
       <Stack direction="row" sx={{ mb: 8 }}>
         <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
-          <ProbabilitySankey riskFile={riskFile} />
+          <ProbabilitySankey riskFile={riskFile} calculation={calculations[0]?.cr4de_results || null} />
         </Box>
         <Stack direction="column" justifyContent="center" sx={{ width: 300, p: "50px" }}>
           {/* <Box
@@ -127,14 +130,14 @@ export default function RiskPage() {
               height: 200,
             }}
           >
-            <ImpactDistributionPieChart riskFile={riskFile} />
+            <ImpactDistributionPieChart riskFile={riskFile} calculation={calculations[0]?.cr4de_results || null} />
             <Box sx={{ width: "100%", textAlign: "center", mt: 2 }}>
               <Typography variant="subtitle2">Damage Indicators</Typography>
             </Box>
           </Box>
         </Stack>
         <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
-          <ImpactSankey riskFile={riskFile} />
+          <ImpactSankey riskFile={riskFile} calculation={calculations[0]?.cr4de_results || null} />
         </Box>
       </Stack>
       <Box>
@@ -180,32 +183,38 @@ export default function RiskPage() {
                   <TableCell component="th" scope="row">
                     <Typography variant="body1">
                       {getProbabilityScale(
-                        riskFile.calculated[0].dp_c,
+                        calculations[0]?.cr4de_results?.dp_c,
                         riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
                       )}
                     </Typography>
-                    <Typography variant="caption">{Math.round(riskFile.calculated[0].dp_c * 10000) / 100}%</Typography>
+                    <Typography variant="caption">
+                      {Math.round(calculations[0]?.cr4de_results?.dp_c * 10000) / 100}%
+                    </Typography>
                   </TableCell>
                   <TableCell component="th" scope="row">
                     <Typography variant="body1">
                       {getProbabilityScale(
-                        riskFile.calculated[0].dp_m,
+                        calculations[0]?.cr4de_results?.dp_m,
                         riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
                       )}
                     </Typography>
-                    <Typography variant="caption">{Math.round(riskFile.calculated[0].dp_m * 10000) / 100}%</Typography>
+                    <Typography variant="caption">
+                      {Math.round(calculations[0]?.cr4de_results?.dp_m * 10000) / 100}%
+                    </Typography>
                   </TableCell>
                   <TableCell component="th" scope="row">
                     <Typography variant="body1">
                       {getProbabilityScale(
-                        riskFile.calculated[0].dp_e,
+                        calculations[0]?.cr4de_results?.dp_e,
                         riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
                       )}
                     </Typography>
-                    <Typography variant="caption">{Math.round(riskFile.calculated[0].dp_e * 10000) / 100}%</Typography>
+                    <Typography variant="caption">
+                      {Math.round(calculations[0]?.cr4de_results?.dp_e * 10000) / 100}%
+                    </Typography>
                   </TableCell>
                   <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
-                    {Math.round(riskFile.calculated[0].dp * 10000) / 100}%
+                    {Math.round(calculations[0]?.cr4de_results?.dp * 10000) / 100}%
                   </TableCell>
                 </TableRow>
                 <TableRow key={riskFile.cr4de_title} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
@@ -221,32 +230,38 @@ export default function RiskPage() {
                   <TableCell component="th" scope="row">
                     <Typography variant="body1">
                       {getProbabilityScale(
-                        riskFile.calculated[0].ip_c,
+                        calculations[0]?.cr4de_results?.ip_c,
                         riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
                       )}
                     </Typography>
-                    <Typography variant="caption">{Math.round(riskFile.calculated[0].ip_c * 10000) / 100}%</Typography>
+                    <Typography variant="caption">
+                      {Math.round(calculations[0]?.cr4de_results?.ip_c * 10000) / 100}%
+                    </Typography>
                   </TableCell>
                   <TableCell component="th" scope="row">
                     <Typography variant="body1">
                       {getProbabilityScale(
-                        riskFile.calculated[0].ip_m,
+                        calculations[0]?.cr4de_results?.ip_m,
                         riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
                       )}
                     </Typography>
-                    <Typography variant="caption">{Math.round(riskFile.calculated[0].ip_m * 10000) / 100}%</Typography>
+                    <Typography variant="caption">
+                      {Math.round(calculations[0]?.cr4de_results?.ip_m * 10000) / 100}%
+                    </Typography>
                   </TableCell>
                   <TableCell component="th" scope="row">
                     <Typography variant="body1">
                       {getProbabilityScale(
-                        riskFile.calculated[0].ip_e,
+                        calculations[0]?.cr4de_results?.ip_e,
                         riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
                       )}
                     </Typography>
-                    <Typography variant="caption">{Math.round(riskFile.calculated[0].ip_e * 10000) / 100}%</Typography>
+                    <Typography variant="caption">
+                      {Math.round(calculations[0]?.cr4de_results?.ip_e * 10000) / 100}%
+                    </Typography>
                   </TableCell>
                   <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
-                    {Math.round(riskFile.calculated[0].ip * 10000) / 100}%
+                    {Math.round(calculations[0]?.cr4de_results?.ip * 10000) / 100}%
                   </TableCell>
                 </TableRow>
                 <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
@@ -262,32 +277,38 @@ export default function RiskPage() {
                   <TableCell component="th" scope="row">
                     <Typography variant="body1">
                       {getProbabilityScale(
-                        riskFile.calculated[0].tp_c,
+                        calculations[0]?.cr4de_results?.tp_c,
                         riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
                       )}
                     </Typography>
-                    <Typography variant="caption">{Math.round(riskFile.calculated[0].tp_c * 10000) / 100}%</Typography>
+                    <Typography variant="caption">
+                      {Math.round(calculations[0]?.cr4de_results?.tp_c * 10000) / 100}%
+                    </Typography>
                   </TableCell>
                   <TableCell component="th" scope="row">
                     <Typography variant="body1">
                       {getProbabilityScale(
-                        riskFile.calculated[0].tp_m,
+                        calculations[0]?.cr4de_results?.tp_m,
                         riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
                       )}
                     </Typography>
-                    <Typography variant="caption">{Math.round(riskFile.calculated[0].tp_m * 10000) / 100}%</Typography>
+                    <Typography variant="caption">
+                      {Math.round(calculations[0]?.cr4de_results?.tp_m * 10000) / 100}%
+                    </Typography>
                   </TableCell>
                   <TableCell component="th" scope="row">
                     <Typography variant="body1">
                       {getProbabilityScale(
-                        riskFile.calculated[0].tp_e,
+                        calculations[0]?.cr4de_results?.tp_e,
                         riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
                       )}
                     </Typography>
-                    <Typography variant="caption">{Math.round(riskFile.calculated[0].tp_e * 10000) / 100}%</Typography>
+                    <Typography variant="caption">
+                      {Math.round(calculations[0]?.cr4de_results?.tp_e * 10000) / 100}%
+                    </Typography>
                   </TableCell>
                   <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
-                    {Math.round(riskFile.calculated[0].tp * 10000) / 100}%
+                    {Math.round(calculations[0]?.cr4de_results?.tp * 10000) / 100}%
                   </TableCell>
                 </TableRow>
               </>
@@ -369,45 +390,49 @@ export default function RiskPage() {
                       <TableCell component="th" scope="row">
                         <Typography variant="body1">
                           {getImpactScale(
-                            riskFile.calculated[0][`${f.fieldName}_c` as keyof RiskCalculation] as number as number,
+                            calculations[0]?.cr4de_results[
+                              `${f.fieldName}_c` as keyof RiskCalculation
+                            ] as number as number,
                             f.fieldName.split("_")[1] || ""
                           )}
                         </Typography>
                         <Typography variant="caption">
                           {curFormat.format(
-                            riskFile.calculated[0][`${f.fieldName}_c` as keyof RiskCalculation] as number
+                            calculations[0]?.cr4de_results[`${f.fieldName}_c` as keyof RiskCalculation] as number
                           )}
                         </Typography>
                       </TableCell>
                       <TableCell component="th" scope="row">
                         <Typography variant="body1">
                           {getImpactScale(
-                            riskFile.calculated[0][`${f.fieldName}_m` as keyof RiskCalculation] as number,
+                            calculations[0]?.cr4de_results[`${f.fieldName}_m` as keyof RiskCalculation] as number,
                             f.fieldName?.split("_")[1] || ""
                           )}
                         </Typography>
                         <Typography variant="caption">
                           {curFormat.format(
-                            riskFile.calculated[0][`${f.fieldName}_m` as keyof RiskCalculation] as number
+                            calculations[0]?.cr4de_results[`${f.fieldName}_m` as keyof RiskCalculation] as number
                           )}
                         </Typography>
                       </TableCell>
                       <TableCell component="th" scope="row">
                         <Typography variant="body1">
                           {getImpactScale(
-                            riskFile.calculated[0][`${f.fieldName}_e` as keyof RiskCalculation] as number,
+                            calculations[0]?.cr4de_results[`${f.fieldName}_e` as keyof RiskCalculation] as number,
                             f.fieldName?.split("_")[1] || ""
                           )}
                         </Typography>
                         <Typography variant="caption">
                           {curFormat.format(
-                            riskFile.calculated[0][`${f.fieldName}_e` as keyof RiskCalculation] as number
+                            calculations[0]?.cr4de_results[`${f.fieldName}_e` as keyof RiskCalculation] as number
                           )}
                         </Typography>
                       </TableCell>
                       <TableCell align="right">
                         <Typography variant="body2">
-                          {curFormat.format(riskFile.calculated[0][f.fieldName as keyof RiskCalculation] as number)}
+                          {curFormat.format(
+                            calculations[0]?.cr4de_results[f.fieldName as keyof RiskCalculation] as number
+                          )}
                         </Typography>
                       </TableCell>
                     </TableRow>

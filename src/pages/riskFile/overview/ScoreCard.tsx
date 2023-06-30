@@ -2,7 +2,7 @@ import { Stack, Box, Typography, Paper, Tooltip } from "@mui/material";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { R2G, TEAL } from "./Colors";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { CalculatedRisk } from "../../../types/CalculatedRisk";
+import { DVAnalysisRun } from "../../../types/dataverse/DVAnalysisRun";
 
 const RADIAN = Math.PI / 180;
 const data = [
@@ -49,7 +49,7 @@ const needle = (
   ];
 };
 
-export default function ScoreCard({ riskFile }: { riskFile: CalculatedRisk }) {
+export default function ScoreCard({ riskFile, calculations }: { riskFile: DVRiskFile; calculations: DVAnalysisRun[] }) {
   const score = 0.7;
 
   return (

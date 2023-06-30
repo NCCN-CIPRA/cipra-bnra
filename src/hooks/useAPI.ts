@@ -12,6 +12,7 @@ import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { DVTranslation } from "../types/dataverse/DVTranslation";
 import { DVValidation } from "../types/dataverse/DVValidation";
 import { Buffer } from "buffer";
+import { DVAnalysisRun } from "../types/dataverse/DVAnalysisRun";
 
 export enum DataTable {
   CONTACT,
@@ -32,6 +33,8 @@ export enum DataTable {
   TRANSLATIONS,
 
   PAGE,
+
+  ANALYSIS_RUN,
 }
 
 export interface AuthResponse<T = null> {
@@ -118,6 +121,10 @@ export interface API {
 
   sendInvitationEmail(contactIds: string[]): Promise<void>;
   finishStep(riskFileId: string, contactId: string, step: string): Promise<void>;
+
+  getAnalysisRuns<T = DVAnalysisRun>(query?: string): Promise<T[]>;
+  getAnalysisRun<T = DVAnalysisRun>(id: string, query?: string): Promise<T>;
+  createAnalysisRun(fields: object): Promise<CreateResponse>;
 }
 
 export default function useAPI(): API {
@@ -816,6 +823,33 @@ export default function useAPI(): API {
           }),
         }
       );
+    },
+
+    getAnalysisRuns: async function <T = DVAnalysisRun>(query?: string): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns${query ? "?" + query : ""}`
+      );
+
+      return (await response.json()).value;
+    },
+    getAnalysisRun: async function <T = DVAnalysisRun>(id: string, query?: string): Promise<T> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns(${id})${query ? "?" + query : ""}`
+      );
+
+      return (await response.json()) as T;
+    },
+    createAnalysisRun: async function (fields: object): Promise<CreateResponse> {
+      const response = await authFetch(`https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns`, {
+        method: "POST",
+        headers: {
+          __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      });
+
+      return { id: response.headers.get("entityId") as string };
     },
   };
 }
