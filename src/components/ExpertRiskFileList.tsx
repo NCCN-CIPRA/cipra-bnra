@@ -180,6 +180,11 @@ function RiskFileList({
 
   const getStep2BTooltip = (p: DVParticipation<unknown, DVRiskFile>) => {
     if (p.cr4de_risk_file.cr4de_step2b_enabled) {
+      if (p.cr4de_risk_file.cr4de_risk_type === "Emerging Risk") {
+        if (p.cr4de_cascade_analysis_finished)
+          return t("riskFile.steps.EM.2B.complete", "You have completed step 2 for this Risk File.");
+        else return t("riskFile.steps.EM.2B.progress", "Step 2 can now be completed.");
+      }
       if (p.cr4de_cascade_analysis_finished)
         return t("riskFile.steps.2B.complete", "You have completed step 2B for this Risk File.");
       else return t("riskFile.steps.2B.progress", "Step 2B can now be completed.");
