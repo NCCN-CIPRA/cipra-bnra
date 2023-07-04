@@ -20,7 +20,7 @@ export interface DVAnalysisRun<RiskFileType = unknown> {
   createdon: Date;
 }
 
-export interface RiskAnalysisResults extends DVAnalysisRun {
+export interface RiskAnalysisResults<RiskFileType = unknown> extends DVAnalysisRun<RiskFileType> {
   cr4de_metrics: null;
   cr4de_results: RiskCalculation;
 }

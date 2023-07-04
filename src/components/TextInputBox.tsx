@@ -28,10 +28,12 @@ function TextInputBox({
   limitedOptions,
   debounceInterval = 5000,
   disabled = false,
+  reset,
 
   onSave,
   onBlur,
   setUpdatedValue,
+  onReset,
 }: {
   id?: string;
   height?: string;
@@ -39,21 +41,37 @@ function TextInputBox({
   limitedOptions?: boolean;
   debounceInterval?: number;
   disabled?: boolean | null;
+  reset?: boolean;
 
   onSave?: (newValue: string | null) => void;
   onBlur?: () => void;
   setUpdatedValue?: (newValue: string | null | undefined) => void;
+  onReset?: (oldValue: string | null) => void;
 }) {
   const [savedValue, setSavedValue] = useState(initialValue);
   const [innerValue, setInnerValue] = useState(initialValue);
-  const [debouncedValue] = useDebounce(innerValue, debounceInterval);
+  const [debouncedValue, setDebouncedValue] = useDebounce(innerValue, debounceInterval);
 
   useEffect(() => {
+    console.log("DEBOUNCE: ", savedValue, innerValue, debouncedValue, initialValue);
     if (onSave && debouncedValue !== savedValue) {
       onSave(debouncedValue);
       setSavedValue(debouncedValue);
     }
   }, [debouncedValue, savedValue, onSave, setSavedValue, setUpdatedValue]);
+
+  useEffect(() => {
+    if (reset) {
+      console.log("RESET: ", savedValue, innerValue, debouncedValue, initialValue);
+      const oldValue = innerValue;
+
+      setSavedValue(initialValue);
+      setInnerValue(initialValue);
+      setDebouncedValue(initialValue);
+
+      onReset && onReset(oldValue);
+    }
+  }, [reset]);
 
   // @ts-ignore-next-line
   if (window.Cypress) {

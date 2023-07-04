@@ -64,7 +64,6 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
       const customTransformResult = o.transformResult;
 
       o.transformResult = (result: any[]) => {
-        console.log("PARSING", result);
         const parsedResult = result.map((r) => ({
           ...r,
           cr4de_metrics: r.cr4de_metrics != null ? JSON.parse(r.cr4de_metrics) : null,

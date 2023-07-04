@@ -9,6 +9,10 @@ import { DataTable } from "../../../hooks/useAPI";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import { useParams } from "react-router-dom";
 import { DVContact } from "../../../types/dataverse/DVContact";
+import Step2BTab from "./Step2BTab";
+import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
+import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 type RouteParams = {
   risk_file_id: string;
@@ -16,10 +20,22 @@ type RouteParams = {
 
 export default function InputManagementTab({
   riskFile,
+  cascades,
   participants,
+  directAnalyses,
+  cascadeAnalyses,
+
+  reloadRiskFile,
+  reloadCascades,
 }: {
   riskFile: DVRiskFile | null;
+  cascades: DVRiskCascade<SmallRisk, SmallRisk>[] | null;
   participants: DVParticipation[] | null;
+  directAnalyses: DVDirectAnalysis<unknown, DVContact>[] | null;
+  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[] | null;
+
+  reloadRiskFile: () => void;
+  reloadCascades: () => void;
 }) {
   const params = useParams() as RouteParams;
 
@@ -29,34 +45,36 @@ export default function InputManagementTab({
     setValue(newValue);
   };
 
-  const { data: directAnalyses, getData: getDirectAnalyses } = useLazyRecords<DVDirectAnalysis<unknown, DVContact>>({
-    table: DataTable.DIRECT_ANALYSIS,
-    query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_expert($select=emailaddress1)`,
-  });
-
   return (
-    <Container>
-      <TabContext value={value}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <TabList onChange={handleChange} centered>
-            <Tab label="Validation" value="1" />
-            <Tab label="Step 2A" value="2" />
-            <Tab label="Step 2B" value="3" />
-            <Tab label="Feedback" value="4" />
-          </TabList>
-        </Box>
-        <TabPanel value="1">Validation</TabPanel>
-        <TabPanel value="2">
-          <Step2APage
-            riskFile={riskFile}
-            participants={participants}
-            directAnalyses={directAnalyses}
-            getDirectAnalyses={getDirectAnalyses}
-          />
-        </TabPanel>
-        <TabPanel value="3">2B</TabPanel>
-        <TabPanel value="4">Feedback</TabPanel>
-      </TabContext>
-    </Container>
+    <TabContext value={value}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <TabList onChange={handleChange} centered>
+          <Tab label="Validation" value="1" />
+          <Tab label="Step 2A" value="2" />
+          <Tab label="Step 2B" value="3" />
+          <Tab label="Feedback" value="4" />
+        </TabList>
+      </Box>
+      <TabPanel value="1">Validation</TabPanel>
+      <TabPanel value="2">
+        <Step2APage
+          riskFile={riskFile}
+          participants={participants}
+          directAnalyses={directAnalyses}
+          reloadRiskFile={reloadRiskFile}
+        />
+      </TabPanel>
+      <TabPanel value="3">
+        <Step2BTab
+          riskFile={riskFile}
+          cascades={cascades}
+          directAnalyses={directAnalyses}
+          cascadeAnalyses={cascadeAnalyses}
+          reloadRiskFile={reloadRiskFile}
+          reloadCascades={reloadCascades}
+        />
+      </TabPanel>
+      <TabPanel value="4">Feedback</TabPanel>
+    </TabContext>
   );
 }

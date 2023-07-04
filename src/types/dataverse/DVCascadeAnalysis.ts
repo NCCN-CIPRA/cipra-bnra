@@ -1,7 +1,8 @@
-export interface DVCascadeAnalysis<RiskCascadeType = unknown, RiskFileType = unknown> {
+export interface DVCascadeAnalysis<RiskCascadeType = unknown, RiskFileType = unknown, ExpertType = unknown> {
   cr4de_bnracascadeanalysisid: string;
 
-  cr4de_expert: string;
+  cr4de_expert: ExpertType;
+  _cr4de_expert_value: string;
   cr4de_risk_file: RiskFileType;
   _cr4de_risk_file_value: string;
   cr4de_cascade: RiskCascadeType;

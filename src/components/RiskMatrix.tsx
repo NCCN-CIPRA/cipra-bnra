@@ -17,7 +17,7 @@ import { NameType } from "recharts/types/component/DefaultTooltipContent";
 import { Typography } from "@mui/material";
 import getCategoryColor from "../functions/getCategoryColor";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
-import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
+import { DVAnalysisRun, RiskAnalysisResults, RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   if (active && payload && payload.length) {
@@ -58,25 +58,19 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   return null;
 };
 
-export default function RiskMatrix({
-  riskFiles,
-  calculations,
-}: {
-  riskFiles: { [key: string]: DVRiskFile } | null;
-  calculations: RiskCalculation[] | null;
-}) {
+export default function RiskMatrix({ calculations }: { calculations: RiskAnalysisResults<DVRiskFile>[] | null }) {
   const navigate = useNavigate();
 
-  if (!riskFiles || !calculations) return null;
+  if (!calculations) return null;
 
   const data = calculations
-    .filter((c) => c.tp !== 0 || c.ti !== 0)
+    .filter((c) => c.cr4de_results.tp !== 0 || c.cr4de_results.ti !== 0)
     .map((c) => ({
-      id: c.riskId,
-      name: riskFiles[c.riskId].cr4de_title,
-      category: riskFiles[c.riskId].cr4de_risk_category,
-      x: c.tp || 0.001,
-      y: c.ti || 1600000,
+      id: c.cr4de_risk_file.cr4de_riskfilesid,
+      name: c.cr4de_risk_file.cr4de_title,
+      category: c.cr4de_risk_file.cr4de_risk_category,
+      x: c.cr4de_results.tp || 0.001,
+      y: c.cr4de_results.ti || 1600000,
       z: 1,
     }));
 

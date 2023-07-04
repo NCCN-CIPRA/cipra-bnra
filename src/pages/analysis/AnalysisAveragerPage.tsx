@@ -1,6 +1,6 @@
 import { Typography, Container, Paper, Button, Stack } from "@mui/material";
 import { useState } from "react";
-import { DataTable } from "../../hooks/useAPI";
+import useAPI, { DataTable } from "../../hooks/useAPI";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import usePageTitle from "../../hooks/usePageTitle";
 import useRecords from "../../hooks/useRecords";
@@ -27,6 +27,7 @@ const getScaleString = (scaleNumber: number, prefix: string) => {
 };
 
 const getAverage = (fieldName: string, scalePrefix: string, record: any, analyses: any) => {
+  return null;
   // if (record[fieldName]) return record[fieldName];
 
   if (analyses.length <= 0) return getScaleString(0, scalePrefix);
@@ -46,6 +47,8 @@ export default function AnalysisAveragerPage() {
   const [updatedDAs, setUpdatedDAs] = useState(0);
   const [updatedCAs, setUpdatedCAs] = useState(0);
 
+  const api = useAPI();
+
   usePageTitle("BNRA 2023 - 2026 Expert Input Averager");
   useBreadcrumbs([
     { name: "BNRA 2023 - 2026", url: "/" },
@@ -58,8 +61,6 @@ export default function AnalysisAveragerPage() {
       for (let i = 0; i < riskFiles.length; i++) {
         const riskFile = riskFiles[i];
         const analyses = directAnalyses.filter((da) => da._cr4de_risk_file_value === riskFile.cr4de_riskfilesid);
-
-        if (analyses.length <= 0) continue;
 
         if (riskFile) {
           const fieldsToUpdate = {
@@ -116,23 +117,7 @@ export default function AnalysisAveragerPage() {
             cr4de_di_quanti_fb_e: getAverage("cr4de_di_quanti_fb_e", "Fb", riskFile, analyses),
           };
 
-          const response = await fetch(
-            `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
-            {
-              method: "PATCH",
-              headers: {
-                Authorization:
-                  "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQzMjMxOCwibmJmIjoxNjY0NDMyMzE5LCJleHAiOjE2NjQ0MzMyMTksImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.DSkyEOprtyUJ6juSh5fp1wRUTuH29GQpvLKpGS-rAJfOO98ZQmhzCkdj4zbq3BEH_XJDEJ2wIlvuNscu1HhfV55A37im1Lt0R-Im3rikctYX4mcVRlCCQJ00NA_KUJs5EPigqBZjo7FY9o1xjVuhXo1mOTs3Ozo18inuX0i5mWcuwEQ4oUPxS__NC4ARKTKfGJ4SHcxC3cdQfCLsCfi--AKfYZh5It4YXnuLnttNkRcFDD08lFBBlVKMOprwCcXJNCvzXEbJx9l9silBz_xWYUjed2PIY0ob_ErUiAj6uvMfJDtRu9cgj0pj2EEXyugYFASI2SU9lpz5_yzgFr5c_w",
-                __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(fieldsToUpdate),
-            }
-          );
-
-          if (response.status !== 204) {
-            return console.error("FAILED ON PATCH: ", riskFile, analyses, fieldsToUpdate);
-          }
+          await api.updateRiskFile(riskFile.cr4de_riskfilesid, fieldsToUpdate);
         }
 
         setUpdatedDAs(i + 1);
@@ -146,7 +131,7 @@ export default function AnalysisAveragerPage() {
         const cascade = cascades[i];
         const analyses = cascadeAnalyses.filter((da) => da._cr4de_cascade_value === cascade.cr4de_bnrariskcascadeid);
 
-        if (cascade && analyses.length > 0) {
+        if (cascade) {
           const fieldsToUpdate = {
             cr4de_c2c: getAverage("cr4de_c2c", "CP", cascade, analyses),
             cr4de_c2m: getAverage("cr4de_c2m", "CP", cascade, analyses),
@@ -161,23 +146,7 @@ export default function AnalysisAveragerPage() {
             cr4de_e2e: getAverage("cr4de_e2e", "CP", cascade, analyses),
           };
 
-          const response = await fetch(
-            `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${cascade.cr4de_bnrariskcascadeid})`,
-            {
-              method: "PATCH",
-              headers: {
-                Authorization:
-                  "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIm5vbmNlIjoiIn0.eyJzdWIiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGEuY29tIiwicGhvbmVfbnVtYmVyIjoiIiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYS5jb20iLCJscF9zZGVzIjpbeyJ0eXBlIjoiY3RtcmluZm8iLCJpbmZvIjp7ImNzdGF0dXMiOm51bGwsImN0eXBlIjoiY29udGFjdCIsImN1c3RvbWVySWQiOiJhYmVkMjhkZC02MTNmLWVkMTEtOWRiMC0wMDBkM2FkZjcwODkiLCJiYWxhbmNlIjpudWxsLCJzb2NpYWxJZCI6bnVsbCwiaW1laSI6IiIsInVzZXJOYW1lIjoiYUBhLmNvbSIsImNvbXBhbnlTaXplIjpudWxsLCJhY2NvdW50TmFtZSI6bnVsbCwicm9sZSI6bnVsbCwibGFzdFBheW1lbnREYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9LCJyZWdpc3RyYXRpb25EYXRlIjp7ImRheSI6MCwibW9udGgiOjAsInllYXIiOjB9fX1dLCJhdWQiOiIiLCJhcHBpZCI6IiIsInNjcCI6IjYzNTVhOTMxLTBhMGUtNGE0Ni1iNTE2LThlNTU4OTZjY2E0OSIsImlhdCI6MTY2NDQzMjMxOCwibmJmIjoxNjY0NDMyMzE5LCJleHAiOjE2NjQ0MzMyMTksImlzcyI6ImJucmEucG93ZXJhcHBzcG9ydGFscy5jb20ifQ.DSkyEOprtyUJ6juSh5fp1wRUTuH29GQpvLKpGS-rAJfOO98ZQmhzCkdj4zbq3BEH_XJDEJ2wIlvuNscu1HhfV55A37im1Lt0R-Im3rikctYX4mcVRlCCQJ00NA_KUJs5EPigqBZjo7FY9o1xjVuhXo1mOTs3Ozo18inuX0i5mWcuwEQ4oUPxS__NC4ARKTKfGJ4SHcxC3cdQfCLsCfi--AKfYZh5It4YXnuLnttNkRcFDD08lFBBlVKMOprwCcXJNCvzXEbJx9l9silBz_xWYUjed2PIY0ob_ErUiAj6uvMfJDtRu9cgj0pj2EEXyugYFASI2SU9lpz5_yzgFr5c_w",
-                __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(fieldsToUpdate),
-            }
-          );
-
-          if (response.status !== 204) {
-            return console.error("FAILED ON PATCH: ", cascade, analyses, fieldsToUpdate);
-          }
+          await api.updateCascade(cascade.cr4de_bnrariskcascadeid, fieldsToUpdate);
         }
 
         setUpdatedCAs(i + 1);

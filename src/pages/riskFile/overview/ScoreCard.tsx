@@ -2,7 +2,10 @@ import { Stack, Box, Typography, Paper, Tooltip } from "@mui/material";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { R2G, TEAL } from "./Colors";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { DVAnalysisRun } from "../../../types/dataverse/DVAnalysisRun";
+import { DVAnalysisRun, Quality, RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
+import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
+import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
+import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 
 const RADIAN = Math.PI / 180;
 const data = [
@@ -49,8 +52,44 @@ const needle = (
   ];
 };
 
-export default function ScoreCard({ riskFile, calculations }: { riskFile: DVRiskFile; calculations: DVAnalysisRun[] }) {
-  const score = 0.7;
+const getQualityScore = (quality: Quality, noAverages = 1) => {
+  if (quality === Quality.CONSENSUS) {
+    return 1;
+  } else if (quality === Quality.AVERAGE) {
+    return noAverages / (1 + noAverages);
+  } else {
+    return 0;
+  }
+};
+
+export default function ScoreCard({
+  riskFile,
+  participants,
+  calculation,
+}: {
+  riskFile: DVRiskFile;
+  participants: DVParticipation[];
+  calculation: RiskCalculation;
+}) {
+  let score: { da: number; causes: number; effects: number } = { da: 0, causes: 0, effects: 0 };
+  const dasFinished = participants.filter((p) => p.cr4de_direct_analysis_finished).length;
+  const casFinished = participants.filter((p) => p.cr4de_cascade_analysis_finished).length;
+
+  score.da = getQualityScore(calculation.quality, dasFinished);
+
+  score.causes =
+    calculation.causes.reduce(
+      (tot, cause) => tot + getQualityScore(cause.causeQuality, casFinished) * getQualityScore(cause.cascadeQuality),
+      0
+    ) / calculation.causes.length;
+
+  score.effects =
+    calculation.effects.reduce(
+      (tot, effect) => tot + getQualityScore(effect.effectQuality) * getQualityScore(effect.cascadeQuality),
+      0
+    ) / calculation.effects.length;
+
+  const totalScore = (score.da + score.causes + score.effects) / 3;
 
   return (
     <Stack component={Paper} sx={{ width: "100%", height: "100%", p: 2, position: "relative" }}>
@@ -75,9 +114,22 @@ export default function ScoreCard({ riskFile, calculations }: { riskFile: DVRisk
         </ResponsiveContainer>
       </Box>
       <Box
-        sx={{ position: "relative", transform: `rotate(${score * 180}deg)`, transformOrigin: "50% calc(100% - 32px)" }}
+        sx={{
+          position: "relative",
+          transform: `rotate(${totalScore * 180}deg)`,
+          transformOrigin: "50% calc(100% - 32px)",
+        }}
       >
-        <Tooltip title="Reliability Score: 10">
+        <Tooltip
+          title={
+            <Stack>
+              <Typography variant="subtitle1">{`Total Reliability Score: ${Math.round(totalScore * 100)}`}</Typography>
+              <Typography variant="caption">{`Direct Analysis Score: ${Math.round(score.da * 100)}`}</Typography>
+              <Typography variant="caption">{`Causes Score: ${Math.round(score.causes * 100)}`}</Typography>
+              <Typography variant="caption">{`Effects Score: ${Math.round(score.effects * 100)}`}</Typography>
+            </Stack>
+          }
+        >
           <Box
             sx={{
               position: "absolute",

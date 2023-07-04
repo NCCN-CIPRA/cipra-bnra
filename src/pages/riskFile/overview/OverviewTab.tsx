@@ -25,8 +25,8 @@ export default function OverviewTab({
   calculations,
 }: {
   riskFile: DVRiskFile | null;
-  directAnalyses: DVDirectAnalysis[] | null;
-  cascadeAnalyses: DVCascadeAnalysis[] | null;
+  directAnalyses: DVDirectAnalysis<unknown, DVContact>[] | null;
+  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[] | null;
   participants: DVParticipation<DVContact>[] | null;
   calculations: RiskAnalysisResults[] | null;
 }) {
@@ -42,7 +42,9 @@ export default function OverviewTab({
         </Grid>
         <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <ScoreCard riskFile={riskFile} calculations={calculations} />
+            {participants && (
+              <ScoreCard riskFile={riskFile} participants={participants} calculation={calculations[0].cr4de_results} />
+            )}
           </Box>
         </Grid>
         <Grid xs={6} md={3}>

@@ -88,7 +88,7 @@ export default function RiskFilePage({}) {
     data: cascadeAnalyses,
     reloadData: reloadCascadeAnalyses,
     isFetching: loadingCAs,
-  } = useRecords<DVCascadeAnalysis>({
+  } = useRecords<DVCascadeAnalysis<unknown, unknown, DVContact>>({
     table: DataTable.CASCADE_ANALYSIS,
     query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_expert($select=emailaddress1)`,
   });
@@ -130,7 +130,17 @@ export default function RiskFilePage({}) {
           />
         )}
         {riskFile && tab === 2 && <AnalysisTab riskFile={riskFile} calculations={calculations} />}
-        {riskFile && tab === 3 && <InputManagementTab riskFile={riskFile} participants={participants} />}
+        {riskFile && tab === 3 && (
+          <InputManagementTab
+            riskFile={riskFile}
+            cascades={cascades}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            participants={participants}
+            reloadRiskFile={reloadRiskFile}
+            reloadCascades={reloadCascades}
+          />
+        )}
       </Box>
       <Paper sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }} elevation={3}>
         <BottomNavigation

@@ -87,4 +87,7 @@ export interface DVRiskFile extends RiskFileEditableFields {
   cr4de_step2b_enabled_on: Date | null;
 
   cr4de_is_test: boolean | null;
+
+  createdon: string;
+  modifiedon: string;
 }
