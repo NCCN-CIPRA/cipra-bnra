@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container, Typography, Card, CardActions, CardContent, Button, Stack } from "@mui/material";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
@@ -13,6 +13,8 @@ import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../../types/dat
 import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { v4 as uuid } from "uuid";
+import { DVParticipation } from "../../types/dataverse/DVParticipation";
+import { DVContact } from "../../types/dataverse/DVContact";
 
 interface OtherHazard {
   cr4de_title: string;
@@ -38,16 +40,19 @@ const roundPerc = (v: number) => Math.round(v * 10000) / 100 + "%";
 
 export default function CalculationPage() {
   const api = useAPI();
+  const [useableDAs, setUseableDAs] = useState<DVDirectAnalysis[] | null>(null);
+  const [useableCAs, setUseableCAs] = useState<DVCascadeAnalysis[] | null>(null);
 
+  const { data: participations, isFetching: loadingParticipations } = useRecords<DVParticipation>({
+    table: DataTable.PARTICIPATION,
+  });
   const {
     data: riskFiles,
     isFetching: loadingRiskFiles,
     reloadData: reloadRiskFiles,
   } = useRecords<DVRiskFile>({
     table: DataTable.RISK_FILE,
-    query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_risk_type,cr4de_calculated,${DIRECT_ANALYSIS_QUANTI_FIELDS.join(
-      ","
-    )}`,
+    query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_risk_type,${DIRECT_ANALYSIS_QUANTI_FIELDS.join(",")}`,
   });
   const {
     data: cascades,
@@ -63,21 +68,21 @@ export default function CalculationPage() {
     data: directAnalyses,
     isFetching: loadingDAs,
     reloadData: reloadDAs,
-  } = useRecords<DVDirectAnalysis>({
+  } = useRecords<DVDirectAnalysis<unknown, DVContact>>({
     table: DataTable.DIRECT_ANALYSIS,
     query: `$select=_cr4de_risk_file_value,cr4de_expert,${DIRECT_ANALYSIS_QUANTI_FIELDS.join(
       ","
-    )}&$expand=cr4de_risk_file($select=cr4de_riskfilesid),cr4de_expert($select=emailaddress1)`,
+    )}&$expand=cr4de_expert($select=emailaddress1)&$filter=_cr4de_expert_value ne null`,
   });
   const {
     data: cascadeAnalyses,
     isFetching: loadingCAs,
     reloadData: reloadCAs,
-  } = useRecords<DVCascadeAnalysis>({
+  } = useRecords<DVCascadeAnalysis<unknown, unknown, DVContact>>({
     table: DataTable.CASCADE_ANALYSIS,
-    query: `$select=_cr4de_cascade_value,cr4de_expert,${CASCADE_ANALYSIS_QUANTI_FIELDS.join(
+    query: `$select=_cr4de_risk_file_value,_cr4de_cascade_value,cr4de_expert,${CASCADE_ANALYSIS_QUANTI_FIELDS.join(
       ","
-    )}&$expand=cr4de_cascade($select=cr4de_bnrariskcascadeid),cr4de_expert($select=emailaddress1)`,
+    )}&$expand=cr4de_expert($select=emailaddress1)&$filter=_cr4de_expert_value ne null`,
   });
 
   const [log, setLog] = useState<string[]>([]);
@@ -92,7 +97,38 @@ export default function CalculationPage() {
     { name: "Calculator", url: "" },
   ]);
 
-  const isLoading = loadingRiskFiles || loadingCascades || loadingDAs || loadingCAs;
+  const isLoading = loadingRiskFiles || loadingCascades || loadingDAs || loadingCAs || loadingParticipations;
+
+  useEffect(() => {
+    if (!participations || !participations[0] || !directAnalyses || !cascadeAnalyses) return;
+
+    setUseableDAs(
+      directAnalyses.filter((da) => {
+        const p = participations.find(
+          (p) =>
+            p._cr4de_contact_value === da.cr4de_expert.contactid &&
+            p._cr4de_risk_file_value === da._cr4de_risk_file_value
+        );
+
+        if (!p) return false;
+
+        return p.cr4de_direct_analysis_finished;
+      })
+    );
+    setUseableCAs(
+      cascadeAnalyses.filter((ca) => {
+        const p = participations.find(
+          (p) =>
+            p._cr4de_contact_value === ca.cr4de_expert.contactid &&
+            p._cr4de_risk_file_value === ca._cr4de_risk_file_value
+        );
+
+        if (!p) return false;
+
+        return p.cr4de_cascade_analysis_finished;
+      })
+    );
+  }, [participations, directAnalyses, cascadeAnalyses]);
 
   const reloadData = () => {
     reloadCascades();
@@ -143,18 +179,13 @@ export default function CalculationPage() {
   };
 
   const runCalculations = async () => {
-    if (!riskFiles || !cascades || !directAnalyses || !cascadeAnalyses) return;
+    if (!riskFiles || !cascades || !useableDAs || !useableCAs) return;
 
     const logLines: string[] = [];
 
     setIsCalculating(true);
 
-    const [calculations, daMetrics, caMetrics] = await prepareRiskFiles(
-      riskFiles,
-      cascades,
-      directAnalyses,
-      cascadeAnalyses
-    );
+    const [calculations, daMetrics, caMetrics] = await prepareRiskFiles(riskFiles, cascades, useableDAs, useableCAs);
 
     logLines.push(
       "Direct Analysis Metrics:",
@@ -197,7 +228,7 @@ export default function CalculationPage() {
           <CardContent sx={{ maxHeight: 500, overflowY: "scroll" }}>
             <Typography variant="overline">Loading Risk Files...</Typography>
 
-            {riskFiles && cascades && directAnalyses && cascadeAnalyses && (
+            {riskFiles && cascades && directAnalyses && cascadeAnalyses && useableDAs && useableCAs && (
               <pre>
                 <Typography variant="overline" sx={{ mt: 0, display: "block" }}>
                   Loaded {riskFiles.length} Risk Files
@@ -206,10 +237,10 @@ export default function CalculationPage() {
                   Loaded {cascades.length} Cascades
                 </Typography>
                 <Typography variant="overline" sx={{ mb: 0, display: "block" }}>
-                  Loaded {directAnalyses.length} Direct Analyses
+                  Loaded {directAnalyses.length} Direct Analyses ({useableDAs.length} useable)
                 </Typography>
                 <Typography variant="overline" sx={{ mb: 2, display: "block" }}>
-                  Loaded {cascadeAnalyses.length} Cascade Analyses
+                  Loaded {cascadeAnalyses.length} Cascade Analyses ({useableCAs.length} useable)
                 </Typography>
 
                 {log.map((l, i) => (

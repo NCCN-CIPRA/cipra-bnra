@@ -81,12 +81,19 @@ const getAverage = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDirectA
 
   const prefix = (good[0][fieldName] as string).slice(0, -1);
 
-  const avg = directAnalyses
-    .filter((da) => da[fieldName] !== null)
-    .reduce((avg, da, i, a) => avg + parseFloat((da[fieldName] as string).replace(prefix, "")) / a.length, 0);
+  if (["DP", "M", "CP"].indexOf(prefix) >= 0) {
+    const avg = directAnalyses
+      .filter((da) => da[fieldName] !== null)
+      .reduce((avg, da, i, a) => avg + getAbsoluteProbability(da[fieldName] as string) / a.length, 0);
 
-  if (["DP", "M", "CP"].indexOf(prefix) >= 0) return getProbabilityScale(avg, prefix);
-  else return getImpactScale(avg, prefix);
+    return getProbabilityScale(avg, prefix);
+  } else {
+    const avg = directAnalyses
+      .filter((da) => da[fieldName] !== null)
+      .reduce((avg, da, i, a) => avg + getAbsoluteImpact(da[fieldName] as string) / a.length, 0);
+
+    return getImpactScale(avg, prefix);
+  }
 };
 
 const capFirst = (s: string) => {

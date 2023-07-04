@@ -106,7 +106,7 @@ export default function ProbabilitySankey({
     links: [
       ...(calculation.dp > 0 ? [{ source: 1, target: 0, value: calculation.dp }] : []),
       ...calculation.causes
-        .filter((e) => e.ip > 0)
+        .filter((e) => e.ip > 0 && e.ip > (5 * calculation.ip) / 100)
         .map((e: any, i: number) => ({
           source: i + 2,
           target: 0,

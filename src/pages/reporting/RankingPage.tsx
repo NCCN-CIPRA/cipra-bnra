@@ -23,7 +23,8 @@ export default function RankingPage() {
 
   const { data: calculations, isFetching: loadingCalculations } = useRecords<RiskAnalysisResults<DVRiskFile>>({
     table: DataTable.ANALYSIS_RUN,
-    query: "$expand=cr4de_risk_file",
+    query:
+      "$filter=cr4de_risk_file/cr4de_risk_category ne 'Test'&$expand=cr4de_risk_file&$orderby=createdon desc&$top=118",
   });
 
   useEffect(() => {

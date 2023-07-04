@@ -86,7 +86,7 @@ export default function RiskPage() {
 
   const { data: calculations, isFetching: loadingCalculations } = useRecords<RiskAnalysisResults>({
     table: DataTable.ANALYSIS_RUN,
-    query: `$filter=_cr4de_risk_file_value eq ${params.risk_id}&$top=10`,
+    query: `$filter=_cr4de_risk_file_value eq ${params.risk_id}&$orderby=createdon desc&$top=1`,
   });
 
   usePageTitle("BNRA 2023 - 2026 Results Overview");

@@ -42,11 +42,11 @@ export function getAbsoluteProbability(scaleString: string | null) {
   if (scaleString === null) return 0;
 
   if (scaleString.startsWith("DP")) {
-    return DPScales[scaleString];
+    return DPScales[scaleString.replace("DP", "")];
   } else if (scaleString.startsWith("CP")) {
-    return CPScales[scaleString];
+    return CPScales[scaleString.replace("CP", "")];
   } else if (scaleString.startsWith("M")) {
-    return MScales[scaleString];
+    return MScales[scaleString.replace("M", "")];
   }
 
   return -1;

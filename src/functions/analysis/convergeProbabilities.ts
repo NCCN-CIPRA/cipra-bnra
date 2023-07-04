@@ -22,6 +22,7 @@ export default async function convergeProbabilities(
 
       if (isNaN(totalProbability)) {
         console.error("Error in calculations, probability was NaN: ", risks[j]);
+        console.error("Run: ", run);
         throw new Error("Error in calculations, probability was NaN");
       }
     }

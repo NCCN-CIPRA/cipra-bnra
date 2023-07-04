@@ -1,4 +1,4 @@
-import { Typography, Container, Paper, Button, Stack } from "@mui/material";
+import { Typography, Container, Paper, Button, Stack, CardContent, CardActions, Card } from "@mui/material";
 import { useState } from "react";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
@@ -8,6 +8,7 @@ import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { DVContact } from "../../types/dataverse/DVContact";
 
 const getScaleValue = (scaleString: string) => {
   if (scaleString === null) return 0;
@@ -41,8 +42,12 @@ const getAverage = (fieldName: string, scalePrefix: string, record: any, analyse
 export default function AnalysisAveragerPage() {
   const { data: riskFiles } = useRecords<DVRiskFile>({ table: DataTable.RISK_FILE });
   const { data: cascades } = useRecords<DVRiskCascade>({ table: DataTable.RISK_CASCADE });
-  const { data: directAnalyses } = useRecords<DVDirectAnalysis>({ table: DataTable.DIRECT_ANALYSIS });
-  const { data: cascadeAnalyses } = useRecords<DVCascadeAnalysis>({ table: DataTable.CASCADE_ANALYSIS });
+  const { data: directAnalyses } = useRecords<DVDirectAnalysis>({
+    table: DataTable.DIRECT_ANALYSIS,
+  });
+  const { data: cascadeAnalyses } = useRecords<DVCascadeAnalysis<unknown, unknown, DVContact>>({
+    table: DataTable.CASCADE_ANALYSIS,
+  });
 
   const [updatedDAs, setUpdatedDAs] = useState(0);
   const [updatedCAs, setUpdatedCAs] = useState(0);
@@ -156,34 +161,36 @@ export default function AnalysisAveragerPage() {
 
   return (
     <Container sx={{ mt: 4, pb: 8 }}>
-      <Paper sx={{ p: 2 }}>
-        <Typography>{riskFiles ? `Loaded ${riskFiles.length} risk files` : "Loading risk files..."}</Typography>
-        <Typography>{cascades ? `Loaded ${cascades.length} risk cascades` : "Loading risk cascades..."}</Typography>
-        <Typography>
-          {directAnalyses
-            ? `Loaded ${directAnalyses.length} direct analysis objects to process`
-            : "Loading direct analyses..."}
-        </Typography>
-        <Typography>
-          {cascadeAnalyses
-            ? `Loaded ${cascadeAnalyses.length} cascade analysis objects to process`
-            : "Loading cascade analyses..."}
-        </Typography>
-        {riskFiles && directAnalyses && updatedDAs > 0 && (
-          <Typography sx={{ mb: 2 }}>
-            Updating direct analysis averages ({updatedDAs}/{riskFiles.length})
+      <Card sx={{}}>
+        <CardContent>
+          <Typography>{riskFiles ? `Loaded ${riskFiles.length} risk files` : "Loading risk files..."}</Typography>
+          <Typography>{cascades ? `Loaded ${cascades.length} risk cascades` : "Loading risk cascades..."}</Typography>
+          <Typography>
+            {directAnalyses
+              ? `Loaded ${directAnalyses.length} direct analysis objects to process`
+              : "Loading direct analyses..."}
           </Typography>
-        )}
-        {cascades && cascadeAnalyses && updatedCAs > 0 && (
-          <Typography sx={{ mb: 2 }}>
-            Updating cascade analysis averages ({updatedCAs}/{cascades.length})
+          <Typography>
+            {cascadeAnalyses
+              ? `Loaded ${cascadeAnalyses.length} cascade analysis objects to process`
+              : "Loading cascade analyses..."}
           </Typography>
-        )}
-        <Stack direction="row">
+          {riskFiles && directAnalyses && updatedDAs > 0 && (
+            <Typography sx={{ mb: 2 }}>
+              Updating direct analysis averages ({updatedDAs}/{riskFiles.length})
+            </Typography>
+          )}
+          {cascades && cascadeAnalyses && updatedCAs > 0 && (
+            <Typography sx={{ mb: 2 }}>
+              Updating cascade analysis averages ({updatedCAs}/{cascades.length})
+            </Typography>
+          )}
+        </CardContent>
+        <CardActions>
           <Button onClick={averageDirectAnalyses}>Average Direct Analyses</Button>
           <Button onClick={averageCascadeAnalyses}>Average Cascade Analyses</Button>
-        </Stack>
-      </Paper>
+        </CardActions>
+      </Card>
     </Container>
   );
 }

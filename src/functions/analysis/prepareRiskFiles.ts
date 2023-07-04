@@ -17,57 +17,74 @@ interface Metrics {
   total: number;
 }
 
-function getBestValueRF(
-  field: keyof DVRiskFile & keyof DVDirectAnalysis,
-  riskFile: DVRiskFile,
-  directAnalyses: DVDirectAnalysis[],
-  absoluteValueGetter: (field: string) => number,
-  metrics: Metrics
-) {
-  metrics.total++;
+const wrapIsNan =
+  (f: any) =>
+  (...args: any[]): number => {
+    const result = f(...args);
 
-  if (riskFile[field] != null) {
-    metrics.consensus++;
-    return absoluteValueGetter(riskFile[field] as string);
+    if (isNaN(result)) {
+      console.error("Error in calculations, probability was NaN: ", ...args);
+      throw new Error("Error in calculations, probability was NaN");
+    }
+
+    return result;
+  };
+
+const getBestValueRF = wrapIsNan(
+  (
+    field: keyof DVRiskFile & keyof DVDirectAnalysis,
+    riskFile: DVRiskFile,
+    directAnalyses: DVDirectAnalysis[],
+    absoluteValueGetter: (field: string) => number,
+    metrics: Metrics
+  ) => {
+    metrics.total++;
+
+    if (riskFile[field] != null) {
+      metrics.consensus++;
+      return absoluteValueGetter(riskFile[field] as string);
+    }
+
+    // FIXME: check if participations are finished (direct_analysis_finished)
+    const validDAs = directAnalyses.filter((da) => da[field] != null);
+
+    if (validDAs.length > 0) {
+      metrics.average++;
+      return validDAs.reduce((tot, da) => tot + absoluteValueGetter(da[field] as string), 0) / validDAs.length;
+    }
+
+    metrics.missing++;
+    return 0;
   }
+);
 
-  // FIXME: check if participations are finished (direct_analysis_finished)
-  const validDAs = directAnalyses.filter((da) => da[field] != null);
+const getBestValueRC = wrapIsNan(
+  (
+    field: keyof DVRiskCascade & keyof DVCascadeAnalysis,
+    cascade: DVRiskCascade,
+    cascadeAnalyses: DVCascadeAnalysis[],
+    absoluteValueGetter: (field: string) => number,
+    metrics: Metrics
+  ) => {
+    metrics.total++;
 
-  if (validDAs.length > 0) {
-    metrics.average++;
-    return validDAs.reduce((tot, da) => tot + absoluteValueGetter(da[field] as string), 0) / validDAs.length;
+    if (cascade[field] != null) {
+      metrics.consensus++;
+      return absoluteValueGetter(cascade[field] as string);
+    }
+
+    // FIXME: check if participations are finished (direct_analysis_finished)
+    const validCAs = cascadeAnalyses.filter((ca) => ca[field] != null);
+
+    if (validCAs.length > 0) {
+      metrics.average++;
+      return validCAs.reduce((tot, ca) => tot + absoluteValueGetter(ca[field] as string), 0) / validCAs.length;
+    }
+
+    metrics.missing++;
+    return 0;
   }
-
-  metrics.missing++;
-  return 0;
-}
-
-function getBestValueRC(
-  field: keyof DVRiskCascade & keyof DVCascadeAnalysis,
-  cascade: DVRiskCascade,
-  cascadeAnalyses: DVCascadeAnalysis[],
-  absoluteValueGetter: (field: string) => number,
-  metrics: Metrics
-) {
-  metrics.total++;
-
-  if (cascade[field] != null) {
-    metrics.consensus++;
-    return absoluteValueGetter(cascade[field] as string);
-  }
-
-  // FIXME: check if participations are finished (direct_analysis_finished)
-  const validCAs = cascadeAnalyses.filter((ca) => ca[field] != null);
-
-  if (validCAs.length > 0) {
-    metrics.average++;
-    return validCAs.reduce((tot, ca) => tot + absoluteValueGetter(ca[field] as string), 0) / validCAs.length;
-  }
-
-  metrics.missing++;
-  return 0;
-}
+);
 
 export default async function prepareRiskFiles(
   riskFiles: DVRiskFile[],
