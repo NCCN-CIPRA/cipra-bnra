@@ -95,7 +95,7 @@ export default function RiskFilePage({}) {
 
   const { data: calculations, isFetching: loadingCalculations } = useRecords<RiskAnalysisResults>({
     table: DataTable.ANALYSIS_RUN,
-    query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$top=10`,
+    query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$orderby=createdon desc&$top=10`,
   });
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {

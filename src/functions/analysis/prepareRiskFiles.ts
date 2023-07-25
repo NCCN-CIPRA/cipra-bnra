@@ -130,6 +130,7 @@ export default async function prepareRiskFiles(
 
         timestamp: Date.now(),
         quality: Quality.CONSENSUS,
+        reliability: 0,
 
         // Initialize known fields
         dp_c: getBestValueRF(
@@ -511,6 +512,13 @@ export default async function prepareRiskFiles(
 
       if (daMetrics.missing > oldMetrics.missing) c.quality = Quality.MISSING;
       else if (daMetrics.average > oldMetrics.average) c.quality = Quality.AVERAGE;
+
+      const reliabilityAbs = directAnalyses.reduce((rel, _) => {
+        if ((c.quality = Quality.CONSENSUS)) return rel + 1;
+
+        return rel + 0.5;
+      }, 0);
+      c.reliability = reliabilityAbs / (0.5 + reliabilityAbs);
 
       return c;
     });

@@ -68,7 +68,7 @@ export interface API {
 
   getRiskFiles<T = DVRiskFile>(query?: string): Promise<T[]>;
   getRiskFile<T = DVRiskFile>(id: string, query?: string): Promise<T>;
-  updateRiskFile(id: string, fields: Partial<DVRiskFile>): Promise<void>;
+  updateRiskFile(id: string, fields: object): Promise<void>;
   deleteRiskFile(id: string): Promise<void>;
 
   getRiskCascades<T = DVRiskCascade>(query?: string): Promise<T[]>;
@@ -526,11 +526,23 @@ export default function useAPI(): API {
     },
 
     getCascadeAnalyses: async function <T = DVCascadeAnalysis>(query?: string): Promise<T[]> {
-      const response = await authFetch(
+      const results = [];
+
+      let response = await authFetch(
         `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises${query ? "?" + query : ""}`
       );
 
-      return (await response.json()).value;
+      while (true) {
+        const result = await response.json();
+
+        results.push(...result.value);
+
+        if (!result["@odata.nextLink"]) {
+          return results;
+        }
+
+        response = await authFetch(result["@odata.nextLink"]);
+      }
     },
     getCascadeAnalysis: async function <T = DVCascadeAnalysis>(id: string, query?: string): Promise<T> {
       const response = await authFetch(

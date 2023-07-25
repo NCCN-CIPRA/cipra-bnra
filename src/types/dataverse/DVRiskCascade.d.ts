@@ -17,4 +17,6 @@ export interface DVRiskCascade<CauseType = unknown, EffectType = unknown> {
   cr4de_e2c: string | null;
   cr4de_e2m: string | null;
   cr4de_e2e: string | null;
+
+  cr4de_quali: string | null;
 }

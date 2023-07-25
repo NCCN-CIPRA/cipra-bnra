@@ -1,3 +1,5 @@
+import { DVAnalysisRun } from "./DVAnalysisRun";
+
 export enum RISK_TYPE {
   STANDARD = "Standard Risk",
   MANMADE = "Malicious Man-made Risk",
@@ -18,7 +20,7 @@ export interface RiskFileEditableFields {
   cr4de_online_sources: string | null;
 }
 
-export interface DVRiskFile extends RiskFileEditableFields {
+export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableFields {
   cr4de_riskfilesid: string;
   cr4de_hazard_id: string;
 
@@ -87,6 +89,9 @@ export interface DVRiskFile extends RiskFileEditableFields {
   cr4de_step2b_enabled_on: Date | null;
 
   cr4de_is_test: boolean | null;
+
+  cr4de_latest_calculation: CalculationType | null;
+  _cr4de_latest_calculation_value: string | null;
 
   createdon: string;
   modifiedon: string;

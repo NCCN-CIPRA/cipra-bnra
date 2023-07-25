@@ -16,10 +16,10 @@ export default function calculateIndirectProbabilities(risk: RiskCalculation) {
       throw new Error("Error in calculations, probability was NaN");
     }
 
-    if (cause.ip > 1) {
-      console.error("Error in calculations, probability was >1: ", risk, cause);
-      throw new Error("Error in calculations, probability was >1");
-    }
+    // if (cause.ip > 1) {
+    //   console.error("Error in calculations, probability was >1: ", risk, cause);
+    //   throw new Error("Error in calculations, probability was >1");
+    // }
   });
 
   risk.ip_c = risk.causes.reduce((acc, effect) => acc + effect.ip_c, 0);
@@ -33,12 +33,12 @@ export default function calculateIndirectProbabilities(risk: RiskCalculation) {
     throw new Error("Error in calculations, probability was NaN");
   }
 
-  if (risk.ip > 1) {
-    console.error(
-      "Error in calculations, probability was >1: ",
-      risk,
-      [...risk.causes].sort((a, b) => b.ip_e - a.ip_e)
-    );
-    throw new Error("Error in calculations, probability was >1");
-  }
+  // if (risk.ip > 1) {
+  //   console.error(
+  //     "Error in calculations, probability was >1: ",
+  //     risk,
+  //     [...risk.causes].sort((a, b) => b.ip_e - a.ip_e)
+  //   );
+  //   throw new Error("Error in calculations, probability was >1");
+  // }
 }

@@ -15,6 +15,7 @@ import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { v4 as uuid } from "uuid";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVContact } from "../../types/dataverse/DVContact";
+import calculateMetrics from "../../functions/analysis/calculateMetrics";
 
 interface OtherHazard {
   cr4de_title: string;
@@ -52,7 +53,9 @@ export default function CalculationPage() {
     reloadData: reloadRiskFiles,
   } = useRecords<DVRiskFile>({
     table: DataTable.RISK_FILE,
-    query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_risk_type,${DIRECT_ANALYSIS_QUANTI_FIELDS.join(",")}`,
+    query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_risk_type,cr4de_subjective_importance,${DIRECT_ANALYSIS_QUANTI_FIELDS.join(
+      ","
+    )}`,
   });
   const {
     data: cascades,
@@ -138,7 +141,7 @@ export default function CalculationPage() {
   };
 
   const saveResults = async () => {
-    if (!riskFiles || !results || isCalculating) return;
+    if (!riskFiles || !results || isCalculating || !participations) return;
 
     const innerLog = log;
 
@@ -163,13 +166,19 @@ export default function CalculationPage() {
         }),
       };
 
+      const metrics = calculateMetrics(calculatedFields, results, riskFiles, participations);
+
       const riskId = calculatedFields.riskId;
       delete calculatedFields.riskId;
 
-      await api.createAnalysisRun({
+      const result = await api.createAnalysisRun({
         cr4de_analysis_id: analysisId,
         "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskId})`,
         cr4de_results: JSON.stringify(calculatedFields),
+        cr4de_risk_file_metrics: JSON.stringify(metrics),
+      });
+      await api.updateRiskFile(riskId, {
+        "cr4de_latest_calculation@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns(${result.id})`,
       });
 
       setLog([...innerLog.slice(0, innerLog.length - 1), `Saving calculations (${i + 1}/${results.length})`]);
@@ -179,7 +188,7 @@ export default function CalculationPage() {
   };
 
   const runCalculations = async () => {
-    if (!riskFiles || !cascades || !useableDAs || !useableCAs) return;
+    if (!riskFiles || !cascades || !useableDAs || !useableCAs || !participations) return;
 
     const logLines: string[] = [];
 
@@ -213,6 +222,8 @@ export default function CalculationPage() {
 
     calculations.forEach((c) => {
       c.r = c.ti * c.tp;
+
+      const metrics = calculateMetrics(c, calculations, riskFiles, participations);
     });
     setResults(calculations);
 

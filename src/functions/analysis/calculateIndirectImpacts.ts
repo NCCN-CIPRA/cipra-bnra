@@ -182,6 +182,42 @@ export default function calculateIndirectImpacts(risk: RiskCalculation) {
   risk.ii_Fa_e = risk.effects.reduce((acc: number, effect: any) => acc + effect.ii_Fa_e, 0);
   risk.ii_Fb_e = risk.effects.reduce((acc: number, effect: any) => acc + effect.ii_Fb_e, 0);
 
+  risk.ii_c =
+    risk.ii_Ha_c +
+    risk.ii_Hb_c +
+    risk.ii_Hc_c +
+    risk.ii_Sa_c +
+    risk.ii_Sb_c +
+    risk.ii_Sc_c +
+    risk.ii_Sd_c +
+    risk.ii_Ea_c +
+    risk.ii_Fa_c +
+    risk.ii_Fb_c;
+
+  risk.ii_m =
+    risk.ii_Ha_m +
+    risk.ii_Hb_m +
+    risk.ii_Hc_m +
+    risk.ii_Sa_m +
+    risk.ii_Sb_m +
+    risk.ii_Sc_m +
+    risk.ii_Sd_m +
+    risk.ii_Ea_m +
+    risk.ii_Fa_m +
+    risk.ii_Fb_m;
+
+  risk.ii_e =
+    risk.ii_Ha_e +
+    risk.ii_Hb_e +
+    risk.ii_Hc_e +
+    risk.ii_Sa_e +
+    risk.ii_Sb_e +
+    risk.ii_Sc_e +
+    risk.ii_Sd_e +
+    risk.ii_Ea_e +
+    risk.ii_Fa_e +
+    risk.ii_Fb_e;
+
   risk.ii_Ha = risk.rp_c * risk.ii_Ha_c + risk.rp_m * risk.ii_Ha_m + risk.rp_e * risk.ii_Ha_e;
   risk.ii_Hb = risk.rp_c * risk.ii_Hb_c + risk.rp_m * risk.ii_Hb_m + risk.rp_e * risk.ii_Hb_e;
   risk.ii_Hc = risk.rp_c * risk.ii_Hc_c + risk.rp_m * risk.ii_Hc_m + risk.rp_e * risk.ii_Hc_e;

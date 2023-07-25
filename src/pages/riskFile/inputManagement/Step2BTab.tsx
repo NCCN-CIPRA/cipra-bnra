@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import LoadingTab from "../LoadingTab";
 import {
   Grid,
@@ -17,6 +17,14 @@ import {
   Paper,
   Divider,
   CircularProgress,
+  Drawer,
+  Toolbar,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  CardActionArea,
 } from "@mui/material";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import TextInputBox from "../../../components/TextInputBox";
@@ -97,132 +105,6 @@ const capFirst = (s: string) => {
   return `${s[0].toUpperCase()}${s.slice(1)}`;
 };
 
-function ScenarioSection({
-  riskFile,
-  scenario,
-  parameter,
-  directAnalyses,
-  initialOpen = false,
-
-  reloadRiskFile,
-}: {
-  riskFile: DVRiskFile;
-  scenario: SCENARIOS;
-  parameter: string;
-  directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
-  initialOpen?: Boolean;
-
-  reloadRiskFile: () => void;
-}) {
-  const api = useAPI();
-  const [open, setOpen] = useState(initialOpen);
-  const [isSaving, setIsSaving] = useState(false);
-  const [lastParam, setLastParam] = useState(parameter);
-
-  const qualiName = getQualiFieldName(scenario, parameter);
-  const quantiNames = getQuantiFieldNames(scenario, parameter);
-
-  const handleSave = async (field: string, value: string | null) => {
-    setIsSaving(true);
-
-    await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-      [field]: value,
-    });
-
-    await reloadRiskFile();
-
-    setIsSaving(false);
-  };
-
-  return (
-    <Stack direction="column" spacing={2} sx={{ flex: open ? 1 : 0, transition: "all .3s ease" }}>
-      <Paper
-        sx={{
-          p: 2,
-          bgcolor: `${SCENARIO_PARAMS[scenario].color}`,
-          color: "white",
-          cursor: "pointer",
-          "&:hover": { boxShadow: 4 },
-          width: open ? "100%" : "150px",
-          transition: "all .3s ease",
-        }}
-        onClick={() => setOpen(!open)}
-      >
-        {capFirst(scenario)}
-      </Paper>
-
-      {open && (
-        <>
-          <Card>
-            <CardContent>
-              <TextInputBox
-                initialValue={(riskFile[qualiName as keyof DVRiskFile] as string | null) || ""}
-                onSave={async (newValue) => handleSave(qualiName, newValue)}
-                disabled={false}
-                reset={lastParam !== parameter}
-                onReset={(value: string | null) => {
-                  handleSave(getQualiFieldName(scenario, lastParam), value);
-                  setLastParam(parameter);
-                }}
-              />
-
-              <Stack direction="row">
-                <Stack direction="column" sx={{ mt: 2, flex: 1 }}>
-                  {quantiNames.map((n) => (
-                    <Stack direction="row">
-                      <Typography variant="caption" sx={{ flex: 1 }}>
-                        Average <i>{getQuantiLabel(n, directAnalyses)}</i> Estimate:
-                      </Typography>
-                      <Typography variant="caption">
-                        <b>{getAverage(n, directAnalyses)}</b>
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-                <Stack direction="column" sx={{ ml: 2, mt: 2.5, width: 32, textAlign: "right" }}>
-                  {isSaving && <CircularProgress size={10} />}
-                </Stack>
-              </Stack>
-            </CardContent>
-          </Card>
-
-          <Paper sx={{ p: 2 }}>
-            {directAnalyses
-              .filter((da) => da[qualiName] && da[qualiName] !== NO_COMMENT)
-              .map((da, i, a) => (
-                <>
-                  <Grid container wrap="nowrap" spacing={2}>
-                    <Grid justifyContent="left" item xs zeroMinWidth>
-                      <Typography variant="subtitle2">{da.cr4de_expert.emailaddress1} says:</Typography>
-                      <Box
-                        dangerouslySetInnerHTML={{ __html: (da[qualiName] || "") as string }}
-                        sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
-                      />
-
-                      <Stack direction="column" sx={{ mt: 2 }}>
-                        {quantiNames.map((n) => (
-                          <Stack direction="row">
-                            <Typography variant="caption" sx={{ flex: 1 }}>
-                              <i>{getQuantiLabel(n, directAnalyses)}</i> Estimate:
-                            </Typography>
-                            <Typography variant="caption">
-                              <b>{da[n] as string}</b>
-                            </Typography>
-                          </Stack>
-                        ))}
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                  {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
-                </>
-              ))}
-          </Paper>
-        </>
-      )}
-    </Stack>
-  );
-}
-
 export default function Step2BTab({
   riskFile,
   cascades,
@@ -250,24 +132,118 @@ export default function Step2BTab({
     (ca) => ca._cr4de_cascade_value === cascades[cascadeIndex].cr4de_bnrariskcascadeid
   );
 
+  const causes = cascades.filter(
+    (c) =>
+      c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+      c.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING
+  );
+  const catalyzingEffects = cascades.filter(
+    (c) =>
+      c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+      c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING
+  );
+
+  const cascade = cascades[cascadeIndex];
+
   return (
-    <Container>
-      <Stack spacing={4}>
-        <CascadeMatrix
-          cascadeAnalysis={cascades[cascadeIndex] as unknown as DVCascadeAnalysis}
-          cause={riskFile}
-          effect={cascades[cascadeIndex].cr4de_effect_hazard as DVRiskFile}
-          onChangeScenario={() => {}}
-        />
-        {cas.map((c) => (
-          <CascadeMatrix
-            cascadeAnalysis={c}
-            cause={riskFile}
-            effect={cascades[cascadeIndex].cr4de_effect_hazard as DVRiskFile}
-            onChangeScenario={() => {}}
-          />
-        ))}
-      </Stack>
-    </Container>
+    <>
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: 240,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: {
+            zIndex: 0,
+            top: 169,
+            width: 240,
+            boxSizing: "border-box",
+            height: "auto",
+            minHeight: "calc(100% - 169px)",
+            position: "absolute",
+          },
+        }}
+      >
+        <Box sx={{ overflow: "auto" }}>
+          <List>
+            <ListItem>
+              <Typography variant="subtitle2">Causes</Typography>
+            </ListItem>
+            {causes.map((c) => (
+              <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
+                <ListItemButton
+                  onClick={() => {
+                    setCascadeIndex(
+                      cascades.findIndex((ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean)
+                    );
+                  }}
+                >
+                  <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+          <Divider />
+          <List>
+            <ListItem>
+              <Typography variant="subtitle2">Catalyzing Effects</Typography>
+            </ListItem>
+            {catalyzingEffects.map((c) => (
+              <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
+                <ListItemButton>
+                  <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      </Drawer>
+      <Container>
+        <Typography variant="h6" sx={{ mb: 4 }}>
+          {cascade.cr4de_cause_hazard.cr4de_title} causes {cascade.cr4de_effect_hazard.cr4de_title}
+        </Typography>
+        <Stack spacing={4}>
+          <Card>
+            <CardHeader subheader="Average results:" />
+            <CardContent>
+              <CascadeMatrix
+                cascadeAnalysis={cascades[cascadeIndex] as unknown as DVCascadeAnalysis}
+                cause={riskFile}
+                effect={cascades[cascadeIndex].cr4de_effect_hazard as DVRiskFile}
+                onChangeScenario={() => {}}
+              />
+              <Box sx={{ mt: 4 }}>
+                <TextInputBox
+                  initialValue={(cascade.cr4de_quali as string | null) || ""}
+                  // onSave={async (newValue) => handleSave(qualiName, newValue)}
+                  // disabled={false}
+                  // reset={lastParam !== parameter}
+                  // onReset={(value: string | null) => {
+                  //   handleSave(getQualiFieldName(scenario, lastParam), value);
+                  //   setLastParam(parameter);
+                  // }}
+                />
+              </Box>
+            </CardContent>
+          </Card>
+          {cas.map((c) => (
+            <Card>
+              <CardHeader subheader={`${c.cr4de_expert.emailaddress1} answered:`} />
+              <CardContent>
+                <CascadeMatrix
+                  cascadeAnalysis={c}
+                  cause={riskFile}
+                  effect={cascades[cascadeIndex].cr4de_effect_hazard as DVRiskFile}
+                  onChangeScenario={() => {}}
+                />
+                <Box
+                  dangerouslySetInnerHTML={{ __html: (c.cr4de_quali_cascade || "") as string }}
+                  sx={{ mt: 4, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+                />
+              </CardContent>
+            </Card>
+          ))}
+        </Stack>
+      </Container>
+    </>
   );
 }

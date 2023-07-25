@@ -67,6 +67,7 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
         const parsedResult = result.map((r) => ({
           ...r,
           cr4de_metrics: r.cr4de_metrics != null ? JSON.parse(r.cr4de_metrics) : null,
+          cr4de_risk_file_metrics: r.cr4de_risk_file_metrics != null ? JSON.parse(r.cr4de_risk_file_metrics) : null,
           cr4de_results: r.cr4de_results != null ? JSON.parse(r.cr4de_results) : null,
         }));
 

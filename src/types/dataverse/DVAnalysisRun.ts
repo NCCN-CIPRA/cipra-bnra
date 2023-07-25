@@ -16,6 +16,8 @@ export interface DVAnalysisRun<RiskFileType = unknown> {
   cr4de_metrics: AnalysisMetrics | null;
   // Should be null when risk_file is null
   cr4de_results: RiskCalculation | null;
+  // Should be null when risk_file is null
+  cr4de_risk_file_metrics: RiskFileMetrics | null;
 
   createdon: Date;
 }
@@ -23,6 +25,7 @@ export interface DVAnalysisRun<RiskFileType = unknown> {
 export interface RiskAnalysisResults<RiskFileType = unknown> extends DVAnalysisRun<RiskFileType> {
   cr4de_metrics: null;
   cr4de_results: RiskCalculation;
+  cr4de_risk_file_metrics: RiskFileMetrics;
 }
 
 export interface RiskAnalysisMetrics {
@@ -59,6 +62,9 @@ export interface RiskCalculation {
 
   // The quality of the base results for this risk file
   quality: Quality;
+
+  // The reliability of the base results for this risk file [0,1]
+  reliability: number;
 
   // Direct probability of each scenario
   dp_c: number;
@@ -364,4 +370,25 @@ export interface RiskCalculation {
     // Total indirect impact of this cascade
     ii: number;
   }[];
+}
+
+export interface RiskFileMetrics {
+  importance: {
+    causes: number;
+    effects: number;
+    total: number;
+  };
+
+  reliability: {
+    causes: number;
+    effects: number;
+    total: number;
+  };
+
+  divergence: {
+    directAnalysis: number;
+    cascadeAnalyses: number;
+    other: number;
+    total: number;
+  };
 }

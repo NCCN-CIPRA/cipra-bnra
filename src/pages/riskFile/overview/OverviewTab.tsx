@@ -59,7 +59,7 @@ export default function OverviewTab({
         </Grid>
         <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <HistoryCard riskFile={riskFile} calculations={calculations} />
+            <HistoryCard riskFile={riskFile} calculations={calculations.slice().reverse()} />
           </Box>
         </Grid>
         <Grid xs={12} sx={{ mt: 2 }}>

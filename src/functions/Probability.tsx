@@ -61,7 +61,7 @@ export function getProbabilityScaleNumber(absoluteProbability: number, scalePref
 
   if (absoluteProbability === 0) return "0";
 
-  const diffs = Object.entries(scales)
+  const diffs: [string, number][] = Object.entries(scales)
     .sort((a, b) => b[1] - a[1])
     .map((v) => [v[0], Math.abs(Math.log(v[1]) - Math.log(absoluteProbability))]);
 
