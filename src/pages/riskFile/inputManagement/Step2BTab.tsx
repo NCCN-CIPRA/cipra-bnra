@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
@@ -24,7 +24,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  CardActionArea,
+  CardActions,
+  Button,
 } from "@mui/material";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import TextInputBox from "../../../components/TextInputBox";
@@ -33,10 +34,11 @@ import { getAbsoluteProbability, getProbabilityScale, getProbabilityScaleNumber 
 import { NO_COMMENT } from "../../step2A/sections/QualiTextInputBox";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import useAPI from "../../../hooks/useAPI";
-import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
+import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import CascadeMatrix from "../../step2B/information/CascadeMatrix";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import { LoadingButton } from "@mui/lab";
 
 const scenarioLetter = {
   [SCENARIOS.CONSIDERABLE]: "c",
@@ -123,10 +125,62 @@ export default function Step2BTab({
   reloadCascades: () => void;
 }) {
   const theme = useTheme();
+  const api = useAPI();
 
-  const [cascadeIndex, setCascadeIndex] = useState(0);
+  const [cascadeIndex, setCascadeIndex] = useState<number | null>(null);
+  const [lastCascadeIndex, setLastCascadeIndex] = useState(0);
+  const [consensus, setConsensus] = useState<DVCascadeAnalysis | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  if (!riskFile || cascades === null || directAnalyses === null || cascadeAnalyses === null) return <LoadingTab />;
+  const qualiInput = useRef<null | string>(null);
+
+  useEffect(() => {
+    if (cascades !== null && riskFile !== null && cascadeIndex === null) {
+      const causeIndex = cascades.findIndex(
+        (c) =>
+          c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+          c.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING
+      );
+      if (causeIndex >= 0) setCascadeIndex(causeIndex);
+      else
+        setCascadeIndex(
+          cascades.findIndex(
+            (c) =>
+              c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+              c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING
+          )
+        );
+    }
+  }, [cascades, riskFile, cascadeIndex]);
+
+  useEffect(() => {
+    if (cascades === null || cascadeAnalyses === null || cascadeIndex === null) return;
+
+    const c: any = { ...cascades[cascadeIndex] };
+
+    for (let field of CASCADE_ANALYSIS_QUANTI_FIELDS) {
+      if (c[field] === null) {
+        c[field] = getProbabilityScale(
+          cascadeAnalyses
+            .filter((ca) => ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid && ca[field] !== null)
+            .reduce((avg, ca, i, all) => avg + getAbsoluteProbability(ca[field] as string) / all.length, 0),
+          "CP"
+        );
+      }
+    }
+
+    setConsensus(c);
+  }, [cascades, cascadeIndex, cascadeAnalyses]);
+
+  if (
+    !riskFile ||
+    cascades === null ||
+    directAnalyses === null ||
+    cascadeAnalyses === null ||
+    cascadeIndex === null ||
+    consensus === null
+  )
+    return <LoadingTab />;
 
   const cas = cascadeAnalyses.filter(
     (ca) => ca._cr4de_cascade_value === cascades[cascadeIndex].cr4de_bnrariskcascadeid
@@ -144,6 +198,18 @@ export default function Step2BTab({
   );
 
   const cascade = cascades[cascadeIndex];
+
+  const handleSave = async (innerCascadeIndex: number) => {
+    setIsSaving(true);
+
+    await api.updateCascade(cascades[innerCascadeIndex].cr4de_bnrariskcascadeid, {
+      cr4de_quali: qualiInput.current,
+    });
+
+    await reloadCascades();
+
+    setIsSaving(false);
+  };
 
   return (
     <>
@@ -168,7 +234,7 @@ export default function Step2BTab({
             <ListItem>
               <Typography variant="subtitle2">Causes</Typography>
             </ListItem>
-            {causes.map((c) => (
+            {causes.map((c, i) => (
               <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
                 <ListItemButton
                   onClick={() => {
@@ -177,7 +243,12 @@ export default function Step2BTab({
                     );
                   }}
                 >
-                  <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
+                  <ListItemText
+                    primary={c.cr4de_cause_hazard.cr4de_title}
+                    sx={{
+                      fontWeight: c.cr4de_bnrariskcascadeid === cascade.cr4de_bnrariskcascadeid ? "bold" : "regular",
+                    }}
+                  />
                 </ListItemButton>
               </ListItem>
             ))}
@@ -203,27 +274,36 @@ export default function Step2BTab({
         </Typography>
         <Stack spacing={4}>
           <Card>
-            <CardHeader subheader="Average results:" />
+            <CardHeader subheader="Consensus results:" />
             <CardContent>
               <CascadeMatrix
-                cascadeAnalysis={cascades[cascadeIndex] as unknown as DVCascadeAnalysis}
+                cascadeAnalysis={consensus as DVCascadeAnalysis}
                 cause={riskFile}
                 effect={cascades[cascadeIndex].cr4de_effect_hazard as DVRiskFile}
                 onChangeScenario={() => {}}
               />
-              <Box sx={{ mt: 4 }}>
+              <Box sx={{ mt: 8 }}>
                 <TextInputBox
                   initialValue={(cascade.cr4de_quali as string | null) || ""}
+                  setUpdatedValue={(v) => {
+                    qualiInput.current = v || null;
+                  }}
                   // onSave={async (newValue) => handleSave(qualiName, newValue)}
                   // disabled={false}
-                  // reset={lastParam !== parameter}
-                  // onReset={(value: string | null) => {
-                  //   handleSave(getQualiFieldName(scenario, lastParam), value);
-                  //   setLastParam(parameter);
-                  // }}
+                  reset={lastCascadeIndex !== cascadeIndex}
+                  onReset={async (value: string | null) => {
+                    setLastCascadeIndex(cascadeIndex);
+                    await handleSave(lastCascadeIndex);
+                    qualiInput.current = cascade.cr4de_quali;
+                  }}
                 />
               </Box>
             </CardContent>
+            <CardActions>
+              <LoadingButton loading={isSaving} onClick={() => handleSave(cascadeIndex)}>
+                Save
+              </LoadingButton>
+            </CardActions>
           </Card>
           {cas.map((c) => (
             <Card>

@@ -53,7 +53,6 @@ function TextInputBox({
   const [debouncedValue, setDebouncedValue] = useDebounce(innerValue, debounceInterval);
 
   useEffect(() => {
-    console.log("DEBOUNCE: ", savedValue, innerValue, debouncedValue, initialValue);
     if (onSave && debouncedValue !== savedValue) {
       onSave(debouncedValue);
       setSavedValue(debouncedValue);
@@ -62,7 +61,6 @@ function TextInputBox({
 
   useEffect(() => {
     if (reset) {
-      console.log("RESET: ", savedValue, innerValue, debouncedValue, initialValue);
       const oldValue = innerValue;
 
       setSavedValue(initialValue);
