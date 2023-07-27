@@ -55,6 +55,7 @@ export function getAbsoluteProbability(scaleString: string | null) {
 export function getProbabilityScaleNumber(absoluteProbability: number, scalePrefix: string) {
   let scales;
   if (scalePrefix === "DP") scales = DPScales;
+  else if (scalePrefix === "DP50-") scales = DPScales;
   else if (scalePrefix === "CP") scales = CPScales;
   else if (scalePrefix === "M") scales = MScales;
   else return "??";

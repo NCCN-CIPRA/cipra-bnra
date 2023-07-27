@@ -39,6 +39,8 @@ import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import CascadeMatrix from "../../step2B/information/CascadeMatrix";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { LoadingButton } from "@mui/lab";
+import ScenarioTable from "../../step2A/information/ScenarioTable";
+import { ScenarioInput, ScenarioInputs } from "../../step2A/fields";
 
 const scenarioLetter = {
   [SCENARIOS.CONSIDERABLE]: "c",
@@ -260,7 +262,13 @@ export default function Step2BTab({
             </ListItem>
             {catalyzingEffects.map((c) => (
               <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
-                <ListItemButton>
+                <ListItemButton
+                  onClick={() => {
+                    setCascadeIndex(
+                      cascades.findIndex((ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean)
+                    );
+                  }}
+                >
                   <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
                 </ListItemButton>
               </ListItem>
@@ -276,28 +284,56 @@ export default function Step2BTab({
           <Card>
             <CardHeader subheader="Consensus results:" />
             <CardContent>
-              <CascadeMatrix
-                cascadeAnalysis={consensus as DVCascadeAnalysis}
-                cause={riskFile}
-                effect={cascades[cascadeIndex].cr4de_effect_hazard as DVRiskFile}
-                onChangeScenario={() => {}}
-              />
-              <Box sx={{ mt: 8 }}>
-                <TextInputBox
-                  initialValue={(cascade.cr4de_quali as string | null) || ""}
-                  setUpdatedValue={(v) => {
-                    qualiInput.current = v || null;
-                  }}
-                  // onSave={async (newValue) => handleSave(qualiName, newValue)}
-                  // disabled={false}
-                  reset={lastCascadeIndex !== cascadeIndex}
-                  onReset={async (value: string | null) => {
-                    setLastCascadeIndex(cascadeIndex);
-                    await handleSave(lastCascadeIndex);
-                    qualiInput.current = cascade.cr4de_quali;
-                  }}
+              {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING && (
+                <Box sx={{ mb: 8 }}>
+                  <CascadeMatrix
+                    cascadeAnalysis={consensus as DVCascadeAnalysis}
+                    cause={cascades[cascadeIndex].cr4de_cause_hazard as DVRiskFile}
+                    effect={riskFile}
+                    onChangeScenario={() => {}}
+                  />
+                </Box>
+              )}
+
+              {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
+                <ScenarioTable
+                  inputs={
+                    [
+                      directAnalyses.reduce(
+                        (avg, da, i, all) => ({
+                          c: avg.c + getAbsoluteProbability(da.cr4de_dp50_quanti_c) / all.length,
+                          m: avg.m + getAbsoluteProbability(da.cr4de_dp50_quanti_m) / all.length,
+                          e: avg.e + getAbsoluteProbability(da.cr4de_dp50_quanti_e) / all.length,
+                        }),
+                        {
+                          c: 0,
+                          m: 0,
+                          e: 0,
+                        }
+                      ),
+                    ].map((avg) => ({
+                      considerable: { cr4de_dp50_quanti: getProbabilityScale(avg.c, "DP50-") },
+                      major: { cr4de_dp50_quanti: getProbabilityScale(avg.m, "DP50-") },
+                      extreme: { cr4de_dp50_quanti: getProbabilityScale(avg.e, "DP50-") },
+                    }))[0] as unknown as ScenarioInputs
+                  }
+                  fields={["cr4de_dp50_quanti" as keyof ScenarioInput]}
                 />
-              </Box>
+              )}
+              <TextInputBox
+                initialValue={(cascade.cr4de_quali as string | null) || ""}
+                setUpdatedValue={(v) => {
+                  qualiInput.current = v || null;
+                }}
+                // onSave={async (newValue) => handleSave(qualiName, newValue)}
+                // disabled={false}
+                reset={lastCascadeIndex !== cascadeIndex}
+                onReset={async (value: string | null) => {
+                  setLastCascadeIndex(cascadeIndex);
+                  await handleSave(lastCascadeIndex);
+                  qualiInput.current = cascade.cr4de_quali;
+                }}
+              />
             </CardContent>
             <CardActions>
               <LoadingButton loading={isSaving} onClick={() => handleSave(cascadeIndex)}>
@@ -309,16 +345,47 @@ export default function Step2BTab({
             <Card>
               <CardHeader subheader={`${c.cr4de_expert.emailaddress1} answered:`} />
               <CardContent>
-                <CascadeMatrix
-                  cascadeAnalysis={c}
-                  cause={riskFile}
-                  effect={cascades[cascadeIndex].cr4de_effect_hazard as DVRiskFile}
-                  onChangeScenario={() => {}}
-                />
-                <Box
-                  dangerouslySetInnerHTML={{ __html: (c.cr4de_quali_cascade || "") as string }}
-                  sx={{ mt: 4, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
-                />
+                {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING && (
+                  <Box sx={{ mb: 8 }}>
+                    <CascadeMatrix
+                      cascadeAnalysis={c}
+                      cause={riskFile}
+                      effect={cascades[cascadeIndex].cr4de_effect_hazard as DVRiskFile}
+                      onChangeScenario={() => {}}
+                    />
+                  </Box>
+                )}
+                {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
+                  <ScenarioTable
+                    inputs={
+                      [
+                        directAnalyses.find(
+                          (da) => (da._cr4de_expert_value === c._cr4de_expert_value) as boolean
+                        ) as DVDirectAnalysis,
+                      ].map((da) => ({
+                        considerable: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_c },
+                        major: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_m },
+                        extreme: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_e },
+                      }))[0] as unknown as ScenarioInputs
+                    }
+                    fields={["cr4de_dp50_quanti" as keyof ScenarioInput]}
+                  />
+                )}
+                {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0 && (
+                  <Box
+                    dangerouslySetInnerHTML={{ __html: (c.cr4de_quali_cascade || "") as string }}
+                    sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+                  />
+                )}
+                {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
+                  <Box
+                    dangerouslySetInnerHTML={{
+                      __html: (directAnalyses.find((da) => da._cr4de_expert_value === c._cr4de_expert_value)
+                        ?.cr4de_dp50_quali || "") as string,
+                    }}
+                    sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+                  />
+                )}
               </CardContent>
             </Card>
           ))}

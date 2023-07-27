@@ -190,35 +190,37 @@ function ScenarioSection({
           </Card>
 
           <Paper sx={{ p: 2 }}>
-            {directAnalyses
-              .filter((da) => da[qualiName] && da[qualiName] !== NO_COMMENT)
-              .map((da, i, a) => (
-                <>
-                  <Grid container wrap="nowrap" spacing={2}>
-                    <Grid justifyContent="left" item xs zeroMinWidth>
-                      <Typography variant="subtitle2">{da.cr4de_expert.emailaddress1} says:</Typography>
+            {directAnalyses.map((da, i, a) => (
+              <>
+                <Grid container wrap="nowrap" spacing={2}>
+                  <Grid justifyContent="left" item xs zeroMinWidth>
+                    <Typography variant="subtitle2">{da.cr4de_expert.emailaddress1} says:</Typography>
+                    {da[qualiName] && da[qualiName] !== NO_COMMENT ? (
                       <Box
                         dangerouslySetInnerHTML={{ __html: (da[qualiName] || "") as string }}
-                        sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+                        sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
                       />
+                    ) : (
+                      <Box sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}>- No comment -</Box>
+                    )}
 
-                      <Stack direction="column" sx={{ mt: 2 }}>
-                        {quantiNames.map((n) => (
-                          <Stack direction="row">
-                            <Typography variant="caption" sx={{ flex: 1 }}>
-                              <i>{getQuantiLabel(n, directAnalyses)}</i> Estimate:
-                            </Typography>
-                            <Typography variant="caption">
-                              <b>{da[n] as string}</b>
-                            </Typography>
-                          </Stack>
-                        ))}
-                      </Stack>
-                    </Grid>
+                    <Stack direction="column" sx={{ mt: 2 }}>
+                      {quantiNames.map((n) => (
+                        <Stack direction="row">
+                          <Typography variant="caption" sx={{ flex: 1 }}>
+                            <i>{getQuantiLabel(n, directAnalyses)}</i> Estimate:
+                          </Typography>
+                          <Typography variant="caption">
+                            <b>{da[n] as string}</b>
+                          </Typography>
+                        </Stack>
+                      ))}
+                    </Stack>
                   </Grid>
-                  {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
-                </>
-              ))}
+                </Grid>
+                {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
+              </>
+            ))}
           </Paper>
         </>
       )}

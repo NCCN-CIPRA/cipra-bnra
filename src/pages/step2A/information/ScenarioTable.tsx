@@ -116,6 +116,7 @@ export default function ScenarioTable({
   fields: (keyof ScenarioInput | DirectImpactField)[];
   manmade?: Boolean;
 }) {
+  console.log(inputs);
   return (
     <Stack direction="column" component={Paper} sx={{ overflow: "hidden", mt: 2, mb: 8 }}>
       <Grid container direction="row">
