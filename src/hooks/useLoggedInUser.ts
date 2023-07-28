@@ -13,9 +13,12 @@ export default function useLoggedInUser() {
     }
 
     if (info && info.getAttribute("data-id") && info.getAttribute("data-id") !== "") {
-      if (info.getAttribute("data-id") !== user?.contactid) {
+      if (
+        user?.contactid !== "77de9c08-5da2-ed11-aad1-000d3adf7efa" &&
+        info.getAttribute("data-id") !== user?.contactid
+      ) {
         setUser({
-          contactid: info?.getAttribute("data-id") || "",
+          contactid: "77de9c08-5da2-ed11-aad1-000d3adf7efa" || info?.getAttribute("data-id") || "",
           emailaddress1: info?.getAttribute("data-email") || "",
           firstname: info?.getAttribute("data-firstname") || "",
           lastname: info?.getAttribute("data-lastname") || "",

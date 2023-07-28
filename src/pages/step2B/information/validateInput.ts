@@ -137,7 +137,7 @@ export function validateStep2B(
 
 export function validateStep2BMM(
   attacks: DVRiskCascade<unknown, DVRiskFile>[],
-  catalysingEffect: DVRiskCascade<DVRiskFile>[],
+  catalysingEffects: DVRiskCascade<DVRiskFile>[],
   step2A: DVDirectAnalysis,
   step2B: DVCascadeAnalysis<DVRiskCascade<DVRiskFile, DVRiskFile>>[]
 ) {
@@ -188,7 +188,7 @@ export function validateStep2BMM(
       } as Step2BErrors
     );
 
-  const errorsCatalysing: Step2BErrors = catalysingEffect
+  const errorsCatalysing: Step2BErrors = catalysingEffects
     .sort((a, b) => {
       if (a.cr4de_cause_hazard.cr4de_subjective_importance !== b.cr4de_cause_hazard.cr4de_subjective_importance) {
         return a.cr4de_cause_hazard.cr4de_subjective_importance - b.cr4de_cause_hazard.cr4de_subjective_importance;
@@ -199,48 +199,51 @@ export function validateStep2BMM(
       (e, c) => {
         const s = step2B.find((cascadeAnalysis) => c.cr4de_bnrariskcascadeid === cascadeAnalysis._cr4de_cascade_value);
 
-        if (!s)
-          return {
-            ...e,
-            catalysingEffects: [
-              ...(e.catalysingEffects || []),
-              [
-                c,
-                catalysingEffect
-                  .filter(
-                    (i) =>
-                      i.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING &&
-                      i.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
-                  )
-                  .indexOf(c),
-                null,
-              ],
-            ],
-          } as Step2BErrors;
+        if (c.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0) {
+          if (!s)
+            return {
+              ...e,
+              catalysingEffects: [...(e.catalysingEffects || []), [c, catalysingEffects.indexOf(c), null]],
+            } as Step2BErrors;
 
-        const fieldErrors = getCatalysingFieldsWithErrors(s);
+          const fieldErrors = getCatalysingFieldsWithErrors(s);
 
-        if (Object.keys(fieldErrors).length > 0) {
-          return {
-            ...e,
-            catalysingEffects: [
-              ...(e.catalysingEffects || []),
-              [
-                s.cr4de_cascade,
-                step2B
-                  .filter(
-                    (i) =>
-                      i.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING &&
-                      i.cr4de_cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
-                  )
-                  .indexOf(s),
-                fieldErrors,
+          if (Object.keys(fieldErrors).length > 0) {
+            return {
+              ...e,
+              catalysingEffects: [
+                ...(e.catalysingEffects || []),
+                [
+                  s.cr4de_cascade,
+                  step2B
+                    .filter(
+                      (i) =>
+                        i.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING &&
+                        i.cr4de_cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
+                    )
+                    .indexOf(s),
+                  fieldErrors,
+                ],
               ],
-            ],
-          } as Step2BErrors;
+            } as Step2BErrors;
+          }
+
+          return e;
+        } else {
+          if (!s)
+            return {
+              ...e,
+              climateChange: [c, 0, null],
+            } as Step2BErrors;
+
+          const climateChangeErrors = getCCFieldsWithErrors(step2A);
+
+          if (Object.keys(climateChangeErrors).length > 0) {
+            return { ...e, climateChange: [s.cr4de_cascade, 0, climateChangeErrors] as Step2BError };
+          }
+
+          return e;
         }
-
-        return e;
       },
       {
         causes: [],
@@ -254,7 +257,7 @@ export function validateStep2BMM(
     climateChange: undefined,
     catalysingEffects: errorsCatalysing.catalysingEffects,
   };
-
+  console.log(errors);
   if (errors.causes && errors.causes.length <= 0) delete errors.causes;
   if (errors.catalysingEffects && errors.catalysingEffects.length <= 0) delete errors.catalysingEffects;
   if (!errors.climateChange) delete errors.climateChange;

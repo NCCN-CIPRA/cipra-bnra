@@ -31,7 +31,7 @@ export function validateStep2B(
     climateChange: undefined,
     catalysingEffects: [],
   };
-  console.log(cascades);
+
   errors = cascades
     .sort((a, b) => {
       if (a.cr4de_cause_hazard.cr4de_subjective_importance !== b.cr4de_cause_hazard.cr4de_subjective_importance) {
