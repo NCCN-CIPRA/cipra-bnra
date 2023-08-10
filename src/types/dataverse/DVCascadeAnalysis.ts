@@ -19,6 +19,8 @@ export interface DVCascadeAnalysis<RiskCascadeType = unknown, RiskFileType = unk
   cr4de_e2e: string | null;
 
   cr4de_quali_cascade: string | null;
+
+  cr4de_qualit: number | null;
 }
 
 export const CASCADE_ANALYSIS_QUANTI_FIELDS: (keyof DVCascadeAnalysis)[] = [

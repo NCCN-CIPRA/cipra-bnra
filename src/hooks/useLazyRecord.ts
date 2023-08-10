@@ -39,6 +39,22 @@ export default function useLazyRecord<T>(options: GetRecordParams<T>) {
     try {
       if (o.table === DataTable.RISK_FILE) {
         response = await api.getRiskFile<T>(o.id, o.query);
+
+        const customTransformResult = o.transformResult;
+
+        o.transformResult = (result: any) => {
+          const parsedResult = {
+            ...result,
+            cr4de_discussion_required:
+              result.cr4de_discussion_required != null ? JSON.parse(result.cr4de_discussion_required) : null,
+          };
+
+          if (customTransformResult) {
+            return customTransformResult(parsedResult);
+          }
+
+          return parsedResult;
+        };
       } else if (o.table === DataTable.RISK_CASCADE) {
         response = await api.getRiskCascade<T>(o.id, o.query);
       } else if (o.table === DataTable.VALIDATION) {

@@ -15,6 +15,12 @@ const COLORS = {
   CP3: "#feffd6",
   CP4: "#ffe7d1",
   CP5: "#ffd6c9",
+  "CP0.5": "#e0ffcc",
+  "CP1.5": "#caf2c2",
+  "CP2.5": "#fff8b8",
+  "CP3.5": "#feffd6",
+  "CP4.5": "#ffe7d1",
+  "CP5.5": "#ffd6c9",
 };
 
 const ScenarioBox = ({ scenario }: { scenario: SCENARIOS }) => {

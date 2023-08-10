@@ -69,6 +69,8 @@ export interface DVDirectAnalysis<RiskFileType = unknown, ExpertType = unknown> 
   cr4de_risk_file: RiskFileType;
   _cr4de_risk_file_value: string;
 
+  cr4de_quality: FieldQuality | null;
+
   createdon: Date;
   modifiedon: Date;
 }
@@ -132,3 +134,26 @@ export const DIRECT_ANALYSIS_EDITABLE_FIELDS: (keyof DirectAnalysisEditableField
 ];
 
 export const DIRECT_ANALYSIS_QUANTI_FIELDS = DIRECT_ANALYSIS_EDITABLE_FIELDS.filter((f) => f.indexOf("quanti") > 0);
+
+export interface FieldQuality {
+  dp_c: number;
+  dp_m: number;
+  dp_e: number;
+
+  h_c: number;
+  s_c: number;
+  e_c: number;
+  f_c: number;
+
+  h_m: number;
+  s_m: number;
+  e_m: number;
+  f_m: number;
+
+  h_e: number;
+  s_e: number;
+  e_e: number;
+  f_e: number;
+
+  cb: number;
+}

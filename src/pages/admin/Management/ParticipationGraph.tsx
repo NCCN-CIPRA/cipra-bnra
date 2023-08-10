@@ -29,8 +29,9 @@ import {
 interface Bucket {
   date: number;
   notStarted: number;
-  registered: number;
   validated: number;
+  step2ADone: number;
+  step2BDone: number;
 }
 
 const isValidationEmpty = (input: ValidationEditableFields) =>
@@ -86,25 +87,8 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
             <td>
               <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
                 {Math.round(
-                  (1000 *
-                    (payload[0].value + payload[1].value + payload[2].value + payload[3].value + payload[4].value)) /
-                    payload.reduce((tot, p) => tot + p.value, 0)
-                ) / 10}
-                %
-              </Typography>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <Typography variant="body1" sx={{ pt: 2 }}>
-                % Step 2A Started:
-              </Typography>
-            </td>
-            <td>
-              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
-                {Math.round(
                   (1000 * (payload[0].value + payload[1].value + payload[2].value)) /
-                    (payload[0].value + payload[1].value + payload[2].value + payload[3].value + payload[4].value)
+                    payload.reduce((tot, p) => tot + p.value, 0)
                 ) / 10}
                 %
               </Typography>
@@ -119,10 +103,21 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
             <td>
               <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 0 }}>
                 {Math.round(
-                  (1000 * (payload[0].value + payload[1].value)) /
-                    (payload[0].value + payload[1].value + payload[2].value + payload[3].value + payload[4].value)
+                  (1000 * (payload[0].value + payload[1].value)) / payload.reduce((tot, p) => tot + p.value, 0)
                 ) / 10}
                 %
+              </Typography>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Typography variant="body1" sx={{ pt: 0 }}>
+                % Step 2B Finished:
+              </Typography>
+            </td>
+            <td>
+              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 0 }}>
+                {Math.round((1000 * payload[0].value) / payload.reduce((tot, p) => tot + p.value, 0)) / 10}%
               </Typography>
             </td>
           </tr>
@@ -203,15 +198,8 @@ export default function ParticipationGraph({
       dates.push({
         date: currentDate,
         notStarted: 0,
-        registered: 0,
         validated: 0,
-
-        created2A: 0,
-        modified2A: 0,
-        completed2A: 0,
         step2ADone: 0,
-
-        started2B: 0,
         step2BDone: 0,
       });
 
@@ -224,21 +212,11 @@ export default function ParticipationGraph({
 
         if (p.step2BFinishedDate && d.date >= p.step2BFinishedDate) {
           dates[i].step2BDone++;
-        } else if (p.step2BStartedDate && d.date >= p.step2BStartedDate) {
-          dates[i].started2B++;
         } else if (p.step2AFinishedDate && d.date >= p.step2AFinishedDate) {
           dates[i].step2ADone++;
-        } else if (p.step2ACompletedDate && d.date >= p.step2ACompletedDate) {
-          dates[i].completed2A++;
-        } else if (p.step2AModifiedDate && d.date >= p.step2AModifiedDate) {
-          dates[i].modified2A++;
-        } else if (p.step2ACreatedDate && d.date >= p.step2ACreatedDate) {
-          dates[i].created2A++;
         } else if (p.validationFinishedDate && d.date >= p.validationFinishedDate) {
           dates[i].validated++;
-        } else if (p.registrationDate && d.date >= p.registrationDate) {
-          dates[i].registered++;
-        } else if (p.addedDate && d.date >= p.addedDate) {
+        } else {
           dates[i].notStarted++;
         }
       }
@@ -279,34 +257,15 @@ export default function ParticipationGraph({
           fill="#ffa600"
           name="Finished step 2B"
         />
-        <Area type="monotone" dataKey="step2ADone" stackId="1" stroke="#ffa600" fill="#ffa600" name="Started step 2B" />
-        <Area type="monotone" dataKey="started2B" stackId="1" stroke="#ffa600" fill="#ffa600" name="Finished step 2A" />
         <Area
           type="monotone"
-          dataKey="completed2A"
+          dataKey="step2ADone"
           stackId="1"
           stroke="#ff6e54"
           fill="#ff6e54"
-          name="Filled in all fields"
-        />
-        <Area
-          type="monotone"
-          dataKey="modified2A"
-          stackId="1"
-          stroke="#ff6e54"
-          fill="#ff6e54"
-          name="Filled in at least 1 field"
-        />
-        <Area
-          type="monotone"
-          dataKey="created2A"
-          stackId="1"
-          stroke="#dd5182"
-          fill="#dd5182"
-          name="Looked at the risk file"
+          name="Finished step 2A"
         />
         <Area type="monotone" dataKey="validated" stackId="1" stroke="#955196" fill="#955196" name="Validated" />
-        <Area type="monotone" dataKey="registered" stackId="1" stroke="#444e86" fill="#444e86" name="Registered" />
         <Area type="monotone" dataKey="notStarted" stackId="1" stroke="#003f5c" fill="#003f5c" name="Not registered" />
       </AreaChart>
     </>

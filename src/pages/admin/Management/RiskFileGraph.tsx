@@ -11,13 +11,12 @@ interface RFBucket {
   date: number;
   notStarted: number;
   started: number;
-  moreThan2Done: number;
-  twoLeft: number;
-  oneLeft: number;
-  validationComplete: number;
   silenceProcedureStarted: number;
-  consensusMeeting: number;
   step2AStarted: number;
+  step2BStarted: number;
+  enoughInput2A: number;
+  enoughInput2B: number;
+  allInputs: number;
 }
 
 const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any[]; label?: any } = {}) => {
@@ -63,7 +62,8 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
             <td>
               <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
                 {Math.round(
-                  (1000 * (payload[0].value + payload[1].value + payload[2].value + payload[3].value)) /
+                  (1000 *
+                    (payload[0].value + payload[1].value + payload[2].value + payload[3].value + payload[4].value)) /
                     payload.reduce((tot, p) => tot + p.value, 0)
                 ) / 10}
                 %
@@ -72,19 +72,24 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
           </tr>
           <tr>
             <td>
-              <Typography variant="body1">% Validation Acceptable:</Typography>
+              <Typography variant="body1">% Step 2A Acceptable:</Typography>
+            </td>
+            <td>
+              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2 }}>
+                {Math.round((1000 * payload[0].payload.enoughInput2A) / payload.reduce((tot, p) => tot + p.value, 0)) /
+                  10}
+                %
+              </Typography>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Typography variant="body1">% Step 2B Acceptable:</Typography>
             </td>
             <td>
               <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2 }}>
                 {Math.round(
-                  (1000 *
-                    (payload[0].value +
-                      payload[1].value +
-                      payload[2].value +
-                      payload[3].value +
-                      payload[4].value +
-                      payload[5].value +
-                      payload[6].value)) /
+                  (1000 * payload[0].payload.enoughInput2B + payload[0].payload.allInputs) /
                     payload.reduce((tot, p) => tot + p.value, 0)
                 ) / 10}
                 %
@@ -133,13 +138,12 @@ export default function RiskFileGraph({
         date: currentDate,
         notStarted: 0,
         started: 0,
-        moreThan2Done: 0,
-        twoLeft: 0,
-        oneLeft: 0,
-        validationComplete: 0,
         silenceProcedureStarted: 0,
-        consensusMeeting: 0,
         step2AStarted: 0,
+        step2BStarted: 0,
+        enoughInput2A: 0,
+        enoughInput2B: 0,
+        allInputs: 0,
       });
 
       currentDate = addDays(new Date(currentDate), 1).getTime();
@@ -150,26 +154,42 @@ export default function RiskFileGraph({
         const d = dates[i];
 
         if (
-          participations.some(
+          participations.filter(
             (p) =>
-              p.cr4de_risk_file?.cr4de_validation_silent_procedure_until &&
-              new Date(p.cr4de_risk_file.cr4de_validation_silent_procedure_until).getTime() <= d.date
-          )
+              p.cr4de_direct_analysis_finished_on && new Date(p.cr4de_direct_analysis_finished_on).getTime() <= d.date
+          ).length >= 2
         ) {
-          dates[i].step2AStarted++;
-        } else if (
+          dates[i].enoughInput2A++;
+        }
+
+        if (
           participations.every(
             (p) =>
-              p.cr4de_role !== "expert" ||
-              (p.cr4de_validation_finished_on && new Date(p.cr4de_validation_finished_on).getTime() <= d.date)
-          ) &&
-          participations.some(
-            (p) =>
-              p.cr4de_risk_file?.cr4de_validations_processed &&
-              !p.cr4de_risk_file?.cr4de_validation_silent_procedure_until
+              p.cr4de_cascade_analysis_finished_on && new Date(p.cr4de_cascade_analysis_finished_on).getTime() <= d.date
           )
         ) {
-          dates[i].consensusMeeting++;
+          dates[i].allInputs++;
+        } else if (
+          participations.filter(
+            (p) =>
+              p.cr4de_cascade_analysis_finished_on && new Date(p.cr4de_cascade_analysis_finished_on).getTime() <= d.date
+          ).length >= 2
+        ) {
+          dates[i].enoughInput2B++;
+        } else if (
+          participations.filter(
+            (p) =>
+              p.cr4de_cascade_analysis_finished_on && new Date(p.cr4de_cascade_analysis_finished_on).getTime() <= d.date
+          ).length >= 1
+        ) {
+          dates[i].step2BStarted++;
+        } else if (
+          participations.filter(
+            (p) =>
+              p.cr4de_direct_analysis_finished_on && new Date(p.cr4de_direct_analysis_finished_on).getTime() <= d.date
+          ).length >= 1
+        ) {
+          dates[i].step2AStarted++;
         } else if (
           participations.some(
             (p) =>
@@ -177,61 +197,15 @@ export default function RiskFileGraph({
               addDays(new Date(p.cr4de_risk_file?.cr4de_validation_silent_procedure_until), -14).getTime() <= d.date
           )
         ) {
+          console.log(participations);
           dates[i].silenceProcedureStarted++;
         } else if (
-          participations.every(
-            (p) =>
-              p.cr4de_role !== "expert" ||
-              (p.cr4de_validation_finished_on && new Date(p.cr4de_validation_finished_on).getTime() <= d.date)
-          )
-        ) {
-          dates[i].validationComplete++;
-        } else if (
-          participations.filter(
-            (p) =>
-              p.cr4de_role === "expert" &&
-              (p.cr4de_validation_finished_on === null ||
-                (p.cr4de_validation_finished_on && new Date(p.cr4de_validation_finished_on).getTime() > d.date))
-          ).length === 1 &&
           participations.filter(
             (p) =>
               p.cr4de_role === "expert" &&
               p.cr4de_validation_finished_on !== null &&
               new Date(p.cr4de_validation_finished_on).getTime() <= d.date
-          ).length >= 2
-        ) {
-          dates[i].oneLeft++;
-        } else if (
-          participations.filter(
-            (p) =>
-              p.cr4de_role === "expert" &&
-              (p.cr4de_validation_finished_on === null ||
-                (p.cr4de_validation_finished_on && new Date(p.cr4de_validation_finished_on).getTime() > d.date))
-          ).length === 2 &&
-          participations.filter(
-            (p) =>
-              p.cr4de_role === "expert" &&
-              p.cr4de_validation_finished_on !== null &&
-              new Date(p.cr4de_validation_finished_on).getTime() <= d.date
-          ).length >= 2
-        ) {
-          dates[i].twoLeft++;
-        } else if (
-          participations.filter(
-            (p) =>
-              p.cr4de_role === "expert" &&
-              p.cr4de_validation_finished_on !== null &&
-              new Date(p.cr4de_validation_finished_on).getTime() <= d.date
-          ).length >= 2
-        ) {
-          dates[i].moreThan2Done++;
-        } else if (
-          participations.filter(
-            (p) =>
-              p.cr4de_role === "expert" &&
-              p.cr4de_validation_finished_on !== null &&
-              new Date(p.cr4de_validation_finished_on).getTime() <= d.date
-          ).length == 1
+          ).length >= 1
         ) {
           dates[i].started++;
         } else {
@@ -265,61 +239,53 @@ export default function RiskFileGraph({
         />
         <YAxis />
         <Tooltip content={<CustomTooltip />} />
+        {/* <Area
+          type="monotone"
+          dataKey="enoughInput"
+          stackId="1"
+          stroke="#ffa600"
+          fill="#ffa600"
+          name="Ready for consensus"
+        /> */}
+        <Area
+          type="monotone"
+          dataKey="allInputs"
+          stackId="1"
+          stroke="#ff7c43"
+          fill="#ff7c43"
+          name="All inputs received"
+        />
+        <Area
+          type="monotone"
+          dataKey="enoughInput2B"
+          stackId="1"
+          stroke="#f95d6a"
+          fill="#f95d6a"
+          name="Ready for consensus"
+        />
+        <Area
+          type="monotone"
+          dataKey="step2BStarted"
+          stackId="1"
+          stroke="#d45087"
+          fill="#d45087"
+          name="Step 2B started"
+        />
         <Area
           type="monotone"
           dataKey="step2AStarted"
           stackId="1"
-          stroke="#ffa600"
-          fill="#ffa600"
+          stroke="#a05195"
+          fill="#a05195"
           name="Step 2A started"
         />
         <Area
           type="monotone"
           dataKey="silenceProcedureStarted"
           stackId="1"
-          stroke="#ff7c43"
-          fill="#ff7c43"
-          name="Silence procedure started"
-        />
-        <Area
-          type="monotone"
-          dataKey="consensusMeeting"
-          stackId="1"
-          stroke="#ff7c43"
-          fill="#ff7c43"
-          name="Awaiting consensus meeting"
-        />
-        <Area
-          type="monotone"
-          dataKey="validationComplete"
-          stackId="1"
-          stroke="#f95d6a"
-          fill="#f95d6a"
-          name="All validations finished"
-        />
-        <Area
-          type="monotone"
-          dataKey="oneLeft"
-          stackId="1"
-          stroke="#d45087"
-          fill="#d45087"
-          name="1 validation left, 2 or more done"
-        />
-        <Area
-          type="monotone"
-          dataKey="twoLeft"
-          stackId="1"
-          stroke="#a05195"
-          fill="#a05195"
-          name="2 validations left, 2 or more done"
-        />
-        <Area
-          type="monotone"
-          dataKey="moreThan2Done"
-          stackId="1"
           stroke="#665191"
           fill="#665191"
-          name="> 2 validations left, 2 or more done"
+          name="Silence procedure started"
         />
         <Area
           type="monotone"
@@ -327,7 +293,7 @@ export default function RiskFileGraph({
           stackId="1"
           stroke="#2f4b7c"
           fill="#2f4b7c"
-          name="less than 2 validations done"
+          name="Validation phase started"
         />
         <Area
           type="monotone"
@@ -335,7 +301,7 @@ export default function RiskFileGraph({
           stackId="1"
           stroke="#003f5c"
           fill="#003f5c"
-          name="Validation not started"
+          name="Process not started"
         />
       </AreaChart>
     </>

@@ -276,7 +276,7 @@ export default function Step2BTab({
           </List>
         </Box>
       </Drawer>
-      <Container>
+      <Container sx={{ ml: "240px" }}>
         <Typography variant="h6" sx={{ mb: 4 }}>
           {cascade.cr4de_cause_hazard.cr4de_title} causes {cascade.cr4de_effect_hazard.cr4de_title}
         </Typography>

@@ -44,6 +44,22 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
       response = await api.getContacts<T>(o.query);
     } else if (o.table === DataTable.RISK_FILE) {
       response = await api.getRiskFiles<T>(o.query);
+
+      const customTransformResult = o.transformResult;
+
+      o.transformResult = (result: any[]) => {
+        const parsedResult = result.map((r) => ({
+          ...r,
+          cr4de_discussion_required:
+            r.cr4de_discussion_required != null ? JSON.parse(r.cr4de_discussion_required) : null,
+        }));
+
+        if (customTransformResult) {
+          return customTransformResult(parsedResult);
+        }
+
+        return parsedResult;
+      };
     } else if (o.table === DataTable.RISK_CASCADE) {
       response = await api.getRiskCascades<T>(o.query);
     } else if (o.table === DataTable.PARTICIPATION) {
@@ -52,6 +68,21 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
       response = await api.getValidations<T>(o.query);
     } else if (o.table === DataTable.DIRECT_ANALYSIS) {
       response = await api.getDirectAnalyses<T>(o.query);
+
+      const customTransformResult = o.transformResult;
+
+      o.transformResult = (result: any[]) => {
+        const parsedResult = result.map((r) => ({
+          ...r,
+          cr4de_quality: r.cr4de_quality != null ? JSON.parse(r.cr4de_quality) : null,
+        }));
+
+        if (customTransformResult) {
+          return customTransformResult(parsedResult);
+        }
+
+        return parsedResult;
+      };
     } else if (o.table === DataTable.CASCADE_ANALYSIS) {
       response = await api.getCascadeAnalyses<T>(o.query);
     } else if (o.table === DataTable.FEEDBACK) {

@@ -1,3 +1,4 @@
+import { DiscussionRequired } from "../DiscussionRequired";
 import { DVAnalysisRun } from "./DVAnalysisRun";
 
 export enum RISK_TYPE {
@@ -18,6 +19,29 @@ export interface RiskFileEditableFields {
   cr4de_roles_responsibilities: string | null;
   cr4de_existing_measures: string | null;
   cr4de_online_sources: string | null;
+}
+
+export interface DiscussionsRequired {
+  dp_c: DiscussionRequired;
+  dp_m: DiscussionRequired;
+  dp_e: DiscussionRequired;
+
+  h_c: DiscussionRequired;
+  s_c: DiscussionRequired;
+  e_c: DiscussionRequired;
+  f_c: DiscussionRequired;
+
+  h_m: DiscussionRequired;
+  s_m: DiscussionRequired;
+  e_m: DiscussionRequired;
+  f_m: DiscussionRequired;
+
+  h_e: DiscussionRequired;
+  s_e: DiscussionRequired;
+  e_e: DiscussionRequired;
+  f_e: DiscussionRequired;
+
+  cb: DiscussionRequired;
 }
 
 export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableFields {
@@ -87,6 +111,7 @@ export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableF
   cr4de_step2a_enabled_on: Date | null;
   cr4de_step2b_enabled: boolean | null;
   cr4de_step2b_enabled_on: Date | null;
+  cr4de_discussion_required: DiscussionsRequired | null;
 
   cr4de_is_test: boolean | null;
 

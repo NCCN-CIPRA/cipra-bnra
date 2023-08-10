@@ -110,7 +110,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
                 {Math.round(
                   (1000 *
                     (total - payload[l].value - payload[l - 1].value - payload[l - 2].value - payload[l - 3].value)) /
-                    (total - payload[l].value - payload[l - 1].value)
+                    (total - payload[l].value - payload[l - 1].value - payload[l - 2].value)
                 ) / 10}
                 %
               </Typography>

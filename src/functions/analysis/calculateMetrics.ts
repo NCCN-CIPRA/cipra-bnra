@@ -82,16 +82,16 @@ export default function calculateMetrics(
       effects: effectImportance,
       total:
         (riskFile.cr4de_subjective_importance +
-          parseFloat(getImpactScaleNumber(risk.ti)) +
-          causeImportance +
-          effectImportance) /
-        14,
+          (parseFloat(getImpactScaleNumber(risk.ti)) * 2) / 5 +
+          causeImportance / 3 +
+          effectImportance / 3) /
+        7,
     },
 
     reliability: {
       causes: causesReliability,
       effects: effectsReliability,
-      total: (risk.reliability + causesReliability + effectsReliability) / 3,
+      total: (risk.reliability + 0.5 * causesReliability + 0.5 * effectsReliability) / 2,
     },
 
     divergence: {

@@ -49,16 +49,17 @@ export const DPValueStack = ({ value }: { value: number }) => {
       <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", mr: 1, pb: 1, fontWeight: "bold" }}>
         {`DP${value + 1}`}
       </Typography>
-      {DPRows.map((r, ri) => (
-        <Stack key={r} direction="row">
-          <Typography variant="body2" sx={{ whiteSpace: "nowrap", mr: 1, fontWeight: "bold" }}>
-            <Trans i18nKey={r} />:{" "}
-          </Typography>
-          <Typography variant="caption" sx={{ whiteSpace: "normal" }}>
-            <Trans i18nKey={DPs[value][ri]} />
-          </Typography>
-        </Stack>
-      ))}
+      {DPs[value] &&
+        DPRows.map((r, ri) => (
+          <Stack key={r} direction="row">
+            <Typography variant="body2" sx={{ whiteSpace: "nowrap", mr: 1, fontWeight: "bold" }}>
+              <Trans i18nKey={r} />:{" "}
+            </Typography>
+            <Typography variant="caption" sx={{ whiteSpace: "normal" }}>
+              <Trans i18nKey={DPs[value][ri]} />
+            </Typography>
+          </Stack>
+        ))}
     </Stack>
   );
 };

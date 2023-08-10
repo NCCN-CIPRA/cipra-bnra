@@ -123,7 +123,12 @@ export default function ScenarioTable({
         <Grid
           item
           xs={4}
-          sx={{ backgroundColor: stepNames[STEPS.CONSIDERABLE].color, p: 1, borderRight: "1px solid #eee" }}
+          sx={{
+            backgroundColor: stepNames[STEPS.CONSIDERABLE].color,
+            p: 1,
+            borderRight: "1px solid #eee",
+            color: "white",
+          }}
         >
           <Typography variant="subtitle2">
             <Trans i18nKey={stepNames[STEPS.CONSIDERABLE].titleI18N}>
@@ -131,12 +136,16 @@ export default function ScenarioTable({
             </Trans>
           </Typography>
         </Grid>
-        <Grid item xs={4} sx={{ backgroundColor: stepNames[STEPS.MAJOR].color, p: 1, borderRight: "1px solid #eee" }}>
+        <Grid
+          item
+          xs={4}
+          sx={{ backgroundColor: stepNames[STEPS.MAJOR].color, p: 1, borderRight: "1px solid #eee", color: "white" }}
+        >
           <Typography variant="subtitle2">
             <Trans i18nKey={stepNames[STEPS.MAJOR].titleI18N}>{stepNames[STEPS.MAJOR].titleDefault}</Trans>
           </Typography>
         </Grid>
-        <Grid item xs={4} sx={{ backgroundColor: stepNames[STEPS.EXTREME].color, p: 1 }}>
+        <Grid item xs={4} sx={{ backgroundColor: stepNames[STEPS.EXTREME].color, p: 1, color: "white" }}>
           <Typography variant="subtitle2">
             <Trans i18nKey={stepNames[STEPS.EXTREME].titleI18N}>{stepNames[STEPS.EXTREME].titleDefault}</Trans>
           </Typography>

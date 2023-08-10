@@ -25,7 +25,7 @@ import { MaterialReactTable } from "material-react-table";
 
 const roundPerc = (val: number) => Math.round(val * 10000) / 100.0;
 
-function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
+function LinearProgressWithLabel(props: LinearProgressProps & { cur: number; max: number }) {
   return (
     <Box
       sx={{
@@ -44,12 +44,14 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number })
         sx={{
           position: "absolute",
           height: "100%",
-          width: `${props.value}%`,
+          width: `${Math.round((100.0 * props.cur) / props.max)}%`,
           backgroundColor: "rgba(0, 164, 154, 0.4)",
           left: 0,
         }}
       />
-      <Typography variant="body2" color="text.secondary" sx={{ mt: "1px" }}>{`${Math.round(props.value)}%`}</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: "1px" }}>
+        {props.cur}/{props.max}
+      </Typography>
     </Box>
   );
 }
@@ -85,7 +87,13 @@ const dataColumns: GridColDef[] = [
     renderCell: (params: GridRenderCellParams<RiskFileParticipation>) => {
       return (
         <>
-          <LinearProgressWithLabel value={params.value} />
+          <LinearProgressWithLabel
+            cur={
+              params.row.participations.filter((p) => p.cr4de_direct_analysis_finished && p.cr4de_role === "expert")
+                .length
+            }
+            max={params.row.participations.filter((p) => p.cr4de_role === "expert").length}
+          />
         </>
       );
     },
@@ -107,7 +115,13 @@ const dataColumns: GridColDef[] = [
     renderCell: (params: GridRenderCellParams<RiskFileParticipation>) => {
       return (
         <>
-          <LinearProgressWithLabel value={params.value} />
+          <LinearProgressWithLabel
+            cur={
+              params.row.participations.filter((p) => p.cr4de_cascade_analysis_finished && p.cr4de_role === "expert")
+                .length
+            }
+            max={params.row.participations.filter((p) => p.cr4de_role === "expert").length}
+          />
         </>
       );
     },
@@ -142,15 +156,16 @@ const dataColumns: GridColDef[] = [
     headerAlign: "right",
     type: "number",
     valueGetter: (params: GridValueGetterParams<DVRiskFile<RiskAnalysisResults>>) => {
-      if (params.row.cr4de_latest_calculation && params.row.cr4de_latest_calculation.cr4de_risk_file_metrics) {
-        return roundPerc(params.row.cr4de_latest_calculation.cr4de_risk_file_metrics.importance.total);
-      }
+      return params.row.cr4de_subjective_importance / 3;
+      // if (params.row.cr4de_latest_calculation && params.row.cr4de_latest_calculation.cr4de_risk_file_metrics) {
+      //   return roundPerc(params.row.cr4de_latest_calculation.cr4de_risk_file_metrics.importance.total);
+      // }
 
-      return 0;
+      // return 0;
     },
-    valueFormatter: (params: GridValueFormatterParams<DVRiskFile<RiskAnalysisResults>>) => {
-      return `${params.value}%`;
-    },
+    // valueFormatter: (params: GridValueFormatterParams<DVRiskFile<RiskAnalysisResults>>) => {
+    //   return `${params.value}%`;
+    // },
   },
   {
     field: "reliability",
