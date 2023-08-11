@@ -18,9 +18,15 @@ export const SCENARIO_PARAMS = {
     titleI18N: "2A.progress.considerable.title",
     titleDefault: "Considerable",
     color: "#9DC3E6",
+    prefix: "c",
   },
-  [SCENARIOS.MAJOR]: { titleI18N: "2A.progress.major.title", titleDefault: "Major", color: "#FFE699" },
-  [SCENARIOS.EXTREME]: { titleI18N: "2A.progress.extreme.title", titleDefault: "Extreme", color: "#F47C7C" },
+  [SCENARIOS.MAJOR]: { titleI18N: "2A.progress.major.title", titleDefault: "Major", color: "#FFE699", prefix: "m" },
+  [SCENARIOS.EXTREME]: {
+    titleI18N: "2A.progress.extreme.title",
+    titleDefault: "Extreme",
+    color: "#F47C7C",
+    prefix: "e",
+  },
 };
 
 const noScenarios = {

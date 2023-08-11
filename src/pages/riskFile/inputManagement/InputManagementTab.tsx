@@ -7,12 +7,13 @@ import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DataTable } from "../../../hooks/useAPI";
 import useLazyRecords from "../../../hooks/useLazyRecords";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import Step2BTab from "./Step2BTab";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import InputOverviewTab from "./InputOverviewTab";
 
 type RouteParams = {
   risk_file_id: string;
@@ -30,7 +31,7 @@ export default function InputManagementTab({
 }: {
   riskFile: DVRiskFile | null;
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[] | null;
-  participants: DVParticipation[] | null;
+  participants: DVParticipation<DVContact>[] | null;
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[] | null;
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[] | null;
 
@@ -38,23 +39,37 @@ export default function InputManagementTab({
   reloadCascades: () => void;
 }) {
   const params = useParams() as RouteParams;
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [value, setValue] = useState("2");
+  const [value, setValue] = useState();
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    setValue(newValue);
+    setSearchParams({
+      tab: "input",
+      subtab: newValue,
+    });
   };
 
   return (
-    <TabContext value={value}>
+    <TabContext value={searchParams.get("subtab") || "0"}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <TabList onChange={handleChange} centered>
+          <Tab label="Overview" value="0" />
           <Tab label="Validation" value="1" />
           <Tab label="Step 2A" value="2" />
           <Tab label="Step 2B" value="3" />
           <Tab label="Feedback" value="4" />
         </TabList>
       </Box>
+      <TabPanel value="0">
+        <InputOverviewTab
+          riskFile={riskFile}
+          participants={participants}
+          cascades={cascades}
+          directAnalyses={directAnalyses}
+          cascadeAnalyses={cascadeAnalyses}
+        />
+      </TabPanel>
       <TabPanel value="1">Validation</TabPanel>
       <TabPanel value="2">
         <Step2APage

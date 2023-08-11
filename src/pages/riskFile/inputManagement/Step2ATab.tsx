@@ -138,7 +138,9 @@ function ScenarioSection({
   const [lastParam, setLastParam] = useState(parameter);
   const [discussionRequired, setDiscussionRequired] = useState(
     riskFile.cr4de_discussion_required
-      ? riskFile.cr4de_discussion_required[parameter as keyof DiscussionsRequired]
+      ? riskFile.cr4de_discussion_required[
+          `${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
+        ]
       : null
   );
 
@@ -315,7 +317,7 @@ function ScenarioSection({
                     api.updateRiskFile(riskFile.cr4de_riskfilesid, {
                       cr4de_discussion_required: JSON.stringify({
                         ...riskFile.cr4de_discussion_required,
-                        [parameter]: e.target.value,
+                        [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]: e.target.value,
                       }),
                     });
                   }}
@@ -369,6 +371,7 @@ function ScenarioSection({
                   parameter={parameter}
                   qualiName={qualiName}
                   quantiNames={quantiNames}
+                  scenario={scenario}
                 />
                 {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
               </>
@@ -385,16 +388,20 @@ function ExpertInput({
   parameter,
   qualiName,
   quantiNames,
+  scenario,
 }: {
   directAnalysis: DVDirectAnalysis<unknown, DVContact>;
   parameter: string;
   qualiName: keyof DVDirectAnalysis<unknown, unknown>;
   quantiNames: (keyof DVDirectAnalysis<unknown, unknown>)[];
+  scenario: SCENARIOS;
 }) {
   const api = useAPI();
 
   const [rating, setRating] = useState(
-    (directAnalysis.cr4de_quality && directAnalysis.cr4de_quality[parameter as keyof FieldQuality]) ?? null
+    (directAnalysis.cr4de_quality &&
+      directAnalysis.cr4de_quality[`${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof FieldQuality]) ??
+      null
   );
 
   return (
@@ -412,7 +419,7 @@ function ExpertInput({
               api.updateDirectAnalysis(directAnalysis.cr4de_bnradirectanalysisid, {
                 cr4de_quality: JSON.stringify({
                   ...directAnalysis.cr4de_quality,
-                  [parameter]: newValue,
+                  [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]: newValue,
                 }),
               });
             }}

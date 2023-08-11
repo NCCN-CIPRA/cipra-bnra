@@ -12,10 +12,12 @@ import {
   Typography,
   useTheme,
   Container,
+  Chip,
   MenuItem,
   CardHeader,
   Paper,
   Divider,
+  Select,
   CircularProgress,
   Drawer,
   Toolbar,
@@ -26,6 +28,7 @@ import {
   ListItemText,
   CardActions,
   Button,
+  Rating,
 } from "@mui/material";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import TextInputBox from "../../../components/TextInputBox";
@@ -41,6 +44,8 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { LoadingButton } from "@mui/lab";
 import ScenarioTable from "../../step2A/information/ScenarioTable";
 import { ScenarioInput, ScenarioInputs } from "../../step2A/fields";
+import { getCADivergence } from "../../../functions/inputProcessing";
+import { DiscussionRequired } from "../../../types/DiscussionRequired";
 
 const scenarioLetter = {
   [SCENARIOS.CONSIDERABLE]: "c",
@@ -133,6 +138,7 @@ export default function Step2BTab({
   const [lastCascadeIndex, setLastCascadeIndex] = useState(0);
   const [consensus, setConsensus] = useState<DVCascadeAnalysis | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [discussionRequired, setDiscussionRequired] = useState<DiscussionRequired | null>(null);
 
   const qualiInput = useRef<null | string>(null);
 
@@ -172,6 +178,7 @@ export default function Step2BTab({
     }
 
     setConsensus(c);
+    setDiscussionRequired(c.cr4de_discussion_required);
   }, [cascades, cascadeIndex, cascadeAnalyses]);
 
   if (
@@ -213,6 +220,7 @@ export default function Step2BTab({
     setIsSaving(false);
   };
 
+  const divergence = getCADivergence(cascadeAnalyses);
   return (
     <>
       <Drawer
@@ -282,8 +290,12 @@ export default function Step2BTab({
         </Typography>
         <Stack spacing={4}>
           <Card>
-            <CardHeader subheader="Consensus results:" />
             <CardContent>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body1">
+                  Below is a summary of the quantitative results for this cascade:
+                </Typography>
+              </Box>
               {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING && (
                 <Box sx={{ mb: 8 }}>
                   <CascadeMatrix
@@ -320,6 +332,47 @@ export default function Step2BTab({
                   fields={["cr4de_dp50_quanti" as keyof ScenarioInput]}
                 />
               )}
+
+              <Stack direction="row" sx={{ mt: 2, alignItems: "center" }}>
+                <Typography variant="body1" sx={{ flex: 1 }}>
+                  Divergence:
+                </Typography>
+                {divergence < 0.2 && <Chip label="LOW" color="success" />}
+                {divergence >= 0.2 && divergence < 0.4 && <Chip label="MEDIUM" color="warning" />}
+                {divergence >= 4 && <Chip label="HIGH" color="error" />}
+              </Stack>
+
+              <Stack direction="row" sx={{ mt: 2, alignItems: "center" }}>
+                <Typography variant="body1" sx={{ flex: 1 }}>
+                  Discussion Needed:
+                </Typography>
+                <Select
+                  value={discussionRequired || "unknown"}
+                  sx={{ width: 200 }}
+                  onChange={(e) => {
+                    setDiscussionRequired(e.target.value as DiscussionRequired);
+                    api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+                      cr4de_discussion_required: e.target.value,
+                    });
+                  }}
+                >
+                  <MenuItem value="unknown">Unknown</MenuItem>
+                  <MenuItem value={DiscussionRequired.REQUIRED}>Required</MenuItem>
+                  <MenuItem value={DiscussionRequired.PREFERRED}>Preferred</MenuItem>
+                  <MenuItem value={DiscussionRequired.NOT_NECESSARY}>Unnecessary</MenuItem>
+                </Select>
+              </Stack>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body1">
+                  The field below can be used to summarize the qualitative responses of the experts or to prepare for
+                  the consensus meeting:
+                </Typography>
+              </Box>
               <TextInputBox
                 initialValue={(cascade.cr4de_quali as string | null) || ""}
                 setUpdatedValue={(v) => {
@@ -341,56 +394,101 @@ export default function Step2BTab({
               </LoadingButton>
             </CardActions>
           </Card>
-          {cas.map((c) => (
-            <Card>
-              <CardHeader subheader={`${c.cr4de_expert.emailaddress1} answered:`} />
-              <CardContent>
-                {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING && (
-                  <Box sx={{ mb: 8 }}>
-                    <CascadeMatrix
-                      cascadeAnalysis={c}
-                      cause={riskFile}
-                      effect={cascades[cascadeIndex].cr4de_effect_hazard as DVRiskFile}
-                      onChangeScenario={() => {}}
-                    />
-                  </Box>
-                )}
-                {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
-                  <ScenarioTable
-                    inputs={
-                      [
-                        directAnalyses.find(
-                          (da) => (da._cr4de_expert_value === c._cr4de_expert_value) as boolean
-                        ) as DVDirectAnalysis,
-                      ].map((da) => ({
-                        considerable: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_c },
-                        major: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_m },
-                        extreme: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_e },
-                      }))[0] as unknown as ScenarioInputs
-                    }
-                    fields={["cr4de_dp50_quanti" as keyof ScenarioInput]}
-                  />
-                )}
-                {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0 && (
-                  <Box
-                    dangerouslySetInnerHTML={{ __html: (c.cr4de_quali_cascade || "") as string }}
-                    sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
-                  />
-                )}
-                {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
-                  <Box
-                    dangerouslySetInnerHTML={{
-                      __html: (directAnalyses.find((da) => da._cr4de_expert_value === c._cr4de_expert_value)
-                        ?.cr4de_dp50_quali || "") as string,
-                    }}
-                    sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
-                  />
-                )}
-              </CardContent>
-            </Card>
-          ))}
+
+          <Paper sx={{ p: 2 }}>
+            {cas.map((ca, i, a) => (
+              <>
+                <ExpertInput
+                  riskFile={riskFile}
+                  cascade={cascade}
+                  directAnalysis={
+                    directAnalyses.find(
+                      (da) => (da._cr4de_expert_value === ca._cr4de_expert_value) as boolean
+                    ) as DVDirectAnalysis
+                  }
+                  cascadeAnalysis={ca}
+                />
+                {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
+              </>
+            ))}
+          </Paper>
         </Stack>
       </Container>
     </>
+  );
+}
+
+function ExpertInput({
+  riskFile,
+  cascade,
+  directAnalysis,
+  cascadeAnalysis,
+}: {
+  riskFile: DVRiskFile;
+  cascade: DVRiskCascade<SmallRisk, SmallRisk>;
+  directAnalysis: DVDirectAnalysis;
+  cascadeAnalysis: DVCascadeAnalysis<unknown, unknown, DVContact>;
+}) {
+  const api = useAPI();
+  const [rating, setRating] = useState(cascadeAnalysis.cr4de_quality);
+
+  return (
+    <Grid container wrap="nowrap" spacing={2}>
+      <Grid justifyContent="left" item xs zeroMinWidth>
+        <Stack direction="row">
+          <Typography variant="subtitle2" sx={{ flex: 1 }}>
+            {cascadeAnalysis.cr4de_expert.emailaddress1} says:
+          </Typography>
+          <Rating
+            name="size-small"
+            value={rating}
+            onChange={(e, newValue) => {
+              setRating(newValue);
+              api.updateCascadeAnalysis(cascadeAnalysis.cr4de_bnracascadeanalysisid, {
+                cr4de_quality: newValue,
+              });
+            }}
+            size="small"
+          />
+        </Stack>
+
+        {cascade.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING && (
+          <Box sx={{ mb: 8 }}>
+            <CascadeMatrix
+              cascadeAnalysis={cascadeAnalysis}
+              cause={riskFile}
+              effect={cascade.cr4de_effect_hazard as DVRiskFile}
+              onChangeScenario={() => {}}
+            />
+          </Box>
+        )}
+        {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
+          <ScenarioTable
+            inputs={
+              [directAnalysis].map((da) => ({
+                considerable: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_c },
+                major: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_m },
+                extreme: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_e },
+              }))[0] as unknown as ScenarioInputs
+            }
+            fields={["cr4de_dp50_quanti" as keyof ScenarioInput]}
+          />
+        )}
+        {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0 && (
+          <Box
+            dangerouslySetInnerHTML={{ __html: (cascadeAnalysis.cr4de_quali_cascade || "") as string }}
+            sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+          />
+        )}
+        {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
+          <Box
+            dangerouslySetInnerHTML={{
+              __html: (directAnalysis.cr4de_dp50_quali || "") as string,
+            }}
+            sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+          />
+        )}
+      </Grid>
+    </Grid>
   );
 }

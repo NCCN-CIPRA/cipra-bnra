@@ -4,7 +4,7 @@ import { TabContext, TabPanel, TabList } from "@mui/lab";
 import useRecord from "../../hooks/useRecord";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { DataTable } from "../../hooks/useAPI";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVContact } from "../../types/dataverse/DVContact";
 import useRecords from "../../hooks/useRecords";
@@ -30,6 +30,13 @@ type RouteParams = {
   risk_file_id: string;
 };
 
+const TABS = {
+  overview: 0,
+  identification: 1,
+  analysis: 2,
+  input: 3,
+};
+
 const defaultBreadcrumbs: Breadcrumb[] = [
   { name: "BNRA 2023 - 2026", url: "/" },
   { name: "Risk Catalogue", url: "/risks" },
@@ -37,8 +44,9 @@ const defaultBreadcrumbs: Breadcrumb[] = [
 
 export default function RiskFilePage({}) {
   const params = useParams() as RouteParams;
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState(TABS[(searchParams.get("tab") || "overview") as keyof typeof TABS]);
 
   const {
     data: riskFile,
@@ -150,10 +158,26 @@ export default function RiskFilePage({}) {
             setTab(newValue);
           }}
         >
-          <BottomNavigationAction label="Overview" icon={<AodIcon />} />
-          <BottomNavigationAction label="Risk Identification" icon={<FingerprintIcon />} />
-          <BottomNavigationAction label="Risk Analysis" icon={<AssessmentIcon />} />
-          <BottomNavigationAction label="Expert Input" icon={<PsychologyIcon />} />
+          <BottomNavigationAction
+            label="Overview"
+            icon={<AodIcon />}
+            onClick={() => setSearchParams({ tab: "overview" })}
+          />
+          <BottomNavigationAction
+            label="Risk Identification"
+            icon={<FingerprintIcon />}
+            onClick={() => setSearchParams({ tab: "identification" })}
+          />
+          <BottomNavigationAction
+            label="Risk Analysis"
+            icon={<AssessmentIcon />}
+            onClick={() => setSearchParams({ tab: "analysis" })}
+          />
+          <BottomNavigationAction
+            label="Expert Input"
+            icon={<PsychologyIcon />}
+            onClick={() => setSearchParams({ tab: "input" })}
+          />
         </BottomNavigation>
       </Paper>
     </>
