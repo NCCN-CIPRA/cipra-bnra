@@ -433,7 +433,7 @@ export default function Step2BTab({
                 reset={lastCascadeIndex !== cascadeIndex}
                 onReset={async (value: string | null) => {
                   setLastCascadeIndex(cascadeIndex);
-                  await handleSave(lastCascadeIndex);
+                  // await handleSave(lastCascadeIndex);
                   qualiInput.current = cascade.cr4de_quali;
                 }}
               />

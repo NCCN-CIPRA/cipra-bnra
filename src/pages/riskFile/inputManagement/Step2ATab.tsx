@@ -353,7 +353,7 @@ function ScenarioSection({
                 // disabled={false}
                 reset={lastParam !== parameter}
                 onReset={async (value: string | null) => {
-                  await handleSave(getQualiFieldName(scenario, lastParam), value);
+                  // await handleSave(getQualiFieldName(scenario, lastParam), value);
                   setLastParam(parameter);
                   qualiInput.current = (riskFile[qualiName as keyof DVRiskFile] as string | null) || "";
                 }}
