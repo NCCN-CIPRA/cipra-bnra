@@ -147,6 +147,8 @@ export default function RiskFilePage({}) {
             participants={participants}
             reloadRiskFile={reloadRiskFile}
             reloadCascades={reloadCascades}
+            reloadDirectAnalyses={reloadDirectAnalyses}
+            reloadCascadeAnalyses={reloadCascadeAnalyses}
           />
         )}
       </Box>

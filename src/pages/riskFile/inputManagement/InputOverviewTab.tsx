@@ -54,7 +54,7 @@ export default function InputOverviewTab({
     directAnalyses === null ||
     cascadeAnalyses === null
   )
-    return <CircularProgress />;
+    return <CircularProgress sx={{ margin: "auto" }} />;
 
   const input = participants
     .filter((p) => p.cr4de_role === "expert")

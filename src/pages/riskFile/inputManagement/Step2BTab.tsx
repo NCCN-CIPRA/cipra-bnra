@@ -122,6 +122,7 @@ export default function Step2BTab({
 
   reloadRiskFile,
   reloadCascades,
+  reloadCascadeAnalyses,
 }: {
   riskFile: DVRiskFile | null;
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[] | null;
@@ -130,6 +131,7 @@ export default function Step2BTab({
 
   reloadRiskFile: () => void;
   reloadCascades: () => void;
+  reloadCascadeAnalyses: () => void;
 }) {
   const theme = useTheme();
   const api = useAPI();
@@ -150,7 +152,7 @@ export default function Step2BTab({
           c.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING
       );
       if (causeIndex >= 0) setCascadeIndex(causeIndex);
-      else
+      else if (riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING)
         setCascadeIndex(
           cascades.findIndex(
             (c) =>
@@ -158,6 +160,7 @@ export default function Step2BTab({
               c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING
           )
         );
+      else setCascadeIndex(cascades.findIndex((c) => c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid));
     }
   }, [cascades, riskFile, cascadeIndex]);
 
@@ -190,7 +193,7 @@ export default function Step2BTab({
     consensus === null
   )
     return <LoadingTab />;
-
+  console.log(cascades, cascadeIndex);
   const cas = cascadeAnalyses.filter(
     (ca) => ca._cr4de_cascade_value === cascades[cascadeIndex].cr4de_bnrariskcascadeid
   );
@@ -204,6 +207,9 @@ export default function Step2BTab({
     (c) =>
       c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
       c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING
+  );
+  const catalyzedRisks = cascades.filter(
+    (c) => c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid && riskFile.cr4de_risk_type === RISK_TYPE.EMERGING
   );
 
   const cascade = cascades[cascadeIndex];
@@ -239,49 +245,88 @@ export default function Step2BTab({
           },
         }}
       >
-        <Box sx={{ overflow: "auto" }}>
-          <List>
-            <ListItem>
-              <Typography variant="subtitle2">Causes</Typography>
-            </ListItem>
-            {causes.map((c, i) => (
-              <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
-                <ListItemButton
-                  onClick={() => {
-                    setCascadeIndex(
-                      cascades.findIndex((ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean)
-                    );
-                  }}
-                >
-                  <ListItemText
-                    primary={c.cr4de_cause_hazard.cr4de_title}
-                    sx={{
-                      fontWeight: c.cr4de_bnrariskcascadeid === cascade.cr4de_bnrariskcascadeid ? "bold" : "regular",
-                    }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-          <Divider />
-          <List>
-            <ListItem>
-              <Typography variant="subtitle2">Catalyzing Effects</Typography>
-            </ListItem>
-            {catalyzingEffects.map((c) => (
-              <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
-                <ListItemButton
-                  onClick={() => {
-                    setCascadeIndex(
-                      cascades.findIndex((ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean)
-                    );
-                  }}
-                >
-                  <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+        <Box sx={{ overflow: "auto", mb: 8 }}>
+          {causes.length > 0 && (
+            <>
+              <List>
+                <ListItem>
+                  <Typography variant="subtitle2">Causes</Typography>
+                </ListItem>
+                {causes.map((c, i) => (
+                  <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
+                    <ListItemButton
+                      onClick={() => {
+                        setCascadeIndex(
+                          cascades.findIndex(
+                            (ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean
+                          )
+                        );
+                      }}
+                    >
+                      <ListItemText
+                        primary={c.cr4de_cause_hazard.cr4de_title}
+                        sx={{
+                          fontWeight:
+                            c.cr4de_bnrariskcascadeid === cascade.cr4de_bnrariskcascadeid ? "bold" : "regular",
+                        }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+              {(catalyzingEffects.length > 0 || catalyzedRisks.length > 0) && <Divider />}
+            </>
+          )}
+          {catalyzingEffects.length > 0 && (
+            <>
+              <List>
+                <ListItem>
+                  <Typography variant="subtitle2">Catalyzing Effects</Typography>
+                </ListItem>
+                {catalyzingEffects.map((c) => (
+                  <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
+                    <ListItemButton
+                      onClick={() => {
+                        setCascadeIndex(
+                          cascades.findIndex(
+                            (ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean
+                          )
+                        );
+                      }}
+                    >
+                      <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+
+              {catalyzedRisks.length > 0 && <Divider />}
+            </>
+          )}
+          {catalyzedRisks.length > 0 && (
+            <>
+              <List>
+                <ListItem>
+                  <Typography variant="subtitle2">Catalyzing Effects</Typography>
+                </ListItem>
+                {catalyzedRisks.map((c) => (
+                  <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
+                    <ListItemButton
+                      onClick={() => {
+                        setCascadeIndex(
+                          cascades.findIndex(
+                            (ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean
+                          )
+                        );
+                      }}
+                    >
+                      <ListItemText primary={c.cr4de_effect_hazard.cr4de_title} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </>
+          )}
         </Box>
       </Drawer>
       <Container sx={{ ml: "240px" }}>
@@ -291,56 +336,60 @@ export default function Step2BTab({
         <Stack spacing={4}>
           <Card>
             <CardContent>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body1">
-                  Below is a summary of the quantitative results for this cascade:
-                </Typography>
-              </Box>
-              {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING && (
-                <Box sx={{ mb: 8 }}>
-                  <CascadeMatrix
-                    cascadeAnalysis={consensus as DVCascadeAnalysis}
-                    cause={cascades[cascadeIndex].cr4de_cause_hazard as DVRiskFile}
-                    effect={riskFile}
-                    onChangeScenario={() => {}}
-                  />
-                </Box>
-              )}
+              {riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING && (
+                <>
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body1">
+                      Below is a summary of the quantitative results for this cascade:
+                    </Typography>
+                  </Box>
+                  {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING && (
+                    <Box sx={{ mb: 8 }}>
+                      <CascadeMatrix
+                        cascadeAnalysis={consensus as DVCascadeAnalysis}
+                        cause={cascades[cascadeIndex].cr4de_cause_hazard as DVRiskFile}
+                        effect={riskFile}
+                        onChangeScenario={() => {}}
+                      />
+                    </Box>
+                  )}
 
-              {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
-                <ScenarioTable
-                  inputs={
-                    [
-                      directAnalyses.reduce(
-                        (avg, da, i, all) => ({
-                          c: avg.c + getAbsoluteProbability(da.cr4de_dp50_quanti_c) / all.length,
-                          m: avg.m + getAbsoluteProbability(da.cr4de_dp50_quanti_m) / all.length,
-                          e: avg.e + getAbsoluteProbability(da.cr4de_dp50_quanti_e) / all.length,
-                        }),
-                        {
-                          c: 0,
-                          m: 0,
-                          e: 0,
-                        }
-                      ),
-                    ].map((avg) => ({
-                      considerable: { cr4de_dp50_quanti: getProbabilityScale(avg.c, "DP50-") },
-                      major: { cr4de_dp50_quanti: getProbabilityScale(avg.m, "DP50-") },
-                      extreme: { cr4de_dp50_quanti: getProbabilityScale(avg.e, "DP50-") },
-                    }))[0] as unknown as ScenarioInputs
-                  }
-                  fields={["cr4de_dp50_quanti" as keyof ScenarioInput]}
-                />
-              )}
+                  {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
+                    <ScenarioTable
+                      inputs={
+                        [
+                          directAnalyses.reduce(
+                            (avg, da, i, all) => ({
+                              c: avg.c + getAbsoluteProbability(da.cr4de_dp50_quanti_c) / all.length,
+                              m: avg.m + getAbsoluteProbability(da.cr4de_dp50_quanti_m) / all.length,
+                              e: avg.e + getAbsoluteProbability(da.cr4de_dp50_quanti_e) / all.length,
+                            }),
+                            {
+                              c: 0,
+                              m: 0,
+                              e: 0,
+                            }
+                          ),
+                        ].map((avg) => ({
+                          considerable: { cr4de_dp50_quanti: getProbabilityScale(avg.c, "DP50-") },
+                          major: { cr4de_dp50_quanti: getProbabilityScale(avg.m, "DP50-") },
+                          extreme: { cr4de_dp50_quanti: getProbabilityScale(avg.e, "DP50-") },
+                        }))[0] as unknown as ScenarioInputs
+                      }
+                      fields={["cr4de_dp50_quanti" as keyof ScenarioInput]}
+                    />
+                  )}
 
-              <Stack direction="row" sx={{ mt: 2, alignItems: "center" }}>
-                <Typography variant="body1" sx={{ flex: 1 }}>
-                  Divergence:
-                </Typography>
-                {divergence < 0.2 && <Chip label="LOW" color="success" />}
-                {divergence >= 0.2 && divergence < 0.4 && <Chip label="MEDIUM" color="warning" />}
-                {divergence >= 4 && <Chip label="HIGH" color="error" />}
-              </Stack>
+                  <Stack direction="row" sx={{ mt: 2, alignItems: "center" }}>
+                    <Typography variant="body1" sx={{ flex: 1 }}>
+                      Divergence:
+                    </Typography>
+                    {divergence < 0.2 && <Chip label="LOW" color="success" />}
+                    {divergence >= 0.2 && divergence < 0.4 && <Chip label="MEDIUM" color="warning" />}
+                    {divergence >= 4 && <Chip label="HIGH" color="error" />}
+                  </Stack>
+                </>
+              )}
 
               <Stack direction="row" sx={{ mt: 2, alignItems: "center" }}>
                 <Typography variant="body1" sx={{ flex: 1 }}>
@@ -349,11 +398,12 @@ export default function Step2BTab({
                 <Select
                   value={discussionRequired || "unknown"}
                   sx={{ width: 200 }}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     setDiscussionRequired(e.target.value as DiscussionRequired);
-                    api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+                    await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
                       cr4de_discussion_required: e.target.value,
                     });
+                    reloadCascades();
                   }}
                 >
                   <MenuItem value="unknown">Unknown</MenuItem>
@@ -407,6 +457,7 @@ export default function Step2BTab({
                     ) as DVDirectAnalysis
                   }
                   cascadeAnalysis={ca}
+                  reloadCascadeAnalyses={reloadCascadeAnalyses}
                 />
                 {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
               </>
@@ -423,11 +474,13 @@ function ExpertInput({
   cascade,
   directAnalysis,
   cascadeAnalysis,
+  reloadCascadeAnalyses,
 }: {
   riskFile: DVRiskFile;
   cascade: DVRiskCascade<SmallRisk, SmallRisk>;
   directAnalysis: DVDirectAnalysis;
   cascadeAnalysis: DVCascadeAnalysis<unknown, unknown, DVContact>;
+  reloadCascadeAnalyses: () => void;
 }) {
   const api = useAPI();
   const [rating, setRating] = useState(cascadeAnalysis.cr4de_quality);
@@ -442,11 +495,12 @@ function ExpertInput({
           <Rating
             name="size-small"
             value={rating}
-            onChange={(e, newValue) => {
+            onChange={async (e, newValue) => {
               setRating(newValue);
-              api.updateCascadeAnalysis(cascadeAnalysis.cr4de_bnracascadeanalysisid, {
+              await api.updateCascadeAnalysis(cascadeAnalysis.cr4de_bnracascadeanalysisid, {
                 cr4de_quality: newValue,
               });
+              reloadCascadeAnalyses();
             }}
             size="small"
           />

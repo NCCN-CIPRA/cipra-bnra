@@ -123,6 +123,7 @@ function ScenarioSection({
   initialOpen = false,
 
   reloadRiskFile,
+  reloadDirectAnalyses,
 }: {
   riskFile: DVRiskFile;
   scenario: SCENARIOS;
@@ -131,6 +132,7 @@ function ScenarioSection({
   initialOpen?: Boolean;
 
   reloadRiskFile: () => void;
+  reloadDirectAnalyses: () => void;
 }) {
   const api = useAPI();
   const [open, setOpen] = useState(initialOpen);
@@ -312,14 +314,15 @@ function ScenarioSection({
                 <Select
                   value={discussionRequired || "unknown"}
                   sx={{ width: 200 }}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     setDiscussionRequired(e.target.value as DiscussionRequired);
-                    api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+                    await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
                       cr4de_discussion_required: JSON.stringify({
                         ...riskFile.cr4de_discussion_required,
                         [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]: e.target.value,
                       }),
                     });
+                    reloadRiskFile();
                   }}
                 >
                   <MenuItem value="unknown">Unknown</MenuItem>
@@ -341,7 +344,7 @@ function ScenarioSection({
               </Box>
               <TextInputBox
                 initialValue={(riskFile[qualiName as keyof DVRiskFile] as string | null) || ""}
-                onSave={async (newValue) => handleSave(qualiName, newValue)}
+                // onSave={async (newValue) => handleSave(qualiName, newValue)}
                 disabled={false}
                 setUpdatedValue={(v) => {
                   qualiInput.current = v || null;
@@ -372,6 +375,7 @@ function ScenarioSection({
                   qualiName={qualiName}
                   quantiNames={quantiNames}
                   scenario={scenario}
+                  reloadDirectAnalyses={reloadDirectAnalyses}
                 />
                 {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
               </>
@@ -389,12 +393,14 @@ function ExpertInput({
   qualiName,
   quantiNames,
   scenario,
+  reloadDirectAnalyses,
 }: {
   directAnalysis: DVDirectAnalysis<unknown, DVContact>;
   parameter: string;
   qualiName: keyof DVDirectAnalysis<unknown, unknown>;
   quantiNames: (keyof DVDirectAnalysis<unknown, unknown>)[];
   scenario: SCENARIOS;
+  reloadDirectAnalyses: () => void;
 }) {
   const api = useAPI();
 
@@ -414,14 +420,15 @@ function ExpertInput({
           <Rating
             name="size-small"
             value={rating}
-            onChange={(e, newValue) => {
+            onChange={async (e, newValue) => {
               setRating(newValue);
-              api.updateDirectAnalysis(directAnalysis.cr4de_bnradirectanalysisid, {
+              await api.updateDirectAnalysis(directAnalysis.cr4de_bnradirectanalysisid, {
                 cr4de_quality: JSON.stringify({
                   ...directAnalysis.cr4de_quality,
                   [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]: newValue,
                 }),
               });
+              reloadDirectAnalyses();
             }}
             size="small"
           />
@@ -460,12 +467,14 @@ export default function Step2APage({
   directAnalyses,
 
   reloadRiskFile,
+  reloadDirectAnalyses,
 }: {
   riskFile: DVRiskFile | null;
   participants: DVParticipation[] | null;
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[] | null;
 
   reloadRiskFile: () => void;
+  reloadDirectAnalyses: () => void;
 }) {
   const theme = useTheme();
   const [parameter, setParameter] = useState("dp");
@@ -493,6 +502,7 @@ export default function Step2APage({
           directAnalyses={directAnalyses}
           initialOpen={true}
           reloadRiskFile={reloadRiskFile}
+          reloadDirectAnalyses={reloadDirectAnalyses}
         />
         <ScenarioSection
           riskFile={riskFile}
@@ -500,6 +510,7 @@ export default function Step2APage({
           parameter={parameter}
           directAnalyses={directAnalyses}
           reloadRiskFile={reloadRiskFile}
+          reloadDirectAnalyses={reloadDirectAnalyses}
         />
         <ScenarioSection
           riskFile={riskFile}
@@ -507,6 +518,7 @@ export default function Step2APage({
           parameter={parameter}
           directAnalyses={directAnalyses}
           reloadRiskFile={reloadRiskFile}
+          reloadDirectAnalyses={reloadDirectAnalyses}
         />
       </Stack>
     </Stack>

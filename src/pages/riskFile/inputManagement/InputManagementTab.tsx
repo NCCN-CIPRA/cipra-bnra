@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Box, Container, Tab, BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
 import { TabContext, TabPanel, TabList } from "@mui/lab";
 import Step2APage from "./Step2ATab";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DataTable } from "../../../hooks/useAPI";
@@ -28,6 +28,8 @@ export default function InputManagementTab({
 
   reloadRiskFile,
   reloadCascades,
+  reloadDirectAnalyses,
+  reloadCascadeAnalyses,
 }: {
   riskFile: DVRiskFile | null;
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[] | null;
@@ -37,6 +39,8 @@ export default function InputManagementTab({
 
   reloadRiskFile: () => void;
   reloadCascades: () => void;
+  reloadDirectAnalyses: () => void;
+  reloadCascadeAnalyses: () => void;
 }) {
   const params = useParams() as RouteParams;
   const [searchParams, setSearchParams] = useSearchParams();
@@ -56,7 +60,7 @@ export default function InputManagementTab({
         <TabList onChange={handleChange} centered>
           <Tab label="Overview" value="0" />
           <Tab label="Validation" value="1" />
-          <Tab label="Step 2A" value="2" />
+          <Tab label="Step 2A" value="2" disabled={riskFile?.cr4de_risk_type === RISK_TYPE.EMERGING} />
           <Tab label="Step 2B" value="3" />
           <Tab label="Feedback" value="4" />
         </TabList>
@@ -77,6 +81,7 @@ export default function InputManagementTab({
           participants={participants}
           directAnalyses={directAnalyses}
           reloadRiskFile={reloadRiskFile}
+          reloadDirectAnalyses={reloadDirectAnalyses}
         />
       </TabPanel>
       <TabPanel value="3">
@@ -87,6 +92,7 @@ export default function InputManagementTab({
           cascadeAnalyses={cascadeAnalyses}
           reloadRiskFile={reloadRiskFile}
           reloadCascades={reloadCascades}
+          reloadCascadeAnalyses={reloadCascadeAnalyses}
         />
       </TabPanel>
       <TabPanel value="4">Feedback</TabPanel>
