@@ -14,6 +14,10 @@ export const DIRECT_ANALYSIS_SECTIONS_STANDARD: DIRECT_ANALYSIS_SECTION[] = [
     label: "Direct Probability",
   },
   {
+    name: "dp50",
+    label: "Direct Probability 2050",
+  },
+  {
     name: "h",
     label: "Human Impact",
   },
@@ -65,11 +69,11 @@ function getQuantiNumbers(quantiInput: (string | null)[]) {
   };
 }
 
-function avg(n: number[]) {
+export function avg(n: number[]) {
   return Math.round((10 * n.reduce((tot, cur) => tot + cur, 0)) / n.length) / 10;
 }
 
-function std(n: number[]) {
+export function std(n: number[]) {
   const average = avg(n);
 
   return Math.round((10 * n.reduce((varTot, cur) => varTot + Math.pow(cur - average, 2), 0)) / n.length) / 10.0 / 6;
@@ -148,6 +152,10 @@ export const getQuantiFieldNames = (
 ): (keyof DVDirectAnalysis)[] => {
   if (parameter.name === "dp") {
     return [`cr4de_dp_quanti_${SCENARIO_PARAMS[scenario].prefix}` as keyof DVDirectAnalysis];
+  }
+
+  if (parameter.name === "dp50") {
+    return [`cr4de_dp50_quanti_${SCENARIO_PARAMS[scenario].prefix}` as keyof DVDirectAnalysis];
   }
 
   if (parameter.name === "cb") {

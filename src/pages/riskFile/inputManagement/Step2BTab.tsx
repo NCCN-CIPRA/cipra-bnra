@@ -44,7 +44,7 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { LoadingButton } from "@mui/lab";
 import ScenarioTable from "../../step2A/information/ScenarioTable";
 import { ScenarioInput, ScenarioInputs } from "../../step2A/fields";
-import { getCADivergence } from "../../../functions/inputProcessing";
+import { avg, getAverage, getCADivergence, getDADivergence } from "../../../functions/inputProcessing";
 import { DiscussionRequired } from "../../../types/DiscussionRequired";
 
 const scenarioLetter = {
@@ -93,21 +93,6 @@ const getQuantiLabel = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDir
     Fb: "Reduction of economic performance",
     CP: "Conditional Probability",
   }[prefix];
-};
-
-const getAverage = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDirectAnalysis[]) => {
-  const good = directAnalyses.filter((da) => da[fieldName] !== null);
-
-  if (good.length <= 0) return 0;
-
-  const prefix = (good[0][fieldName] as string).slice(0, -1);
-
-  const avg = directAnalyses
-    .filter((da) => da[fieldName] !== null)
-    .reduce((avg, da, i, a) => avg + parseFloat((da[fieldName] as string).replace(prefix, "")) / a.length, 0);
-
-  if (["DP", "M", "CP"].indexOf(prefix) >= 0) return getProbabilityScale(avg, prefix);
-  else return getImpactScale(avg, prefix);
 };
 
 const capFirst = (s: string) => {
@@ -226,7 +211,15 @@ export default function Step2BTab({
     setIsSaving(false);
   };
 
-  const divergence = getCADivergence(cascadeAnalyses);
+  const divergence =
+    cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0
+      ? avg([
+          getDADivergence(directAnalyses, SCENARIOS.CONSIDERABLE, { name: "dp50", label: "" }),
+          getDADivergence(directAnalyses, SCENARIOS.MAJOR, { name: "dp50", label: "" }),
+          getDADivergence(directAnalyses, SCENARIOS.EXTREME, { name: "dp50", label: "" }),
+        ])
+      : getCADivergence(cascadeAnalyses);
+  console.log(divergence);
   return (
     <>
       <Drawer
@@ -357,24 +350,17 @@ export default function Step2BTab({
                   {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
                     <ScenarioTable
                       inputs={
-                        [
-                          directAnalyses.reduce(
-                            (avg, da, i, all) => ({
-                              c: avg.c + getAbsoluteProbability(da.cr4de_dp50_quanti_c) / all.length,
-                              m: avg.m + getAbsoluteProbability(da.cr4de_dp50_quanti_m) / all.length,
-                              e: avg.e + getAbsoluteProbability(da.cr4de_dp50_quanti_e) / all.length,
-                            }),
-                            {
-                              c: 0,
-                              m: 0,
-                              e: 0,
-                            }
-                          ),
-                        ].map((avg) => ({
-                          considerable: { cr4de_dp50_quanti: getProbabilityScale(avg.c, "DP50-") },
-                          major: { cr4de_dp50_quanti: getProbabilityScale(avg.m, "DP50-") },
-                          extreme: { cr4de_dp50_quanti: getProbabilityScale(avg.e, "DP50-") },
-                        }))[0] as unknown as ScenarioInputs
+                        {
+                          considerable: {
+                            cr4de_dp50_quanti: getAverage(directAnalyses.map((da) => da.cr4de_dp50_quanti_c)),
+                          },
+                          major: {
+                            cr4de_dp50_quanti: getAverage(directAnalyses.map((da) => da.cr4de_dp50_quanti_m)),
+                          },
+                          extreme: {
+                            cr4de_dp50_quanti: getAverage(directAnalyses.map((da) => da.cr4de_dp50_quanti_e)),
+                          },
+                        } as unknown as ScenarioInputs
                       }
                       fields={["cr4de_dp50_quanti" as keyof ScenarioInput]}
                     />
@@ -386,7 +372,7 @@ export default function Step2BTab({
                     </Typography>
                     {divergence < 0.2 && <Chip label="LOW" color="success" />}
                     {divergence >= 0.2 && divergence < 0.4 && <Chip label="MEDIUM" color="warning" />}
-                    {divergence >= 4 && <Chip label="HIGH" color="error" />}
+                    {divergence >= 0.4 && <Chip label="HIGH" color="error" />}
                   </Stack>
                 </>
               )}
