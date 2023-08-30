@@ -484,6 +484,14 @@ function ExpertInput({
 }) {
   const api = useAPI();
   const [rating, setRating] = useState(cascadeAnalysis.cr4de_quality);
+  const [lastCascadeAnalysis, setLastCascadeAnalysis] = useState(cascadeAnalysis);
+
+  useEffect(() => {
+    if (cascadeAnalysis !== lastCascadeAnalysis) {
+      setLastCascadeAnalysis(cascadeAnalysis);
+      setRating(cascadeAnalysis.cr4de_quality);
+    }
+  }, [cascadeAnalysis]);
 
   return (
     <Grid container wrap="nowrap" spacing={2}>

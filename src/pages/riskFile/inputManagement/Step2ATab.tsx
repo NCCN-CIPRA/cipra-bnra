@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   DIRECT_ANALYSIS_QUANTI_FIELDS,
   DVDirectAnalysis,
@@ -409,6 +409,18 @@ function ExpertInput({
       directAnalysis.cr4de_quality[`${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof FieldQuality]) ??
       null
   );
+  const [lastParameter, setLastParameter] = useState(parameter);
+
+  useEffect(() => {
+    if (parameter !== lastParameter) {
+      setLastParameter(parameter);
+      setRating(
+        (directAnalysis.cr4de_quality &&
+          directAnalysis.cr4de_quality[`${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof FieldQuality]) ??
+          null
+      );
+    }
+  }, [parameter]);
 
   return (
     <Grid container wrap="nowrap" spacing={2}>
