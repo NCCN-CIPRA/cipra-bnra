@@ -46,6 +46,8 @@ import ScenarioTable from "../../step2A/information/ScenarioTable";
 import { ScenarioInput, ScenarioInputs } from "../../step2A/fields";
 import { avg, getAverage, getCADivergence, getDADivergence } from "../../../functions/inputProcessing";
 import { DiscussionRequired } from "../../../types/DiscussionRequired";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import Attachments from "./Attachments";
 
 const scenarioLetter = {
   [SCENARIOS.CONSIDERABLE]: "c",
@@ -128,6 +130,11 @@ export default function Step2BTab({
   const [discussionRequired, setDiscussionRequired] = useState<DiscussionRequired | null>(null);
 
   const qualiInput = useRef<null | string>(null);
+  const [reloadAttachments, setReloadAttachments] = useState(false);
+
+  useEffect(() => {
+    if (reloadAttachments) setReloadAttachments(false);
+  }, [reloadAttachments]);
 
   useEffect(() => {
     if (cascades !== null && riskFile !== null && cascadeIndex === null) {
@@ -219,7 +226,7 @@ export default function Step2BTab({
           getDADivergence(directAnalyses, SCENARIOS.EXTREME, { name: "dp50", label: "" }),
         ])
       : getCADivergence(cascadeAnalyses);
-  console.log(divergence);
+
   return (
     <>
       <Drawer
@@ -429,6 +436,20 @@ export default function Step2BTab({
                 Save
               </LoadingButton>
             </CardActions>
+
+            <Attachments
+              reset={lastCascadeIndex !== cascadeIndex || reloadAttachments}
+              getAttachments={() =>
+                api.getAttachments(
+                  `$filter=_cr4de_riskcascade_value eq ${cascade.cr4de_bnrariskcascadeid} and _cr4de_cascadeanalysis_value eq null&$expand=cr4de_referencedSource`
+                )
+              }
+              consolidateAttachment={null}
+              deleteAttachment={async (attachment: DVAttachment) => {
+                await api.deleteAttachment(attachment.cr4de_bnraattachmentid);
+                setReloadAttachments(true);
+              }}
+            />
           </Card>
 
           <Paper sx={{ p: 2 }}>
@@ -444,6 +465,7 @@ export default function Step2BTab({
                   }
                   cascadeAnalysis={ca}
                   reloadCascadeAnalyses={reloadCascadeAnalyses}
+                  setReloadAttachments={() => setReloadAttachments(true)}
                 />
                 {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
               </>
@@ -461,12 +483,14 @@ function ExpertInput({
   directAnalysis,
   cascadeAnalysis,
   reloadCascadeAnalyses,
+  setReloadAttachments,
 }: {
   riskFile: DVRiskFile;
   cascade: DVRiskCascade<SmallRisk, SmallRisk>;
   directAnalysis: DVDirectAnalysis;
   cascadeAnalysis: DVCascadeAnalysis<unknown, unknown, DVContact>;
   reloadCascadeAnalyses: () => void;
+  setReloadAttachments: () => void;
 }) {
   const api = useAPI();
   const [rating, setRating] = useState(cascadeAnalysis.cr4de_quality);
@@ -536,6 +560,29 @@ function ExpertInput({
             sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
           />
         )}
+
+        <Attachments
+          reset={lastCascadeAnalysis !== cascadeAnalysis}
+          getAttachments={() =>
+            api.getAttachments(
+              `$filter=_cr4de_cascadeanalysis_value eq ${cascadeAnalysis?.cr4de_bnracascadeanalysisid}`
+            )
+          }
+          consolidateAttachment={async (attachment: DVAttachment) => {
+            await api.createAttachment(
+              {
+                "cr4de_owner@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${attachment._cr4de_owner_value})`,
+                cr4de_field: attachment.cr4de_field,
+                "cr4de_referencedSource@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${attachment.cr4de_bnraattachmentid})`,
+                "cr4de_riskcascade@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${cascadeAnalysis._cr4de_cascade_value})`,
+              },
+              null
+            );
+
+            setReloadAttachments();
+          }}
+          deleteAttachment={null}
+        />
       </Grid>
     </Grid>
   );

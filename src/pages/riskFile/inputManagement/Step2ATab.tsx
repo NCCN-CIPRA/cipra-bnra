@@ -31,10 +31,15 @@ import { getAbsoluteImpact, getImpactScale } from "../../../functions/Impact";
 import { getAbsoluteProbability, getProbabilityScale, getProbabilityScaleNumber } from "../../../functions/Probability";
 import { NO_COMMENT } from "../../step2A/sections/QualiTextInputBox";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
-import useAPI from "../../../hooks/useAPI";
+import useAPI, { DataTable } from "../../../hooks/useAPI";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { LoadingButton } from "@mui/lab";
 import { DiscussionRequired } from "../../../types/DiscussionRequired";
+import Attachments from "./Attachments";
+import useLazyRecords from "../../../hooks/useLazyRecords";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import { useOutletContext } from "react-router-dom";
+import { AuthPageContext } from "../../AuthPage";
 
 const scenarioLetter = {
   [SCENARIOS.CONSIDERABLE]: "c",
@@ -115,6 +120,12 @@ const capFirst = (s: string) => {
   return `${s[0].toUpperCase()}${s.slice(1)}`;
 };
 
+const getField = (parameter: string) => {
+  if (parameter === "dp") return "dp_quali";
+
+  return `di_quali_${parameter}`;
+};
+
 function ScenarioSection({
   riskFile,
   scenario,
@@ -145,6 +156,11 @@ function ScenarioSection({
         ]
       : null
   );
+  const [reloadAttachments, setReloadAttachments] = useState(false);
+
+  useEffect(() => {
+    if (reloadAttachments) setReloadAttachments(false);
+  }, [reloadAttachments]);
 
   const qualiName = getQualiFieldName(scenario, parameter);
   const quantiNames = getQuantiFieldNames(scenario, parameter);
@@ -364,6 +380,24 @@ function ScenarioSection({
                 Save
               </LoadingButton>
             </CardActions>
+
+            <Attachments
+              reset={lastParam !== parameter || reloadAttachments}
+              getAttachments={() =>
+                api.getAttachments(
+                  `$filter=_cr4de_risk_file_value eq ${
+                    riskFile.cr4de_riskfilesid
+                  } and _cr4de_directanalysis_value eq null and cr4de_field eq 'cr4de_${getField(parameter)}_${
+                    scenarioLetter[scenario]
+                  }'&$expand=cr4de_referencedSource`
+                )
+              }
+              consolidateAttachment={null}
+              deleteAttachment={async (attachment: DVAttachment) => {
+                await api.deleteAttachment(attachment.cr4de_bnraattachmentid);
+                setReloadAttachments(true);
+              }}
+            />
           </Card>
 
           <Paper sx={{ p: 2 }}>
@@ -376,6 +410,7 @@ function ScenarioSection({
                   quantiNames={quantiNames}
                   scenario={scenario}
                   reloadDirectAnalyses={reloadDirectAnalyses}
+                  setReloadAttachments={() => setReloadAttachments(true)}
                 />
                 {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
               </>
@@ -394,6 +429,7 @@ function ExpertInput({
   quantiNames,
   scenario,
   reloadDirectAnalyses,
+  setReloadAttachments,
 }: {
   directAnalysis: DVDirectAnalysis<unknown, DVContact>;
   parameter: string;
@@ -401,6 +437,7 @@ function ExpertInput({
   quantiNames: (keyof DVDirectAnalysis<unknown, unknown>)[];
   scenario: SCENARIOS;
   reloadDirectAnalyses: () => void;
+  setReloadAttachments: () => void;
 }) {
   const api = useAPI();
 
@@ -468,6 +505,31 @@ function ExpertInput({
             ))}
           </Stack>
         )}
+
+        <Attachments
+          reset={lastParameter !== parameter}
+          getAttachments={() =>
+            api.getAttachments(
+              `$filter=_cr4de_directanalysis_value eq ${
+                directAnalysis?.cr4de_bnradirectanalysisid
+              } and cr4de_field eq 'cr4de_${getField(parameter)}_${scenarioLetter[scenario]}'`
+            )
+          }
+          consolidateAttachment={async (attachment: DVAttachment) => {
+            await api.createAttachment(
+              {
+                "cr4de_owner@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${attachment._cr4de_owner_value})`,
+                cr4de_field: attachment.cr4de_field,
+                "cr4de_referencedSource@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${attachment.cr4de_bnraattachmentid})`,
+                "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${directAnalysis._cr4de_risk_file_value})`,
+              },
+              null
+            );
+
+            setReloadAttachments();
+          }}
+          deleteAttachment={null}
+        />
       </Grid>
     </Grid>
   );
