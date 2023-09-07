@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
@@ -176,6 +176,20 @@ export default function Step2BTab({
     setDiscussionRequired(c.cr4de_discussion_required);
   }, [cascades, cascadeIndex, cascadeAnalyses]);
 
+  const divergence = useMemo(() => {
+    if (cascades === null || cascadeIndex === null || directAnalyses === null || cascadeAnalyses === null) return 0;
+
+    if (cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0) {
+      return avg([
+        getDADivergence(directAnalyses, SCENARIOS.CONSIDERABLE, { name: "dp50", label: "" }),
+        getDADivergence(directAnalyses, SCENARIOS.MAJOR, { name: "dp50", label: "" }),
+        getDADivergence(directAnalyses, SCENARIOS.EXTREME, { name: "dp50", label: "" }),
+      ]);
+    } else {
+      return getCADivergence(cascadeAnalyses);
+    }
+  }, [cascades, cascadeIndex, directAnalyses, cascadeAnalyses]);
+
   if (
     !riskFile ||
     cascades === null ||
@@ -185,7 +199,7 @@ export default function Step2BTab({
     consensus === null
   )
     return <LoadingTab />;
-  console.log(cascades, cascadeIndex);
+
   const cas = cascadeAnalyses.filter(
     (ca) => ca._cr4de_cascade_value === cascades[cascadeIndex].cr4de_bnrariskcascadeid
   );
@@ -217,15 +231,6 @@ export default function Step2BTab({
 
     setIsSaving(false);
   };
-
-  const divergence =
-    cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0
-      ? avg([
-          getDADivergence(directAnalyses, SCENARIOS.CONSIDERABLE, { name: "dp50", label: "" }),
-          getDADivergence(directAnalyses, SCENARIOS.MAJOR, { name: "dp50", label: "" }),
-          getDADivergence(directAnalyses, SCENARIOS.EXTREME, { name: "dp50", label: "" }),
-        ])
-      : getCADivergence(cascadeAnalyses);
 
   return (
     <>

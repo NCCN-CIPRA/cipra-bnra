@@ -8,50 +8,72 @@ interface DIRECT_ANALYSIS_SECTION {
   label: string;
 }
 
-export const DIRECT_ANALYSIS_SECTIONS_STANDARD: DIRECT_ANALYSIS_SECTION[] = [
-  {
+export interface STATS {
+  min: number;
+  minLabel: string;
+  max: number;
+  maxLabel: string;
+  avg: number;
+  avgLabel: string;
+  std: number;
+}
+
+export enum PARAMETER {
+  DP,
+  DP2050,
+  H,
+  S,
+  E,
+  F,
+  CB,
+}
+
+export const DIRECT_ANALYSIS_SECTIONS_STANDARD: { [key in PARAMETER]: DIRECT_ANALYSIS_SECTION } = {
+  [PARAMETER.DP]: {
     name: "dp",
     label: "Direct Probability",
   },
-  {
+  [PARAMETER.DP2050]: {
     name: "dp50",
     label: "Direct Probability 2050",
   },
-  {
+  [PARAMETER.H]: {
     name: "h",
     label: "Human Impact",
   },
-  {
+  [PARAMETER.S]: {
     name: "s",
     label: "Societal Impact",
   },
-  {
+  [PARAMETER.E]: {
     name: "e",
     label: "Environmental Impact",
   },
-  {
+  [PARAMETER.F]: {
     name: "f",
     label: "Fincancial Impact",
   },
-  {
+  [PARAMETER.CB]: {
     name: "cb",
     label: "Cross-border Effects",
   },
-];
+};
 
-export const DIRECT_ANALYSIS_SECTIONS_MANMADE: DIRECT_ANALYSIS_SECTION[] = [
-  {
+export const DIRECT_ANALYSIS_SECTIONS_MANMADE: Partial<{ [key in PARAMETER]: DIRECT_ANALYSIS_SECTION }> = {
+  [PARAMETER.DP]: {
     name: "dp",
     label: "Motivation",
   },
-];
+};
 
 export const getDASections = (riskFile: DVRiskFile) => {
   if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD) {
-    return DIRECT_ANALYSIS_SECTIONS_STANDARD;
+    return [PARAMETER.DP, PARAMETER.H, PARAMETER.S, PARAMETER.E, PARAMETER.F, PARAMETER.CB].map(
+      (p) => DIRECT_ANALYSIS_SECTIONS_STANDARD[p]
+    ) as DIRECT_ANALYSIS_SECTION[];
   }
   if (riskFile.cr4de_risk_type === RISK_TYPE.MANMADE) {
-    return DIRECT_ANALYSIS_SECTIONS_MANMADE;
+    return [DIRECT_ANALYSIS_SECTIONS_MANMADE[PARAMETER.DP]] as DIRECT_ANALYSIS_SECTION[];
   }
   return [] as DIRECT_ANALYSIS_SECTION[];
 };
@@ -69,42 +91,75 @@ function getQuantiNumbers(quantiInput: (string | null)[]) {
   };
 }
 
-export function avg(n: number[]) {
-  return Math.round((10 * n.reduce((tot, cur) => tot + cur, 0)) / n.length) / 10;
+export function avg(n: number[], weights?: number[]) {
+  const totalWeight = weights ? weights.reduce((tot, cur) => tot + cur) : n.length;
+  console.log(n, weights);
+  return (
+    Math.round(
+      10 *
+        n.reduce((tot, cur, i) => {
+          if (weights) return tot + (cur * weights[i]) / totalWeight;
+          return tot + cur / totalWeight;
+        }, 0)
+    ) / 10
+  );
 }
 
-export function std(n: number[]) {
-  const average = avg(n);
+export function std(n: number[], weights?: number[]) {
+  const average = avg(n, weights);
 
-  return Math.round((10 * n.reduce((varTot, cur) => varTot + Math.pow(cur - average, 2), 0)) / n.length) / 10.0 / 6;
+  const totalWeight = weights ? weights.reduce((tot, cur) => tot + cur) : n.length;
+
+  return (
+    Math.round(
+      (10 *
+        n.reduce((varTot, cur, i) => {
+          if (weights) {
+            return varTot + Math.pow(weights[i] * (cur - average), 2);
+          }
+
+          return varTot + Math.pow(cur - average, 2);
+        }, 0)) /
+        totalWeight
+    ) /
+    10.0 /
+    6
+  );
 }
 
-export function getAverage(quantiInput: (string | null)[]) {
+export function getAverage(quantiInput: (string | null)[], weights?: number[]) {
   const n = getQuantiNumbers(quantiInput);
 
   if (!n) return null;
 
-  return `${n.prefix}${avg(n.numbers)}`;
+  return `${n.prefix}${avg(n.numbers, weights)}`;
 }
 
-export function getStd(quantiInput: (string | null)[]) {
+export function getStd(quantiInput: (string | null)[], weights?: number[]) {
   const n = getQuantiNumbers(quantiInput);
 
   if (!n) return null;
 
-  return std(n.numbers);
+  return std(n.numbers, weights);
 }
 
-export function getStats(quantiInput: (string | null)[]) {
+export function getStats(quantiInput: (string | null)[], weights?: number[]): STATS | null {
   const n = getQuantiNumbers(quantiInput);
 
   if (!n) return null;
+
+  const values = {
+    min: Math.min(...n.numbers),
+    max: Math.max(...n.numbers),
+    avg: avg(n.numbers, weights),
+    std: std(n.numbers, weights),
+  };
 
   return {
-    min: `${n.prefix}${Math.min(...n.numbers)}`,
-    max: `${n.prefix}${Math.max(...n.numbers)}`,
-    avg: `${n.prefix}${avg(n.numbers)}`,
-    std: std(n.numbers),
+    ...values,
+    minLabel: `${n.prefix}${values.min}`,
+    maxLabel: `${n.prefix}${values.max}`,
+    avgLabel: `${n.prefix}${values.avg}`,
   };
 }
 

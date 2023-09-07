@@ -142,8 +142,20 @@ export default function RiskFilePage({}) {
           <InputManagementTab
             riskFile={riskFile}
             cascades={cascades}
-            directAnalyses={directAnalyses}
-            cascadeAnalyses={cascadeAnalyses}
+            directAnalyses={
+              directAnalyses?.filter((da) =>
+                participants?.some(
+                  (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_direct_analysis_finished
+                )
+              ) || null
+            }
+            cascadeAnalyses={
+              cascadeAnalyses?.filter((ca) =>
+                participants?.some(
+                  (p) => p._cr4de_contact_value === ca._cr4de_expert_value && p.cr4de_cascade_analysis_finished
+                )
+              ) || null
+            }
             participants={participants}
             reloadRiskFile={reloadRiskFile}
             reloadCascades={reloadCascades}

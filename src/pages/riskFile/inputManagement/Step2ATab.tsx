@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   DIRECT_ANALYSIS_QUANTI_FIELDS,
   DVDirectAnalysis,
@@ -40,6 +40,7 @@ import useLazyRecords from "../../../hooks/useLazyRecords";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { useOutletContext } from "react-router-dom";
 import { AuthPageContext } from "../../AuthPage";
+import { PARAMETER, STATS, avg, getAverage, getStats } from "../../../functions/inputProcessing";
 
 const scenarioLetter = {
   [SCENARIOS.CONSIDERABLE]: "c",
@@ -103,19 +104,6 @@ const getQuantiLabel = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDir
   }[prefix];
 };
 
-const getAverage = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDirectAnalysis[]) => {
-  const good = directAnalyses.filter((da) => da[fieldName] !== null);
-
-  if (good.length <= 0) return 0;
-
-  const prefix = (good[0][fieldName] as string).slice(0, -1);
-
-  return `${prefix}${good.reduce(
-    (avg, cur) => avg + parseInt((cur[fieldName] as string).slice(-1), 10) / good.length,
-    0
-  )}`;
-};
-
 const capFirst = (s: string) => {
   return `${s[0].toUpperCase()}${s.slice(1)}`;
 };
@@ -162,8 +150,8 @@ function ScenarioSection({
     if (reloadAttachments) setReloadAttachments(false);
   }, [reloadAttachments]);
 
-  const qualiName = getQualiFieldName(scenario, parameter);
-  const quantiNames = getQuantiFieldNames(scenario, parameter);
+  const qualiName = useMemo(() => getQualiFieldName(scenario, parameter), [scenario, parameter]);
+  const quantiNames = useMemo(() => getQuantiFieldNames(scenario, parameter), [scenario, parameter]);
 
   const qualiInput = useRef<null | string>(null);
 
@@ -179,47 +167,27 @@ function ScenarioSection({
     setIsSaving(false);
   };
 
-  const distribution = quantiNames.reduce((dist, field) => {
-    const good = directAnalyses.filter((da) => da[field] !== null);
-
-    if (good.length <= 0) return { ...dist, [field]: { min: 0, avg: 0, max: 0 } };
-
-    return {
-      ...dist,
-      [field]: good
-        .map((da) => parseInt((da[field] as string).slice(-1), 10))
-        .reduce(
-          (dom, cur) => {
-            return {
-              min: cur < dom.min ? cur : dom.min,
-              avg: dom.avg + cur / good.length,
-              max: cur > dom.max ? cur : dom.max,
-            };
-          },
-          {
-            min: Infinity,
-            avg: 0,
-            max: -Infinity,
-          }
+  const distribution = useMemo(() => {
+    const d = quantiNames.reduce((dist, field) => {
+      return {
+        ...dist,
+        [field]: getStats(
+          directAnalyses.map((da) => da[field]) as string[],
+          directAnalyses.map(
+            (da) =>
+              (da.cr4de_quality &&
+                da.cr4de_quality[`${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof FieldQuality]) ||
+              2.5
+          )
         ),
-    };
-  }, {} as { [key in keyof DVDirectAnalysis]: { min: number; avg: number; max: number } });
-
-  const std_avg = quantiNames.reduce((cum, field) => {
-    const good = directAnalyses.filter((da) => da[field] !== null);
-
-    if (good.length <= 0) return { ...cum, [field]: 0 };
+      };
+    }, {}) as { [key in keyof DVDirectAnalysis]: STATS };
 
     return {
-      ...cum,
-      [field]: Math.sqrt(
-        good
-          .map((da) => parseInt((da[field] as string).slice(-1), 10))
-          .reduce((varTot, cur) => varTot + Math.pow(cur - distribution[field].avg, 2), 0) / good.length
-      ),
+      ...d,
+      std: avg(Object.values(d).map((dist) => dist.std)),
     };
-  }, {} as { [key in keyof DVDirectAnalysis]: number });
-  const std = Object.values(std_avg).reduce((avg, cur, i, all) => avg + cur / all.length, 0);
+  }, [quantiNames, directAnalyses]);
 
   return (
     <Stack direction="column" spacing={2} sx={{ flex: open ? 1 : 0, transition: "all .3s ease" }}>
@@ -307,7 +275,7 @@ function ScenarioSection({
                         <Typography variant="body1" sx={{ flex: 1 }}>
                           Average <i>{getQuantiLabel(n, directAnalyses)}</i> Estimate:
                         </Typography>
-                        <Chip label={getAverage(n, directAnalyses)} sx={{ fontWeight: "bold" }}></Chip>
+                        <Chip label={distribution[n].avgLabel} sx={{ fontWeight: "bold" }}></Chip>
                       </Stack>
                     ))}
                   </Stack>
@@ -318,9 +286,9 @@ function ScenarioSection({
                 <Typography variant="body1" sx={{ flex: 1 }}>
                   Divergence:
                 </Typography>
-                {std < 1 && <Chip label="LOW" color="success" />}
-                {std >= 1 && std < 2 && <Chip label="MEDIUM" color="warning" />}
-                {std >= 2 && <Chip label="HIGH" color="error" />}
+                {distribution.std < 1 && <Chip label="LOW" color="success" />}
+                {distribution.std >= 1 && distribution.std < 2 && <Chip label="MEDIUM" color="warning" />}
+                {distribution.std >= 2 && <Chip label="HIGH" color="error" />}
               </Stack>
 
               <Stack direction="row" sx={{ mt: 2, alignItems: "center" }}>
