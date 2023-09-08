@@ -25,6 +25,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
+  Link,
   ListItemText,
   CardActions,
   Button,
@@ -379,7 +380,13 @@ export default function Step2BTab({
       </Drawer>
       <Container sx={{ ml: "240px" }}>
         <Typography variant="h6" sx={{ mb: 4 }}>
-          {cascade.cr4de_cause_hazard.cr4de_title} causes {cascade.cr4de_effect_hazard.cr4de_title}
+          <Link href={`/learning/risk/${cascade.cr4de_cause_hazard.cr4de_riskfilesid}`} target="_blank">
+            {cascade.cr4de_cause_hazard.cr4de_title}
+          </Link>{" "}
+          causes{" "}
+          <Link href={`/learning/risk/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}`} target="_blank">
+            {cascade.cr4de_effect_hazard.cr4de_title}
+          </Link>
         </Typography>
         <Stack spacing={4}>
           <Card>
