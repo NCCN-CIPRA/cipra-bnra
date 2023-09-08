@@ -29,6 +29,7 @@ import {
   CardActions,
   Button,
   Rating,
+  Tooltip as MUITooltip,
 } from "@mui/material";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import TextInputBox from "../../../components/TextInputBox";
@@ -44,10 +45,11 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { LoadingButton } from "@mui/lab";
 import ScenarioTable from "../../step2A/information/ScenarioTable";
 import { ScenarioInput, ScenarioInputs } from "../../step2A/fields";
-import { avg, getAverage, getCADivergence, getDADivergence } from "../../../functions/inputProcessing";
+import { STATS, avg, getAverage, getCADivergence, getDADivergence, getStats } from "../../../functions/inputProcessing";
 import { DiscussionRequired } from "../../../types/DiscussionRequired";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import Attachments from "./Attachments";
+import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 const scenarioLetter = {
   [SCENARIOS.CONSIDERABLE]: "c",
@@ -176,19 +178,60 @@ export default function Step2BTab({
     setDiscussionRequired(c.cr4de_discussion_required);
   }, [cascades, cascadeIndex, cascadeAnalyses]);
 
-  const divergence = useMemo(() => {
-    if (cascades === null || cascadeIndex === null || directAnalyses === null || cascadeAnalyses === null) return 0;
-
-    if (cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0) {
-      return avg([
-        getDADivergence(directAnalyses, SCENARIOS.CONSIDERABLE, { name: "dp50", label: "" }),
-        getDADivergence(directAnalyses, SCENARIOS.MAJOR, { name: "dp50", label: "" }),
-        getDADivergence(directAnalyses, SCENARIOS.EXTREME, { name: "dp50", label: "" }),
-      ]);
-    } else {
-      return getCADivergence(cascadeAnalyses);
+  const dp50Distribution = useMemo(() => {
+    if (
+      cascades !== null &&
+      cascadeIndex !== null &&
+      riskFile !== null &&
+      directAnalyses !== null &&
+      cascadeAnalyses !== null &&
+      cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 &&
+      riskFile?.cr4de_riskfilesid !== cascades[cascadeIndex]._cr4de_cause_hazard_value
+    ) {
+      return {
+        [SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].titleDefault]: {
+          ...(getStats(
+            directAnalyses.map((da) => da["cr4de_dp50_quanti_c"]),
+            directAnalyses
+              .map((da) => cascadeAnalyses.find((ca) => ca._cr4de_expert_value === da._cr4de_expert_value))
+              .map((ca) => (ca?.cr4de_quality ? ca?.cr4de_quality : 2.5))
+          ) as STATS),
+          dp: getStats(
+            directAnalyses.map((da) => da.cr4de_dp_quanti_c) as string[],
+            directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality.dp_c) || 2.5)
+          )?.avg,
+        },
+        [SCENARIO_PARAMS[SCENARIOS.MAJOR].titleDefault]: {
+          ...(getStats(
+            directAnalyses.map((da) => da["cr4de_dp50_quanti_m"]),
+            directAnalyses
+              .map((da) => cascadeAnalyses.find((ca) => ca._cr4de_expert_value === da._cr4de_expert_value))
+              .map((ca) => (ca?.cr4de_quality ? ca?.cr4de_quality : 2.5))
+          ) as STATS),
+          dp: getStats(
+            directAnalyses.map((da) => da.cr4de_dp_quanti_m) as string[],
+            directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality.dp_m) || 2.5)
+          )?.avg,
+        },
+        [SCENARIO_PARAMS[SCENARIOS.EXTREME].titleDefault]: {
+          ...(getStats(
+            directAnalyses.map((da) => da["cr4de_dp50_quanti_e"]),
+            directAnalyses
+              .map((da) => cascadeAnalyses.find((ca) => ca._cr4de_expert_value === da._cr4de_expert_value))
+              .map((ca) => (ca?.cr4de_quality ? ca?.cr4de_quality : 2.5))
+          ) as STATS),
+          dp: getStats(
+            directAnalyses.map((da) => da.cr4de_dp_quanti_e) as string[],
+            directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality.dp_e) || 2.5)
+          )?.avg,
+        },
+      };
     }
-  }, [cascades, cascadeIndex, directAnalyses, cascadeAnalyses]);
+
+    return null;
+  }, [cascades, cascadeIndex, riskFile, directAnalyses, cascadeAnalyses]);
+
+  const dp50Divergence = dp50Distribution ? avg(Object.values(dp50Distribution).map((d) => d.std)) / 6 : 0;
 
   if (
     !riskFile ||
@@ -359,32 +402,130 @@ export default function Step2BTab({
                     </Box>
                   )}
 
-                  {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
-                    <ScenarioTable
-                      inputs={
-                        {
-                          considerable: {
-                            cr4de_dp50_quanti: getAverage(directAnalyses.map((da) => da.cr4de_dp50_quanti_c)),
-                          },
-                          major: {
-                            cr4de_dp50_quanti: getAverage(directAnalyses.map((da) => da.cr4de_dp50_quanti_m)),
-                          },
-                          extreme: {
-                            cr4de_dp50_quanti: getAverage(directAnalyses.map((da) => da.cr4de_dp50_quanti_e)),
-                          },
-                        } as unknown as ScenarioInputs
-                      }
-                      fields={["cr4de_dp50_quanti" as keyof ScenarioInput]}
-                    />
-                  )}
+                  {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 &&
+                    riskFile.cr4de_riskfilesid !== cascade._cr4de_cause_hazard_value &&
+                    dp50Distribution && (
+                      <Box sx={{ width: "100%", height: 300, mt: 4, position: "relative" }}>
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            top: 0,
+                          }}
+                        >
+                          <ResponsiveContainer>
+                            <BarChart
+                              data={Object.entries(dp50Distribution).map(([label, distribution]) => {
+                                return {
+                                  name: `${label} Input Distribution`,
+                                  distFloat: distribution.min - 0.05,
+                                  distBot: distribution.avg - distribution.min,
+                                  distAvg: 0.1,
+                                  distTop: distribution.max - distribution.avg,
+                                };
+                              })}
+                              margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                              }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" />
+                              <YAxis domain={[-1, 6]} ticks={[0, 1, 2, 3, 4, 5]} />
+                              <Tooltip
+                                formatter={(value, name, props) => {
+                                  if (name === "Minimum") return props.payload.distFloat + 0.05;
+                                  if (name === "Average") return props.payload.distFloat + 0.05 + props.payload.distBot;
+                                  if (name === "Maximum")
+                                    return (
+                                      props.payload.distFloat + 0.05 + props.payload.distBot + props.payload.distTop
+                                    );
+
+                                  return value;
+                                }}
+                              />
+                              <Bar dataKey="distFloat" stackId="a" fill="transparent" />
+                              <Bar dataKey="distBot" stackId="a" fill="#82ca9d" name="Minimum" />
+                              <Bar dataKey="distAvg" stackId="a" fill="#5a9671" name="Average" />
+                              <Bar dataKey="distTop" stackId="a" fill="#82ca9d" name="Maximum" />
+
+                              <ReferenceLine
+                                segment={[
+                                  {
+                                    x: "Considerable Input Distribution",
+                                    y: (dp50Distribution.Considerable.dp || 0) - 0.1,
+                                  },
+                                  {
+                                    x: "Considerable Input Distribution",
+                                    y: (dp50Distribution.Considerable.dp || 0) + 0.1,
+                                  },
+                                ]}
+                                strokeWidth="25%"
+                                stroke="rgba(255, 0, 0, 0.3)"
+                                label={{
+                                  value: "Original DP",
+                                  position: "top",
+                                }}
+                              />
+
+                              <ReferenceLine
+                                segment={[
+                                  {
+                                    x: "Major Input Distribution",
+                                    y: (dp50Distribution.Major.dp || 0) - 0.1,
+                                  },
+                                  {
+                                    x: "Major Input Distribution",
+                                    y: (dp50Distribution.Major.dp || 0) + 0.1,
+                                  },
+                                ]}
+                                strokeWidth="25%"
+                                stroke="rgba(255, 0, 0, 0.3)"
+                                label={{
+                                  value: "Original DP",
+                                  position: "top",
+                                }}
+                              />
+
+                              <ReferenceLine
+                                segment={[
+                                  {
+                                    x: "Extreme Input Distribution",
+                                    y: (dp50Distribution.Extreme.dp || 0) - 0.1,
+                                  },
+                                  {
+                                    x: "Extreme Input Distribution",
+                                    y: (dp50Distribution.Extreme.dp || 0) + 0.1,
+                                  },
+                                ]}
+                                strokeWidth="25%"
+                                stroke="rgba(255, 0, 0, 0.3)"
+                                label={{
+                                  value: "Original DP",
+                                  position: "top",
+                                }}
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </Box>
+                      </Box>
+                    )}
 
                   <Stack direction="row" sx={{ mt: 2, alignItems: "center" }}>
                     <Typography variant="body1" sx={{ flex: 1 }}>
                       Divergence:
                     </Typography>
-                    {divergence < 0.2 && <Chip label="LOW" color="success" />}
-                    {divergence >= 0.2 && divergence < 0.4 && <Chip label="MEDIUM" color="warning" />}
-                    {divergence >= 0.4 && <Chip label="HIGH" color="error" />}
+                    <MUITooltip title={`Divergence: ${100 * dp50Divergence}%`}>
+                      <Box>
+                        {dp50Divergence < 0.2 && <Chip label="LOW" color="success" />}
+                        {dp50Divergence >= 0.2 && dp50Divergence < 0.4 && <Chip label="MEDIUM" color="warning" />}
+                        {dp50Divergence >= 0.4 && <Chip label="HIGH" color="error" />}
+                      </Box>
+                    </MUITooltip>
                   </Stack>
                 </>
               )}
@@ -507,7 +648,7 @@ function ExpertInput({
       setRating(cascadeAnalysis.cr4de_quality);
     }
   }, [cascadeAnalysis]);
-
+  console.log(cascade);
   return (
     <Grid container wrap="nowrap" spacing={2}>
       <Grid justifyContent="left" item xs zeroMinWidth>
@@ -539,32 +680,36 @@ function ExpertInput({
             />
           </Box>
         )}
-        {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
-          <ScenarioTable
-            inputs={
-              [directAnalysis].map((da) => ({
-                considerable: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_c },
-                major: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_m },
-                extreme: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_e },
-              }))[0] as unknown as ScenarioInputs
-            }
-            fields={["cr4de_dp50_quanti" as keyof ScenarioInput]}
-          />
-        )}
-        {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0 && (
+        {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 &&
+          riskFile.cr4de_riskfilesid !== cascade._cr4de_cause_hazard_value && (
+            <ScenarioTable
+              inputs={
+                [directAnalysis].map((da) => ({
+                  considerable: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_c },
+                  major: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_m },
+                  extreme: { cr4de_dp50_quanti: da.cr4de_dp50_quanti_e },
+                }))[0] as unknown as ScenarioInputs
+              }
+              fields={["cr4de_dp50_quanti" as keyof ScenarioInput]}
+            />
+          )}
+        {(cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0 ||
+          (cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 &&
+            riskFile.cr4de_riskfilesid === cascade._cr4de_cause_hazard_value)) && (
           <Box
             dangerouslySetInnerHTML={{ __html: (cascadeAnalysis.cr4de_quali_cascade || "") as string }}
             sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
           />
         )}
-        {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 && (
-          <Box
-            dangerouslySetInnerHTML={{
-              __html: (directAnalysis.cr4de_dp50_quali || "") as string,
-            }}
-            sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
-          />
-        )}
+        {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 &&
+          riskFile.cr4de_riskfilesid !== cascade._cr4de_cause_hazard_value && (
+            <Box
+              dangerouslySetInnerHTML={{
+                __html: (directAnalysis.cr4de_dp50_quali || "") as string,
+              }}
+              sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+            />
+          )}
 
         <Attachments
           reset={lastCascadeAnalysis !== cascadeAnalysis}

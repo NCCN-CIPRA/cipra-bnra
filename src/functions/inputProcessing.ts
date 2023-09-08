@@ -93,7 +93,7 @@ function getQuantiNumbers(quantiInput: (string | null)[]) {
 
 export function avg(n: number[], weights?: number[]) {
   const totalWeight = weights ? weights.reduce((tot, cur) => tot + cur) : n.length;
-  console.log(n, weights);
+
   return (
     Math.round(
       10 *
@@ -112,18 +112,17 @@ export function std(n: number[], weights?: number[]) {
 
   return (
     Math.round(
-      (10 *
-        n.reduce((varTot, cur, i) => {
-          if (weights) {
-            return varTot + Math.pow(weights[i] * (cur - average), 2);
-          }
+      10 *
+        Math.sqrt(
+          n.reduce((varTot, cur, i) => {
+            if (weights) {
+              return varTot + Math.pow(weights[i] * (cur - average), 2);
+            }
 
-          return varTot + Math.pow(cur - average, 2);
-        }, 0)) /
-        totalWeight
-    ) /
-    10.0 /
-    6
+            return varTot + Math.pow(cur - average, 2);
+          }, 0) / totalWeight
+        )
+    ) / 10.0
   );
 }
 
@@ -178,7 +177,7 @@ export function getDADivergence(
     return stats.std;
   });
 
-  return avg(stds.filter((s) => s !== null) as number[]);
+  return Math.round((100 * avg(stds.filter((s) => s !== null) as number[])) / (section.name === "dp" ? 5 : 6)) / 100;
 }
 
 export function getCADivergence(cascadeAnalyses: DVCascadeAnalysis[]) {
@@ -186,7 +185,7 @@ export function getCADivergence(cascadeAnalyses: DVCascadeAnalysis[]) {
     return getStd(cascadeAnalyses.map((ca) => ca[`cr4de_${f}` as keyof DVCascadeAnalysis] as string | null));
   });
 
-  return avg(stds.filter((s) => s !== null) as number[]);
+  return Math.round((100 * avg(stds.filter((s) => s !== null) as number[])) / 6) / 100;
 }
 
 export const getQualiFieldName = (scenario: SCENARIOS, parameter: DIRECT_ANALYSIS_SECTION): keyof DVDirectAnalysis => {

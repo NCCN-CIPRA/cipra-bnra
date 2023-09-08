@@ -1,5 +1,6 @@
 import {
   DIRECT_ANALYSIS_SECTIONS_STANDARD,
+  avg,
   getCADivergence,
   getDADivergence,
   getDASections,
@@ -91,6 +92,16 @@ export default function InputOverviewTab({
       c.cascade._cr4de_effect_hazard_value !== riskFile.cr4de_riskfilesid
   );
 
+  console.log(
+    getDADivergence(
+      directAnalyses.filter((da) =>
+        participants.some((p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished)
+      ),
+      SCENARIOS.CONSIDERABLE,
+      { name: "dp50", label: "" }
+    )
+  );
+
   return (
     <>
       {riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING && (
@@ -162,7 +173,20 @@ export default function InputOverviewTab({
                           <TableCell align="center">
                             {section.name === "cb"
                               ? "-"
-                              : `${100 * getDADivergence(directAnalyses, scenario, section)}%`}
+                              : `${
+                                  100 *
+                                  getDADivergence(
+                                    directAnalyses?.filter((da) =>
+                                      participants?.some(
+                                        (p) =>
+                                          p._cr4de_contact_value === da._cr4de_expert_value &&
+                                          p.cr4de_direct_analysis_finished
+                                      )
+                                    ),
+                                    scenario,
+                                    section
+                                  )
+                                }%`}
                           </TableCell>
                           <TableCell align="center">
                             <Checkbox
@@ -266,7 +290,7 @@ export default function InputOverviewTab({
                     {100 *
                       getCADivergence(
                         input.cascadeAnalyses
-                          .filter((p) => p.cascadeAnalysis)
+                          .filter((i) => i.cascadeAnalysis && i.participant.cr4de_cascade_analysis_finished)
                           .map((p) => p.cascadeAnalysis) as DVCascadeAnalysis[]
                       )}
                     %
@@ -393,7 +417,48 @@ export default function InputOverviewTab({
                       </TableCell>
                     );
                   })}
-                  <TableCell align="center">-</TableCell>
+                  <TableCell align="center">
+                    {input.cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0
+                      ? `${
+                          100 *
+                          avg([
+                            getDADivergence(
+                              directAnalyses.filter((da) =>
+                                participants.some(
+                                  (p) =>
+                                    p._cr4de_contact_value === da._cr4de_expert_value &&
+                                    p.cr4de_cascade_analysis_finished
+                                )
+                              ),
+                              SCENARIOS.CONSIDERABLE,
+                              { name: "dp50", label: "" }
+                            ),
+                            getDADivergence(
+                              directAnalyses.filter((da) =>
+                                participants.some(
+                                  (p) =>
+                                    p._cr4de_contact_value === da._cr4de_expert_value &&
+                                    p.cr4de_cascade_analysis_finished
+                                )
+                              ),
+                              SCENARIOS.MAJOR,
+                              { name: "dp50", label: "" }
+                            ),
+                            getDADivergence(
+                              directAnalyses.filter((da) =>
+                                participants.some(
+                                  (p) =>
+                                    p._cr4de_contact_value === da._cr4de_expert_value &&
+                                    p.cr4de_cascade_analysis_finished
+                                )
+                              ),
+                              SCENARIOS.EXTREME,
+                              { name: "dp50", label: "" }
+                            ),
+                          ])
+                        }%`
+                      : "-"}
+                  </TableCell>
                   <TableCell align="center">
                     <Checkbox
                       checked={input.cascade.cr4de_quali !== null && input.cascade.cr4de_quali !== ""}
