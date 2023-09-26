@@ -32,6 +32,7 @@ import ProcessManagementPage from "./pages/admin/Management/ProcessManagementPag
 import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
 import Step2BPage from "./pages/step2B/Step2BPage";
 import RiskFilePage from "./pages/riskFile/RiskFilePage";
+import ConsensusExpertPage from "./pages/consensus/ConsensusExpertPage";
 
 function App() {
   useEffect(() => {
@@ -120,6 +121,10 @@ function App() {
                 {
                   path: "/step2B/:step2A_id",
                   element: <Step2BPage />,
+                },
+                {
+                  path: "/consensus/:riskFile_id",
+                  element: <ConsensusExpertPage />,
                 },
 
                 {

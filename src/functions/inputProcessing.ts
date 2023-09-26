@@ -39,19 +39,19 @@ export const DIRECT_ANALYSIS_SECTIONS_STANDARD: { [key in PARAMETER]: DIRECT_ANA
   },
   [PARAMETER.H]: {
     name: "h",
-    label: "Human Impact",
+    label: "Direct Human Impact",
   },
   [PARAMETER.S]: {
     name: "s",
-    label: "Societal Impact",
+    label: "Direct Societal Impact",
   },
   [PARAMETER.E]: {
     name: "e",
-    label: "Environmental Impact",
+    label: "Direct Environmental Impact",
   },
   [PARAMETER.F]: {
     name: "f",
-    label: "Fincancial Impact",
+    label: "Direct Fincancial Impact",
   },
   [PARAMETER.CB]: {
     name: "cb",
@@ -219,4 +219,26 @@ export const getQuantiFieldNames = (
   return DIRECT_ANALYSIS_QUANTI_FIELDS.filter((f) =>
     f.match(new RegExp(`cr4de_di_quanti_${parameter.name}.{1}_${SCENARIO_PARAMS[scenario].prefix}`, "g"))
   );
+};
+
+export const quantiLabels = {};
+
+export const getQuantiLabel = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDirectAnalysis<DVRiskFile>) => {
+  if (fieldName.indexOf("_dp_") >= 0) {
+    if (directAnalyses.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.STANDARD) return "Direct probability";
+    return "Motivation";
+  }
+
+  return {
+    ha: "Fatalities",
+    hb: "Injured / sick people",
+    hc: "People in need of assistance",
+    sa: "Supply shortfalls and unmet human needs",
+    sb: "Diminished public order and domestic security",
+    sc: "Damage to the reputation of Belgium",
+    sd: "Loss of confidence in or functioning of the state and/or its values",
+    ea: "Damaged ecosystems",
+    fa: "Financial asset damages",
+    fb: "Reduction of economic performance",
+  }[fieldName.replace("cr4de_di_quanti_", "").slice(0, 2)];
 };
