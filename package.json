@@ -10,6 +10,7 @@
     "@mui/lab": "^5.0.0-alpha.101",
     "@mui/material": "^5.10.7",
     "@mui/x-data-grid": "^6.2.0",
+    "@react-pdf/renderer": "^3.1.12",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -21,6 +22,7 @@
     "buffer": "^6.0.3",
     "d3-scale": "^4.0.2",
     "devextreme-react": "22.1.5",
+    "file-saver": "^2.0.5",
     "framer-motion": "^7.6.7",
     "http-proxy-middleware": "^2.0.6",
     "i18next": "^21.10.0",
@@ -67,6 +69,7 @@
     ]
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.5",
     "@types/uuid": "^8.3.4",
     "cypress": "^10.10.0",
     "eslint-plugin-cypress": "^2.12.1"

@@ -285,12 +285,17 @@ function CauseSection({
   riskFile: DVRiskFile;
   cascadeAnalysis: DVCascadeAnalysis<DVRiskCascade<SmallRisk, SmallRisk>>;
 }) {
-  const [open, setOpen] = useState(false);
+  const discussionRequired = Boolean(
+    cascadeAnalysis.cr4de_cascade.cr4de_discussion_required &&
+      cascadeAnalysis.cr4de_cascade.cr4de_discussion_required !== DiscussionRequired.NOT_NECESSARY
+  );
+
+  const [open, setOpen] = useState(discussionRequired);
 
   return (
     <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />} onClick={() => setOpen(!open)}>
-        <Typography>
+        <Typography sx={{ flex: 1 }}>
           <Link
             href={`/learning/risk/${cascadeAnalysis.cr4de_cascade.cr4de_cause_hazard.cr4de_riskfilesid}`}
             target="_blank"
@@ -305,6 +310,11 @@ function CauseSection({
             {cascadeAnalysis.cr4de_cascade.cr4de_effect_hazard.cr4de_title}
           </Link>
         </Typography>
+        {discussionRequired && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <ErrorIcon color="warning" />
+          </Tooltip>
+        )}
       </AccordionSummary>
       <AccordionDetails>
         <Stack direction="column" sx={{ width: "100%" }}>
@@ -343,12 +353,17 @@ function CauseSection({
 }
 
 function EmergingSection({ cascadeAnalysis }: { cascadeAnalysis: DVCascadeAnalysis<DVRiskCascade<SmallRisk>> }) {
-  const [open, setOpen] = useState(false);
+  const discussionRequired = Boolean(
+    cascadeAnalysis.cr4de_cascade.cr4de_discussion_required &&
+      cascadeAnalysis.cr4de_cascade.cr4de_discussion_required !== DiscussionRequired.NOT_NECESSARY
+  );
+
+  const [open, setOpen] = useState(discussionRequired);
 
   return (
     <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />} onClick={() => setOpen(!open)}>
-        <Typography>
+        <Typography sx={{ flex: 1 }}>
           Catalyzing Risk:{" "}
           <Link
             href={`/learning/risk/${cascadeAnalysis.cr4de_cascade.cr4de_cause_hazard.cr4de_riskfilesid}`}
@@ -357,6 +372,11 @@ function EmergingSection({ cascadeAnalysis }: { cascadeAnalysis: DVCascadeAnalys
             {cascadeAnalysis.cr4de_cascade.cr4de_cause_hazard.cr4de_title}
           </Link>
         </Typography>
+        {discussionRequired && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <ErrorIcon color="warning" />
+          </Tooltip>
+        )}
       </AccordionSummary>
       <AccordionDetails>
         <Stack direction="row" sx={{ width: "100%", justifyContent: "stretch" }}></Stack>

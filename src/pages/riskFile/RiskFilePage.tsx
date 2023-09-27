@@ -25,6 +25,8 @@ import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import AnalysisTab from "./analysis/AnalysisTab";
 import LoadingTab from "./LoadingTab";
 import { RiskAnalysisResults } from "../../types/dataverse/DVAnalysisRun";
+import GroupsIcon from "@mui/icons-material/Groups";
+import ConsensusTab from "./consensus/ConsensusTab";
 
 type RouteParams = {
   risk_file_id: string;
@@ -35,6 +37,7 @@ const TABS = {
   identification: 1,
   analysis: 2,
   input: 3,
+  consensus: 4,
 };
 
 const defaultBreadcrumbs: Breadcrumb[] = [
@@ -163,6 +166,7 @@ export default function RiskFilePage({}) {
             reloadCascadeAnalyses={reloadCascadeAnalyses}
           />
         )}
+        {riskFile && cascades && tab === 4 && <ConsensusTab riskFile={riskFile} cascades={cascades} />}
       </Box>
       <Paper sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }} elevation={3}>
         <BottomNavigation
@@ -191,6 +195,11 @@ export default function RiskFilePage({}) {
             label="Expert Input"
             icon={<PsychologyIcon />}
             onClick={() => setSearchParams({ tab: "input" })}
+          />
+          <BottomNavigationAction
+            label="Consensus Meeting"
+            icon={<GroupsIcon />}
+            onClick={() => setSearchParams({ tab: "consensus" })}
           />
         </BottomNavigation>
       </Paper>

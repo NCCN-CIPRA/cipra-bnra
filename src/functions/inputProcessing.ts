@@ -223,9 +223,17 @@ export const getQuantiFieldNames = (
 
 export const quantiLabels = {};
 
-export const getQuantiLabel = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDirectAnalysis<DVRiskFile>) => {
+export const getQuantiLabel = (
+  fieldName: keyof DVDirectAnalysis,
+  rfContainer: DVRiskFile | DVDirectAnalysis<DVRiskFile>
+) => {
   if (fieldName.indexOf("_dp_") >= 0) {
-    if (directAnalyses.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.STANDARD) return "Direct probability";
+    if ((rfContainer as DVDirectAnalysis<DVRiskFile>).cr4de_risk_file) {
+      if ((rfContainer as DVDirectAnalysis<DVRiskFile>).cr4de_risk_file.cr4de_risk_type === RISK_TYPE.STANDARD)
+        return "Direct probability";
+    } else {
+      if ((rfContainer as DVRiskFile).cr4de_risk_type === RISK_TYPE.STANDARD) return "Direct probability";
+    }
     return "Motivation";
   }
 

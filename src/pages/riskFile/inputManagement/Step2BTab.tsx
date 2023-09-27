@@ -253,6 +253,9 @@ export default function Step2BTab({
       c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
       c.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING
   );
+  const attacks = cascades.filter(
+    (c) => riskFile.cr4de_risk_type === RISK_TYPE.MANMADE && c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid
+  );
   const catalyzingEffects = cascades.filter(
     (c) =>
       c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
@@ -314,6 +317,37 @@ export default function Step2BTab({
                     >
                       <ListItemText
                         primary={c.cr4de_cause_hazard.cr4de_title}
+                        sx={{
+                          fontWeight:
+                            c.cr4de_bnrariskcascadeid === cascade.cr4de_bnrariskcascadeid ? "bold" : "regular",
+                        }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+              {(attacks.length > 0 || catalyzingEffects.length > 0 || catalyzedRisks.length > 0) && <Divider />}
+            </>
+          )}
+          {attacks.length > 0 && (
+            <>
+              <List>
+                <ListItem>
+                  <Typography variant="subtitle2">Potential Attacks</Typography>
+                </ListItem>
+                {attacks.map((c, i) => (
+                  <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
+                    <ListItemButton
+                      onClick={() => {
+                        setCascadeIndex(
+                          cascades.findIndex(
+                            (ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean
+                          )
+                        );
+                      }}
+                    >
+                      <ListItemText
+                        primary={c.cr4de_effect_hazard.cr4de_title}
                         sx={{
                           fontWeight:
                             c.cr4de_bnrariskcascadeid === cascade.cr4de_bnrariskcascadeid ? "bold" : "regular",
