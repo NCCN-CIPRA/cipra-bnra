@@ -1,1 +1,34 @@
+@media print {
+  header,
+  .MuiToolbar-root,
+  .MuiBox-root:has(> nav),
+  .consensus-introduction,
+  .MuiAccordionSummary-content svg,
+  .MuiAccordionSummary-expandIconWrapper,
+  .MuiAccordionDetails-root svg,
+  .consensus-scenario-stack,
+  .consensus-bottom-nav {
+    display: none !important;
+  }
 
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .MuiAccordionSummary-root {
+    min-height: 44px !important;
+  }
+  .MuiAccordionSummary-content {
+    margin: 10px 0 !important;
+  }
+
+  .consensus-scenario {
+    padding: 5px 10px !important;
+    box-shadow: none !important;
+  }
+
+  .consensus-scenario-stack-expanded:not(:last-child) {
+    border-right: 1px solid #eee !important;
+  }
+}

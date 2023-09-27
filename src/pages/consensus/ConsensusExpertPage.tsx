@@ -14,9 +14,6 @@ import useRecords from "../../hooks/useRecords";
 import Standard from "./Standard";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import { pdf } from "@react-pdf/renderer";
-import * as FileSaver from "file-saver";
-import ConsensusPDF from "./pdf/ConsensusPDF";
 
 type RouteParams = {
   riskFile_id: string;
@@ -47,16 +44,6 @@ export default function ConsensusExpertPage() {
     table: DataTable.CASCADE_ANALYSIS,
     query: `$filter=_cr4de_risk_file_value eq ${routeParams.riskFile_id} and _cr4de_expert_value eq ${user.contactid}&$expand=cr4de_cascade($expand=cr4de_cause_hazard($select=cr4de_title,cr4de_risk_type),cr4de_effect_hazard($select=cr4de_title,cr4de_risk_type))`,
   });
-
-  const generatePDF = async () => {
-    if (!directAnalysis || !directAnalysis[0] || !cascadeAnalyses) return;
-
-    const file = await pdf(
-      <ConsensusPDF directAnalysis={directAnalysis[0]} cascadeAnalyses={cascadeAnalyses} />
-    ).toBlob();
-
-    FileSaver.saveAs(file, `${directAnalysis[0].cr4de_risk_file.cr4de_hazard_id}_consensus.pdf`);
-  };
 
   usePageTitle(t("step3.pageTitle", "BNRA 2023 - 2026 Risk File Consensus"));
   useBreadcrumbs([
@@ -91,11 +78,12 @@ export default function ConsensusExpertPage() {
         }}
         component={Paper}
         elevation={5}
+        className="consensus-bottom-nav"
       >
         <Box id="directAnalysis-next-buttons">
           {directAnalysis && directAnalysis[0] && cascadeAnalyses && (
-            <Button color="primary" sx={{ mr: 1 }} onClick={generatePDF}>
-              <Trans i18nKey="button.export">Export to PDF</Trans>
+            <Button color="primary" sx={{ mr: 1 }} onClick={() => window.print()}>
+              <Trans i18nKey="button.printOverview">Print Overview</Trans>
             </Button>
           )}
           <Button color="primary" sx={{ mr: 1 }} onClick={() => navigate("/overview")}>

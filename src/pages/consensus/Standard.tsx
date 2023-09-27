@@ -174,7 +174,11 @@ function ScenarioSection({
   const quantiNames = useMemo(() => getQuantiFieldNames(scenario, section), [scenario, parameter]);
 
   return (
-    <Stack direction="column" sx={{ flex: open ? 10 : 1, transition: "all .3s ease" }}>
+    <Stack
+      direction="column"
+      sx={{ flex: open ? 10 : 1, transition: "all .3s ease" }}
+      className={`consensus-scenario-stack${open ? "-expanded" : ""}`}
+    >
       <Paper
         sx={{
           p: 2,
@@ -187,6 +191,7 @@ function ScenarioSection({
           borderRadius: 0,
           display: "flex",
         }}
+        className="consensus-scenario"
         onClick={() => setOpen(!open)}
       >
         <ExpandMoreIcon sx={{ transform: open ? "none" : "rotate(-90deg)" }} />
