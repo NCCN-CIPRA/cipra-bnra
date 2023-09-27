@@ -64,6 +64,18 @@ const dataColumns: GridColDef[] = [
     flex: 1,
   },
   {
+    field: "analist",
+    headerName: "Analist",
+    width: 150,
+    valueGetter: (params: GridValueGetterParams<RiskFileParticipation>) => {
+      console.log(params.row.participations);
+      return params.row.participations.find((p) => p.cr4de_role === "analist")?.cr4de_contact.firstname;
+    },
+    renderCell: (params: GridRenderCellParams<RiskFileParticipation>) => {
+      return params.row.participations.find((p) => p.cr4de_role === "analist")?.cr4de_contact.firstname;
+    },
+  },
+  {
     field: "cr4de_risk_category",
     headerName: "Category",
     width: 150,
@@ -204,7 +216,7 @@ const dataColumns: GridColDef[] = [
 ];
 
 interface RiskFileParticipation extends DVRiskFile<RiskAnalysisResults> {
-  participations: DVParticipation[];
+  participations: DVParticipation<DVContact>[];
 }
 
 export default function EditorIntroPage() {
@@ -236,7 +248,7 @@ export default function EditorIntroPage() {
   const { data: participations } = useRecords<DVParticipation<DVContact>>({
     table: DataTable.PARTICIPATION,
     query:
-      "$select=cr4de_contact,_cr4de_risk_file_value,cr4de_role,cr4de_direct_analysis_finished,cr4de_cascade_analysis_finished&$expand=cr4de_contact($select=emailaddress1)",
+      "$select=cr4de_contact,_cr4de_risk_file_value,cr4de_role,cr4de_direct_analysis_finished,cr4de_cascade_analysis_finished&$expand=cr4de_contact($select=emailaddress1,firstname)",
   });
 
   useEffect(() => {

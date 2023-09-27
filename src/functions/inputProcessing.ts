@@ -1,5 +1,5 @@
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
-import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
+import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis, FieldQuality } from "../types/dataverse/DVDirectAnalysis";
 import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
 import { SCENARIOS, SCENARIO_PARAMS } from "./scenarios";
 
@@ -250,3 +250,35 @@ export const getQuantiLabel = (
     fb: "Reduction of economic performance",
   }[fieldName.replace("cr4de_di_quanti_", "").slice(0, 2)];
 };
+
+function getAveragesForScenarios(parameter: string, field: string, directAnalyses: DVDirectAnalysis[]) {
+  return {
+    [`${field}_c`]: getAverage(
+      directAnalyses.map((da) => da[`${field}_c` as keyof DVDirectAnalysis]) as string[],
+      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_c}` as keyof FieldQuality]) || 2.5)
+    ),
+    [`${field}_m`]: getAverage(
+      directAnalyses.map((da) => da[`${field}_m` as keyof DVDirectAnalysis]) as string[],
+      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_m}` as keyof FieldQuality]) || 2.5)
+    ),
+    [`${field}_e`]: getAverage(
+      directAnalyses.map((da) => da[`${field}_e` as keyof DVDirectAnalysis]) as string[],
+      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_e}` as keyof FieldQuality]) || 2.5)
+    ),
+  };
+}
+export function getConsensusRiskFile(directAnalyses: DVDirectAnalysis[]) {
+  return {
+    ...getAveragesForScenarios("dp", "cr4de_dp_quanti", directAnalyses),
+    ...getAveragesForScenarios("ha", "cr4de_di_quanti_ha", directAnalyses),
+    ...getAveragesForScenarios("hb", "cr4de_di_quanti_hb", directAnalyses),
+    ...getAveragesForScenarios("hc", "cr4de_di_quanti_hc", directAnalyses),
+    ...getAveragesForScenarios("sa", "cr4de_di_quanti_sa", directAnalyses),
+    ...getAveragesForScenarios("sb", "cr4de_di_quanti_sb", directAnalyses),
+    ...getAveragesForScenarios("sc", "cr4de_di_quanti_sc", directAnalyses),
+    ...getAveragesForScenarios("sd", "cr4de_di_quanti_sd", directAnalyses),
+    ...getAveragesForScenarios("ea", "cr4de_di_quanti_ea", directAnalyses),
+    ...getAveragesForScenarios("fa", "cr4de_di_quanti_fa", directAnalyses),
+    ...getAveragesForScenarios("fb", "cr4de_di_quanti_fb", directAnalyses),
+  };
+}
