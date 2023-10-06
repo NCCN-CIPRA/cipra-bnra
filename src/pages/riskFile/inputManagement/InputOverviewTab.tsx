@@ -92,16 +92,6 @@ export default function InputOverviewTab({
       c.cascade._cr4de_effect_hazard_value !== riskFile.cr4de_riskfilesid
   );
 
-  console.log(
-    getDADivergence(
-      directAnalyses.filter((da) =>
-        participants.some((p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished)
-      ),
-      SCENARIOS.CONSIDERABLE,
-      { name: "dp50", label: "" }
-    )
-  );
-
   return (
     <>
       {riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING && (

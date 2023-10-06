@@ -126,10 +126,13 @@ export default function RiskFilePage({}) {
         {tab === 0 && (
           <OverviewTab
             riskFile={riskFile}
+            cascades={cascades}
             directAnalyses={directAnalyses}
             cascadeAnalyses={cascadeAnalyses}
             participants={participants}
             calculations={calculations}
+            reloadRiskFile={reloadRiskFile}
+            reloadCascades={reloadCascades}
           />
         )}
         {riskFile && tab === 1 && (
@@ -166,7 +169,17 @@ export default function RiskFilePage({}) {
             reloadCascadeAnalyses={reloadCascadeAnalyses}
           />
         )}
-        {riskFile && cascades && tab === 4 && <ConsensusTab riskFile={riskFile} cascades={cascades} />}
+        {riskFile && cascades && participants && directAnalyses && cascadeAnalyses && tab === 4 && (
+          <ConsensusTab
+            riskFile={riskFile}
+            cascades={cascades}
+            participants={participants}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            reloadRiskFile={reloadRiskFile}
+            reloadCascades={reloadCascades}
+          />
+        )}
       </Box>
       <Paper sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }} elevation={3}>
         <BottomNavigation

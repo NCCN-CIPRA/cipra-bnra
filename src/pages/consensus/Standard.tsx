@@ -73,7 +73,7 @@ export default function Standard({
   const emerging = useMemo(() => {
     return cascadeAnalyses.filter((ca) => ca.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING);
   }, [cascadeAnalyses]);
-
+  console.log(causes, cascadeAnalyses);
   return (
     <>
       <Container>

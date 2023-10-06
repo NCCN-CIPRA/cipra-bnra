@@ -27,6 +27,8 @@ import { DVContact } from "../types/dataverse/DVContact";
 import useAPI, { DataTable } from "../hooks/useAPI";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import useRecords from "../hooks/useRecords";
+import DoneIcon from "@mui/icons-material/Done";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 
 const roles = {
   analist: "Author",
@@ -120,9 +122,27 @@ export default function ParticipationTable({
                     {p.cr4de_contact.emailaddress1}
                   </TableCell>
                   <TableCell sx={{ whiteSpace: "nowrap" }}>{roles[p.cr4de_role as keyof typeof roles]}</TableCell>
-                  <TableCell align="center"></TableCell>
-                  <TableCell align="center"></TableCell>
-                  <TableCell align="center"></TableCell>
+                  <TableCell align="center">
+                    {p.cr4de_validation_finished ? (
+                      <DoneIcon color="success" sx={{ fontSize: 16 }} />
+                    ) : (
+                      <HourglassEmptyIcon color="warning" sx={{ opacity: 0.5, fontSize: 16 }} />
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {p.cr4de_direct_analysis_finished ? (
+                      <DoneIcon color="success" sx={{ fontSize: 16 }} />
+                    ) : (
+                      <HourglassEmptyIcon color="warning" sx={{ opacity: 0.5, fontSize: 16 }} />
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {p.cr4de_cascade_analysis_finished ? (
+                      <DoneIcon color="success" sx={{ fontSize: 16 }} />
+                    ) : (
+                      <HourglassEmptyIcon color="warning" sx={{ opacity: 0.5, fontSize: 16 }} />
+                    )}
+                  </TableCell>
                   <TableCell align="center"></TableCell>
                 </TableRow>
               ))}

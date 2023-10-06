@@ -287,7 +287,7 @@ export default function EditorIntroPage() {
           </Paper>
         </Box>
       )}
-      <Container>
+      {/* <Container>
         <RiskFileList
           riskFiles={riskFiles}
           onClick={async (riskFile) => {
@@ -296,7 +296,7 @@ export default function EditorIntroPage() {
             navigate(`/risks/${riskFile.cr4de_riskfilesid}`);
           }}
         />
-      </Container>
+      </Container> */}
     </>
   );
 }

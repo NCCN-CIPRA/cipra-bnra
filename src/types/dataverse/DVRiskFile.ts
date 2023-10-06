@@ -7,6 +7,12 @@ export enum RISK_TYPE {
   EMERGING = "Emerging Risk",
 }
 
+export enum CONSENSUS_TYPE {
+  MEETING = 0,
+  SILENCE = 1,
+  NONE = 2,
+}
+
 export interface RiskFileEditableFields {
   cr4de_definition: string | null;
   cr4de_historical_events: string | null;
@@ -111,6 +117,8 @@ export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableF
   cr4de_step2a_enabled_on: Date | null;
   cr4de_step2b_enabled: boolean | null;
   cr4de_step2b_enabled_on: Date | null;
+  cr4de_consensus_type: CONSENSUS_TYPE | null;
+  cr4de_consensus_date: Date | null;
   cr4de_discussion_required: DiscussionsRequired | null;
 
   cr4de_is_test: boolean | null;

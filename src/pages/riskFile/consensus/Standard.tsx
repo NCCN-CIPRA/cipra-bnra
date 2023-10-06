@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Container, Box, Stack, Paper, Link, Tooltip, Button } from "@mui/material";
+import { Container, Box, Stack, Paper, Link, Tooltip, Button, Alert } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVRiskFile, DiscussionsRequired, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
@@ -22,11 +22,17 @@ import {
 } from "../../../functions/inputProcessing";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import CascadeMatrix from "../../step2B/information/CascadeMatrix";
 import ErrorIcon from "@mui/icons-material/Error";
 import { DiscussionRequired } from "../../../types/DiscussionRequired";
 import TextInputBox from "../../../components/TextInputBox";
 import { DPSlider } from "../../step2A/sections/QuantitativeMarks";
+import { Slider } from "./Slider";
+import useAPI from "../../../hooks/useAPI";
+import { LoadingButton } from "@mui/lab";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { DVContact } from "../../../types/dataverse/DVContact";
+import { DirectImpactField } from "../../learning/QuantitativeScales/DI";
+import CascadeMatrix from "./CascadeMatrix";
 
 const capFirst = (s: string) => {
   return `${s[0].toUpperCase()}${s.slice(1)}`;
@@ -64,9 +70,17 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 export default function Standard({
   riskFile,
   cascades,
+  directAnalyses,
+  cascadeAnalyses,
+  reloadRiskFile,
+  reloadCascades,
 }: {
   riskFile: DVRiskFile;
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
+  directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
+  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
+  reloadRiskFile: () => Promise<void>;
+  reloadCascades: () => Promise<void>;
 }) {
   const causes = useMemo(() => {
     return cascades.filter((ca) => ca.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING);
@@ -78,22 +92,71 @@ export default function Standard({
   return (
     <>
       <Box sx={{ mx: 4 }}>
+        {riskFile.cr4de_consensus_type === null && (
+          <Box sx={{ mb: 4, border: "1px solid #ff9800aa" }}>
+            <Alert severity="warning">
+              The consensus phase for this risk file has not yet been started so average values for quantitative
+              parameters can not yet be displayed.
+            </Alert>
+          </Box>
+        )}
         <Box sx={{ mb: 8 }}>
-          <ParameterSection riskFile={riskFile} parameter={PARAMETER.DP} />
-          <ParameterSection riskFile={riskFile} parameter={PARAMETER.H} />
-          <ParameterSection riskFile={riskFile} parameter={PARAMETER.S} />
-          <ParameterSection riskFile={riskFile} parameter={PARAMETER.E} />
-          <ParameterSection riskFile={riskFile} parameter={PARAMETER.F} />
-          <ParameterSection riskFile={riskFile} parameter={PARAMETER.CB} />
+          <ParameterSection
+            riskFile={riskFile}
+            parameter={PARAMETER.DP}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            reloadRiskFile={reloadRiskFile}
+          />
+          <ParameterSection
+            riskFile={riskFile}
+            parameter={PARAMETER.H}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            reloadRiskFile={reloadRiskFile}
+          />
+          <ParameterSection
+            riskFile={riskFile}
+            parameter={PARAMETER.S}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            reloadRiskFile={reloadRiskFile}
+          />
+          <ParameterSection
+            riskFile={riskFile}
+            parameter={PARAMETER.E}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            reloadRiskFile={reloadRiskFile}
+          />
+          <ParameterSection
+            riskFile={riskFile}
+            parameter={PARAMETER.F}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            reloadRiskFile={reloadRiskFile}
+          />
+          <ParameterSection
+            riskFile={riskFile}
+            parameter={PARAMETER.CB}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            reloadRiskFile={reloadRiskFile}
+          />
         </Box>
         <Box sx={{ mb: 8 }}>
           {causes.map((ca) => (
-            <CauseSection key={ca.cr4de_bnrariskcascadeid} riskFile={riskFile} cascade={ca} />
+            <CauseSection
+              key={ca.cr4de_bnrariskcascadeid}
+              riskFile={riskFile}
+              cascade={ca}
+              reloadCascades={reloadCascades}
+            />
           ))}
         </Box>
         <Box sx={{ mb: 8 }}>
           {emerging.map((ca) => (
-            <EmergingSection key={ca.cr4de_bnrariskcascadeid} cascade={ca} />
+            <EmergingSection key={ca.cr4de_bnrariskcascadeid} cascade={ca} reloadCascades={reloadCascades} />
           ))}
         </Box>
       </Box>
@@ -101,36 +164,103 @@ export default function Standard({
   );
 }
 
-function ParameterSection({ riskFile, parameter }: { riskFile: DVRiskFile; parameter: PARAMETER }) {
+function ParameterSection({
+  riskFile,
+  parameter,
+  directAnalyses,
+  cascadeAnalyses,
+  reloadRiskFile,
+}: {
+  riskFile: DVRiskFile;
+  parameter: PARAMETER;
+  directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
+  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
+  reloadRiskFile: () => Promise<void>;
+}) {
   const section = DIRECT_ANALYSIS_SECTIONS_STANDARD[parameter];
   const discussionRequired = useMemo(() => {
     if (!riskFile.cr4de_discussion_required) return false;
 
-    return Object.keys(riskFile.cr4de_discussion_required).some(
-      (k) =>
-        k.indexOf(section.name) >= 0 &&
-        riskFile.cr4de_discussion_required &&
-        riskFile.cr4de_discussion_required[k as keyof DiscussionsRequired] !== DiscussionRequired.NOT_NECESSARY
-    );
+    if (
+      Object.keys(riskFile.cr4de_discussion_required).some(
+        (k) =>
+          k.indexOf(section.name) >= 0 &&
+          riskFile.cr4de_discussion_required &&
+          riskFile.cr4de_discussion_required[k as keyof DiscussionsRequired] === DiscussionRequired.REQUIRED
+      )
+    )
+      return DiscussionRequired.REQUIRED;
+    if (
+      Object.keys(riskFile.cr4de_discussion_required).some(
+        (k) =>
+          k.indexOf(section.name) >= 0 &&
+          riskFile.cr4de_discussion_required &&
+          riskFile.cr4de_discussion_required[k as keyof DiscussionsRequired] === DiscussionRequired.PREFERRED
+      )
+    )
+      return DiscussionRequired.PREFERRED;
+    if (
+      Object.keys(riskFile.cr4de_discussion_required).some(
+        (k) =>
+          k.indexOf(section.name) >= 0 &&
+          riskFile.cr4de_discussion_required &&
+          riskFile.cr4de_discussion_required[k as keyof DiscussionsRequired] === DiscussionRequired.RESOLVED
+      )
+    )
+      return DiscussionRequired.RESOLVED;
+    return DiscussionRequired.NOT_NECESSARY;
   }, [riskFile, parameter]);
 
-  const [open, setOpen] = useState(discussionRequired);
+  const [open, setOpen] = useState(
+    discussionRequired === DiscussionRequired.PREFERRED || discussionRequired === DiscussionRequired.REQUIRED
+  );
 
   return (
     <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />} onClick={() => setOpen(!open)}>
         <Typography sx={{ flex: 1 }}>{section.label}</Typography>
-        {discussionRequired && (
+        {discussionRequired === DiscussionRequired.REQUIRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="warning" />
+          </Tooltip>
+        )}
+        {discussionRequired === DiscussionRequired.PREFERRED && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <ErrorIcon color="info" />
+          </Tooltip>
+        )}
+        {discussionRequired === DiscussionRequired.RESOLVED && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <CheckCircleIcon color="success" />
           </Tooltip>
         )}
       </AccordionSummary>
       <AccordionDetails>
         <Stack direction="row" sx={{ width: "100%", justifyContent: "stretch" }}>
-          <ScenarioSection riskFile={riskFile} parameter={parameter} scenario={SCENARIOS.CONSIDERABLE} />
-          <ScenarioSection riskFile={riskFile} parameter={parameter} scenario={SCENARIOS.MAJOR} />
-          <ScenarioSection riskFile={riskFile} parameter={parameter} scenario={SCENARIOS.EXTREME} />
+          <ScenarioSection
+            riskFile={riskFile}
+            parameter={parameter}
+            scenario={SCENARIOS.CONSIDERABLE}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            reloadRiskFile={reloadRiskFile}
+          />
+          <ScenarioSection
+            riskFile={riskFile}
+            parameter={parameter}
+            scenario={SCENARIOS.MAJOR}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            reloadRiskFile={reloadRiskFile}
+          />
+          <ScenarioSection
+            riskFile={riskFile}
+            parameter={parameter}
+            scenario={SCENARIOS.EXTREME}
+            directAnalyses={directAnalyses}
+            cascadeAnalyses={cascadeAnalyses}
+            reloadRiskFile={reloadRiskFile}
+          />
         </Stack>
       </AccordionDetails>
     </Accordion>
@@ -141,31 +271,50 @@ function ScenarioSection({
   riskFile,
   parameter,
   scenario,
+  directAnalyses,
+  cascadeAnalyses,
+  reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   parameter: PARAMETER;
   scenario: SCENARIOS;
+  directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
+  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
+  reloadRiskFile: () => Promise<void>;
 }) {
+  const api = useAPI();
   const section = DIRECT_ANALYSIS_SECTIONS_STANDARD[parameter];
   const discussionRequired = useMemo(() => {
     if (!riskFile.cr4de_discussion_required) return false;
 
-    return (
-      Boolean(
-        riskFile.cr4de_discussion_required[
-          `${section.name}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
-        ]
-      ) &&
-      riskFile.cr4de_discussion_required[
-        `${section.name}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
-      ] !== DiscussionRequired.NOT_NECESSARY
-    );
+    return riskFile.cr4de_discussion_required[
+      `${section.name}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
+    ];
   }, [riskFile, parameter]);
 
-  const [open, setOpen] = useState(discussionRequired);
+  const [open, setOpen] = useState(
+    discussionRequired === DiscussionRequired.PREFERRED || discussionRequired === DiscussionRequired.REQUIRED
+  );
+  const [saving, setSaving] = useState(false);
 
   const qualiName = useMemo(() => getQualiFieldName(scenario, section), [scenario, parameter]);
   const quantiNames = useMemo(() => getQuantiFieldNames(scenario, section), [scenario, parameter]);
+
+  const [quali, setQuali] = useState<string | null>((riskFile[qualiName as keyof DVRiskFile] as string | null) || "");
+
+  const handleSave = async () => {
+    setSaving(true);
+    await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+      [qualiName]: quali,
+      cr4de_discussion_required: JSON.stringify({
+        ...riskFile.cr4de_discussion_required,
+        [`${section.name}_${SCENARIO_PARAMS[scenario].prefix}`]: DiscussionRequired.RESOLVED,
+      }),
+    });
+    await reloadRiskFile();
+    setSaving(false);
+    setOpen(false);
+  };
 
   return (
     <Stack direction="column" sx={{ flex: open ? 10 : 1, transition: "all .3s ease" }}>
@@ -187,9 +336,19 @@ function ScenarioSection({
         <Typography variant="subtitle1" sx={{ flex: 1 }}>
           {capFirst(scenario)}
         </Typography>
-        {discussionRequired && (
+        {discussionRequired === DiscussionRequired.REQUIRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="warning" />
+          </Tooltip>
+        )}
+        {discussionRequired === DiscussionRequired.PREFERRED && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <ErrorIcon color="info" />
+          </Tooltip>
+        )}
+        {discussionRequired === DiscussionRequired.RESOLVED && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <CheckCircleIcon color="success" />
           </Tooltip>
         )}
       </Paper>
@@ -197,9 +356,12 @@ function ScenarioSection({
       {open && (
         <Box sx={{ p: 2 }}>
           <Typography variant="subtitle2">Final Consensus Results:</Typography>
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ mt: 2, mb: 4 }}>
             <TextInputBox
-              initialValue={(riskFile[qualiName as keyof DVRiskFile] as string | null) || ""}
+              initialValue={quali}
+              setUpdatedValue={(newValue) => {
+                setQuali(newValue || null);
+              }}
               // onSave={async (newValue) => handleSave(qualiName, newValue)}
             />
 
@@ -210,12 +372,21 @@ function ScenarioSection({
                     <Typography variant="caption" sx={{ flex: 1 }}>
                       <i>{getQuantiLabel(n, riskFile)}</i> Estimation:
                     </Typography>
-                    <Box sx={{ flex: 1, minWidth: "300px" }}>
-                      <DPSlider
-                        initialValue={riskFile[n as keyof DVRiskFile] as string}
-                        error={false}
-                        onChange={() => {}}
-                      />
+                    <Box sx={{ flex: 1, minWidth: "300px", textAlign: "right", fontWeight: "bold" }}>
+                      {riskFile.cr4de_consensus_type !== null ? (
+                        <Slider
+                          initialValue={riskFile[n as keyof DVRiskFile] as string}
+                          name={n}
+                          spread={[2, 4.5]}
+                          onChange={async (newValue) => {
+                            await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+                              [n]: newValue,
+                            });
+                          }}
+                        />
+                      ) : (
+                        <Typography variant="subtitle2">N/A</Typography>
+                      )}
                     </Box>
                   </Stack>
                 ))}
@@ -241,7 +412,9 @@ function ScenarioSection({
             }}
           /> */}
           <Box sx={{ textAlign: "center" }}>
-            <Button variant="outlined">Save & Close</Button>
+            <LoadingButton loading={saving} variant="outlined" onClick={handleSave}>
+              Save & Close
+            </LoadingButton>
           </Box>
         </Box>
       )}
@@ -249,12 +422,35 @@ function ScenarioSection({
   );
 }
 
-function CauseSection({ riskFile, cascade }: { riskFile: DVRiskFile; cascade: DVRiskCascade<SmallRisk, SmallRisk> }) {
-  const discussionRequired = Boolean(
-    cascade.cr4de_discussion_required && cascade.cr4de_discussion_required !== DiscussionRequired.NOT_NECESSARY
-  );
+function CauseSection({
+  riskFile,
+  cascade,
+  reloadCascades,
+}: {
+  riskFile: DVRiskFile;
+  cascade: DVRiskCascade<SmallRisk, SmallRisk>;
+  reloadCascades: () => Promise<void>;
+}) {
+  const api = useAPI();
+  const discussionRequired = cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
 
-  const [open, setOpen] = useState(discussionRequired);
+  const [open, setOpen] = useState(
+    discussionRequired === DiscussionRequired.PREFERRED || discussionRequired === DiscussionRequired.REQUIRED
+  );
+  const [saving, setSaving] = useState(false);
+
+  const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali || "");
+
+  const handleSave = async () => {
+    setSaving(true);
+    await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+      cr4de_quali: quali,
+      cr4de_discussion_required: DiscussionRequired.RESOLVED,
+    });
+    await reloadCascades();
+    setSaving(false);
+    setOpen(false);
+  };
 
   return (
     <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
@@ -268,9 +464,19 @@ function CauseSection({ riskFile, cascade }: { riskFile: DVRiskFile; cascade: DV
             {cascade.cr4de_effect_hazard.cr4de_title}
           </Link>
         </Typography>
-        {discussionRequired && (
+        {discussionRequired === DiscussionRequired.REQUIRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="warning" />
+          </Tooltip>
+        )}
+        {discussionRequired === DiscussionRequired.PREFERRED && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <ErrorIcon color="info" />
+          </Tooltip>
+        )}
+        {discussionRequired === DiscussionRequired.RESOLVED && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <CheckCircleIcon color="success" />
           </Tooltip>
         )}
       </AccordionSummary>
@@ -281,7 +487,12 @@ function CauseSection({ riskFile, cascade }: { riskFile: DVRiskFile; cascade: DV
               cascadeAnalysis={cascade as unknown as DVCascadeAnalysis}
               cause={cascade.cr4de_cause_hazard as DVRiskFile}
               effect={riskFile}
-              onChangeScenario={() => {}}
+              onChange={async (field, newValue) => {
+                await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+                  [field]: newValue,
+                });
+                reloadCascades();
+              }}
             />
           </Box>
 
@@ -290,11 +501,15 @@ function CauseSection({ riskFile, cascade }: { riskFile: DVRiskFile; cascade: DV
               Final Consensus Results:
             </Typography>
             <TextInputBox
-              initialValue={cascade.cr4de_quali || ""}
-              // onSave={async (newValue) => handleSave(qualiName, newValue)}
+              initialValue={quali}
+              setUpdatedValue={(newValue) => {
+                setQuali(newValue || null);
+              }}
             />
             <Box sx={{ textAlign: "center", mt: 4 }}>
-              <Button variant="outlined">Save & Close</Button>
+              <LoadingButton loading={saving} onClick={handleSave} variant="outlined">
+                Save & Close
+              </LoadingButton>
             </Box>
           </Box>
         </Stack>
@@ -303,12 +518,33 @@ function CauseSection({ riskFile, cascade }: { riskFile: DVRiskFile; cascade: DV
   );
 }
 
-function EmergingSection({ cascade }: { cascade: DVRiskCascade<SmallRisk> }) {
-  const discussionRequired = Boolean(
-    cascade.cr4de_discussion_required && cascade.cr4de_discussion_required !== DiscussionRequired.NOT_NECESSARY
-  );
+function EmergingSection({
+  cascade,
+  reloadCascades,
+}: {
+  cascade: DVRiskCascade<SmallRisk>;
+  reloadCascades: () => Promise<void>;
+}) {
+  const api = useAPI();
+  const discussionRequired = cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
 
-  const [open, setOpen] = useState(discussionRequired);
+  const [open, setOpen] = useState(
+    discussionRequired === DiscussionRequired.PREFERRED || discussionRequired === DiscussionRequired.REQUIRED
+  );
+  const [saving, setSaving] = useState(false);
+
+  const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali || "");
+
+  const handleSave = async () => {
+    setSaving(true);
+    await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+      cr4de_quali: quali,
+      cr4de_discussion_required: DiscussionRequired.RESOLVED,
+    });
+    await reloadCascades();
+    setSaving(false);
+    setOpen(false);
+  };
 
   return (
     <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
@@ -319,14 +555,41 @@ function EmergingSection({ cascade }: { cascade: DVRiskCascade<SmallRisk> }) {
             {cascade.cr4de_cause_hazard.cr4de_title}
           </Link>
         </Typography>
-        {discussionRequired && (
+        {discussionRequired === DiscussionRequired.REQUIRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="warning" />
           </Tooltip>
         )}
+        {discussionRequired === DiscussionRequired.PREFERRED && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <ErrorIcon color="info" />
+          </Tooltip>
+        )}
+        {discussionRequired === DiscussionRequired.RESOLVED && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <CheckCircleIcon color="success" />
+          </Tooltip>
+        )}
       </AccordionSummary>
       <AccordionDetails>
-        <Stack direction="row" sx={{ width: "100%", justifyContent: "stretch" }}></Stack>
+        <Stack direction="row" sx={{ width: "100%", justifyContent: "stretch" }}>
+          <Box sx={{ p: 4 }}>
+            <Typography variant="subtitle2" sx={{ mb: 2 }}>
+              Final Consensus Results:
+            </Typography>
+            <TextInputBox
+              initialValue={quali}
+              setUpdatedValue={(newValue) => {
+                setQuali(newValue || null);
+              }}
+            />
+            <Box sx={{ textAlign: "center", mt: 4 }}>
+              <LoadingButton loading={saving} onClick={handleSave} variant="outlined">
+                Save & Close
+              </LoadingButton>
+            </Box>
+          </Box>
+        </Stack>
       </AccordionDetails>
     </Accordion>
   );

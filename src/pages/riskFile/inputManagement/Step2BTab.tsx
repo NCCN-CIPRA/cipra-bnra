@@ -155,7 +155,14 @@ export default function Step2BTab({
               c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING
           )
         );
-      else setCascadeIndex(cascades.findIndex((c) => c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid));
+      else
+        setCascadeIndex(
+          cascades.findIndex(
+            (c) =>
+              c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid &&
+              c.cr4de_effect_hazard.cr4de_risk_type !== RISK_TYPE.MANMADE
+          )
+        );
     }
   }, [cascades, riskFile, cascadeIndex]);
 
@@ -262,7 +269,10 @@ export default function Step2BTab({
       c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING
   );
   const catalyzedRisks = cascades.filter(
-    (c) => c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid && riskFile.cr4de_risk_type === RISK_TYPE.EMERGING
+    (c) =>
+      c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid &&
+      riskFile.cr4de_risk_type === RISK_TYPE.EMERGING &&
+      c.cr4de_effect_hazard.cr4de_risk_type !== RISK_TYPE.MANMADE
   );
 
   const cascade = cascades[cascadeIndex];
@@ -689,7 +699,7 @@ function ExpertInput({
       setRating(cascadeAnalysis.cr4de_quality);
     }
   }, [cascadeAnalysis]);
-  console.log(cascade);
+
   return (
     <Grid container wrap="nowrap" spacing={2}>
       <Grid justifyContent="left" item xs zeroMinWidth>

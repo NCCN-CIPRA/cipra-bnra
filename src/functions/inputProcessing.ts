@@ -1,6 +1,7 @@
-import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
+import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis, FieldQuality } from "../types/dataverse/DVDirectAnalysis";
 import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
+import { getProbabilityScale } from "./Probability";
 import { SCENARIOS, SCENARIO_PARAMS } from "./scenarios";
 
 interface DIRECT_ANALYSIS_SECTION {
@@ -59,7 +60,7 @@ export const DIRECT_ANALYSIS_SECTIONS_STANDARD: { [key in PARAMETER]: DIRECT_ANA
   },
 };
 
-export const DIRECT_ANALYSIS_SECTIONS_MANMADE: Partial<{ [key in PARAMETER]: DIRECT_ANALYSIS_SECTION }> = {
+export const DIRECT_ANALYSIS_SECTIONS_MANMADE: { [PARAMETER.DP]: DIRECT_ANALYSIS_SECTION } = {
   [PARAMETER.DP]: {
     name: "dp",
     label: "Motivation",
@@ -91,17 +92,26 @@ function getQuantiNumbers(quantiInput: (string | null)[]) {
   };
 }
 
+export function getQuantiNumber(quantiString: string) {
+  const prefix = quantiString.slice(0, quantiString.search(/\d/));
+
+  return {
+    prefix,
+    number: parseFloat(quantiString.replace(prefix, "")),
+  };
+}
+
 export function avg(n: number[], weights?: number[]) {
   const totalWeight = weights ? weights.reduce((tot, cur) => tot + cur) : n.length;
 
   return (
     Math.round(
-      10 *
+      2 *
         n.reduce((tot, cur, i) => {
           if (weights) return tot + (cur * weights[i]) / totalWeight;
           return tot + cur / totalWeight;
         }, 0)
-    ) / 10
+    ) / 2
   );
 }
 
@@ -160,6 +170,17 @@ export function getStats(quantiInput: (string | null)[], weights?: number[]): ST
     maxLabel: `${n.prefix}${values.max}`,
     avgLabel: `${n.prefix}${values.avg}`,
   };
+}
+
+export function getDASpread(directAnalyses: DVDirectAnalysis[], fieldName: keyof DVDirectAnalysis) {
+  return directAnalyses.reduce(
+    (minMax, cur) => {
+      const num = getQuantiNumber(cur[fieldName] as string).number;
+
+      return [minMax[0] <= num ? minMax[0] : num, minMax[1] >= num ? minMax[1] : num];
+    },
+    [6, 0]
+  );
 }
 
 export function getDADivergence(
@@ -281,4 +302,16 @@ export function getConsensusRiskFile(directAnalyses: DVDirectAnalysis[]) {
     ...getAveragesForScenarios("fa", "cr4de_di_quanti_fa", directAnalyses),
     ...getAveragesForScenarios("fb", "cr4de_di_quanti_fb", directAnalyses),
   };
+}
+export function getConsensusCascade(cascadeAnalyses: DVCascadeAnalysis[]) {
+  const c: any = {};
+
+  for (let field of CASCADE_ANALYSIS_QUANTI_FIELDS) {
+    c[field] = getAverage(
+      cascadeAnalyses.map((ca) => ca[field] as string),
+      cascadeAnalyses.map((ca) => ca.cr4de_quality || 2.5)
+    );
+  }
+
+  return c;
 }

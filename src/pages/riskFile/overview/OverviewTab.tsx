@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { CONSENSUS_TYPE, DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import LoadingTab from "../LoadingTab";
 import {
   Box,
@@ -9,6 +9,7 @@ import {
   Card,
   CardActions,
   CardContent,
+  Typography,
   Container,
   FormControl,
   Grid,
@@ -24,33 +25,132 @@ import HistoryCard from "./HistoryCard";
 import ImportanceCard from "./ImportanceCard";
 import EventTimeline from "./EventTimeline";
 import useRecords from "../../../hooks/useRecords";
-import { DataTable } from "../../../hooks/useAPI";
+import useAPI, { DataTable } from "../../../hooks/useAPI";
 import { DVAnalysisRun, RiskAnalysisResults } from "../../../types/dataverse/DVAnalysisRun";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { getConsensusRiskFile } from "../../../functions/inputProcessing";
+import { getConsensusCascade, getConsensusRiskFile } from "../../../functions/inputProcessing";
+import { addDays, format } from "date-fns";
+import nlBE from "date-fns/locale/nl-BE";
+import { LoadingButton } from "@mui/lab";
+import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 
 export default function OverviewTab({
   riskFile,
+  cascades,
   directAnalyses,
   cascadeAnalyses,
   participants,
   calculations,
+  reloadRiskFile,
+  reloadCascades,
 }: {
   riskFile: DVRiskFile | null;
+  cascades: DVRiskCascade[] | null;
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[] | null;
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[] | null;
   participants: DVParticipation<DVContact>[] | null;
   calculations: RiskAnalysisResults[] | null;
+  reloadRiskFile: () => Promise<void>;
+  reloadCascades: () => Promise<void>;
 }) {
-  const [consensus, setConsensus] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [consensus, setConsensus] = useState<CONSENSUS_TYPE | string>("");
+  const [consensusDate, setConsensusDate] = useState<Date | null>(null);
+  const api = useAPI();
 
-  if (!riskFile || !calculations || !participants) {
+  if (!riskFile || !cascades || !calculations || !participants || !directAnalyses || !cascadeAnalyses) {
     return <LoadingTab />;
   }
+
+  const startConsensus = async () => {
+    setIsSaving(true);
+
+    await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+      ...getConsensusRiskFile(
+        directAnalyses.filter((da) =>
+          participants.some(
+            (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
+          )
+        )
+      ),
+      cr4de_consensus_type: consensus,
+      cr4de_consensus_date:
+        (consensus === CONSENSUS_TYPE.MEETING && consensusDate) ||
+        (consensus === CONSENSUS_TYPE.SILENCE && addDays(new Date(), 14)) ||
+        (consensus === CONSENSUS_TYPE.NONE && new Date()),
+    });
+
+    for (let c of cascades) {
+      await api.updateCascade(
+        c.cr4de_bnrariskcascadeid,
+        getConsensusCascade(
+          cascadeAnalyses.filter((da) =>
+            participants.some(
+              (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
+            )
+          )
+        )
+      );
+    }
+
+    await reloadRiskFile();
+    await reloadCascades();
+
+    setIsSaving(false);
+  };
+
+  const cancelConsensus = async () => {
+    setIsSaving(true);
+
+    await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+      ...Object.keys(
+        getConsensusRiskFile(
+          directAnalyses.filter((da) =>
+            participants.some(
+              (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
+            )
+          )
+        )
+      ).reduce(
+        (f, k) => ({
+          ...f,
+          [k]: null,
+        }),
+        {}
+      ),
+      cr4de_consensus_type: null,
+      cr4de_consensus_date: null,
+    });
+
+    for (let c of cascades) {
+      await api.updateCascade(c.cr4de_bnrariskcascadeid, {
+        ...Object.keys(
+          getConsensusCascade(
+            cascadeAnalyses.filter((da) =>
+              participants.some(
+                (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
+              )
+            )
+          )
+        ).reduce(
+          (f, k) => ({
+            ...f,
+            [k]: null,
+          }),
+          {}
+        ),
+      });
+    }
+
+    await reloadRiskFile();
+    await reloadCascades();
+
+    setIsSaving(false);
+  };
 
   return (
     <Container>
@@ -81,52 +181,71 @@ export default function OverviewTab({
           </Box>
         </Grid>
         <Grid xs={12} sx={{ mt: 2 }}>
-          <Card>
-            <CardContent>
-              <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Consensus Type</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  label="Consensus Type"
-                  onChange={(e) => setConsensus(e.target.value as string)}
+          {riskFile.cr4de_consensus_type === null ? (
+            <Card>
+              <CardContent>
+                <FormControl fullWidth>
+                  <InputLabel>Consensus Type</InputLabel>
+                  <Select label="Consensus Type" onChange={(e) => setConsensus(e.target.value as CONSENSUS_TYPE)}>
+                    <MenuItem value={CONSENSUS_TYPE.SILENCE}>Silence Procedure</MenuItem>
+                    <MenuItem value={CONSENSUS_TYPE.MEETING}>Consensus Meeting</MenuItem>
+                    <MenuItem value={CONSENSUS_TYPE.NONE}>No Consensus</MenuItem>
+                  </Select>
+                </FormControl>
+                {consensus === CONSENSUS_TYPE.MEETING && (
+                  <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={nlBE}>
+                    <DatePicker
+                      sx={{ mt: 2, width: "100%" }}
+                      value={consensusDate}
+                      onChange={(v) => setConsensusDate(v)}
+                    />
+                  </LocalizationProvider>
+                )}
+              </CardContent>
+              <CardActions sx={{ justifyContent: "flex-end" }}>
+                <LoadingButton
+                  loading={isSaving}
+                  placeholder="Saving average values..."
+                  disabled={consensus === "" || (consensus === CONSENSUS_TYPE.MEETING && !consensusDate)}
+                  onClick={startConsensus}
                 >
-                  <MenuItem value={"silence"}>Silence Procedure</MenuItem>
-                  <MenuItem value={"meeting"}>Consensus Meeting</MenuItem>
-                  <MenuItem value={"none"}>No Consensus</MenuItem>
-                </Select>
-              </FormControl>
-              {consensus === "meeting" && (
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <DatePicker sx={{ mt: 2, width: "100%" }} />
-                </LocalizationProvider>
-              )}
-            </CardContent>
-            <CardActions sx={{ justifyContent: "flex-end" }}>
-              <Button
-                onClick={() => {
-                  if (!participants || !directAnalyses) return;
+                  Start Consensus Phase
+                </LoadingButton>
+              </CardActions>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent>
+                {riskFile.cr4de_consensus_type === CONSENSUS_TYPE.MEETING && riskFile.cr4de_consensus_date && (
+                  <Typography variant="body1">
+                    Consensus meeting planned on {format(new Date(riskFile.cr4de_consensus_date), "dd.MM.yyyy")}
+                  </Typography>
+                )}
 
-                  console.log(
-                    getConsensusRiskFile(
-                      directAnalyses.filter((da) =>
-                        participants.some(
-                          (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
-                        )
-                      )
-                    )
-                  );
-                }}
-              >
-                Start Consensus Phase
-              </Button>
-            </CardActions>
-          </Card>
+                {riskFile.cr4de_consensus_type === CONSENSUS_TYPE.SILENCE && riskFile.cr4de_consensus_date && (
+                  <Typography variant="body1">
+                    Silence procedure ending on {format(new Date(riskFile.cr4de_consensus_date), "dd.MM.yyyy")}
+                  </Typography>
+                )}
+
+                {riskFile.cr4de_consensus_type === CONSENSUS_TYPE.NONE && riskFile.cr4de_consensus_date && (
+                  <Typography variant="body1">
+                    Consensus phase was skipped on {format(new Date(riskFile.cr4de_consensus_date), "dd.MM.yyyy")}
+                  </Typography>
+                )}
+              </CardContent>
+              <CardActions sx={{ justifyContent: "flex-end" }}>
+                <LoadingButton loading={isSaving} onClick={cancelConsensus} color="warning">
+                  Cancel Consensus Phase
+                </LoadingButton>
+              </CardActions>
+            </Card>
+          )}
         </Grid>
-        <Grid xs={12} sx={{ mt: 2 }}>
+        <Grid xs={12} sx={{ my: 2 }}>
           <ParticipationTable riskFile={riskFile} participants={participants} reloadParticipants={async () => {}} />
         </Grid>
-        <Grid xs={12}>
+        {/* <Grid xs={12}>
           {directAnalyses && cascadeAnalyses && (
             <EventTimeline
               riskFile={riskFile}
@@ -136,7 +255,7 @@ export default function OverviewTab({
               participants={participants}
             />
           )}
-        </Grid>
+        </Grid> */}
       </Grid>
     </Container>
   );
