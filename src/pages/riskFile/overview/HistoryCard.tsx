@@ -10,8 +10,11 @@ export default function HistoryCard({
   calculations,
 }: {
   riskFile: DVRiskFile;
-  calculations: RiskAnalysisResults[];
+  calculations: RiskAnalysisResults[] | null;
 }) {
+  if (!calculations)
+    return <Stack component={Paper} sx={{ width: "100%", height: "100%", p: 2, position: "relative" }}></Stack>;
+
   const data = calculations.reverse().map((c) => ({
     time: new Date(c.cr4de_results.timestamp),
     risk: parseFloat(getImpactScaleNumber(c.cr4de_results.tp * c.cr4de_results.ti)),

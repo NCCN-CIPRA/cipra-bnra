@@ -69,11 +69,14 @@ export default function ScoreCard({
 }: {
   riskFile: DVRiskFile;
   participants: DVParticipation[];
-  calculation: RiskCalculation;
+  calculation: RiskCalculation | null;
 }) {
   let score: { da: number; causes: number; effects: number } = { da: 0, causes: 0, effects: 0 };
   const dasFinished = participants.filter((p) => p.cr4de_direct_analysis_finished).length;
   const casFinished = participants.filter((p) => p.cr4de_cascade_analysis_finished).length;
+
+  if (!calculation)
+    return <Stack component={Paper} sx={{ width: "100%", height: "100%", p: 2, position: "relative" }}></Stack>;
 
   score.da = getQualityScore(calculation.quality, dasFinished);
 

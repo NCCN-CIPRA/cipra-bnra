@@ -37,6 +37,10 @@ import { addDays, format } from "date-fns";
 import nlBE from "date-fns/locale/nl-BE";
 import { LoadingButton } from "@mui/lab";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
+import useProcess from "../../../hooks/useProcess";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 export default function OverviewTab({
   riskFile,
@@ -60,7 +64,9 @@ export default function OverviewTab({
   const [isSaving, setIsSaving] = useState(false);
   const [consensus, setConsensus] = useState<CONSENSUS_TYPE | string>("");
   const [consensusDate, setConsensusDate] = useState<Date | null>(null);
+  const [sendEmail, setSendEmail] = useState<boolean>(true);
   const api = useAPI();
+  const process = useProcess();
 
   if (!riskFile || !cascades || !calculations || !participants || !directAnalyses || !cascadeAnalyses) {
     return <LoadingTab />;
@@ -95,6 +101,11 @@ export default function OverviewTab({
           )
         )
       );
+    }
+
+    if (sendEmail) {
+      if (consensus === CONSENSUS_TYPE.MEETING) await process.startConsensusMeeting(riskFile);
+      else if (consensus === CONSENSUS_TYPE.SILENCE) await process.startConsensusSilenceProcedure(riskFile);
     }
 
     await reloadRiskFile();
@@ -161,23 +172,27 @@ export default function OverviewTab({
         <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
             {participants && (
-              <ScoreCard riskFile={riskFile} participants={participants} calculation={calculations[0].cr4de_results} />
+              <ScoreCard
+                riskFile={riskFile}
+                participants={participants}
+                calculation={calculations[0] ? calculations[0].cr4de_results : null}
+              />
             )}
           </Box>
         </Grid>
         <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <ImportanceCard riskFile={riskFile} calculation={calculations[0].cr4de_results} />
+            <ImportanceCard riskFile={riskFile} calculation={calculations[0] ? calculations[0].cr4de_results : null} />
           </Box>
         </Grid>
         <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <ResultCard riskFile={riskFile} calculation={calculations[0].cr4de_results} />
+            <ResultCard riskFile={riskFile} calculation={calculations[0] ? calculations[0].cr4de_results : null} />
           </Box>
         </Grid>
         <Grid xs={6} md={3}>
           <Box sx={{ height: 200 }}>
-            <HistoryCard riskFile={riskFile} calculations={calculations.slice().reverse()} />
+            <HistoryCard riskFile={riskFile} calculations={calculations ? calculations.slice().reverse() : null} />
           </Box>
         </Grid>
         <Grid xs={12} sx={{ mt: 2 }}>
@@ -201,6 +216,15 @@ export default function OverviewTab({
                     />
                   </LocalizationProvider>
                 )}
+                <FormGroup sx={{ mt: 2 }}>
+                  <FormControlLabel
+                    control={<Checkbox checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} />}
+                    label={`Send invitation email to ${participants
+                      .filter((p) => p.cr4de_cascade_analysis_finished)
+                      .map((p) => p.cr4de_contact.emailaddress1)
+                      .join(", ")}`}
+                  />
+                </FormGroup>
               </CardContent>
               <CardActions sx={{ justifyContent: "flex-end" }}>
                 <LoadingButton

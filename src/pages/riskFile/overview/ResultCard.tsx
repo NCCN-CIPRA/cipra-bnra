@@ -15,7 +15,16 @@ import { getImpactScale, getImpactScaleNumber } from "../../../functions/Impact"
 import { getProbabilityScale } from "../../../functions/Probability";
 import { DVAnalysisRun, RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
 
-export default function ResultCard({ riskFile, calculation }: { riskFile: DVRiskFile; calculation: RiskCalculation }) {
+export default function ResultCard({
+  riskFile,
+  calculation,
+}: {
+  riskFile: DVRiskFile;
+  calculation: RiskCalculation | null;
+}) {
+  if (!calculation)
+    return <Stack component={Paper} sx={{ width: "100%", height: "100%", p: 2, position: "relative" }}></Stack>;
+
   const data = [
     {
       subject: "Probability",

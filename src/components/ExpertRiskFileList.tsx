@@ -21,7 +21,7 @@ import {
   CircularProgress,
   StepButton,
 } from "@mui/material";
-import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
+import { CONSENSUS_TYPE, DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
 import getCategoryColor from "../functions/getCategoryColor";
 import SearchIcon from "@mui/icons-material/Search";
 import CheckCircleOutlineIcon from "@mui/icons-material/TaskAlt";
@@ -73,7 +73,9 @@ function RiskFileList({
   const handleClick = (p: DVParticipation<undefined, DVRiskFile>) => async () => {
     if (!participations) return;
 
-    if (
+    if (p.cr4de_risk_file.cr4de_consensus_type !== null) {
+      navigate(`/consensus/${p._cr4de_risk_file_value}`);
+    } else if (
       p.cr4de_risk_file.cr4de_step2b_enabled &&
       p.cr4de_direct_analysis_finished &&
       p._cr4de_direct_analysis_value !== null
@@ -196,7 +198,27 @@ function RiskFileList({
     }
   };
 
+  const getStep3Tooltip = (p: DVParticipation<unknown, DVRiskFile>) => {
+    if (p.cr4de_risk_file.cr4de_consensus_date) {
+      if (new Date(p.cr4de_risk_file.cr4de_consensus_date) < new Date()) {
+        if (p.cr4de_risk_file.cr4de_consensus_type === CONSENSUS_TYPE.MEETING) {
+          return t("riskFile.steps.3.meeting", "Awaiting consensus meeting.");
+        } else {
+          return t("riskFile.steps.3.silence", "A silence procedure is ongoing for this risk file.");
+        }
+      }
+      return t("riskFile.steps.3.complete", "The consensus step for this risk file has been completed.");
+    }
+    return t(
+      "riskFile.steps.3.notyet",
+      "This step cannot be started yet, we will contact you when it becomes available"
+    );
+  };
+
   const getActiveStep = (p: DVParticipation<unknown, DVRiskFile>) => {
+    if (p.cr4de_risk_file.cr4de_consensus_type !== null) {
+      return 3;
+    }
     if (
       p.cr4de_risk_file.cr4de_step2b_enabled &&
       (p.cr4de_risk_file.cr4de_risk_type === RISK_TYPE.EMERGING || p.cr4de_direct_analysis_finished)
@@ -332,16 +354,25 @@ function RiskFileList({
                             </StepButton>
                           </Tooltip>
                         </Step>
-                        <Step>
-                          <Tooltip
-                            title={t(
-                              "riskFile.steps.3.notyet",
-                              "This step cannot be started yet, we will contact you when it becomes available"
-                            )}
-                          >
-                            <StepLabel icon={"3"}>
-                              <Trans i18nKey="riskFile.steps.3.name">Consensus</Trans>
-                            </StepLabel>
+                        <Step
+                          completed={Boolean(
+                            p.cr4de_risk_file.cr4de_consensus_date &&
+                              new Date(p.cr4de_risk_file.cr4de_consensus_date) > new Date()
+                          )}
+                        >
+                          <Tooltip title={getStep3Tooltip(p)}>
+                            <StepButton
+                              disabled={false}
+                              icon={"3"}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/consensus/${p._cr4de_risk_file_value}`);
+                              }}
+                            >
+                              <StepLabel>
+                                <Trans i18nKey="riskFile.steps.3.name">Consensus</Trans>
+                              </StepLabel>
+                            </StepButton>
                           </Tooltip>
                         </Step>
                       </Stepper>
