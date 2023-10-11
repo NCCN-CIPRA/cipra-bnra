@@ -177,7 +177,7 @@ export default function Step2BTab({
     if (cascades === null || cascadeAnalyses === null || cascadeIndex === null) return;
 
     const c: any = getConsensusCascade(
-      cascadeAnalyses.filter((ca) => ca._cr4de_cascade_value === cascade.cr4de_bnrariskcascadeid)
+      cascadeAnalyses.filter((ca) => ca._cr4de_cascade_value === cascades[cascadeIndex].cr4de_bnrariskcascadeid)
     );
 
     setConsensus(c);

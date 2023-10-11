@@ -81,7 +81,10 @@ export default function RiskFilesView({
 
     if (specialFilters.MY_RISK_FILES && !specialFilters.MY_RISK_FILES_BACKUP) {
       runningFilter = runningFilter.filter((rf) =>
-        rf.participants.some((p) => p.cr4de_contact.emailaddress1 === user?.emailaddress1 && p.cr4de_role === "analist")
+        rf.participants.some((p) => {
+          console.log(p);
+          return p.cr4de_contact.emailaddress1 === user?.emailaddress1 && p.cr4de_role === "analist";
+        })
       );
     }
 

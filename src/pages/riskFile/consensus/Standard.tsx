@@ -83,7 +83,11 @@ export default function Standard({
   reloadCascades: () => Promise<void>;
 }) {
   const causes = useMemo(() => {
-    return cascades.filter((ca) => ca.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING);
+    return cascades.filter(
+      (ca) =>
+        ca.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING &&
+        ca._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid
+    );
   }, [cascades]);
   const emerging = useMemo(() => {
     return cascades.filter((ca) => ca.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING);
