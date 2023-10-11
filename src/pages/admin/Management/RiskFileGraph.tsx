@@ -14,9 +14,8 @@ interface RFBucket {
   silenceProcedureStarted: number;
   step2AStarted: number;
   step2BStarted: number;
-  enoughInput2A: number;
-  enoughInput2B: number;
-  allInputs: number;
+  consensusStarted: number;
+  finished: number;
 }
 
 const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any[]; label?: any } = {}) => {
@@ -56,43 +55,12 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
           <tr>
             <td>
               <Typography variant="body1" sx={{ pt: 2 }}>
-                % Validation Finished:
+                % Risk files finished:
               </Typography>
             </td>
             <td>
               <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
-                {Math.round(
-                  (1000 *
-                    (payload[0].value + payload[1].value + payload[2].value + payload[3].value + payload[4].value)) /
-                    payload.reduce((tot, p) => tot + p.value, 0)
-                ) / 10}
-                %
-              </Typography>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <Typography variant="body1">% Step 2A Acceptable:</Typography>
-            </td>
-            <td>
-              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2 }}>
-                {Math.round((1000 * payload[0].payload.enoughInput2A) / payload.reduce((tot, p) => tot + p.value, 0)) /
-                  10}
-                %
-              </Typography>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <Typography variant="body1">% Step 2B Acceptable:</Typography>
-            </td>
-            <td>
-              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2 }}>
-                {Math.round(
-                  (1000 * payload[0].payload.enoughInput2B + payload[0].payload.allInputs) /
-                    payload.reduce((tot, p) => tot + p.value, 0)
-                ) / 10}
-                %
+                {Math.round((1000 * payload[0].value) / payload.reduce((tot, p) => tot + p.value, 0)) / 10}%
               </Typography>
             </td>
           </tr>
@@ -141,9 +109,8 @@ export default function RiskFileGraph({
         silenceProcedureStarted: 0,
         step2AStarted: 0,
         step2BStarted: 0,
-        enoughInput2A: 0,
-        enoughInput2B: 0,
-        allInputs: 0,
+        consensusStarted: 0,
+        finished: 0,
       });
 
       currentDate = addDays(new Date(currentDate), 1).getTime();
@@ -154,40 +121,33 @@ export default function RiskFileGraph({
         const d = dates[i];
 
         if (
-          participations.filter(
+          participations.some(
             (p) =>
-              p.cr4de_direct_analysis_finished_on && new Date(p.cr4de_direct_analysis_finished_on).getTime() <= d.date
-          ).length >= 2
-        ) {
-          dates[i].enoughInput2A++;
-        }
-
-        if (
-          participations.every(
-            (p) =>
-              p.cr4de_cascade_analysis_finished_on && new Date(p.cr4de_cascade_analysis_finished_on).getTime() <= d.date
+              p.cr4de_risk_file?.cr4de_consensus_date &&
+              new Date(p.cr4de_risk_file?.cr4de_consensus_date).getTime() < d.date
           )
         ) {
-          dates[i].allInputs++;
+          dates[i].finished++;
+        } else if (
+          participations.some(
+            (p) =>
+              p.cr4de_risk_file?.cr4de_consensus_date &&
+              addDays(new Date(p.cr4de_risk_file?.cr4de_consensus_date), -14).getTime() <= d.date
+          )
+        ) {
+          dates[i].consensusStarted++;
         } else if (
           participations.filter(
             (p) =>
               p.cr4de_cascade_analysis_finished_on && new Date(p.cr4de_cascade_analysis_finished_on).getTime() <= d.date
           ).length >= 2
-        ) {
-          dates[i].enoughInput2B++;
-        } else if (
-          participations.filter(
-            (p) =>
-              p.cr4de_cascade_analysis_finished_on && new Date(p.cr4de_cascade_analysis_finished_on).getTime() <= d.date
-          ).length >= 1
         ) {
           dates[i].step2BStarted++;
         } else if (
           participations.filter(
             (p) =>
               p.cr4de_direct_analysis_finished_on && new Date(p.cr4de_direct_analysis_finished_on).getTime() <= d.date
-          ).length >= 1
+          ).length >= 2
         ) {
           dates[i].step2AStarted++;
         } else if (
@@ -197,7 +157,6 @@ export default function RiskFileGraph({
               addDays(new Date(p.cr4de_risk_file?.cr4de_validation_silent_procedure_until), -14).getTime() <= d.date
           )
         ) {
-          console.log(participations);
           dates[i].silenceProcedureStarted++;
         } else if (
           participations.filter(
@@ -247,21 +206,14 @@ export default function RiskFileGraph({
           fill="#ffa600"
           name="Ready for consensus"
         /> */}
+        <Area type="monotone" dataKey="finished" stackId="1" stroke="#ff7c43" fill="#ff7c43" name="Process finished" />
         <Area
           type="monotone"
-          dataKey="allInputs"
-          stackId="1"
-          stroke="#ff7c43"
-          fill="#ff7c43"
-          name="All inputs received"
-        />
-        <Area
-          type="monotone"
-          dataKey="enoughInput2B"
+          dataKey="consensusStarted"
           stackId="1"
           stroke="#f95d6a"
           fill="#f95d6a"
-          name="Ready for consensus"
+          name="Consensus step started"
         />
         <Area
           type="monotone"
@@ -269,7 +221,7 @@ export default function RiskFileGraph({
           stackId="1"
           stroke="#d45087"
           fill="#d45087"
-          name="Step 2B started"
+          name="Step 2B finished"
         />
         <Area
           type="monotone"
@@ -277,7 +229,7 @@ export default function RiskFileGraph({
           stackId="1"
           stroke="#a05195"
           fill="#a05195"
-          name="Step 2A started"
+          name="Step 2A finished"
         />
         <Area
           type="monotone"
@@ -285,24 +237,9 @@ export default function RiskFileGraph({
           stackId="1"
           stroke="#665191"
           fill="#665191"
-          name="Silence procedure started"
+          name="Validation step finished"
         />
-        <Area
-          type="monotone"
-          dataKey="started"
-          stackId="1"
-          stroke="#2f4b7c"
-          fill="#2f4b7c"
-          name="Validation phase started"
-        />
-        <Area
-          type="monotone"
-          dataKey="notStarted"
-          stackId="1"
-          stroke="#003f5c"
-          fill="#003f5c"
-          name="Process not started"
-        />
+        <Area type="monotone" dataKey="started" stackId="1" stroke="#2f4b7c" fill="#2f4b7c" name="Process started" />
       </AreaChart>
     </>
   );

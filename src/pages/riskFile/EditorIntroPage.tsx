@@ -1,7 +1,7 @@
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import { CONSENSUS_TYPE, DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 
 import { useNavigate } from "react-router-dom";
-import { Container, Box, Paper, LinearProgressProps, Typography, LinearProgress } from "@mui/material";
+import { Container, Box, Paper, LinearProgressProps, Typography, LinearProgress, Rating } from "@mui/material";
 import RiskFileList from "../../components/RiskFileList";
 import { DataTable } from "../../hooks/useAPI";
 import useRecords from "../../hooks/useRecords";
@@ -20,8 +20,9 @@ import {
 import { RiskAnalysisResults } from "../../types/dataverse/DVAnalysisRun";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVContact } from "../../types/dataverse/DVContact";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MaterialReactTable } from "material-react-table";
+import { format } from "date-fns";
 
 const roundPerc = (val: number) => Math.round(val * 10000) / 100.0;
 
@@ -139,12 +140,33 @@ const dataColumns: GridColDef[] = [
     },
   },
   {
+    field: "cr4de_consensus_type",
+    headerName: "Consensus",
+    width: 200,
+    headerAlign: "left",
+    valueGetter: (params: GridValueGetterParams<RiskFileParticipation>) => {
+      if (params.row.cr4de_consensus_date && new Date(params.row.cr4de_consensus_date) < new Date()) return "Finished";
+      if (params.row.cr4de_consensus_type === null) return "Not Planned";
+      if (params.row.cr4de_consensus_date && params.row.cr4de_consensus_type === CONSENSUS_TYPE.MEETING)
+        return `Consensus meeting on (${format(new Date(params.row.cr4de_consensus_date), "dd-MM-yy")})`;
+      if (params.row.cr4de_consensus_date && params.row.cr4de_consensus_type === CONSENSUS_TYPE.SILENCE)
+        return `Silence procedure until (${format(new Date(params.row.cr4de_consensus_date), "dd-MM-yy")})`;
+    },
+  },
+  {
     field: "finishable",
-    headerName: "Finishable",
+    headerName: "Input OK",
     type: "boolean",
     width: 100,
     headerAlign: "center",
     valueGetter: (params: GridValueGetterParams<RiskFileParticipation>) => {
+      if (params.row.cr4de_risk_type === RISK_TYPE.EMERGING) {
+        return (
+          params.row.participations.filter((p) => p.cr4de_cascade_analysis_finished && p.cr4de_role === "expert")
+            .length >= 2
+        );
+      }
+
       return (
         (params.row.participations.filter((p) => p.cr4de_direct_analysis_finished && p.cr4de_role === "expert")
           .length >= 2 &&
@@ -168,51 +190,54 @@ const dataColumns: GridColDef[] = [
     headerAlign: "right",
     type: "number",
     valueGetter: (params: GridValueGetterParams<DVRiskFile<RiskAnalysisResults>>) => {
-      return params.row.cr4de_subjective_importance / 3;
-      // if (params.row.cr4de_latest_calculation && params.row.cr4de_latest_calculation.cr4de_risk_file_metrics) {
-      //   return roundPerc(params.row.cr4de_latest_calculation.cr4de_risk_file_metrics.importance.total);
-      // }
-
-      // return 0;
+      return 4 - params.row.cr4de_subjective_importance;
     },
-    // valueFormatter: (params: GridValueFormatterParams<DVRiskFile<RiskAnalysisResults>>) => {
-    //   return `${params.value}%`;
-    // },
+    renderCell: (params: GridRenderCellParams<any, number, any>) => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "right",
+          color: "text.secondary",
+        }}
+      >
+        <Rating value={params.value} sx={{ mr: 0 }} readOnly size="small" max={3} />
+      </Box>
+    ),
   },
-  {
-    field: "reliability",
-    headerName: "Reliability",
-    width: 150,
-    align: "right",
-    headerAlign: "right",
-    type: "number",
-    valueGetter: (params: GridValueGetterParams<DVRiskFile<RiskAnalysisResults>>) => {
-      if (params.row.cr4de_latest_calculation && params.row.cr4de_latest_calculation.cr4de_risk_file_metrics)
-        return roundPerc(params.row.cr4de_latest_calculation.cr4de_risk_file_metrics.reliability.total);
+  //   {
+  //     field: "reliability",
+  //     headerName: "Reliability",
+  //     width: 150,
+  //     align: "right",
+  //     headerAlign: "right",
+  //     type: "number",
+  //     valueGetter: (params: GridValueGetterParams<DVRiskFile<RiskAnalysisResults>>) => {
+  //       if (params.row.cr4de_latest_calculation && params.row.cr4de_latest_calculation.cr4de_risk_file_metrics)
+  //         return roundPerc(params.row.cr4de_latest_calculation.cr4de_risk_file_metrics.reliability.total);
 
-      return 0;
-    },
-    valueFormatter: (params: GridValueFormatterParams<DVRiskFile<RiskAnalysisResults>>) => {
-      return `${params.value}%`;
-    },
-  },
-  {
-    field: "divergence",
-    headerName: "Divergence",
-    width: 150,
-    align: "right",
-    headerAlign: "right",
-    type: "number",
-    valueGetter: (params: GridValueGetterParams<DVRiskFile<RiskAnalysisResults>>) => {
-      if (params.row.cr4de_latest_calculation && params.row.cr4de_latest_calculation.cr4de_risk_file_metrics)
-        return params.row.cr4de_latest_calculation.cr4de_risk_file_metrics.divergence.total;
+  //       return 0;
+  //     },
+  //     valueFormatter: (params: GridValueFormatterParams<DVRiskFile<RiskAnalysisResults>>) => {
+  //       return `${params.value}%`;
+  //     },
+  //   },
+  //   {
+  //     field: "divergence",
+  //     headerName: "Divergence",
+  //     width: 150,
+  //     align: "right",
+  //     headerAlign: "right",
+  //     type: "number",
+  //     valueGetter: (params: GridValueGetterParams<DVRiskFile<RiskAnalysisResults>>) => {
+  //       if (params.row.cr4de_latest_calculation && params.row.cr4de_latest_calculation.cr4de_risk_file_metrics)
+  //         return params.row.cr4de_latest_calculation.cr4de_risk_file_metrics.divergence.total;
 
-      return 0;
-    },
-    valueFormatter: (params: GridValueFormatterParams<DVRiskFile<RiskAnalysisResults>>) => {
-      return `${params.value}%`;
-    },
-  },
+  //       return 0;
+  //     },
+  //     valueFormatter: (params: GridValueFormatterParams<DVRiskFile<RiskAnalysisResults>>) => {
+  //       return `${params.value}%`;
+  //     },
+  //   },
 ];
 
 interface RiskFileParticipation extends DVRiskFile<RiskAnalysisResults> {
