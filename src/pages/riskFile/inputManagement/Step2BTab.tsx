@@ -46,7 +46,14 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { LoadingButton } from "@mui/lab";
 import ScenarioTable from "../../step2A/information/ScenarioTable";
 import { ScenarioInput, ScenarioInputs } from "../../step2A/fields";
-import { STATS, avg, getAverage, getCADivergence, getDADivergence, getStats } from "../../../functions/inputProcessing";
+import {
+  STATS,
+  avg,
+  getConsensusCascade,
+  getCADivergence,
+  getDADivergence,
+  getStats,
+} from "../../../functions/inputProcessing";
 import { DiscussionRequired } from "../../../types/DiscussionRequired";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import Attachments from "./Attachments";
@@ -169,18 +176,9 @@ export default function Step2BTab({
   useEffect(() => {
     if (cascades === null || cascadeAnalyses === null || cascadeIndex === null) return;
 
-    const c: any = { ...cascades[cascadeIndex] };
-
-    for (let field of CASCADE_ANALYSIS_QUANTI_FIELDS) {
-      if (c[field] === null) {
-        c[field] = getProbabilityScale(
-          cascadeAnalyses
-            .filter((ca) => ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid && ca[field] !== null)
-            .reduce((avg, ca, i, all) => avg + getAbsoluteProbability(ca[field] as string) / all.length, 0),
-          "CP"
-        );
-      }
-    }
+    const c: any = getConsensusCascade(
+      cascadeAnalyses.filter((ca) => ca._cr4de_cascade_value === cascade.cr4de_bnrariskcascadeid)
+    );
 
     setConsensus(c);
     setDiscussionRequired(c.cr4de_discussion_required);

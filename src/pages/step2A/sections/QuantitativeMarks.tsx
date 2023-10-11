@@ -95,7 +95,7 @@ export function MSlider({
     if (newValue < 0) {
       onChange(null);
     } else {
-      const t = `M${(newValue as number) + 1}`;
+      const t = `M${newValue as number}`;
 
       onChange(t);
     }
