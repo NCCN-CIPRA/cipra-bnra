@@ -150,6 +150,16 @@ function ScenarioSection({
     if (reloadAttachments) setReloadAttachments(false);
   }, [reloadAttachments]);
 
+  useEffect(() => {
+    setDiscussionRequired(
+      riskFile.cr4de_discussion_required
+        ? riskFile.cr4de_discussion_required[
+            `${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
+          ]
+        : null
+    );
+  }, [riskFile, scenario, parameter]);
+
   const qualiName = useMemo(() => getQualiFieldName(scenario, parameter), [scenario, parameter]);
   const quantiNames = useMemo(() => getQuantiFieldNames(scenario, parameter), [scenario, parameter]);
 
