@@ -12,7 +12,6 @@ export default function ImportanceCard({
   riskFile: DVRiskFile;
   calculation: RiskCalculation | null;
 }) {
-  console.log(calculation);
   const data = [
     {
       name: "Subjective Importance",

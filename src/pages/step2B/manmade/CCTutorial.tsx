@@ -102,7 +102,7 @@ export default function CCTutorial({ run, setRun }: { run: boolean; setRun: (r: 
 
   const handleTutorialCallback = (data: CallBackProps) => {
     const { action, index, status, type, lifecycle } = data;
-    console.log(data);
+
     // @ts-ignore-next-line
     if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
       // Update state to advance the tour

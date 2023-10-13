@@ -170,6 +170,8 @@ export default function Step2BTab({
               c.cr4de_effect_hazard.cr4de_risk_type !== RISK_TYPE.MANMADE
           )
         );
+    } else if (cascades !== null && cascadeIndex !== null) {
+      setDiscussionRequired(cascades[cascadeIndex].cr4de_discussion_required as DiscussionRequired | null);
     }
   }, [cascades, riskFile, cascadeIndex]);
 
@@ -181,7 +183,6 @@ export default function Step2BTab({
     );
 
     setConsensus(c);
-    setDiscussionRequired(c.cr4de_discussion_required);
   }, [cascades, cascadeIndex, cascadeAnalyses]);
 
   const dp50Distribution = useMemo(() => {

@@ -15,8 +15,6 @@ import {
 import LoadingTab from "../LoadingTab";
 
 function ProgressConnector(props: any) {
-  console.log(props);
-
   return <StepConnector {...props} />;
 }
 

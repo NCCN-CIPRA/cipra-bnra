@@ -69,7 +69,6 @@ const dataColumns: GridColDef[] = [
     headerName: "Analist",
     width: 150,
     valueGetter: (params: GridValueGetterParams<RiskFileParticipation>) => {
-      console.log(params.row.participations);
       return params.row.participations.find((p) => p.cr4de_role === "analist")?.cr4de_contact.firstname;
     },
     renderCell: (params: GridRenderCellParams<RiskFileParticipation>) => {

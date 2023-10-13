@@ -187,7 +187,6 @@ export default function CatalysingTutorial({ run, setRun }: { run: boolean; setR
 
   const handleTutorialCallback = (data: CallBackProps) => {
     const { action, index, status, type, lifecycle } = data;
-    console.log(data);
 
     if (
       (action === ACTIONS.NEXT && index === 0 && lifecycle === LIFECYCLE.COMPLETE) ||

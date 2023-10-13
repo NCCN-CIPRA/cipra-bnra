@@ -257,7 +257,7 @@ export function validateStep2BMM(
     climateChange: undefined,
     catalysingEffects: errorsCatalysing.catalysingEffects,
   };
-  console.log(errors);
+
   if (errors.causes && errors.causes.length <= 0) delete errors.causes;
   if (errors.catalysingEffects && errors.catalysingEffects.length <= 0) delete errors.catalysingEffects;
   if (!errors.climateChange) delete errors.climateChange;

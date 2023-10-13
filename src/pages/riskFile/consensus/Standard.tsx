@@ -16,6 +16,7 @@ import { NO_COMMENT } from "../../step2A/sections/QualiTextInputBox";
 import {
   DIRECT_ANALYSIS_SECTIONS_STANDARD,
   PARAMETER,
+  getDASpread,
   getQualiFieldName,
   getQuantiFieldNames,
   getQuantiLabel,
@@ -381,7 +382,7 @@ function ScenarioSection({
                         <Slider
                           initialValue={riskFile[n as keyof DVRiskFile] as string}
                           name={n}
-                          spread={[2, 4.5]}
+                          spread={getDASpread(directAnalyses, n)}
                           onChange={async (newValue) => {
                             await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
                               [n]: newValue,

@@ -57,7 +57,7 @@ export default function CatalysingEffectsAnalysis({
       }
     }
   }, [cascade]);
-  console.log(visibleCascade);
+
   return (
     <Box>
       <Container>

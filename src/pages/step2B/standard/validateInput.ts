@@ -31,7 +31,7 @@ export function validateStep2B(
     climateChange: undefined,
     catalysingEffects: [],
   };
-  console.log(cascades);
+
   errors = cascades
     .sort((a, b) => {
       if (a.cr4de_cause_hazard.cr4de_subjective_importance !== b.cr4de_cause_hazard.cr4de_subjective_importance) {
@@ -41,7 +41,7 @@ export function validateStep2B(
     })
     .reduce((e, c) => {
       const s = step2B.find((cascadeAnalysis) => c.cr4de_bnrariskcascadeid === cascadeAnalysis._cr4de_cascade_value);
-      console.log(s);
+
       if (c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.STANDARD) {
         if (!s)
           return {

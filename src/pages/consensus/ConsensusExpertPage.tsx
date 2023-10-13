@@ -44,7 +44,7 @@ export default function ConsensusExpertPage() {
     table: DataTable.CASCADE_ANALYSIS,
     query: `$filter=_cr4de_risk_file_value eq ${routeParams.riskFile_id} and _cr4de_expert_value eq ${user.contactid}&$expand=cr4de_cascade($expand=cr4de_cause_hazard($select=cr4de_title,cr4de_risk_type),cr4de_effect_hazard($select=cr4de_title,cr4de_risk_type))`,
   });
-  console.log(directAnalysis);
+
   usePageTitle(t("step3.pageTitle", "BNRA 2023 - 2026 Risk File Consensus"));
   useBreadcrumbs([
     { name: t("bnra.shortName"), url: "/" },
