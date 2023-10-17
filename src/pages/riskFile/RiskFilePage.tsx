@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Box, Container, Tab, BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
 import { TabContext, TabPanel, TabList } from "@mui/lab";
 import useRecord from "../../hooks/useRecord";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { DataTable } from "../../hooks/useAPI";
 import { useParams, useSearchParams } from "react-router-dom";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
@@ -20,8 +20,8 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import InputManagementTab from "./inputManagement/InputManagementTab";
-import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
-import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
+import { DIRECT_ANALYSIS_EDITABLE_FIELDS, DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
+import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import AnalysisTab from "./analysis/AnalysisTab";
 import LoadingTab from "./LoadingTab";
 import { RiskAnalysisResults } from "../../types/dataverse/DVAnalysisRun";
@@ -117,6 +117,53 @@ export default function RiskFilePage({}) {
     return reloadCascades();
   };
 
+  const goodDAs = useMemo(
+    () =>
+      directAnalyses && participants
+        ? directAnalyses.filter(
+            (da) =>
+              participants.some(
+                (pa) => pa._cr4de_contact_value === da._cr4de_expert_value && pa.cr4de_direct_analysis_finished
+              ) && !DIRECT_ANALYSIS_EDITABLE_FIELDS.some((f) => da[f] === null)
+          )
+        : null,
+    [directAnalyses, participants]
+  );
+
+  const goodCAs = useMemo(() => {
+    if (!cascadeAnalyses || !participants || !cascades) return null;
+
+    return cascadeAnalyses.filter((ca) => {
+      if (
+        !participants.some(
+          (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
+        )
+      )
+        return false;
+
+      const cascade = cascades.find((c) => ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid);
+
+      if (!cascade) return false;
+
+      if (cascade.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING)
+        return !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null);
+
+      if (cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0) {
+        const d = directAnalyses?.find((da) => da._cr4de_expert_value === ca._cr4de_expert_value);
+
+        return (
+          d &&
+          d.cr4de_dp50_quanti_c !== null &&
+          d.cr4de_dp50_quanti_m !== null &&
+          d.cr4de_dp50_quanti_e !== null &&
+          d.cr4de_dp50_quali !== null
+        );
+      }
+
+      return ca.cr4de_quali_cascade !== null;
+    });
+  }, [directAnalyses, cascadeAnalyses, participants, cascades]);
+
   usePageTitle("BNRA 2023 - 2026 Risk File");
   useBreadcrumbs([...defaultBreadcrumbs, riskFile ? { name: riskFile.cr4de_title, url: "" } : null]);
 
@@ -148,20 +195,8 @@ export default function RiskFilePage({}) {
           <InputManagementTab
             riskFile={riskFile}
             cascades={cascades}
-            directAnalyses={
-              directAnalyses?.filter((da) =>
-                participants?.some(
-                  (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_direct_analysis_finished
-                )
-              ) || null
-            }
-            cascadeAnalyses={
-              cascadeAnalyses?.filter((ca) =>
-                participants?.some(
-                  (p) => p._cr4de_contact_value === ca._cr4de_expert_value && p.cr4de_cascade_analysis_finished
-                )
-              ) || null
-            }
+            directAnalyses={goodDAs}
+            cascadeAnalyses={goodCAs}
             participants={participants}
             reloadRiskFile={reloadRiskFile}
             reloadCascades={reloadCascades}
@@ -169,13 +204,13 @@ export default function RiskFilePage({}) {
             reloadCascadeAnalyses={reloadCascadeAnalyses}
           />
         )}
-        {riskFile && cascades && participants && directAnalyses && cascadeAnalyses && tab === 4 && (
+        {riskFile && cascades && participants && goodDAs && goodCAs && tab === 4 && (
           <ConsensusTab
             riskFile={riskFile}
             cascades={cascades}
             participants={participants}
-            directAnalyses={directAnalyses}
-            cascadeAnalyses={cascadeAnalyses}
+            directAnalyses={goodDAs}
+            cascadeAnalyses={goodCAs}
             reloadRiskFile={reloadRiskFile}
             reloadCascades={reloadCascades}
           />

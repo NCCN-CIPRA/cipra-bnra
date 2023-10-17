@@ -54,25 +54,6 @@ export default function InputManagementTab({
     });
   };
 
-  const goodDAs =
-    directAnalyses && participants
-      ? directAnalyses.filter(
-          (da) =>
-            participants.some(
-              (pa) => pa._cr4de_contact_value === da._cr4de_expert_value && pa.cr4de_direct_analysis_finished
-            ) && !DIRECT_ANALYSIS_EDITABLE_FIELDS.some((f) => da[f] === null)
-        )
-      : null;
-  const goodCAs =
-    cascadeAnalyses && participants
-      ? cascadeAnalyses.filter(
-          (ca) =>
-            participants.some(
-              (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
-            ) && !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
-        )
-      : null;
-
   return (
     <TabContext value={searchParams.get("subtab") || "0"}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -89,7 +70,7 @@ export default function InputManagementTab({
           riskFile={riskFile}
           participants={participants}
           cascades={cascades}
-          directAnalyses={goodDAs}
+          directAnalyses={directAnalyses}
           cascadeAnalyses={cascadeAnalyses}
         />
       </TabPanel>
@@ -98,7 +79,7 @@ export default function InputManagementTab({
         <Step2APage
           riskFile={riskFile}
           participants={participants}
-          directAnalyses={goodDAs}
+          directAnalyses={directAnalyses}
           reloadRiskFile={reloadRiskFile}
           reloadDirectAnalyses={reloadDirectAnalyses}
         />
@@ -107,8 +88,8 @@ export default function InputManagementTab({
         <Step2BTab
           riskFile={riskFile}
           cascades={cascades}
-          directAnalyses={goodDAs}
-          cascadeAnalyses={goodCAs}
+          directAnalyses={directAnalyses}
+          cascadeAnalyses={cascadeAnalyses}
           reloadRiskFile={reloadRiskFile}
           reloadCascades={reloadCascades}
           reloadCascadeAnalyses={reloadCascadeAnalyses}

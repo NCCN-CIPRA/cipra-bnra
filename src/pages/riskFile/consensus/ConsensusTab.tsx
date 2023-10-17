@@ -44,19 +44,6 @@ export default function ConsensusTab({
 
   const [fade, setFade] = useState(true);
 
-  const goodDAs = directAnalyses.filter(
-    (da) =>
-      participants.some(
-        (pa) => pa._cr4de_contact_value === da._cr4de_expert_value && pa.cr4de_direct_analysis_finished
-      ) && !DIRECT_ANALYSIS_EDITABLE_FIELDS.some((f) => da[f] === null)
-  );
-  const goodCAs = cascadeAnalyses.filter(
-    (ca) =>
-      participants.some(
-        (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
-      ) && !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
-  );
-
   usePageTitle(t("step3.pageTitle", "BNRA 2023 - 2026 Risk File Consensus"));
   useBreadcrumbs([
     { name: "BNRA 2023 - 2026", url: "/" },
@@ -72,8 +59,8 @@ export default function ConsensusTab({
             <Standard
               riskFile={riskFile}
               cascades={cascades}
-              directAnalyses={goodDAs}
-              cascadeAnalyses={goodCAs}
+              directAnalyses={directAnalyses}
+              cascadeAnalyses={cascadeAnalyses}
               reloadRiskFile={reloadRiskFile}
               reloadCascades={reloadCascades}
             />
@@ -82,8 +69,8 @@ export default function ConsensusTab({
             <ManMade
               riskFile={riskFile}
               cascades={cascades}
-              directAnalyses={goodDAs}
-              cascadeAnalyses={goodCAs}
+              directAnalyses={directAnalyses}
+              cascadeAnalyses={cascadeAnalyses}
               reloadRiskFile={reloadRiskFile}
               reloadCascades={reloadCascades}
             />
