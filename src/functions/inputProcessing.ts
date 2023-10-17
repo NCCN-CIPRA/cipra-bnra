@@ -155,7 +155,16 @@ export function getStd(quantiInput: (string | null)[], weights?: number[]) {
 export function getStats(quantiInput: (string | null)[], weights?: number[]): STATS | null {
   const n = getQuantiNumbers(quantiInput);
 
-  if (!n) return null;
+  if (!n)
+    return {
+      min: 0,
+      max: 0,
+      avg: 0,
+      std: 0,
+      minLabel: "",
+      maxLabel: "",
+      avgLabel: "",
+    };
 
   const values = {
     min: Math.min(...n.numbers),
