@@ -184,6 +184,7 @@ export function getStats(quantiInput: (string | null)[], weights?: number[]): ST
 export function getDASpread(directAnalyses: DVDirectAnalysis[], fieldName: keyof DVDirectAnalysis) {
   return directAnalyses.reduce(
     (minMax, cur) => {
+      console.log(cur);
       const num = getQuantiNumber(cur[fieldName] as string).number;
 
       return [minMax[0] <= num ? minMax[0] : num, minMax[1] >= num ? minMax[1] : num];

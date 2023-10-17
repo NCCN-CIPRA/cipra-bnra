@@ -357,7 +357,7 @@ function ScenarioSection({
           </Tooltip>
         )}
       </Paper>
-
+      console.log(directAnalyses)
       {open && (
         <Box sx={{ p: 2 }}>
           <Typography variant="subtitle2">Final Consensus Results:</Typography>

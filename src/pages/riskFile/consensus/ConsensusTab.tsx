@@ -5,11 +5,11 @@ import useAPI, { DataTable } from "../../../hooks/useAPI";
 import useBreadcrumbs from "../../../hooks/useBreadcrumbs";
 import usePageTitle from "../../../hooks/usePageTitle";
 import useRecord from "../../../hooks/useRecord";
-import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
+import { DIRECT_ANALYSIS_EDITABLE_FIELDS, DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import { Box, Button, Paper, Fade, Container } from "@mui/material";
 import { AuthPageContext } from "../../AuthPage";
-import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
+import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import useRecords from "../../../hooks/useRecords";
 import Standard from "./Standard";
 import ManMade from "./ManMade";
@@ -44,11 +44,17 @@ export default function ConsensusTab({
 
   const [fade, setFade] = useState(true);
 
-  const goodDAs = directAnalyses.filter((da) =>
-    participants.some((pa) => pa._cr4de_contact_value === da._cr4de_expert_value && pa.cr4de_direct_analysis_finished)
+  const goodDAs = directAnalyses.filter(
+    (da) =>
+      participants.some(
+        (pa) => pa._cr4de_contact_value === da._cr4de_expert_value && pa.cr4de_direct_analysis_finished
+      ) && !DIRECT_ANALYSIS_EDITABLE_FIELDS.some((f) => da[f] === null)
   );
-  const goodCAs = cascadeAnalyses.filter((ca) =>
-    participants.some((pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished)
+  const goodCAs = cascadeAnalyses.filter(
+    (ca) =>
+      participants.some(
+        (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
+      ) && !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
   );
 
   usePageTitle(t("step3.pageTitle", "BNRA 2023 - 2026 Risk File Consensus"));

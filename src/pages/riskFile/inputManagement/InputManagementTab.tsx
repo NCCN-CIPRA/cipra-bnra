@@ -4,14 +4,14 @@ import { TabContext, TabPanel, TabList } from "@mui/lab";
 import Step2APage from "./Step2ATab";
 import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
-import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
+import { DIRECT_ANALYSIS_EDITABLE_FIELDS, DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DataTable } from "../../../hooks/useAPI";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import { useParams, useSearchParams } from "react-router-dom";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import Step2BTab from "./Step2BTab";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
+import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import InputOverviewTab from "./InputOverviewTab";
 
@@ -54,6 +54,25 @@ export default function InputManagementTab({
     });
   };
 
+  const goodDAs =
+    directAnalyses && participants
+      ? directAnalyses.filter(
+          (da) =>
+            participants.some(
+              (pa) => pa._cr4de_contact_value === da._cr4de_expert_value && pa.cr4de_direct_analysis_finished
+            ) && !DIRECT_ANALYSIS_EDITABLE_FIELDS.some((f) => da[f] === null)
+        )
+      : null;
+  const goodCAs =
+    cascadeAnalyses && participants
+      ? cascadeAnalyses.filter(
+          (ca) =>
+            participants.some(
+              (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
+            ) && !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
+        )
+      : null;
+
   return (
     <TabContext value={searchParams.get("subtab") || "0"}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -70,7 +89,7 @@ export default function InputManagementTab({
           riskFile={riskFile}
           participants={participants}
           cascades={cascades}
-          directAnalyses={directAnalyses}
+          directAnalyses={goodDAs}
           cascadeAnalyses={cascadeAnalyses}
         />
       </TabPanel>
@@ -79,7 +98,7 @@ export default function InputManagementTab({
         <Step2APage
           riskFile={riskFile}
           participants={participants}
-          directAnalyses={directAnalyses}
+          directAnalyses={goodDAs}
           reloadRiskFile={reloadRiskFile}
           reloadDirectAnalyses={reloadDirectAnalyses}
         />
@@ -88,8 +107,8 @@ export default function InputManagementTab({
         <Step2BTab
           riskFile={riskFile}
           cascades={cascades}
-          directAnalyses={directAnalyses}
-          cascadeAnalyses={cascadeAnalyses}
+          directAnalyses={goodDAs}
+          cascadeAnalyses={goodCAs}
           reloadRiskFile={reloadRiskFile}
           reloadCascades={reloadCascades}
           reloadCascadeAnalyses={reloadCascadeAnalyses}

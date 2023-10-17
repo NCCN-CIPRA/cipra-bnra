@@ -27,8 +27,8 @@ import EventTimeline from "./EventTimeline";
 import useRecords from "../../../hooks/useRecords";
 import useAPI, { DataTable } from "../../../hooks/useAPI";
 import { DVAnalysisRun, RiskAnalysisResults } from "../../../types/dataverse/DVAnalysisRun";
-import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
-import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
+import { DIRECT_ANALYSIS_EDITABLE_FIELDS, DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
+import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -77,10 +77,11 @@ export default function OverviewTab({
 
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
       ...getConsensusRiskFile(
-        directAnalyses.filter((da) =>
-          participants.some(
-            (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
-          )
+        directAnalyses.filter(
+          (da) =>
+            participants.some(
+              (pa) => pa._cr4de_contact_value === da._cr4de_expert_value && pa.cr4de_direct_analysis_finished
+            ) && !DIRECT_ANALYSIS_EDITABLE_FIELDS.some((f) => da[f] === null)
         )
       ),
       cr4de_consensus_type: consensus,
@@ -94,10 +95,11 @@ export default function OverviewTab({
       await api.updateCascade(
         c.cr4de_bnrariskcascadeid,
         getConsensusCascade(
-          cascadeAnalyses.filter((da) =>
-            participants.some(
-              (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
-            )
+          cascadeAnalyses.filter(
+            (ca) =>
+              participants.some(
+                (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
+              ) && !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
           )
         )
       );
