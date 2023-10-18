@@ -353,22 +353,22 @@ export default function InputOverviewTab({
                   </TableCell>
                   <TableCell align="center">
                     <Checkbox
-                      checked={input.cascade.cr4de_quali !== null && input.cascade.cr4de_quali !== ""}
+                      checked={input.cascade.cr4de_quali_cause !== null && input.cascade.cr4de_quali_cause !== ""}
                       size="small"
                       readOnly
                     />
                   </TableCell>
                   <TableCell align="center">
-                    {input.cascade.cr4de_discussion_required === DiscussionRequired.REQUIRED && (
+                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.REQUIRED && (
                       <Chip label={DiscussionRequired.REQUIRED} color="error" />
                     )}
-                    {input.cascade.cr4de_discussion_required === DiscussionRequired.PREFERRED && (
+                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.PREFERRED && (
                       <Chip label={DiscussionRequired.PREFERRED} color="warning" />
                     )}
-                    {input.cascade.cr4de_discussion_required === DiscussionRequired.NOT_NECESSARY && (
+                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.NOT_NECESSARY && (
                       <Chip label={DiscussionRequired.NOT_NECESSARY} color="success" />
                     )}
-                    {input.cascade.cr4de_discussion_required == null && <Chip label="?" color="default" />}
+                    {input.cascade.cr4de_discussion_required_cause == null && <Chip label="?" color="default" />}
                   </TableCell>
                 </TableRow>
               ))}

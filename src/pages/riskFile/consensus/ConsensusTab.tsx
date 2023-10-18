@@ -17,6 +17,7 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
+import Emerging from "./Emerging";
 
 const transitionDelay = 500;
 
@@ -75,7 +76,16 @@ export default function ConsensusTab({
               reloadCascades={reloadCascades}
             />
           )}
-          {riskFile.cr4de_risk_type === RISK_TYPE.EMERGING && <Box />}
+          {riskFile.cr4de_risk_type === RISK_TYPE.EMERGING && (
+            <Emerging
+              riskFile={riskFile}
+              cascades={cascades}
+              directAnalyses={directAnalyses}
+              cascadeAnalyses={cascadeAnalyses}
+              reloadRiskFile={reloadRiskFile}
+              reloadCascades={reloadCascades}
+            />
+          )}
         </Box>
       </Fade>
 

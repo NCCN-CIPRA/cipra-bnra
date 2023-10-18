@@ -197,7 +197,11 @@ export default function Step2BTab({
         );
       }
     } else if (cascades !== null && cascadeIndex !== null) {
-      setDiscussionRequired(cascades[cascadeIndex].cr4de_discussion_required as DiscussionRequired | null);
+      if (riskFile?.cr4de_riskfilesid !== cascades[cascadeIndex]._cr4de_cause_hazard_value) {
+        setDiscussionRequired(cascades[cascadeIndex].cr4de_discussion_required as DiscussionRequired | null);
+      } else {
+        setDiscussionRequired(cascades[cascadeIndex].cr4de_discussion_required_cause as DiscussionRequired | null);
+      }
     }
   }, [cascades, riskFile, cascadeIndex]);
 
@@ -305,7 +309,7 @@ export default function Step2BTab({
   const handleSave = async (innerCascadeIndex: number) => {
     setIsSaving(true);
 
-    if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD) {
+    if (riskFile.cr4de_riskfilesid !== cascades[innerCascadeIndex]._cr4de_cause_hazard_value) {
       await api.updateCascade(cascades[innerCascadeIndex].cr4de_bnrariskcascadeid, {
         cr4de_quali: qualiInput.current,
       });
@@ -621,9 +625,15 @@ export default function Step2BTab({
                   sx={{ width: 200 }}
                   onChange={async (e) => {
                     setDiscussionRequired(e.target.value as DiscussionRequired);
-                    await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
-                      cr4de_discussion_required: e.target.value,
-                    });
+                    if (riskFile.cr4de_riskfilesid !== cascade._cr4de_cause_hazard_value) {
+                      await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+                        cr4de_discussion_required: e.target.value,
+                      });
+                    } else {
+                      await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+                        cr4de_discussion_required_cause: e.target.value,
+                      });
+                    }
                     reloadCascades();
                   }}
                 >

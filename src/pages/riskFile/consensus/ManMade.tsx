@@ -390,20 +390,20 @@ function CauseSection({
   reloadCascades: () => Promise<void>;
 }) {
   const api = useAPI();
-  const discussionRequired = cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
+  const discussionRequired = cascade.cr4de_discussion_required_cause || DiscussionRequired.NOT_NECESSARY;
 
   const [open, setOpen] = useState(
     discussionRequired === DiscussionRequired.PREFERRED || discussionRequired === DiscussionRequired.REQUIRED
   );
   const [saving, setSaving] = useState(false);
 
-  const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali || "");
+  const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali_cause || "");
 
   const handleSave = async () => {
     setSaving(true);
     await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
       cr4de_quali_cause: quali,
-      cr4de_discussion_required: DiscussionRequired.RESOLVED,
+      cr4de_discussion_required_cause: DiscussionRequired.RESOLVED,
     });
     await reloadCascades();
     setSaving(false);
