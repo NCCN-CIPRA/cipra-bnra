@@ -357,7 +357,7 @@ function ScenarioSection({
           </Tooltip>
         )}
       </Paper>
-      console.log(directAnalyses)
+
       {open && (
         <Box sx={{ p: 2 }}>
           <Typography variant="subtitle2">Final Consensus Results:</Typography>
@@ -489,7 +489,7 @@ function CauseSection({
         <Stack direction="column" sx={{ width: "100%" }}>
           <Box sx={{ maxWidth: "800px", mx: "auto", my: 4, px: 4 }}>
             <CascadeMatrix
-              cascadeAnalysis={cascade as unknown as DVCascadeAnalysis}
+              cascade={cascade}
               cause={cascade.cr4de_cause_hazard as DVRiskFile}
               effect={riskFile}
               onChange={async (field, newValue) => {

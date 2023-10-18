@@ -402,7 +402,7 @@ function CauseSection({
   const handleSave = async () => {
     setSaving(true);
     await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
-      cr4de_quali: quali,
+      cr4de_quali_cause: quali,
       cr4de_discussion_required: DiscussionRequired.RESOLVED,
     });
     await reloadCascades();
@@ -442,12 +442,13 @@ function CauseSection({
         <Stack direction="column" sx={{ width: "100%" }}>
           <Box sx={{ maxWidth: "800px", mx: "auto", my: 4, px: 4 }}>
             <CascadeMatrix
-              cascadeAnalysis={cascade as unknown as DVCascadeAnalysis}
+              cascade={cascade}
               cause={cascade.cr4de_cause_hazard as DVRiskFile}
               effect={riskFile}
+              isCause={true}
               onChange={async (field, newValue) => {
                 await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
-                  [field]: newValue,
+                  [`${field}_cause`]: newValue,
                 });
                 reloadCascades();
               }}

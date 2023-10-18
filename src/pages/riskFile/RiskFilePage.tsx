@@ -131,7 +131,7 @@ export default function RiskFilePage({}) {
   );
 
   const goodCAs = useMemo(() => {
-    if (!cascadeAnalyses || !participants || !cascades) return null;
+    if (!riskFile || !cascadeAnalyses || !participants || !cascades) return null;
 
     return cascadeAnalyses.filter((ca) => {
       if (
@@ -148,7 +148,10 @@ export default function RiskFilePage({}) {
       if (cascade.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING)
         return !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null);
 
-      if (cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0) {
+      if (
+        riskFile.cr4de_title.indexOf("Climate") < 0 &&
+        cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0
+      ) {
         const d = directAnalyses?.find((da) => da._cr4de_expert_value === ca._cr4de_expert_value);
 
         return (

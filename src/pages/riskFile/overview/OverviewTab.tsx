@@ -97,10 +97,13 @@ export default function OverviewTab({
         getConsensusCascade(
           cascadeAnalyses.filter(
             (ca) =>
+              ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
               participants.some(
                 (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
-              ) && !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
-          )
+              ) &&
+              !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
+          ),
+          riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
         )
       );
     }
@@ -147,7 +150,8 @@ export default function OverviewTab({
               participants.some(
                 (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
               )
-            )
+            ),
+            riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
           )
         ).reduce(
           (f, k) => ({

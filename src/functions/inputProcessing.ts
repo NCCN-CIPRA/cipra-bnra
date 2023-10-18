@@ -184,7 +184,6 @@ export function getStats(quantiInput: (string | null)[], weights?: number[]): ST
 export function getDASpread(directAnalyses: DVDirectAnalysis[], fieldName: keyof DVDirectAnalysis) {
   return directAnalyses.reduce(
     (minMax, cur) => {
-      console.log(cur);
       const num = getQuantiNumber(cur[fieldName] as string).number;
 
       return [minMax[0] <= num ? minMax[0] : num, minMax[1] >= num ? minMax[1] : num];
@@ -313,11 +312,11 @@ export function getConsensusRiskFile(directAnalyses: DVDirectAnalysis[]) {
     ...getAveragesForScenarios("fb", "cr4de_di_quanti_fb", directAnalyses),
   };
 }
-export function getConsensusCascade(cascadeAnalyses: DVCascadeAnalysis[]) {
+export function getConsensusCascade(cascadeAnalyses: DVCascadeAnalysis[], isCause = false) {
   const c: any = {};
 
   for (let field of CASCADE_ANALYSIS_QUANTI_FIELDS) {
-    c[field] = getAverage(
+    c[`${field}${isCause ? "_cause" : ""}`] = getAverage(
       cascadeAnalyses.map((ca) => ca[field] as string),
       cascadeAnalyses.map((ca) => ca.cr4de_quality || 2.5)
     );

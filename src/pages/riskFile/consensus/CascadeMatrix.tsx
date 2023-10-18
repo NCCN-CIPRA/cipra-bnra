@@ -1,6 +1,5 @@
 import Grid from "@mui/material/Unstable_Grid2";
 import { styled, Box, Typography, useTheme, Tooltip, Select, MenuItem } from "@mui/material";
-import { CascadeAnalysisInput, getCascadeField } from "../../../functions/cascades";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
@@ -23,6 +22,38 @@ const COLORS = {
   "CP4.5": "#ffe7d1",
   "CP5.5": "#ffd6c9",
 };
+
+export function getCascadeField(
+  causeScenario: SCENARIOS,
+  effectScenario: SCENARIOS,
+  isCause = false
+): keyof DVRiskCascade {
+  if (causeScenario === SCENARIOS.CONSIDERABLE) {
+    if (effectScenario === SCENARIOS.CONSIDERABLE) {
+      return `cr4de_c2c${isCause ? "_cause" : ""}`;
+    } else if (effectScenario === SCENARIOS.MAJOR) {
+      return `cr4de_c2m${isCause ? "_cause" : ""}`;
+    } else {
+      return `cr4de_c2e${isCause ? "_cause" : ""}`;
+    }
+  } else if (causeScenario === SCENARIOS.MAJOR) {
+    if (effectScenario === SCENARIOS.CONSIDERABLE) {
+      return `cr4de_m2c${isCause ? "_cause" : ""}`;
+    } else if (effectScenario === SCENARIOS.MAJOR) {
+      return `cr4de_m2m${isCause ? "_cause" : ""}`;
+    } else {
+      return `cr4de_m2e${isCause ? "_cause" : ""}`;
+    }
+  } else {
+    if (effectScenario === SCENARIOS.CONSIDERABLE) {
+      return `cr4de_e2c${isCause ? "_cause" : ""}`;
+    } else if (effectScenario === SCENARIOS.MAJOR) {
+      return `cr4de_e2m${isCause ? "_cause" : ""}`;
+    } else {
+      return `cr4de_e2e${isCause ? "_cause" : ""}`;
+    }
+  }
+}
 
 const ScenarioBox = ({ scenario }: { scenario: SCENARIOS }) => {
   const theme = useTheme();
@@ -82,12 +113,14 @@ const CPX = ({ value, onChange }: { value: string | null; onChange: (newValue: s
 export default function CascadeMatrix({
   cause,
   effect,
-  cascadeAnalysis,
+  cascade,
+  isCause = false,
   onChange,
 }: {
   cause: DVRiskFile;
   effect: DVRiskFile;
-  cascadeAnalysis: DVCascadeAnalysis;
+  cascade: DVRiskCascade;
+  isCause?: boolean;
   onChange: (field: keyof DVRiskCascade, newValue: string) => Promise<void>;
 }) {
   const theme = useTheme();
@@ -136,20 +169,22 @@ export default function CascadeMatrix({
       </Grid>
       <Grid xs={2.5} sx={{ cursor: "pointer" }}>
         <CPX
-          value={cascadeAnalysis[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.CONSIDERABLE)]}
-          onChange={(newValue) => onChange("cr4de_c2c", newValue)}
+          value={cascade[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.CONSIDERABLE, isCause)] as string}
+          onChange={(newValue) => onChange(getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.CONSIDERABLE), newValue)}
         />
       </Grid>
       <Grid xs={2.5} sx={{ cursor: "pointer" }}>
         <CPX
-          value={cascadeAnalysis[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR)]}
-          onChange={(newValue) => onChange("cr4de_c2m", newValue)}
+          value={cascade[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, isCause)] as string}
+          onChange={(newValue) => onChange(getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, isCause), newValue)}
         />
       </Grid>
       <Grid xs={2.5} sx={{ cursor: "pointer" }}>
         <CPX
-          value={cascadeAnalysis[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.EXTREME)]}
-          onChange={(newValue) => onChange("cr4de_c2e", newValue)}
+          value={cascade[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.EXTREME, isCause)] as string}
+          onChange={(newValue) =>
+            onChange(getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.EXTREME, isCause), newValue)
+          }
         />
       </Grid>
 
@@ -158,20 +193,20 @@ export default function CascadeMatrix({
       </Grid>
       <Grid xs={2.5} sx={{ cursor: "pointer" }}>
         <CPX
-          value={cascadeAnalysis[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.CONSIDERABLE)]}
-          onChange={(newValue) => onChange("cr4de_m2c", newValue)}
+          value={cascade[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.CONSIDERABLE, isCause)] as string}
+          onChange={(newValue) => onChange(getCascadeField(SCENARIOS.MAJOR, SCENARIOS.CONSIDERABLE, isCause), newValue)}
         />
       </Grid>
       <Grid xs={2.5} sx={{ cursor: "pointer" }}>
         <CPX
-          value={cascadeAnalysis[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.MAJOR)]}
-          onChange={(newValue) => onChange("cr4de_m2m", newValue)}
+          value={cascade[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.MAJOR, isCause)] as string}
+          onChange={(newValue) => onChange(getCascadeField(SCENARIOS.MAJOR, SCENARIOS.MAJOR, isCause), newValue)}
         />
       </Grid>
       <Grid xs={2.5} sx={{ cursor: "pointer" }}>
         <CPX
-          value={cascadeAnalysis[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.EXTREME)]}
-          onChange={(newValue) => onChange("cr4de_m2e", newValue)}
+          value={cascade[getCascadeField(SCENARIOS.MAJOR, SCENARIOS.EXTREME, isCause)] as string}
+          onChange={(newValue) => onChange(getCascadeField(SCENARIOS.MAJOR, SCENARIOS.EXTREME, isCause), newValue)}
         />
       </Grid>
 
@@ -180,20 +215,22 @@ export default function CascadeMatrix({
       </Grid>
       <Grid xs={2.5} sx={{ cursor: "pointer" }}>
         <CPX
-          value={cascadeAnalysis[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.CONSIDERABLE)]}
-          onChange={(newValue) => onChange("cr4de_e2c", newValue)}
+          value={cascade[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.CONSIDERABLE, isCause)] as string}
+          onChange={(newValue) =>
+            onChange(getCascadeField(SCENARIOS.EXTREME, SCENARIOS.CONSIDERABLE, isCause), newValue)
+          }
         />
       </Grid>
       <Grid xs={2.5} sx={{ cursor: "pointer" }}>
         <CPX
-          value={cascadeAnalysis[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.MAJOR)]}
-          onChange={(newValue) => onChange("cr4de_e2m", newValue)}
+          value={cascade[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.MAJOR, isCause)] as string}
+          onChange={(newValue) => onChange(getCascadeField(SCENARIOS.EXTREME, SCENARIOS.MAJOR, isCause), newValue)}
         />
       </Grid>
       <Grid xs={2.5} sx={{ cursor: "pointer" }}>
         <CPX
-          value={cascadeAnalysis[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.EXTREME)]}
-          onChange={(newValue) => onChange("cr4de_e2e", newValue)}
+          value={cascade[getCascadeField(SCENARIOS.EXTREME, SCENARIOS.EXTREME, isCause)] as string}
+          onChange={(newValue) => onChange(getCascadeField(SCENARIOS.EXTREME, SCENARIOS.EXTREME, isCause), newValue)}
         />
       </Grid>
     </Grid>

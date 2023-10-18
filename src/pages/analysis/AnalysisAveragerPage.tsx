@@ -7,7 +7,7 @@ import useRecords from "../../hooks/useRecords";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { DVContact } from "../../types/dataverse/DVContact";
 
 const getScaleValue = (scaleString: string) => {
@@ -41,7 +41,10 @@ const getAverage = (fieldName: string, scalePrefix: string, record: any, analyse
 
 export default function AnalysisAveragerPage() {
   const { data: riskFiles } = useRecords<DVRiskFile>({ table: DataTable.RISK_FILE });
-  const { data: cascades } = useRecords<DVRiskCascade>({ table: DataTable.RISK_CASCADE });
+  const { data: cascades } = useRecords<DVRiskCascade<DVRiskFile>>({
+    table: DataTable.RISK_CASCADE,
+    query: "$expand=cr4de_cause_hazard",
+  });
   const { data: directAnalyses } = useRecords<DVDirectAnalysis>({
     table: DataTable.DIRECT_ANALYSIS,
   });
@@ -159,6 +162,46 @@ export default function AnalysisAveragerPage() {
     }
   };
 
+  const copyCauseCascades = async () => {
+    if (cascades) {
+      console.log(
+        cascades.filter(
+          (c) =>
+            (c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING ||
+              c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.MANMADE) &&
+            c.cr4de_quali &&
+            c.cr4de_quali.length > 1800
+        ).length
+      );
+      let i = 1;
+      for (let cascade of cascades.filter(
+        (c) =>
+          (c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING ||
+            c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.MANMADE) &&
+          c.cr4de_quali &&
+          c.cr4de_quali.length > 1800
+      )) {
+        console.log(i);
+        i++;
+        await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+          cr4de_c2c_cause: cascade.cr4de_c2c,
+          cr4de_c2m_cause: cascade.cr4de_c2m,
+          cr4de_c2e_cause: cascade.cr4de_c2e,
+
+          cr4de_m2c_cause: cascade.cr4de_m2c,
+          cr4de_m2m_cause: cascade.cr4de_m2m,
+          cr4de_m2e_cause: cascade.cr4de_m2e,
+
+          cr4de_e2c_cause: cascade.cr4de_e2c,
+          cr4de_e2m_cause: cascade.cr4de_e2m,
+          cr4de_e2e_cause: cascade.cr4de_e2e,
+
+          cr4de_quali_cause: cascade.cr4de_quali,
+        });
+      }
+    }
+  };
+
   return (
     <Container sx={{ mt: 4, pb: 8 }}>
       <Card sx={{}}>
@@ -187,8 +230,9 @@ export default function AnalysisAveragerPage() {
           )}
         </CardContent>
         <CardActions>
-          <Button onClick={averageDirectAnalyses}>Average Direct Analyses</Button>
-          <Button onClick={averageCascadeAnalyses}>Average Cascade Analyses</Button>
+          {/* <Button onClick={averageDirectAnalyses}>Average Direct Analyses</Button>
+          <Button onClick={averageCascadeAnalyses}>Average Cascade Analyses</Button> */}
+          {/* <Button onClick={copyCauseCascades}>Copy Causes Cascades</Button> */}
         </CardActions>
       </Card>
     </Container>

@@ -192,7 +192,7 @@ function ScenarioSection({
         ),
       };
     }, {}) as { [key in keyof DVDirectAnalysis]: STATS };
-    console.log(d);
+
     return {
       ...d,
       std: avg(Object.values(d).map((dist) => dist.std)),

@@ -157,21 +157,37 @@ export default function Step2BTab({
 
   useEffect(() => {
     if (cascades !== null && riskFile !== null && cascadeIndex === null) {
-      const causeIndex = cascades.findIndex(
-        (c) =>
-          c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
-          c.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING
-      );
-      if (causeIndex >= 0) setCascadeIndex(causeIndex);
-      else if (riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING)
-        setCascadeIndex(
-          cascades.findIndex(
-            (c) =>
-              c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
-              c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING
-          )
+      if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD) {
+        const causeIndex = cascades.findIndex(
+          (c) =>
+            c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+            c.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING
         );
-      else
+        if (causeIndex >= 0) setCascadeIndex(causeIndex);
+        else
+          setCascadeIndex(
+            cascades.findIndex(
+              (c) =>
+                c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+                c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING
+            )
+          );
+      } else if (riskFile.cr4de_risk_type === RISK_TYPE.MANMADE) {
+        const causeIndex = cascades.findIndex(
+          (c) =>
+            c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid &&
+            c.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING
+        );
+        if (causeIndex >= 0) setCascadeIndex(causeIndex);
+        else
+          setCascadeIndex(
+            cascades.findIndex(
+              (c) =>
+                c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+                c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING
+            )
+          );
+      } else {
         setCascadeIndex(
           cascades.findIndex(
             (c) =>
@@ -179,6 +195,7 @@ export default function Step2BTab({
               c.cr4de_effect_hazard.cr4de_risk_type !== RISK_TYPE.MANMADE
           )
         );
+      }
     } else if (cascades !== null && cascadeIndex !== null) {
       setDiscussionRequired(cascades[cascadeIndex].cr4de_discussion_required as DiscussionRequired | null);
     }
@@ -288,9 +305,15 @@ export default function Step2BTab({
   const handleSave = async (innerCascadeIndex: number) => {
     setIsSaving(true);
 
-    await api.updateCascade(cascades[innerCascadeIndex].cr4de_bnrariskcascadeid, {
-      cr4de_quali: qualiInput.current,
-    });
+    if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD) {
+      await api.updateCascade(cascades[innerCascadeIndex].cr4de_bnrariskcascadeid, {
+        cr4de_quali: qualiInput.current,
+      });
+    } else {
+      await api.updateCascade(cascades[innerCascadeIndex].cr4de_bnrariskcascadeid, {
+        cr4de_quali_cause: qualiInput.current,
+      });
+    }
 
     await reloadCascades();
 
@@ -621,20 +644,37 @@ export default function Step2BTab({
                   the consensus meeting:
                 </Typography>
               </Box>
-              <TextInputBox
-                initialValue={(cascade.cr4de_quali as string | null) || ""}
-                setUpdatedValue={(v) => {
-                  qualiInput.current = v || null;
-                }}
-                // onSave={async (newValue) => handleSave(qualiName, newValue)}
-                // disabled={false}
-                reset={lastCascadeIndex !== cascadeIndex}
-                onReset={async (value: string | null) => {
-                  setLastCascadeIndex(cascadeIndex);
-                  // await handleSave(lastCascadeIndex);
-                  qualiInput.current = cascade.cr4de_quali;
-                }}
-              />
+              {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD ? (
+                <TextInputBox
+                  initialValue={(cascade.cr4de_quali as string | null) || ""}
+                  setUpdatedValue={(v) => {
+                    qualiInput.current = v || null;
+                  }}
+                  // onSave={async (newValue) => handleSave(qualiName, newValue)}
+                  // disabled={false}
+                  reset={lastCascadeIndex !== cascadeIndex}
+                  onReset={async (value: string | null) => {
+                    setLastCascadeIndex(cascadeIndex);
+                    // await handleSave(lastCascadeIndex);
+                    qualiInput.current = cascade.cr4de_quali;
+                  }}
+                />
+              ) : (
+                <TextInputBox
+                  initialValue={(cascade.cr4de_quali_cause as string | null) || ""}
+                  setUpdatedValue={(v) => {
+                    qualiInput.current = v || null;
+                  }}
+                  // onSave={async (newValue) => handleSave(qualiName, newValue)}
+                  // disabled={false}
+                  reset={lastCascadeIndex !== cascadeIndex}
+                  onReset={async (value: string | null) => {
+                    setLastCascadeIndex(cascadeIndex);
+                    // await handleSave(lastCascadeIndex);
+                    qualiInput.current = cascade.cr4de_quali_cause;
+                  }}
+                />
+              )}
             </CardContent>
             <CardActions>
               <LoadingButton loading={isSaving} onClick={() => handleSave(cascadeIndex)}>
@@ -658,7 +698,8 @@ export default function Step2BTab({
           </Card>
 
           <Paper sx={{ p: 2 }}>
-            {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0
+            {riskFile.cr4de_title.indexOf("Climate") < 0 &&
+            cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0
               ? directAnalyses.map((da, i, a) => (
                   <>
                     <ExpertInputCC
