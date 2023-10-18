@@ -156,4 +156,5 @@ export interface FieldQuality {
   f_e: number;
 
   cb: number;
+  cc: number;
 }

@@ -92,6 +92,7 @@ export default function InputManagementTab({
           cascadeAnalyses={cascadeAnalyses}
           reloadRiskFile={reloadRiskFile}
           reloadCascades={reloadCascades}
+          reloadDirectAnalyses={reloadDirectAnalyses}
           reloadCascadeAnalyses={reloadCascadeAnalyses}
         />
       </TabPanel>

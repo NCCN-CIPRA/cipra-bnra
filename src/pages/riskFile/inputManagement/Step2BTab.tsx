@@ -1,5 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
+import {
+  DIRECT_ANALYSIS_QUANTI_FIELDS,
+  DVDirectAnalysis,
+  FieldQuality,
+} from "../../../types/dataverse/DVDirectAnalysis";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import LoadingTab from "../LoadingTab";
@@ -88,7 +92,7 @@ const getQuantiLabel = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDir
 
   if (good.length <= 0) return 0;
 
-  const prefix = (good[0][fieldName] as string).slice(0, -1);
+  const prefix = fieldName.startsWith("cr4de_dp50") ? fieldName : (good[0][fieldName] as string).slice(0, -1);
 
   return {
     M: "Motivation",
@@ -104,6 +108,9 @@ const getQuantiLabel = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDir
     Fa: "Financial asset damages",
     Fb: "Reduction of economic performance",
     CP: "Conditional Probability",
+    cr4de_dp50_quanti_c: "Direct probability in 2050 - Considerable scenario",
+    cr4de_dp50_quanti_m: "Direct probability in 2050 - Major scenario",
+    cr4de_dp50_quanti_e: "Direct probability in 2050 - Extreme scenario",
   }[prefix];
 };
 
@@ -119,6 +126,7 @@ export default function Step2BTab({
 
   reloadRiskFile,
   reloadCascades,
+  reloadDirectAnalyses,
   reloadCascadeAnalyses,
 }: {
   riskFile: DVRiskFile | null;
@@ -128,6 +136,7 @@ export default function Step2BTab({
 
   reloadRiskFile: () => void;
   reloadCascades: () => void;
+  reloadDirectAnalyses: () => void;
   reloadCascadeAnalyses: () => void;
 }) {
   const theme = useTheme();
@@ -649,23 +658,35 @@ export default function Step2BTab({
           </Card>
 
           <Paper sx={{ p: 2 }}>
-            {cas.map((ca, i, a) => (
-              <>
-                <ExpertInput
-                  riskFile={riskFile}
-                  cascade={cascade}
-                  directAnalysis={
-                    directAnalyses.find(
-                      (da) => (da._cr4de_expert_value === ca._cr4de_expert_value) as boolean
-                    ) as DVDirectAnalysis
-                  }
-                  cascadeAnalysis={ca}
-                  reloadCascadeAnalyses={reloadCascadeAnalyses}
-                  setReloadAttachments={() => setReloadAttachments(true)}
-                />
-                {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
-              </>
-            ))}
+            {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0
+              ? directAnalyses.map((da, i, a) => (
+                  <>
+                    <ExpertInputCC
+                      directAnalysis={da}
+                      cascade={cascade}
+                      reloadDirectAnalyses={reloadDirectAnalyses}
+                      setReloadAttachments={() => setReloadAttachments(true)}
+                    />
+                    {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
+                  </>
+                ))
+              : cas.map((ca, i, a) => (
+                  <>
+                    <ExpertInput
+                      riskFile={riskFile}
+                      cascade={cascade}
+                      directAnalysis={
+                        directAnalyses.find(
+                          (da) => (da._cr4de_expert_value === ca._cr4de_expert_value) as boolean
+                        ) as DVDirectAnalysis
+                      }
+                      cascadeAnalysis={ca}
+                      reloadCascadeAnalyses={reloadCascadeAnalyses}
+                      setReloadAttachments={() => setReloadAttachments(true)}
+                    />
+                    {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
+                  </>
+                ))}
           </Paper>
         </Stack>
       </Container>
@@ -775,6 +796,91 @@ function ExpertInput({
                 cr4de_field: attachment.cr4de_field,
                 "cr4de_referencedSource@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${attachment.cr4de_bnraattachmentid})`,
                 "cr4de_riskcascade@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${cascadeAnalysis._cr4de_cascade_value})`,
+              },
+              null
+            );
+
+            setReloadAttachments();
+          }}
+          deleteAttachment={null}
+        />
+      </Grid>
+    </Grid>
+  );
+}
+
+function ExpertInputCC({
+  directAnalysis,
+  cascade,
+  reloadDirectAnalyses,
+  setReloadAttachments,
+}: {
+  directAnalysis: DVDirectAnalysis<unknown, DVContact>;
+  cascade: DVRiskCascade;
+  reloadDirectAnalyses: () => void;
+  setReloadAttachments: () => void;
+}) {
+  const api = useAPI();
+
+  const [rating, setRating] = useState((directAnalysis.cr4de_quality && directAnalysis.cr4de_quality.cc) ?? null);
+
+  return (
+    <Grid container wrap="nowrap" spacing={2}>
+      <Grid justifyContent="left" item xs zeroMinWidth>
+        <Stack direction="row">
+          <Typography variant="subtitle2" sx={{ flex: 1 }}>
+            {directAnalysis.cr4de_expert.emailaddress1} says:
+          </Typography>
+          <Rating
+            name="size-small"
+            value={rating}
+            onChange={async (e, newValue) => {
+              setRating(newValue);
+              await api.updateDirectAnalysis(directAnalysis.cr4de_bnradirectanalysisid, {
+                cr4de_quality: JSON.stringify({
+                  ...directAnalysis.cr4de_quality,
+                  cc: newValue,
+                }),
+              });
+              reloadDirectAnalyses();
+            }}
+            size="small"
+          />
+        </Stack>
+        {directAnalysis.cr4de_dp50_quali && directAnalysis.cr4de_dp50_quali !== NO_COMMENT ? (
+          <Box
+            dangerouslySetInnerHTML={{ __html: (directAnalysis.cr4de_dp50_quali || "") as string }}
+            sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+          />
+        ) : (
+          <Box sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}>- No comment -</Box>
+        )}
+
+        <Stack direction="column" sx={{ mt: 2 }}>
+          {["cr4de_dp50_quanti_c", "cr4de_dp50_quanti_m", "cr4de_dp50_quanti_e"].map((n) => (
+            <Stack direction="row">
+              <Typography variant="caption" sx={{ flex: 1 }}>
+                <i>{getQuantiLabel(n as keyof DVDirectAnalysis, [directAnalysis])}</i> Estimate:
+              </Typography>
+              <Typography variant="caption">
+                <b>{directAnalysis[n as keyof DVDirectAnalysis] as string}</b>
+              </Typography>
+            </Stack>
+          ))}
+        </Stack>
+
+        <Attachments
+          reset={false}
+          getAttachments={() =>
+            api.getAttachments(`$filter=_cr4de_directanalysis_value eq ${directAnalysis?.cr4de_bnradirectanalysisid}`)
+          }
+          consolidateAttachment={async (attachment: DVAttachment) => {
+            await api.createAttachment(
+              {
+                "cr4de_owner@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${attachment._cr4de_owner_value})`,
+                cr4de_field: attachment.cr4de_field,
+                "cr4de_referencedSource@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnraattachments(${attachment.cr4de_bnraattachmentid})`,
+                "cr4de_riskcascade@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${cascade.cr4de_bnrariskcascadeid})`,
               },
               null
             );
