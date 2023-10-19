@@ -10,6 +10,7 @@ import { Ha, Hb, Hc } from "../../learning/QuantitativeScales/H";
 import { Sa, Sb, Sc, Sd } from "../../learning/QuantitativeScales/S";
 import { Ea } from "../../learning/QuantitativeScales/E";
 import { Fa, Fb } from "../../learning/QuantitativeScales/F";
+import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 
 const prefixToField: { [prefix: string]: DirectImpactField } = {
   Ha: Ha,
@@ -37,7 +38,7 @@ export function Slider({
   onChange,
 }: {
   initialValue: string;
-  name?: keyof DVDirectAnalysis;
+  name?: keyof DVRiskFile;
   spread: number[];
   onChange: (newValue: string) => Promise<void>;
 }) {

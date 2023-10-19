@@ -93,6 +93,7 @@ function getQuantiNumbers(quantiInput: (string | null)[]) {
 }
 
 export function getQuantiNumber(quantiString: string) {
+  console.log(quantiString);
   const prefix = quantiString.slice(0, quantiString.search(/\d/));
 
   return {
@@ -265,6 +266,10 @@ export const getQuantiLabel = (
       if ((rfContainer as DVRiskFile).cr4de_risk_type === RISK_TYPE.STANDARD) return "Direct probability";
     }
     return "Motivation";
+  } else if (fieldName.indexOf("_climate_change_") >= 0) {
+    if (fieldName.indexOf("_c")) return "Direct probability in 2050 - Considerable scenario";
+    if (fieldName.indexOf("_m")) return "Direct probability in 2050 - Major scenario";
+    if (fieldName.indexOf("_e")) return "Direct probability in 2050 - Extreme scenario";
   }
 
   return {
@@ -282,17 +287,19 @@ export const getQuantiLabel = (
 };
 
 function getAveragesForScenarios(parameter: string, field: string, directAnalyses: DVDirectAnalysis[]) {
+  const daField = field.indexOf("climate_change") >= 0 ? "cr4de_dp50_quanti" : field;
+
   return {
     [`${field}_c`]: getAverage(
-      directAnalyses.map((da) => da[`${field}_c` as keyof DVDirectAnalysis]) as string[],
+      directAnalyses.map((da) => da[`${daField}_c` as keyof DVDirectAnalysis]) as string[],
       directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_c}` as keyof FieldQuality]) || 2.5)
     ),
     [`${field}_m`]: getAverage(
-      directAnalyses.map((da) => da[`${field}_m` as keyof DVDirectAnalysis]) as string[],
+      directAnalyses.map((da) => da[`${daField}_m` as keyof DVDirectAnalysis]) as string[],
       directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_m}` as keyof FieldQuality]) || 2.5)
     ),
     [`${field}_e`]: getAverage(
-      directAnalyses.map((da) => da[`${field}_e` as keyof DVDirectAnalysis]) as string[],
+      directAnalyses.map((da) => da[`${daField}_e` as keyof DVDirectAnalysis]) as string[],
       directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_e}` as keyof FieldQuality]) || 2.5)
     ),
   };
@@ -310,6 +317,7 @@ export function getConsensusRiskFile(directAnalyses: DVDirectAnalysis[]) {
     ...getAveragesForScenarios("ea", "cr4de_di_quanti_ea", directAnalyses),
     ...getAveragesForScenarios("fa", "cr4de_di_quanti_fa", directAnalyses),
     ...getAveragesForScenarios("fb", "cr4de_di_quanti_fb", directAnalyses),
+    ...getAveragesForScenarios("cc", "cr4de_climate_change_quanti", directAnalyses),
   };
 }
 export function getConsensusCascade(cascadeAnalyses: DVCascadeAnalysis[], isCause = false) {

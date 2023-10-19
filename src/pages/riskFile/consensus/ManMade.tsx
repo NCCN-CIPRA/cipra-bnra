@@ -120,9 +120,20 @@ export default function ManMade({
           ))}
         </Box>
         <Box sx={{ mb: 8 }}>
-          {emerging.map((ca) => (
-            <EmergingSection key={ca.cr4de_bnrariskcascadeid} cascade={ca} reloadCascades={reloadCascades} />
-          ))}
+          {emerging.map((ca) =>
+            ca.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 ? (
+              <CCSection
+                key={ca.cr4de_bnrariskcascadeid}
+                riskFile={riskFile}
+                cascade={ca}
+                directAnalyses={directAnalyses}
+                reloadRiskFile={reloadRiskFile}
+                reloadCascades={reloadCascades}
+              />
+            ) : (
+              <EmergingSection key={ca.cr4de_bnrariskcascadeid} cascade={ca} reloadCascades={reloadCascades} />
+            )
+          )}
         </Box>
       </Box>
     </>
@@ -542,6 +553,123 @@ function EmergingSection({
                 setQuali(newValue || null);
               }}
             />
+            <Box sx={{ textAlign: "center", mt: 4 }}>
+              <LoadingButton loading={saving} onClick={handleSave} variant="outlined">
+                Save & Close
+              </LoadingButton>
+            </Box>
+          </Box>
+        </Stack>
+      </AccordionDetails>
+    </Accordion>
+  );
+}
+
+function CCSection({
+  riskFile,
+  cascade,
+  directAnalyses,
+  reloadRiskFile,
+  reloadCascades,
+}: {
+  riskFile: DVRiskFile;
+  cascade: DVRiskCascade<SmallRisk>;
+  directAnalyses: DVDirectAnalysis[];
+  reloadRiskFile: () => Promise<void>;
+  reloadCascades: () => Promise<void>;
+}) {
+  const api = useAPI();
+  const discussionRequired = cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
+
+  const [open, setOpen] = useState(
+    discussionRequired === DiscussionRequired.PREFERRED || discussionRequired === DiscussionRequired.REQUIRED
+  );
+  const [saving, setSaving] = useState(false);
+
+  const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali || "");
+
+  const handleSave = async () => {
+    setSaving(true);
+    await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+      cr4de_quali: quali,
+      cr4de_discussion_required: DiscussionRequired.RESOLVED,
+    });
+    await reloadCascades();
+    setSaving(false);
+    setOpen(false);
+  };
+
+  return (
+    <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} onClick={() => setOpen(!open)}>
+        <Typography sx={{ flex: 1 }}>
+          Catalyzing Risk:{" "}
+          <Link href={`/learning/risk/${cascade.cr4de_cause_hazard.cr4de_riskfilesid}`} target="_blank">
+            {cascade.cr4de_cause_hazard.cr4de_title}
+          </Link>
+        </Typography>
+        {discussionRequired === DiscussionRequired.REQUIRED && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <ErrorIcon color="warning" />
+          </Tooltip>
+        )}
+        {discussionRequired === DiscussionRequired.PREFERRED && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <ErrorIcon color="info" />
+          </Tooltip>
+        )}
+        {discussionRequired === DiscussionRequired.RESOLVED && (
+          <Tooltip title="The input received for this section was divergent and may require further discussion">
+            <CheckCircleIcon color="success" />
+          </Tooltip>
+        )}
+      </AccordionSummary>
+      <AccordionDetails>
+        <Stack direction="row" sx={{ width: "100%", justifyContent: "stretch" }}>
+          <Box sx={{ p: 4 }}>
+            <Typography variant="subtitle2" sx={{ mb: 2 }}>
+              Final Consensus Results:
+            </Typography>
+            <TextInputBox
+              initialValue={quali}
+              setUpdatedValue={(newValue) => {
+                setQuali(newValue || null);
+              }}
+            />
+            <Stack direction="column" sx={{ mt: 2 }}>
+              {(
+                [
+                  "cr4de_climate_change_quanti_c",
+                  "cr4de_climate_change_quanti_m",
+                  "cr4de_climate_change_quanti_e",
+                ] as (keyof DVRiskFile)[]
+              ).map((n) => (
+                <Stack direction="row" sx={{ alignItems: "center" }}>
+                  <Typography variant="caption" sx={{ flex: 1 }}>
+                    <i>{getQuantiLabel(n as keyof DVDirectAnalysis, riskFile)}</i> Estimation:
+                  </Typography>
+                  <Box sx={{ flex: 1, minWidth: "300px", textAlign: "right", fontWeight: "bold" }}>
+                    {riskFile.cr4de_consensus_type !== null ? (
+                      <Slider
+                        initialValue={riskFile[n as keyof DVRiskFile] as string}
+                        name={n}
+                        spread={getDASpread(
+                          directAnalyses,
+                          `cr4de_dp50_quanti${n.slice(-2)}` as keyof DVDirectAnalysis
+                        )}
+                        onChange={async (newValue) => {
+                          await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+                            [n]: newValue,
+                          });
+                        }}
+                      />
+                    ) : (
+                      <Typography variant="subtitle2">N/A</Typography>
+                    )}
+                  </Box>
+                </Stack>
+              ))}
+            </Stack>
             <Box sx={{ textAlign: "center", mt: 4 }}>
               <LoadingButton loading={saving} onClick={handleSave} variant="outlined">
                 Save & Close
