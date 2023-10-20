@@ -20,6 +20,7 @@ import {
   getQualiFieldName,
   getQuantiFieldNames,
   getQuantiLabel,
+  getQuantiNumber,
 } from "../../../functions/inputProcessing";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
@@ -34,6 +35,8 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import { DirectImpactField } from "../../learning/QuantitativeScales/DI";
 import CascadeMatrix from "./CascadeMatrix";
+import TornadoIcon from "@mui/icons-material/Tornado";
+import { useTranslation } from "react-i18next";
 
 const capFirst = (s: string) => {
   return `${s[0].toUpperCase()}${s.slice(1)}`;
@@ -636,6 +639,7 @@ function CCSection({
   const [saving, setSaving] = useState(false);
 
   const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali || "");
+  const { t } = useTranslation();
 
   const handleSave = async () => {
     setSaving(true);
@@ -699,19 +703,44 @@ function CCSection({
                   </Typography>
                   <Box sx={{ flex: 1, minWidth: "300px", textAlign: "right", fontWeight: "bold" }}>
                     {riskFile.cr4de_consensus_type !== null ? (
-                      <Slider
-                        initialValue={riskFile[n as keyof DVRiskFile] as string}
-                        name={n}
-                        spread={getDASpread(
-                          directAnalyses,
-                          `cr4de_dp50_quanti${n.slice(-2)}` as keyof DVDirectAnalysis
-                        )}
-                        onChange={async (newValue) => {
-                          await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-                            [n]: newValue,
-                          });
-                        }}
-                      />
+                      <Box id={`DP50-slider-${n}`} sx={{ mx: 2, mt: 3, position: "relative" }}>
+                        <Tooltip
+                          title={t("2B.DP50.originalValue", "The original DP value selected in the previous step.")}
+                        >
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              top: -18,
+                              left: `calc(${
+                                (getQuantiNumber(
+                                  riskFile[`cr4de_dp_quanti_${n.slice(-1)}` as keyof DVRiskFile] as string
+                                ).number +
+                                  0) *
+                                18.18
+                              }% - 15px)`,
+                              width: 30,
+                              height: 30,
+                            }}
+                            className="original-dp-value"
+                          >
+                            <TornadoIcon color="secondary" sx={{ fontSize: 30 }} />
+                          </Box>
+                        </Tooltip>
+                        <Slider
+                          mx={0}
+                          initialValue={riskFile[n as keyof DVRiskFile] as string}
+                          name={n}
+                          spread={getDASpread(
+                            directAnalyses,
+                            `cr4de_dp50_quanti${n.slice(-2)}` as keyof DVDirectAnalysis
+                          )}
+                          onChange={async (newValue) => {
+                            await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+                              [n]: newValue,
+                            });
+                          }}
+                        />
+                      </Box>
                     ) : (
                       <Typography variant="subtitle2">N/A</Typography>
                     )}

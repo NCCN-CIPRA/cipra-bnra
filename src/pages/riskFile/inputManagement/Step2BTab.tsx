@@ -301,7 +301,7 @@ export default function Step2BTab({
     (c) =>
       c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid &&
       riskFile.cr4de_risk_type === RISK_TYPE.EMERGING &&
-      c.cr4de_effect_hazard.cr4de_risk_type !== RISK_TYPE.MANMADE
+      c.cr4de_effect_hazard.cr4de_risk_type === RISK_TYPE.STANDARD
   );
 
   const cascade = cascades[cascadeIndex];

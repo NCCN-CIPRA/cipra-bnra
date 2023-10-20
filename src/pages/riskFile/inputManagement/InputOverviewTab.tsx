@@ -86,10 +86,16 @@ export default function InputOverviewTab({
       c.cascade._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
       c.cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING
   );
-  const effects = cInput.filter(
+  const attacks = cInput.filter(
     (c) =>
-      riskFile.cr4de_risk_type !== RISK_TYPE.STANDARD &&
+      riskFile.cr4de_risk_type === RISK_TYPE.MANMADE &&
       c.cascade._cr4de_effect_hazard_value !== riskFile.cr4de_riskfilesid
+  );
+  const catalyzedRisks = cInput.filter(
+    (c) =>
+      riskFile.cr4de_risk_type === RISK_TYPE.EMERGING &&
+      c.cascade._cr4de_effect_hazard_value !== riskFile.cr4de_riskfilesid &&
+      c.cascade.cr4de_effect_hazard.cr4de_risk_type === RISK_TYPE.STANDARD
   );
 
   return (
@@ -306,12 +312,13 @@ export default function InputOverviewTab({
                   </TableCell>
                 </TableRow>
               ))}
-              {causes.length > 0 && (effects.length > 0 || catalysingEffects.length > 0) && (
-                <TableRow>
-                  <TableCell colSpan={1000}>&nbsp;</TableCell>
-                </TableRow>
-              )}
-              {effects.length > 0 && (
+              {causes.length > 0 &&
+                (attacks.length > 0 || catalyzedRisks.length > 0 || catalysingEffects.length > 0) && (
+                  <TableRow>
+                    <TableCell colSpan={1000}>&nbsp;</TableCell>
+                  </TableRow>
+                )}
+              {attacks.length > 0 && (
                 <TableRow>
                   <TableCell
                     colSpan={1000}
@@ -325,7 +332,7 @@ export default function InputOverviewTab({
                   </TableCell>
                 </TableRow>
               )}
-              {effects.map((input) => (
+              {attacks.map((input) => (
                 <TableRow>
                   <TableCell>{input.cascade.cr4de_effect_hazard.cr4de_title}</TableCell>
                   {input.cascadeAnalyses.map((e) => {
@@ -372,7 +379,51 @@ export default function InputOverviewTab({
                   </TableCell>
                 </TableRow>
               ))}
-              {effects.length > 0 && catalysingEffects.length > 0 && (
+              {catalyzedRisks.length > 0 && catalysingEffects.length > 0 && (
+                <TableRow>
+                  <TableCell colSpan={1000}>&nbsp;</TableCell>
+                </TableRow>
+              )}
+              {catalyzedRisks.map((input) => (
+                <TableRow>
+                  <TableCell>{input.cascade.cr4de_effect_hazard.cr4de_title}</TableCell>
+                  {input.cascadeAnalyses.map((e) => {
+                    if (!e.cascadeAnalysis) {
+                      return <TableCell align="center">-</TableCell>;
+                    }
+                    return (
+                      <TableCell align="center">
+                        {e.cascadeAnalysis?.cr4de_quality ? (
+                          <Rating size="small" value={e.cascadeAnalysis?.cr4de_quality} />
+                        ) : (
+                          "?"
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                  <TableCell align="center">-</TableCell>
+                  <TableCell align="center">
+                    <Checkbox
+                      checked={input.cascade.cr4de_quali_cause !== null && input.cascade.cr4de_quali_cause !== ""}
+                      size="small"
+                      readOnly
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.REQUIRED && (
+                      <Chip label={DiscussionRequired.REQUIRED} color="error" />
+                    )}
+                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.PREFERRED && (
+                      <Chip label={DiscussionRequired.PREFERRED} color="warning" />
+                    )}
+                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.NOT_NECESSARY && (
+                      <Chip label={DiscussionRequired.NOT_NECESSARY} color="success" />
+                    )}
+                    {input.cascade.cr4de_discussion_required_cause == null && <Chip label="?" color="default" />}
+                  </TableCell>
+                </TableRow>
+              ))}
+              {catalyzedRisks.length > 0 && catalysingEffects.length > 0 && (
                 <TableRow>
                   <TableCell colSpan={1000}>&nbsp;</TableCell>
                 </TableRow>

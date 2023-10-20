@@ -20,12 +20,13 @@ import {
   MenuItem,
   TextField,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { DVParticipation } from "../types/dataverse/DVParticipation";
 import { DVContact } from "../types/dataverse/DVContact";
 import useAPI, { DataTable } from "../hooks/useAPI";
-import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
 import useRecords from "../hooks/useRecords";
 import DoneIcon from "@mui/icons-material/Done";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
@@ -34,6 +35,18 @@ const roles = {
   analist: "Author",
   analist_2: "Co-author (backup)",
   expert: "Topical Expert",
+};
+
+const showDoneIcon = (doneField: boolean | null, roleField: string, available: boolean = true) => {
+  if (roleField === "analist" || roleField === "analist_2" || !available) {
+    return <Typography variant="subtitle1">-</Typography>;
+  }
+
+  if (doneField) {
+    return <DoneIcon color="success" sx={{ fontSize: 16 }} />;
+  }
+
+  return <HourglassEmptyIcon color="warning" sx={{ opacity: 0.5, fontSize: 16 }} />;
 };
 
 export default function ParticipationTable({
@@ -122,27 +135,15 @@ export default function ParticipationTable({
                     {p.cr4de_contact.emailaddress1}
                   </TableCell>
                   <TableCell sx={{ whiteSpace: "nowrap" }}>{roles[p.cr4de_role as keyof typeof roles]}</TableCell>
+                  <TableCell align="center">{showDoneIcon(p.cr4de_validation_finished, p.cr4de_role)}</TableCell>
                   <TableCell align="center">
-                    {p.cr4de_validation_finished ? (
-                      <DoneIcon color="success" sx={{ fontSize: 16 }} />
-                    ) : (
-                      <HourglassEmptyIcon color="warning" sx={{ opacity: 0.5, fontSize: 16 }} />
+                    {showDoneIcon(
+                      p.cr4de_direct_analysis_finished,
+                      p.cr4de_role,
+                      riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING
                     )}
                   </TableCell>
-                  <TableCell align="center">
-                    {p.cr4de_direct_analysis_finished ? (
-                      <DoneIcon color="success" sx={{ fontSize: 16 }} />
-                    ) : (
-                      <HourglassEmptyIcon color="warning" sx={{ opacity: 0.5, fontSize: 16 }} />
-                    )}
-                  </TableCell>
-                  <TableCell align="center">
-                    {p.cr4de_cascade_analysis_finished ? (
-                      <DoneIcon color="success" sx={{ fontSize: 16 }} />
-                    ) : (
-                      <HourglassEmptyIcon color="warning" sx={{ opacity: 0.5, fontSize: 16 }} />
-                    )}
-                  </TableCell>
+                  <TableCell align="center">{showDoneIcon(p.cr4de_cascade_analysis_finished, p.cr4de_role)}</TableCell>
                   <TableCell align="center"></TableCell>
                 </TableRow>
               ))}

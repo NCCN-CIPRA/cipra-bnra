@@ -42,7 +42,19 @@ export const DP5 = [
 export const DPs = [DP1, DP2, DP3, DP4, DP5];
 
 export const DPValueStack = ({ value }: { value: number }) => {
-  if (value < 0) return null;
+  if (value < 0)
+    return (
+      <Stack sx={{ width: 500 }} spacing={1}>
+        <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", mr: 1, pb: 1, fontWeight: "bold" }}>
+          {`DP${value + 1}`}
+        </Typography>
+        <Stack direction="row">
+          <Typography variant="body2" sx={{ whiteSpace: "nowrap", mr: 1, fontWeight: "bold" }}>
+            Impossible
+          </Typography>
+        </Stack>
+      </Stack>
+    );
 
   return (
     <Stack sx={{ width: 500 }} spacing={1}>

@@ -27,7 +27,7 @@ const prefixToField: { [prefix: string]: DirectImpactField } = {
 
 const getValueStack = (prefix: string, value: number) => {
   if (prefix === "M") return <MValueStack value={value} />;
-  else if (prefix === "DP") return <DPValueStack value={value} />;
+  else if (prefix === "DP") return <DPValueStack value={value - 1} />;
   return <DIValueStack field={prefixToField[prefix]} value={value} />;
 };
 
@@ -35,11 +35,13 @@ export function Slider({
   initialValue,
   name,
   spread,
+  mx = 2,
   onChange,
 }: {
   initialValue: string;
   name?: keyof DVRiskFile;
   spread: number[];
+  mx?: number;
   onChange: (newValue: string) => Promise<void>;
 }) {
   const { prefix, number } = getQuantiNumber(initialValue);
@@ -61,7 +63,7 @@ export function Slider({
   return (
     <Box
       sx={{
-        mx: 2,
+        mx,
         mt: 2,
         "& .MuiSlider-track": {
           // display: "none"

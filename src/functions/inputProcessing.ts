@@ -267,9 +267,9 @@ export const getQuantiLabel = (
     }
     return "Motivation";
   } else if (fieldName.indexOf("_climate_change_") >= 0) {
-    if (fieldName.indexOf("_c")) return "Direct probability in 2050 - Considerable scenario";
-    if (fieldName.indexOf("_m")) return "Direct probability in 2050 - Major scenario";
-    if (fieldName.indexOf("_e")) return "Direct probability in 2050 - Extreme scenario";
+    if (fieldName.endsWith("_c")) return "Direct probability in 2050 - Considerable scenario";
+    if (fieldName.endsWith("_m")) return "Direct probability in 2050 - Major scenario";
+    if (fieldName.endsWith("_e")) return "Direct probability in 2050 - Extreme scenario";
   }
 
   return {
