@@ -93,7 +93,6 @@ function getQuantiNumbers(quantiInput: (string | null)[]) {
 }
 
 export function getQuantiNumber(quantiString: string) {
-  console.log(quantiString);
   const prefix = quantiString.slice(0, quantiString.search(/\d/));
 
   return {
@@ -185,6 +184,8 @@ export function getStats(quantiInput: (string | null)[], weights?: number[]): ST
 export function getDASpread(directAnalyses: DVDirectAnalysis[], fieldName: keyof DVDirectAnalysis) {
   return directAnalyses.reduce(
     (minMax, cur) => {
+      if (cur[fieldName] === null) return minMax;
+
       const num = getQuantiNumber(cur[fieldName] as string).number;
 
       return [minMax[0] <= num ? minMax[0] : num, minMax[1] >= num ? minMax[1] : num];

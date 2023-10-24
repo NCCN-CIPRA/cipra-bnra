@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
-import { CONSENSUS_TYPE, DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { CONSENSUS_TYPE, DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import LoadingTab from "../LoadingTab";
 import {
   Box,
@@ -92,6 +92,13 @@ export default function OverviewTab({
     });
 
     for (let c of cascades) {
+      if (
+        riskFile.cr4de_risk_type === RISK_TYPE.STANDARD &&
+        riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
+      ) {
+        continue;
+      }
+
       await api.updateCascade(
         c.cr4de_bnrariskcascadeid,
         getConsensusCascade(
