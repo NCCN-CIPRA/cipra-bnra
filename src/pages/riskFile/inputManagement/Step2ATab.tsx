@@ -5,7 +5,7 @@ import {
   FieldQuality,
 } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
-import { DVRiskFile, DiscussionsRequired } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile, DiscussionsRequired, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import LoadingTab from "../LoadingTab";
 import {
   Grid,
@@ -74,15 +74,18 @@ const getQuantiFieldNames = (scenario: SCENARIOS, parameter: string): (keyof DVD
   );
 };
 
-const getPrefix = (parameter: string, fieldName: string) => {
-  if (parameter === "dp") return "DP";
+const getPrefix = (parameter: string, fieldName: string, riskType: RISK_TYPE) => {
+  if (parameter === "dp") {
+    if (riskType === RISK_TYPE.MANMADE) return "Motivation";
+    return "DP";
+  }
 
   return capFirst(fieldName.slice(0, -2).slice(-2));
 };
 
 const getQuantiLabel = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDirectAnalysis[]) => {
   const good = directAnalyses.filter((da) => da[fieldName] !== null);
-
+  console.log(directAnalyses);
   if (good.length <= 0) return 0;
 
   const prefix = (good[0][fieldName] as string).slice(0, -1);
@@ -240,7 +243,7 @@ function ScenarioSection({
                       <BarChart
                         data={quantiNames.map((n) => {
                           return {
-                            name: `${getPrefix(parameter, n)} Input Distribution`,
+                            name: `${getPrefix(parameter, n, riskFile.cr4de_risk_type)} Input Distribution`,
                             distFloat: distribution[n].min - 0.05,
                             distBot: distribution[n].avg - distribution[n].min,
                             distAvg: 0.1,
@@ -536,14 +539,21 @@ export default function Step2APage({
   return (
     <Stack spacing={4}>
       <Stack direction="row" spacing={2} sx={{ bgcolor: theme.palette.background.paper }}>
-        <Select value={parameter} sx={{ flex: 1 }} onChange={(e) => setParameter(e.target.value)}>
-          <MenuItem value={"dp"}>Direct Probability</MenuItem>
-          <MenuItem value={"h"}>Direct Human Impact</MenuItem>
-          <MenuItem value={"s"}>Direct Societal Impact</MenuItem>
-          <MenuItem value={"e"}>Direct Environmental Impact</MenuItem>
-          <MenuItem value={"f"}>Direct Financial</MenuItem>
-          <MenuItem value={"cb"}>Cross-border Effects</MenuItem>
-        </Select>
+        {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && (
+          <Select value={parameter} sx={{ flex: 1 }} onChange={(e) => setParameter(e.target.value)}>
+            <MenuItem value={"dp"}>Direct Probability</MenuItem>
+            <MenuItem value={"h"}>Direct Human Impact</MenuItem>
+            <MenuItem value={"s"}>Direct Societal Impact</MenuItem>
+            <MenuItem value={"e"}>Direct Environmental Impact</MenuItem>
+            <MenuItem value={"f"}>Direct Financial</MenuItem>
+            <MenuItem value={"cb"}>Cross-border Effects</MenuItem>
+          </Select>
+        )}
+        {riskFile.cr4de_risk_type === RISK_TYPE.MANMADE && (
+          <Select value={parameter} sx={{ flex: 1 }} onChange={(e) => setParameter(e.target.value)}>
+            <MenuItem value={"dp"}>Motivation</MenuItem>
+          </Select>
+        )}
       </Stack>
 
       <Stack direction="row" spacing={2} sx={{ width: "100%" }}>

@@ -75,6 +75,15 @@ export interface DVDirectAnalysis<RiskFileType = unknown, ExpertType = unknown> 
   modifiedon: Date;
 }
 
+export const DIRECT_ANALYSIS_EDITABLE_FIELDS_MANMADE: (keyof DirectAnalysisEditableFields)[] = [
+  "cr4de_dp_quali_c",
+  "cr4de_dp_quanti_c",
+  "cr4de_dp_quali_m",
+  "cr4de_dp_quanti_m",
+  "cr4de_dp_quali_e",
+  "cr4de_dp_quanti_e",
+];
+
 export const DIRECT_ANALYSIS_EDITABLE_FIELDS: (keyof DirectAnalysisEditableFields)[] = [
   "cr4de_dp_quali_c",
   "cr4de_dp_quanti_c",

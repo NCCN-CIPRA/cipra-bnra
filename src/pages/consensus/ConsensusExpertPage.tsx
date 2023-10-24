@@ -14,6 +14,7 @@ import useRecords from "../../hooks/useRecords";
 import Standard from "./Standard";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
+import ManMade from "./ManMade";
 
 type RouteParams = {
   riskFile_id: string;
@@ -59,7 +60,9 @@ export default function ConsensusExpertPage() {
           {directAnalysis &&
             directAnalysis[0].cr4de_risk_file.cr4de_risk_type === RISK_TYPE.STANDARD &&
             cascadeAnalyses && <Standard directAnalysis={directAnalysis[0]} cascadeAnalyses={cascadeAnalyses} />}
-          {directAnalysis && directAnalysis[0].cr4de_risk_file.cr4de_risk_type === RISK_TYPE.MANMADE && <Box />}
+          {directAnalysis &&
+            directAnalysis[0].cr4de_risk_file.cr4de_risk_type === RISK_TYPE.MANMADE &&
+            cascadeAnalyses && <ManMade directAnalysis={directAnalysis[0]} cascadeAnalyses={cascadeAnalyses} />}
           {directAnalysis && directAnalysis[0].cr4de_risk_file.cr4de_risk_type === RISK_TYPE.EMERGING && <Box />}
         </Box>
       </Fade>

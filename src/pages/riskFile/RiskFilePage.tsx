@@ -20,13 +20,18 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import InputManagementTab from "./inputManagement/InputManagementTab";
-import { DIRECT_ANALYSIS_EDITABLE_FIELDS, DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
+import {
+  DIRECT_ANALYSIS_EDITABLE_FIELDS,
+  DIRECT_ANALYSIS_EDITABLE_FIELDS_MANMADE,
+  DVDirectAnalysis,
+} from "../../types/dataverse/DVDirectAnalysis";
 import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import AnalysisTab from "./analysis/AnalysisTab";
 import LoadingTab from "./LoadingTab";
 import { RiskAnalysisResults } from "../../types/dataverse/DVAnalysisRun";
 import GroupsIcon from "@mui/icons-material/Groups";
 import ConsensusTab from "./consensus/ConsensusTab";
+import { getCompletedCascadeAnalyses, getCompletedDirectAnalyses } from "../../functions/inputProcessing";
 
 type RouteParams = {
   risk_file_id: string;
@@ -118,53 +123,14 @@ export default function RiskFilePage({}) {
   };
 
   const goodDAs = useMemo(
-    () =>
-      directAnalyses && participants
-        ? directAnalyses.filter(
-            (da) =>
-              participants.some(
-                (pa) => pa._cr4de_contact_value === da._cr4de_expert_value && pa.cr4de_direct_analysis_finished
-              ) && !DIRECT_ANALYSIS_EDITABLE_FIELDS.some((f) => da[f] === null)
-          )
-        : null,
+    () => (directAnalyses && participants ? getCompletedDirectAnalyses(riskFile, participants, directAnalyses) : null),
     [directAnalyses, participants]
   );
 
   const goodCAs = useMemo(() => {
     if (!riskFile || !cascadeAnalyses || !participants || !cascades) return null;
 
-    return cascadeAnalyses.filter((ca) => {
-      if (
-        !participants.some(
-          (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
-        )
-      )
-        return false;
-
-      const cascade = cascades.find((c) => ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid);
-
-      if (!cascade) return false;
-
-      if (cascade.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING)
-        return !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null);
-
-      if (
-        riskFile.cr4de_title.indexOf("Climate") < 0 &&
-        cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0
-      ) {
-        const d = directAnalyses?.find((da) => da._cr4de_expert_value === ca._cr4de_expert_value);
-
-        return (
-          d &&
-          d.cr4de_dp50_quanti_c !== null &&
-          d.cr4de_dp50_quanti_m !== null &&
-          d.cr4de_dp50_quanti_e !== null &&
-          d.cr4de_dp50_quali !== null
-        );
-      }
-
-      return ca.cr4de_quali_cascade !== null;
-    });
+    return getCompletedCascadeAnalyses(riskFile, participants, cascades, directAnalyses, cascadeAnalyses);
   }, [directAnalyses, cascadeAnalyses, participants, cascades]);
 
   usePageTitle("BNRA 2023 - 2026 Risk File");

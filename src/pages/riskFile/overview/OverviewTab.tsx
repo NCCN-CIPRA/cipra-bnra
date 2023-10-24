@@ -32,7 +32,11 @@ import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../../type
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { getConsensusCascade, getConsensusRiskFile } from "../../../functions/inputProcessing";
+import {
+  getCompletedDirectAnalyses,
+  getConsensusCascade,
+  getConsensusRiskFile,
+} from "../../../functions/inputProcessing";
 import { addDays, format } from "date-fns";
 import nlBE from "date-fns/locale/nl-BE";
 import { LoadingButton } from "@mui/lab";
@@ -76,14 +80,7 @@ export default function OverviewTab({
     setIsSaving(true);
 
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-      ...getConsensusRiskFile(
-        directAnalyses.filter(
-          (da) =>
-            participants.some(
-              (pa) => pa._cr4de_contact_value === da._cr4de_expert_value && pa.cr4de_direct_analysis_finished
-            ) && !DIRECT_ANALYSIS_EDITABLE_FIELDS.some((f) => da[f] === null)
-        )
-      ),
+      ...getConsensusRiskFile(getCompletedDirectAnalyses(riskFile, participants, directAnalyses)),
       cr4de_consensus_type: consensus,
       cr4de_consensus_date:
         (consensus === CONSENSUS_TYPE.MEETING && consensusDate) ||

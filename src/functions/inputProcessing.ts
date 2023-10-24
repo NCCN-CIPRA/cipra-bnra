@@ -1,6 +1,16 @@
 import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
-import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis, FieldQuality } from "../types/dataverse/DVDirectAnalysis";
+import { DVContact } from "../types/dataverse/DVContact";
+import {
+  DIRECT_ANALYSIS_EDITABLE_FIELDS,
+  DIRECT_ANALYSIS_EDITABLE_FIELDS_MANMADE,
+  DIRECT_ANALYSIS_QUANTI_FIELDS,
+  DVDirectAnalysis,
+  FieldQuality,
+} from "../types/dataverse/DVDirectAnalysis";
+import { DVParticipation } from "../types/dataverse/DVParticipation";
+import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
+import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { getProbabilityScale } from "./Probability";
 import { SCENARIOS, SCENARIO_PARAMS } from "./scenarios";
 
@@ -289,7 +299,10 @@ export const getQuantiLabel = (
 
 function getAveragesForScenarios(parameter: string, field: string, directAnalyses: DVDirectAnalysis[]) {
   const daField = field.indexOf("climate_change") >= 0 ? "cr4de_dp50_quanti" : field;
-
+  console.log(
+    daField,
+    directAnalyses.map((da) => da[`${daField}_c` as keyof DVDirectAnalysis])
+  );
   return {
     [`${field}_c`]: getAverage(
       directAnalyses.map((da) => da[`${daField}_c` as keyof DVDirectAnalysis]) as string[],
@@ -333,3 +346,60 @@ export function getConsensusCascade(cascadeAnalyses: DVCascadeAnalysis[], isCaus
 
   return c;
 }
+
+export const getCompletedDirectAnalyses = (
+  riskFile: DVRiskFile | null,
+  participants: DVParticipation[],
+  directAnalyses: DVDirectAnalysis<unknown, DVContact>[]
+) => {
+  return directAnalyses.filter((da) => {
+    const participant = participants.find((p) => p._cr4de_contact_value === da._cr4de_expert_value);
+
+    if (!participant) return false;
+    if (!participant.cr4de_direct_analysis_finished) return false;
+
+    if (riskFile?.cr4de_risk_type === RISK_TYPE.STANDARD) {
+      return !DIRECT_ANALYSIS_EDITABLE_FIELDS.some((f) => da[f] === null);
+    } else if (riskFile?.cr4de_risk_type === RISK_TYPE.MANMADE) {
+      return !DIRECT_ANALYSIS_EDITABLE_FIELDS_MANMADE.some((f) => da[f] === null);
+    }
+  });
+};
+
+export const getCompletedCascadeAnalyses = (
+  riskFile: DVRiskFile,
+  participants: DVParticipation[],
+  cascades: DVRiskCascade<SmallRisk>[],
+  directAnalyses: DVDirectAnalysis<unknown, DVContact>[] | null,
+  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[]
+) => {
+  return cascadeAnalyses.filter((ca) => {
+    if (
+      !participants.some(
+        (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
+      )
+    )
+      return false;
+
+    const cascade = cascades.find((c) => ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid);
+
+    if (!cascade) return false;
+
+    if (cascade.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING)
+      return !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null);
+
+    if (riskFile.cr4de_title.indexOf("Climate") < 0 && cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0) {
+      const d = directAnalyses?.find((da) => da._cr4de_expert_value === ca._cr4de_expert_value);
+
+      return (
+        d &&
+        d.cr4de_dp50_quanti_c !== null &&
+        d.cr4de_dp50_quanti_m !== null &&
+        d.cr4de_dp50_quanti_e !== null &&
+        d.cr4de_dp50_quali !== null
+      );
+    }
+
+    return ca.cr4de_quali_cascade !== null;
+  });
+};
