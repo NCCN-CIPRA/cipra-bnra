@@ -713,7 +713,7 @@ function CCSection({
                               top: -18,
                               left: `calc(${
                                 (getQuantiNumber(
-                                  riskFile[`cr4de_dp_quanti_${n.slice(-1)}` as keyof DVRiskFile] as string
+                                  (riskFile[`cr4de_dp_quanti_${n.slice(-1)}` as keyof DVRiskFile] as string) || "DP0"
                                 ).number +
                                   0) *
                                 18.18
@@ -728,7 +728,7 @@ function CCSection({
                         </Tooltip>
                         <Slider
                           mx={0}
-                          initialValue={riskFile[n as keyof DVRiskFile] as string}
+                          initialValue={(riskFile[n as keyof DVRiskFile] as string) || "DP0"}
                           name={n}
                           spread={getDASpread(
                             directAnalyses,

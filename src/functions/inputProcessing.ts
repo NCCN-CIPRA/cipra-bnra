@@ -299,10 +299,7 @@ export const getQuantiLabel = (
 
 function getAveragesForScenarios(parameter: string, field: string, directAnalyses: DVDirectAnalysis[]) {
   const daField = field.indexOf("climate_change") >= 0 ? "cr4de_dp50_quanti" : field;
-  console.log(
-    daField,
-    directAnalyses.map((da) => da[`${daField}_c` as keyof DVDirectAnalysis])
-  );
+
   return {
     [`${field}_c`]: getAverage(
       directAnalyses.map((da) => da[`${daField}_c` as keyof DVDirectAnalysis]) as string[],

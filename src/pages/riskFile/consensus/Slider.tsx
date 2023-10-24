@@ -10,7 +10,17 @@ import { Ha, Hb, Hc } from "../../learning/QuantitativeScales/H";
 import { Sa, Sb, Sc, Sd } from "../../learning/QuantitativeScales/S";
 import { Ea } from "../../learning/QuantitativeScales/E";
 import { Fa, Fb } from "../../learning/QuantitativeScales/F";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
+
+const nameToPrefix = (name: string, type: RISK_TYPE) => {
+  if (name.indexOf("_dp_") >= 0) {
+    if (type === RISK_TYPE.STANDARD) return "DP";
+    return "M";
+  }
+
+  const pLC = name.slice(-4, -2);
+  return `${pLC[0].toUpperCase()}${pLC[1]}`;
+};
 
 const prefixToField: { [prefix: string]: DirectImpactField } = {
   Ha: Ha,
@@ -33,18 +43,27 @@ const getValueStack = (prefix: string, value: number) => {
 
 export function Slider({
   initialValue,
-  name,
+  name = "cr4de_dp_quanti_c",
+  type = RISK_TYPE.STANDARD,
   spread,
   mx = 2,
   onChange,
 }: {
-  initialValue: string;
+  initialValue: string | null;
   name?: keyof DVRiskFile;
+  type?: RISK_TYPE;
   spread: number[];
   mx?: number;
   onChange: (newValue: string) => Promise<void>;
 }) {
-  const { prefix, number } = getQuantiNumber(initialValue);
+  let prefix: string, number: number;
+
+  if (initialValue === null) {
+    prefix = nameToPrefix(name, type);
+    number = 0;
+  } else {
+    ({ prefix, number } = getQuantiNumber(initialValue));
+  }
 
   const [value, setValue] = useState(number);
 

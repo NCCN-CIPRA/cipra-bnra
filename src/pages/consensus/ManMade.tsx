@@ -98,7 +98,11 @@ export default function ManMade({
         </Box>
         <Box sx={{ mb: 8 }}>
           {emerging.map((ca) => (
-            <EmergingSection key={ca.cr4de_bnracascadeanalysisid} cascadeAnalysis={ca} />
+            <EmergingSection
+              key={ca.cr4de_bnracascadeanalysisid}
+              directAnalysis={directAnalysis}
+              cascadeAnalysis={ca}
+            />
           ))}
         </Box>
       </Box>
@@ -328,7 +332,7 @@ function AttackSection({
             <Typography variant="subtitle2">Preliminary Consensus Results:</Typography>
             <Box
               dangerouslySetInnerHTML={{
-                __html: cascadeAnalysis.cr4de_cascade.cr4de_quali || "",
+                __html: cascadeAnalysis.cr4de_cascade.cr4de_quali_cause || "",
               }}
               sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
             />
@@ -349,7 +353,13 @@ function AttackSection({
   );
 }
 
-function EmergingSection({ cascadeAnalysis }: { cascadeAnalysis: DVCascadeAnalysis<DVRiskCascade<SmallRisk>> }) {
+function EmergingSection({
+  directAnalysis,
+  cascadeAnalysis,
+}: {
+  directAnalysis: DVDirectAnalysis<DVRiskFile>;
+  cascadeAnalysis: DVCascadeAnalysis<DVRiskCascade<SmallRisk>>;
+}) {
   const discussionRequired = Boolean(
     cascadeAnalysis.cr4de_cascade.cr4de_discussion_required &&
       cascadeAnalysis.cr4de_cascade.cr4de_discussion_required !== DiscussionRequired.NOT_NECESSARY
@@ -376,7 +386,105 @@ function EmergingSection({ cascadeAnalysis }: { cascadeAnalysis: DVCascadeAnalys
         )}
       </AccordionSummary>
       <AccordionDetails>
-        <Stack direction="row" sx={{ width: "100%", justifyContent: "stretch" }}></Stack>
+        {cascadeAnalysis.cr4de_cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0 ? (
+          <Stack direction="column" sx={{ width: "100%" }}>
+            <Box sx={{ p: 4 }}>
+              <Typography variant="subtitle2">Preliminary Consensus Results:</Typography>
+              <Box
+                dangerouslySetInnerHTML={{
+                  __html: cascadeAnalysis.cr4de_cascade.cr4de_quali || "",
+                }}
+                sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+              />
+
+              <Typography variant="subtitle2" sx={{ mt: 4 }}>
+                Your Input:
+              </Typography>
+              <Box
+                dangerouslySetInnerHTML={{
+                  __html: cascadeAnalysis.cr4de_quali_cascade || "",
+                }}
+                sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+              />
+            </Box>
+          </Stack>
+        ) : (
+          <Stack direction="column" sx={{ width: "100%" }}>
+            <Box sx={{ p: 4 }}>
+              <Typography variant="subtitle2">Preliminary Consensus Results:</Typography>
+              <Box
+                dangerouslySetInnerHTML={{
+                  __html: cascadeAnalysis.cr4de_cascade.cr4de_quali || "",
+                }}
+                sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+              />
+
+              <Stack direction="column" sx={{ mt: 2 }}>
+                <Stack direction="row">
+                  <Typography variant="caption" sx={{ flex: 1 }}>
+                    <i>M2050</i> Average - Considerable Scenario:
+                  </Typography>
+                  <Typography variant="caption">
+                    <b>{directAnalysis.cr4de_risk_file.cr4de_climate_change_quanti_c}</b>
+                  </Typography>
+                </Stack>
+                <Stack direction="row">
+                  <Typography variant="caption" sx={{ flex: 1 }}>
+                    <i>M2050</i> Average - Major Scenario:
+                  </Typography>
+                  <Typography variant="caption">
+                    <b>{directAnalysis.cr4de_risk_file.cr4de_climate_change_quanti_m}</b>
+                  </Typography>
+                </Stack>
+                <Stack direction="row">
+                  <Typography variant="caption" sx={{ flex: 1 }}>
+                    <i>M2050</i> Average - Extreme Scenario:
+                  </Typography>
+                  <Typography variant="caption">
+                    <b>{directAnalysis.cr4de_risk_file.cr4de_climate_change_quanti_e}</b>
+                  </Typography>
+                </Stack>
+              </Stack>
+
+              <Typography variant="subtitle2" sx={{ mt: 4 }}>
+                Your Input:
+              </Typography>
+              <Box
+                dangerouslySetInnerHTML={{
+                  __html: cascadeAnalysis.cr4de_quali_cascade || "",
+                }}
+                sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+              />
+
+              <Stack direction="column" sx={{ mt: 2 }}>
+                <Stack direction="row">
+                  <Typography variant="caption" sx={{ flex: 1 }}>
+                    <i>M2050</i> Input - Considerable Scenario:
+                  </Typography>
+                  <Typography variant="caption">
+                    <b>{directAnalysis.cr4de_dp50_quanti_c}</b>
+                  </Typography>
+                </Stack>
+                <Stack direction="row">
+                  <Typography variant="caption" sx={{ flex: 1 }}>
+                    <i>M2050</i> Input - Major Scenario:
+                  </Typography>
+                  <Typography variant="caption">
+                    <b>{directAnalysis.cr4de_dp50_quanti_m}</b>
+                  </Typography>
+                </Stack>
+                <Stack direction="row">
+                  <Typography variant="caption" sx={{ flex: 1 }}>
+                    <i>M2050</i> Input - Extreme Scenario:
+                  </Typography>
+                  <Typography variant="caption">
+                    <b>{directAnalysis.cr4de_dp50_quanti_e}</b>
+                  </Typography>
+                </Stack>
+              </Stack>
+            </Box>
+          </Stack>
+        )}
       </AccordionDetails>
     </Accordion>
   );

@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/css/main.aec5b9a6.css",
-    "main.js": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/js/main.e1265e5e.js",
+    "main.js": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/js/main.99a1e1fe.js",
     "static/js/787.3fe0f5ae.chunk.js": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/js/787.3fe0f5ae.chunk.js",
     "static/media/roboto-all-500-normal.woff": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/media/roboto-all-500-normal.0ab669b7a0d19b178f57.woff",
     "static/media/roboto-all-700-normal.woff": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/media/roboto-all-700-normal.a457fde362a540fcadff.woff",
@@ -40,11 +40,11 @@
     "static/media/roboto-greek-ext-700-normal.woff2": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/media/roboto-greek-ext-700-normal.bd9854c751441ccc1a70.woff2",
     "index.html": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/index.html",
     "main.aec5b9a6.css.map": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/css/main.aec5b9a6.css.map",
-    "main.e1265e5e.js.map": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/js/main.e1265e5e.js.map",
+    "main.99a1e1fe.js.map": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/js/main.99a1e1fe.js.map",
     "787.3fe0f5ae.chunk.js.map": "https://raw.githubusercontent.com/NCCN-JoepDriesen/cipra-bnra/main/build/static/js/787.3fe0f5ae.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.aec5b9a6.css",
-    "static/js/main.e1265e5e.js"
+    "static/js/main.99a1e1fe.js"
   ]
 }
