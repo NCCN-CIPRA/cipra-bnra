@@ -15,6 +15,7 @@ import Standard from "./Standard";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import ManMade from "./ManMade";
+import Emerging from "./Emerging";
 
 type RouteParams = {
   riskFile_id: string;
@@ -63,7 +64,9 @@ export default function ConsensusExpertPage() {
           {directAnalysis &&
             directAnalysis[0].cr4de_risk_file.cr4de_risk_type === RISK_TYPE.MANMADE &&
             cascadeAnalyses && <ManMade directAnalysis={directAnalysis[0]} cascadeAnalyses={cascadeAnalyses} />}
-          {directAnalysis && directAnalysis[0].cr4de_risk_file.cr4de_risk_type === RISK_TYPE.EMERGING && <Box />}
+          {directAnalysis &&
+            directAnalysis[0].cr4de_risk_file.cr4de_risk_type === RISK_TYPE.EMERGING &&
+            cascadeAnalyses && <Emerging directAnalysis={directAnalysis[0]} cascadeAnalyses={cascadeAnalyses} />}
         </Box>
       </Fade>
 

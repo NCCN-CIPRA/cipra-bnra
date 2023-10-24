@@ -68,8 +68,10 @@ export default function ManMade({
   directAnalysis: DVDirectAnalysis<DVRiskFile>;
   cascadeAnalyses: DVCascadeAnalysis<DVRiskCascade<SmallRisk, SmallRisk>>[];
 }) {
-  const causes = useMemo(() => {
-    return cascadeAnalyses.filter((ca) => ca.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING);
+  const attacks = useMemo(() => {
+    return cascadeAnalyses.filter(
+      (ca) => ca.cr4de_cascade._cr4de_cause_hazard_value === directAnalysis._cr4de_risk_file_value
+    );
   }, [cascadeAnalyses]);
   const emerging = useMemo(() => {
     return cascadeAnalyses.filter((ca) => ca.cr4de_cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING);
@@ -86,8 +88,8 @@ export default function ManMade({
           <ParameterSection directAnalysis={directAnalysis} />
         </Box>
         <Box sx={{ mb: 8 }}>
-          {causes.map((ca) => (
-            <CauseSection
+          {attacks.map((ca) => (
+            <AttackSection
               key={ca.cr4de_bnracascadeanalysisid}
               riskFile={directAnalysis.cr4de_risk_file}
               cascadeAnalysis={ca}
@@ -273,7 +275,7 @@ function ScenarioSection({
   );
 }
 
-function CauseSection({
+function AttackSection({
   riskFile,
   cascadeAnalysis,
 }: {
