@@ -459,7 +459,7 @@ function CauseSection({
               isCause={true}
               onChange={async (field, newValue) => {
                 await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
-                  [`${field}_cause`]: newValue,
+                  [field]: newValue,
                 });
                 reloadCascades();
               }}
