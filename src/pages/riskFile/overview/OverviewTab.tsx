@@ -16,6 +16,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Tooltip,
 } from "@mui/material";
 import RiskFileStepper from "./RiskFileStepper";
 import ParticipationTable from "../../../components/ParticipationTable";
@@ -250,17 +251,36 @@ export default function OverviewTab({
           ) : (
             <Card>
               <CardContent>
-                {riskFile.cr4de_consensus_type === CONSENSUS_TYPE.MEETING && riskFile.cr4de_consensus_date && (
-                  <Typography variant="body1">
-                    Consensus meeting planned on {format(new Date(riskFile.cr4de_consensus_date), "dd.MM.yyyy")}
-                  </Typography>
-                )}
+                {riskFile.cr4de_consensus_type === CONSENSUS_TYPE.MEETING &&
+                  riskFile.cr4de_consensus_date &&
+                  new Date(riskFile.cr4de_consensus_date) >= new Date() && (
+                    <Typography variant="body1">
+                      Consensus meeting planned on {format(new Date(riskFile.cr4de_consensus_date), "dd.MM.yyyy")}
+                    </Typography>
+                  )}
+                {riskFile.cr4de_consensus_type === CONSENSUS_TYPE.MEETING &&
+                  riskFile.cr4de_consensus_date &&
+                  new Date(riskFile.cr4de_consensus_date) < new Date() && (
+                    <Typography variant="body1">
+                      Consensus meeting took place on {format(new Date(riskFile.cr4de_consensus_date), "dd.MM.yyyy")}
+                    </Typography>
+                  )}
 
-                {riskFile.cr4de_consensus_type === CONSENSUS_TYPE.SILENCE && riskFile.cr4de_consensus_date && (
-                  <Typography variant="body1">
-                    Silence procedure ending on {format(new Date(riskFile.cr4de_consensus_date), "dd.MM.yyyy")}
-                  </Typography>
-                )}
+                {riskFile.cr4de_consensus_type === CONSENSUS_TYPE.SILENCE &&
+                  riskFile.cr4de_consensus_date &&
+                  new Date(riskFile.cr4de_consensus_date) >= new Date() && (
+                    <Typography variant="body1">
+                      Silence procedure ending on {format(new Date(riskFile.cr4de_consensus_date), "dd.MM.yyyy")}
+                    </Typography>
+                  )}
+
+                {riskFile.cr4de_consensus_type === CONSENSUS_TYPE.SILENCE &&
+                  riskFile.cr4de_consensus_date &&
+                  new Date(riskFile.cr4de_consensus_date) < new Date() && (
+                    <Typography variant="body1">
+                      Silence procedure ended on {format(new Date(riskFile.cr4de_consensus_date), "dd.MM.yyyy")}
+                    </Typography>
+                  )}
 
                 {riskFile.cr4de_consensus_type === CONSENSUS_TYPE.NONE && riskFile.cr4de_consensus_date && (
                   <Typography variant="body1">
@@ -269,9 +289,26 @@ export default function OverviewTab({
                 )}
               </CardContent>
               <CardActions sx={{ justifyContent: "flex-end" }}>
-                <LoadingButton loading={isSaving} onClick={cancelConsensus} color="warning">
-                  Cancel Consensus Phase
-                </LoadingButton>
+                <Tooltip
+                  title={
+                    riskFile.cr4de_consensus_date !== null && new Date(riskFile.cr4de_consensus_date) < new Date()
+                      ? "This risk file has been finalized. To click this button anyway, please contact an administrator"
+                      : "Cancel the consensus phase and erase all consensus values"
+                  }
+                >
+                  <Box>
+                    <LoadingButton
+                      disabled={
+                        riskFile.cr4de_consensus_date !== null && new Date(riskFile.cr4de_consensus_date) < new Date()
+                      }
+                      loading={isSaving}
+                      onClick={cancelConsensus}
+                      color="warning"
+                    >
+                      Cancel Consensus Phase
+                    </LoadingButton>
+                  </Box>
+                </Tooltip>
               </CardActions>
             </Card>
           )}

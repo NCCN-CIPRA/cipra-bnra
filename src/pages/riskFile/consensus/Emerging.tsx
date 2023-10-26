@@ -95,14 +95,16 @@ export default function Emerging({
           </Box>
         )}
         <Box sx={{ mb: 8 }}>
-          {cascades.map((ca) => (
-            <CatalyzedSection
-              key={ca.cr4de_bnrariskcascadeid}
-              riskFile={riskFile}
-              cascade={ca}
-              reloadCascades={reloadCascades}
-            />
-          ))}
+          {cascades
+            .filter((c) => c.cr4de_effect_hazard.cr4de_risk_type !== RISK_TYPE.MANMADE)
+            .map((ca) => (
+              <CatalyzedSection
+                key={ca.cr4de_bnrariskcascadeid}
+                riskFile={riskFile}
+                cascade={ca}
+                reloadCascades={reloadCascades}
+              />
+            ))}
         </Box>
       </Box>
     </>
