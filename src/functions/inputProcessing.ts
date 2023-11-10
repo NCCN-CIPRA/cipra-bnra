@@ -355,11 +355,7 @@ export const getCompletedDirectAnalyses = (
     if (!participant) return false;
     if (!participant.cr4de_direct_analysis_finished) return false;
 
-    if (riskFile?.cr4de_risk_type === RISK_TYPE.STANDARD) {
-      return !DIRECT_ANALYSIS_EDITABLE_FIELDS.some((f) => da[f] === null);
-    } else if (riskFile?.cr4de_risk_type === RISK_TYPE.MANMADE) {
-      return !DIRECT_ANALYSIS_EDITABLE_FIELDS_MANMADE.some((f) => da[f] === null);
-    }
+    return true;
   });
 };
 

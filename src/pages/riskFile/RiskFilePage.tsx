@@ -126,7 +126,7 @@ export default function RiskFilePage({}) {
     () => (directAnalyses && participants ? getCompletedDirectAnalyses(riskFile, participants, directAnalyses) : null),
     [directAnalyses, participants]
   );
-
+  console.log(directAnalyses, participants, goodDAs);
   const goodCAs = useMemo(() => {
     if (!riskFile || !cascadeAnalyses || !participants || !cascades) return null;
 
