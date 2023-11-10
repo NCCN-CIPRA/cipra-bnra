@@ -99,8 +99,8 @@ export default function ProbabilitySankey({
       ...calculation.causes
         .filter((c) => c.ip > 0)
         .map((c) => ({
-          name: c.title,
-          id: c.riskId,
+          name: c.cascadeTitle,
+          id: c.cause.riskId,
         })),
     ],
     links: [

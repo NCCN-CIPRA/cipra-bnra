@@ -1,7 +1,7 @@
 export enum Quality {
   CONSENSUS = "consensus",
   AVERAGE = "average",
-  MISSING = "missing",
+  MISSING = "no input",
 }
 
 export interface DVAnalysisRun<RiskFileType = unknown> {
@@ -53,13 +53,89 @@ export interface AnalysisMetrics {
   };
 }
 
-export interface RiskCalculation {
-  // The id of the risk that this calculation belongs to
-  riskId: string;
+export interface CascadeCalculation {
+  // The object holding the calculated fields for the causing risk
+  cause: RiskCalculation;
+  effect: RiskCalculation;
 
-  // The time at which the analysis was executed
-  timestamp: number;
+  quality: Quality;
 
+  // database id of the causing risk cascade
+  cascadeId: string;
+
+  // title of the causing risk file
+  cascadeTitle: string;
+
+  // Conditional probabilities per scenario couple
+  c2c: number;
+  c2m: number;
+  c2e: number;
+  m2c: number;
+  m2m: number;
+  m2e: number;
+  e2c: number;
+  e2m: number;
+  e2e: number;
+
+  // Indirect probability of this cascade per scenario
+  ip_c: number;
+  ip_m: number;
+  ip_e: number;
+
+  // Total indirect probability of this cascade
+  ip: number;
+
+  // Indirect impact of this cascade damage indicator per scenario
+  ii_Ha_c: number;
+  ii_Hb_c: number;
+  ii_Hc_c: number;
+  ii_Sa_c: number;
+  ii_Sb_c: number;
+  ii_Sc_c: number;
+  ii_Sd_c: number;
+  ii_Ea_c: number;
+  ii_Fa_c: number;
+  ii_Fb_c: number;
+
+  ii_Ha_m: number;
+  ii_Hb_m: number;
+  ii_Hc_m: number;
+  ii_Sa_m: number;
+  ii_Sb_m: number;
+  ii_Sc_m: number;
+  ii_Sd_m: number;
+  ii_Ea_m: number;
+  ii_Fa_m: number;
+  ii_Fb_m: number;
+
+  ii_Ha_e: number;
+  ii_Hb_e: number;
+  ii_Hc_e: number;
+  ii_Sa_e: number;
+  ii_Sb_e: number;
+  ii_Sc_e: number;
+  ii_Sd_e: number;
+  ii_Ea_e: number;
+  ii_Fa_e: number;
+  ii_Fb_e: number;
+
+  // Indirect impact of this cascade damage indicator
+  ii_Ha: number;
+  ii_Hb: number;
+  ii_Hc: number;
+  ii_Sa: number;
+  ii_Sb: number;
+  ii_Sc: number;
+  ii_Sd: number;
+  ii_Ea: number;
+  ii_Fa: number;
+  ii_Fb: number;
+
+  // Total indirect impact of this cascade
+  ii: number;
+}
+
+export interface RiskCalculationKnownFields {
   // The quality of the base results for this risk file
   quality: Quality;
 
@@ -70,30 +146,6 @@ export interface RiskCalculation {
   dp_c: number;
   dp_m: number;
   dp_e: number;
-
-  // Total direct probability
-  dp: number;
-
-  // Indirect probabilities of each scenario
-  ip_c: number;
-  ip_m: number;
-  ip_e: number;
-
-  // Total indirect probability
-  ip: number;
-
-  // Total probabilities per scenario
-  tp_c: number;
-  tp_m: number;
-  tp_e: number;
-
-  // Total probability of the risk
-  tp: number;
-
-  // Relative probabilities of each scenario (normalized)
-  rp_c: number;
-  rp_m: number;
-  rp_e: number;
 
   // Direct Impacts per damage indicator and per scenario
   di_Ha_c: number;
@@ -128,6 +180,45 @@ export interface RiskCalculation {
   di_Ea_e: number;
   di_Fa_e: number;
   di_Fb_e: number;
+
+  dp50_c: number;
+  dp50_m: number;
+  dp50_e: number;
+}
+
+export interface RiskCalculation extends RiskCalculationKnownFields {
+  // The id of the risk that this calculation belongs to
+  riskId: string;
+
+  // Title of the risk file for debugging purposes
+  riskTitle: string;
+
+  // The time at which the analysis was executed
+  timestamp: number;
+
+  // Total direct probability
+  dp: number;
+
+  // Indirect probabilities of each scenario
+  ip_c: number;
+  ip_m: number;
+  ip_e: number;
+
+  // Total indirect probability
+  ip: number;
+
+  // Total probabilities per scenario
+  tp_c: number;
+  tp_m: number;
+  tp_e: number;
+
+  // Total probability of the risk
+  tp: number;
+
+  // Relative probabilities of each scenario (normalized)
+  rp_c: number;
+  rp_m: number;
+  rp_e: number;
 
   // Total direct impact per damage indicator
   di_Ha: number;
@@ -260,116 +351,9 @@ export interface RiskCalculation {
   // Risk
   r: number;
 
-  causes: {
-    // The object holding the calculated fields for the causing risk
-    risk: RiskCalculation;
+  causes: CascadeCalculation[];
 
-    cascadeQuality: Quality;
-    causeQuality: Quality;
-
-    // database id of the causing risk file
-    riskId: string;
-    // database id of the causing risk cascade
-    cascadeId: string;
-
-    // title of the causing risk file
-    title: string;
-
-    // Conditional probabilities per scenario couple
-    c2c: number;
-    c2m: number;
-    c2e: number;
-    m2c: number;
-    m2m: number;
-    m2e: number;
-    e2c: number;
-    e2m: number;
-    e2e: number;
-
-    // Indirect probability of this cascade per scenario
-    ip_c: number;
-    ip_m: number;
-    ip_e: number;
-
-    // Total indirect probability of this cascade
-    ip: number;
-  }[];
-
-  effects: {
-    // The object holding the calculated fields for the effect risk
-    risk: RiskCalculation;
-
-    cascadeQuality: Quality;
-    effectQuality: Quality;
-
-    // database id of the effect risk file
-    riskId: string;
-    // database id of the effect risk cascade
-    cascadeId: string;
-
-    // title of the effect risk file
-    title: string;
-
-    // Conditional probabilities per scenario couple
-    c2c: number;
-    c2m: number;
-    c2e: number;
-    m2c: number;
-    m2m: number;
-    m2e: number;
-    e2c: number;
-    e2m: number;
-    e2e: number;
-
-    // Indirect impact of this cascade damage indicator per scenario
-    ii_Ha_c: number;
-    ii_Hb_c: number;
-    ii_Hc_c: number;
-    ii_Sa_c: number;
-    ii_Sb_c: number;
-    ii_Sc_c: number;
-    ii_Sd_c: number;
-    ii_Ea_c: number;
-    ii_Fa_c: number;
-    ii_Fb_c: number;
-
-    ii_Ha_m: number;
-    ii_Hb_m: number;
-    ii_Hc_m: number;
-    ii_Sa_m: number;
-    ii_Sb_m: number;
-    ii_Sc_m: number;
-    ii_Sd_m: number;
-    ii_Ea_m: number;
-    ii_Fa_m: number;
-    ii_Fb_m: number;
-
-    ii_Ha_e: number;
-    ii_Hb_e: number;
-    ii_Hc_e: number;
-    ii_Sa_e: number;
-    ii_Sb_e: number;
-    ii_Sc_e: number;
-    ii_Sd_e: number;
-    ii_Ea_e: number;
-    ii_Fa_e: number;
-    ii_Fb_e: number;
-
-    // Indirect impact of this cascade damage indicator
-    ii_Ha: number;
-    ii_Hb: number;
-    ii_Hc: number;
-    ii_Sa: number;
-    ii_Sb: number;
-    ii_Sc: number;
-    ii_Sd: number;
-    ii_Ea: number;
-    ii_Fa: number;
-    ii_Fb: number;
-
-    // Total indirect impact of this cascade
-    ii: number;
-  }[];
+  effects: CascadeCalculation[];
 }
 
 export interface RiskFileMetrics {

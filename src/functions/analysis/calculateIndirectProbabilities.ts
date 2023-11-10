@@ -1,18 +1,30 @@
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 
 export default function calculateIndirectProbabilities(risk: RiskCalculation) {
-  risk.causes.forEach((cause) => {
-    cause.ip_c =
-      cause.c2c * (cause.risk.tp_c || 0) + cause.m2c * (cause.risk.tp_m || 0) + cause.e2c * (cause.risk.tp_e || 0);
-    cause.ip_m =
-      cause.c2m * (cause.risk.tp_c || 0) + cause.m2m * (cause.risk.tp_m || 0) + cause.e2m * (cause.risk.tp_e || 0);
-    cause.ip_e =
-      cause.c2e * (cause.risk.tp_c || 0) + cause.m2e * (cause.risk.tp_m || 0) + cause.e2e * (cause.risk.tp_e || 0);
+  risk.causes.forEach((cascade) => {
+    cascade.ip_c = Math.min(
+      1,
+      cascade.c2c * (cascade.cause.tp_c || 0) +
+        cascade.m2c * (cascade.cause.tp_m || 0) +
+        cascade.e2c * (cascade.cause.tp_e || 0)
+    );
+    cascade.ip_m = Math.min(
+      1,
+      cascade.c2m * (cascade.cause.tp_c || 0) +
+        cascade.m2m * (cascade.cause.tp_m || 0) +
+        cascade.e2m * (cascade.cause.tp_e || 0)
+    );
+    cascade.ip_e = Math.min(
+      1,
+      cascade.c2e * (cascade.cause.tp_c || 0) +
+        cascade.m2e * (cascade.cause.tp_m || 0) +
+        cascade.e2e * (cascade.cause.tp_e || 0)
+    );
 
-    cause.ip = cause.ip_c + cause.ip_m + cause.ip_e;
+    cascade.ip = cascade.ip_c + cascade.ip_m + cascade.ip_e;
 
-    if (isNaN(cause.ip_c) || isNaN(cause.ip_m) || isNaN(cause.ip_e) || isNaN(cause.ip)) {
-      console.error("Error in calculations, probability was NaN: ", risk, cause);
+    if (isNaN(cascade.ip_c) || isNaN(cascade.ip_m) || isNaN(cascade.ip_e) || isNaN(cascade.ip)) {
+      console.error("Error in calculations, probability was NaN: ", risk, cascade);
       throw new Error("Error in calculations, probability was NaN");
     }
 

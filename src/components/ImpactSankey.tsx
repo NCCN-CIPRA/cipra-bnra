@@ -103,8 +103,8 @@ export default function ImpactSankey({
           (e) => e.ii_Ha + e.ii_Hb + e.ii_Hc + e.ii_Sa + e.ii_Sb + e.ii_Sc + e.ii_Sd + e.ii_Ea + e.ii_Fa + e.ii_Fb > 0
         )
         .map((e) => ({
-          name: e.title,
-          id: e.riskId,
+          name: e.cascadeTitle,
+          id: e.effect.riskId,
         })),
     ],
     links: [

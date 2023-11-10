@@ -82,13 +82,13 @@ export default function ScoreCard({
 
   score.causes =
     calculation.causes.reduce(
-      (tot, cause) => tot + getQualityScore(cause.causeQuality, casFinished) * getQualityScore(cause.cascadeQuality),
+      (tot, cause) => tot + getQualityScore(cause.cause.quality, casFinished) * getQualityScore(cause.quality),
       0
     ) / calculation.causes.length;
 
   score.effects =
     calculation.effects.reduce(
-      (tot, effect) => tot + getQualityScore(effect.effectQuality) * getQualityScore(effect.cascadeQuality),
+      (tot, effect) => tot + getQualityScore(effect.effect.quality) * getQualityScore(effect.quality),
       0
     ) / calculation.effects.length;
 

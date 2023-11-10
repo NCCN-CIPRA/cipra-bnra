@@ -25,6 +25,26 @@ export default function convergeImpacts(
         throw new Error("Error in calculations, impact was NaN");
       }
     }
+
+    console.log(`====================== Run ${run} ======================`);
+
+    const ordered = [...risks];
+    ordered.sort((a, b) => b.tp - a.ti);
+
+    console.log(ordered);
+
+    // for (let risk of ordered) {
+    //   console.log(`${risk.riskTitle}: ${risk.ti}`);
+
+    //   const orderedCauses = [...risk.causes];
+    //   orderedCauses.sort((a, b) => b.ii - a.ii);
+
+    //   for (let i = 0; i < Math.min(orderedCauses.length, 5); i++) {
+    //     console.log(`     ${orderedCauses[i].cause.riskTitle}: ${orderedCauses[i].ii}`);
+    //   }
+    // }
+
+    console.log("\n\n\n");
     const deltaTotalImpact = Math.abs(totalImpact - lastTotalImpact) / totalImpact;
 
     if (deltaTotalImpact < maxDelta) {

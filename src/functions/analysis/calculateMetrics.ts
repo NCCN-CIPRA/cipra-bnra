@@ -16,84 +16,84 @@ export default function calculateMetrics(
   riskFiles: DVRiskFile[],
   participations: DVParticipation[]
 ): RiskFileMetrics {
-  const riskFile = riskFiles.find((r) => r.cr4de_riskfilesid === risk.riskId);
-
-  if (!riskFile) {
-    throw Error("No Risk File Found");
-  }
-
-  const causeImportanceAbs = risk.causes.reduce((imp, cause) => {
-    const causeRisk = allRisks.find((r) => r.riskId === cause.riskId);
-    if (!causeRisk) return imp;
-
-    const effect = causeRisk.effects.find((e) => e.riskId === risk.riskId);
-    if (!effect) return imp;
-
-    return imp + parseFloat(getImpactScaleNumber(effect.ii));
-  }, 0);
-  const causeImportance = (3 * causeImportanceAbs) / (3 + causeImportanceAbs);
-
-  const effectImportanceAbs = risk.effects.reduce((imp, effect) => {
-    const effectRisk = allRisks.find((r) => r.riskId === effect.riskId);
-    if (!effectRisk) return imp;
-
-    const cause = effectRisk.causes.find((c) => c.riskId === risk.riskId);
-    if (!cause) return imp;
-
-    return imp + parseFloat(getProbabilityScaleNumber(cause.ip, "DP"));
-  }, 0);
-  const effectImportance = (3 * effectImportanceAbs) / (3 + effectImportanceAbs);
-
-  const causesReliability =
-    risk.causes.reduce((tot, c) => {
-      if (risk.quality === Quality.CONSENSUS) return 1;
-
-      const causeRisk = allRisks.find((r) => r.riskId === c.riskId);
-      if (!causeRisk) return 0;
-
-      const causeReliabilityAbs = participations
-        .filter((p) => p._cr4de_risk_file_value === c.riskId)
-        .reduce((rel, p) => {
-          return rel + (p.cr4de_cascade_analysis_finished ? 0.5 : 0);
-        }, 0);
-
-      return tot + (causeRisk.reliability * causeReliabilityAbs) / (0.5 + causeReliabilityAbs);
-    }, 0) / risk.causes.length;
-
-  const effectsReliability =
-    risk.effects.reduce((tot, e) => {
-      if (risk.quality === Quality.CONSENSUS) return 1;
-
-      const effectRisk = allRisks.find((r) => r.riskId === e.riskId);
-      if (!effectRisk) return 0;
-
-      const effectReliabilityAbs = participations
-        .filter((p) => p._cr4de_risk_file_value === e.riskId)
-        .reduce((rel, p) => {
-          return rel + (p.cr4de_cascade_analysis_finished ? 0.5 : 0);
-        }, 0);
-
-      return tot + (effectRisk.reliability * effectReliabilityAbs) / (0.5 + effectReliabilityAbs);
-    }, 0) / risk.effects.length;
-
+  // const riskFile = riskFiles.find((r) => r.cr4de_riskfilesid === risk.riskId);
+  // if (!riskFile) {
+  //   throw Error("No Risk File Found");
+  // }
+  // const causeImportanceAbs = risk.causes.reduce((imp, cause) => {
+  //   const causeRisk = allRisks.find((r) => r.riskId === cause.riskId);
+  //   if (!causeRisk) return imp;
+  //   const effect = causeRisk.effects.find((e) => e.riskId === risk.riskId);
+  //   if (!effect) return imp;
+  //   return imp + parseFloat(getImpactScaleNumber(effect.ii));
+  // }, 0);
+  // const causeImportance = (3 * causeImportanceAbs) / (3 + causeImportanceAbs);
+  // const effectImportanceAbs = risk.effects.reduce((imp, effect) => {
+  //   const effectRisk = allRisks.find((r) => r.riskId === effect.riskId);
+  //   if (!effectRisk) return imp;
+  //   const cause = effectRisk.causes.find((c) => c.riskId === risk.riskId);
+  //   if (!cause) return imp;
+  //   return imp + parseFloat(getProbabilityScaleNumber(cause.ip, "DP"));
+  // }, 0);
+  // const effectImportance = (3 * effectImportanceAbs) / (3 + effectImportanceAbs);
+  // const causesReliability =
+  //   risk.causes.reduce((tot, c) => {
+  //     if (risk.quality === Quality.CONSENSUS) return 1;
+  //     const causeRisk = allRisks.find((r) => r.riskId === c.riskId);
+  //     if (!causeRisk) return 0;
+  //     const causeReliabilityAbs = participations
+  //       .filter((p) => p._cr4de_risk_file_value === c.riskId)
+  //       .reduce((rel, p) => {
+  //         return rel + (p.cr4de_cascade_analysis_finished ? 0.5 : 0);
+  //       }, 0);
+  //     return tot + (causeRisk.reliability * causeReliabilityAbs) / (0.5 + causeReliabilityAbs);
+  //   }, 0) / risk.causes.length;
+  // const effectsReliability =
+  //   risk.effects.reduce((tot, e) => {
+  //     if (risk.quality === Quality.CONSENSUS) return 1;
+  //     const effectRisk = allRisks.find((r) => r.riskId === e.riskId);
+  //     if (!effectRisk) return 0;
+  //     const effectReliabilityAbs = participations
+  //       .filter((p) => p._cr4de_risk_file_value === e.riskId)
+  //       .reduce((rel, p) => {
+  //         return rel + (p.cr4de_cascade_analysis_finished ? 0.5 : 0);
+  //       }, 0);
+  //     return tot + (effectRisk.reliability * effectReliabilityAbs) / (0.5 + effectReliabilityAbs);
+  //   }, 0) / risk.effects.length;
+  // return {
+  //   importance: {
+  //     causes: causeImportance,
+  //     effects: effectImportance,
+  //     total:
+  //       (riskFile.cr4de_subjective_importance +
+  //         (parseFloat(getImpactScaleNumber(risk.ti)) * 2) / 5 +
+  //         causeImportance / 3 +
+  //         effectImportance / 3) /
+  //       7,
+  //   },
+  //   reliability: {
+  //     causes: causesReliability,
+  //     effects: effectsReliability,
+  //     total: (risk.reliability + 0.5 * causesReliability + 0.5 * effectsReliability) / 2,
+  //   },
+  //   divergence: {
+  //     directAnalysis: 0,
+  //     cascadeAnalyses: 0,
+  //     other: 0,
+  //     total: 0,
+  //   },
+  // };
   return {
     importance: {
-      causes: causeImportance,
-      effects: effectImportance,
-      total:
-        (riskFile.cr4de_subjective_importance +
-          (parseFloat(getImpactScaleNumber(risk.ti)) * 2) / 5 +
-          causeImportance / 3 +
-          effectImportance / 3) /
-        7,
+      causes: 0,
+      effects: 0,
+      total: 0,
     },
-
     reliability: {
-      causes: causesReliability,
-      effects: effectsReliability,
-      total: (risk.reliability + 0.5 * causesReliability + 0.5 * effectsReliability) / 2,
+      causes: 0,
+      effects: 0,
+      total: 0,
     },
-
     divergence: {
       directAnalysis: 0,
       cascadeAnalyses: 0,

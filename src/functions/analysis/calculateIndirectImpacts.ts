@@ -1,152 +1,152 @@
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 
 export default function calculateIndirectImpacts(risk: RiskCalculation) {
-  risk.effects.forEach((effect) => {
-    effect.ii_Ha_c =
-      effect.c2c * (effect.risk.ti_Ha_c || 0) +
-      effect.c2m * (effect.risk.ti_Ha_m || 0) +
-      effect.c2e * (effect.risk.ti_Ha_e || 0);
-    effect.ii_Hb_c =
-      effect.c2c * (effect.risk.ti_Hb_c || 0) +
-      effect.c2m * (effect.risk.ti_Hb_m || 0) +
-      effect.c2e * (effect.risk.ti_Hb_e || 0);
-    effect.ii_Hc_c =
-      effect.c2c * (effect.risk.ti_Hc_c || 0) +
-      effect.c2m * (effect.risk.ti_Hc_m || 0) +
-      effect.c2e * (effect.risk.ti_Hc_e || 0);
-    effect.ii_Sa_c =
-      effect.c2c * (effect.risk.ti_Sa_c || 0) +
-      effect.c2m * (effect.risk.ti_Sa_m || 0) +
-      effect.c2e * (effect.risk.ti_Sa_e || 0);
-    effect.ii_Sb_c =
-      effect.c2c * (effect.risk.ti_Sb_c || 0) +
-      effect.c2m * (effect.risk.ti_Sb_m || 0) +
-      effect.c2e * (effect.risk.ti_Sb_e || 0);
-    effect.ii_Sc_c =
-      effect.c2c * (effect.risk.ti_Sc_c || 0) +
-      effect.c2m * (effect.risk.ti_Sc_m || 0) +
-      effect.c2e * (effect.risk.ti_Sc_e || 0);
-    effect.ii_Sd_c =
-      effect.c2c * (effect.risk.ti_Sd_c || 0) +
-      effect.c2m * (effect.risk.ti_Sd_m || 0) +
-      effect.c2e * (effect.risk.ti_Sd_e || 0);
-    effect.ii_Ea_c =
-      effect.c2c * (effect.risk.ti_Ea_c || 0) +
-      effect.c2m * (effect.risk.ti_Ea_m || 0) +
-      effect.c2e * (effect.risk.ti_Ea_e || 0);
-    effect.ii_Fa_c =
-      effect.c2c * (effect.risk.ti_Fa_c || 0) +
-      effect.c2m * (effect.risk.ti_Fa_m || 0) +
-      effect.c2e * (effect.risk.ti_Fa_e || 0);
-    effect.ii_Fb_c =
-      effect.c2c * (effect.risk.ti_Fb_c || 0) +
-      effect.c2m * (effect.risk.ti_Fb_m || 0) +
-      effect.c2e * (effect.risk.ti_Fb_e || 0);
+  risk.effects.forEach((cascade) => {
+    cascade.ii_Ha_c =
+      cascade.c2c * (cascade.effect.ti_Ha_c || 0) +
+      cascade.c2m * (cascade.effect.ti_Ha_m || 0) +
+      cascade.c2e * (cascade.effect.ti_Ha_e || 0);
+    cascade.ii_Hb_c =
+      cascade.c2c * (cascade.effect.ti_Hb_c || 0) +
+      cascade.c2m * (cascade.effect.ti_Hb_m || 0) +
+      cascade.c2e * (cascade.effect.ti_Hb_e || 0);
+    cascade.ii_Hc_c =
+      cascade.c2c * (cascade.effect.ti_Hc_c || 0) +
+      cascade.c2m * (cascade.effect.ti_Hc_m || 0) +
+      cascade.c2e * (cascade.effect.ti_Hc_e || 0);
+    cascade.ii_Sa_c =
+      cascade.c2c * (cascade.effect.ti_Sa_c || 0) +
+      cascade.c2m * (cascade.effect.ti_Sa_m || 0) +
+      cascade.c2e * (cascade.effect.ti_Sa_e || 0);
+    cascade.ii_Sb_c =
+      cascade.c2c * (cascade.effect.ti_Sb_c || 0) +
+      cascade.c2m * (cascade.effect.ti_Sb_m || 0) +
+      cascade.c2e * (cascade.effect.ti_Sb_e || 0);
+    cascade.ii_Sc_c =
+      cascade.c2c * (cascade.effect.ti_Sc_c || 0) +
+      cascade.c2m * (cascade.effect.ti_Sc_m || 0) +
+      cascade.c2e * (cascade.effect.ti_Sc_e || 0);
+    cascade.ii_Sd_c =
+      cascade.c2c * (cascade.effect.ti_Sd_c || 0) +
+      cascade.c2m * (cascade.effect.ti_Sd_m || 0) +
+      cascade.c2e * (cascade.effect.ti_Sd_e || 0);
+    cascade.ii_Ea_c =
+      cascade.c2c * (cascade.effect.ti_Ea_c || 0) +
+      cascade.c2m * (cascade.effect.ti_Ea_m || 0) +
+      cascade.c2e * (cascade.effect.ti_Ea_e || 0);
+    cascade.ii_Fa_c =
+      cascade.c2c * (cascade.effect.ti_Fa_c || 0) +
+      cascade.c2m * (cascade.effect.ti_Fa_m || 0) +
+      cascade.c2e * (cascade.effect.ti_Fa_e || 0);
+    cascade.ii_Fb_c =
+      cascade.c2c * (cascade.effect.ti_Fb_c || 0) +
+      cascade.c2m * (cascade.effect.ti_Fb_m || 0) +
+      cascade.c2e * (cascade.effect.ti_Fb_e || 0);
 
-    effect.ii_Ha_m =
-      effect.m2c * (effect.risk.ti_Ha_c || 0) +
-      effect.m2m * (effect.risk.ti_Ha_m || 0) +
-      effect.m2e * (effect.risk.ti_Ha_e || 0);
-    effect.ii_Hb_m =
-      effect.m2c * (effect.risk.ti_Hb_c || 0) +
-      effect.m2m * (effect.risk.ti_Hb_m || 0) +
-      effect.m2e * (effect.risk.ti_Hb_e || 0);
-    effect.ii_Hc_m =
-      effect.m2c * (effect.risk.ti_Hc_c || 0) +
-      effect.m2m * (effect.risk.ti_Hc_m || 0) +
-      effect.m2e * (effect.risk.ti_Hc_e || 0);
-    effect.ii_Sa_m =
-      effect.m2c * (effect.risk.ti_Sa_c || 0) +
-      effect.m2m * (effect.risk.ti_Sa_m || 0) +
-      effect.m2e * (effect.risk.ti_Sa_e || 0);
-    effect.ii_Sb_m =
-      effect.m2c * (effect.risk.ti_Sb_c || 0) +
-      effect.m2m * (effect.risk.ti_Sb_m || 0) +
-      effect.m2e * (effect.risk.ti_Sb_e || 0);
-    effect.ii_Sc_m =
-      effect.m2c * (effect.risk.ti_Sc_c || 0) +
-      effect.m2m * (effect.risk.ti_Sc_m || 0) +
-      effect.m2e * (effect.risk.ti_Sc_e || 0);
-    effect.ii_Sd_m =
-      effect.m2c * (effect.risk.ti_Sd_c || 0) +
-      effect.m2m * (effect.risk.ti_Sd_m || 0) +
-      effect.m2e * (effect.risk.ti_Sd_e || 0);
-    effect.ii_Ea_m =
-      effect.m2c * (effect.risk.ti_Ea_c || 0) +
-      effect.m2m * (effect.risk.ti_Ea_m || 0) +
-      effect.m2e * (effect.risk.ti_Ea_e || 0);
-    effect.ii_Fa_m =
-      effect.m2c * (effect.risk.ti_Fa_c || 0) +
-      effect.m2m * (effect.risk.ti_Fa_m || 0) +
-      effect.m2e * (effect.risk.ti_Fa_e || 0);
-    effect.ii_Fb_m =
-      effect.m2c * (effect.risk.ti_Fb_c || 0) +
-      effect.m2m * (effect.risk.ti_Fb_m || 0) +
-      effect.m2e * (effect.risk.ti_Fb_e || 0);
+    cascade.ii_Ha_m =
+      cascade.m2c * (cascade.effect.ti_Ha_c || 0) +
+      cascade.m2m * (cascade.effect.ti_Ha_m || 0) +
+      cascade.m2e * (cascade.effect.ti_Ha_e || 0);
+    cascade.ii_Hb_m =
+      cascade.m2c * (cascade.effect.ti_Hb_c || 0) +
+      cascade.m2m * (cascade.effect.ti_Hb_m || 0) +
+      cascade.m2e * (cascade.effect.ti_Hb_e || 0);
+    cascade.ii_Hc_m =
+      cascade.m2c * (cascade.effect.ti_Hc_c || 0) +
+      cascade.m2m * (cascade.effect.ti_Hc_m || 0) +
+      cascade.m2e * (cascade.effect.ti_Hc_e || 0);
+    cascade.ii_Sa_m =
+      cascade.m2c * (cascade.effect.ti_Sa_c || 0) +
+      cascade.m2m * (cascade.effect.ti_Sa_m || 0) +
+      cascade.m2e * (cascade.effect.ti_Sa_e || 0);
+    cascade.ii_Sb_m =
+      cascade.m2c * (cascade.effect.ti_Sb_c || 0) +
+      cascade.m2m * (cascade.effect.ti_Sb_m || 0) +
+      cascade.m2e * (cascade.effect.ti_Sb_e || 0);
+    cascade.ii_Sc_m =
+      cascade.m2c * (cascade.effect.ti_Sc_c || 0) +
+      cascade.m2m * (cascade.effect.ti_Sc_m || 0) +
+      cascade.m2e * (cascade.effect.ti_Sc_e || 0);
+    cascade.ii_Sd_m =
+      cascade.m2c * (cascade.effect.ti_Sd_c || 0) +
+      cascade.m2m * (cascade.effect.ti_Sd_m || 0) +
+      cascade.m2e * (cascade.effect.ti_Sd_e || 0);
+    cascade.ii_Ea_m =
+      cascade.m2c * (cascade.effect.ti_Ea_c || 0) +
+      cascade.m2m * (cascade.effect.ti_Ea_m || 0) +
+      cascade.m2e * (cascade.effect.ti_Ea_e || 0);
+    cascade.ii_Fa_m =
+      cascade.m2c * (cascade.effect.ti_Fa_c || 0) +
+      cascade.m2m * (cascade.effect.ti_Fa_m || 0) +
+      cascade.m2e * (cascade.effect.ti_Fa_e || 0);
+    cascade.ii_Fb_m =
+      cascade.m2c * (cascade.effect.ti_Fb_c || 0) +
+      cascade.m2m * (cascade.effect.ti_Fb_m || 0) +
+      cascade.m2e * (cascade.effect.ti_Fb_e || 0);
 
-    effect.ii_Ha_e =
-      effect.e2c * (effect.risk.ti_Ha_c || 0) +
-      effect.e2m * (effect.risk.ti_Ha_m || 0) +
-      effect.e2e * (effect.risk.ti_Ha_e || 0);
-    effect.ii_Hb_e =
-      effect.e2c * (effect.risk.ti_Hb_c || 0) +
-      effect.e2m * (effect.risk.ti_Hb_m || 0) +
-      effect.e2e * (effect.risk.ti_Hb_e || 0);
-    effect.ii_Hc_e =
-      effect.e2c * (effect.risk.ti_Hc_c || 0) +
-      effect.e2m * (effect.risk.ti_Hc_m || 0) +
-      effect.e2e * (effect.risk.ti_Hc_e || 0);
-    effect.ii_Sa_e =
-      effect.e2c * (effect.risk.ti_Sa_c || 0) +
-      effect.e2m * (effect.risk.ti_Sa_m || 0) +
-      effect.e2e * (effect.risk.ti_Sa_e || 0);
-    effect.ii_Sb_e =
-      effect.e2c * (effect.risk.ti_Sb_c || 0) +
-      effect.e2m * (effect.risk.ti_Sb_m || 0) +
-      effect.e2e * (effect.risk.ti_Sb_e || 0);
-    effect.ii_Sc_e =
-      effect.e2c * (effect.risk.ti_Sc_c || 0) +
-      effect.e2m * (effect.risk.ti_Sc_m || 0) +
-      effect.e2e * (effect.risk.ti_Sc_e || 0);
-    effect.ii_Sd_e =
-      effect.e2c * (effect.risk.ti_Sd_c || 0) +
-      effect.e2m * (effect.risk.ti_Sd_m || 0) +
-      effect.e2e * (effect.risk.ti_Sd_e || 0);
-    effect.ii_Ea_e =
-      effect.e2c * (effect.risk.ti_Ea_c || 0) +
-      effect.e2m * (effect.risk.ti_Ea_m || 0) +
-      effect.e2e * (effect.risk.ti_Ea_e || 0);
-    effect.ii_Fa_e =
-      effect.e2c * (effect.risk.ti_Fa_c || 0) +
-      effect.e2m * (effect.risk.ti_Fa_m || 0) +
-      effect.e2e * (effect.risk.ti_Fa_e || 0);
-    effect.ii_Fb_e =
-      effect.e2c * (effect.risk.ti_Fb_c || 0) +
-      effect.e2m * (effect.risk.ti_Fb_m || 0) +
-      effect.e2e * (effect.risk.ti_Fb_e || 0);
+    cascade.ii_Ha_e =
+      cascade.e2c * (cascade.effect.ti_Ha_c || 0) +
+      cascade.e2m * (cascade.effect.ti_Ha_m || 0) +
+      cascade.e2e * (cascade.effect.ti_Ha_e || 0);
+    cascade.ii_Hb_e =
+      cascade.e2c * (cascade.effect.ti_Hb_c || 0) +
+      cascade.e2m * (cascade.effect.ti_Hb_m || 0) +
+      cascade.e2e * (cascade.effect.ti_Hb_e || 0);
+    cascade.ii_Hc_e =
+      cascade.e2c * (cascade.effect.ti_Hc_c || 0) +
+      cascade.e2m * (cascade.effect.ti_Hc_m || 0) +
+      cascade.e2e * (cascade.effect.ti_Hc_e || 0);
+    cascade.ii_Sa_e =
+      cascade.e2c * (cascade.effect.ti_Sa_c || 0) +
+      cascade.e2m * (cascade.effect.ti_Sa_m || 0) +
+      cascade.e2e * (cascade.effect.ti_Sa_e || 0);
+    cascade.ii_Sb_e =
+      cascade.e2c * (cascade.effect.ti_Sb_c || 0) +
+      cascade.e2m * (cascade.effect.ti_Sb_m || 0) +
+      cascade.e2e * (cascade.effect.ti_Sb_e || 0);
+    cascade.ii_Sc_e =
+      cascade.e2c * (cascade.effect.ti_Sc_c || 0) +
+      cascade.e2m * (cascade.effect.ti_Sc_m || 0) +
+      cascade.e2e * (cascade.effect.ti_Sc_e || 0);
+    cascade.ii_Sd_e =
+      cascade.e2c * (cascade.effect.ti_Sd_c || 0) +
+      cascade.e2m * (cascade.effect.ti_Sd_m || 0) +
+      cascade.e2e * (cascade.effect.ti_Sd_e || 0);
+    cascade.ii_Ea_e =
+      cascade.e2c * (cascade.effect.ti_Ea_c || 0) +
+      cascade.e2m * (cascade.effect.ti_Ea_m || 0) +
+      cascade.e2e * (cascade.effect.ti_Ea_e || 0);
+    cascade.ii_Fa_e =
+      cascade.e2c * (cascade.effect.ti_Fa_c || 0) +
+      cascade.e2m * (cascade.effect.ti_Fa_m || 0) +
+      cascade.e2e * (cascade.effect.ti_Fa_e || 0);
+    cascade.ii_Fb_e =
+      cascade.e2c * (cascade.effect.ti_Fb_c || 0) +
+      cascade.e2m * (cascade.effect.ti_Fb_m || 0) +
+      cascade.e2e * (cascade.effect.ti_Fb_e || 0);
 
-    effect.ii_Ha = risk.rp_c * effect.ii_Ha_c + risk.rp_m * effect.ii_Ha_m + risk.rp_e * effect.ii_Ha_e;
-    effect.ii_Hb = risk.rp_c * effect.ii_Hb_c + risk.rp_m * effect.ii_Hb_m + risk.rp_e * effect.ii_Hb_e;
-    effect.ii_Hc = risk.rp_c * effect.ii_Hc_c + risk.rp_m * effect.ii_Hc_m + risk.rp_e * effect.ii_Hc_e;
-    effect.ii_Sa = risk.rp_c * effect.ii_Sa_c + risk.rp_m * effect.ii_Sa_m + risk.rp_e * effect.ii_Sa_e;
-    effect.ii_Sb = risk.rp_c * effect.ii_Sb_c + risk.rp_m * effect.ii_Sb_m + risk.rp_e * effect.ii_Sb_e;
-    effect.ii_Sc = risk.rp_c * effect.ii_Sc_c + risk.rp_m * effect.ii_Sc_m + risk.rp_e * effect.ii_Sc_e;
-    effect.ii_Sd = risk.rp_c * effect.ii_Sd_c + risk.rp_m * effect.ii_Sd_m + risk.rp_e * effect.ii_Sd_e;
-    effect.ii_Ea = risk.rp_c * effect.ii_Ea_c + risk.rp_m * effect.ii_Ea_m + risk.rp_e * effect.ii_Ea_e;
-    effect.ii_Fa = risk.rp_c * effect.ii_Fa_c + risk.rp_m * effect.ii_Fa_m + risk.rp_e * effect.ii_Fa_e;
-    effect.ii_Fb = risk.rp_c * effect.ii_Fb_c + risk.rp_m * effect.ii_Fb_m + risk.rp_e * effect.ii_Fb_e;
+    cascade.ii_Ha = risk.rp_c * cascade.ii_Ha_c + risk.rp_m * cascade.ii_Ha_m + risk.rp_e * cascade.ii_Ha_e;
+    cascade.ii_Hb = risk.rp_c * cascade.ii_Hb_c + risk.rp_m * cascade.ii_Hb_m + risk.rp_e * cascade.ii_Hb_e;
+    cascade.ii_Hc = risk.rp_c * cascade.ii_Hc_c + risk.rp_m * cascade.ii_Hc_m + risk.rp_e * cascade.ii_Hc_e;
+    cascade.ii_Sa = risk.rp_c * cascade.ii_Sa_c + risk.rp_m * cascade.ii_Sa_m + risk.rp_e * cascade.ii_Sa_e;
+    cascade.ii_Sb = risk.rp_c * cascade.ii_Sb_c + risk.rp_m * cascade.ii_Sb_m + risk.rp_e * cascade.ii_Sb_e;
+    cascade.ii_Sc = risk.rp_c * cascade.ii_Sc_c + risk.rp_m * cascade.ii_Sc_m + risk.rp_e * cascade.ii_Sc_e;
+    cascade.ii_Sd = risk.rp_c * cascade.ii_Sd_c + risk.rp_m * cascade.ii_Sd_m + risk.rp_e * cascade.ii_Sd_e;
+    cascade.ii_Ea = risk.rp_c * cascade.ii_Ea_c + risk.rp_m * cascade.ii_Ea_m + risk.rp_e * cascade.ii_Ea_e;
+    cascade.ii_Fa = risk.rp_c * cascade.ii_Fa_c + risk.rp_m * cascade.ii_Fa_m + risk.rp_e * cascade.ii_Fa_e;
+    cascade.ii_Fb = risk.rp_c * cascade.ii_Fb_c + risk.rp_m * cascade.ii_Fb_m + risk.rp_e * cascade.ii_Fb_e;
 
-    effect.ii =
-      effect.ii_Ha +
-      effect.ii_Hb +
-      effect.ii_Hc +
-      effect.ii_Sa +
-      effect.ii_Sb +
-      effect.ii_Sc +
-      effect.ii_Sd +
-      effect.ii_Ea +
-      effect.ii_Fa +
-      effect.ii_Fb;
+    cascade.ii =
+      cascade.ii_Ha +
+      cascade.ii_Hb +
+      cascade.ii_Hc +
+      cascade.ii_Sa +
+      cascade.ii_Sb +
+      cascade.ii_Sc +
+      cascade.ii_Sd +
+      cascade.ii_Ea +
+      cascade.ii_Fa +
+      cascade.ii_Fb;
   });
 
   risk.ii_Ha_c = risk.effects.reduce((acc: number, effect: any) => acc + effect.ii_Ha_c, 0);

@@ -1,14 +1,14 @@
-import { Quality, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
+import { Quality, RiskCalculation, RiskCalculationKnownFields } from "../../types/dataverse/DVAnalysisRun";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
-import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
+import { DVContact } from "../../types/dataverse/DVContact";
+import { DVDirectAnalysis, FieldQuality } from "../../types/dataverse/DVDirectAnalysis";
+import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { getAbsoluteImpact } from "../Impact";
 import { getAbsoluteProbability } from "../Probability";
-
-interface OtherHazard {
-  cr4de_title: string;
-}
+import { getAverage, getConsensusRiskFile as getConsensusRiskFileAverage } from "../inputProcessing";
 
 interface Metrics {
   consensus: number;
@@ -17,82 +17,294 @@ interface Metrics {
   total: number;
 }
 
-const wrapIsNan =
-  (f: any) =>
-  (...args: any[]): number => {
-    const result = f(...args);
+const getAveragesForScenarios = (
+  name: string,
+  parameter: string,
+  field: string,
+  directAnalyses: DVDirectAnalysis[],
+  absoluteValueGetter: (strValue: string | null) => number
+) => {
+  const daField = field.indexOf("climate_change") >= 0 ? "cr4de_dp50_quanti" : field;
 
-    if (isNaN(result)) {
-      console.error("Error in calculations, probability was NaN: ", ...args);
-      throw new Error("Error in calculations, probability was NaN");
-    }
-
-    return result;
+  return {
+    [`${name}_c`]: absoluteValueGetter(
+      getAverage(
+        directAnalyses.map((da) => da[`${daField}_c` as keyof DVDirectAnalysis]) as string[],
+        directAnalyses.map(
+          (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_c}` as keyof FieldQuality]) || 2.5
+        )
+      )
+    ),
+    [`${name}_m`]: absoluteValueGetter(
+      getAverage(
+        directAnalyses.map((da) => da[`${daField}_m` as keyof DVDirectAnalysis]) as string[],
+        directAnalyses.map(
+          (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_m}` as keyof FieldQuality]) || 2.5
+        )
+      )
+    ),
+    [`${name}_e`]: absoluteValueGetter(
+      getAverage(
+        directAnalyses.map((da) => da[`${daField}_e` as keyof DVDirectAnalysis]) as string[],
+        directAnalyses.map(
+          (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_e}` as keyof FieldQuality]) || 2.5
+        )
+      )
+    ),
   };
+};
 
-const getBestValueRF = wrapIsNan(
-  (
-    field: keyof DVRiskFile & keyof DVDirectAnalysis,
-    riskFile: DVRiskFile,
-    directAnalyses: DVDirectAnalysis[],
-    absoluteValueGetter: (field: string) => number,
-    metrics: Metrics
-  ) => {
-    metrics.total++;
+const getConsensusRiskFile = (
+  riskFile: DVRiskFile,
+  participations: DVParticipation[],
+  directAnalyses: DVDirectAnalysis<unknown, DVContact>[] | undefined
+): RiskCalculationKnownFields => {
+  const goodDAs = directAnalyses
+    ? directAnalyses.filter((da) =>
+        participations.some(
+          (p) =>
+            p._cr4de_contact_value === da.cr4de_expert.contactid &&
+            p.cr4de_role === "expert" &&
+            p.cr4de_direct_analysis_finished
+        )
+      )
+    : [];
 
-    if (riskFile[field] != null) {
-      metrics.consensus++;
-      return absoluteValueGetter(riskFile[field] as string);
-    }
+  if (
+    (riskFile.cr4de_consensus_date && new Date(riskFile.cr4de_consensus_date) <= new Date()) ||
+    riskFile.cr4de_risk_type === RISK_TYPE.EMERGING
+  )
+    return {
+      quality: Quality.CONSENSUS,
+      reliability: goodDAs.length,
+      dp_c: getAbsoluteProbability(riskFile.cr4de_dp_quanti_c),
+      dp_m: getAbsoluteProbability(riskFile.cr4de_dp_quanti_m),
+      dp_e: getAbsoluteProbability(riskFile.cr4de_dp_quanti_e),
 
-    // FIXME: check if participations are finished (direct_analysis_finished)
-    const validDAs = directAnalyses.filter((da) => da[field] != null);
+      di_Ha_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_c),
+      di_Hb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_c),
+      di_Hc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_c),
+      di_Sa_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_c),
+      di_Sb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_c),
+      di_Sc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_c),
+      di_Sd_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_c),
+      di_Ea_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_c),
+      di_Fa_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_c),
+      di_Fb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_c),
 
-    if (validDAs.length > 0) {
-      metrics.average++;
-      return validDAs.reduce((tot, da) => tot + absoluteValueGetter(da[field] as string), 0) / validDAs.length;
-    }
+      di_Ha_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_m),
+      di_Hb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_m),
+      di_Hc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_m),
+      di_Sa_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_m),
+      di_Sb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_m),
+      di_Sc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_m),
+      di_Sd_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_m),
+      di_Ea_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_m),
+      di_Fa_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_m),
+      di_Fb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_m),
 
-    metrics.missing++;
-    return 0;
+      di_Ha_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_e),
+      di_Hb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_e),
+      di_Hc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_e),
+      di_Sa_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_e),
+      di_Sb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_e),
+      di_Sc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_e),
+      di_Sd_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_e),
+      di_Ea_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_e),
+      di_Fa_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_e),
+      di_Fb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_e),
+
+      dp50_c: getAbsoluteProbability(riskFile.cr4de_climate_change_quanti_c),
+      dp50_m: getAbsoluteProbability(riskFile.cr4de_climate_change_quanti_m),
+      dp50_e: getAbsoluteProbability(riskFile.cr4de_climate_change_quanti_e),
+    };
+
+  if (goodDAs.length > 0)
+    return {
+      quality: Quality.AVERAGE,
+      reliability: goodDAs.length,
+      ...getAveragesForScenarios("dp", "dp", "cr4de_dp_quanti", goodDAs, getAbsoluteProbability),
+      ...getAveragesForScenarios("di_Ha", "ha", "cr4de_di_quanti_ha", goodDAs, getAbsoluteImpact),
+      ...getAveragesForScenarios("di_Hb", "hb", "cr4de_di_quanti_hb", goodDAs, getAbsoluteImpact),
+      ...getAveragesForScenarios("di_Hc", "hc", "cr4de_di_quanti_hc", goodDAs, getAbsoluteImpact),
+      ...getAveragesForScenarios("di_Sa", "sa", "cr4de_di_quanti_sa", goodDAs, getAbsoluteImpact),
+      ...getAveragesForScenarios("di_Sb", "sb", "cr4de_di_quanti_sb", goodDAs, getAbsoluteImpact),
+      ...getAveragesForScenarios("di_Sc", "sc", "cr4de_di_quanti_sc", goodDAs, getAbsoluteImpact),
+      ...getAveragesForScenarios("di_Sd", "sd", "cr4de_di_quanti_sd", goodDAs, getAbsoluteImpact),
+      ...getAveragesForScenarios("di_Ea", "ea", "cr4de_di_quanti_ea", goodDAs, getAbsoluteImpact),
+      ...getAveragesForScenarios("di_Fa", "fa", "cr4de_di_quanti_fa", goodDAs, getAbsoluteImpact),
+      ...getAveragesForScenarios("di_Fb", "fb", "cr4de_di_quanti_fb", goodDAs, getAbsoluteImpact),
+      ...getAveragesForScenarios("dp50", "cc", "cr4de_climate_change_quanti", goodDAs, getAbsoluteProbability),
+    } as RiskCalculationKnownFields;
+
+  return {
+    quality: Quality.MISSING,
+    reliability: 0,
+    dp_c: 0,
+    dp_m: 0,
+    dp_e: 0,
+
+    di_Ha_c: 0,
+    di_Hb_c: 0,
+    di_Hc_c: 0,
+    di_Sa_c: 0,
+    di_Sb_c: 0,
+    di_Sc_c: 0,
+    di_Sd_c: 0,
+    di_Ea_c: 0,
+    di_Fa_c: 0,
+    di_Fb_c: 0,
+
+    di_Ha_m: 0,
+    di_Hb_m: 0,
+    di_Hc_m: 0,
+    di_Sa_m: 0,
+    di_Sb_m: 0,
+    di_Sc_m: 0,
+    di_Sd_m: 0,
+    di_Ea_m: 0,
+    di_Fa_m: 0,
+    di_Fb_m: 0,
+
+    di_Ha_e: 0,
+    di_Hb_e: 0,
+    di_Hc_e: 0,
+    di_Sa_e: 0,
+    di_Sb_e: 0,
+    di_Sc_e: 0,
+    di_Sd_e: 0,
+    di_Ea_e: 0,
+    di_Fa_e: 0,
+    di_Fb_e: 0,
+
+    dp50_c: 0,
+    dp50_m: 0,
+    dp50_e: 0,
+  };
+};
+
+const getConsensusCascade = (
+  cause: DVRiskFile,
+  effect: DVRiskFile,
+  cascade: DVRiskCascade,
+  participations: DVParticipation[],
+  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[] | undefined
+) => {
+  const goodCAs = cascadeAnalyses
+    ? cascadeAnalyses.filter((ca) =>
+        participations.some(
+          (p) =>
+            p._cr4de_contact_value === ca.cr4de_expert.contactid &&
+            p.cr4de_role === "expert" &&
+            p.cr4de_direct_analysis_finished
+        )
+      )
+    : [];
+
+  if (
+    (effect.cr4de_consensus_date && new Date(effect.cr4de_consensus_date) <= new Date()) ||
+    effect.cr4de_risk_type === RISK_TYPE.EMERGING
+  ) {
+    return {
+      quality: Quality.CONSENSUS,
+      reliabilty: goodCAs.length,
+      c2c: getAbsoluteProbability(cascade.cr4de_c2c),
+      c2m: getAbsoluteProbability(cascade.cr4de_c2m),
+      c2e: getAbsoluteProbability(cascade.cr4de_c2e),
+      m2c: getAbsoluteProbability(cascade.cr4de_m2c),
+      m2m: getAbsoluteProbability(cascade.cr4de_m2m),
+      m2e: getAbsoluteProbability(cascade.cr4de_m2e),
+      e2c: getAbsoluteProbability(cascade.cr4de_e2c),
+      e2m: getAbsoluteProbability(cascade.cr4de_e2m),
+      e2e: getAbsoluteProbability(cascade.cr4de_e2e),
+    };
   }
-);
 
-const getBestValueRC = wrapIsNan(
-  (
-    field: keyof DVRiskCascade & keyof DVCascadeAnalysis,
-    cascade: DVRiskCascade,
-    cascadeAnalyses: DVCascadeAnalysis[],
-    absoluteValueGetter: (field: string) => number,
-    metrics: Metrics
-  ) => {
-    metrics.total++;
-
-    if (cascade[field] != null) {
-      metrics.consensus++;
-      return absoluteValueGetter(cascade[field] as string);
-    }
-
-    // FIXME: check if participations are finished (direct_analysis_finished)
-    const validCAs = cascadeAnalyses.filter((ca) => ca[field] != null);
-
-    if (validCAs.length > 0) {
-      metrics.average++;
-      return validCAs.reduce((tot, ca) => tot + absoluteValueGetter(ca[field] as string), 0) / validCAs.length;
-    }
-
-    metrics.missing++;
-    return 0;
+  if (goodCAs.length > 0) {
+    return {
+      quality: Quality.AVERAGE,
+      reliabilty: goodCAs.length,
+      c2c: getAbsoluteProbability(
+        getAverage(
+          goodCAs.map((ca) => ca.cr4de_c2c),
+          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+        )
+      ),
+      c2m: getAbsoluteProbability(
+        getAverage(
+          goodCAs.map((ca) => ca.cr4de_c2m),
+          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+        )
+      ),
+      c2e: getAbsoluteProbability(
+        getAverage(
+          goodCAs.map((ca) => ca.cr4de_c2e),
+          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+        )
+      ),
+      m2c: getAbsoluteProbability(
+        getAverage(
+          goodCAs.map((ca) => ca.cr4de_m2c),
+          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+        )
+      ),
+      m2m: getAbsoluteProbability(
+        getAverage(
+          goodCAs.map((ca) => ca.cr4de_m2m),
+          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+        )
+      ),
+      m2e: getAbsoluteProbability(
+        getAverage(
+          goodCAs.map((ca) => ca.cr4de_m2e),
+          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+        )
+      ),
+      e2c: getAbsoluteProbability(
+        getAverage(
+          goodCAs.map((ca) => ca.cr4de_e2c),
+          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+        )
+      ),
+      e2m: getAbsoluteProbability(
+        getAverage(
+          goodCAs.map((ca) => ca.cr4de_e2m),
+          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+        )
+      ),
+      e2e: getAbsoluteProbability(
+        getAverage(
+          goodCAs.map((ca) => ca.cr4de_e2e),
+          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+        )
+      ),
+    };
   }
-);
+
+  return {
+    quality: Quality.MISSING,
+    reliabilty: 0,
+    c2c: 0,
+    c2m: 0,
+    c2e: 0,
+    m2c: 0,
+    m2m: 0,
+    m2e: 0,
+    e2c: 0,
+    e2m: 0,
+    e2e: 0,
+  };
+};
 
 export default async function prepareRiskFiles(
   riskFiles: DVRiskFile[],
-  cascades: DVRiskCascade<OtherHazard, OtherHazard>[],
-  directAnalyses: DVDirectAnalysis[],
-  cascadeAnalyses: DVCascadeAnalysis[]
-): Promise<[RiskCalculation[], Metrics, Metrics]> {
-  const daDict: { [key: string]: DVDirectAnalysis[] } = directAnalyses.reduce((acc, da) => {
+  riskFilesDict: { [key: string]: DVRiskFile },
+  cascades: DVRiskCascade<SmallRisk, SmallRisk>[],
+  participations: DVParticipation[],
+  directAnalyses: DVDirectAnalysis<unknown, DVContact>[],
+  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[]
+): Promise<RiskCalculation[]> {
+  const daDict: { [key: string]: DVDirectAnalysis<unknown, DVContact>[] } = directAnalyses.reduce((acc, da) => {
     if (!acc[da._cr4de_risk_file_value]) {
       return {
         ...acc,
@@ -103,269 +315,37 @@ export default async function prepareRiskFiles(
       ...acc,
       [da._cr4de_risk_file_value]: [...acc[da._cr4de_risk_file_value], da],
     };
-  }, {} as { [key: string]: DVDirectAnalysis[] });
+  }, {} as { [key: string]: DVDirectAnalysis<unknown, DVContact>[] });
 
-  const caDict: { [key: string]: DVCascadeAnalysis[] } = cascadeAnalyses.reduce((acc, ca) => {
-    if (!acc[ca._cr4de_cascade_value]) {
+  const caDict: { [key: string]: DVCascadeAnalysis<unknown, unknown, DVContact>[] } = cascadeAnalyses.reduce(
+    (acc, ca) => {
+      if (!acc[ca._cr4de_cascade_value]) {
+        return {
+          ...acc,
+          [ca._cr4de_cascade_value]: [ca],
+        };
+      }
       return {
         ...acc,
-        [ca._cr4de_cascade_value]: [ca],
+        [ca._cr4de_cascade_value]: [...acc[ca._cr4de_cascade_value], ca],
       };
-    }
-    return {
-      ...acc,
-      [ca._cr4de_cascade_value]: [...acc[ca._cr4de_cascade_value], ca],
-    };
-  }, {} as { [key: string]: DVCascadeAnalysis[] });
-
-  const daMetrics: Metrics = { consensus: 0, average: 0, missing: 0, total: 0 };
-  const caMetrics = { consensus: 0, average: 0, missing: 0, total: 0 };
+    },
+    {} as { [key: string]: DVCascadeAnalysis<unknown, unknown, DVContact>[] }
+  );
 
   return new Promise((resolve) => {
     const calculations: RiskCalculation[] = riskFiles.map((rf) => {
-      const oldMetrics = { ...daMetrics };
-
       const c = {
         riskId: rf.cr4de_riskfilesid,
+        riskTitle: rf.cr4de_title,
 
         timestamp: Date.now(),
-        quality: Quality.CONSENSUS,
-        reliability: 0,
 
         // Initialize known fields
-        dp_c: getBestValueRF(
-          "cr4de_dp_quanti_c",
+        ...getConsensusRiskFile(
           rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteProbability,
-          daMetrics
-        ),
-        dp_m: getBestValueRF(
-          "cr4de_dp_quanti_m",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteProbability,
-          daMetrics
-        ),
-        dp_e: getBestValueRF(
-          "cr4de_dp_quanti_e",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteProbability,
-          daMetrics
-        ),
-
-        di_Ha_c: getBestValueRF(
-          "cr4de_di_quanti_ha_c",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Hb_c: getBestValueRF(
-          "cr4de_di_quanti_hb_c",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Hc_c: getBestValueRF(
-          "cr4de_di_quanti_hc_c",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sa_c: getBestValueRF(
-          "cr4de_di_quanti_sa_c",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sb_c: getBestValueRF(
-          "cr4de_di_quanti_sb_c",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sc_c: getBestValueRF(
-          "cr4de_di_quanti_sc_c",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sd_c: getBestValueRF(
-          "cr4de_di_quanti_sd_c",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Ea_c: getBestValueRF(
-          "cr4de_di_quanti_ea_c",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Fa_c: getBestValueRF(
-          "cr4de_di_quanti_fa_c",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Fb_c: getBestValueRF(
-          "cr4de_di_quanti_fb_c",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-
-        di_Ha_m: getBestValueRF(
-          "cr4de_di_quanti_ha_m",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Hb_m: getBestValueRF(
-          "cr4de_di_quanti_hb_m",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Hc_m: getBestValueRF(
-          "cr4de_di_quanti_hc_m",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sa_m: getBestValueRF(
-          "cr4de_di_quanti_sa_m",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sb_m: getBestValueRF(
-          "cr4de_di_quanti_sb_m",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sc_m: getBestValueRF(
-          "cr4de_di_quanti_sc_m",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sd_m: getBestValueRF(
-          "cr4de_di_quanti_sd_m",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Ea_m: getBestValueRF(
-          "cr4de_di_quanti_ea_m",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Fa_m: getBestValueRF(
-          "cr4de_di_quanti_fa_m",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Fb_m: getBestValueRF(
-          "cr4de_di_quanti_fb_m",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-
-        di_Ha_e: getBestValueRF(
-          "cr4de_di_quanti_ha_e",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Hb_e: getBestValueRF(
-          "cr4de_di_quanti_hb_e",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Hc_e: getBestValueRF(
-          "cr4de_di_quanti_hc_e",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sa_e: getBestValueRF(
-          "cr4de_di_quanti_sa_e",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sb_e: getBestValueRF(
-          "cr4de_di_quanti_sb_e",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sc_e: getBestValueRF(
-          "cr4de_di_quanti_sc_e",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Sd_e: getBestValueRF(
-          "cr4de_di_quanti_sd_e",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Ea_e: getBestValueRF(
-          "cr4de_di_quanti_ea_e",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Fa_e: getBestValueRF(
-          "cr4de_di_quanti_fa_e",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
-        ),
-        di_Fb_e: getBestValueRF(
-          "cr4de_di_quanti_fb_e",
-          rf,
-          daDict[rf.cr4de_riskfilesid] || [],
-          getAbsoluteImpact,
-          daMetrics
+          participations.filter((p) => p._cr4de_risk_file_value === rf.cr4de_riskfilesid),
+          daDict[rf.cr4de_riskfilesid]
         ),
 
         // Initialize unknown fields
@@ -510,16 +490,6 @@ export default async function prepareRiskFiles(
         effects: [],
       };
 
-      if (daMetrics.missing > oldMetrics.missing) c.quality = Quality.MISSING;
-      else if (daMetrics.average > oldMetrics.average) c.quality = Quality.AVERAGE;
-
-      const reliabilityAbs = directAnalyses.reduce((rel, _) => {
-        if ((c.quality = Quality.CONSENSUS)) return rel + 1;
-
-        return rel + 0.5;
-      }, 0);
-      c.reliability = reliabilityAbs / (0.5 + reliabilityAbs);
-
       return c;
     });
 
@@ -532,35 +502,47 @@ export default async function prepareRiskFiles(
       {}
     );
 
+    const hasTitle = (cascade: DVRiskCascade<SmallRisk, SmallRisk>, titles: string[]) => {
+      return titles.some(
+        (t) =>
+          cascade.cr4de_cause_hazard.cr4de_title.indexOf(t) >= 0 ||
+          cascade.cr4de_effect_hazard.cr4de_title.indexOf(t) >= 0
+      );
+    };
+
     // Create links between the risk file calculation objects according to the risk cascades
     cascades.forEach((c) => {
+      //if (hasTitle(c, ["Information", "sewage", "Building Struct", "Unrest", "Substandard"])) return;
+
       const cause = calculationsDict[c._cr4de_cause_hazard_value];
       const effect = calculationsDict[c._cr4de_effect_hazard_value];
 
       if (!cause || !effect) return;
 
-      let oldMetrics = { ...caMetrics };
-
-      cause.effects.push({
-        risk: effect,
-        riskId: c._cr4de_effect_hazard_value,
-
-        cascadeQuality: Quality.CONSENSUS,
-        effectQuality: effect.quality,
-
-        title: c.cr4de_effect_hazard.cr4de_title,
+      const cascadeCalculation = {
+        cause: cause,
+        effect: effect,
 
         cascadeId: c.cr4de_bnrariskcascadeid,
+        cascadeTitle: `${cause.riskTitle} causes ${effect.riskTitle}`,
 
-        c2c: getBestValueRC("cr4de_c2c", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        c2m: getBestValueRC("cr4de_c2m", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        c2e: getBestValueRC("cr4de_c2e", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        m2c: getBestValueRC("cr4de_m2c", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        m2m: getBestValueRC("cr4de_m2m", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        m2e: getBestValueRC("cr4de_m2e", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        e2c: getBestValueRC("cr4de_e2c", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        e2m: getBestValueRC("cr4de_e2m", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        e2e: getBestValueRC("cr4de_e2e", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
+        ...getConsensusCascade(
+          riskFilesDict[c._cr4de_cause_hazard_value],
+          riskFilesDict[c._cr4de_effect_hazard_value],
+          c,
+          participations.filter(
+            (p) =>
+              p._cr4de_risk_file_value === c._cr4de_cause_hazard_value ||
+              p._cr4de_risk_file_value === c._cr4de_effect_hazard_value
+          ),
+          caDict[c.cr4de_bnrariskcascadeid]
+        ),
+
+        ip_c: 0,
+        ip_m: 0,
+        ip_e: 0,
+
+        ip: 0,
 
         ii_Ha_c: 0,
         ii_Hb_c: 0,
@@ -607,49 +589,12 @@ export default async function prepareRiskFiles(
         ii_Fb: 0,
 
         ii: 0,
-      });
+      };
 
-      if (caMetrics.missing > oldMetrics.missing)
-        cause.effects[cause.effects.length - 1].cascadeQuality = Quality.MISSING;
-      else if (caMetrics.average > oldMetrics.average)
-        cause.effects[cause.effects.length - 1].cascadeQuality = Quality.AVERAGE;
-
-      oldMetrics = { ...caMetrics };
-
-      effect.causes.push({
-        risk: cause,
-        riskId: c._cr4de_cause_hazard_value,
-
-        cascadeQuality: Quality.CONSENSUS,
-        causeQuality: cause.quality,
-
-        title: c.cr4de_cause_hazard.cr4de_title,
-
-        cascadeId: c.cr4de_bnrariskcascadeid,
-
-        c2c: getBestValueRC("cr4de_c2c", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        c2m: getBestValueRC("cr4de_c2m", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        c2e: getBestValueRC("cr4de_c2e", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        m2c: getBestValueRC("cr4de_m2c", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        m2m: getBestValueRC("cr4de_m2m", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        m2e: getBestValueRC("cr4de_m2e", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        e2c: getBestValueRC("cr4de_e2c", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        e2m: getBestValueRC("cr4de_e2m", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-        e2e: getBestValueRC("cr4de_e2e", c, caDict[c.cr4de_bnrariskcascadeid] || [], getAbsoluteProbability, caMetrics),
-
-        ip_c: 0,
-        ip_m: 0,
-        ip_e: 0,
-
-        ip: 0,
-      });
-
-      if (caMetrics.missing > oldMetrics.missing)
-        effect.causes[effect.causes.length - 1].cascadeQuality = Quality.MISSING;
-      else if (caMetrics.average > oldMetrics.average)
-        effect.causes[effect.causes.length - 1].cascadeQuality = Quality.AVERAGE;
+      cause.effects.push(cascadeCalculation);
+      effect.causes.push(cascadeCalculation);
     });
 
-    return resolve([calculations, daMetrics, caMetrics]);
+    return resolve(calculations);
   });
 }

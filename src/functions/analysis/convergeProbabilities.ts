@@ -27,6 +27,25 @@ export default async function convergeProbabilities(
       }
     }
 
+    console.log(`====================== Run ${run} ======================`);
+
+    const ordered = [...risks];
+    ordered.sort((a, b) => b.tp - a.tp);
+
+    console.log(ordered);
+
+    // for (let risk of ordered) {
+    //   console.log(`${risk.riskTitle}: ${risk.tp}`);
+
+    //   const orderedCauses = [...risk.causes];
+    //   orderedCauses.sort((a, b) => b.ip - a.ip);
+
+    //   for (let i = 0; i < Math.min(orderedCauses.length, 5); i++) {
+    //     console.log(`     ${orderedCauses[i].cause.riskTitle}: ${orderedCauses[i].ip}`);
+    //   }
+    // }
+
+    console.log("\n\n\n");
     const deltaTotalProbability = Math.abs(totalProbability - lastTotalProbability) / totalProbability;
 
     if (deltaTotalProbability < maxDelta) {

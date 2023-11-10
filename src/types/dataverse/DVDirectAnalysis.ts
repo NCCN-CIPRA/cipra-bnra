@@ -140,6 +140,10 @@ export const DIRECT_ANALYSIS_EDITABLE_FIELDS: (keyof DirectAnalysisEditableField
   "cr4de_cross_border_impact_quali_c",
   "cr4de_cross_border_impact_quali_m",
   "cr4de_cross_border_impact_quali_e",
+
+  "cr4de_dp50_quanti_c",
+  "cr4de_dp50_quanti_m",
+  "cr4de_dp50_quanti_e",
 ];
 
 export const DIRECT_ANALYSIS_QUANTI_FIELDS = DIRECT_ANALYSIS_EDITABLE_FIELDS.filter((f) => f.indexOf("quanti") > 0);
