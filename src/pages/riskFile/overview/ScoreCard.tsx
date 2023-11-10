@@ -80,17 +80,17 @@ export default function ScoreCard({
 
   score.da = getQualityScore(calculation.quality, dasFinished);
 
-  score.causes =
-    calculation.causes.reduce(
-      (tot, cause) => tot + getQualityScore(cause.cause.quality, casFinished) * getQualityScore(cause.quality),
-      0
-    ) / calculation.causes.length;
+  score.causes = 0;
+  // calculation.causes.reduce((tot, cascade) => {
+  //   console.log(cascade);
+  //   return tot + getQualityScore(cascade.cause.quality, casFinished) * getQualityScore(cascade.quality);
+  // }, 0) / calculation.causes.length;
 
-  score.effects =
-    calculation.effects.reduce(
-      (tot, effect) => tot + getQualityScore(effect.effect.quality) * getQualityScore(effect.quality),
-      0
-    ) / calculation.effects.length;
+  score.effects = 0;
+  // calculation.effects.reduce(
+  //   (tot, effect) => tot + getQualityScore(effect.effect.quality) * getQualityScore(effect.quality),
+  //   0
+  // ) / calculation.effects.length;
 
   const totalScore = (score.da + score.causes + score.effects) / 3;
 

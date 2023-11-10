@@ -251,7 +251,21 @@ export default function CalculationPage() {
       g.nodes.push({ id: c.riskId, riskTitle: c.riskTitle, category: "A", tp: c.tp });
 
       for (let cascade of c.causes) {
-        g.links.push({ source: cascade.cause.riskId, target: cascade.effect.riskId, value: cascade.ip });
+        g.links.push({
+          source: cascade.cause.riskId,
+          target: cascade.effect.riskId,
+          value:
+            (cascade.c2c +
+              cascade.m2c +
+              cascade.e2c +
+              cascade.c2m +
+              cascade.m2m +
+              cascade.e2m +
+              cascade.c2e +
+              cascade.m2e +
+              cascade.e2e) /
+            9,
+        });
       }
     }
 

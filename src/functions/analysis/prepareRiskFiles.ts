@@ -512,7 +512,7 @@ export default async function prepareRiskFiles(
 
     // Create links between the risk file calculation objects according to the risk cascades
     cascades.forEach((c) => {
-      //if (hasTitle(c, ["Information", "sewage", "Building Struct", "Unrest", "Substandard"])) return;
+      if (hasTitle(c, ["Information" /*, "sewage", "Building Struct", "Unrest", "Substandard"*/])) return;
 
       const cause = calculationsDict[c._cr4de_cause_hazard_value];
       const effect = calculationsDict[c._cr4de_effect_hazard_value];
