@@ -77,6 +77,26 @@ export default function OverviewTab({
     return <LoadingTab />;
   }
 
+  for (let c of cascades) {
+    if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value) {
+      continue;
+    }
+
+    console.log(
+      getConsensusCascade(
+        cascadeAnalyses.filter(
+          (ca) =>
+            ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
+            participants.some(
+              (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
+            ) &&
+            !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
+        ),
+        riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
+      )
+    );
+  }
+
   const startConsensus = async () => {
     setIsSaving(true);
 
@@ -128,45 +148,45 @@ export default function OverviewTab({
     setIsSaving(true);
 
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-      ...Object.keys(
-        getConsensusRiskFile(
-          directAnalyses.filter((da) =>
-            participants.some(
-              (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
-            )
-          )
-        )
-      ).reduce(
-        (f, k) => ({
-          ...f,
-          [k]: null,
-        }),
-        {}
-      ),
+      // ...Object.keys(
+      //   getConsensusRiskFile(
+      //     directAnalyses.filter((da) =>
+      //       participants.some(
+      //         (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
+      //       )
+      //     )
+      //   )
+      // ).reduce(
+      //   (f, k) => ({
+      //     ...f,
+      //     [k]: null,
+      //   }),
+      //   {}
+      // ),
       cr4de_consensus_type: null,
       cr4de_consensus_date: null,
     });
 
-    for (let c of cascades) {
-      await api.updateCascade(c.cr4de_bnrariskcascadeid, {
-        ...Object.keys(
-          getConsensusCascade(
-            cascadeAnalyses.filter((da) =>
-              participants.some(
-                (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
-              )
-            ),
-            riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
-          )
-        ).reduce(
-          (f, k) => ({
-            ...f,
-            [k]: null,
-          }),
-          {}
-        ),
-      });
-    }
+    // for (let c of cascades) {
+    //   await api.updateCascade(c.cr4de_bnrariskcascadeid, {
+    //     ...Object.keys(
+    //       getConsensusCascade(
+    //         cascadeAnalyses.filter((da) =>
+    //           participants.some(
+    //             (p) => p._cr4de_contact_value === da._cr4de_expert_value && p.cr4de_cascade_analysis_finished
+    //           )
+    //         ),
+    //         riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
+    //       )
+    //     ).reduce(
+    //       (f, k) => ({
+    //         ...f,
+    //         [k]: null,
+    //       }),
+    //       {}
+    //     ),
+    //   });
+    // }
 
     await reloadRiskFile();
     await reloadCascades();

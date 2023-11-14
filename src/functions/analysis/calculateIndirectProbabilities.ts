@@ -1,24 +1,24 @@
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 
-export default function calculateIndirectProbabilities(risk: RiskCalculation) {
+export default function calculateIndirectProbabilities(risk: RiskCalculation, damping: number = 1) {
   risk.causes.forEach((cascade) => {
     cascade.ip_c = Math.min(
-      1,
-      cascade.c2c * (cascade.cause.tp_c || 0) +
-        cascade.m2c * (cascade.cause.tp_m || 0) +
-        cascade.e2c * (cascade.cause.tp_e || 0)
+      100000000,
+      cascade.c2c * (cascade.cause.tp_c || 0) * damping +
+        cascade.m2c * (cascade.cause.tp_m || 0) * damping +
+        cascade.e2c * (cascade.cause.tp_e || 0) * damping
     );
     cascade.ip_m = Math.min(
-      1,
-      cascade.c2m * (cascade.cause.tp_c || 0) +
-        cascade.m2m * (cascade.cause.tp_m || 0) +
-        cascade.e2m * (cascade.cause.tp_e || 0)
+      100000000,
+      cascade.c2m * (cascade.cause.tp_c || 0) * damping +
+        cascade.m2m * (cascade.cause.tp_m || 0) * damping +
+        cascade.e2m * (cascade.cause.tp_e || 0) * damping
     );
     cascade.ip_e = Math.min(
-      1,
-      cascade.c2e * (cascade.cause.tp_c || 0) +
-        cascade.m2e * (cascade.cause.tp_m || 0) +
-        cascade.e2e * (cascade.cause.tp_e || 0)
+      100000000,
+      cascade.c2e * (cascade.cause.tp_c || 0) * damping +
+        cascade.m2e * (cascade.cause.tp_m || 0) * damping +
+        cascade.e2e * (cascade.cause.tp_e || 0) * damping
     );
 
     cascade.ip = cascade.ip_c + cascade.ip_m + cascade.ip_e;

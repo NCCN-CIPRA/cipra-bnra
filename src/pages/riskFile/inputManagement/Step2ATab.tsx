@@ -85,7 +85,7 @@ const getPrefix = (parameter: string, fieldName: string, riskType: RISK_TYPE) =>
 
 const getQuantiLabel = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDirectAnalysis[]) => {
   const good = directAnalyses.filter((da) => da[fieldName] !== null);
-  console.log(directAnalyses);
+
   if (good.length <= 0) return 0;
 
   const prefix = (good[0][fieldName] as string).slice(0, -1);

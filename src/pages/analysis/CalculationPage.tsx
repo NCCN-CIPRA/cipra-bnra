@@ -32,15 +32,16 @@ import calculateMetrics from "../../functions/analysis/calculateMetrics";
 import runAnalysis from "../../functions/analysis/runAnalysis";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import * as d3 from "d3";
+import CalculationsDataGrid from "./CalculationsDataGrid";
+import { CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis } from "recharts";
+import CalculationsRiskMatrix from "./CalculationsRiskMatrix";
 
-const width = 1400;
-const height = 600;
-const RADIUS = 10;
+const graphHeight = 600;
 var margin = {
-  top: 50,
-  bottom: 50,
-  left: 50,
-  right: 50,
+  top: 5,
+  bottom: 5,
+  left: 5,
+  right: 5,
 };
 
 export interface RiskNode extends d3.SimulationNodeDatum {
@@ -77,17 +78,37 @@ const roundPerc = (v: number) => Math.round(v * 10000) / 100 + "%";
 
 export default function CalculationPage() {
   const api = useAPI();
+  const logLines = useRef<string[]>(["Loading data..."]);
+  const [updateLog, setUpdateLog] = useState(Date.now());
+
+  const graphElement = useRef<SVGSVGElement | null>(null);
+  const [graphWidth, setGraphWidth] = useState<number>(0);
+
   const [useableDAs, setUseableDAs] = useState<DVDirectAnalysis<unknown, DVContact>[] | null>(null);
   const [useableCAs, setUseableCAs] = useState<DVCascadeAnalysis<unknown, unknown, DVContact>[] | null>(null);
+  const [calculations, setCalculations] = useState<RiskCalculation[] | null>(null);
   const [graph, setGraph] = useState<{ nodes: RiskNode[]; links: CascadeLink[] } | null>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [onlyLoops, setOnlyLoops] = useState<boolean>(false);
   const [onlyCauses, setOnlyCauses] = useState<boolean>(false);
   const [onlyEffects, setOnlyEffects] = useState<boolean>(false);
-  const [simRuns, setSimRuns] = useState<number>(1);
+  const [simRuns, setSimRuns] = useState<number>(30);
+  const [damping, setDamping] = useState<string>("0.35");
 
-  const { data: participations, isFetching: loadingParticipations } = useRecords<DVParticipation>({
+  const logger = (line: string, slice: number = 0) => {
+    logLines.current = [...logLines.current.slice(slice), line];
+    setUpdateLog(Date.now());
+  };
+
+  const {
+    data: participations,
+    isFetching: loadingParticipations,
+    reloadData: reloadParticipations,
+  } = useRecords<DVParticipation>({
     table: DataTable.PARTICIPATION,
+    onComplete: async (data) => {
+      logger(`    Finished loading ${data.length} participations`);
+    },
   });
   const {
     data: riskFiles,
@@ -98,6 +119,7 @@ export default function CalculationPage() {
     query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_title,cr4de_risk_type,cr4de_subjective_importance,cr4de_consensus_date,${RISK_FILE_QUANTI_FIELDS.join(
       ","
     )}`,
+    onComplete: async (data) => logger(`    Finished loading ${data.length} risk files`),
   });
   const {
     data: cascades,
@@ -108,6 +130,7 @@ export default function CalculationPage() {
     query: `$select=_cr4de_cause_hazard_value,_cr4de_effect_hazard_value,${CASCADE_ANALYSIS_QUANTI_FIELDS.join(
       ","
     )}&$expand=cr4de_cause_hazard($select=cr4de_title),cr4de_effect_hazard($select=cr4de_title)`,
+    onComplete: async (data) => logger(`    Finished loading ${data.length} cascades`),
   });
   const {
     data: directAnalyses,
@@ -118,6 +141,7 @@ export default function CalculationPage() {
     query: `$select=_cr4de_risk_file_value,cr4de_expert,cr4de_quality,${DIRECT_ANALYSIS_QUANTI_FIELDS.join(
       ","
     )}&$expand=cr4de_expert($select=emailaddress1)&$filter=_cr4de_expert_value ne null`,
+    onComplete: async (data) => logger(`    Finished loading ${data.length} direct analyses`),
   });
   const {
     data: cascadeAnalyses,
@@ -128,9 +152,9 @@ export default function CalculationPage() {
     query: `$select=_cr4de_risk_file_value,_cr4de_cascade_value,cr4de_expert,cr4de_quality,${CASCADE_ANALYSIS_QUANTI_FIELDS.join(
       ","
     )}&$expand=cr4de_expert($select=emailaddress1)&$filter=_cr4de_expert_value ne null`,
+    onComplete: async (data) => logger(`    Finished loading ${data.length} cascade analyses`),
   });
 
-  const [log, setLog] = useState<string[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
 
   const [results, setResults] = useState<RiskCalculation[] | null>(null);
@@ -176,6 +200,8 @@ export default function CalculationPage() {
   }, [participations, directAnalyses, cascadeAnalyses]);
 
   const reloadData = () => {
+    logger("Loading data...");
+    reloadParticipations();
     reloadCascades();
     reloadRiskFiles();
     reloadDAs();
@@ -185,9 +211,7 @@ export default function CalculationPage() {
   const saveResults = async () => {
     if (!riskFiles || !results || isCalculating || !participations) return;
 
-    const innerLog = log;
-
-    setLog([...innerLog, `Saving calculations (0/${results.length})`]);
+    logger(`Saving calculations (0/${results.length})`);
 
     const analysisId = uuid();
 
@@ -223,16 +247,14 @@ export default function CalculationPage() {
         "cr4de_latest_calculation@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns(${result.id})`,
       });
 
-      setLog([...innerLog.slice(0, innerLog.length - 1), `Saving calculations (${i + 1}/${results.length})`]);
+      logger(`Saving calculations (${i + 1}/${results.length})`, 1);
     }
 
-    setLog([...innerLog, "Done"]);
+    logger("Done");
   };
 
   const runCalculations = async () => {
     if (!riskFiles || !cascades || !useableDAs || !useableCAs || !participations) return;
-
-    const logLines: string[] = [];
 
     setIsCalculating(true);
 
@@ -242,29 +264,34 @@ export default function CalculationPage() {
       participations,
       directAnalyses: useableDAs,
       cascadeAnalyses: useableCAs,
+      log: logger,
       runs: simRuns,
+      damping: parseFloat(damping),
     });
+
+    setCalculations(calcs);
 
     const g = { nodes: [] as RiskNode[], links: [] as CascadeLink[] };
 
     for (let c of calcs) {
-      g.nodes.push({ id: c.riskId, riskTitle: c.riskTitle, category: "A", tp: c.tp });
+      g.nodes.push({ id: c.riskId, riskTitle: c.riskTitle, category: "A", tp: (c.tp_c + c.tp_m + c.tp_e) / 3 });
 
       for (let cascade of c.causes) {
         g.links.push({
           source: cascade.cause.riskId,
           target: cascade.effect.riskId,
-          value:
-            (cascade.c2c +
-              cascade.m2c +
-              cascade.e2c +
-              cascade.c2m +
-              cascade.m2m +
-              cascade.e2m +
-              cascade.c2e +
-              cascade.m2e +
-              cascade.e2e) /
-            9,
+          // value:
+          //   (cascade.c2c +
+          //     cascade.m2c +
+          //     cascade.e2c +
+          //     cascade.c2m +
+          //     cascade.m2m +
+          //     cascade.e2m +
+          //     cascade.c2e +
+          //     cascade.m2e +
+          //     cascade.e2e) /
+          //   9,
+          value: (cascade.ip_c + cascade.ip_m + cascade.ip_e) / 3,
         });
       }
     }
@@ -310,10 +337,17 @@ export default function CalculationPage() {
     setIsCalculating(false);
   };
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (!graphElement.current) return;
+
+    setGraphWidth(graphElement.current.getBoundingClientRect().width);
+  }, []);
 
   useEffect(() => {
     if (!graph) return;
+
+    const width = graphWidth - margin.left - margin.right;
+    const height = graphHeight - margin.top - margin.bottom;
 
     d3.selectAll("#network-graph > *").remove();
 
@@ -541,46 +575,106 @@ export default function CalculationPage() {
       link.style("stroke-opacity", 1);
       link.style("stroke", "#ddd");
     }
-  }, [width, height, graph, selectedNode, onlyLoops, onlyCauses, onlyEffects]);
+  }, [graphWidth, graph, selectedNode, onlyLoops, onlyCauses, onlyEffects]);
 
   return (
     <>
       <Container sx={{ mt: 4, pb: 8 }}>
-        <Card>
-          <CardContent sx={{ maxHeight: 500, overflowY: "scroll" }}>
-            <Typography variant="overline">Loading Risk Files...</Typography>
+        <Card sx={{ mb: 4 }}>
+          <CardContent sx={{}}>
+            <Typography variant="subtitle2">Simulation log:</Typography>
+            <Box
+              sx={{
+                height: 200,
+                overflowY: "scroll",
+                border: "1px solid #eee",
+                backgroundColor: "#00000005",
+                mt: 1,
+                mb: 4,
+              }}
+            >
+              <pre style={{ paddingLeft: 12, paddingRight: 12 }}>{logLines.current.map((l, i) => `${l}\n`)}</pre>
+            </Box>
 
-            {riskFiles && cascades && directAnalyses && cascadeAnalyses && useableDAs && useableCAs && (
-              <pre>
-                <Typography variant="overline" sx={{ mt: 0, display: "block" }}>
-                  Loaded {riskFiles.length} Risk Files
-                </Typography>
-                <Typography variant="overline" sx={{ mb: 0, display: "block" }}>
-                  Loaded {cascades.length} Cascades
-                </Typography>
-                <Typography variant="overline" sx={{ mb: 0, display: "block" }}>
-                  Loaded {directAnalyses.length} Direct Analyses ({useableDAs.length} useable)
-                </Typography>
-                <Typography variant="overline" sx={{ mb: 2, display: "block" }}>
-                  Loaded {cascadeAnalyses.length} Cascade Analyses ({useableCAs.length} useable)
-                </Typography>
+            <Typography variant="subtitle2">Simulation parameters:</Typography>
 
-                {log.map((l, i) => (
-                  <Typography key={i} variant="overline" sx={{ mt: 0, display: "block" }}>
-                    {l}
-                  </Typography>
-                ))}
-              </pre>
+            <Stack direction="column" sx={{ mt: 1, mb: 1 }}>
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  placeholder="Maximum Simulation Runs"
+                  type="number"
+                  value={simRuns}
+                  helperText="Maximum simulation runs"
+                  onChange={(event) => setSimRuns(parseInt(event.target.value, 10))}
+                  sx={{ flex: 1 }}
+                />
+                <TextField
+                  placeholder="Damping Factor"
+                  type="number"
+                  value={damping}
+                  helperText="Damping factor (between 0 and 1)"
+                  onChange={(event) => setDamping(event.target.value)}
+                  sx={{ flex: 1 }}
+                />
+              </Stack>
+            </Stack>
+          </CardContent>
+          <CardActions>
+            <Button disabled={isLoading} onClick={reloadData}>
+              Reload data
+            </Button>
+            <Button disabled={riskFiles === null || cascades === null} onClick={runCalculations}>
+              Start calculation
+            </Button>
+            <Button disabled={results === null || isCalculating} onClick={saveResults}>
+              Save results
+            </Button>
+            <Box sx={{ flex: 1 }} />
+            <Button
+              color="warning"
+              onClick={() => {
+                logLines.current = [];
+                setUpdateLog(Date.now());
+              }}
+            >
+              Clear log
+            </Button>
+          </CardActions>
+        </Card>
+
+        <Card sx={{ mb: 4 }}>
+          <CardContent sx={{}}>
+            <Box>
+              <Typography variant="subtitle2">Risk network graph:</Typography>
+            </Box>
+
+            {!graph && (
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="caption">Please run calculations to display graph</Typography>
+              </Box>
             )}
 
-            <FormGroup sx={{}}>
-              <TextField
-                placeholder="Simulation Runs to complete"
-                type="number"
-                value={simRuns}
-                helperText="Simulation Runs"
-                onChange={(event) => setSimRuns(parseInt(event.target.value, 10))}
+            <Box sx={{ border: "1px solid #eee" }}>
+              <svg
+                id="network-graph"
+                ref={graphElement}
+                width={`calc(100% - ${margin.left + margin.right}px)`}
+                height={graph ? graphHeight - margin.top - margin.bottom : 0}
+                style={{
+                  marginLeft: margin.left,
+                  marginRight: margin.right,
+                  marginTop: margin.top,
+                  marginBottom: margin.bottom,
+                }}
               />
+            </Box>
+          </CardContent>
+          <CardActions>
+            <Box>
+              <Typography variant="subtitle2">Risk network graph parameters:</Typography>
+            </Box>
+            <FormGroup sx={{}}>
+              <FormGroup row></FormGroup>
               <Stack direction="row" sx={{ m: 1 }}>
                 <FormControlLabel
                   control={<Checkbox checked={onlyLoops} onChange={(e) => setOnlyLoops(e.target.checked)} />}
@@ -596,22 +690,16 @@ export default function CalculationPage() {
                 />
               </Stack>
             </FormGroup>
-          </CardContent>
-          <CardActions>
-            <Button disabled={isLoading} onClick={reloadData}>
-              Reload data
-            </Button>
-            <Button disabled={riskFiles === null || cascades === null} onClick={runCalculations}>
-              Start calculation
-            </Button>
-            <Button disabled={results === null || isCalculating} onClick={saveResults}>
-              Save results
-            </Button>
           </CardActions>
         </Card>
-        <Box sx={{ m: 2 }}>
-          <svg id="network-graph" width={width} height={height} />
-        </Box>
+
+        {calculations && (
+          <>
+            <CalculationsRiskMatrix risks={calculations} />
+
+            <CalculationsDataGrid data={calculations} />
+          </>
+        )}
       </Container>
     </>
   );

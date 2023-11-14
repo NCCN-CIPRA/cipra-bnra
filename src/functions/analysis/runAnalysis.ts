@@ -16,6 +16,8 @@ export default async function runAnalysis({
   directAnalyses,
   cascadeAnalyses,
   runs,
+  damping,
+  log,
 }: {
   riskFiles: DVRiskFile[];
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
@@ -24,6 +26,8 @@ export default async function runAnalysis({
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
   runs: number;
+  damping: number;
+  log: (l: string) => void;
 }) {
   const riskFilesDict = riskFiles.reduce(
     (d, c) => ({
@@ -49,9 +53,9 @@ export default async function runAnalysis({
     cascadeAnalyses
   );
 
-  convergeProbabilities(calculations, console.log, runs);
+  convergeProbabilities({ risks: calculations, log, maxRuns: runs, damping });
 
-  //   convergeImpacts(calculations, console.log, 30);
+  convergeImpacts({ risks: calculations, log, maxRuns: runs, damping });
 
   return calculations;
 }

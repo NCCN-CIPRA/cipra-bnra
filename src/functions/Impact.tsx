@@ -34,3 +34,17 @@ export function getImpactScaleNumber(absoluteImpact: number) {
 export function getImpactScale(absoluteImpact: number, scalePrefix: string) {
   return `${scalePrefix}${getImpactScaleNumber(absoluteImpact)}`;
 }
+
+export function getMoneyString(impactNumber: number) {
+  if (impactNumber < 1000000) {
+    return `€ ${impactNumber.toLocaleString()}`;
+  }
+  if (impactNumber < 1000000000) {
+    return `€ ${(Math.round(impactNumber / 10000) / 100).toLocaleString()}M`;
+  }
+  if (impactNumber < 1000000000000) {
+    return `€ ${(Math.round(impactNumber / 10000000) / 100).toLocaleString()}B`;
+  }
+
+  return `€ ${(Math.round(impactNumber / 10000000000) / 100).toLocaleString()}T`;
+}

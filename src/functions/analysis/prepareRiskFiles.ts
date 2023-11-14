@@ -334,164 +334,166 @@ export default async function prepareRiskFiles(
   );
 
   return new Promise((resolve) => {
-    const calculations: RiskCalculation[] = riskFiles.map((rf) => {
-      const c = {
-        riskId: rf.cr4de_riskfilesid,
-        riskTitle: rf.cr4de_title,
+    const calculations: RiskCalculation[] = riskFiles
+      .filter((rf) => rf.cr4de_risk_type !== RISK_TYPE.EMERGING)
+      .map((rf) => {
+        const c = {
+          riskId: rf.cr4de_riskfilesid,
+          riskTitle: rf.cr4de_title,
 
-        timestamp: Date.now(),
+          timestamp: Date.now(),
 
-        // Initialize known fields
-        ...getConsensusRiskFile(
-          rf,
-          participations.filter((p) => p._cr4de_risk_file_value === rf.cr4de_riskfilesid),
-          daDict[rf.cr4de_riskfilesid]
-        ),
+          // Initialize known fields
+          ...getConsensusRiskFile(
+            rf,
+            participations.filter((p) => p._cr4de_risk_file_value === rf.cr4de_riskfilesid),
+            daDict[rf.cr4de_riskfilesid]
+          ),
 
-        // Initialize unknown fields
-        dp: 0,
+          // Initialize unknown fields
+          dp: 0,
 
-        ip_c: 0,
-        ip_m: 0,
-        ip_e: 0,
+          ip_c: 0,
+          ip_m: 0,
+          ip_e: 0,
 
-        ip: 0,
+          ip: 0,
 
-        tp_c: 0,
-        tp_m: 0,
-        tp_e: 0,
+          tp_c: 0,
+          tp_m: 0,
+          tp_e: 0,
 
-        tp: 0,
+          tp: 0,
 
-        rp_c: 0,
-        rp_m: 0,
-        rp_e: 0,
+          rp_c: 0,
+          rp_m: 0,
+          rp_e: 0,
 
-        di_Ha: 0,
-        di_Hb: 0,
-        di_Hc: 0,
-        di_Sa: 0,
-        di_Sb: 0,
-        di_Sc: 0,
-        di_Sd: 0,
-        di_Ea: 0,
-        di_Fa: 0,
-        di_Fb: 0,
+          di_Ha: 0,
+          di_Hb: 0,
+          di_Hc: 0,
+          di_Sa: 0,
+          di_Sb: 0,
+          di_Sc: 0,
+          di_Sd: 0,
+          di_Ea: 0,
+          di_Fa: 0,
+          di_Fb: 0,
 
-        di_c: 0,
-        di_m: 0,
-        di_e: 0,
+          di_c: 0,
+          di_m: 0,
+          di_e: 0,
 
-        di: 0,
+          di: 0,
 
-        ii_Ha_c: 0,
-        ii_Hb_c: 0,
-        ii_Hc_c: 0,
-        ii_Sa_c: 0,
-        ii_Sb_c: 0,
-        ii_Sc_c: 0,
-        ii_Sd_c: 0,
-        ii_Ea_c: 0,
-        ii_Fa_c: 0,
-        ii_Fb_c: 0,
+          ii_Ha_c: 0,
+          ii_Hb_c: 0,
+          ii_Hc_c: 0,
+          ii_Sa_c: 0,
+          ii_Sb_c: 0,
+          ii_Sc_c: 0,
+          ii_Sd_c: 0,
+          ii_Ea_c: 0,
+          ii_Fa_c: 0,
+          ii_Fb_c: 0,
 
-        ii_Ha_m: 0,
-        ii_Hb_m: 0,
-        ii_Hc_m: 0,
-        ii_Sa_m: 0,
-        ii_Sb_m: 0,
-        ii_Sc_m: 0,
-        ii_Sd_m: 0,
-        ii_Ea_m: 0,
-        ii_Fa_m: 0,
-        ii_Fb_m: 0,
+          ii_Ha_m: 0,
+          ii_Hb_m: 0,
+          ii_Hc_m: 0,
+          ii_Sa_m: 0,
+          ii_Sb_m: 0,
+          ii_Sc_m: 0,
+          ii_Sd_m: 0,
+          ii_Ea_m: 0,
+          ii_Fa_m: 0,
+          ii_Fb_m: 0,
 
-        ii_Ha_e: 0,
-        ii_Hb_e: 0,
-        ii_Hc_e: 0,
-        ii_Sa_e: 0,
-        ii_Sb_e: 0,
-        ii_Sc_e: 0,
-        ii_Sd_e: 0,
-        ii_Ea_e: 0,
-        ii_Fa_e: 0,
-        ii_Fb_e: 0,
+          ii_Ha_e: 0,
+          ii_Hb_e: 0,
+          ii_Hc_e: 0,
+          ii_Sa_e: 0,
+          ii_Sb_e: 0,
+          ii_Sc_e: 0,
+          ii_Sd_e: 0,
+          ii_Ea_e: 0,
+          ii_Fa_e: 0,
+          ii_Fb_e: 0,
 
-        ii_Ha: 0,
-        ii_Hb: 0,
-        ii_Hc: 0,
-        ii_Sa: 0,
-        ii_Sb: 0,
-        ii_Sc: 0,
-        ii_Sd: 0,
-        ii_Ea: 0,
-        ii_Fa: 0,
-        ii_Fb: 0,
+          ii_Ha: 0,
+          ii_Hb: 0,
+          ii_Hc: 0,
+          ii_Sa: 0,
+          ii_Sb: 0,
+          ii_Sc: 0,
+          ii_Sd: 0,
+          ii_Ea: 0,
+          ii_Fa: 0,
+          ii_Fb: 0,
 
-        ii_c: 0,
-        ii_m: 0,
-        ii_e: 0,
+          ii_c: 0,
+          ii_m: 0,
+          ii_e: 0,
 
-        ii: 0,
+          ii: 0,
 
-        ti_Ha_c: 0,
-        ti_Hb_c: 0,
-        ti_Hc_c: 0,
-        ti_Sa_c: 0,
-        ti_Sb_c: 0,
-        ti_Sc_c: 0,
-        ti_Sd_c: 0,
-        ti_Ea_c: 0,
-        ti_Fa_c: 0,
-        ti_Fb_c: 0,
+          ti_Ha_c: 0,
+          ti_Hb_c: 0,
+          ti_Hc_c: 0,
+          ti_Sa_c: 0,
+          ti_Sb_c: 0,
+          ti_Sc_c: 0,
+          ti_Sd_c: 0,
+          ti_Ea_c: 0,
+          ti_Fa_c: 0,
+          ti_Fb_c: 0,
 
-        ti_Ha_m: 0,
-        ti_Hb_m: 0,
-        ti_Hc_m: 0,
-        ti_Sa_m: 0,
-        ti_Sb_m: 0,
-        ti_Sc_m: 0,
-        ti_Sd_m: 0,
-        ti_Ea_m: 0,
-        ti_Fa_m: 0,
-        ti_Fb_m: 0,
+          ti_Ha_m: 0,
+          ti_Hb_m: 0,
+          ti_Hc_m: 0,
+          ti_Sa_m: 0,
+          ti_Sb_m: 0,
+          ti_Sc_m: 0,
+          ti_Sd_m: 0,
+          ti_Ea_m: 0,
+          ti_Fa_m: 0,
+          ti_Fb_m: 0,
 
-        ti_Ha_e: 0,
-        ti_Hb_e: 0,
-        ti_Hc_e: 0,
-        ti_Sa_e: 0,
-        ti_Sb_e: 0,
-        ti_Sc_e: 0,
-        ti_Sd_e: 0,
-        ti_Ea_e: 0,
-        ti_Fa_e: 0,
-        ti_Fb_e: 0,
+          ti_Ha_e: 0,
+          ti_Hb_e: 0,
+          ti_Hc_e: 0,
+          ti_Sa_e: 0,
+          ti_Sb_e: 0,
+          ti_Sc_e: 0,
+          ti_Sd_e: 0,
+          ti_Ea_e: 0,
+          ti_Fa_e: 0,
+          ti_Fb_e: 0,
 
-        ti_Ha: 0,
-        ti_Hb: 0,
-        ti_Hc: 0,
-        ti_Sa: 0,
-        ti_Sb: 0,
-        ti_Sc: 0,
-        ti_Sd: 0,
-        ti_Ea: 0,
-        ti_Fa: 0,
-        ti_Fb: 0,
+          ti_Ha: 0,
+          ti_Hb: 0,
+          ti_Hc: 0,
+          ti_Sa: 0,
+          ti_Sb: 0,
+          ti_Sc: 0,
+          ti_Sd: 0,
+          ti_Ea: 0,
+          ti_Fa: 0,
+          ti_Fb: 0,
 
-        ti_c: 0,
-        ti_m: 0,
-        ti_e: 0,
+          ti_c: 0,
+          ti_m: 0,
+          ti_e: 0,
 
-        ti: 0,
+          ti: 0,
 
-        r: 0,
+          r: 0,
 
-        causes: [],
-        effects: [],
-      };
+          causes: [],
+          effects: [],
+        };
 
-      return c;
-    });
+        return c;
+      });
 
     // Create a lookup table so we can easily find a calculation by the id of its risk file
     const calculationsDict: { [key: string]: RiskCalculation } = calculations.reduce(
@@ -512,7 +514,10 @@ export default async function prepareRiskFiles(
 
     // Create links between the risk file calculation objects according to the risk cascades
     cascades.forEach((c) => {
-      if (hasTitle(c, ["Information" /*, "sewage", "Building Struct", "Unrest", "Substandard"*/])) return;
+      if (c.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING) return;
+
+      // if (hasTitle(c, ["Information", "Subsidence", "Espionage", "Interference"])) return;
+      // if (hasTitle(c, ["Information", "sewage", "Building Struct", "Unrest", "Substandard"])) return;
 
       const cause = calculationsDict[c._cr4de_cause_hazard_value];
       const effect = calculationsDict[c._cr4de_effect_hazard_value];
@@ -590,6 +595,36 @@ export default async function prepareRiskFiles(
 
         ii: 0,
       };
+
+      // if (
+      //   (cascadeCalculation.c2c +
+      //     cascadeCalculation.c2m +
+      //     cascadeCalculation.c2e +
+      //     cascadeCalculation.m2c +
+      //     cascadeCalculation.m2m +
+      //     cascadeCalculation.m2e +
+      //     cascadeCalculation.e2c +
+      //     cascadeCalculation.e2m +
+      //     cascadeCalculation.e2e) /
+      //     9 >
+      //   0.3
+      // ) {
+      //   console.log(
+      //     `${cascadeCalculation.cascadeTitle}: ${
+      //       (cascadeCalculation.c2c +
+      //         cascadeCalculation.c2m +
+      //         cascadeCalculation.c2e +
+      //         cascadeCalculation.m2c +
+      //         cascadeCalculation.m2m +
+      //         cascadeCalculation.m2e +
+      //         cascadeCalculation.e2c +
+      //         cascadeCalculation.e2m +
+      //         cascadeCalculation.e2e) /
+      //       9
+      //     }`
+      //   );
+      //   return;
+      // }
 
       cause.effects.push(cascadeCalculation);
       effect.causes.push(cascadeCalculation);
