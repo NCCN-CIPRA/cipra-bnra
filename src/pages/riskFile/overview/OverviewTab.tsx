@@ -116,9 +116,7 @@ export default function OverviewTab({
       ) {
         continue;
       }
-
-      await api.updateCascade(
-        c.cr4de_bnrariskcascadeid,
+      console.log(
         getConsensusCascade(
           cascadeAnalyses.filter(
             (ca) =>
@@ -131,6 +129,20 @@ export default function OverviewTab({
           riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
         )
       );
+      // await api.updateCascade(
+      //   c.cr4de_bnrariskcascadeid,
+      //   getConsensusCascade(
+      //     cascadeAnalyses.filter(
+      //       (ca) =>
+      //         ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
+      //         participants.some(
+      //           (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
+      //         ) &&
+      //         !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
+      //     ),
+      //     riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
+      //   )
+      //);
     }
 
     if (sendEmail) {

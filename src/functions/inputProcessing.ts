@@ -303,31 +303,31 @@ function getAveragesForScenarios(parameter: string, field: string, directAnalyse
   return {
     [`${field}_c`]: getAverage(
       directAnalyses.map((da) => da[`${daField}_c` as keyof DVDirectAnalysis]) as string[],
-      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_c}` as keyof FieldQuality]) || 2.5)
+      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_c` as keyof FieldQuality]) || 2.5)
     ),
     [`${field}_m`]: getAverage(
       directAnalyses.map((da) => da[`${daField}_m` as keyof DVDirectAnalysis]) as string[],
-      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_m}` as keyof FieldQuality]) || 2.5)
+      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_m` as keyof FieldQuality]) || 2.5)
     ),
     [`${field}_e`]: getAverage(
       directAnalyses.map((da) => da[`${daField}_e` as keyof DVDirectAnalysis]) as string[],
-      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_e}` as keyof FieldQuality]) || 2.5)
+      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_e` as keyof FieldQuality]) || 2.5)
     ),
   };
 }
 export function getConsensusRiskFile(directAnalyses: DVDirectAnalysis[]) {
   return {
     ...getAveragesForScenarios("dp", "cr4de_dp_quanti", directAnalyses),
-    ...getAveragesForScenarios("ha", "cr4de_di_quanti_ha", directAnalyses),
-    ...getAveragesForScenarios("hb", "cr4de_di_quanti_hb", directAnalyses),
-    ...getAveragesForScenarios("hc", "cr4de_di_quanti_hc", directAnalyses),
-    ...getAveragesForScenarios("sa", "cr4de_di_quanti_sa", directAnalyses),
-    ...getAveragesForScenarios("sb", "cr4de_di_quanti_sb", directAnalyses),
-    ...getAveragesForScenarios("sc", "cr4de_di_quanti_sc", directAnalyses),
-    ...getAveragesForScenarios("sd", "cr4de_di_quanti_sd", directAnalyses),
-    ...getAveragesForScenarios("ea", "cr4de_di_quanti_ea", directAnalyses),
-    ...getAveragesForScenarios("fa", "cr4de_di_quanti_fa", directAnalyses),
-    ...getAveragesForScenarios("fb", "cr4de_di_quanti_fb", directAnalyses),
+    ...getAveragesForScenarios("h", "cr4de_di_quanti_ha", directAnalyses),
+    ...getAveragesForScenarios("h", "cr4de_di_quanti_hb", directAnalyses),
+    ...getAveragesForScenarios("h", "cr4de_di_quanti_hc", directAnalyses),
+    ...getAveragesForScenarios("s", "cr4de_di_quanti_sa", directAnalyses),
+    ...getAveragesForScenarios("s", "cr4de_di_quanti_sb", directAnalyses),
+    ...getAveragesForScenarios("s", "cr4de_di_quanti_sc", directAnalyses),
+    ...getAveragesForScenarios("s", "cr4de_di_quanti_sd", directAnalyses),
+    ...getAveragesForScenarios("e", "cr4de_di_quanti_ea", directAnalyses),
+    ...getAveragesForScenarios("f", "cr4de_di_quanti_fa", directAnalyses),
+    ...getAveragesForScenarios("f", "cr4de_di_quanti_fb", directAnalyses),
     ...getAveragesForScenarios("cc", "cr4de_climate_change_quanti", directAnalyses),
   };
 }
