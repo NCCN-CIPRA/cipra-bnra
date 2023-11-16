@@ -345,7 +345,12 @@ export function getConsensusRiskFile(directAnalyses: DVDirectAnalysis[], useWeig
     ...getAveragesForScenarios("e", "cr4de_di_quanti_ea", directAnalyses, useWeights),
     ...getAveragesForScenarios("f", "cr4de_di_quanti_fa", directAnalyses, useWeights),
     ...getAveragesForScenarios("f", "cr4de_di_quanti_fb", directAnalyses, useWeights),
-    ...getAveragesForScenarios("cc", "cr4de_climate_change_quanti", directAnalyses, useWeights),
+    ...getAveragesForScenarios(
+      "cc",
+      "cr4de_climate_change_quanti",
+      directAnalyses.filter((da) => da.cr4de_dp50_quanti_c !== null),
+      useWeights
+    ),
   };
 }
 export function getConsensusCascade(cascadeAnalyses: DVCascadeAnalysis[], isCause = false, useWeights: Boolean = true) {

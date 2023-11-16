@@ -225,11 +225,12 @@ export default function Step2BTab({
       cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 &&
       riskFile?.cr4de_riskfilesid !== cascades[cascadeIndex]._cr4de_cause_hazard_value
     ) {
+      const goodDas = directAnalyses.filter((da) => da.cr4de_dp50_quanti_c !== null);
       return {
         [SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].titleDefault]: {
           ...(getStats(
-            directAnalyses.map((da) => da["cr4de_dp50_quanti_c"]),
-            directAnalyses
+            goodDas.map((da) => da["cr4de_dp50_quanti_c"]),
+            goodDas
               .map((da) => cascadeAnalyses.find((ca) => ca._cr4de_expert_value === da._cr4de_expert_value))
               .map((ca) => (ca?.cr4de_quality ? ca?.cr4de_quality : 2.5))
           ) as STATS),
@@ -240,8 +241,8 @@ export default function Step2BTab({
         },
         [SCENARIO_PARAMS[SCENARIOS.MAJOR].titleDefault]: {
           ...(getStats(
-            directAnalyses.map((da) => da["cr4de_dp50_quanti_m"]),
-            directAnalyses
+            goodDas.map((da) => da["cr4de_dp50_quanti_m"]),
+            goodDas
               .map((da) => cascadeAnalyses.find((ca) => ca._cr4de_expert_value === da._cr4de_expert_value))
               .map((ca) => (ca?.cr4de_quality ? ca?.cr4de_quality : 2.5))
           ) as STATS),
@@ -252,8 +253,8 @@ export default function Step2BTab({
         },
         [SCENARIO_PARAMS[SCENARIOS.EXTREME].titleDefault]: {
           ...(getStats(
-            directAnalyses.map((da) => da["cr4de_dp50_quanti_e"]),
-            directAnalyses
+            goodDas.map((da) => da["cr4de_dp50_quanti_e"]),
+            goodDas
               .map((da) => cascadeAnalyses.find((ca) => ca._cr4de_expert_value === da._cr4de_expert_value))
               .map((ca) => (ca?.cr4de_quality ? ca?.cr4de_quality : 2.5))
           ) as STATS),
@@ -710,17 +711,19 @@ export default function Step2BTab({
           <Paper sx={{ p: 2 }}>
             {riskFile.cr4de_title.indexOf("Climate") < 0 &&
             cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0
-              ? directAnalyses.map((da, i, a) => (
-                  <>
-                    <ExpertInputCC
-                      directAnalysis={da}
-                      cascade={cascade}
-                      reloadDirectAnalyses={reloadDirectAnalyses}
-                      setReloadAttachments={() => setReloadAttachments(true)}
-                    />
-                    {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
-                  </>
-                ))
+              ? directAnalyses
+                  .filter((da) => da.cr4de_dp50_quanti_c !== null)
+                  .map((da, i, a) => (
+                    <>
+                      <ExpertInputCC
+                        directAnalysis={da}
+                        cascade={cascade}
+                        reloadDirectAnalyses={reloadDirectAnalyses}
+                        setReloadAttachments={() => setReloadAttachments(true)}
+                      />
+                      {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
+                    </>
+                  ))
               : cas.map((ca, i, a) => (
                   <>
                     <ExpertInput

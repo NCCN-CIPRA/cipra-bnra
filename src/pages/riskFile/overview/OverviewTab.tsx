@@ -53,6 +53,7 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { DiscussionRequired } from "../../../types/DiscussionRequired";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 export default function OverviewTab({
   riskFile,
@@ -65,7 +66,7 @@ export default function OverviewTab({
   reloadCascades,
 }: {
   riskFile: DVRiskFile | null;
-  cascades: DVRiskCascade[] | null;
+  cascades: DVRiskCascade<SmallRisk, SmallRisk>[] | null;
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[] | null;
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[] | null;
   participants: DVParticipation<DVContact>[] | null;
@@ -83,9 +84,13 @@ export default function OverviewTab({
   const [test, setTest] = useState<any>(null);
 
   const getParameter = (field: string) => {
-    if (field.indexOf("_dp_")) {
+    if (field.indexOf("_climate_change_") >= 0) {
+      return `cc_${field.slice(-1)}`;
+    }
+    if (field.indexOf("_dp_") >= 0) {
       return `dp_${field.slice(-1)}`;
     }
+
     return `${field.slice(-4, -3)}_${field.slice(-1)}`;
   };
 
@@ -233,30 +238,66 @@ export default function OverviewTab({
       });
     }
 
-    console.log(check.cascades);
+    // console.log(check.cascades);
 
     setTest(check);
   };
 
-  const fixConsensus = () => {
+  const fixConsensus = async () => {
     const weights = getConsensusRiskFile(getCompletedDirectAnalyses(riskFile, participants, directAnalyses));
 
-    RISK_FILE_QUANTI_FIELDS.filter((f) => {
-      if (
-        riskFile.cr4de_discussion_required &&
-        riskFile.cr4de_discussion_required[getParameter(f) as keyof DiscussionsRequired] === DiscussionRequired.RESOLVED
-      ) {
-        return false;
-      }
-      if (
-        riskFile[f] === test.noWeights[f] &&
-        riskFile[f] === test.weights[f] &&
-        test.weights[f] === test.noWeights[f]
-      ) {
-        return false;
-      }
-      return true;
-    });
+    console.log(
+      RISK_FILE_QUANTI_FIELDS.filter((f) => {
+        if (
+          riskFile.cr4de_discussion_required &&
+          riskFile.cr4de_discussion_required[getParameter(f) as keyof DiscussionsRequired] ===
+            DiscussionRequired.RESOLVED
+        ) {
+          return false;
+        }
+        if (
+          riskFile[f] === test.noWeights[f] &&
+          riskFile[f] === test.weights[f] &&
+          test.weights[f] === test.noWeights[f]
+        ) {
+          return false;
+        }
+        return true;
+      }).reduce(
+        (u, f) => ({
+          ...u,
+          [f]: test.weights[f],
+        }),
+        {} as Partial<DVRiskFile>
+      )
+    );
+
+    await api.updateRiskFile(
+      riskFile.cr4de_riskfilesid,
+      RISK_FILE_QUANTI_FIELDS.filter((f) => {
+        if (
+          riskFile.cr4de_discussion_required &&
+          riskFile.cr4de_discussion_required[getParameter(f) as keyof DiscussionsRequired] ===
+            DiscussionRequired.RESOLVED
+        ) {
+          return false;
+        }
+        if (
+          riskFile[f] === test.noWeights[f] &&
+          riskFile[f] === test.weights[f] &&
+          test.weights[f] === test.noWeights[f]
+        ) {
+          return false;
+        }
+        return true;
+      }).reduce(
+        (u, f) => ({
+          ...u,
+          [f]: test.weights[f],
+        }),
+        {} as Partial<DVRiskFile>
+      )
+    );
   };
 
   return (
@@ -453,22 +494,26 @@ export default function OverviewTab({
                       <th>Weights</th>
                     </tr>
                     {test.cascades
-                      .filter((c: any) => {
-                        return CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => {
-                          return (
-                            c.cascade[f] !== c.weights[f] &&
-                            c.cascade.cr4de_discussion_required !== DiscussionRequired.RESOLVED
-                          );
-                        });
-                      })
+                      // .filter((c: any) => {
+                      //   if (c.cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING) return false;
+                      //   return CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => {
+                      //     return (
+                      //       c.cascade[f] !== c.weights[f] &&
+                      //       c.cascade.cr4de_discussion_required !== DiscussionRequired.RESOLVED
+                      //     );
+                      //   });
+                      // })
                       .map((c: any) => (
                         <>
                           <tr>
-                            <td colSpan={4}>{c.cascade.cr4de_bnrariskcascadeid}</td>
+                            <td colSpan={4}>
+                              {(c.cascade as DVRiskCascade<SmallRisk, SmallRisk>).cr4de_cause_hazard.cr4de_title} causes{" "}
+                              {(c.cascade as DVRiskCascade<SmallRisk, SmallRisk>).cr4de_effect_hazard.cr4de_title}
+                            </td>
                           </tr>
                           <tr>
                             {CASCADE_ANALYSIS_QUANTI_FIELDS.filter((f) => {
-                              return c.cascade[f] !== c.weights[f];
+                              // return c.cascade[f] !== c.weights[f];
                               return true;
                             }).map((f) => (
                               <tr>
