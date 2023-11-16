@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
-import { CONSENSUS_TYPE, DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
+import {
+  CONSENSUS_TYPE,
+  DVRiskFile,
+  DiscussionsRequired,
+  RISK_FILE_QUANTI_FIELDS,
+  RISK_TYPE,
+} from "../../../types/dataverse/DVRiskFile";
 import LoadingTab from "../LoadingTab";
 import {
   Box,
@@ -46,6 +52,7 @@ import useProcess from "../../../hooks/useProcess";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
+import { DiscussionRequired } from "../../../types/DiscussionRequired";
 
 export default function OverviewTab({
   riskFile,
@@ -73,28 +80,17 @@ export default function OverviewTab({
   const api = useAPI();
   const process = useProcess();
 
+  const [test, setTest] = useState<any>(null);
+
+  const getParameter = (field: string) => {
+    if (field.indexOf("_dp_")) {
+      return `dp_${field.slice(-1)}`;
+    }
+    return `${field.slice(-4, -3)}_${field.slice(-1)}`;
+  };
+
   if (!riskFile || !cascades || !calculations || !participants || !directAnalyses || !cascadeAnalyses) {
     return <LoadingTab />;
-  }
-
-  for (let c of cascades) {
-    if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value) {
-      continue;
-    }
-
-    console.log(
-      getConsensusCascade(
-        cascadeAnalyses.filter(
-          (ca) =>
-            ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
-            participants.some(
-              (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
-            ) &&
-            !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
-        ),
-        riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
-      )
-    );
   }
 
   const startConsensus = async () => {
@@ -116,7 +112,9 @@ export default function OverviewTab({
       ) {
         continue;
       }
-      console.log(
+
+      await api.updateCascade(
+        c.cr4de_bnrariskcascadeid,
         getConsensusCascade(
           cascadeAnalyses.filter(
             (ca) =>
@@ -129,20 +127,6 @@ export default function OverviewTab({
           riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
         )
       );
-      // await api.updateCascade(
-      //   c.cr4de_bnrariskcascadeid,
-      //   getConsensusCascade(
-      //     cascadeAnalyses.filter(
-      //       (ca) =>
-      //         ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
-      //         participants.some(
-      //           (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
-      //         ) &&
-      //         !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
-      //     ),
-      //     riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
-      //   )
-      //);
     }
 
     if (sendEmail) {
@@ -204,6 +188,75 @@ export default function OverviewTab({
     await reloadCascades();
 
     setIsSaving(false);
+  };
+
+  const checkConsensus = () => {
+    const check = {
+      weights: getConsensusRiskFile(getCompletedDirectAnalyses(riskFile, participants, directAnalyses)),
+      noWeights: getConsensusRiskFile(getCompletedDirectAnalyses(riskFile, participants, directAnalyses), false),
+      cascades: [] as any[],
+    };
+
+    for (let c of cascades) {
+      if (
+        riskFile.cr4de_risk_type === RISK_TYPE.STANDARD &&
+        riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
+      ) {
+        continue;
+      }
+
+      check.cascades.push({
+        cascade: c,
+        weights: getConsensusCascade(
+          cascadeAnalyses.filter(
+            (ca) =>
+              ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
+              participants.some(
+                (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
+              ) &&
+              !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
+          ),
+          riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value
+        ),
+        noWeights: getConsensusCascade(
+          cascadeAnalyses.filter(
+            (ca) =>
+              ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
+              participants.some(
+                (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
+              ) &&
+              !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null)
+          ),
+          riskFile.cr4de_riskfilesid === c._cr4de_cause_hazard_value,
+          false
+        ),
+      });
+    }
+
+    console.log(check.cascades);
+
+    setTest(check);
+  };
+
+  const fixConsensus = () => {
+    const weights = getConsensusRiskFile(getCompletedDirectAnalyses(riskFile, participants, directAnalyses));
+
+    RISK_FILE_QUANTI_FIELDS.filter((f) => {
+      if (
+        riskFile.cr4de_discussion_required &&
+        riskFile.cr4de_discussion_required[getParameter(f) as keyof DiscussionsRequired] === DiscussionRequired.RESOLVED
+      ) {
+        return false;
+      }
+      if (
+        riskFile[f] === test.noWeights[f] &&
+        riskFile[f] === test.weights[f] &&
+        test.weights[f] === test.noWeights[f]
+      ) {
+        return false;
+      }
+      return true;
+    });
   };
 
   return (
@@ -345,6 +398,110 @@ export default function OverviewTab({
             </Card>
           )}
         </Grid>
+        {/* <Grid xs={12} sx={{ mt: 2 }}>
+          <Card>
+            <CardContent>
+              {test && (
+                <>
+                  <Typography variant="subtitle1">Risk File Fields:</Typography>
+                  <table>
+                    <tr>
+                      <th>Parameters</th>
+                      <th>Risk File</th>
+                      <th>No Weights</th>
+                      <th>Weights</th>
+                    </tr>
+                    {RISK_FILE_QUANTI_FIELDS.filter((f) => {
+                      if (
+                        riskFile.cr4de_discussion_required &&
+                        riskFile.cr4de_discussion_required[getParameter(f) as keyof DiscussionsRequired] ===
+                          DiscussionRequired.RESOLVED
+                      ) {
+                        return false;
+                      }
+                      if (riskFile[f] === test.weights[f]) {
+                        return false;
+                      }
+                      return true;
+                    }).map((f) => (
+                      <tr>
+                        <td>{f}</td>
+
+                        {[riskFile, test.noWeights, test.weights].map((rf) => (
+                          <td style={{ paddingLeft: 10, paddingRight: 10 }}>{rf[f]}</td>
+                        ))}
+                        <td>
+                          {riskFile.cr4de_discussion_required &&
+                            riskFile.cr4de_discussion_required[getParameter(f) as keyof DiscussionsRequired]}
+                        </td>
+                      </tr>
+                    ))}
+                  </table>
+                </>
+              )}
+
+              {test && (
+                <>
+                  <Typography variant="subtitle1" sx={{ mt: 4 }}>
+                    Cascades:
+                  </Typography>
+                  <table>
+                    <tr>
+                      <th style={{ textAlign: "left" }}>Parameters</th>
+                      <th>Cascade</th>
+                      <th>No Weights</th>
+                      <th>Weights</th>
+                    </tr>
+                    {test.cascades
+                      .filter((c: any) => {
+                        return CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => {
+                          return (
+                            c.cascade[f] !== c.weights[f] &&
+                            c.cascade.cr4de_discussion_required !== DiscussionRequired.RESOLVED
+                          );
+                        });
+                      })
+                      .map((c: any) => (
+                        <>
+                          <tr>
+                            <td colSpan={4}>{c.cascade.cr4de_bnrariskcascadeid}</td>
+                          </tr>
+                          <tr>
+                            {CASCADE_ANALYSIS_QUANTI_FIELDS.filter((f) => {
+                              return c.cascade[f] !== c.weights[f];
+                              return true;
+                            }).map((f) => (
+                              <tr>
+                                <td>{f}</td>
+
+                                {[c.cascade, c.noWeights, c.weights].map((rf) => (
+                                  <td style={{ paddingLeft: 10, paddingRight: 10 }}>{rf[f] || "-"}</td>
+                                ))}
+                                <td>{c.cascade.cr4de_discussion_required}</td>
+                              </tr>
+                            ))}
+                          </tr>
+                        </>
+                      ))}
+                  </table>
+                </>
+              )}
+            </CardContent>
+            <CardActions sx={{ justifyContent: "flex-end" }}>
+              <LoadingButton
+                loading={isSaving}
+                disabled={!test}
+                placeholder="Updating average values..."
+                onClick={fixConsensus}
+              >
+                Update inconsistent data
+              </LoadingButton>
+              <LoadingButton loading={isSaving} placeholder="Checking average values..." onClick={checkConsensus}>
+                Check consensus data
+              </LoadingButton>
+            </CardActions>
+          </Card>
+        </Grid> */}
         <Grid xs={12} sx={{ my: 2 }}>
           <ParticipationTable riskFile={riskFile} participants={participants} reloadParticipants={async () => {}} />
         </Grid>

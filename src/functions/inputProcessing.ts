@@ -297,47 +297,64 @@ export const getQuantiLabel = (
   }[fieldName.replace("cr4de_di_quanti_", "").slice(0, 2)];
 };
 
-function getAveragesForScenarios(parameter: string, field: string, directAnalyses: DVDirectAnalysis[]) {
+function getAveragesForScenarios(
+  parameter: string,
+  field: string,
+  directAnalyses: DVDirectAnalysis[],
+  useWeights: Boolean = true
+) {
   const daField = field.indexOf("climate_change") >= 0 ? "cr4de_dp50_quanti" : field;
 
   return {
     [`${field}_c`]: getAverage(
       directAnalyses.map((da) => da[`${daField}_c` as keyof DVDirectAnalysis]) as string[],
-      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_c` as keyof FieldQuality]) || 2.5)
+      useWeights
+        ? directAnalyses.map(
+            (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_c` as keyof FieldQuality]) || 2.5
+          )
+        : undefined
     ),
     [`${field}_m`]: getAverage(
       directAnalyses.map((da) => da[`${daField}_m` as keyof DVDirectAnalysis]) as string[],
-      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_m` as keyof FieldQuality]) || 2.5)
+      useWeights
+        ? directAnalyses.map(
+            (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_m` as keyof FieldQuality]) || 2.5
+          )
+        : undefined
     ),
     [`${field}_e`]: getAverage(
       directAnalyses.map((da) => da[`${daField}_e` as keyof DVDirectAnalysis]) as string[],
-      directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_e` as keyof FieldQuality]) || 2.5)
+      useWeights
+        ? directAnalyses.map(
+            (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_e` as keyof FieldQuality]) || 2.5
+          )
+        : undefined
     ),
   };
 }
-export function getConsensusRiskFile(directAnalyses: DVDirectAnalysis[]) {
+export function getConsensusRiskFile(directAnalyses: DVDirectAnalysis[], useWeights: Boolean = true) {
   return {
-    ...getAveragesForScenarios("dp", "cr4de_dp_quanti", directAnalyses),
-    ...getAveragesForScenarios("h", "cr4de_di_quanti_ha", directAnalyses),
-    ...getAveragesForScenarios("h", "cr4de_di_quanti_hb", directAnalyses),
-    ...getAveragesForScenarios("h", "cr4de_di_quanti_hc", directAnalyses),
-    ...getAveragesForScenarios("s", "cr4de_di_quanti_sa", directAnalyses),
-    ...getAveragesForScenarios("s", "cr4de_di_quanti_sb", directAnalyses),
-    ...getAveragesForScenarios("s", "cr4de_di_quanti_sc", directAnalyses),
-    ...getAveragesForScenarios("s", "cr4de_di_quanti_sd", directAnalyses),
-    ...getAveragesForScenarios("e", "cr4de_di_quanti_ea", directAnalyses),
-    ...getAveragesForScenarios("f", "cr4de_di_quanti_fa", directAnalyses),
-    ...getAveragesForScenarios("f", "cr4de_di_quanti_fb", directAnalyses),
-    ...getAveragesForScenarios("cc", "cr4de_climate_change_quanti", directAnalyses),
+    ...getAveragesForScenarios("dp", "cr4de_dp_quanti", directAnalyses, useWeights),
+    ...getAveragesForScenarios("h", "cr4de_di_quanti_ha", directAnalyses, useWeights),
+    ...getAveragesForScenarios("h", "cr4de_di_quanti_hb", directAnalyses, useWeights),
+    ...getAveragesForScenarios("h", "cr4de_di_quanti_hc", directAnalyses, useWeights),
+    ...getAveragesForScenarios("s", "cr4de_di_quanti_sa", directAnalyses, useWeights),
+    ...getAveragesForScenarios("s", "cr4de_di_quanti_sb", directAnalyses, useWeights),
+    ...getAveragesForScenarios("s", "cr4de_di_quanti_sc", directAnalyses, useWeights),
+    ...getAveragesForScenarios("s", "cr4de_di_quanti_sd", directAnalyses, useWeights),
+    ...getAveragesForScenarios("e", "cr4de_di_quanti_ea", directAnalyses, useWeights),
+    ...getAveragesForScenarios("f", "cr4de_di_quanti_fa", directAnalyses, useWeights),
+    ...getAveragesForScenarios("f", "cr4de_di_quanti_fb", directAnalyses, useWeights),
+    ...getAveragesForScenarios("cc", "cr4de_climate_change_quanti", directAnalyses, useWeights),
   };
 }
-export function getConsensusCascade(cascadeAnalyses: DVCascadeAnalysis[], isCause = false) {
+export function getConsensusCascade(cascadeAnalyses: DVCascadeAnalysis[], isCause = false, useWeights: Boolean = true) {
   const c: any = {};
 
   for (let field of CASCADE_ANALYSIS_QUANTI_FIELDS) {
     c[`${field}${isCause ? "_cause" : ""}`] = getAverage(
       cascadeAnalyses.map((ca) => ca[field] as string),
-      cascadeAnalyses.map((ca) => ca.cr4de_quality || 2.5)
+      useWeights ? cascadeAnalyses.map((ca) => ca.cr4de_quality || 2.5) : undefined
     );
   }
 
