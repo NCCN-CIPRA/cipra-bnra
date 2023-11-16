@@ -170,7 +170,9 @@ export default function CascadeMatrix({
       <Grid xs={2.5} sx={{ cursor: "pointer" }}>
         <CPX
           value={cascade[getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.CONSIDERABLE, isCause)] as string}
-          onChange={(newValue) => onChange(getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.CONSIDERABLE), newValue)}
+          onChange={(newValue) =>
+            onChange(getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.CONSIDERABLE, isCause), newValue)
+          }
         />
       </Grid>
       <Grid xs={2.5} sx={{ cursor: "pointer" }}>

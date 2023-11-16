@@ -458,6 +458,7 @@ function CauseSection({
               effect={riskFile}
               isCause={true}
               onChange={async (field, newValue) => {
+                console.log(field);
                 await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
                   [field]: newValue,
                 });

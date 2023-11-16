@@ -415,7 +415,7 @@ export default function CalculationPage() {
       .attr("class", "link")
       .attr("fill", "none")
       .attr("stroke-width", function (d) {
-        return 2 + (6 * (d.value - minIp)) / (maxIp - minIp);
+        return 10 + (10 * (d.value - minIp)) / (maxIp - minIp);
       })
       .attr("stroke", function (d) {
         return "#aaa";
@@ -472,7 +472,7 @@ export default function CalculationPage() {
       )
       .force(
         "collide",
-        d3.forceCollide().radius((d) => (d as RiskNode).tp * 1.2)
+        d3.forceCollide().radius((d) => (d as RiskNode).tp + 20)
       )
       .force("charge", d3.forceManyBody().strength(-50))
       .force("center", d3.forceCenter(width / 2, height / 2))

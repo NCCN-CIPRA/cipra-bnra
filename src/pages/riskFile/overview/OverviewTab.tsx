@@ -439,7 +439,7 @@ export default function OverviewTab({
             </Card>
           )}
         </Grid>
-        {/* <Grid xs={12} sx={{ mt: 2 }}>
+        <Grid xs={12} sx={{ mt: 2 }}>
           <Card>
             <CardContent>
               {test && (
@@ -494,15 +494,15 @@ export default function OverviewTab({
                       <th>Weights</th>
                     </tr>
                     {test.cascades
-                      // .filter((c: any) => {
-                      //   if (c.cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING) return false;
-                      //   return CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => {
-                      //     return (
-                      //       c.cascade[f] !== c.weights[f] &&
-                      //       c.cascade.cr4de_discussion_required !== DiscussionRequired.RESOLVED
-                      //     );
-                      //   });
-                      // })
+                      .filter((c: any) => {
+                        if (c.cascade.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING) return false;
+                        return CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => {
+                          return (
+                            c.cascade[f] !== c.weights[f] &&
+                            c.cascade.cr4de_discussion_required !== DiscussionRequired.RESOLVED
+                          );
+                        });
+                      })
                       .map((c: any) => (
                         <>
                           <tr>
@@ -513,7 +513,7 @@ export default function OverviewTab({
                           </tr>
                           <tr>
                             {CASCADE_ANALYSIS_QUANTI_FIELDS.filter((f) => {
-                              // return c.cascade[f] !== c.weights[f];
+                              return c.cascade[f] !== c.weights[f];
                               return true;
                             }).map((f) => (
                               <tr>
@@ -546,7 +546,7 @@ export default function OverviewTab({
               </LoadingButton>
             </CardActions>
           </Card>
-        </Grid> */}
+        </Grid>
         <Grid xs={12} sx={{ my: 2 }}>
           <ParticipationTable riskFile={riskFile} participants={participants} reloadParticipants={async () => {}} />
         </Grid>
