@@ -158,11 +158,6 @@ export default function RiskNetworkGraph({
     const width = graphWidth - margin.left - margin.right;
     const height = graphHeight - margin.top - margin.bottom;
 
-    const minTp = graph.nodes.reduce((m, n) => (m > n.value ? n.value : m), Infinity);
-    const maxTp = graph.nodes.reduce((m, n) => (m < n.value ? n.value : m), 0);
-    const minIp = graph.links.reduce((m, l) => (m > l.value ? l.value : m), Infinity);
-    const maxIp = graph.links.reduce((m, l) => (m < l.value ? l.value : m), 0);
-
     d3.selectAll("#network-graph > *").remove();
 
     var svg = d3.select("#network-graph").append("g");
@@ -195,6 +190,11 @@ export default function RiskNetworkGraph({
         // @ts-expect-error
         links.some((l) => (l.source.id || l.source) === n.id || (l.target.id || l.target) === n.id)
     );
+
+    const minTp = nodes.reduce((m, n) => (m > n.value ? n.value : m), Infinity);
+    const maxTp = nodes.reduce((m, n) => (m < n.value ? n.value : m), 0);
+    const minIp = links.reduce((m, l) => (m > l.value ? l.value : m), Infinity);
+    const maxIp = links.reduce((m, l) => (m < l.value ? l.value : m), 0);
 
     const radius = (n: RiskNode) => 5 + (10 * (n.value - minTp)) / (maxTp - minTp);
 
@@ -433,7 +433,7 @@ export default function RiskNetworkGraph({
             <Select value={filter} label="Filter" onChange={(e) => setFilter(e.target.value as any)}>
               <MenuItem value={"ALL"}>Causes & Effects</MenuItem>
               <MenuItem value={"CAUSES"}>Causes only</MenuItem>
-              <MenuItem value={"EFFECT"}>Effects only</MenuItem>
+              <MenuItem value={"EFFECTS"}>Effects only</MenuItem>
             </Select>
           </FormControl>
         </Stack>

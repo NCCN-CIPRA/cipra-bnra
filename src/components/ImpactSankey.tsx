@@ -111,38 +111,42 @@ export default function ImpactSankey({
 }) {
   if (!calculation) return null;
 
-  let minImpact =
-    maxEffects === null
+  const effects = [
+    {
+      name: "Direct Impact",
+      i: calculation.di,
+    },
+    ...calculation.effects.map((c) => ({
+      name: c.effect.riskTitle,
+      i: c.ii,
+    })),
+  ];
+
+  let minI =
+    maxEffects === null || effects.length < maxEffects
       ? -1
-      : calculation.effects.sort((a, b) => b.ii - a.ii)[Math.min(maxEffects - 2, calculation.effects.length - 1)].ii;
+      : effects.sort((a, b) => b.i - a.i)[Math.min(maxEffects - 1, effects.length - 1)].i;
+
+  const nodes = [{ name: calculation.riskTitle }, ...effects.filter((c) => c.i >= minI)];
+  if (minI >= 0) nodes.push({ name: "Other" });
+
+  const links = effects
+    .filter((e) => e.i >= minI)
+    .map((e, i: number) => ({
+      source: 0,
+      target: i + 1,
+      value: e.i,
+    }));
+  if (minI > 0)
+    links.push({
+      source: 0,
+      target: nodes.length - 1,
+      value: calculation.effects.filter((e: any, i: number) => e.ii < minI).reduce((tot, e) => tot + e.ii, 0),
+    });
 
   const data = {
-    nodes: [
-      { name: calculation.riskTitle },
-      { name: "Direct Impact" },
-      { name: "Other" },
-      ...calculation.effects
-        .filter((e) => e.ii >= minImpact)
-        .map((e) => ({
-          name: e.cascadeTitle,
-          id: e.effect.riskId,
-        })),
-    ],
-    links: [
-      ...(calculation.di > 0 ? [{ source: 0, target: 1, value: calculation.di }] : []),
-      {
-        source: 0,
-        target: 2,
-        value: calculation.effects.filter((e: any, i: number) => e.ii < minImpact).reduce((tot, e) => tot + e.ii, 0),
-      },
-      ...calculation.effects
-        .filter((e: any, i: number) => e.ii >= minImpact)
-        .map((e: any, i: number) => ({
-          source: 0,
-          target: i + 3,
-          value: Math.round(e.ii),
-        })),
-    ],
+    nodes,
+    links,
   };
 
   return (

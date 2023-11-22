@@ -24,7 +24,7 @@ const getCP = (cascade: CascadeCalculation, fromScenario: SCENARIOS, toScenario:
   if (fromScenario === SCENARIOS.CONSIDERABLE && toScenario === SCENARIOS.MAJOR) return cascade.c2m;
   if (fromScenario === SCENARIOS.CONSIDERABLE && toScenario === SCENARIOS.EXTREME) return cascade.c2e;
   if (fromScenario === SCENARIOS.MAJOR && toScenario === SCENARIOS.CONSIDERABLE) return cascade.m2c;
-  if (fromScenario === SCENARIOS.MAJOR && toScenario === SCENARIOS.CONSIDERABLE) return cascade.m2m;
+  if (fromScenario === SCENARIOS.MAJOR && toScenario === SCENARIOS.MAJOR) return cascade.m2m;
   if (fromScenario === SCENARIOS.MAJOR && toScenario === SCENARIOS.EXTREME) return cascade.m2e;
   if (fromScenario === SCENARIOS.EXTREME && toScenario === SCENARIOS.CONSIDERABLE) return cascade.e2c;
   if (fromScenario === SCENARIOS.EXTREME && toScenario === SCENARIOS.MAJOR) return cascade.e2m;
@@ -77,7 +77,7 @@ export default function calculateTotalProbability(risk: RiskCalculation): void {
   risk.tp_m = calculateTotalProbabilityScenario(risk, SCENARIOS.MAJOR);
   risk.tp_e = calculateTotalProbabilityScenario(risk, SCENARIOS.EXTREME);
 
-  risk.tp = risk.tp_c + risk.tp_m + risk.tp_e;
+  risk.tp = -1;
 }
 
 function calculateTotalProbabilityScenario(risk: RiskCalculation, scenario: SCENARIOS): number {
@@ -96,7 +96,7 @@ function calculateTotalProbabilityScenario(risk: RiskCalculation, scenario: SCEN
           cascade.cause.tp_e * getCP(cascade, SCENARIOS.EXTREME, scenario)
       );
 
-      cascade.ip = cascade.ip_c + cascade.ip_m + cascade.ip_e;
+      cascade.ip = -1;
 
       return ipTot + getIP(cascade, scenario);
     }, 0)

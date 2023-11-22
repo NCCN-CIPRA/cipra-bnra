@@ -8,7 +8,7 @@ import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { SCENARIOS } from "../scenarios";
 import calculateTotalImpact, { getEffectGraph } from "./calculateTotalImpact";
 import calculateTotalProbability, { getCausalGraph } from "./calculateTotalProbability";
-import CalculateTotalRisk from "./calculateTotalRisk";
+import calculateTotalRisk from "./calculateTotalRisk";
 import convergeImpacts from "./convergeImpacts";
 import convergeProbabilities from "./convergeProbabilities";
 import prepareRiskFiles from "./prepareRiskFiles";
@@ -58,11 +58,14 @@ export default async function runAnalysis({
   );
 
   return calculations.map((c, i) => {
+    console.count("Risk #");
     const graph = getEffectGraph(getCausalGraph(c));
+
+    // if (c.riskTitle.indexOf("lectricity") < 0) return c;
 
     calculateTotalProbability(graph);
     calculateTotalImpact(graph);
-    CalculateTotalRisk(graph);
+    calculateTotalRisk(graph);
 
     return graph;
 

@@ -10,6 +10,8 @@ import { getAbsoluteImpact } from "../Impact";
 import { getAbsoluteProbability, getDPDailyProbability } from "../Probability";
 import { getAverage, getConsensusRiskFile as getConsensusRiskFileAverage } from "../inputProcessing";
 
+const SC_FACTOR = 1;
+
 interface Metrics {
   consensus: number;
   average: number;
@@ -26,31 +28,36 @@ const getAveragesForScenarios = (
 ) => {
   const daField = field.indexOf("climate_change") >= 0 ? "cr4de_dp50_quanti" : field;
 
+  const factor = daField === "di_Sc" ? SC_FACTOR : 1;
+
   return {
-    [`${name}_c`]: absoluteValueGetter(
-      getAverage(
-        directAnalyses.map((da) => da[`${daField}_c` as keyof DVDirectAnalysis]) as string[],
-        directAnalyses.map(
-          (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_c` as keyof FieldQuality]) || 2.5
+    [`${name}_c`]:
+      absoluteValueGetter(
+        getAverage(
+          directAnalyses.map((da) => da[`${daField}_c` as keyof DVDirectAnalysis]) as string[],
+          directAnalyses.map(
+            (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_c` as keyof FieldQuality]) || 2.5
+          )
         )
-      )
-    ),
-    [`${name}_m`]: absoluteValueGetter(
-      getAverage(
-        directAnalyses.map((da) => da[`${daField}_m` as keyof DVDirectAnalysis]) as string[],
-        directAnalyses.map(
-          (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_m` as keyof FieldQuality]) || 2.5
+      ) / factor,
+    [`${name}_m`]:
+      absoluteValueGetter(
+        getAverage(
+          directAnalyses.map((da) => da[`${daField}_m` as keyof DVDirectAnalysis]) as string[],
+          directAnalyses.map(
+            (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_m` as keyof FieldQuality]) || 2.5
+          )
         )
-      )
-    ),
-    [`${name}_e`]: absoluteValueGetter(
-      getAverage(
-        directAnalyses.map((da) => da[`${daField}_e` as keyof DVDirectAnalysis]) as string[],
-        directAnalyses.map(
-          (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_e` as keyof FieldQuality]) || 2.5
+      ) / factor,
+    [`${name}_e`]:
+      absoluteValueGetter(
+        getAverage(
+          directAnalyses.map((da) => da[`${daField}_e` as keyof DVDirectAnalysis]) as string[],
+          directAnalyses.map(
+            (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_e` as keyof FieldQuality]) || 2.5
+          )
         )
-      )
-    ),
+      ) / factor,
   };
 };
 
@@ -86,7 +93,7 @@ const getConsensusRiskFile = (
       di_Hc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_c),
       di_Sa_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_c),
       di_Sb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_c),
-      di_Sc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_c),
+      di_Sc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_c) / SC_FACTOR,
       di_Sd_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_c),
       di_Ea_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_c),
       di_Fa_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_c),
@@ -97,7 +104,7 @@ const getConsensusRiskFile = (
       di_Hc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_m),
       di_Sa_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_m),
       di_Sb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_m),
-      di_Sc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_m),
+      di_Sc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_m) / SC_FACTOR,
       di_Sd_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_m),
       di_Ea_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_m),
       di_Fa_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_m),
@@ -108,7 +115,7 @@ const getConsensusRiskFile = (
       di_Hc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_e),
       di_Sa_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_e),
       di_Sb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_e),
-      di_Sc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_e),
+      di_Sc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_e) / SC_FACTOR,
       di_Sd_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_e),
       di_Ea_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_e),
       di_Fa_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_e),

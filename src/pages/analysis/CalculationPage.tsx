@@ -283,6 +283,82 @@ export default function CalculationPage() {
     setIsCalculating(false);
   };
 
+  useEffect(() => {
+    if (calculations && selectedNode) {
+      const c = calculations.find((c) => c.riskId === selectedNode);
+
+      if (!c) return;
+
+      const r = (a: number) => Math.round(a / 100000000);
+
+      // console.log("TP: ", r(c.tp), r(c.tp_c), r(c.tp_m), r(c.tp_e));
+      // console.log(
+      //   "TP sum: ",
+      //   r(c.dp + c.causes.reduce((t, c) => t + c.ip, 0)),
+      //   r(c.dp_c + c.causes.reduce((t, c) => t + c.ip_c, 0)),
+      //   r(c.dp_m + c.causes.reduce((t, c) => t + c.ip_m, 0)),
+      //   r(c.dp_e + c.causes.reduce((t, c) => t + c.ip_e, 0))
+      // );
+
+      console.log("TI: ", r(c.ti), r(c.ti_c), r(c.ti_m), r(c.ti_e));
+      console.log(
+        "TI sum: ",
+        r(c.di + c.effects.reduce((t, c) => t + c.ii, 0)),
+        r(c.di_c + c.effects.reduce((t, c) => t + c.ii_c, 0)),
+        r(c.di_m + c.effects.reduce((t, c) => t + c.ii_m, 0)),
+        r(c.di_e + c.effects.reduce((t, c) => t + c.ii_e, 0))
+      );
+
+      // console.log(
+      //   "TI sum",
+      //   r(c.ti_Ha + c.ti_Hb + c.ti_Hc + c.ti_Sa + c.ti_Sb + c.ti_Sc + c.ti_Sd + c.ti_Ea + c.ti_Fa + c.ti_Fb),
+      //   r(
+      //     c.ti_Ha_c +
+      //       c.ti_Hb_c +
+      //       c.ti_Hc_c +
+      //       c.ti_Sa_c +
+      //       c.ti_Sb_c +
+      //       c.ti_Sc_c +
+      //       c.ti_Sd_c +
+      //       c.ti_Ea_c +
+      //       c.ti_Fa_c +
+      //       c.ti_Fb_c
+      //   ),
+      //   r(
+      //     c.ti_Ha_m +
+      //       c.ti_Hb_m +
+      //       c.ti_Hc_m +
+      //       c.ti_Sa_m +
+      //       c.ti_Sb_m +
+      //       c.ti_Sc_m +
+      //       c.ti_Sd_m +
+      //       c.ti_Ea_m +
+      //       c.ti_Fa_m +
+      //       c.ti_Fb_m
+      //   ),
+      //   r(
+      //     c.ti_Ha_e +
+      //       c.ti_Hb_e +
+      //       c.ti_Hc_e +
+      //       c.ti_Sa_e +
+      //       c.ti_Sb_e +
+      //       c.ti_Sc_e +
+      //       c.ti_Sd_e +
+      //       c.ti_Ea_e +
+      //       c.ti_Fa_e +
+      //       c.ti_Fb_e
+      //   )
+      // );
+      // console.log(
+      //   "TI S: ",
+      //   r(c.ti_Sa + c.ti_Sb + c.ti_Sc + c.ti_Sd),
+      //   r(c.ti_Sa_c + c.ti_Sb_c + c.ti_Sc_c + c.ti_Sd_c),
+      //   r(c.ti_Sa_m + c.ti_Sb_m + c.ti_Sc_m + c.ti_Sd_m),
+      //   r(c.ti_Sa_e + c.ti_Sb_e + c.ti_Sc_e + c.ti_Sd_e)
+      // );
+    }
+  }, [selectedNode]);
+
   return (
     <>
       <Container sx={{ mt: 4, pb: 8 }}>
@@ -326,11 +402,11 @@ export default function CalculationPage() {
         </Card>
 
         <Box>
-          <RiskNetworkGraph
+          {/* <RiskNetworkGraph
             calculations={calculations}
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}
-          />
+          /> */}
 
           <CalculationsRiskMatrix
             calculations={calculations}

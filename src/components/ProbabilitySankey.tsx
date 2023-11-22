@@ -109,38 +109,42 @@ export default function ProbabilitySankey({
 }) {
   if (!calculation) return null;
 
+  const causes = [
+    {
+      name: "Direct Probability",
+      p: calculation.dp,
+    },
+    ...calculation.causes.map((c) => ({
+      name: c.cause.riskTitle,
+      p: c.ip,
+    })),
+  ];
+
   let minP =
-    maxCauses === null || calculation.causes.length <= 0
+    maxCauses === null || causes.length <= maxCauses
       ? -1
-      : calculation.causes.sort((a, b) => b.ip - a.ip)[Math.min(maxCauses - 2, calculation.causes.length - 1)].ip;
+      : causes.sort((a, b) => b.p - a.p)[Math.min(maxCauses - 1, causes.length - 1)].p;
+
+  const nodes = [{ name: calculation.riskTitle }, ...causes.filter((c) => c.p >= minP)];
+  if (minP >= 0) nodes.push({ name: "Other" });
+
+  const links = causes
+    .filter((e) => e.p >= minP)
+    .map((e, i: number) => ({
+      source: i + 1,
+      target: 0,
+      value: e.p,
+    }));
+  if (minP > 0)
+    links.push({
+      source: nodes.length - 1,
+      target: 0,
+      value: calculation.causes.filter((e: any, i: number) => e.ip < minP).reduce((tot, e) => tot + e.ip, 0),
+    });
 
   const data = {
-    nodes: [
-      { name: calculation.riskTitle },
-      { name: "Direct Probability" },
-      { name: "Other" },
-      ...calculation.causes
-        .filter((c) => c.ip >= minP)
-        .map((c) => ({
-          name: c.cascadeTitle,
-          id: c.cause.riskId,
-        })),
-    ],
-    links: [
-      ...(calculation.dp > 0 ? [{ source: 1, target: 0, value: calculation.dp }] : []),
-      {
-        source: 2,
-        target: 0,
-        value: calculation.causes.filter((e: any, i: number) => e.ip < minP).reduce((tot, e) => tot + e.ip, 0),
-      },
-      ...calculation.causes
-        .filter((e) => e.ip >= minP)
-        .map((e: any, i: number) => ({
-          source: i + 3,
-          target: 0,
-          value: e.ip,
-        })),
-    ],
+    nodes,
+    links,
   };
 
   return (
