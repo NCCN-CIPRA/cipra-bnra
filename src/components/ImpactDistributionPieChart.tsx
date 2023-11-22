@@ -33,13 +33,13 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
 };
 
 export default function ImpactDistributionPieChart({
-  riskFile,
+  riskFile = null,
   calculation,
 }: {
-  riskFile: DVRiskFile | null;
+  riskFile?: DVRiskFile | null;
   calculation: RiskCalculation | null;
 }) {
-  if (!riskFile || !calculation) return null;
+  if (!calculation) return null;
 
   const dataGlobal = [
     {

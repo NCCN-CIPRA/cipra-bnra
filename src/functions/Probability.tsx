@@ -1,28 +1,21 @@
+// Upper bounds of interval
+// Return period of an event
 const DPScales: { [key: string]: number } = {
-  "0": 0,
-  "0.5": 0.001,
-  "1": 0.0016,
-  "1.5": 0.003,
-  "2": 0.0036,
-  "2.5": 0.01,
-  "3": 0.016,
-  "3.5": 0.03,
-  "4": 0.036,
-  "4.5": 0.1,
-  "5": 0.16,
+  "0": 30000,
+  "1": 3000,
+  "2": 300,
+  "3": 30,
+  "4": 3,
+  "5": 0.3,
 };
+
+// Upper bound of interval
+// Probability of at least 1 attack in the next 3 years
 const MScales: { [key: string]: number } = {
-  "0": 0,
-  "0.5": 0.001,
-  "1": 0.0016,
-  "1.5": 0.003,
-  "2": 0.0036,
-  "2.5": 0.01,
-  "3": 0.016,
-  "3.5": 0.03,
-  "4": 0.036,
-  "4.5": 0.1,
-  "5": 0.16,
+  "0": 0.01,
+  "1": 0.5,
+  "2": 0.0,
+  "3": 1,
 };
 const CPScales: { [key: string]: number } = {
   "0": 0,
@@ -38,15 +31,59 @@ const CPScales: { [key: string]: number } = {
   "5": 0.95,
 };
 
+const logMean = (x: number, y: number) => (y - x) / (Math.log10(y) - Math.log10(x));
+const mean = (x: number, y: number) => (x + y) / 2;
+
+export function getReturnPeriod(DPScaleString: string) {
+  if (DPScaleString === "DP0") return logMean(DPScales["0"], DPScales["0"] * 10);
+
+  if (DPScaleString.indexOf(".") >= 0) {
+    const scaleNumber = Math.floor(parseFloat(DPScaleString.replace("DP", "")));
+    return DPScales[scaleNumber];
+  } else {
+    const scaleNumber = parseInt(DPScaleString.replace("DP", ""), 10);
+    const upperReturnPeriod = DPScales[scaleNumber - 1];
+    const lowerReturnPeriod = DPScales[scaleNumber];
+
+    return logMean(lowerReturnPeriod, upperReturnPeriod);
+  }
+}
+
+export function get3YearLikelihood(MScaleString: string) {
+  if (MScaleString === "M0") return mean(0, MScales["0"]);
+
+  if (MScaleString.indexOf(".") >= 0) {
+    const scaleNumber = Math.floor(parseFloat(MScaleString.replace("M", "")));
+    return MScales[scaleNumber];
+  } else {
+    const scaleNumber = parseInt(MScaleString.replace("M", ""), 10);
+    return mean(MScales[scaleNumber - 1], MScales[scaleNumber]);
+  }
+}
+
+export function getDPDailyProbability(scaleString: string | null) {
+  if (scaleString === null) return 0;
+
+  // Assuming poisson distribution
+  return 1 - Math.exp(-1 / (getReturnPeriod(scaleString) * 365));
+}
+
+export function getMDailyProbability(scaleString: string | null) {
+  if (scaleString === null) return 0;
+
+  // Assuming poisson distribution
+  return (-1 * Math.log(1 - get3YearLikelihood(scaleString))) / (3 * 365);
+}
+
 export function getAbsoluteProbability(scaleString: string | null) {
   if (scaleString === null) return 0;
 
   if (scaleString.startsWith("DP")) {
-    return DPScales[scaleString.replace("DP", "")];
+    return getDPDailyProbability(scaleString);
   } else if (scaleString.startsWith("CP")) {
     return CPScales[scaleString.replace("CP", "")];
   } else if (scaleString.startsWith("M")) {
-    return MScales[scaleString.replace("M", "")];
+    return getMDailyProbability(scaleString);
   }
 
   return -1;

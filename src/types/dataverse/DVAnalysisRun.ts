@@ -66,6 +66,9 @@ export interface CascadeCalculation {
   // title of the causing risk file
   cascadeTitle: string;
 
+  // identifies this cascade as one that should be damped
+  damp: boolean;
+
   // Conditional probabilities per scenario couple
   c2c: number;
   c2m: number;
@@ -131,8 +134,18 @@ export interface CascadeCalculation {
   ii_Fa: number;
   ii_Fb: number;
 
+  ii_c: number;
+  ii_m: number;
+  ii_e: number;
+
   // Total indirect impact of this cascade
   ii: number;
+
+  ir_c: number;
+  ir_m: number;
+  ir_e: number;
+
+  ir: number;
 }
 
 export interface RiskCalculationKnownFields {
@@ -349,7 +362,11 @@ export interface RiskCalculation extends RiskCalculationKnownFields {
   ti: number;
 
   // Risk
-  r: number;
+  tr_c: number;
+  tr_m: number;
+  tr_e: number;
+
+  tr: number;
 
   causes: CascadeCalculation[];
 

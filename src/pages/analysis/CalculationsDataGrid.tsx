@@ -2,7 +2,17 @@ import { useState, useMemo } from "react";
 import { DataGrid, GridRowsProp, GridColDef, GridValueFormatterParams } from "@mui/x-data-grid";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { getMoneyString } from "../../functions/Impact";
-import { Box, Card, CardActions, CardContent, Checkbox, FormControlLabel, FormGroup, Typography } from "@mui/material";
+import {
+  Box,
+  Accordion,
+  AccordionActions,
+  AccordionDetails,
+  AccordionSummary,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Typography,
+} from "@mui/material";
 
 const columns: GridColDef[] = [
   {
@@ -33,11 +43,19 @@ const columns: GridColDef[] = [
   },
 ];
 
-export default function CalculationsDataGrid({ data }: { data: RiskCalculation[] }) {
+export default function CalculationsDataGrid({
+  data,
+  setSelectedRiskId,
+}: {
+  data: RiskCalculation[] | null;
+  setSelectedRiskId: (id: string) => void;
+}) {
   const [rows, setRows] = useState<GridRowsProp | null>(null);
   const [worstCase, setWorstCase] = useState(false);
 
   useMemo(() => {
+    if (!data) return;
+
     setRows(
       data.reduce((split, c) => {
         const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
@@ -48,6 +66,7 @@ export default function CalculationsDataGrid({ data }: { data: RiskCalculation[]
             [
               {
                 id: `${c.riskId}_c`,
+                riskId: c.riskId,
                 title: `Considerable ${c.riskTitle}`,
                 tp: c.tp_c,
                 ti: c.ti_c,
@@ -55,6 +74,7 @@ export default function CalculationsDataGrid({ data }: { data: RiskCalculation[]
               },
               {
                 id: `${c.riskId}_m`,
+                riskId: c.riskId,
                 title: `Major ${c.riskTitle}`,
                 tp: c.tp_m,
                 ti: c.ti_m,
@@ -62,6 +82,7 @@ export default function CalculationsDataGrid({ data }: { data: RiskCalculation[]
               },
               {
                 id: `${c.riskId}_e`,
+                riskId: c.riskId,
                 title: `Extreme ${c.riskTitle}`,
                 tp: c.tp_e,
                 ti: c.ti_e,
@@ -74,6 +95,7 @@ export default function CalculationsDataGrid({ data }: { data: RiskCalculation[]
             ...split,
             {
               id: `${c.riskId}_c`,
+              riskId: c.riskId,
               title: `Considerable ${c.riskTitle}`,
               tp: c.tp_c,
               ti: c.ti_c,
@@ -81,6 +103,7 @@ export default function CalculationsDataGrid({ data }: { data: RiskCalculation[]
             },
             {
               id: `${c.riskId}_m`,
+              riskId: c.riskId,
               title: `Major ${c.riskTitle}`,
               tp: c.tp_m,
               ti: c.ti_m,
@@ -88,6 +111,7 @@ export default function CalculationsDataGrid({ data }: { data: RiskCalculation[]
             },
             {
               id: `${c.riskId}_e`,
+              riskId: c.riskId,
               title: `Extreme ${c.riskTitle}`,
               tp: c.tp_e,
               ti: c.ti_e,
@@ -100,13 +124,16 @@ export default function CalculationsDataGrid({ data }: { data: RiskCalculation[]
   }, [data, worstCase]);
 
   return (
-    <Card>
-      <CardContent sx={{ height: 1000 }}>
-        <DataGrid rows={rows || []} columns={columns} />
-      </CardContent>
-      <CardActions sx={{ mx: 2 }}>
+    <Accordion>
+      <AccordionSummary>
+        <Typography variant="subtitle2">Risk table</Typography>
+      </AccordionSummary>
+      <AccordionDetails sx={{ height: 1000 }}>
+        <DataGrid rows={rows || []} columns={columns} onRowClick={(params) => setSelectedRiskId(params.row.riskId)} />
+      </AccordionDetails>
+      <AccordionActions sx={{ mx: 2 }}>
         <Box>
-          <Typography variant="subtitle2">Risk table parameters:</Typography>
+          <Typography variant="subtitle2">filters:</Typography>
         </Box>
         <FormGroup sx={{}}>
           <FormControlLabel
@@ -114,7 +141,7 @@ export default function CalculationsDataGrid({ data }: { data: RiskCalculation[]
             label="Show only worst case scenario"
           />
         </FormGroup>
-      </CardActions>
-    </Card>
+      </AccordionActions>
+    </Accordion>
   );
 }

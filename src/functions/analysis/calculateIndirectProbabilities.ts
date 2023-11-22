@@ -1,7 +1,9 @@
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 
-export default function calculateIndirectProbabilities(risk: RiskCalculation, damping: number = 1) {
+export default function calculateIndirectProbabilities(risk: RiskCalculation, dampingFactor: number = 1) {
   risk.causes.forEach((cascade) => {
+    const damping = cascade.damp ? dampingFactor : 1;
+
     cascade.ip_c = Math.min(
       100000000,
       cascade.c2c * (cascade.cause.tp_c || 0) * damping +

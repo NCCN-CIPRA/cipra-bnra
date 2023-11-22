@@ -7,7 +7,18 @@ import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 
 const baseY = 50;
 
-const PSankeyNode = ({ x, y, width, height, index, payload, containerWidth, totalProbability, totalNodes }: any) => {
+const PSankeyNode = ({
+  x,
+  y,
+  width,
+  height,
+  index,
+  payload,
+  containerWidth,
+  totalProbability,
+  totalNodes,
+  onClick,
+}: any) => {
   const navigate = useNavigate();
 
   if (payload.depth > 0) {
@@ -36,6 +47,8 @@ const PSankeyNode = ({ x, y, width, height, index, payload, containerWidth, tota
           style={{ cursor: payload.id && "pointer" }}
           onClick={() => {
             if (!payload.id) return;
+
+            if (onClick) return onClick(payload.id);
 
             navigate(`/reporting/${payload.id}`);
           }}
@@ -84,20 +97,30 @@ const PSankeyLink = (props: any) => {
 };
 
 export default function ProbabilitySankey({
-  riskFile,
+  riskFile = null,
   calculation,
+  maxCauses = null,
+  onClick = null,
 }: {
-  riskFile: DVRiskFile | null;
+  riskFile?: DVRiskFile | null;
   calculation: RiskCalculation | null;
+  maxCauses?: number | null;
+  onClick?: ((id: string) => void) | null;
 }) {
-  if (!riskFile || !calculation) return null;
+  if (!calculation) return null;
+
+  let minP =
+    maxCauses === null || calculation.causes.length <= 0
+      ? -1
+      : calculation.causes.sort((a, b) => b.ip - a.ip)[Math.min(maxCauses - 2, calculation.causes.length - 1)].ip;
 
   const data = {
     nodes: [
-      { name: riskFile.cr4de_title, category: riskFile.cr4de_risk_category },
+      { name: calculation.riskTitle },
       { name: "Direct Probability" },
+      { name: "Other" },
       ...calculation.causes
-        .filter((c) => c.ip > 0)
+        .filter((c) => c.ip >= minP)
         .map((c) => ({
           name: c.cascadeTitle,
           id: c.cause.riskId,
@@ -105,10 +128,15 @@ export default function ProbabilitySankey({
     ],
     links: [
       ...(calculation.dp > 0 ? [{ source: 1, target: 0, value: calculation.dp }] : []),
+      {
+        source: 2,
+        target: 0,
+        value: calculation.causes.filter((e: any, i: number) => e.ip < minP).reduce((tot, e) => tot + e.ip, 0),
+      },
       ...calculation.causes
-        .filter((e) => e.ip > 0 && e.ip > (5 * calculation.ip) / 100)
+        .filter((e) => e.ip >= minP)
         .map((e: any, i: number) => ({
-          source: i + 2,
+          source: i + 3,
           target: 0,
           value: e.ip,
         })),
@@ -123,7 +151,7 @@ export default function ProbabilitySankey({
       <ResponsiveContainer width="100%" height="100%">
         <Sankey
           data={data}
-          node={<PSankeyNode totalProbability={calculation.tp} totalNodes={data.nodes.length} />}
+          node={<PSankeyNode onClick={onClick} totalProbability={calculation.tp} totalNodes={data.nodes.length} />}
           link={<PSankeyLink totalNodes={data.nodes.length} />}
           nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
         ></Sankey>

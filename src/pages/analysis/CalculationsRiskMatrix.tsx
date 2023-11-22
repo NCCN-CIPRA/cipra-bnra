@@ -15,9 +15,10 @@ import { NameType, ValueType } from "recharts/types/component/DefaultTooltipCont
 import {
   Stack,
   Typography,
-  Card,
-  CardContent,
-  CardActions,
+  Accordion,
+  AccordionActions,
+  AccordionDetails,
+  AccordionSummary,
   Checkbox,
   FormGroup,
   FormControlLabel,
@@ -27,6 +28,7 @@ import { getMoneyString } from "../../functions/Impact";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 
 interface MatrixRisk {
+  riskId: string;
   id: string;
   title: string;
   x: number;
@@ -35,7 +37,15 @@ interface MatrixRisk {
   scenario: SCENARIOS;
 }
 
-export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculation[] }) {
+export default function CalculationsRiskMatrix({
+  calculations,
+  selectedNodeId,
+  setSelectedNodeId,
+}: {
+  calculations: RiskCalculation[] | null;
+  selectedNodeId: string | null;
+  setSelectedNodeId: (id: string | null) => void;
+}) {
   const [dots, setDots] = useState<MatrixRisk[] | null>(null);
   const [worstCase, setWorstCase] = useState(false);
 
@@ -59,8 +69,10 @@ export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculati
   };
 
   useMemo(() => {
+    if (!calculations) return;
+
     setDots(
-      risks.reduce((split, c) => {
+      calculations.reduce((split, c) => {
         const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
 
         if (worstCase) {
@@ -70,6 +82,7 @@ export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculati
             ...split,
             [
               {
+                riskId: c.riskId,
                 id: `${c.riskId}_c`,
                 title: `Considerable ${c.riskTitle}`,
                 x: c.tp_c,
@@ -78,6 +91,7 @@ export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculati
                 scenario: SCENARIOS.CONSIDERABLE,
               },
               {
+                riskId: c.riskId,
                 id: `${c.riskId}_m`,
                 title: `Major ${c.riskTitle}`,
                 x: c.tp_m,
@@ -86,6 +100,7 @@ export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculati
                 scenario: SCENARIOS.MAJOR,
               },
               {
+                riskId: c.riskId,
                 id: `${c.riskId}_e`,
                 title: `Extreme ${c.riskTitle}`,
                 x: c.tp_e,
@@ -102,6 +117,7 @@ export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculati
               ? []
               : [
                   {
+                    riskId: c.riskId,
                     id: `${c.riskId}_c`,
                     title: `Considerable ${c.riskTitle}`,
                     x: c.tp_c,
@@ -114,6 +130,7 @@ export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculati
               ? []
               : [
                   {
+                    riskId: c.riskId,
                     id: `${c.riskId}_m`,
                     title: `Major ${c.riskTitle}`,
                     x: c.tp_m,
@@ -126,6 +143,7 @@ export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculati
               ? []
               : [
                   {
+                    riskId: c.riskId,
                     id: `${c.riskId}_e`,
                     title: `Extreme ${c.riskTitle}`,
                     x: c.tp_e,
@@ -138,11 +156,14 @@ export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculati
         }
       }, [] as MatrixRisk[])
     );
-  }, [risks, worstCase]);
+  }, [calculations, worstCase]);
 
   return (
-    <Card sx={{ mb: 4 }}>
-      <CardContent sx={{ height: 600 }}>
+    <Accordion sx={{}}>
+      <AccordionSummary>
+        <Typography variant="subtitle2">Risk matrix</Typography>
+      </AccordionSummary>
+      <AccordionDetails sx={{ height: 600 }}>
         <ResponsiveContainer>
           <ScatterChart
             margin={{
@@ -160,8 +181,9 @@ export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculati
               unit="%"
               scale="log"
               domain={["auto", "auto"]}
-              tickCount={10}
+              // tickCount={10}
               tickFormatter={(n) => `${Math.round(n * 100000) / 1000}`}
+              ticks={[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1]}
             />
             <YAxis
               type="number"
@@ -175,13 +197,18 @@ export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculati
             <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
             <Scatter name="A school" data={dots || []} fill="#8884d8">
               {(dots || []).map((entry, index) => (
-                <Cell key={`cell-${entry.id}`} fill={SCENARIO_PARAMS[entry.scenario].color} />
+                <Cell
+                  key={`cell-${entry.id}`}
+                  fill={SCENARIO_PARAMS[entry.scenario].color}
+                  opacity={selectedNodeId === null || selectedNodeId === entry.riskId ? 1 : 0.2}
+                  onClick={() => setSelectedNodeId(entry.riskId)}
+                />
               ))}
             </Scatter>
           </ScatterChart>
         </ResponsiveContainer>
-      </CardContent>
-      <CardActions sx={{ mx: 2 }}>
+      </AccordionDetails>
+      <AccordionActions sx={{ mx: 2 }}>
         <Box>
           <Typography variant="subtitle2">Risk matrix parameters:</Typography>
         </Box>
@@ -191,7 +218,7 @@ export default function CalculationsRiskMatrix({ risks }: { risks: RiskCalculati
             label="Show only worst case scenario"
           />
         </FormGroup>
-      </CardActions>
-    </Card>
+      </AccordionActions>
+    </Accordion>
   );
 }

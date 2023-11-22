@@ -1,7 +1,9 @@
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 
-export default function calculateIndirectImpacts(risk: RiskCalculation, damping: number = 1) {
+export default function calculateIndirectImpacts(risk: RiskCalculation, dampingFactor: number = 1) {
   risk.effects.forEach((cascade) => {
+    const damping = cascade.damp ? dampingFactor : 1;
+
     cascade.ii_Ha_c =
       cascade.c2c * (cascade.effect.ti_Ha_c || 0) * damping +
       cascade.c2m * (cascade.effect.ti_Ha_m || 0) * damping +

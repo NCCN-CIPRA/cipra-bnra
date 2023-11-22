@@ -35,4 +35,6 @@ export interface DVRiskCascade<CauseType = unknown, EffectType = unknown> {
   cr4de_discussion_required: string | null;
 
   cr4de_discussion_required_cause: string | null;
+
+  cr4de_damp: boolean | null;
 }

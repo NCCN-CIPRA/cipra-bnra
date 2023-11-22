@@ -7,7 +7,18 @@ import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 
 const baseY = 50;
 
-const ISankeyNode = ({ x, y, width, height, index, payload, containerWidth, totalImpact, totalNodes }: any) => {
+const ISankeyNode = ({
+  x,
+  y,
+  width,
+  height,
+  index,
+  payload,
+  containerWidth,
+  totalImpact,
+  totalNodes,
+  onClick,
+}: any) => {
   const navigate = useNavigate();
 
   if (payload.depth <= 0) {
@@ -38,6 +49,8 @@ const ISankeyNode = ({ x, y, width, height, index, payload, containerWidth, tota
           style={{ cursor: payload.id && "pointer" }}
           onClick={() => {
             if (!payload.id) return;
+
+            if (onClick) return onClick(payload.id);
 
             navigate(`/reporting/${payload.id}`);
           }}
@@ -86,22 +99,30 @@ const ISankeyLink = (props: any) => {
 };
 
 export default function ImpactSankey({
-  riskFile,
+  riskFile = null,
   calculation,
+  maxEffects = null,
+  onClick = null,
 }: {
-  riskFile: DVRiskFile | null;
+  riskFile?: DVRiskFile | null;
   calculation: RiskCalculation | null;
+  maxEffects?: number | null;
+  onClick?: ((id: string) => void) | null;
 }) {
-  if (!riskFile || !calculation) return null;
+  if (!calculation) return null;
+
+  let minImpact =
+    maxEffects === null
+      ? -1
+      : calculation.effects.sort((a, b) => b.ii - a.ii)[Math.min(maxEffects - 2, calculation.effects.length - 1)].ii;
 
   const data = {
     nodes: [
-      { name: riskFile.cr4de_title, category: riskFile.cr4de_risk_category },
+      { name: calculation.riskTitle },
       { name: "Direct Impact" },
+      { name: "Other" },
       ...calculation.effects
-        .filter(
-          (e) => e.ii_Ha + e.ii_Hb + e.ii_Hc + e.ii_Sa + e.ii_Sb + e.ii_Sc + e.ii_Sd + e.ii_Ea + e.ii_Fa + e.ii_Fb > 0
-        )
+        .filter((e) => e.ii >= minImpact)
         .map((e) => ({
           name: e.cascadeTitle,
           id: e.effect.riskId,
@@ -109,17 +130,17 @@ export default function ImpactSankey({
     ],
     links: [
       ...(calculation.di > 0 ? [{ source: 0, target: 1, value: calculation.di }] : []),
+      {
+        source: 0,
+        target: 2,
+        value: calculation.effects.filter((e: any, i: number) => e.ii < minImpact).reduce((tot, e) => tot + e.ii, 0),
+      },
       ...calculation.effects
-        .filter(
-          (e: any, i: number) =>
-            e.ii_Ha + e.ii_Hb + e.ii_Hc + e.ii_Sa + e.ii_Sb + e.ii_Sc + e.ii_Sd + e.ii_Ea + e.ii_Fa + e.ii_Fb > 0
-        )
+        .filter((e: any, i: number) => e.ii >= minImpact)
         .map((e: any, i: number) => ({
           source: 0,
-          target: i + 2,
-          value: Math.round(
-            e.ii_Ha + e.ii_Hb + e.ii_Hc + e.ii_Sa + e.ii_Sb + e.ii_Sc + e.ii_Sd + e.ii_Ea + e.ii_Fa + e.ii_Fb
-          ),
+          target: i + 3,
+          value: Math.round(e.ii),
         })),
     ],
   };
@@ -132,7 +153,7 @@ export default function ImpactSankey({
       <ResponsiveContainer width="100%" height="100%">
         <Sankey
           data={data}
-          node={<ISankeyNode totalImpact={calculation.ti} totalNodes={data.nodes.length} />}
+          node={<ISankeyNode onClick={onClick} totalImpact={calculation.ti} totalNodes={data.nodes.length} />}
           link={<ISankeyLink totalNodes={data.nodes.length} />}
           nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
         ></Sankey>
