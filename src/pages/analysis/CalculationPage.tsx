@@ -41,7 +41,7 @@ import RiskNetworkGraph from "./RiskNetworkGraph";
 import CalculationsCascadeDataGrid from "./CalculationsCascadeDataGrid";
 import CalculationsSankeyGraph from "./CalculationsSankeyGraph";
 import RiskProfileGraph from "./RiskProfileGraph";
-import { MessageParams } from "../../functions/analysis/calculator.worker";
+// import { MessageParams } from "../../functions/analysis/calculator.worker";
 
 const roundNumberField = (n: number) => {
   if (n > 10) return Math.round(n);
@@ -147,14 +147,19 @@ export default function CalculationPage() {
 
   const isLoading = loadingRiskFiles || loadingCascades || loadingDAs || loadingCAs || loadingParticipations;
 
-  const calculator: Worker = useMemo(
-    () => new Worker(new URL("../../functions/analysis/calculator.worker.ts", import.meta.url)),
-    [riskFiles]
-  );
+  const calculator: Worker = useMemo(() => {
+    const url = new URL(
+      "https://raw.githack.com/NCCN-JoepDriesen/cipra-bnra/main/src/functions/analysis/calculator.worker.js"
+    );
+    const workerBlob = new Blob([`import "${url}"`], { type: "text/javascript" });
+    const blobUrl = window.URL.createObjectURL(workerBlob);
+
+    return new Worker(blobUrl, { type: "module" });
+  }, [riskFiles]);
 
   useEffect(() => {
     if (window.Worker) {
-      calculator.onmessage = (e: MessageEvent<MessageParams>) => {
+      calculator.onmessage = (e: MessageEvent<any>) => {
         if (e.data.type === "progress") {
           setCalculationProgress(e.data.value);
         }
