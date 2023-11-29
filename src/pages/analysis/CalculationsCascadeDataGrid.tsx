@@ -137,7 +137,7 @@ export default function CalculationsCascadeDataGrid({ data }: { data: RiskCalcul
   }, [rows]);
 
   return (
-    <Accordion>
+    <Accordion disabled={!data}>
       <AccordionSummary>
         <Typography variant="subtitle2">Cascade table</Typography>
       </AccordionSummary>

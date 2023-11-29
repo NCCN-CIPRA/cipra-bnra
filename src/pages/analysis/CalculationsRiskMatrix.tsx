@@ -159,7 +159,7 @@ export default function CalculationsRiskMatrix({
   }, [calculations, worstCase]);
 
   return (
-    <Accordion sx={{}}>
+    <Accordion disabled={!calculations}>
       <AccordionSummary>
         <Typography variant="subtitle2">Risk matrix</Typography>
       </AccordionSummary>
@@ -172,6 +172,7 @@ export default function CalculationsRiskMatrix({
               bottom: 20,
               left: 20,
             }}
+            onClick={() => setSelectedNodeId(null)}
           >
             <CartesianGrid />
             <XAxis
@@ -201,7 +202,10 @@ export default function CalculationsRiskMatrix({
                   key={`cell-${entry.id}`}
                   fill={SCENARIO_PARAMS[entry.scenario].color}
                   opacity={selectedNodeId === null || selectedNodeId === entry.riskId ? 1 : 0.2}
-                  onClick={() => setSelectedNodeId(entry.riskId)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedNodeId(entry.riskId);
+                  }}
                 />
               ))}
             </Scatter>

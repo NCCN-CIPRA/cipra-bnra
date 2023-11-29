@@ -198,6 +198,18 @@ export default function RiskNetworkGraph({
 
     const radius = (n: RiskNode) => 5 + (10 * (n.value - minTp)) / (maxTp - minTp);
 
+    // create a tooltip
+    var tooltip = d3
+      .select("body")
+      .append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0)
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "2px")
+      .style("border-radius", "5px")
+      .style("padding", "5px");
+
     svg
       .append("svg:defs")
       .selectAll("marker")
@@ -383,7 +395,7 @@ export default function RiskNetworkGraph({
   }, [graphWidth, graph, selectedNodeId, filter]);
 
   return (
-    <Accordion>
+    <Accordion disabled={!calculations}>
       <AccordionSummary>
         <Typography variant="subtitle2">Risk network graph</Typography>
       </AccordionSummary>

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import { DataGrid, GridRowsProp, GridColDef, GridValueFormatterParams } from "@mui/x-data-grid";
-import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
+import { DataGrid, GridRowsProp, GridColDef, GridValueFormatterParams, GridValueGetterParams } from "@mui/x-data-grid";
+import { Quality, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { getMoneyString } from "../../functions/Impact";
 import {
   Box,
@@ -41,6 +41,12 @@ const columns: GridColDef[] = [
     width: 200,
     valueFormatter: (params: GridValueFormatterParams<number>) => getMoneyString(params.value),
   },
+  {
+    field: "consensus",
+    headerName: "Consensus",
+    width: 200,
+    type: "boolean",
+  },
 ];
 
 export default function CalculationsDataGrid({
@@ -59,7 +65,7 @@ export default function CalculationsDataGrid({
     setRows(
       data.reduce((split, c) => {
         const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
-
+        console.log(c.quality);
         if (worstCase) {
           return [
             ...split,
@@ -71,6 +77,7 @@ export default function CalculationsDataGrid({
                 tp: c.tp_c,
                 ti: c.ti_c,
                 tr: c.tp_c * c.ti_c,
+                consensus: c.quality === Quality.CONSENSUS,
               },
               {
                 id: `${c.riskId}_m`,
@@ -79,6 +86,7 @@ export default function CalculationsDataGrid({
                 tp: c.tp_m,
                 ti: c.ti_m,
                 tr: c.tp_m * c.ti_m,
+                consensus: c.quality === Quality.CONSENSUS,
               },
               {
                 id: `${c.riskId}_e`,
@@ -87,6 +95,7 @@ export default function CalculationsDataGrid({
                 tp: c.tp_e,
                 ti: c.ti_e,
                 tr: c.tp_e * c.ti_e,
+                consensus: c.quality === Quality.CONSENSUS,
               },
             ][rs.indexOf(Math.max(...rs))],
           ];
@@ -100,6 +109,7 @@ export default function CalculationsDataGrid({
               tp: c.tp_c,
               ti: c.ti_c,
               tr: c.tp_c * c.ti_c,
+              consensus: c.quality === Quality.CONSENSUS,
             },
             {
               id: `${c.riskId}_m`,
@@ -108,6 +118,7 @@ export default function CalculationsDataGrid({
               tp: c.tp_m,
               ti: c.ti_m,
               tr: c.tp_m * c.ti_m,
+              consensus: c.quality === Quality.CONSENSUS,
             },
             {
               id: `${c.riskId}_e`,
@@ -116,6 +127,7 @@ export default function CalculationsDataGrid({
               tp: c.tp_e,
               ti: c.ti_e,
               tr: c.tp_e * c.ti_e,
+              consensus: c.quality === Quality.CONSENSUS,
             },
           ];
         }
@@ -124,7 +136,7 @@ export default function CalculationsDataGrid({
   }, [data, worstCase]);
 
   return (
-    <Accordion>
+    <Accordion disabled={!data}>
       <AccordionSummary>
         <Typography variant="subtitle2">Risk table</Typography>
       </AccordionSummary>

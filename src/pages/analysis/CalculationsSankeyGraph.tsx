@@ -37,7 +37,7 @@ export default function CalculationsSankeyGraph({
   if (!calculation) return null;
 
   return (
-    <Accordion sx={{}}>
+    <Accordion disabled={!calculations || !selectedNodeId}>
       <AccordionSummary>
         <Typography variant="subtitle2">Risk sankey diagram</Typography>
       </AccordionSummary>

@@ -13,26 +13,30 @@ import convergeImpacts from "./convergeImpacts";
 import convergeProbabilities from "./convergeProbabilities";
 import prepareRiskFiles from "./prepareRiskFiles";
 
-export default async function runAnalysis({
-  riskFiles,
-  cascades,
-  participations,
-  directAnalyses,
-  cascadeAnalyses,
-  runs,
-  damping,
-  log,
-}: {
-  riskFiles: DVRiskFile[];
-  cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
-  //   contacts: DVContact[];
-  participations: DVParticipation[];
-  directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
-  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
-  runs: number;
-  damping: number;
-  log: (l: string) => void;
-}) {
+export default function runAnalysis(
+  {
+    riskFiles,
+    cascades,
+    participations,
+    directAnalyses,
+    cascadeAnalyses,
+  }: // runs,
+  // damping,
+  // log,
+  // setCalculationProgress,
+  {
+    riskFiles: DVRiskFile[];
+    cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
+    //   contacts: DVContact[];
+    participations: DVParticipation[];
+    directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
+    cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
+    // runs: number;
+    // damping: number;
+    // log: (l: string) => void;
+  },
+  setCalculationProgress: (l: number) => void
+) {
   const riskFilesDict = riskFiles.reduce(
     (d, c) => ({
       ...d,
@@ -48,7 +52,7 @@ export default async function runAnalysis({
     {}
   );
 
-  const calculations = await prepareRiskFiles(
+  const calculations = prepareRiskFiles(
     riskFiles,
     riskFilesDict,
     cascades,
@@ -58,7 +62,6 @@ export default async function runAnalysis({
   );
 
   return calculations.map((c, i) => {
-    console.count("Risk #");
     const graph = getEffectGraph(getCausalGraph(c));
 
     // if (c.riskTitle.indexOf("lectricity") < 0) return c;
@@ -67,18 +70,15 @@ export default async function runAnalysis({
     calculateTotalImpact(graph);
     calculateTotalRisk(graph);
 
-    return graph;
+    // console.log((100 * (i + 1)) / calculations.length);
+    setCalculationProgress((100 * (i + 1)) / calculations.length);
 
     // console.log(`(${i + 1}/${calculations.length}) - Starting calculation for "${c.riskTitle}"`);
     // c.tp_c = calculateTotalProbability(c, SCENARIOS.CONSIDERABLE);
     // c.tp_m = calculateTotalProbability(c, SCENARIOS.MAJOR);
     // c.tp_e = calculateTotalProbability(c, SCENARIOS.EXTREME);
     // c.causes.forEach((cascade) => (c.ip = c.ip_c + c.ip_m + c.ip_e));
+
+    return graph;
   });
-
-  // convergeProbabilities({ risks: calculations, log, maxRuns: runs, damping });
-
-  // convergeImpacts({ risks: calculations, log, maxRuns: runs, damping });
-
-  return calculations;
 }

@@ -123,12 +123,13 @@ export default function CascadeMatrix({
   isCause?: boolean;
   onChange: (field: keyof DVRiskCascade, newValue: string) => Promise<void>;
 }) {
+  console.log(cascade);
   const theme = useTheme();
   return (
     <Grid container spacing={1}>
       <Grid xs={4.5}></Grid>
       <Grid xs={7.5}>
-        <Tooltip title={cause.cr4de_title}>
+        <Tooltip title={effect.cr4de_title}>
           <Box sx={{ padding: theme.spacing(1), textAlign: "center" }}>
             <Typography variant="h6">
               {cause.cr4de_risk_type === RISK_TYPE.MANMADE ? (
@@ -142,7 +143,7 @@ export default function CascadeMatrix({
       </Grid>
 
       <Grid xs={4.5}>
-        <Tooltip title={effect.cr4de_title}>
+        <Tooltip title={cause.cr4de_title}>
           <Box sx={{ padding: theme.spacing(1), textAlign: "center" }}>
             <Typography variant="h6">
               {cause.cr4de_risk_type === RISK_TYPE.MANMADE ? (

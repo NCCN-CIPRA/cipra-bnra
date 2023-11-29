@@ -117,6 +117,7 @@ export default function ImpactSankey({
       i: calculation.di,
     },
     ...calculation.effects.map((c) => ({
+      id: c.effect.riskId,
       name: c.effect.riskTitle,
       i: c.ii,
     })),

@@ -1,9 +1,10 @@
-import { Layer, Rectangle, ResponsiveContainer, Sankey, Tooltip } from "recharts";
-import { Box, Typography } from "@mui/material";
+import { Layer, Rectangle, ResponsiveContainer, Sankey, Tooltip, TooltipProps } from "recharts";
+import { Box, Typography, Card, CardContent } from "@mui/material";
 import getCategoryColor from "../functions/getCategoryColor";
 import { useNavigate } from "react-router-dom";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
-import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
+import { CascadeCalculation, RiskCalculation } from "../types/dataverse/DVAnalysisRun";
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 const baseY = 50;
 
@@ -115,6 +116,7 @@ export default function ProbabilitySankey({
       p: calculation.dp,
     },
     ...calculation.causes.map((c) => ({
+      id: c.cause.riskId,
       name: c.cause.riskTitle,
       p: c.ip,
     })),
@@ -125,10 +127,14 @@ export default function ProbabilitySankey({
       ? -1
       : causes.sort((a, b) => b.p - a.p)[Math.min(maxCauses - 1, causes.length - 1)].p;
 
-  const nodes = [{ name: calculation.riskTitle }, ...causes.filter((c) => c.p >= minP)];
-  if (minP >= 0) nodes.push({ name: "Other" });
+  const nodes: any[] = [{ name: calculation.riskTitle }, ...causes.filter((c) => c.p >= minP)];
+  if (minP >= 0)
+    nodes.push({
+      name: "Other",
+      hidden: calculation.causes.filter((e: any, i: number) => e.ip < minP),
+    });
 
-  const links = causes
+  const links: any[] = causes
     .filter((e) => e.p >= minP)
     .map((e, i: number) => ({
       source: i + 1,
@@ -140,11 +146,35 @@ export default function ProbabilitySankey({
       source: nodes.length - 1,
       target: 0,
       value: calculation.causes.filter((e: any, i: number) => e.ip < minP).reduce((tot, e) => tot + e.ip, 0),
+      hidden: calculation.causes.filter((e: any, i: number) => e.ip < minP),
     });
 
   const data = {
     nodes,
     links,
+  };
+
+  const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+    if (active && payload) {
+      if (payload[0].payload?.payload?.hidden) {
+        return (
+          <Card sx={{ backgroundColor: "rgba(255, 255, 255, 0.9)" }}>
+            <CardContent>
+              {payload[0].payload?.payload?.hidden
+                .sort((a: CascadeCalculation, b: CascadeCalculation) => b.ip - a.ip)
+                .slice(0, 10)
+                .map((c: CascadeCalculation) => (
+                  <Box sx={{ margin: 0, padding: 0 }}>
+                    {`${c.cause.riskTitle}:`} <b>{`${Math.round((10000 * c.ip) / calculation.tp) / 100}%`}</b>
+                  </Box>
+                ))}
+            </CardContent>
+          </Card>
+        );
+      }
+    }
+
+    return null;
   };
 
   return (
@@ -158,7 +188,9 @@ export default function ProbabilitySankey({
           node={<PSankeyNode onClick={onClick} totalProbability={calculation.tp} totalNodes={data.nodes.length} />}
           link={<PSankeyLink totalNodes={data.nodes.length} />}
           nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
-        ></Sankey>
+        >
+          <Tooltip content={<CustomTooltip />} />
+        </Sankey>
       </ResponsiveContainer>
     </>
   );

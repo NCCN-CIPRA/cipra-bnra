@@ -1,6 +1,8 @@
 import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { SCENARIOS } from "../scenarios";
 
+const INFO_OPS_FACTOR = 10;
+
 const getDP = (risk: RiskCalculation, scenario: SCENARIOS) => {
   if (scenario === SCENARIOS.CONSIDERABLE) return risk.dp_c;
   if (scenario === SCENARIOS.MAJOR) return risk.dp_m;
@@ -14,9 +16,11 @@ const getIP = (cascade: CascadeCalculation, scenario: SCENARIOS) => {
 };
 
 const setIP = (cascade: CascadeCalculation, scenario: SCENARIOS, ip: number) => {
-  if (scenario === SCENARIOS.CONSIDERABLE) cascade.ip_c = ip;
-  if (scenario === SCENARIOS.MAJOR) cascade.ip_m = ip;
-  if (scenario === SCENARIOS.EXTREME) cascade.ip_e = ip;
+  const factor = cascade.cause.riskTitle === "Information operations" ? INFO_OPS_FACTOR : 1;
+
+  if (scenario === SCENARIOS.CONSIDERABLE) cascade.ip_c = ip / factor;
+  if (scenario === SCENARIOS.MAJOR) cascade.ip_m = ip / factor;
+  if (scenario === SCENARIOS.EXTREME) cascade.ip_e = ip / factor;
 };
 
 const getCP = (cascade: CascadeCalculation, fromScenario: SCENARIOS, toScenario: SCENARIOS) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Container,
   Typography,
@@ -12,8 +12,10 @@ import {
   FormControlLabel,
   Checkbox,
   Stack,
+  LinearProgress,
   Accordion,
 } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import useRecords from "../../hooks/useRecords";
@@ -38,6 +40,8 @@ import CalculationsRiskMatrix from "./CalculationsRiskMatrix";
 import RiskNetworkGraph from "./RiskNetworkGraph";
 import CalculationsCascadeDataGrid from "./CalculationsCascadeDataGrid";
 import CalculationsSankeyGraph from "./CalculationsSankeyGraph";
+import RiskProfileGraph from "./RiskProfileGraph";
+import { MessageParams } from "../../functions/analysis/calculator.worker";
 
 const roundNumberField = (n: number) => {
   if (n > 10) return Math.round(n);
@@ -61,6 +65,11 @@ export default function CalculationPage() {
   const api = useAPI();
   const logLines = useRef<string[]>(["Loading data..."]);
   const [updateLog, setUpdateLog] = useState(Date.now());
+
+  const [calculationProgress, setCalculationProgress] = useState<number | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  const [results, setResults] = useState<RiskCalculation[] | null>(null);
 
   const [useableDAs, setUseableDAs] = useState<DVDirectAnalysis<unknown, DVContact>[] | null>(null);
   const [useableCAs, setUseableCAs] = useState<DVCascadeAnalysis<unknown, unknown, DVContact>[] | null>(null);
@@ -129,10 +138,6 @@ export default function CalculationPage() {
     onComplete: async (data) => logger(`    Finished loading ${data.length} cascade analyses`),
   });
 
-  const [isCalculating, setIsCalculating] = useState(false);
-
-  const [results, setResults] = useState<RiskCalculation[] | null>(null);
-
   usePageTitle("BNRA 2023 - 2026 Result Calculator");
   useBreadcrumbs([
     { name: "BNRA 2023 - 2026", url: "/" },
@@ -141,6 +146,25 @@ export default function CalculationPage() {
   ]);
 
   const isLoading = loadingRiskFiles || loadingCascades || loadingDAs || loadingCAs || loadingParticipations;
+
+  const calculator: Worker = useMemo(
+    () => new Worker(new URL("../../functions/analysis/calculator.worker.ts", import.meta.url)),
+    [riskFiles]
+  );
+
+  useEffect(() => {
+    if (window.Worker) {
+      calculator.onmessage = (e: MessageEvent<MessageParams>) => {
+        if (e.data.type === "progress") {
+          setCalculationProgress(e.data.value);
+        }
+        if (e.data.type === "result") {
+          setCalculations(e.data.value);
+          setIsCalculating(false);
+        }
+      };
+    }
+  }, [calculator]);
 
   useEffect(() => {
     if (!participations || !participations[0] || !directAnalyses || !cascadeAnalyses) return;
@@ -233,18 +257,17 @@ export default function CalculationPage() {
     setIsCalculating(true);
     setSelectedNode(null);
 
-    const calcs = await runAnalysis({
+    setCalculationProgress(0);
+
+    calculator.postMessage({
       riskFiles,
       cascades,
       participations,
       directAnalyses: useableDAs,
       cascadeAnalyses: useableCAs,
-      log: logger,
-      runs: simRuns,
-      damping: parseFloat(damping),
     });
-    console.log(calcs);
-    setCalculations(calcs);
+
+    // setCalculations(calcs);
     // const [calculations, daMetrics, caMetrics] = await prepareRiskFiles(riskFiles, cascades, useableDAs, useableCAs);
 
     // logLines.push(
@@ -279,8 +302,6 @@ export default function CalculationPage() {
     // setResults(calculations);
 
     // setLog([...logLines, "Done"]);
-
-    setIsCalculating(false);
   };
 
   useEffect(() => {
@@ -300,14 +321,14 @@ export default function CalculationPage() {
       //   r(c.dp_e + c.causes.reduce((t, c) => t + c.ip_e, 0))
       // );
 
-      console.log("TI: ", r(c.ti), r(c.ti_c), r(c.ti_m), r(c.ti_e));
-      console.log(
-        "TI sum: ",
-        r(c.di + c.effects.reduce((t, c) => t + c.ii, 0)),
-        r(c.di_c + c.effects.reduce((t, c) => t + c.ii_c, 0)),
-        r(c.di_m + c.effects.reduce((t, c) => t + c.ii_m, 0)),
-        r(c.di_e + c.effects.reduce((t, c) => t + c.ii_e, 0))
-      );
+      // console.log("TI: ", r(c.ti), r(c.ti_c), r(c.ti_m), r(c.ti_e));
+      // console.log(
+      //   "TI sum: ",
+      //   r(c.di + c.effects.reduce((t, c) => t + c.ii, 0)),
+      //   r(c.di_c + c.effects.reduce((t, c) => t + c.ii_c, 0)),
+      //   r(c.di_m + c.effects.reduce((t, c) => t + c.ii_m, 0)),
+      //   r(c.di_e + c.effects.reduce((t, c) => t + c.ii_e, 0))
+      // );
 
       // console.log(
       //   "TI sum",
@@ -367,29 +388,84 @@ export default function CalculationPage() {
             <Typography variant="subtitle2">Simulation log:</Typography>
             <Box
               sx={{
-                height: 200,
-                overflowY: "scroll",
-                border: "1px solid #eee",
-                backgroundColor: "#00000005",
                 mt: 1,
-                mb: 4,
               }}
             >
-              <pre style={{ paddingLeft: 12, paddingRight: 12 }}>{logLines.current.map((l, i) => `${l}\n`)}</pre>
+              <Stack direction="row">
+                <Stack direction="column" sx={{ flex: 1 }}>
+                  <Stack direction="row">
+                    <Box sx={{ width: 24, height: 32, mx: 1 }}>
+                      {riskFiles && !loadingRiskFiles && <CheckIcon color="success" />}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle2" sx={{ mt: "2px" }}>
+                        Risk Files
+                      </Typography>
+                    </Box>
+                  </Stack>
+                  <Stack direction="row">
+                    <Box sx={{ width: 24, height: 32, mx: 1 }}>
+                      {cascades && !loadingCascades && <CheckIcon color="success" />}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle2" sx={{ mt: "2px" }}>
+                        Risk Cascades
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Stack>
+                <Stack direction="column" sx={{ flex: 1 }}>
+                  <Stack direction="row">
+                    <Box sx={{ width: 24, height: 32, mx: 1 }}>
+                      {participations && !loadingParticipations && <CheckIcon color="success" />}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle2" sx={{ mt: "2px" }}>
+                        Participations
+                      </Typography>
+                    </Box>
+                  </Stack>
+                  <Stack direction="row">
+                    <Box sx={{ width: 24, height: 32, mx: 1 }}>
+                      {directAnalyses && !loadingDAs && <CheckIcon color="success" />}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle2" sx={{ mt: "2px" }}>
+                        Direct Analyses
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Stack>
+                <Stack direction="column" sx={{ flex: 1 }}>
+                  <Stack direction="row">
+                    <Box sx={{ width: 24, height: 32, mx: 1 }}>
+                      {cascadeAnalyses && !loadingCAs && <CheckIcon color="success" />}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle2" sx={{ mt: "2px" }}>
+                        Cascade Analyses
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Stack>
+              </Stack>
+              <Box sx={{ height: 8, mt: 2, mx: 1 }}>
+                {calculationProgress !== null && <LinearProgress variant="determinate" value={calculationProgress} />}
+              </Box>
             </Box>
           </CardContent>
           <CardActions>
             <Button disabled={isLoading} onClick={reloadData}>
               Reload data
             </Button>
-            <Button disabled={riskFiles === null || cascades === null} onClick={runCalculations}>
-              Start calculation
+            <Button disabled={isLoading} onClick={runCalculations}>
+              {calculations ? "Res" : "S"}tart calculation
             </Button>
-            <Button disabled={results === null || isCalculating} onClick={saveResults}>
+            {/* <Button disabled={results === null || isCalculating} onClick={saveResults}>
               Save results
-            </Button>
+            </Button> */}
             <Box sx={{ flex: 1 }} />
-            <Button
+            {/* <Button
               color="warning"
               onClick={() => {
                 logLines.current = [];
@@ -397,16 +473,16 @@ export default function CalculationPage() {
               }}
             >
               Clear log
-            </Button>
+            </Button> */}
           </CardActions>
         </Card>
 
         <Box>
-          {/* <RiskNetworkGraph
+          <RiskNetworkGraph
             calculations={calculations}
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}
-          /> */}
+          />
 
           <CalculationsRiskMatrix
             calculations={calculations}
@@ -419,6 +495,11 @@ export default function CalculationPage() {
           <CalculationsCascadeDataGrid data={calculations} />
 
           <CalculationsSankeyGraph
+            calculations={calculations}
+            selectedNodeId={selectedNode}
+            setSelectedNodeId={setSelectedNode}
+          />
+          <RiskProfileGraph
             calculations={calculations}
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}
