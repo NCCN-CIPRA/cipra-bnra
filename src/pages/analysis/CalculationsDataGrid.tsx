@@ -65,7 +65,7 @@ export default function CalculationsDataGrid({
     setRows(
       data.reduce((split, c) => {
         const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
-        console.log(c.quality);
+
         if (worstCase) {
           return [
             ...split,

@@ -153,7 +153,7 @@ export default function ProbabilitySankey({
     nodes,
     links,
   };
-
+  console.log(data);
   const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
     if (active && payload) {
       if (payload[0].payload?.payload?.hidden) {
