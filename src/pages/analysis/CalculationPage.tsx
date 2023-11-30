@@ -148,17 +148,12 @@ export default function CalculationPage() {
   const isLoading = loadingRiskFiles || loadingCascades || loadingDAs || loadingCAs || loadingParticipations;
 
   const calculator: Worker = useMemo(() => {
-    const url = new URL(
-      "https://raw.githack.com/NCCN-JoepDriesen/cipra-bnra/main/src/functions/analysis/calculator.worker.js"
-    );
-    const workerBlob = new Blob([`import "${url}"`], { type: "text/javascript" });
-    const blobUrl = window.URL.createObjectURL(workerBlob);
-
-    return new Worker(blobUrl, { type: "module" });
+    return new Worker(new URL("../../functions/analysis/calculator.worker.ts", import.meta.url), { type: "module" });
   }, [riskFiles]);
 
   useEffect(() => {
     if (window.Worker) {
+      // calculator.onmessage = (e: MessageEvent<MessageParams>) => {
       calculator.onmessage = (e: MessageEvent<any>) => {
         if (e.data.type === "progress") {
           setCalculationProgress(e.data.value);
@@ -263,7 +258,7 @@ export default function CalculationPage() {
     setSelectedNode(null);
 
     setCalculationProgress(0);
-
+    console.log("ok");
     calculator.postMessage({
       riskFiles,
       cascades,
