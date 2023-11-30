@@ -136,13 +136,13 @@ export default function ImpactSankey({
     .map((e, i: number) => ({
       source: 0,
       target: i + 1,
-      value: e.i,
+      value: Math.max(0.000000001, e.i),
     }));
   if (minI > 0)
     links.push({
       source: 0,
       target: nodes.length - 1,
-      value: calculation.effects.filter((e: any, i: number) => e.ii < minI).reduce((tot, e) => tot + e.ii, 0),
+      value: calculation.effects.filter((e: any, i: number) => e.ii < minI).reduce((tot, e) => tot + e.ii, 0.000000001),
     });
 
   const data = {

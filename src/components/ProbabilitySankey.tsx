@@ -139,13 +139,13 @@ export default function ProbabilitySankey({
     .map((e, i: number) => ({
       source: i + 1,
       target: 0,
-      value: e.p,
+      value: Math.max(0.000000001, e.p),
     }));
   if (minP > 0)
     links.push({
       source: nodes.length - 1,
       target: 0,
-      value: calculation.causes.filter((e: any, i: number) => e.ip < minP).reduce((tot, e) => tot + e.ip, 0),
+      value: calculation.causes.filter((e: any, i: number) => e.ip < minP).reduce((tot, e) => tot + e.ip, 0.000000001),
       hidden: calculation.causes.filter((e: any, i: number) => e.ip < minP),
     });
 
@@ -153,7 +153,7 @@ export default function ProbabilitySankey({
     nodes,
     links,
   };
-  console.log(data);
+
   const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
     if (active && payload) {
       if (payload[0].payload?.payload?.hidden) {

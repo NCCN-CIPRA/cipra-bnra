@@ -155,11 +155,10 @@ export default function CalculationPage() {
       const content = `importScripts( "${url}" );`;
       return URL.createObjectURL(new Blob([content], { type: "text/javascript" }));
     }
+    const workerUrl = new URL("../../functions/analysis/calculator.worker.ts", import.meta.url);
 
-    const cross_origin_script_url = "../../functions/analysis/calculator.worker.ts";
-
-    if (cross_origin_script_url.indexOf("http") >= 0) {
-      const worker_url = getWorkerURL(cross_origin_script_url);
+    if (workerUrl.href.indexOf("githack") >= 0) {
+      const worker_url = getWorkerURL(workerUrl.href);
       const worker = new Worker(worker_url);
 
       if (typeof worker_url === "string") URL.revokeObjectURL(worker_url);

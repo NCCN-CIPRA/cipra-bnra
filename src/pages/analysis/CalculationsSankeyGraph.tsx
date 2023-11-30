@@ -13,6 +13,11 @@ import {
   FormGroup,
   FormControlLabel,
   Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
 } from "@mui/material";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
@@ -27,6 +32,10 @@ export default function CalculationsSankeyGraph({
   setSelectedNodeId: (id: string | null) => void;
 }) {
   const [calculation, setCalculation] = useState<RiskCalculation | null>(null);
+  const [scenario, setScenario] = useState<"wcs" | "c" | "m" | "e">("wcs");
+  const [split, setSplit] = useState<"total" | "scenario" | "impact">("impact");
+  const [causes, setCauses] = useState(5);
+  const [effects, setEffects] = useState(5);
 
   useEffect(() => {
     if (!calculations) return;
@@ -46,7 +55,7 @@ export default function CalculationsSankeyGraph({
           <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
             <ProbabilitySankey
               calculation={calculation}
-              maxCauses={5}
+              maxCauses={causes}
               onClick={(id: string) => setSelectedNodeId(id)}
             />
           </Box>
@@ -83,10 +92,51 @@ export default function CalculationsSankeyGraph({
             </Box>
           </Stack>
           <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
-            <ImpactSankey calculation={calculation} maxEffects={5} onClick={(id: string) => setSelectedNodeId(id)} />
+            <ImpactSankey
+              calculation={calculation}
+              maxEffects={effects}
+              onClick={(id: string) => setSelectedNodeId(id)}
+            />
           </Box>
         </Stack>
       </AccordionDetails>
+      <AccordionActions>
+        <Stack direction="row" spacing={5} sx={{ flex: 1 }}>
+          <FormControl sx={{ flex: 1 }} fullWidth>
+            <InputLabel>Causes</InputLabel>
+            <TextField
+              type="number"
+              value={causes}
+              onChange={(e) => setCauses(Math.min(10, Math.max(0, parseInt(e.target.value))))}
+            />
+          </FormControl>
+          <FormControl sx={{ flex: 1 }} fullWidth>
+            <InputLabel>Show Scenario</InputLabel>
+            <Select value={scenario} label="Show Scenario" onChange={(e) => setScenario(e.target.value as any)}>
+              <MenuItem value={"wcs"}>Worst Case</MenuItem>
+              <MenuItem value={"c"}>Considerable</MenuItem>
+              <MenuItem value={"m"}>Major</MenuItem>
+              <MenuItem value={"e"}>Extreme</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl sx={{ flex: 1 }} fullWidth>
+            <InputLabel>Split flows</InputLabel>
+            <Select value={split} label="Node Size" onChange={(e) => setSplit(e.target.value as any)}>
+              <MenuItem value={"total"}>-</MenuItem>
+              <MenuItem value={"scenario"}>Scenario</MenuItem>
+              <MenuItem value={"impact"}>Impact</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl sx={{ flex: 1 }} fullWidth>
+            <InputLabel>Effects</InputLabel>
+            <TextField
+              type="number"
+              value={effects}
+              onChange={(e) => setEffects(Math.min(10, Math.max(0, parseInt(e.target.value))))}
+            />
+          </FormControl>
+        </Stack>
+      </AccordionActions>
     </Accordion>
   );
 }
