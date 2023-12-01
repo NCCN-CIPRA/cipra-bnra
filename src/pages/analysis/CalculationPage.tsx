@@ -155,15 +155,11 @@ export default function CalculationPage() {
       const content = `importScripts( "${url}" );`;
       return URL.createObjectURL(new Blob([content], { type: "text/javascript" }));
     }
-    const workerUrl = new URL("../../functions/analysis/calculator.worker.ts", import.meta.url);
 
-    if (workerUrl.href.indexOf("githack") >= 0) {
-      const worker_url = getWorkerURL(workerUrl.href);
-      const worker = new Worker(worker_url);
+    const testUrl = new URL("../../functions/analysis/calculator.worker.ts", import.meta.url);
 
-      if (typeof worker_url === "string") URL.revokeObjectURL(worker_url);
-
-      return worker;
+    if (testUrl.href.indexOf("githack") >= 0) {
+      return new Worker(new URL("https://bnra.powerappsportals.com/calculator.worker.js"));
     }
 
     return new Worker(new URL("../../functions/analysis/calculator.worker.ts", import.meta.url), { type: "module" });

@@ -99,7 +99,7 @@ const PSankeyLink = (props: any) => {
 
 export default function SankeyPerImpact({
   calculation,
-  maxCauses = null,
+  maxLinks = null,
   onClick = null,
 }: {
   riskFile?: DVRiskFile | null;
@@ -137,9 +137,9 @@ export default function SankeyPerImpact({
   ];
 
   let minP =
-    maxCauses === null || causes.length <= maxCauses
+    maxLinks === null || causes.length <= maxLinks
       ? -1
-      : causes.sort((a, b) => b.p - a.p)[Math.min(maxCauses - 1, causes.length - 1)].p;
+      : causes.sort((a, b) => b.p - a.p)[Math.min(maxLinks - 1, causes.length - 1)].p;
 
   const nodes: any[] = [{ name: calculation.riskTitle }, ...causes.filter((c) => c.p >= minP)];
   if (minP >= 0)
