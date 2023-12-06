@@ -206,6 +206,10 @@ export interface RiskCalculation extends RiskCalculationKnownFields {
   // Title of the risk file for debugging purposes
   riskTitle: string;
 
+  keyRisk?: boolean;
+  code?: string;
+  category?: string;
+
   // The time at which the analysis was executed
   timestamp: number;
 

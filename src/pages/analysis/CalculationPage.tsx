@@ -99,7 +99,7 @@ export default function CalculationPage() {
     reloadData: reloadRiskFiles,
   } = useRecords<DVRiskFile>({
     table: DataTable.RISK_FILE,
-    query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_title,cr4de_risk_type,cr4de_key_risk,cr4de_subjective_importance,cr4de_consensus_date,${RISK_FILE_QUANTI_FIELDS.join(
+    query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_title,cr4de_risk_type,cr4de_key_risk,cr4de_hazard_id,cr4de_risk_category,cr4de_subjective_importance,cr4de_consensus_date,${RISK_FILE_QUANTI_FIELDS.join(
       ","
     )}`,
     onComplete: async (data) => logger(`    Finished loading ${data.length} risk files`),
@@ -173,7 +173,20 @@ export default function CalculationPage() {
           setCalculationProgress(e.data.value);
         }
         if (e.data.type === "result") {
-          setCalculations(e.data.value);
+          setCalculations(
+            e.data.value.map((c: RiskCalculation) => {
+              const risk = riskFiles?.find((r) => r.cr4de_riskfilesid === c.riskId);
+
+              if (!risk) return c;
+              console.log(risk);
+              return {
+                ...c,
+                keyRisk: risk.cr4de_key_risk,
+                code: risk.cr4de_hazard_id,
+                category: risk.cr4de_risk_category,
+              };
+            })
+          );
           setIsCalculating(false);
         }
       };
@@ -499,7 +512,6 @@ export default function CalculationPage() {
           />
 
           <CalculationsRiskMatrix
-            risks={riskFiles}
             calculations={calculations}
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}

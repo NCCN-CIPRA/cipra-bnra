@@ -9,6 +9,8 @@ import {
   ResponsiveContainer,
   TooltipProps,
   Cell,
+  LabelList,
+  Legend,
 } from "recharts";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
@@ -37,28 +39,50 @@ interface MatrixRisk {
   riskId: string;
   id: string;
   title: string;
+  fullTitle: string;
   x: number;
   y: number;
   tr: number;
   scenario: SCENARIOS;
   keyRisk: boolean;
+  code: string;
+  category: string;
 }
 
+const CATEGORIES: { [key: string]: "circle" | "cross" | "diamond" | "square" | "star" | "triangle" | "wye" } = {
+  Cyber: "square",
+  EcoTech: "star",
+  Health: "diamond",
+  "Man-made": "cross",
+  Nature: "triangle",
+  Transversal: "circle",
+};
+
+const defaultFields = (c: RiskCalculation) =>
+  ({
+    riskId: c.riskId,
+    title: c.riskTitle,
+    keyRisk: Boolean(c.keyRisk),
+    code: c.code,
+    category: c.category,
+  } as Partial<MatrixRisk>);
+
 export default function CalculationsRiskMatrix({
-  risks,
   calculations,
   selectedNodeId,
   setSelectedNodeId,
 }: {
-  risks: DVRiskFile[] | null;
   calculations: RiskCalculation[] | null;
   selectedNodeId: string | null;
   setSelectedNodeId: (id: string | null) => void;
 }) {
   const [dots, setDots] = useState<MatrixRisk[] | null>(null);
   const [worstCase, setWorstCase] = useState(false);
+  const [labels, setLabels] = useState(false);
   const [scales, setScales] = useState<"absolute" | "classes">("classes");
   const [nonKeyRisks, setNonKeyRisks] = useState<"show" | "fade" | "hide">("show");
+  const [categories, setCategories] = useState<"shapes" | "none">("none");
+  const [scenarios, setScenarios] = useState<"colors" | "none">("colors");
 
   const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
     if (active) {
@@ -114,7 +138,6 @@ export default function CalculationsRiskMatrix({
 
     setDots(
       calculations.reduce((split, c) => {
-        const keyRisk = Boolean(risks?.find((r) => r.cr4de_riskfilesid === c.riskId && r.cr4de_key_risk));
         const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
 
         if (worstCase) {
@@ -125,33 +148,30 @@ export default function CalculationsRiskMatrix({
             ...split,
             [
               {
-                riskId: c.riskId,
                 id: `${c.riskId}_c`,
-                title: `Considerable ${c.riskTitle}`,
-                ...recalcPI(c.tp_c, c.ti_c),
+                fullTitle: `Considerable ${c.riskTitle}`,
                 scenario: SCENARIOS.CONSIDERABLE,
-                keyRisk,
-              },
+                ...defaultFields(c),
+                ...recalcPI(c.tp_c, c.ti_c),
+              } as MatrixRisk,
               {
-                riskId: c.riskId,
                 id: `${c.riskId}_m`,
-                title: `Major ${c.riskTitle}`,
+                fullTitle: `Major ${c.riskTitle}`,
                 ...recalcPI(c.tp_m, c.ti_m),
                 scenario: SCENARIOS.MAJOR,
-                keyRisk,
-              },
+                ...defaultFields(c),
+              } as MatrixRisk,
               {
                 riskId: c.riskId,
                 id: `${c.riskId}_e`,
-                title: `Extreme ${c.riskTitle}`,
+                fullTitle: `Extreme ${c.riskTitle}`,
                 ...recalcPI(c.tp_e, c.ti_e),
                 scenario: SCENARIOS.EXTREME,
-                keyRisk,
-              },
+                ...defaultFields(c),
+              } as MatrixRisk,
             ][rs.indexOf(Math.max(...rs))],
           ];
         } else {
-          if (c.riskTitle.indexOf("Volcanic") >= 0) console.log(1 - Math.pow(1 - c.tp_e, 365));
           return [
             ...split,
             ...(c.tp_c === 0 || c.ti_c === 0
@@ -160,11 +180,11 @@ export default function CalculationsRiskMatrix({
                   {
                     riskId: c.riskId,
                     id: `${c.riskId}_c`,
-                    title: `Considerable ${c.riskTitle}`,
+                    fullTitle: `Considerable ${c.riskTitle}`,
                     ...recalcPI(c.tp_c, c.ti_c),
                     scenario: SCENARIOS.CONSIDERABLE,
-                    keyRisk,
-                  },
+                    ...defaultFields(c),
+                  } as MatrixRisk,
                 ]),
             ...(c.tp_m === 0 || c.ti_m === 0
               ? []
@@ -172,11 +192,11 @@ export default function CalculationsRiskMatrix({
                   {
                     riskId: c.riskId,
                     id: `${c.riskId}_m`,
-                    title: `Major ${c.riskTitle}`,
+                    fullTitle: `Major ${c.riskTitle}`,
                     ...recalcPI(c.tp_m, c.ti_m),
                     scenario: SCENARIOS.MAJOR,
-                    keyRisk,
-                  },
+                    ...defaultFields(c),
+                  } as MatrixRisk,
                 ]),
             ...(c.tp_e === 0 || c.ti_e === 0
               ? []
@@ -184,18 +204,18 @@ export default function CalculationsRiskMatrix({
                   {
                     riskId: c.riskId,
                     id: `${c.riskId}_e`,
-                    title: `Extreme ${c.riskTitle}`,
+                    fullTitle: `Extreme ${c.riskTitle}`,
                     ...recalcPI(c.tp_e, c.ti_e),
                     scenario: SCENARIOS.EXTREME,
-                    keyRisk,
-                  },
+                    ...defaultFields(c),
+                  } as MatrixRisk,
                 ]),
           ];
         }
       }, [] as MatrixRisk[])
     );
-  }, [risks, calculations, worstCase, scales, nonKeyRisks]);
-
+  }, [calculations, worstCase, scales, nonKeyRisks]);
+  console.log(dots);
   return (
     <Accordion disabled={!calculations}>
       <AccordionSummary>
@@ -269,34 +289,61 @@ export default function CalculationsRiskMatrix({
               </>
             )}
             <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
-            <Scatter name="Risks" data={dots || []} fill="#8884d8">
-              {(dots || []).map((entry, index) => {
-                let opacity = 1;
-                if (selectedNodeId !== null) {
-                  if (selectedNodeId !== entry.riskId) opacity = opacity * 0.2;
-                }
-                if (nonKeyRisks !== "show" && !entry.keyRisk) {
-                  if (nonKeyRisks === "fade") {
-                    opacity = opacity * 0.2;
-                  } else {
-                    opacity = 0;
-                  }
-                }
+            {Object.entries(CATEGORIES).map(([CATEGORY, shape]) => {
+              const catData = dots?.filter((d) => d.category === CATEGORY) || [];
 
-                return (
-                  <Cell
-                    key={`cell-${entry.id}`}
-                    fill={SCENARIO_PARAMS[entry.scenario].color}
-                    stroke="rgba(0,0,0,0.1)"
-                    opacity={opacity}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedNodeId(entry.riskId);
-                    }}
-                  />
-                );
-              })}
-            </Scatter>
+              return (
+                <Scatter
+                  name={`${CATEGORY} Risks`}
+                  data={catData}
+                  fill="#8884d8"
+                  shape={categories === "shapes" ? shape : "circle"}
+                >
+                  {labels && <LabelList dataKey="code" position="insideTop" offset={15} />}
+                  {catData.map((entry, index) => {
+                    let opacity = 1;
+                    if (selectedNodeId !== null) {
+                      if (selectedNodeId !== entry.riskId) opacity = opacity * 0.2;
+                    }
+                    if (nonKeyRisks !== "show" && !entry.keyRisk) {
+                      if (nonKeyRisks === "fade") {
+                        opacity = opacity * 0.2;
+                      } else {
+                        opacity = 0;
+                      }
+                    }
+
+                    return (
+                      <Cell
+                        key={`cell-${entry.id}`}
+                        fill={scenarios === "colors" ? SCENARIO_PARAMS[entry.scenario].color : "rgba(150,150,150,1)"}
+                        stroke="rgba(0,0,0,0.1)"
+                        strokeWidth={2}
+                        opacity={opacity}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedNodeId(entry.riskId);
+                        }}
+                      />
+                    );
+                  })}
+                </Scatter>
+              );
+            })}
+            {/* <Legend
+              payload={Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
+                value: `${CATEGORY} Risks`,
+                type: shape,
+                color: "rgba(150,150,150,1)",
+              }))}
+            /> */}
+            <Legend
+              payload={Object.entries(SCENARIO_PARAMS).map(([scenario, params]) => ({
+                value: `${scenario[0].toUpperCase()}${scenario.slice(1)}`,
+                type: "circle",
+                color: params.color,
+              }))}
+            />
           </ScatterChart>
         </ResponsiveContainer>
       </AccordionDetails>
@@ -307,22 +354,58 @@ export default function CalculationsRiskMatrix({
               control={<Checkbox checked={worstCase} onChange={(e) => setWorstCase(e.target.checked)} />}
               label="Show only worst case scenario"
             />
+            <FormControlLabel
+              control={<Checkbox checked={labels} onChange={(e) => setLabels(e.target.checked)} />}
+              label="Show labels"
+            />
           </FormGroup>
-          <FormControl sx={{ flex: 1 }} fullWidth>
-            <InputLabel>Scale Display</InputLabel>
-            <Select value={scales} label="Scale Display" onChange={(e) => setScales(e.target.value as any)}>
-              <MenuItem value={"classes"}>Classes</MenuItem>
-              <MenuItem value={"absolute"}>Absolute</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl sx={{ flex: 1 }} fullWidth>
-            <InputLabel>Non-key Risks</InputLabel>
-            <Select value={nonKeyRisks} label="Non-key Risks" onChange={(e) => setNonKeyRisks(e.target.value as any)}>
-              <MenuItem value={"show"}>Show</MenuItem>
-              <MenuItem value={"fade"}>Fade</MenuItem>
-              <MenuItem value={"hide"}>Hide</MenuItem>
-            </Select>
-          </FormControl>
+          <Stack direction="column" sx={{ flex: 1 }} spacing={3}>
+            <Stack direction="row" spacing={5}>
+              <FormControl sx={{ flex: 1 }} fullWidth>
+                <InputLabel>Scale Display</InputLabel>
+                <Select value={scales} label="Scale Display" onChange={(e) => setScales(e.target.value as any)}>
+                  <MenuItem value={"classes"}>Classes</MenuItem>
+                  <MenuItem value={"absolute"}>Absolute</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl sx={{ flex: 1 }} fullWidth>
+                <InputLabel>Non-key Risks</InputLabel>
+                <Select
+                  value={nonKeyRisks}
+                  label="Non-key Risks"
+                  onChange={(e) => setNonKeyRisks(e.target.value as any)}
+                >
+                  <MenuItem value={"show"}>Show</MenuItem>
+                  <MenuItem value={"fade"}>Fade</MenuItem>
+                  <MenuItem value={"hide"}>Hide</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+            <Stack direction="row" spacing={5}>
+              <FormControl sx={{ flex: 1 }} fullWidth>
+                <InputLabel>Categories display</InputLabel>
+                <Select
+                  value={categories}
+                  label="Categories display"
+                  onChange={(e) => setCategories(e.target.value as any)}
+                >
+                  <MenuItem value={"shapes"}>Shapes</MenuItem>
+                  <MenuItem value={"none"}>None</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl sx={{ flex: 1 }} fullWidth>
+                <InputLabel>Scenarios display</InputLabel>
+                <Select
+                  value={scenarios}
+                  label="Scenarios display"
+                  onChange={(e) => setScenarios(e.target.value as any)}
+                >
+                  <MenuItem value={"colors"}>Colors</MenuItem>
+                  <MenuItem value={"none"}>None</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+          </Stack>
         </Stack>
       </AccordionActions>
     </Accordion>
