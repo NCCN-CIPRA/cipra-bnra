@@ -2,8 +2,9 @@ import { Layer, Rectangle, ResponsiveContainer, Sankey, Tooltip } from "recharts
 import { Box, Typography } from "@mui/material";
 import getCategoryColor from "../functions/getCategoryColor";
 import { useNavigate } from "react-router-dom";
-import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
+import { CascadeCalculation, RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import { SCENARIOS } from "../functions/scenarios";
 
 const baseY = 50;
 
@@ -102,24 +103,44 @@ export default function ImpactSankey({
   riskFile = null,
   calculation,
   maxEffects = null,
+  scenario = null,
   onClick = null,
 }: {
   riskFile?: DVRiskFile | null;
   calculation: RiskCalculation | null;
   maxEffects?: number | null;
+  scenario?: SCENARIOS | null;
   onClick?: ((id: string) => void) | null;
 }) {
   if (!calculation) return null;
 
+  let scenarioSuffix: string;
+  if (!scenario) {
+    const rs = [
+      calculation.tp_c * calculation.ti_c,
+      calculation.tp_m * calculation.ti_m,
+      calculation.tp_e * calculation.ti_e,
+    ];
+
+    const s = ["c", "m", "e"][rs.indexOf(Math.max(...rs))];
+    scenarioSuffix = "_" + s;
+  } else if (scenario === SCENARIOS.CONSIDERABLE) {
+    scenarioSuffix = "_c";
+  } else if (scenario === SCENARIOS.MAJOR) {
+    scenarioSuffix = "_m";
+  } else {
+    scenarioSuffix = "_e";
+  }
+
   const effects = [
     {
       name: "Direct Impact",
-      i: calculation.di,
+      i: calculation[`di${scenarioSuffix}` as keyof RiskCalculation] as number,
     },
     ...calculation.effects.map((c) => ({
       id: c.effect.riskId,
       name: c.effect.riskTitle,
-      i: c.ii,
+      i: c[`ii${scenarioSuffix}` as keyof CascadeCalculation] as number,
     })),
   ];
 
@@ -142,7 +163,9 @@ export default function ImpactSankey({
     links.push({
       source: 0,
       target: nodes.length - 1,
-      value: calculation.effects.filter((e: any, i: number) => e.ii < minI).reduce((tot, e) => tot + e.ii, 0.000000001),
+      value: calculation.effects
+        .filter((e: any, i: number) => (e[`ii${scenarioSuffix}` as keyof CascadeCalculation] as number) < minI)
+        .reduce((tot, e) => tot + (e[`ii${scenarioSuffix}` as keyof CascadeCalculation] as number), 0.000000001),
     });
 
   const data = {
@@ -158,7 +181,13 @@ export default function ImpactSankey({
       <ResponsiveContainer width="100%" height="100%">
         <Sankey
           data={data}
-          node={<ISankeyNode onClick={onClick} totalImpact={calculation.ti} totalNodes={data.nodes.length} />}
+          node={
+            <ISankeyNode
+              onClick={onClick}
+              totalImpact={calculation[`ti${scenarioSuffix}` as keyof RiskCalculation]}
+              totalNodes={data.nodes.length}
+            />
+          }
           link={<ISankeyLink totalNodes={data.nodes.length} />}
           nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
         ></Sankey>

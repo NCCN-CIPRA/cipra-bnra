@@ -99,7 +99,7 @@ export default function CalculationPage() {
     reloadData: reloadRiskFiles,
   } = useRecords<DVRiskFile>({
     table: DataTable.RISK_FILE,
-    query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_title,cr4de_risk_type,cr4de_subjective_importance,cr4de_consensus_date,${RISK_FILE_QUANTI_FIELDS.join(
+    query: `$filter=cr4de_risk_category ne 'test'&$select=cr4de_title,cr4de_risk_type,cr4de_key_risk,cr4de_subjective_importance,cr4de_consensus_date,${RISK_FILE_QUANTI_FIELDS.join(
       ","
     )}`,
     onComplete: async (data) => logger(`    Finished loading ${data.length} risk files`),
@@ -469,10 +469,10 @@ export default function CalculationPage() {
             </Box>
           </CardContent>
           <CardActions>
-            <Button disabled={isLoading} onClick={reloadData}>
+            <Button disabled={isLoading || isCalculating} onClick={reloadData}>
               Reload data
             </Button>
-            <Button disabled={isLoading} onClick={runCalculations}>
+            <Button disabled={isLoading || isCalculating} onClick={runCalculations}>
               {calculations ? "Res" : "S"}tart calculation
             </Button>
             {/* <Button disabled={results === null || isCalculating} onClick={saveResults}>
@@ -499,6 +499,7 @@ export default function CalculationPage() {
           />
 
           <CalculationsRiskMatrix
+            risks={riskFiles}
             calculations={calculations}
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}

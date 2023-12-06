@@ -1,5 +1,12 @@
 import { useState, useMemo } from "react";
-import { DataGrid, GridRowsProp, GridColDef, GridValueFormatterParams, GridValueGetterParams } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridRowsProp,
+  GridColDef,
+  GridValueFormatterParams,
+  GridValueGetterParams,
+  GridToolbar,
+} from "@mui/x-data-grid";
 import { Quality, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { getMoneyString } from "../../functions/Impact";
 import {
@@ -141,7 +148,12 @@ export default function CalculationsDataGrid({
         <Typography variant="subtitle2">Risk table</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ height: 1000 }}>
-        <DataGrid rows={rows || []} columns={columns} onRowClick={(params) => setSelectedRiskId(params.row.riskId)} />
+        <DataGrid
+          rows={rows || []}
+          columns={columns}
+          slots={{ toolbar: GridToolbar }}
+          onRowClick={(params) => setSelectedRiskId(params.row.riskId)}
+        />
       </AccordionDetails>
       <AccordionActions sx={{ mx: 2 }}>
         <Box>

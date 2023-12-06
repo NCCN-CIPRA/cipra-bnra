@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
+import { SCENARIOS } from "../../functions/scenarios";
 
 export default function CalculationsSankeyGraph({
   calculations,
@@ -32,7 +33,7 @@ export default function CalculationsSankeyGraph({
   setSelectedNodeId: (id: string | null) => void;
 }) {
   const [calculation, setCalculation] = useState<RiskCalculation | null>(null);
-  const [scenario, setScenario] = useState<"wcs" | "c" | "m" | "e">("wcs");
+  const [scenario, setScenario] = useState<"wcs" | SCENARIOS>("wcs");
   const [split, setSplit] = useState<"total" | "scenario" | "impact">("impact");
   const [causes, setCauses] = useState(5);
   const [effects, setEffects] = useState(5);
@@ -56,6 +57,7 @@ export default function CalculationsSankeyGraph({
             <ProbabilitySankey
               calculation={calculation}
               maxCauses={causes}
+              scenario={scenario === "wcs" ? null : scenario}
               onClick={(id: string) => setSelectedNodeId(id)}
             />
           </Box>
@@ -95,6 +97,7 @@ export default function CalculationsSankeyGraph({
             <ImpactSankey
               calculation={calculation}
               maxEffects={effects}
+              scenario={scenario === "wcs" ? null : scenario}
               onClick={(id: string) => setSelectedNodeId(id)}
             />
           </Box>
@@ -103,20 +106,24 @@ export default function CalculationsSankeyGraph({
       <AccordionActions>
         <Stack direction="row" spacing={5} sx={{ flex: 1 }}>
           <FormControl sx={{ flex: 1 }} fullWidth>
-            <InputLabel>Causes</InputLabel>
             <TextField
+              label="Causes"
               type="number"
               value={causes}
-              onChange={(e) => setCauses(Math.min(10, Math.max(0, parseInt(e.target.value))))}
+              onChange={(e) => {
+                if (e.target.value !== "" && !isNaN(parseInt(e.target.value))) {
+                  setCauses(Math.min(10, Math.max(1, parseInt(e.target.value))));
+                }
+              }}
             />
           </FormControl>
           <FormControl sx={{ flex: 1 }} fullWidth>
             <InputLabel>Show Scenario</InputLabel>
             <Select value={scenario} label="Show Scenario" onChange={(e) => setScenario(e.target.value as any)}>
               <MenuItem value={"wcs"}>Worst Case</MenuItem>
-              <MenuItem value={"c"}>Considerable</MenuItem>
-              <MenuItem value={"m"}>Major</MenuItem>
-              <MenuItem value={"e"}>Extreme</MenuItem>
+              <MenuItem value={"considerable"}>Considerable</MenuItem>
+              <MenuItem value={"major"}>Major</MenuItem>
+              <MenuItem value={"extreme"}>Extreme</MenuItem>
             </Select>
           </FormControl>
           <FormControl sx={{ flex: 1 }} fullWidth>
@@ -128,11 +135,15 @@ export default function CalculationsSankeyGraph({
             </Select>
           </FormControl>
           <FormControl sx={{ flex: 1 }} fullWidth>
-            <InputLabel>Effects</InputLabel>
             <TextField
               type="number"
+              label="Effects"
               value={effects}
-              onChange={(e) => setEffects(Math.min(10, Math.max(0, parseInt(e.target.value))))}
+              onChange={(e) => {
+                if (e.target.value !== "" && !isNaN(parseInt(e.target.value))) {
+                  setEffects(Math.min(10, Math.max(1, parseInt(e.target.value))));
+                }
+              }}
             />
           </FormControl>
         </Stack>

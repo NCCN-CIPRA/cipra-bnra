@@ -57,6 +57,7 @@ export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableF
   cr4de_title: string;
   cr4de_risk_type: RISK_TYPE;
   cr4de_risk_category: string;
+  cr4de_key_risk: boolean;
 
   cr4de_subjective_importance: number;
 
