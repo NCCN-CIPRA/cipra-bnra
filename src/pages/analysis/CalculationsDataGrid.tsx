@@ -30,6 +30,11 @@ import { SCENARIOS } from "../../functions/scenarios";
 
 const columns: GridColDef[] = [
   {
+    field: "code",
+    headerName: "ID",
+    minWidth: 50,
+  },
+  {
     field: "scenario",
     headerName: "Scenario",
     minWidth: 120,
