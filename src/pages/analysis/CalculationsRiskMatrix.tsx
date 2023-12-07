@@ -58,6 +58,15 @@ const CATEGORIES: { [key: string]: "circle" | "cross" | "diamond" | "square" | "
   Transversal: "circle",
 };
 
+const CATEGORY_NAMES: { [key: string]: string } = {
+  Cyber: "Cyber Risks",
+  EcoTech: "Economical and Technological Risks",
+  Health: "Health Risks",
+  "Man-made": "Man-made Risks and Malicious Actors",
+  Nature: "Natural Risks",
+  Transversal: "Societal Risks",
+};
+
 const defaultFields = (c: RiskCalculation) =>
   ({
     riskId: c.riskId,
@@ -221,8 +230,8 @@ export default function CalculationsRiskMatrix({
       <AccordionSummary>
         <Typography variant="subtitle2">Risk matrix</Typography>
       </AccordionSummary>
-      <AccordionDetails sx={{ height: 600 }}>
-        <ResponsiveContainer>
+      <AccordionDetails>
+        <ResponsiveContainer width="100%" aspect={1}>
           <ScatterChart
             margin={{
               top: 20,
@@ -317,8 +326,8 @@ export default function CalculationsRiskMatrix({
                       <Cell
                         key={`cell-${entry.id}`}
                         fill={scenarios === "colors" ? SCENARIO_PARAMS[entry.scenario].color : "rgba(150,150,150,1)"}
-                        stroke="rgba(0,0,0,0.1)"
-                        strokeWidth={2}
+                        stroke="rgba(150,150,150,0.4)"
+                        strokeWidth={1}
                         opacity={opacity}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -330,22 +339,34 @@ export default function CalculationsRiskMatrix({
                 </Scatter>
               );
             })}
-            {/* <Legend
-              payload={Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
-                value: `${CATEGORY} Risks`,
-                type: shape,
-                color: "rgba(150,150,150,1)",
-              }))}
-            /> */}
-            <Legend
-              payload={Object.entries(SCENARIO_PARAMS).map(([scenario, params]) => ({
-                value: `${scenario[0].toUpperCase()}${scenario.slice(1)}`,
-                type: "circle",
-                color: params.color,
-              }))}
-            />
           </ScatterChart>
         </ResponsiveContainer>
+        <Stack direction="row" sx={{ mx: 4, pb: 4 }} spacing={4}>
+          {categories === "shapes" && (
+            <Box sx={{ flex: 1 }}>
+              <Legend
+                wrapperStyle={{ position: "relative" }}
+                payload={Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
+                  value: CATEGORY_NAMES[CATEGORY],
+                  type: shape,
+                  color: "rgba(150,150,150,1)",
+                }))}
+              />
+            </Box>
+          )}
+          {scenarios === "colors" && (
+            <Box sx={{ flex: 1 }}>
+              <Legend
+                wrapperStyle={{ position: "relative" }}
+                payload={Object.entries(SCENARIO_PARAMS).map(([scenario, params]) => ({
+                  value: `${scenario[0].toUpperCase()}${scenario.slice(1)} Scenario`,
+                  type: "circle",
+                  color: params.color,
+                }))}
+              />
+            </Box>
+          )}
+        </Stack>
       </AccordionDetails>
       <AccordionActions sx={{ mx: 2 }}>
         <Stack direction="row" spacing={5} sx={{ flex: 1 }}>
