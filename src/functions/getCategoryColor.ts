@@ -1,4 +1,4 @@
-const colors: { [key: string]: string } = {
+export const colors: { [key: string]: string } = {
   Cyber: "#7D5C65",
   EcoTech: "#A69658",
   "Emerging Risk": "#E5BEED",

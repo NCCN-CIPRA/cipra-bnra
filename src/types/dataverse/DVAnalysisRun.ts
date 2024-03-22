@@ -4,7 +4,7 @@ export enum Quality {
   MISSING = "no input",
 }
 
-export interface DVAnalysisRun<RiskFileType = unknown> {
+export interface DVAnalysisRun<RiskFileType = unknown, RiskCalculationType = RiskCalculation> {
   cr4de_bnraanalysisrunid: string;
 
   cr4de_risk_file: RiskFileType;
@@ -15,7 +15,7 @@ export interface DVAnalysisRun<RiskFileType = unknown> {
   // Should only be !null when risk_file is null
   cr4de_metrics: AnalysisMetrics | null;
   // Should be null when risk_file is null
-  cr4de_results: RiskCalculation | null;
+  cr4de_results: RiskCalculationType | null;
   // Should be null when risk_file is null
   cr4de_risk_file_metrics: RiskFileMetrics | null;
 
@@ -87,6 +87,12 @@ export interface CascadeCalculation {
 
   // Total indirect probability of this cascade
   ip: number;
+
+  ip50_c: number;
+  ip50_m: number;
+  ip50_e: number;
+
+  ip50: number;
 
   // Indirect impact of this cascade damage indicator per scenario
   ii_Ha_c: number;
@@ -216,6 +222,8 @@ export interface RiskCalculation extends RiskCalculationKnownFields {
   // Total direct probability
   dp: number;
 
+  dp50: number;
+
   // Indirect probabilities of each scenario
   ip_c: number;
   ip_m: number;
@@ -224,6 +232,12 @@ export interface RiskCalculation extends RiskCalculationKnownFields {
   // Total indirect probability
   ip: number;
 
+  ip50_c: number;
+  ip50_m: number;
+  ip50_e: number;
+
+  ip50: number;
+
   // Total probabilities per scenario
   tp_c: number;
   tp_m: number;
@@ -231,6 +245,12 @@ export interface RiskCalculation extends RiskCalculationKnownFields {
 
   // Total probability of the risk
   tp: number;
+
+  tp50_c: number;
+  tp50_m: number;
+  tp50_e: number;
+
+  tp50: number;
 
   // Relative probabilities of each scenario (normalized)
   rp_c: number;

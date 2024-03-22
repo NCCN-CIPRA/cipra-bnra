@@ -1,3 +1,4 @@
+import { M } from "../../pages/learning/QuantitativeScales/M";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 
 const DAMAGE_INDICATORS = ["Ha", "Hb", "Hc", "Sa", "Sb", "Sc", "Sd", "Ea", "Fa", "Fb"];
@@ -6,6 +7,16 @@ const getWorstCaseScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return "_c";
   if (r.tr_m > r.tr_c && r.tr_m > r.tr_e) return "_m";
   return "_e";
+};
+
+const getYearlyRisk = (dailyP: number, ti: number) => {
+  const yearlyP = 1 - Math.pow(1 - dailyP, 365);
+
+  return yearlyP * ti;
+};
+
+export const getYearlyProbability = (dailyP: number) => {
+  return 1 - Math.pow(1 - dailyP, 365);
 };
 
 export default function calculateTotalRisk(r: RiskCalculation) {
@@ -36,8 +47,12 @@ export default function calculateTotalRisk(r: RiskCalculation) {
   r.dp = r[`dp${wcsSuffix}`];
   r.tp = r[`tp${wcsSuffix}`];
 
+  r.dp50 = r[`dp50${wcsSuffix}`];
+  r.tp50 = r[`tp50${wcsSuffix}`];
+
   r.causes.forEach((c) => {
     c.ip = c[`ip${wcsSuffix}`];
+    c.ip50 = c[`ip50${wcsSuffix}`];
   });
 
   r.di = r[`di${wcsSuffix}`];

@@ -120,6 +120,7 @@ export default function CalculationsDataGrid({
                 tr: c.tp_c * c.ti_c,
                 consensus: c.quality === Quality.CONSENSUS,
                 keyRisk: c.keyRisk,
+                code: c.code,
               },
               {
                 id: `${c.riskId}_m`,
@@ -131,6 +132,7 @@ export default function CalculationsDataGrid({
                 tr: c.tp_m * c.ti_m,
                 consensus: c.quality === Quality.CONSENSUS,
                 keyRisk: c.keyRisk,
+                code: c.code,
               },
               {
                 id: `${c.riskId}_e`,
@@ -142,6 +144,7 @@ export default function CalculationsDataGrid({
                 tr: c.tp_e * c.ti_e,
                 consensus: c.quality === Quality.CONSENSUS,
                 keyRisk: c.keyRisk,
+                code: c.code,
               },
             ][rs.indexOf(Math.max(...rs))],
           ];
@@ -158,6 +161,7 @@ export default function CalculationsDataGrid({
               tr: c.tp_c * c.ti_c,
               consensus: c.quality === Quality.CONSENSUS,
               keyRisk: c.keyRisk,
+              code: c.code,
             },
             {
               id: `${c.riskId}_m`,
@@ -169,6 +173,7 @@ export default function CalculationsDataGrid({
               tr: c.tp_m * c.ti_m,
               consensus: c.quality === Quality.CONSENSUS,
               keyRisk: c.keyRisk,
+              code: c.code,
             },
             {
               id: `${c.riskId}_e`,
@@ -180,6 +185,7 @@ export default function CalculationsDataGrid({
               tr: c.tp_e * c.ti_e,
               consensus: c.quality === Quality.CONSENSUS,
               keyRisk: c.keyRisk,
+              code: c.code,
             },
           ];
         }

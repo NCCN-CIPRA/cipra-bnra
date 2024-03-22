@@ -62,10 +62,26 @@ export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableF
   cr4de_subjective_importance: number;
 
   cr4de_dp_quali: string | null;
+  cr4de_dp_quali_c: string | null;
+  cr4de_dp_quali_m: string | null;
+  cr4de_dp_quali_e: string | null;
   cr4de_di_quali_h: string | null;
   cr4de_di_quali_s: string | null;
   cr4de_di_quali_e: string | null;
   cr4de_di_quali_f: string | null;
+
+  cr4de_di_quali_h_c: string | null;
+  cr4de_di_quali_s_c: string | null;
+  cr4de_di_quali_e_c: string | null;
+  cr4de_di_quali_f_c: string | null;
+  cr4de_di_quali_h_m: string | null;
+  cr4de_di_quali_s_m: string | null;
+  cr4de_di_quali_e_m: string | null;
+  cr4de_di_quali_f_m: string | null;
+  cr4de_di_quali_h_e: string | null;
+  cr4de_di_quali_s_e: string | null;
+  cr4de_di_quali_e_e: string | null;
+  cr4de_di_quali_f_e: string | null;
 
   cr4de_dp_quanti_c: string | null;
   cr4de_dp_quanti_m: string | null;
@@ -109,7 +125,9 @@ export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableF
   cr4de_climate_change_quanti_m: string | null;
   cr4de_climate_change_quanti_e: string | null;
 
-  cr4de_cross_border_impact_quali: string | null;
+  cr4de_cross_border_impact_quali_c: string | null;
+  cr4de_cross_border_impact_quali_m: string | null;
+  cr4de_cross_border_impact_quali_e: string | null;
 
   cr4de_validations_processed: boolean | null;
   cr4de_validation_silent_procedure_until: Date | null;

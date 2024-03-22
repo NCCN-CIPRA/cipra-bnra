@@ -27,7 +27,7 @@ import convergeProbabilities from "../../functions/analysis/convergeProbabilitie
 import convergeImpacts from "../../functions/analysis/convergeImpacts";
 import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
-import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
+import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { v4 as uuid } from "uuid";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVContact } from "../../types/dataverse/DVContact";
@@ -178,7 +178,7 @@ export default function CalculationPage() {
               const risk = riskFiles?.find((r) => r.cr4de_riskfilesid === c.riskId);
 
               if (!risk) return c;
-              console.log(risk);
+
               return {
                 ...c,
                 keyRisk: risk.cr4de_key_risk,
@@ -234,49 +234,82 @@ export default function CalculationPage() {
   };
 
   const saveResults = async () => {
-    if (!riskFiles || !results || isCalculating || !participations) return;
+    if (!calculations) return;
 
-    logger(`Saving calculations (0/${results.length})`);
+    setCalculationProgress(0);
+
+    function flattenCause(c: CascadeCalculation): CascadeCalculation {
+      return {
+        ...c,
+        effect: { riskId: c.effect.riskId } as unknown as RiskCalculation,
+        cause: {
+          ...c.cause,
+          effects: [],
+          causes: [],
+        },
+      };
+    }
+
+    function flattenEffect(e: CascadeCalculation): CascadeCalculation {
+      return {
+        ...e,
+        cause: { riskId: e.cause.riskId } as unknown as RiskCalculation,
+        effect: {
+          ...e.effect,
+          causes: [],
+          effects: [],
+        },
+      };
+    }
+
+    console.log("test");
+    // console.log(
+    //   JSON.stringify(
+    //     calculations.map((calc) => ({
+    //       ...calc,
+    //       causes: calc.causes.map((cause) => flattenCause(cause)),
+    //       effects: calc.effects.map((effect) => flattenEffect(effect)),
+    //     }))
+    //   ).length
+    // );
+
+    // logger(`Saving calculations (0/${results.length})`);
 
     const analysisId = uuid();
 
-    for (let i = 0; i < results.length; i++) {
-      const calculation = results[i];
+    for (let i = 0; i < calculations.length; i++) {
+      const calculation = calculations[i];
 
-      const calculatedFields: any = {
-        ...roundNumberFields(calculation),
-        causes: calculation.causes.map((c) => {
-          const cleanCause: any = roundNumberFields(c);
-          delete cleanCause.risk;
-          return cleanCause;
-        }),
-        effects: calculation.effects.map((e) => {
-          const cleanEffect: any = roundNumberFields(e);
-          delete cleanEffect.risk;
-          return cleanEffect;
-        }),
+      const flatCalculation: RiskCalculation = {
+        ...calculation,
+        causes: calculation.causes.map((cause) => flattenCause(cause)),
+        effects: calculation.effects.map((effect) => flattenEffect(effect)),
       };
+      console.log(JSON.stringify(flatCalculation));
 
-      const metrics = calculateMetrics(calculatedFields, results, riskFiles, participations);
+      //   const metrics = calculateMetrics(calculatedFields, results, riskFiles, participations);
 
-      const riskId = calculatedFields.riskId;
-      delete calculatedFields.riskId;
+      const riskId = flatCalculation.riskId;
+      //   delete calculatedFields.riskId;
 
       const result = await api.createAnalysisRun({
         cr4de_analysis_id: analysisId,
         "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskId})`,
-        cr4de_results: JSON.stringify(calculatedFields),
-        cr4de_risk_file_metrics: JSON.stringify(metrics),
+        cr4de_results: JSON.stringify(flatCalculation),
+        // cr4de_risk_file_metrics: JSON.stringify(metrics),
       });
       await api.updateRiskFile(riskId, {
         "cr4de_latest_calculation@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns(${result.id})`,
       });
 
-      logger(`Saving calculations (${i + 1}/${results.length})`, 1);
+      //   logger(`Saving calculations (${i + 1}/${results.length})`, 1);
+      setCalculationProgress(i + 1 / calculations.length);
     }
 
-    logger("Done");
+    // logger("Done");
   };
+
+  console.log(calculations);
 
   const runCalculations = async () => {
     if (!riskFiles || !cascades || !useableDAs || !useableCAs || !participations) return;
@@ -488,19 +521,10 @@ export default function CalculationPage() {
             <Button disabled={isLoading || isCalculating} onClick={runCalculations}>
               {calculations ? "Res" : "S"}tart calculation
             </Button>
-            {/* <Button disabled={results === null || isCalculating} onClick={saveResults}>
-              Save results
-            </Button> */}
             <Box sx={{ flex: 1 }} />
-            {/* <Button
-              color="warning"
-              onClick={() => {
-                logLines.current = [];
-                setUpdateLog(Date.now());
-              }}
-            >
-              Clear log
-            </Button> */}
+            <Button color="warning" disabled={calculations === null || isCalculating} onClick={saveResults}>
+              Save results
+            </Button>
           </CardActions>
         </Card>
 

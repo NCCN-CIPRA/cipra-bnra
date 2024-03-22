@@ -171,6 +171,16 @@ export default function ContactListItem({
         >
           Resend Invitation Email
         </MenuItem>
+        <MenuItem
+          onClick={async () => {
+            await api.updateContact(contact.contactid, {
+              "ownerid@odata.bind": "/systemusers(412a1781-de11-ea11-a816-000d3aba9502)",
+              // "owninguser@odata.value": "/systemusers(412a1781-de11-ea11-a816-000d3aba9502)",
+            });
+          }}
+        >
+          Take ownership
+        </MenuItem>
         <MenuItem onClick={() => deleteContact(contact)}>Delete</MenuItem>
       </Menu>
     </>

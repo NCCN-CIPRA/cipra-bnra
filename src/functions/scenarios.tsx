@@ -7,14 +7,6 @@ export enum SCENARIOS {
   EXTREME = "extreme",
 }
 
-export function hexToRGB(hex: string, alpha: number) {
-  var r = parseInt(hex.slice(1, 3), 16),
-    g = parseInt(hex.slice(3, 5), 16),
-    b = parseInt(hex.slice(5, 7), 16);
-
-  return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
-}
-
 export interface Scenarios {
   considerable: IntensityParameter<string>[];
   major: IntensityParameter<string>[];
@@ -43,7 +35,7 @@ const noScenarios = {
   extreme: [],
 };
 
-const unwrapScenario = (scenario: string, parameters: IntensityParameter[]) => {
+export const unwrapScenario = (scenario: string, parameters: IntensityParameter[]) => {
   try {
     return JSON.parse(scenario);
   } catch (e) {

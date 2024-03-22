@@ -31,7 +31,10 @@ const setIndirectImpacts = (
   s2e: number
 ) => {
   let suffix = getScenarioSuffix(scenario);
-  const factor = cascade.effect.riskTitle === "Information operations" ? INFO_OPS_FACTOR : 1;
+  const factor =
+    cascade.effect.riskTitle === "Information operations" || cascade.cause.riskTitle === "Information operations"
+      ? INFO_OPS_FACTOR
+      : 1;
 
   DAMAGE_INDICATORS.forEach((d) => {
     //@ts-expect-error

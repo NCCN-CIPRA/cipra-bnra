@@ -9,10 +9,22 @@ const getDP = (risk: RiskCalculation, scenario: SCENARIOS) => {
   return risk.dp_e;
 };
 
+const getDP50 = (risk: RiskCalculation, scenario: SCENARIOS) => {
+  if (scenario === SCENARIOS.CONSIDERABLE) return risk.dp50_c;
+  if (scenario === SCENARIOS.MAJOR) return risk.dp50_m;
+  return risk.dp50_e;
+};
+
 const getIP = (cascade: CascadeCalculation, scenario: SCENARIOS) => {
   if (scenario === SCENARIOS.CONSIDERABLE) return cascade.ip_c;
   if (scenario === SCENARIOS.MAJOR) return cascade.ip_m;
   return cascade.ip_e;
+};
+
+const getIP50 = (cascade: CascadeCalculation, scenario: SCENARIOS) => {
+  if (scenario === SCENARIOS.CONSIDERABLE) return cascade.ip50_c;
+  if (scenario === SCENARIOS.MAJOR) return cascade.ip50_m;
+  return cascade.ip50_e;
 };
 
 const setIP = (cascade: CascadeCalculation, scenario: SCENARIOS, ip: number) => {
@@ -21,6 +33,14 @@ const setIP = (cascade: CascadeCalculation, scenario: SCENARIOS, ip: number) => 
   if (scenario === SCENARIOS.CONSIDERABLE) cascade.ip_c = ip / factor;
   if (scenario === SCENARIOS.MAJOR) cascade.ip_m = ip / factor;
   if (scenario === SCENARIOS.EXTREME) cascade.ip_e = ip / factor;
+};
+
+const setIP50 = (cascade: CascadeCalculation, scenario: SCENARIOS, ip: number) => {
+  const factor = cascade.cause.riskTitle === "Information operations" ? INFO_OPS_FACTOR : 1;
+
+  if (scenario === SCENARIOS.CONSIDERABLE) cascade.ip50_c = ip / factor;
+  if (scenario === SCENARIOS.MAJOR) cascade.ip50_m = ip / factor;
+  if (scenario === SCENARIOS.EXTREME) cascade.ip50_e = ip / factor;
 };
 
 const getCP = (cascade: CascadeCalculation, fromScenario: SCENARIOS, toScenario: SCENARIOS) => {
@@ -82,6 +102,12 @@ export default function calculateTotalProbability(risk: RiskCalculation): void {
   risk.tp_e = calculateTotalProbabilityScenario(risk, SCENARIOS.EXTREME);
 
   risk.tp = -1;
+
+  risk.tp50_c = calculateTotalProbability2050Scenario(risk, SCENARIOS.CONSIDERABLE);
+  risk.tp50_m = calculateTotalProbability2050Scenario(risk, SCENARIOS.MAJOR);
+  risk.tp50_e = calculateTotalProbability2050Scenario(risk, SCENARIOS.EXTREME);
+
+  risk.tp50 = -1;
 }
 
 function calculateTotalProbabilityScenario(risk: RiskCalculation, scenario: SCENARIOS): number {
@@ -103,6 +129,29 @@ function calculateTotalProbabilityScenario(risk: RiskCalculation, scenario: SCEN
       cascade.ip = -1;
 
       return ipTot + getIP(cascade, scenario);
+    }, 0)
+  );
+}
+
+function calculateTotalProbability2050Scenario(risk: RiskCalculation, scenario: SCENARIOS): number {
+  return (
+    getDP50(risk, scenario) +
+    risk.causes.reduce((ipTot, cascade) => {
+      if (cascade.cause.tp50 <= 0) {
+        calculateTotalProbability(cascade.cause);
+      }
+
+      setIP50(
+        cascade,
+        scenario,
+        cascade.cause.tp50_c * getCP(cascade, SCENARIOS.CONSIDERABLE, scenario) +
+          cascade.cause.tp50_m * getCP(cascade, SCENARIOS.MAJOR, scenario) +
+          cascade.cause.tp50_e * getCP(cascade, SCENARIOS.EXTREME, scenario)
+      );
+
+      cascade.ip50 = -1;
+
+      return ipTot + getIP50(cascade, scenario);
     }, 0)
   );
 }

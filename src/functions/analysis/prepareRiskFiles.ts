@@ -360,6 +360,7 @@ export default function prepareRiskFiles(
 
         // Initialize unknown fields
         dp: 0,
+        dp50: 0,
 
         ip_c: 0,
         ip_m: 0,
@@ -367,11 +368,23 @@ export default function prepareRiskFiles(
 
         ip: 0,
 
+        ip50_c: 0,
+        ip50_m: 0,
+        ip50_e: 0,
+
+        ip50: 0,
+
         tp_c: 0,
         tp_m: 0,
         tp_e: 0,
 
         tp: 0,
+
+        tp50_c: 0,
+        tp50_m: 0,
+        tp50_e: 0,
+
+        tp50: 0,
 
         rp_c: 0,
         rp_m: 0,
@@ -594,6 +607,12 @@ export default function prepareRiskFiles(
       ip_e: 0,
 
       ip: 0,
+
+      ip50_c: 0,
+      ip50_m: 0,
+      ip50_e: 0,
+
+      ip50: 0,
 
       ii_Ha_c: 0,
       ii_Hb_c: 0,

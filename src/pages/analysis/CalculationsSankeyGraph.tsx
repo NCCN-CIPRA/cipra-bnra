@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import ImpactDistributionPieChart from "../../components/ImpactDistributionPieChart";
-import ImpactSankey from "../../components/ImpactSankey";
-import ProbabilitySankey from "../../components/ProbabilitySankey";
+import ImpactDistributionPieChart from "../../components/charts/ImpactDistributionPieChart";
+import ImpactSankey from "../../components/charts/ImpactSankey";
+import ProbabilitySankey from "../../components/charts/ProbabilitySankey";
 import {
   Stack,
   Typography,

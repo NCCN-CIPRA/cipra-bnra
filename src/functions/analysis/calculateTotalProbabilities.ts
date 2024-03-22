@@ -9,6 +9,12 @@ export default function calculateTotalProbabilities(risk: RiskCalculation) {
 
   risk.tp = risk.tp_c + risk.tp_m + risk.tp_e;
 
+  risk.tp50_c = risk.dp50_c + risk.ip50_c;
+  risk.tp50_m = risk.dp50_m + risk.ip50_m;
+  risk.tp50_e = risk.dp50_e + risk.ip50_e;
+
+  risk.tp50 = risk.tp50_c + risk.tp50_m + risk.tp50_e;
+
   // Relative probabilities
   risk.rp_c = risk.tp_c / (risk.tp || 1);
   risk.rp_m = risk.tp_m / (risk.tp || 1);

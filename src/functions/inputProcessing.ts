@@ -62,7 +62,7 @@ export const DIRECT_ANALYSIS_SECTIONS_STANDARD: { [key in PARAMETER]: DIRECT_ANA
   },
   [PARAMETER.F]: {
     name: "f",
-    label: "Direct Fincancial Impact",
+    label: "Direct Financial Impact",
   },
   [PARAMETER.CB]: {
     name: "cb",

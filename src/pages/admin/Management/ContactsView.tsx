@@ -172,6 +172,8 @@ export default function ContactsView({
         .filter((c) => c.participations.length > 0);
     }
 
+    console.log(runningFilter);
+
     setFilteredContacts(runningFilter);
   };
 

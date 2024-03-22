@@ -60,7 +60,7 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
                       <ListItemText primary={t("sideDrawer.reporting", "Reporting")} />
                     </ListItemButton>
                   </ListItem>
-                  <Divider />
+                  {/* <Divider /> */}
                   {/* <ListItem disablePadding>
                     <ListItemButton component={Link} to="/analysis/averager" onClick={onClose}>
                       <ListItemIcon></ListItemIcon>

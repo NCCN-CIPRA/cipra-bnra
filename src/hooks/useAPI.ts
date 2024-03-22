@@ -61,7 +61,7 @@ export interface API {
 
   getContacts<T = DVContact>(query?: string): Promise<T[]>;
   createContact(fields: Partial<DVContact>): Promise<CreateResponse>;
-  updateContact(id: string, fields: Partial<DVContact>): Promise<void>;
+  updateContact(id: string, fields: Partial<any>): Promise<void>;
   deleteContact(id: string): Promise<void>;
 
   getInvitations<T = DVInvitation>(query?: string): Promise<T[]>;

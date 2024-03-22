@@ -224,7 +224,7 @@ export default function CalculationsRiskMatrix({
       }, [] as MatrixRisk[])
     );
   }, [calculations, worstCase, scales, nonKeyRisks]);
-  console.log(dots);
+
   return (
     <Accordion disabled={!calculations}>
       <AccordionSummary>
@@ -284,6 +284,12 @@ export default function CalculationsRiskMatrix({
                   // tickCount={10}
                   tickFormatter={(n) => `TP${n}`}
                   ticks={[1, 2, 3, 4, 5]}
+                  label={{
+                    value: "Total Probability",
+                    position: "insideBottom",
+                    offset: -10,
+                    props: { fontWeight: "bold" },
+                  }}
                 />
                 <YAxis
                   type="number"
@@ -293,7 +299,8 @@ export default function CalculationsRiskMatrix({
                   domain={[0, 5]}
                   tickCount={6}
                   tickFormatter={(n) => `TI${n}`}
-                  ticks={[0, 1, 2, 3, 4, 5]}
+                  ticks={[1, 2, 3, 4, 5]}
+                  label={{ value: "Total Impact", angle: -90, position: "insideLeft" }}
                 />
               </>
             )}
@@ -303,6 +310,7 @@ export default function CalculationsRiskMatrix({
 
               return (
                 <Scatter
+                  key={CATEGORY}
                   name={`${CATEGORY} Risks`}
                   data={catData}
                   fill="#8884d8"
@@ -341,7 +349,7 @@ export default function CalculationsRiskMatrix({
             })}
           </ScatterChart>
         </ResponsiveContainer>
-        <Stack direction="row" sx={{ mx: 4, pb: 4 }} spacing={4}>
+        <Stack direction="row" sx={{ mx: 4, pb: 4, mt: 2 }} spacing={4}>
           {categories === "shapes" && (
             <Box sx={{ flex: 1 }}>
               <Legend
