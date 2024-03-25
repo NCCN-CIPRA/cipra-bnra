@@ -9,7 +9,7 @@ const getWorstCaseScenario = (r: RiskCalculation) => {
   return "_e";
 };
 
-const getYearlyRisk = (dailyP: number, ti: number) => {
+export const getYearlyRisk = (dailyP: number, ti: number) => {
   const yearlyP = 1 - Math.pow(1 - dailyP, 365);
 
   return yearlyP * ti;

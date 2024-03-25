@@ -9,8 +9,6 @@ import { SCENARIOS } from "../scenarios";
 import calculateTotalImpact, { getEffectGraph } from "./calculateTotalImpact";
 import calculateTotalProbability, { getCausalGraph } from "./calculateTotalProbability";
 import calculateTotalRisk from "./calculateTotalRisk";
-import convergeImpacts from "./convergeImpacts";
-import convergeProbabilities from "./convergeProbabilities";
 import prepareRiskFiles from "./prepareRiskFiles";
 
 export default function runAnalysis(

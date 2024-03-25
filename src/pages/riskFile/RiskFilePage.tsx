@@ -28,7 +28,7 @@ import {
 import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import AnalysisTab from "./analysis/AnalysisTab";
 import LoadingTab from "./LoadingTab";
-import { RiskAnalysisResults } from "../../types/dataverse/DVAnalysisRun";
+import { DVAnalysisRun, RiskAnalysisResults } from "../../types/dataverse/DVAnalysisRun";
 import GroupsIcon from "@mui/icons-material/Groups";
 import ConsensusTab from "./consensus/ConsensusTab";
 import { getCompletedCascadeAnalyses, getCompletedDirectAnalyses } from "../../functions/inputProcessing";
@@ -56,22 +56,16 @@ export default function RiskFilePage({}) {
 
   const [tab, setTab] = useState(TABS[(searchParams.get("tab") || "overview") as keyof typeof TABS]);
 
-  const {
-    data: riskFile,
-    reloadData: reloadRiskFile,
-    isFetching: loadingRiskFile,
-  } = useRecord<DVRiskFile>({
+  const { data: riskFiles, reloadData: reloadRiskFiles } = useRecords<DVRiskFile<DVAnalysisRun<unknown, string>>>({
     table: DataTable.RISK_FILE,
-    id: params.risk_file_id,
+    query: "$orderby=cr4de_hazard_id&$expand=cr4de_latest_calculation",
+    transformResult: (data) => data.filter((r: DVRiskFile) => !r.cr4de_hazard_id.startsWith("X")),
   });
-  const {
-    data: otherRisks,
-    reloadData: reloadRiskFiles,
-    isFetching: loadingRiskFiles,
-  } = useRecords<SmallRisk>({
-    table: DataTable.RISK_FILE,
-    query: `$filter=cr4de_riskfilesid ne ${params.risk_file_id}&$select=cr4de_riskfilesid,cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_definition`,
-  });
+
+  const riskFile = useMemo(
+    () => riskFiles?.find((rf) => rf.cr4de_riskfilesid === params.risk_file_id) || null,
+    [riskFiles]
+  );
 
   const {
     data: participants,
@@ -135,7 +129,7 @@ export default function RiskFilePage({}) {
 
   usePageTitle("BNRA 2023 - 2026 Risk File");
   useBreadcrumbs([...defaultBreadcrumbs, riskFile ? { name: riskFile.cr4de_title, url: "" } : null]);
-
+  console.log(riskFile, cascades, participants, goodDAs, goodCAs, tab);
   return (
     <>
       <Box sx={{ mb: 15 }}>
@@ -147,7 +141,7 @@ export default function RiskFilePage({}) {
             cascadeAnalyses={cascadeAnalyses}
             participants={participants}
             calculations={calculations}
-            reloadRiskFile={reloadRiskFile}
+            reloadRiskFile={reloadRiskFiles}
             reloadCascades={reloadCascades}
           />
         )}
@@ -155,11 +149,11 @@ export default function RiskFilePage({}) {
           <IdentificationTab
             riskFile={riskFile}
             cascades={cascades}
-            otherRisks={otherRisks}
+            otherRisks={riskFiles}
             onUpdateCascades={handleUpdateCascades}
           />
         )}
-        {riskFile && tab === 2 && <AnalysisTab riskFile={riskFile} calculations={calculations} />}
+        {riskFile && tab === 2 && <AnalysisTab riskFiles={riskFiles} cascades={cascades} />}
         {riskFile && tab === 3 && (
           <InputManagementTab
             riskFile={riskFile}
@@ -167,7 +161,7 @@ export default function RiskFilePage({}) {
             directAnalyses={goodDAs}
             cascadeAnalyses={goodCAs}
             participants={participants}
-            reloadRiskFile={reloadRiskFile}
+            reloadRiskFile={reloadRiskFiles}
             reloadCascades={reloadCascades}
             reloadDirectAnalyses={reloadDirectAnalyses}
             reloadCascadeAnalyses={reloadCascadeAnalyses}
@@ -180,7 +174,7 @@ export default function RiskFilePage({}) {
             participants={participants}
             directAnalyses={goodDAs}
             cascadeAnalyses={goodCAs}
-            reloadRiskFile={reloadRiskFile}
+            reloadRiskFile={reloadRiskFiles}
             reloadCascades={reloadCascades}
           />
         )}

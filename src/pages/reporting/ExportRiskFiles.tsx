@@ -20,6 +20,7 @@ import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import getImpactColor from "../../functions/getImpactColor";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import ClimateChangeMatrix from "../../components/charts/ClimateChangeMatrix";
+import { useMemo } from "react";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -40,13 +41,20 @@ export default function ExportRiskFiles({
   riskFiles: DVRiskFile<DVAnalysisRun<unknown, string>>[];
   cascades: DVRiskCascade<SmallRisk>[];
 }) {
-  const calculations = riskFiles.map((rf) => JSON.parse(rf.cr4de_latest_calculation?.cr4de_results as string));
-  const cDict = cascades.reduce(
-    (acc, c) => ({
-      ...acc,
-      [c.cr4de_bnrariskcascadeid]: c,
-    }),
-    {} as { [key: string]: DVRiskCascade }
+  const calculations = useMemo(
+    () => riskFiles.map((rf) => JSON.parse(rf.cr4de_latest_calculation?.cr4de_results as string)),
+    [riskFiles]
+  );
+  const cDict = useMemo(
+    () =>
+      cascades.reduce(
+        (acc, c) => ({
+          ...acc,
+          [c.cr4de_bnrariskcascadeid]: c,
+        }),
+        {} as { [key: string]: DVRiskCascade }
+      ),
+    [cascades]
   );
 
   return (

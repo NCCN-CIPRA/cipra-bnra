@@ -1,4 +1,9 @@
-import { Quality, RiskCalculation, RiskCalculationKnownFields } from "../../types/dataverse/DVAnalysisRun";
+import {
+  CascadeCalculation,
+  Quality,
+  RiskCalculation,
+  RiskCalculationKnownFields,
+} from "../../types/dataverse/DVAnalysisRun";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import { DVContact } from "../../types/dataverse/DVContact";
 import { DVDirectAnalysis, FieldQuality } from "../../types/dataverse/DVDirectAnalysis";
@@ -303,6 +308,29 @@ const getConsensusCascade = (
   };
 };
 
+const getNormalizedCascade = (c: ReturnType<typeof getConsensusCascade>) => {
+  const c20 = (1 - c.c2c) * (1 - c.c2m) * (1 - c.c2e);
+  const m20 = (1 - c.m2c) * (1 - c.m2m) * (1 - c.m2e);
+  const e20 = (1 - c.e2c) * (1 - c.e2m) * (1 - c.e2e);
+
+  const cTot = c20 + c.c2c + c.c2m + c.c2e;
+  const mTot = m20 + c.m2c + c.m2m + c.m2e;
+  const eTot = e20 + c.e2c + c.e2m + c.e2e;
+
+  return {
+    ...c,
+    c2c: c.c2c / cTot,
+    c2m: c.c2m / cTot,
+    c2e: c.c2e / cTot,
+    m2c: c.m2c / mTot,
+    m2m: c.m2m / mTot,
+    m2e: c.m2e / mTot,
+    e2c: c.e2c / eTot,
+    e2m: c.e2m / eTot,
+    e2e: c.e2e / eTot,
+  };
+};
+
 export default function prepareRiskFiles(
   riskFiles: DVRiskFile[],
   riskFilesDict: { [key: string]: DVRiskFile },
@@ -590,16 +618,18 @@ export default function prepareRiskFiles(
 
       damp: c.cr4de_damp || true,
 
-      ...getConsensusCascade(
-        riskFilesDict[c._cr4de_cause_hazard_value],
-        riskFilesDict[c._cr4de_effect_hazard_value],
-        c,
-        participations.filter(
-          (p) =>
-            p._cr4de_risk_file_value === c._cr4de_cause_hazard_value ||
-            p._cr4de_risk_file_value === c._cr4de_effect_hazard_value
-        ),
-        caDict[c.cr4de_bnrariskcascadeid]
+      ...getNormalizedCascade(
+        getConsensusCascade(
+          riskFilesDict[c._cr4de_cause_hazard_value],
+          riskFilesDict[c._cr4de_effect_hazard_value],
+          c,
+          participations.filter(
+            (p) =>
+              p._cr4de_risk_file_value === c._cr4de_cause_hazard_value ||
+              p._cr4de_risk_file_value === c._cr4de_effect_hazard_value
+          ),
+          caDict[c.cr4de_bnrariskcascadeid]
+        )
       ),
 
       ip_c: 0,

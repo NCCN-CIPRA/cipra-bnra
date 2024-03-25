@@ -1,11 +1,12 @@
-import { Layer, Rectangle, ResponsiveContainer, Sankey, Tooltip, TooltipProps } from "recharts";
-import { Box, Typography, Card, CardContent } from "@mui/material";
+import { Layer, Rectangle, ResponsiveContainer, Sankey, TooltipProps } from "recharts";
+import { Box, Typography, Card, CardContent, Tooltip } from "@mui/material";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { useNavigate } from "react-router-dom";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { SCENARIOS, Scenarios } from "../../functions/scenarios";
+import { getYearlyProbability } from "../../functions/analysis/calculateTotalRisk";
 
 const baseY = 50;
 
@@ -19,10 +20,13 @@ const PSankeyNode = ({
   containerWidth,
   totalProbability,
   totalNodes,
+  scenarioSuffix,
+  showComponents,
   onClick,
 }: any) => {
   const navigate = useNavigate();
-
+  const scenarioLetter = scenarioSuffix[1];
+  console.log(payload.cascade);
   if (payload.depth > 0) {
     return (
       <Layer key={`CustomNode${index}`} height="50px">
@@ -38,11 +42,14 @@ const PSankeyNode = ({
           textAnchor="middle"
           x={-y - height / 2 - 18}
           y={x - 15}
-          fontSize="12"
+          fontSize="16"
           stroke="#333"
           transform="rotate(270)"
         >
-          {`${Math.round(100000 * totalProbability) / 1000} % chance of occurence within 3 years`}
+          Total Probability:{" "}
+          {`${Math.round(10000 * getYearlyProbability(totalProbability)) / 100}% / year (${
+            Math.round(100000 * totalProbability) / 1000
+          }% / day)`}
         </text>
       </Layer>
     );
@@ -65,12 +72,101 @@ const PSankeyNode = ({
             navigate(`/reporting/${payload.id}`);
           }}
         />
-        <text textAnchor="start" x={x + 15} y={y + height / 2} fontSize="14" stroke="#333">
-          {payload.name}
-        </text>
-        <text textAnchor="start" x={x + 15} y={y + height / 2 + 18} fontSize="12" stroke="#333" strokeOpacity="0.5">
+
+        {showComponents ? (
+          <Tooltip
+            title={
+              <Box sx={{}}>
+                {payload.cascade ? (
+                  <>
+                    <Typography color="inherit">{payload.name}</Typography>
+
+                    <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                      IP(all&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade.ip) / 100}% / day
+                    </Typography>
+
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                      IP(c&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade.ip_c) / 100}% / day
+                    </Typography>
+                    <Typography variant="subtitle2">
+                      CP(c&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`c2${scenarioLetter}`]) / 100}%
+                    </Typography>
+                    <Typography variant="subtitle2">
+                      TP(c): {Math.round(10000 * payload.cascade.cause.tp_c) / 100}% / day
+                    </Typography>
+
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                      IP(m&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade.ip_m) / 100}% / day
+                    </Typography>
+                    <Typography variant="subtitle2">
+                      CP(m&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`m2${scenarioLetter}`]) / 100}%
+                    </Typography>
+                    <Typography variant="subtitle2">
+                      TP(m): {Math.round(10000 * payload.cascade.cause.tp_m) / 100}% / day
+                    </Typography>
+
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                      IP(e&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade.ip_e) / 100}% / day
+                    </Typography>
+                    <Typography variant="subtitle2">
+                      CP(e&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`e2${scenarioLetter}`]) / 100}%
+                    </Typography>
+                    <Typography variant="subtitle2">
+                      TP(e): {Math.round(10000 * payload.cascade.cause.tp_e) / 100}% / day
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <Typography color="inherit">{payload.name}</Typography>
+
+                    <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                      DP({scenarioLetter}): {Math.round(10000 * payload.p) / 100}% / day
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            }
+          >
+            <text
+              textAnchor="start"
+              x={x + 15}
+              y={y + height / 2}
+              fontSize="14"
+              stroke="#333"
+              cursor="pointer"
+              onClick={() => {
+                if (!payload.id) return;
+
+                if (onClick) return onClick(payload.id);
+
+                navigate(`/reporting/${payload.id}`);
+              }}
+            >
+              {payload.name}
+            </text>
+          </Tooltip>
+        ) : (
+          <text
+            textAnchor="start"
+            x={x + 15}
+            y={y + height / 2}
+            fontSize="14"
+            stroke="#333"
+            cursor="pointer"
+            onClick={() => {
+              if (!payload.id) return;
+
+              if (onClick) return onClick(payload.id);
+
+              navigate(`/reporting/${payload.id}`);
+            }}
+          >
+            {payload.name}
+          </text>
+        )}
+        {/* <text textAnchor="start" x={x + 15} y={y + height / 2 + 18} fontSize="12" stroke="#333" strokeOpacity="0.5">
           {`${Math.round((100 * payload.value) / totalProbability)}%`}
-        </text>
+        </text> */}
       </Layer>
     );
   }
@@ -115,6 +211,7 @@ export default function ProbabilitySankey({
   minCausePortion = null,
   shownCausePortion = null,
   scenario = null,
+  debug = false,
   onClick = null,
 }: {
   riskFile?: DVRiskFile | null;
@@ -123,6 +220,7 @@ export default function ProbabilitySankey({
   minCausePortion?: number | null;
   shownCausePortion?: number | null;
   scenario?: SCENARIOS | null;
+  debug?: boolean;
   onClick?: ((id: string) => void) | null;
 }) {
   if (!calculation) return null;
@@ -154,6 +252,7 @@ export default function ProbabilitySankey({
       id: c.cause.riskId,
       name: c.cause.riskTitle,
       p: c[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number,
+      cascade: c,
     })),
   ];
 
@@ -260,13 +359,13 @@ export default function ProbabilitySankey({
               onClick={onClick}
               totalProbability={calculation[`tp${scenarioSuffix}` as keyof RiskCalculation] as number}
               totalNodes={data.nodes.length}
+              showComponents={debug}
+              scenarioSuffix={scenarioSuffix}
             />
           }
           link={<PSankeyLink totalNodes={data.nodes.length} />}
           nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
-        >
-          <Tooltip content={<CustomTooltip />} />
-        </Sankey>
+        ></Sankey>
       </ResponsiveContainer>
     </>
   );

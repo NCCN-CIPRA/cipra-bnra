@@ -18,10 +18,17 @@ import {
   Select,
   MenuItem,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS } from "../../functions/scenarios";
+import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
+import ImpactBarChart from "../../components/charts/ImpactBarChart";
+import { getYearlyProbability, getYearlyRisk } from "../../functions/analysis/calculateTotalRisk";
+import { getMoneyString } from "../../functions/Impact";
+import { setSyntheticLeadingComments } from "typescript";
+
+const capFirst = (s: string) => s[0].toUpperCase() + s.slice(1);
 
 export default function CalculationsSankeyGraph({
   calculations,
@@ -46,6 +53,14 @@ export default function CalculationsSankeyGraph({
 
   if (!calculation) return null;
 
+  const rs = [
+    calculation.tp_c * calculation.ti_c,
+    calculation.tp_m * calculation.ti_m,
+    calculation.tp_e * calculation.ti_e,
+  ];
+
+  const wcs = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME][rs.indexOf(Math.max(...rs))];
+
   return (
     <Accordion disabled={!calculations || !selectedNodeId}>
       <AccordionSummary>
@@ -58,6 +73,7 @@ export default function CalculationsSankeyGraph({
               calculation={calculation}
               maxCauses={causes}
               scenario={scenario === "wcs" ? null : scenario}
+              debug={true}
               onClick={(id: string) => setSelectedNodeId(id)}
             />
           </Box>
@@ -78,27 +94,36 @@ export default function CalculationsSankeyGraph({
       >
         <ImpactOriginPieChart riskFile={riskFile} />
       </Box> */}
-            <Box sx={{ width: "100%", textAlign: "center", mb: 6 }}>
+            <Box sx={{ width: "100%", textAlign: "center", mb: 2 }}>
               <Typography variant="h6">{calculation.riskTitle}</Typography>
+              <Typography variant="subtitle1" color={SCENARIO_PARAMS[scenario === "wcs" ? wcs : scenario].color}>
+                {capFirst(scenario === "wcs" ? wcs : scenario)} scenario
+              </Typography>
             </Box>
             <Box
               sx={{
                 width: 200,
-                height: 200,
+                height: 350,
               }}
             >
-              <ImpactDistributionPieChart calculation={calculation} />
-              <Box sx={{ width: "100%", textAlign: "center", mt: 2 }}>
-                <Typography variant="subtitle2">Damage Indicators</Typography>
-              </Box>
+              <ImpactBarChart calculation={calculation} />
+              {/* <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2">
+                  Total Probability: <b>{Math.round(10000 * getYearlyProbability(calculation.tp)) / 100}% / year</b>
+                </Typography>
+                <Typography variant="subtitle2">
+                  Total Impact: <b>{getMoneyString(calculation.ti)} / event</b>
+                </Typography>
+              </Box> */}
             </Box>
           </Stack>
           <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
             <ImpactSankey
               calculation={calculation}
-              maxEffects={effects}
+              minEffectPortion={0.05}
               scenario={scenario === "wcs" ? null : scenario}
               onClick={(id: string) => setSelectedNodeId(id)}
+              debug={true}
             />
           </Box>
         </Stack>
