@@ -153,7 +153,12 @@ export default function RankingPage() {
         )}
         {riskFiles && cascades && (
           <ExportRiskFiles
-            riskFiles={riskFiles.filter((r) => r.cr4de_title.indexOf("electricity") > 0)}
+            riskFile={
+              riskFiles.find((r) => r.cr4de_title.indexOf("electricity") > 0) as DVRiskFile<
+                DVAnalysisRun<unknown, string>
+              >
+            }
+            otherRiskFiles={riskFiles}
             cascades={cascades}
           />
         )}

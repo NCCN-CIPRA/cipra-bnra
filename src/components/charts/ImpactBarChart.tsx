@@ -2,6 +2,7 @@ import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Resp
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { Box } from "@mui/material";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
+import { getMoneyString } from "../../functions/Impact";
 
 export default function ImpactBarChart({ calculation }: { calculation: RiskCalculation | null }) {
   if (!calculation) return null;
@@ -46,7 +47,7 @@ export default function ImpactBarChart({ calculation }: { calculation: RiskCalcu
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" angle={-90} dx={-5} dy={5} interval={0} textAnchor="end" />
         <YAxis domain={[0, 100]} hide={true} tickCount={4} />
-        <Tooltip />
+        <Tooltip formatter={(value: any, name: any, props: any) => getMoneyString(value)} />
         <Bar dataKey="Ha" stackId="a" fill="#de6148" />
         <Bar dataKey="Hb" stackId="a" fill="#f39d87" />
         <Bar dataKey="Hc" stackId="a" fill="#ffd7cc" />

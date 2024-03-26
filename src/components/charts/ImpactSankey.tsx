@@ -120,6 +120,17 @@ const ISankeyNode = ({
                     </Typography>
                   </>
                 )}
+                {payload.hidden && (
+                  <>
+                    <Typography color="inherit">Other effects:</Typography>
+
+                    {payload.hidden.map((h: any) => (
+                      <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                        {h.effect.riskTitle} II({scenarioLetter}&rarr;all): {getMoneyString(h.ii)}
+                      </Typography>
+                    ))}
+                  </>
+                )}
               </Box>
             }
           >

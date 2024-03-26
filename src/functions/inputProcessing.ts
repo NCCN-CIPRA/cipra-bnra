@@ -393,15 +393,20 @@ export const getCompletedCascadeAnalyses = (
       !participants.some(
         (pa) => pa._cr4de_contact_value === ca._cr4de_expert_value && pa.cr4de_cascade_analysis_finished
       )
-    )
+    ) {
       return false;
+    }
 
     const cascade = cascades.find((c) => ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid);
 
-    if (!cascade) return false;
+    if (!cascade) {
+      return false;
+    }
 
-    if (cascade.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING)
-      return !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null);
+    if (cascade.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING) {
+      const ret = !CASCADE_ANALYSIS_QUANTI_FIELDS.some((f) => ca[f] === null);
+      return ret;
+    }
 
     if (riskFile.cr4de_title.indexOf("Climate") < 0 && cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0) {
       const d = directAnalyses?.find((da) => da._cr4de_expert_value === ca._cr4de_expert_value);

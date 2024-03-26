@@ -80,17 +80,23 @@ type RouteParams = {
 };
 
 export default function AnalysisTab({
+  riskFile,
   riskFiles,
   cascades,
 }: {
-  riskFiles: DVRiskFile<DVAnalysisRun<unknown, string>>[] | null;
+  riskFile: DVRiskFile<DVAnalysisRun<unknown, string>>;
+  riskFiles: DVRiskFile<DVAnalysisRun<unknown, string>>[];
   cascades: DVRiskCascade<SmallRisk>[] | null;
 }) {
   const params = useParams() as RouteParams;
 
   if (!riskFiles || !cascades) return null;
 
-  return <ExportRiskFiles riskFiles={riskFiles} cascades={cascades} />;
+  return (
+    <Container sx={{ mt: 4, pb: 8 }}>
+      <ExportRiskFiles riskFile={riskFile} otherRiskFiles={riskFiles} cascades={cascades} />
+    </Container>
+  );
   // return (
   //   <Container sx={{ mt: 4, pb: 8 }}>
   //     <Stack direction="row" sx={{ mb: 8 }}>

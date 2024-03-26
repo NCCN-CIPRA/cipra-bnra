@@ -120,7 +120,7 @@ export default function CalculationsSankeyGraph({
           <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
             <ImpactSankey
               calculation={calculation}
-              minEffectPortion={0.05}
+              maxEffects={effects}
               scenario={scenario === "wcs" ? null : scenario}
               onClick={(id: string) => setSelectedNodeId(id)}
               debug={true}

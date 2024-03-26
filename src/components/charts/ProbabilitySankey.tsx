@@ -26,7 +26,7 @@ const PSankeyNode = ({
 }: any) => {
   const navigate = useNavigate();
   const scenarioLetter = scenarioSuffix[1];
-  console.log(payload.cascade);
+  console.log(payload.hidden);
   if (payload.depth > 0) {
     return (
       <Layer key={`CustomNode${index}`} height="50px">
@@ -77,7 +77,7 @@ const PSankeyNode = ({
           <Tooltip
             title={
               <Box sx={{}}>
-                {payload.cascade ? (
+                {payload.cascade && (
                   <>
                     <Typography color="inherit">{payload.name}</Typography>
 
@@ -115,7 +115,19 @@ const PSankeyNode = ({
                       TP(e): {Math.round(10000 * payload.cascade.cause.tp_e) / 100}% / day
                     </Typography>
                   </>
-                ) : (
+                )}
+                {payload.hidden && (
+                  <>
+                    <Typography color="inherit">Other causes:</Typography>
+
+                    {payload.hidden.map((h: any) => (
+                      <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                        {h.cause.riskTitle} IP(all&rarr;{scenarioLetter}): {Math.round(100000 * h.ip) / 1000}% / day
+                      </Typography>
+                    ))}
+                  </>
+                )}
+                {!payload.cascade && !payload.hidden && (
                   <>
                     <Typography color="inherit">{payload.name}</Typography>
 

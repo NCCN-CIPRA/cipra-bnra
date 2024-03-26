@@ -118,18 +118,18 @@ export default function RiskFilePage({}) {
 
   const goodDAs = useMemo(
     () => (directAnalyses && participants ? getCompletedDirectAnalyses(riskFile, participants, directAnalyses) : null),
-    [directAnalyses, participants]
+    [riskFile, participants, directAnalyses]
   );
 
   const goodCAs = useMemo(() => {
     if (!riskFile || !cascadeAnalyses || !participants || !cascades) return null;
 
     return getCompletedCascadeAnalyses(riskFile, participants, cascades, directAnalyses, cascadeAnalyses);
-  }, [directAnalyses, cascadeAnalyses, participants, cascades]);
+  }, [riskFile, participants, cascades, directAnalyses, cascadeAnalyses]);
 
   usePageTitle("BNRA 2023 - 2026 Risk File");
   useBreadcrumbs([...defaultBreadcrumbs, riskFile ? { name: riskFile.cr4de_title, url: "" } : null]);
-  console.log(riskFile, cascades, participants, goodDAs, goodCAs, tab);
+
   return (
     <>
       <Box sx={{ mb: 15 }}>
@@ -153,7 +153,9 @@ export default function RiskFilePage({}) {
             onUpdateCascades={handleUpdateCascades}
           />
         )}
-        {riskFile && tab === 2 && <AnalysisTab riskFiles={riskFiles} cascades={cascades} />}
+        {riskFile && riskFiles && tab === 2 && (
+          <AnalysisTab riskFile={riskFile} riskFiles={riskFiles} cascades={cascades} />
+        )}
         {riskFile && tab === 3 && (
           <InputManagementTab
             riskFile={riskFile}
