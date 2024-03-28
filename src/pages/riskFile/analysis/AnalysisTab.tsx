@@ -94,7 +94,7 @@ export default function AnalysisTab({
 
   return (
     <Container sx={{ mt: 4, pb: 8 }}>
-      <ExportRiskFiles riskFile={riskFile} otherRiskFiles={riskFiles} cascades={cascades} />
+      <ExportRiskFiles riskFile={riskFile} otherRiskFiles={riskFiles} cascades={cascades} mode="edit" />
     </Container>
   );
   // return (

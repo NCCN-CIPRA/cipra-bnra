@@ -21,6 +21,8 @@ import getImpactColor from "../../functions/getImpactColor";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import ClimateChangeMatrix from "../../components/charts/ClimateChangeMatrix";
 import { useMemo } from "react";
+import ProbabilitySection from "./ProbabilitySection";
+import ImpactSection from "./ImpactSection";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -38,10 +40,12 @@ export default function ExportRiskFiles({
   riskFile,
   otherRiskFiles,
   cascades,
+  mode = "view",
 }: {
   riskFile: DVRiskFile<DVAnalysisRun<unknown, string>>;
   otherRiskFiles: DVRiskFile<DVAnalysisRun<unknown, string>>[];
   cascades: DVRiskCascade<SmallRisk>[];
+  mode?: "view" | "edit";
 }) {
   const calculations = useMemo(
     () => otherRiskFiles.map((rf) => JSON.parse(rf.cr4de_latest_calculation?.cr4de_results as string)),
@@ -82,7 +86,6 @@ export default function ExportRiskFiles({
     ...(calc.causes
       .filter((c) => c[`ip${MRSSuffix}`] !== 0)
       .map((c) => {
-        console.log(cDict, c.cascadeId);
         return {
           name: c.cause.riskTitle,
           p: c[`ip${MRSSuffix}`],
@@ -91,7 +94,10 @@ export default function ExportRiskFiles({
       }) || []),
   ].sort((a, b) => b.p - a.p);
 
-  const effects = [getDirectImpact(calc), ...calc.effects.map((c) => getIndirectImpact(c, calc, cDict[c.cascadeId]))];
+  const effects = [
+    getDirectImpact(calc, riskFile, MRSSuffix),
+    ...calc.effects.map((c) => getIndirectImpact(c, calc, MRSSuffix, cDict[c.cascadeId])),
+  ];
 
   const catalyzing = cascades.filter(
     (c) =>
@@ -112,7 +118,13 @@ export default function ExportRiskFiles({
           {rf.cr4de_title}
         </Typography>
 
-        <SankeyDiagram calculations={calculations} selectedNodeId={rf.cr4de_riskfilesid} setSelectedNodeId={() => {}} />
+        <SankeyDiagram
+          calculations={calculations}
+          selectedNodeId={rf.cr4de_riskfilesid}
+          setSelectedNodeId={() => {}}
+          type="PARETO"
+          debug={mode === "edit"}
+        />
 
         <Box sx={{ mt: 2 }}>
           <Typography variant="h5">Definition</Typography>
@@ -139,35 +151,14 @@ export default function ExportRiskFiles({
 
             {/* <IntensityParametersTable initialParameters={rf.cr4de_intensity_parameters} /> */}
 
-            <Scenario intensityParameters={intensityParameters} riskFile={rf} scenario={MRS} />
+            <Scenario intensityParameters={intensityParameters} riskFile={rf} scenario={MRS} mode={mode} />
           </Box>
         )}
 
         <Box sx={{ mt: 8, clear: "both" }}>
           <Typography variant="h5">Probability Assessment</Typography>
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <ProbabilityOriginPieChart
-              causes={causes
-                .filter((c) => c.p / calc[`tp${MRSSuffix}`] >= 0.01)
-                .slice(0, 5)
-                .map((c) => ({ ...c, total: calc[`tp${MRSSuffix}`] }))}
-            />
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              There is an estimated <b>{Math.round(10000 * getYearlyProbability(calc[`tp${MRSSuffix}`])) / 100}%</b>{" "}
-              chance of an incident of this magnitude to happen in the next 3 years. The following possible underlying
-              causes for such an incident were identified:
-            </Typography>
-
-            <Box sx={{ ml: 0 }}>
-              {causes.slice(0, 5).map((c, i) => (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle2">
-                    {i + 1}. {c.name} ({Math.round((10000 * c.p) / calc[`tp${MRSSuffix}`]) / 100}% of total probability)
-                  </Typography>
-                  <Box sx={{ ml: 2 }} dangerouslySetInnerHTML={{ __html: c.quali || "" }} />
-                </Box>
-              ))}
-            </Box>
+            <ProbabilitySection riskFile={rf} causes={causes} MRSSuffix={MRSSuffix} calc={calc} mode={mode} />
           </Box>
         </Box>
 
@@ -175,6 +166,10 @@ export default function ExportRiskFiles({
           <Typography variant="h5">Impact Assessment</Typography>
 
           <Box sx={{ borderLeft: "solid 8px " + getImpactColor("H"), px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
+            <ImpactSection riskFile={rf} effects={effects} scenarioSuffix={MRSSuffix} calc={calc} mode={mode} />
+          </Box>
+
+          {/* <Box sx={{ borderLeft: "solid 8px " + getImpactColor("H"), px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
             {effects.filter((c) => c.h >= 0.01 && (c.h * ti_H) / calc.ti > 0.01).length > 0 ? (
               <>
                 <Typography variant="h6">Human Impact</Typography>
@@ -333,7 +328,7 @@ export default function ExportRiskFiles({
                 The financial impact is within the margin of error and further elaboration is not considered useful.
               </Typography>
             )}
-          </Box>
+          </Box> */}
 
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
             <Typography variant="h6">Cross-border Impact</Typography>

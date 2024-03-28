@@ -28,10 +28,14 @@ export default function SankeyDiagram({
   calculations,
   selectedNodeId,
   setSelectedNodeId,
+  type = "MAX_NODES",
+  debug = false,
 }: {
   calculations: RiskCalculation[] | null;
   selectedNodeId: string | null;
   setSelectedNodeId: (id: string | null) => void;
+  type?: "MAX_NODES" | "PARETO" | "MIN_WEIGHT";
+  debug?: boolean;
 }) {
   const [calculation, setCalculation] = useState<RiskCalculation | null>(null);
   const [scenario, setScenario] = useState<"wcs" | SCENARIOS>("wcs");
@@ -52,9 +56,12 @@ export default function SankeyDiagram({
       <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
         <ProbabilitySankey
           calculation={calculation}
-          shownCausePortion={0.9}
+          maxCauses={type === "MAX_NODES" ? causes : null}
+          shownCausePortion={type === "PARETO" ? 0.8 : null}
+          minCausePortion={type === "MIN_WEIGHT" ? 0.1 : null}
           scenario={scenario === "wcs" ? null : scenario}
           onClick={(id: string) => setSelectedNodeId(id)}
+          debug={debug}
         />
       </Box>
       <Stack direction="column" justifyContent="center" sx={{ width: 300, p: "50px" }}>
@@ -92,9 +99,12 @@ export default function SankeyDiagram({
       <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
         <ImpactSankey
           calculation={calculation}
-          shownEffectPortion={0.9}
+          maxEffects={type === "MAX_NODES" ? effects : null}
+          shownEffectPortion={type === "PARETO" ? 0.8 : null}
+          minEffectPortion={type === "MIN_WEIGHT" ? 0.1 : null}
           scenario={scenario === "wcs" ? null : scenario}
           onClick={(id: string) => setSelectedNodeId(id)}
+          debug={debug}
         />
       </Box>
     </Stack>
