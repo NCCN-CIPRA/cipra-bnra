@@ -7,12 +7,7 @@ import { useMemo, useState } from "react";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../hooks/useAPI";
-
-type Cause = {
-  name: string;
-  p: number;
-  quali: string | null;
-};
+import { Cause } from "../../functions/Probability";
 
 export default function ProbabilitySection({
   riskFile,
@@ -29,6 +24,7 @@ export default function ProbabilitySection({
 }) {
   const paretoCauses = useMemo(() => {
     return causes
+      .sort((a, b) => b.p - a.p)
       .reduce(
         ([cumulCauses, pCumul], c) => {
           if (pCumul / calc[`tp${MRSSuffix}`] > 0.8) return [cumulCauses, pCumul] as [Cause[], number];
@@ -36,8 +32,7 @@ export default function ProbabilitySection({
           return [[...cumulCauses, c], pCumul + c.p] as [Cause[], number];
         },
         [[], 0] as [Cause[], number]
-      )[0]
-      .sort((a, b) => b.p - a.p);
+      )[0];
   }, [riskFile, causes]);
 
   const getDefaultText = () => {

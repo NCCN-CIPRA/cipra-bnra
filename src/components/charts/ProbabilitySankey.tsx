@@ -26,7 +26,7 @@ const PSankeyNode = ({
 }: any) => {
   const navigate = useNavigate();
   const scenarioLetter = scenarioSuffix[1];
-  console.log(payload.hidden);
+
   if (payload.depth > 0) {
     return (
       <Layer key={`CustomNode${index}`} height="50px">

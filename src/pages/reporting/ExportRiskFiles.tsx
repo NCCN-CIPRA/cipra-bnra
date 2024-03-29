@@ -1,4 +1,4 @@
-import { Box, List, ListItem, Typography } from "@mui/material";
+import { Box, List, ListItem, ListItemButton, Typography } from "@mui/material";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import HistoricalEventsTable from "../../components/HistoricalEventsTable";
 import ScenariosTable from "../../components/ScenariosTable";
@@ -19,10 +19,11 @@ import ProbabilityOriginPieChart from "../../components/charts/ProbabilityOrigin
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import getImpactColor from "../../functions/getImpactColor";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import ClimateChangeMatrix from "../../components/charts/ClimateChangeMatrix";
+import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
 import { useMemo } from "react";
 import ProbabilitySection from "./ProbabilitySection";
 import ImpactSection from "./ImpactSection";
+import { Link } from "react-router-dom";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -165,170 +166,41 @@ export default function ExportRiskFiles({
         <Box sx={{ mt: 8 }}>
           <Typography variant="h5">Impact Assessment</Typography>
 
-          <Box sx={{ borderLeft: "solid 8px " + getImpactColor("H"), px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <ImpactSection riskFile={rf} effects={effects} scenarioSuffix={MRSSuffix} calc={calc} mode={mode} />
-          </Box>
+          <ImpactSection
+            riskFile={rf}
+            effects={effects}
+            scenarioSuffix={MRSSuffix}
+            impactName="human"
+            calc={calc}
+            mode={mode}
+          />
 
-          {/* <Box sx={{ borderLeft: "solid 8px " + getImpactColor("H"), px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            {effects.filter((c) => c.h >= 0.01 && (c.h * ti_H) / calc.ti > 0.01).length > 0 ? (
-              <>
-                <Typography variant="h6">Human Impact</Typography>
-                <Typography variant="body2" sx={{ mb: 3 }}>
-                  The human impact represents an estimated <b>{Math.round((100 * ti_H) / calc.ti)}%</b> of the total
-                  impact of an incident of this magnitude. Possible explanation for the human impact are:
-                </Typography>
+          <ImpactSection
+            riskFile={rf}
+            effects={effects}
+            scenarioSuffix={MRSSuffix}
+            impactName="societal"
+            calc={calc}
+            mode={mode}
+          />
 
-                <List sx={{ ml: 2.5, listStyle: "disc" }}>
-                  {effects
-                    .filter((c) => c.h >= 0.01 && (c.h * ti_H) / calc.ti > 0.01)
-                    .sort((a, b) => b.h - a.h)
-                    .slice(0, 5)
-                    .map((c, i) => (
-                      <ListItem sx={{ mb: 1, display: "list-item", pl: 0 }} dense>
-                        <Typography variant="subtitle2">{c.name} </Typography>
-                        <Typography variant="caption">
-                          <b>{Math.round(10000 * c.h) / 100}%</b> of total human impact,{" "}
-                          <b>{Math.round((10000 * c.h * ti_H) / calc.ti) / 100}%</b> of total impact
-                        </Typography>
-                        {c.quali ? (
-                          <Box sx={{ ml: 0 }} dangerouslySetInnerHTML={{ __html: c.quali || "" }} />
-                        ) : (
-                          <Box
-                            sx={{ ml: 0 }}
-                            dangerouslySetInnerHTML={{ __html: rf[`cr4de_di_quali_h${MRSSuffix}`] || "" }}
-                          />
-                        )}
-                      </ListItem>
-                    ))}
-                </List>
-              </>
-            ) : (
-              <Typography variant="caption">
-                The human impact is within the margin of error and further elaboration is not considered useful.
-              </Typography>
-            )}
-          </Box>
+          <ImpactSection
+            riskFile={rf}
+            effects={effects}
+            scenarioSuffix={MRSSuffix}
+            impactName="environmental"
+            calc={calc}
+            mode={mode}
+          />
 
-          <Box sx={{ borderLeft: "solid 8px " + getImpactColor("S"), px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            {effects.filter((c) => c.s >= 0.01 && (c.s * ti_S) / calc.ti > 0.01).length > 0 ? (
-              <>
-                <Typography variant="h6">Societal Impact</Typography>
-                <Typography variant="body2" sx={{ mb: 3 }}>
-                  The societal impact represents an estimated <b>{Math.round((100 * ti_S) / calc.ti)}%</b> of the total
-                  impact of an incident of this magnitude. Possible explanation for the societal impact are:
-                </Typography>
-
-                <List sx={{ ml: 2.5, listStyle: "disc" }}>
-                  {effects
-                    .filter((c) => c.s >= 0.01 && (c.s * ti_S) / calc.ti > 0.01)
-                    .sort((a, b) => b.s - a.s)
-                    .slice(0, 5)
-                    .map((c, i) => (
-                      <ListItem sx={{ mb: 1, display: "list-item", pl: 0 }} dense>
-                        <Typography variant="subtitle2">{c.name} </Typography>
-                        <Typography variant="caption">
-                          <b>{Math.round(10000 * c.s) / 100}%</b> of total scoietal impact,{" "}
-                          <b>{Math.round((10000 * c.s * ti_S) / calc.ti) / 100}%</b> of total impact
-                        </Typography>
-                        {c.quali ? (
-                          <Box sx={{ ml: 0 }} dangerouslySetInnerHTML={{ __html: c.quali || "" }} />
-                        ) : (
-                          <Box
-                            sx={{ ml: 0 }}
-                            dangerouslySetInnerHTML={{ __html: rf[`cr4de_di_quali_s${MRSSuffix}`] || "" }}
-                          />
-                        )}
-                      </ListItem>
-                    ))}
-                </List>
-              </>
-            ) : (
-              <Typography variant="caption">
-                The societal impact is within the margin of error and further elaboration is not considered useful.
-              </Typography>
-            )}
-          </Box>
-
-          <Box sx={{ borderLeft: "solid 8px " + getImpactColor("E"), px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <Typography variant="h6">Environmental Impact</Typography>
-
-            {effects.filter((c) => c.e >= 0.01 && (c.e * ti_E) / calc.ti > 0.01).length > 0 ? (
-              <>
-                <Typography variant="body2" sx={{ mb: 3 }}>
-                  The environmental impact represents an estimated <b>{Math.round((100 * ti_E) / calc.ti)}%</b> of the
-                  total impact of an incident of this magnitude. Possible explanation for the environmental impact are:
-                </Typography>
-
-                <List sx={{ ml: 2.5, listStyle: "disc" }}>
-                  {effects
-                    .filter((c) => c.e >= 0.01 && (c.e * ti_E) / calc.ti > 0.01)
-                    .sort((a, b) => b.e - a.e)
-                    .slice(0, 5)
-                    .map((c, i) => (
-                      <ListItem sx={{ mb: 1, display: "list-item", pl: 0 }} dense>
-                        <Typography variant="subtitle2">{c.name} </Typography>
-                        <Typography variant="caption">
-                          <b>{Math.round(10000 * c.e) / 100}%</b> of total environmental impact,{" "}
-                          <b>{Math.round((10000 * c.e * ti_E) / calc.ti) / 100}%</b> of total impact
-                        </Typography>
-                        {c.quali ? (
-                          <Box sx={{ ml: 0 }} dangerouslySetInnerHTML={{ __html: c.quali || "" }} />
-                        ) : (
-                          <Box
-                            sx={{ ml: 0 }}
-                            dangerouslySetInnerHTML={{ __html: rf[`cr4de_di_quali_e${MRSSuffix}`] || "" }}
-                          />
-                        )}
-                      </ListItem>
-                    ))}
-                </List>
-              </>
-            ) : (
-              <Typography variant="caption">
-                The environmental impact is within the margin of error and further elaboration is not considered useful.
-              </Typography>
-            )}
-          </Box>
-
-          <Box sx={{ borderLeft: "solid 8px " + getImpactColor("F"), px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <Typography variant="h6">Financial Impact</Typography>
-            {effects.filter((c) => c.f >= 0.01 && (c.f * ti_F) / calc.ti > 0.01).length > 0 ? (
-              <>
-                <Typography variant="body2" sx={{ mb: 3 }}>
-                  The financial impact represents an estimated <b>{Math.round((100 * ti_F) / calc.ti)}%</b> of the total
-                  impact of an incident of this magnitude. Possible explanation for the financial impact are:
-                </Typography>
-
-                <List sx={{ ml: 2.5, listStyle: "disc" }}>
-                  {effects
-                    .filter((c) => c.f >= 0.01 && (c.f * ti_F) / calc.ti > 0.01)
-                    .sort((a, b) => b.f - a.f)
-                    .slice(0, 5)
-                    .map((c, i) => (
-                      <ListItem sx={{ mb: 1, display: "list-item", pl: 0 }} dense>
-                        <Typography variant="subtitle2">{c.name} </Typography>
-                        <Typography variant="caption">
-                          <b>{Math.round(10000 * c.f) / 100}%</b> of total financial impact,{" "}
-                          <b>{Math.round((10000 * c.f * ti_F) / calc.ti) / 100}%</b> of total impact
-                        </Typography>
-                        {c.quali ? (
-                          <Box sx={{ ml: 0 }} dangerouslySetInnerHTML={{ __html: c.quali || "" }} />
-                        ) : (
-                          <Box
-                            sx={{ ml: 0 }}
-                            dangerouslySetInnerHTML={{ __html: rf[`cr4de_di_quali_f${MRSSuffix}`] || "" }}
-                          />
-                        )}
-                      </ListItem>
-                    ))}
-                </List>
-              </>
-            ) : (
-              <Typography variant="caption">
-                The financial impact is within the margin of error and further elaboration is not considered useful.
-              </Typography>
-            )}
-          </Box> */}
+          <ImpactSection
+            riskFile={rf}
+            effects={effects}
+            scenarioSuffix={MRSSuffix}
+            impactName="financial"
+            calc={calc}
+            mode={mode}
+          />
 
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
             <Typography variant="h6">Cross-border Impact</Typography>
@@ -345,7 +217,7 @@ export default function ExportRiskFiles({
           <Typography variant="h5">Climate Change</Typography>
 
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <ClimateChangeMatrix calculation={calc} />
+            <ClimateChangeChart calculation={calc} scenarioSuffix={MRSSuffix} />
 
             <Box sx={{ clear: "both" }} />
           </Box>
@@ -354,14 +226,24 @@ export default function ExportRiskFiles({
         <Box sx={{ mt: 8 }}>
           <Typography variant="h5">Other Catalysing Effects</Typography>
 
-          <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <List sx={{ ml: 2.5, listStyle: "disc" }}>
+          <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, backgroundColor: "white" }}>
+            <Box sx={{ px: 2, pt: 2 }}>
+              <Typography variant="body2" paragraph>
+                The following emerging risks were identified as having a potential catalysing effect on the probability
+                and/or impact of this risk. Please refer to the corresponding risk files for the qualitative assessment
+                of this effect:
+              </Typography>
+            </Box>
+            <List>
               {catalyzing.map((c, i) => (
-                <ListItem sx={{ mb: 1, display: "list-item", pl: 0 }} dense>
-                  <Typography variant="subtitle2">{c.cr4de_cause_hazard.cr4de_title} </Typography>
-
-                  <Box sx={{ ml: 0 }} dangerouslySetInnerHTML={{ __html: c.cr4de_quali || "" }} />
-                </ListItem>
+                <ListItemButton
+                  LinkComponent={Link}
+                  href={`/risks/${c.cr4de_cause_hazard.cr4de_riskfilesid}?tab=analysis`}
+                >
+                  <Typography variant="subtitle2" sx={{ pl: 2 }}>
+                    {c.cr4de_cause_hazard.cr4de_title}{" "}
+                  </Typography>
+                </ListItemButton>
               ))}
             </List>
           </Box>

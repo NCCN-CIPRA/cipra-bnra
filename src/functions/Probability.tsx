@@ -1,3 +1,9 @@
+export type Cause = {
+  name: string;
+  p: number;
+  quali: string | null;
+};
+
 // Upper bounds of interval
 // Return period of an event
 const DPScales: { [key: string]: number } = {

@@ -2,6 +2,29 @@ import { CascadeCalculation, RiskCalculation } from "../types/dataverse/DVAnalys
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 
+export type Effect = {
+  name: string;
+  ha: number;
+  hb: number;
+  hc: number;
+  sa: number;
+  sb: number;
+  sc: number;
+  sd: number;
+  ea: number;
+  fa: number;
+  fb: number;
+  h: number;
+  s: number;
+  e: number;
+  f: number;
+  quali?: string | null;
+  quali_h?: string | null;
+  quali_s?: string | null;
+  quali_e?: string | null;
+  quali_f?: string | null;
+};
+
 // in k€ = € 1 000
 const scales: { [key: string]: number } = {
   "0": 0,
@@ -54,7 +77,7 @@ export function getMoneyString(impactNumber: number) {
   return `€ ${(Math.round(impactNumber / 10000000000) / 100).toLocaleString()}T`;
 }
 
-export function getDirectImpact(c: RiskCalculation, rf: DVRiskFile, scenarioSuffix: "_c" | "_m" | "_e") {
+export function getDirectImpact(c: RiskCalculation, rf: DVRiskFile, scenarioSuffix: "_c" | "_m" | "_e"): Effect {
   return {
     name: "Direct Impact",
     ha: c[`di_Ha${scenarioSuffix}`] / c[`ti_Ha${scenarioSuffix}`],
@@ -97,7 +120,7 @@ export function getIndirectImpact(
   tot: RiskCalculation,
   scenarioSuffix: "_c" | "_m" | "_e",
   cascade?: DVRiskCascade
-) {
+): Effect {
   return {
     name: c.effect.riskTitle,
     ha: c[`ii_Ha${scenarioSuffix}`] / tot[`ti_Ha${scenarioSuffix}`],
