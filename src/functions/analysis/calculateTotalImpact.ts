@@ -123,20 +123,26 @@ function calculateTotalImpactScenario(risk: RiskCalculation, scenario: SCENARIOS
         calculateTotalImpact(cascade.effect);
       }
 
-      const cp0 =
-        (1 - getCP(cascade, scenario, SCENARIOS.CONSIDERABLE)) *
-        (1 - getCP(cascade, scenario, SCENARIOS.MAJOR)) *
-        (1 - getCP(cascade, scenario, SCENARIOS.EXTREME));
-      const cpTot =
-        getCP(cascade, scenario, SCENARIOS.CONSIDERABLE) +
-          getCP(cascade, scenario, SCENARIOS.MAJOR) +
-          getCP(cascade, scenario, SCENARIOS.EXTREME) || 0.0000001;
+      // const cp0 =
+      //   (1 - getCP(cascade, scenario, SCENARIOS.CONSIDERABLE)) *
+      //   (1 - getCP(cascade, scenario, SCENARIOS.MAJOR)) *
+      //   (1 - getCP(cascade, scenario, SCENARIOS.EXTREME));
+      // const cpTot =
+      //   getCP(cascade, scenario, SCENARIOS.CONSIDERABLE) +
+      //     getCP(cascade, scenario, SCENARIOS.MAJOR) +
+      //     getCP(cascade, scenario, SCENARIOS.EXTREME) || 0.0000001;
 
-      const s2c = (1 - cp0) * (getCP(cascade, scenario, SCENARIOS.CONSIDERABLE) / cpTot);
-      const s2m = (1 - cp0) * (getCP(cascade, scenario, SCENARIOS.MAJOR) / cpTot);
-      const s2e = (1 - cp0) * (getCP(cascade, scenario, SCENARIOS.EXTREME) / cpTot);
+      // const s2c = (1 - cp0) * (getCP(cascade, scenario, SCENARIOS.CONSIDERABLE) / cpTot);
+      // const s2m = (1 - cp0) * (getCP(cascade, scenario, SCENARIOS.MAJOR) / cpTot);
+      // const s2e = (1 - cp0) * (getCP(cascade, scenario, SCENARIOS.EXTREME) / cpTot);
 
-      setIndirectImpacts(cascade, scenario, s2c, s2m, s2e);
+      setIndirectImpacts(
+        cascade,
+        scenario,
+        getCP(cascade, scenario, SCENARIOS.CONSIDERABLE),
+        getCP(cascade, scenario, SCENARIOS.MAJOR),
+        getCP(cascade, scenario, SCENARIOS.EXTREME)
+      );
 
       return iiTot + getII(cascade, scenario);
     }, 0);

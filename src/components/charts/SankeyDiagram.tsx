@@ -42,7 +42,7 @@ export default function SankeyDiagram({
   const [split, setSplit] = useState<"total" | "scenario" | "impact">("impact");
   const [causes, setCauses] = useState(5);
   const [effects, setEffects] = useState(5);
-
+  console.log(calculations);
   useEffect(() => {
     if (!calculations) return;
 

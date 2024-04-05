@@ -80,11 +80,12 @@ const ISankeyNode = ({
                     <Typography color="inherit">{payload.name}</Typography>
 
                     <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                      II({scenarioLetter}&rarr;all): {getMoneyString(payload.cascade.ii)}
+                      II({scenarioLetter}&rarr;all): {getMoneyString(payload.cascade[`ii_${scenarioLetter}`])}
                     </Typography>
 
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                      II({scenarioLetter}&rarr;c): {getMoneyString(payload.cascade.ii_c)}
+                      II({scenarioLetter}&rarr;c):{" "}
+                      {getMoneyString(payload.cascade[`${scenarioLetter}2c`] * payload.cascade.effect.ti_c)}
                     </Typography>
                     <Typography variant="subtitle2">
                       CP({scenarioLetter}&rarr;c): {Math.round(10000 * payload.cascade[`${scenarioLetter}2c`]) / 100}%
@@ -92,7 +93,8 @@ const ISankeyNode = ({
                     <Typography variant="subtitle2">TI(c): {getMoneyString(payload.cascade.effect.ti_c)}</Typography>
 
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                      II({scenarioLetter}&rarr;m): {getMoneyString(payload.cascade.ii_m)}
+                      II({scenarioLetter}&rarr;m):{" "}
+                      {getMoneyString(payload.cascade[`${scenarioLetter}2m`] * payload.cascade.effect.ti_m)}
                     </Typography>
                     <Typography variant="subtitle2">
                       CP({scenarioLetter}&rarr;m): {Math.round(10000 * payload.cascade[`${scenarioLetter}2m`]) / 100}%
@@ -100,7 +102,8 @@ const ISankeyNode = ({
                     <Typography variant="subtitle2">TI(m): {getMoneyString(payload.cascade.effect.ti_m)}</Typography>
 
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                      II({scenarioLetter}&rarr;e): {getMoneyString(payload.cascade.ii_e)}
+                      II({scenarioLetter}&rarr;e):{" "}
+                      {getMoneyString(payload.cascade[`${scenarioLetter}2e`] * payload.cascade.effect.ti_e)}
                     </Typography>
                     <Typography variant="subtitle2">
                       CP({scenarioLetter}&rarr;e): {Math.round(10000 * payload.cascade[`${scenarioLetter}2e`]) / 100}%
@@ -126,9 +129,18 @@ const ISankeyNode = ({
 
                     {payload.hidden.map((h: any) => (
                       <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                        {h.effect.riskTitle} II({scenarioLetter}&rarr;all): {getMoneyString(h.ii)}
+                        {h.name} II({scenarioLetter}&rarr;all): {getMoneyString(h.i)}
                       </Typography>
                     ))}
+                  </>
+                )}
+                {!payload.cascade && !payload.hidden && (
+                  <>
+                    <Typography color="inherit">Other effects:</Typography>
+
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                      DI({scenarioLetter}): {getMoneyString(payload.i)}
+                    </Typography>
                   </>
                 )}
               </Box>
@@ -291,9 +303,7 @@ export default function ImpactSankey({
   if (minI >= 0)
     nodes.push({
       name: "Other",
-      hidden: calculation.effects.filter(
-        (e: any, i: number) => (e[`ii${scenarioSuffix}` as keyof CascadeCalculation] as number) < minI
-      ),
+      hidden: effects.filter((e: any, i: number) => e.i < minI),
     });
 
   const links: any[] = effects

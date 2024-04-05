@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import AnalysisAveragerPage from "./pages/analysis/AnalysisAveragerPage";
 import AuthenticationPage from "./pages/auth/AuthenticationPage";
-import DataMigrator from "./pages/main/DataMigrator";
 import HomePage from "./pages/main/HomePage";
 import LocalAPI from "./pages/main/LocalAPI";
 import CalculationPage from "./pages/analysis/CalculationPage";
@@ -21,7 +20,6 @@ import OverviewPage from "./pages/main/OverviewPage";
 import AuthPage from "./pages/AuthPage";
 import TranslationsPage from "./pages/admin/TranslationsPage";
 import LearningPage from "./pages/learning/LearningPage";
-import UploadCodePage from "./pages/_dev/UploadCodePage";
 import RiskCataloguePage from "./pages/learning/RiskCataloguePage";
 import QuantitativeScalesPage from "./pages/learning/QuantitativeScalesPage";
 import RegistrationPage from "./pages/auth/RegistrationPage";
@@ -33,6 +31,7 @@ import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
 import Step2BPage from "./pages/step2B/Step2BPage";
 import RiskFilePage from "./pages/riskFile/RiskFilePage";
 import ConsensusExpertPage from "./pages/consensus/ConsensusExpertPage";
+import AdminPage from "./pages/AdminPage";
 
 function App() {
   useEffect(() => {
@@ -144,20 +143,15 @@ function App() {
                   path: "/reporting/:risk_id",
                   element: <RiskReportingPage />,
                 },
-
+              ],
+            },
+            {
+              path: "/",
+              element: <AdminPage />,
+              children: [
                 { path: "/admin/translations", element: <TranslationsPage /> },
                 { path: "/admin/process", element: <ProcessManagementPage /> },
                 { path: "/admin/experts", element: <ExpertManagementPage /> },
-
-                // DEV ONLY
-                {
-                  path: "/__dev/migrate",
-                  element: <DataMigrator />,
-                },
-                {
-                  path: "/__dev/code",
-                  element: <UploadCodePage />,
-                },
               ],
             },
           ],
