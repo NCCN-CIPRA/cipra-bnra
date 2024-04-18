@@ -17,7 +17,7 @@ import { DVAnalysisRun, RiskAnalysisResults, RiskCalculation } from "../../types
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { DataGrid, GridColDef, GridValueGetterParams } from "@mui/x-data-grid";
 import { format } from "date-fns";
-import ExportRiskFiles from "./ExportRiskFiles";
+import ExportRiskFiles from "./Standard";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 
 const dataColumns: GridColDef[] = [

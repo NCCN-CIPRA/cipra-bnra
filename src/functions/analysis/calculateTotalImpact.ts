@@ -31,26 +31,20 @@ const setIndirectImpacts = (
   s2e: number
 ) => {
   let suffix = getScenarioSuffix(scenario);
-  const factor =
-    cascade.effect.riskTitle === "Information operations" || cascade.cause.riskTitle === "Information operations"
-      ? INFO_OPS_FACTOR
-      : 1;
 
   DAMAGE_INDICATORS.forEach((d) => {
     //@ts-expect-error
     cascade[`ii_${d}${suffix}` as keyof CascadeCalculation] =
-      (s2c * (cascade.effect[`ti_${d}_c` as keyof RiskCalculation] as number) +
-        s2m * (cascade.effect[`ti_${d}_m` as keyof RiskCalculation] as number) +
-        s2e * (cascade.effect[`ti_${d}_e` as keyof RiskCalculation] as number)) /
-      factor;
+      s2c * (cascade.effect[`ti_${d}_c` as keyof RiskCalculation] as number) +
+      s2m * (cascade.effect[`ti_${d}_m` as keyof RiskCalculation] as number) +
+      s2e * (cascade.effect[`ti_${d}_e` as keyof RiskCalculation] as number);
   });
 
   //@ts-expect-error
   cascade[`ii${suffix}` as keyof CascadeCalculation] =
-    (s2c * (cascade.effect[`ti_c` as keyof RiskCalculation] as number) +
-      s2m * (cascade.effect[`ti_m` as keyof RiskCalculation] as number) +
-      s2e * (cascade.effect[`ti_e` as keyof RiskCalculation] as number)) /
-    factor;
+    s2c * (cascade.effect[`ti_c` as keyof RiskCalculation] as number) +
+    s2m * (cascade.effect[`ti_m` as keyof RiskCalculation] as number) +
+    s2e * (cascade.effect[`ti_e` as keyof RiskCalculation] as number);
 };
 
 const getCP = (cascade: CascadeCalculation, fromScenario: SCENARIOS, toScenario: SCENARIOS) => {

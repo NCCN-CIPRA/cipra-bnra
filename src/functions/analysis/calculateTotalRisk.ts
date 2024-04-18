@@ -19,6 +19,10 @@ export const getYearlyProbability = (dailyP: number) => {
   return 1 - Math.pow(1 - dailyP, 365);
 };
 
+export const getPercentageProbability = (p: number) => {
+  return `${Math.round(p * 10000) / 100}%`;
+};
+
 export default function calculateTotalRisk(r: RiskCalculation) {
   r.tr_c = r.tp_c * r.ti_c;
   r.tr_m = r.tp_m * r.ti_m;

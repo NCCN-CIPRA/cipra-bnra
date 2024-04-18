@@ -2,7 +2,7 @@ import { Layer, Rectangle, ResponsiveContainer, Sankey, TooltipProps } from "rec
 import { Box, Typography, Card, CardContent, Tooltip } from "@mui/material";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { useNavigate } from "react-router-dom";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { SCENARIOS, Scenarios } from "../../functions/scenarios";
@@ -82,37 +82,46 @@ const PSankeyNode = ({
                     <Typography color="inherit">{payload.name}</Typography>
 
                     <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                      IP(all&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade.ip) / 100}% / day
+                      IP(all&rarr;{scenarioLetter}): {Math.round(1000000 * payload.cascade.ip) / 10000}% / day
                     </Typography>
 
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                      IP(c&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade.ip_c) / 100}% / day
+                      TP(c): {Math.round(1000000 * payload.cascade.cause.tp_c) / 10000}% / day
                     </Typography>
                     <Typography variant="subtitle2">
                       CP(c&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`c2${scenarioLetter}`]) / 100}%
                     </Typography>
                     <Typography variant="subtitle2">
-                      TP(c): {Math.round(10000 * payload.cascade.cause.tp_c) / 100}% / day
+                      IP(c&rarr;{scenarioLetter}):{" "}
+                      {Math.round(1000000 * payload.cascade.cause.tp_c * payload.cascade[`c2${scenarioLetter}`]) /
+                        10000}
+                      % / day
                     </Typography>
 
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                      IP(m&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade.ip_m) / 100}% / day
+                      TP(m): {Math.round(1000000 * payload.cascade.cause.tp_m) / 10000}% / day
                     </Typography>
                     <Typography variant="subtitle2">
                       CP(m&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`m2${scenarioLetter}`]) / 100}%
                     </Typography>
                     <Typography variant="subtitle2">
-                      TP(m): {Math.round(10000 * payload.cascade.cause.tp_m) / 100}% / day
+                      IP(m&rarr;{scenarioLetter}):{" "}
+                      {Math.round(1000000 * payload.cascade.cause.tp_m * payload.cascade[`m2${scenarioLetter}`]) /
+                        10000}
+                      % / day
                     </Typography>
 
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                      IP(e&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade.ip_e) / 100}% / day
+                      TP(e): {Math.round(1000000 * payload.cascade.cause.tp_e) / 10000}% / day
                     </Typography>
                     <Typography variant="subtitle2">
                       CP(e&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`e2${scenarioLetter}`]) / 100}%
                     </Typography>
                     <Typography variant="subtitle2">
-                      TP(e): {Math.round(10000 * payload.cascade.cause.tp_e) / 100}% / day
+                      IP(e&rarr;{scenarioLetter}):{" "}
+                      {Math.round(1000000 * payload.cascade.cause.tp_e * payload.cascade[`e2${scenarioLetter}`]) /
+                        10000}
+                      % / day
                     </Typography>
                   </>
                 )}
@@ -122,7 +131,7 @@ const PSankeyNode = ({
 
                     {payload.hidden.map((h: any) => (
                       <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                        {h.cause.riskTitle} IP(all&rarr;{scenarioLetter}): {Math.round(100000 * h.ip) / 1000}% / day
+                        {h.cause.riskTitle} IP(all&rarr;{scenarioLetter}): {Math.round(1000000 * h.ip) / 10000}% / day
                       </Typography>
                     ))}
                   </>
@@ -132,7 +141,7 @@ const PSankeyNode = ({
                     <Typography color="inherit">{payload.name}</Typography>
 
                     <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                      DP({scenarioLetter}): {Math.round(10000 * payload.p) / 100}% / day
+                      DP({scenarioLetter}): {Math.round(1000000 * payload.p) / 10000}% / day
                     </Typography>
                   </>
                 )}
@@ -224,6 +233,7 @@ export default function ProbabilitySankey({
   shownCausePortion = null,
   scenario = null,
   debug = false,
+  manmade = false,
   onClick = null,
 }: {
   riskFile?: DVRiskFile | null;
@@ -233,6 +243,7 @@ export default function ProbabilitySankey({
   shownCausePortion?: number | null;
   scenario?: SCENARIOS | null;
   debug?: boolean;
+  manmade?: boolean;
   onClick?: ((id: string) => void) | null;
 }) {
   if (!calculation) return null;
@@ -257,20 +268,24 @@ export default function ProbabilitySankey({
 
   const causes = [
     {
-      name: "Direct Probability",
+      name: manmade ? "Motivation" : "Direct Probability",
       p: calculation[`dp${scenarioSuffix}` as keyof RiskCalculation] as number,
     },
-    ...calculation.causes.map((c) => ({
-      id: c.cause.riskId,
-      name: c.cause.riskTitle,
-      p: c[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number,
-      cascade: c,
-    })),
+    ...(manmade
+      ? []
+      : calculation.causes.map((c) => ({
+          id: c.cause.riskId,
+          name: c.cause.riskTitle,
+          p: c[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number,
+          cascade: c,
+        }))),
   ];
 
   let minP = 0;
 
-  if (maxCauses !== null) {
+  if (manmade) {
+    minP = -1;
+  } else if (maxCauses !== null) {
     minP =
       maxCauses === null || causes.length <= maxCauses
         ? -1
@@ -293,7 +308,7 @@ export default function ProbabilitySankey({
   }
 
   const nodes: any[] = [{ name: calculation.riskTitle }, ...causes.filter((c) => c.p >= minP)];
-  if (minP >= 0)
+  if (minP >= 0 && !manmade)
     nodes.push({
       name: "Other",
       hidden: calculation.causes.filter(

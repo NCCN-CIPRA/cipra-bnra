@@ -16,6 +16,9 @@ import { getAbsoluteProbability, getDPDailyProbability } from "../Probability";
 import { getAverage, getConsensusRiskFile as getConsensusRiskFileAverage } from "../inputProcessing";
 
 const SC_FACTOR = 1;
+const EA_FACTOR = 1;
+const METEORITE_DP_FACTOR = 1 / 100;
+const INFO_OPS_CP_FACTOR = 1 / 10;
 
 interface Metrics {
   consensus: number;
@@ -44,7 +47,7 @@ const getAveragesForScenarios = (
             (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_c` as keyof FieldQuality]) || 2.5
           )
         )
-      ) / factor,
+      ) * factor,
     [`${name}_m`]:
       absoluteValueGetter(
         getAverage(
@@ -53,7 +56,7 @@ const getAveragesForScenarios = (
             (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_m` as keyof FieldQuality]) || 2.5
           )
         )
-      ) / factor,
+      ) * factor,
     [`${name}_e`]:
       absoluteValueGetter(
         getAverage(
@@ -62,7 +65,7 @@ const getAveragesForScenarios = (
             (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_e` as keyof FieldQuality]) || 2.5
           )
         )
-      ) / factor,
+      ) * factor,
   };
 };
 
@@ -82,6 +85,9 @@ const getConsensusRiskFile = (
       )
     : [];
 
+  const DPScaleFactor = riskFile.cr4de_title.indexOf("Meteorite") >= 0 ? METEORITE_DP_FACTOR : 1;
+  const EaScaleFactor = EA_FACTOR;
+
   if (
     (riskFile.cr4de_consensus_date && new Date(riskFile.cr4de_consensus_date) <= new Date()) ||
     riskFile.cr4de_risk_type === RISK_TYPE.EMERGING
@@ -89,9 +95,9 @@ const getConsensusRiskFile = (
     return {
       quality: Quality.CONSENSUS,
       reliability: goodDAs.length,
-      dp_c: getAbsoluteProbability(riskFile.cr4de_dp_quanti_c),
-      dp_m: getAbsoluteProbability(riskFile.cr4de_dp_quanti_m),
-      dp_e: getAbsoluteProbability(riskFile.cr4de_dp_quanti_e),
+      dp_c: getAbsoluteProbability(riskFile.cr4de_dp_quanti_c, DPScaleFactor),
+      dp_m: getAbsoluteProbability(riskFile.cr4de_dp_quanti_m, DPScaleFactor),
+      dp_e: getAbsoluteProbability(riskFile.cr4de_dp_quanti_e, DPScaleFactor),
 
       di_Ha_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_c),
       di_Hb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_c),
@@ -100,7 +106,7 @@ const getConsensusRiskFile = (
       di_Sb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_c),
       di_Sc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_c) / SC_FACTOR,
       di_Sd_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_c),
-      di_Ea_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_c),
+      di_Ea_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_c) / EaScaleFactor,
       di_Fa_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_c),
       di_Fb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_c),
 
@@ -111,7 +117,7 @@ const getConsensusRiskFile = (
       di_Sb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_m),
       di_Sc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_m) / SC_FACTOR,
       di_Sd_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_m),
-      di_Ea_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_m),
+      di_Ea_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_m) / EaScaleFactor,
       di_Fa_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_m),
       di_Fb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_m),
 
@@ -122,7 +128,7 @@ const getConsensusRiskFile = (
       di_Sb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_e),
       di_Sc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_e) / SC_FACTOR,
       di_Sd_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_e),
-      di_Ea_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_e),
+      di_Ea_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_e) / EaScaleFactor,
       di_Fa_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_e),
       di_Fb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_e),
 
@@ -203,32 +209,63 @@ const getConsensusCascade = (
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[] | undefined
 ) => {
   const goodCAs = cascadeAnalyses
-    ? cascadeAnalyses.filter((ca) =>
-        participations.some(
-          (p) =>
-            p._cr4de_contact_value === ca.cr4de_expert.contactid &&
-            p.cr4de_role === "expert" &&
-            p.cr4de_direct_analysis_finished
+    ? cascadeAnalyses
+        .filter((ca) =>
+          participations.some(
+            (p) =>
+              p._cr4de_contact_value === ca.cr4de_expert.contactid &&
+              p.cr4de_role === "expert" &&
+              p.cr4de_direct_analysis_finished
+          )
         )
-      )
+        .map((ca) => {
+          if (
+            effect.cr4de_title.indexOf("food supply") >= 0 &&
+            ca.cr4de_expert.emailaddress1 === "laurie.phillips@economie.fgov.be"
+          ) {
+            return {
+              ...ca,
+              cr4de_c2c: ca.cr4de_c2e,
+              cr4de_c2e: ca.cr4de_c2c,
+              cr4de_m2c: ca.cr4de_m2e,
+              cr4de_m2e: ca.cr4de_m2c,
+              cr4de_e2c: ca.cr4de_e2e,
+              cr4de_e2e: ca.cr4de_e2c,
+            };
+          }
+          return ca;
+        })
     : [];
 
+  const cpScaleFactor =
+    cause.cr4de_riskfilesid === "9458db5b-aa6c-ed11-9561-000d3adf7089" ||
+    effect.cr4de_riskfilesid === "9458db5b-aa6c-ed11-9561-000d3adf7089"
+      ? INFO_OPS_CP_FACTOR
+      : 1;
+
   if (
-    (effect.cr4de_consensus_date && new Date(effect.cr4de_consensus_date) <= new Date()) ||
-    effect.cr4de_risk_type === RISK_TYPE.EMERGING
+    ((effect.cr4de_consensus_date && new Date(effect.cr4de_consensus_date) <= new Date()) ||
+      effect.cr4de_risk_type === RISK_TYPE.EMERGING) &&
+    (effect.cr4de_title.indexOf("food supply") < 0 ||
+      [
+        "Failure of electricity supply",
+        "Failure of road transport",
+        "Agricultural Plant Diseases & Pests",
+        "Commodities shortage",
+      ].indexOf(cause.cr4de_title) < 0)
   ) {
     return {
       quality: Quality.CONSENSUS,
       reliabilty: goodCAs.length,
-      c2c: getAbsoluteProbability(cascade.cr4de_c2c),
-      c2m: getAbsoluteProbability(cascade.cr4de_c2m),
-      c2e: getAbsoluteProbability(cascade.cr4de_c2e),
-      m2c: getAbsoluteProbability(cascade.cr4de_m2c),
-      m2m: getAbsoluteProbability(cascade.cr4de_m2m),
-      m2e: getAbsoluteProbability(cascade.cr4de_m2e),
-      e2c: getAbsoluteProbability(cascade.cr4de_e2c),
-      e2m: getAbsoluteProbability(cascade.cr4de_e2m),
-      e2e: getAbsoluteProbability(cascade.cr4de_e2e),
+      c2c: getAbsoluteProbability(cascade.cr4de_c2c) * cpScaleFactor,
+      c2m: getAbsoluteProbability(cascade.cr4de_c2m) * cpScaleFactor,
+      c2e: getAbsoluteProbability(cascade.cr4de_c2e) * cpScaleFactor,
+      m2c: getAbsoluteProbability(cascade.cr4de_m2c) * cpScaleFactor,
+      m2m: getAbsoluteProbability(cascade.cr4de_m2m) * cpScaleFactor,
+      m2e: getAbsoluteProbability(cascade.cr4de_m2e) * cpScaleFactor,
+      e2c: getAbsoluteProbability(cascade.cr4de_e2c) * cpScaleFactor,
+      e2m: getAbsoluteProbability(cascade.cr4de_e2m) * cpScaleFactor,
+      e2e: getAbsoluteProbability(cascade.cr4de_e2e) * cpScaleFactor,
     };
   }
 
@@ -236,60 +273,69 @@ const getConsensusCascade = (
     return {
       quality: Quality.AVERAGE,
       reliabilty: goodCAs.length,
-      c2c: getAbsoluteProbability(
-        getAverage(
-          goodCAs.map((ca) => ca.cr4de_c2c),
-          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-        )
-      ),
-      c2m: getAbsoluteProbability(
-        getAverage(
-          goodCAs.map((ca) => ca.cr4de_c2m),
-          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-        )
-      ),
-      c2e: getAbsoluteProbability(
-        getAverage(
-          goodCAs.map((ca) => ca.cr4de_c2e),
-          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-        )
-      ),
-      m2c: getAbsoluteProbability(
-        getAverage(
-          goodCAs.map((ca) => ca.cr4de_m2c),
-          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-        )
-      ),
-      m2m: getAbsoluteProbability(
-        getAverage(
-          goodCAs.map((ca) => ca.cr4de_m2m),
-          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-        )
-      ),
-      m2e: getAbsoluteProbability(
-        getAverage(
-          goodCAs.map((ca) => ca.cr4de_m2e),
-          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-        )
-      ),
-      e2c: getAbsoluteProbability(
-        getAverage(
-          goodCAs.map((ca) => ca.cr4de_e2c),
-          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-        )
-      ),
-      e2m: getAbsoluteProbability(
-        getAverage(
-          goodCAs.map((ca) => ca.cr4de_e2m),
-          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-        )
-      ),
-      e2e: getAbsoluteProbability(
-        getAverage(
-          goodCAs.map((ca) => ca.cr4de_e2e),
-          goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-        )
-      ),
+      c2c:
+        getAbsoluteProbability(
+          getAverage(
+            goodCAs.map((ca) => ca.cr4de_c2c),
+            goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+          )
+        ) * cpScaleFactor,
+      c2m:
+        getAbsoluteProbability(
+          getAverage(
+            goodCAs.map((ca) => ca.cr4de_c2m),
+            goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+          )
+        ) * cpScaleFactor,
+      c2e:
+        getAbsoluteProbability(
+          getAverage(
+            goodCAs.map((ca) => ca.cr4de_c2e),
+            goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+          )
+        ) * cpScaleFactor,
+      m2c:
+        getAbsoluteProbability(
+          getAverage(
+            goodCAs.map((ca) => ca.cr4de_m2c),
+            goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+          )
+        ) * cpScaleFactor,
+      m2m:
+        getAbsoluteProbability(
+          getAverage(
+            goodCAs.map((ca) => ca.cr4de_m2m),
+            goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+          )
+        ) * cpScaleFactor,
+      m2e:
+        getAbsoluteProbability(
+          getAverage(
+            goodCAs.map((ca) => ca.cr4de_m2e),
+            goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+          )
+        ) * cpScaleFactor,
+      e2c:
+        getAbsoluteProbability(
+          getAverage(
+            goodCAs.map((ca) => ca.cr4de_e2c),
+            goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+          )
+        ) * cpScaleFactor,
+      e2m:
+        getAbsoluteProbability(
+          getAverage(
+            goodCAs.map((ca) => ca.cr4de_e2m),
+            goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+          )
+        ) * cpScaleFactor,
+      e2e:
+        getAbsoluteProbability(
+          getAverage(
+            goodCAs.map((ca) => ca.cr4de_e2e),
+            goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+          )
+        ) * cpScaleFactor,
     };
   }
 

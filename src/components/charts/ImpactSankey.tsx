@@ -127,16 +127,22 @@ const ISankeyNode = ({
                   <>
                     <Typography color="inherit">Other effects:</Typography>
 
-                    {payload.hidden.map((h: any) => (
-                      <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                        {h.name} II({scenarioLetter}&rarr;all): {getMoneyString(h.i)}
-                      </Typography>
-                    ))}
+                    {payload.hidden.map((h: any) =>
+                      h.cascade ? (
+                        <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                          {h.name} II({scenarioLetter}&rarr;all): {getMoneyString(h.i)}
+                        </Typography>
+                      ) : (
+                        <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                          {h.name} DI({scenarioLetter}): {getMoneyString(h.i)}
+                        </Typography>
+                      )
+                    )}
                   </>
                 )}
                 {!payload.cascade && !payload.hidden && (
                   <>
-                    <Typography color="inherit">Other effects:</Typography>
+                    <Typography color="inherit">Direct Impact:</Typography>
 
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
                       DI({scenarioLetter}): {getMoneyString(payload.i)}

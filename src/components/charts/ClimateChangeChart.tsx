@@ -30,6 +30,7 @@ import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import { hexToRGB } from "../../functions/colors";
 import { useMemo } from "react";
 import { Cause as Cause2023 } from "../../functions/Probability";
+import { getPercentageProbability, getYearlyProbability } from "../../functions/analysis/calculateTotalRisk";
 
 type Cause2050 = Cause2023 & {
   p2050: number;
@@ -102,19 +103,12 @@ export default function ClimateChangeChart({
           };
         }) || []),
     ].sort((a, b) => b.p2050 - a.p2050);
-
+    console.log(causes);
     return [
       {
         name: "Total probability",
-        IP2023: calculation[`tp${scenarioSuffix}`],
-        IP2050:
-          calculation[`tp50${scenarioSuffix}`] > calculation[`tp${scenarioSuffix}`]
-            ? calculation[`tp50${scenarioSuffix}`] - calculation[`tp${scenarioSuffix}`]
-            : 0,
-        IP2050neg:
-          calculation[`tp50${scenarioSuffix}`] < calculation[`tp${scenarioSuffix}`]
-            ? calculation[`tp${scenarioSuffix}`] - calculation[`tp50${scenarioSuffix}`]
-            : 0,
+        P2023: getYearlyProbability(calculation[`tp${scenarioSuffix}`]),
+        P2050: getYearlyProbability(calculation[`tp50${scenarioSuffix}`]),
       },
       ...causes
         .reduce(
@@ -128,33 +122,36 @@ export default function ClimateChangeChart({
         )[0]
         .map((cause) => ({
           name: cause.name,
-          IP2023: cause.p,
-          IP2050: cause.p2050 > cause.p ? cause.p2050 - cause.p : 0,
-          IP2050neg: cause.p2050 < cause.p ? cause.p - cause.p2050 : 0,
+          P2023: getYearlyProbability(cause.p),
+          P2050: getYearlyProbability(cause.p2050),
         })),
     ];
   }, [calculation, scenarioSuffix]);
   console.log(data);
   return (
     <BarChart
-      width={650}
-      height={300}
+      width={750}
+      height={450}
       data={data}
       margin={{
         top: 20,
         right: 30,
-        left: 20,
-        bottom: 5,
+        left: 30,
+        bottom: 30,
       }}
+      layout="vertical"
     >
       <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="name" tickLine={false} angle={305} interval={0} textAnchor="end" />
-      <YAxis tickFormatter={() => ""} />
-      <Tooltip />
-      <Legend layout="vertical" align="right" verticalAlign="middle" width={150} wrapperStyle={{ paddingLeft: 20 }} />
-      <Bar name="Probability in 2023" dataKey="IP2023" stackId="a" fill="#8884d8" />
-      <Bar name="Probability in 2050 (increase)" dataKey="IP2050" stackId="a" fill="#ffc658" />
-      <Bar name="Probability in 2050 (decrease)" dataKey="IP2050neg" stackId="a" fill="#82ca9d" />
+      <XAxis
+        type="number"
+        tickFormatter={(value) => getPercentageProbability(value)}
+        label="Probability of occurence in the next 12 months"
+      />
+      <YAxis dataKey="name" type="category" width={150} />
+      <Tooltip formatter={(value) => getPercentageProbability(value as number)} />
+      <Legend align="center" verticalAlign="bottom" wrapperStyle={{ paddingTop: 10 }} />
+      <Bar name="Probability in 2023" dataKey="P2023" fill="#8884d8" />
+      <Bar name="Probability in 2050" dataKey="P2050" fill="#ffc658" />
     </BarChart>
   );
 }

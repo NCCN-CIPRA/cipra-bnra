@@ -16,14 +16,17 @@ import ImpactSankey from "../../../components/charts/ImpactSankey";
 import ProbabilitySankey from "../../../components/charts/ProbabilitySankey";
 import useRecord from "../../../hooks/useRecord";
 import { DataTable } from "../../../hooks/useAPI";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import usePageTitle from "../../../hooks/usePageTitle";
 import useBreadcrumbs from "../../../hooks/useBreadcrumbs";
 import { useMemo, useState } from "react";
 import { DVAnalysisRun, RiskAnalysisResults, RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
-import ExportRiskFiles from "../../reporting/ExportRiskFiles";
+import ExportRiskFiles from "../../reporting/Standard";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import Standard from "../../reporting/Standard";
+import Emerging from "../../reporting/Emerging";
+import ManMade from "../../reporting/ManMade";
 
 const impactFields = [
   { name: "Direct Ha", fieldName: "di_Ha" },
@@ -86,382 +89,29 @@ export default function AnalysisTab({
 }: {
   riskFile: DVRiskFile<DVAnalysisRun<unknown, string>>;
   riskFiles: DVRiskFile<DVAnalysisRun<unknown, string>>[];
-  cascades: DVRiskCascade<SmallRisk>[] | null;
+  cascades: DVRiskCascade<SmallRisk, SmallRisk>[] | null;
 }) {
   const params = useParams() as RouteParams;
 
   if (!riskFiles || !cascades) return null;
 
+  if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD)
+    return (
+      <Container sx={{ mt: 4, pb: 8 }}>
+        <Standard riskFile={riskFile} otherRiskFiles={riskFiles} cascades={cascades} mode="edit" />
+      </Container>
+    );
+
+  if (riskFile.cr4de_risk_type === RISK_TYPE.MANMADE)
+    return (
+      <Container sx={{ mt: 4, pb: 8 }}>
+        <ManMade riskFile={riskFile} otherRiskFiles={riskFiles} cascades={cascades} mode="edit" />
+      </Container>
+    );
+
   return (
     <Container sx={{ mt: 4, pb: 8 }}>
-      <ExportRiskFiles riskFile={riskFile} otherRiskFiles={riskFiles} cascades={cascades} mode="edit" />
+      <Emerging riskFile={riskFile} otherRiskFiles={riskFiles} cascades={cascades} mode="edit" />
     </Container>
   );
-  // return (
-  //   <Container sx={{ mt: 4, pb: 8 }}>
-  //     <Stack direction="row" sx={{ mb: 8 }}>
-  //       <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
-  //         <ProbabilitySankey riskFile={riskFile} calculation={calculations[0].cr4de_results} />
-  //       </Box>
-  //       <Stack direction="column" justifyContent="center" sx={{ width: 300, p: "50px" }}>
-  //         {/* <Box
-  //           sx={{
-  //             width: 200,
-  //             height: 200,
-  //           }}
-  //         >
-  //           <ProbabilityOriginPieChart riskFile={riskFile} />
-  //         </Box>
-  //         <Box
-  //           sx={{
-  //             width: 200,
-  //             height: 200,
-  //           }}
-  //         >
-  //           <ImpactOriginPieChart riskFile={riskFile} />
-  //         </Box> */}
-  //         <Box sx={{ width: "100%", textAlign: "center", mb: 6 }}>
-  //           <Typography variant="h6">{riskFile?.cr4de_title}</Typography>
-  //         </Box>
-  //         <Box
-  //           sx={{
-  //             width: 200,
-  //             height: 200,
-  //           }}
-  //         >
-  //           <ImpactDistributionPieChart riskFile={riskFile} calculation={calculations[0].cr4de_results} />
-  //           <Box sx={{ width: "100%", textAlign: "center", mt: 2 }}>
-  //             <Typography variant="subtitle2">Damage Indicators</Typography>
-  //           </Box>
-  //         </Box>
-  //       </Stack>
-  //       <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
-  //         <ImpactSankey riskFile={riskFile} calculation={calculations[0].cr4de_results} />
-  //       </Box>
-  //     </Stack>
-  //     <Box>
-  //       {riskFile ? (
-  //         <Box
-  //           mt={3}
-  //           dangerouslySetInnerHTML={{
-  //             __html: riskFile.cr4de_dp_quali || "",
-  //           }}
-  //         />
-  //       ) : (
-  //         <Box mt={3}>
-  //           <Skeleton variant="text" />
-  //           <Skeleton variant="text" />
-  //           <Skeleton variant="text" />
-  //         </Box>
-  //       )}
-  //     </Box>
-  //     <TableContainer component={Paper}>
-  //       <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
-  //         <TableHead>
-  //           <TableRow>
-  //             <TableCell sx={{ textAlign: "left", whiteSpace: "nowrap" }}></TableCell>
-  //             <TableCell sx={{ whiteSpace: "nowrap" }}>Considerable</TableCell>
-  //             <TableCell sx={{ whiteSpace: "nowrap" }}>Major</TableCell>
-  //             <TableCell sx={{ whiteSpace: "nowrap" }}>Extreme</TableCell>
-  //             <TableCell sx={{ whiteSpace: "nowrap", textAlign: "right" }}>Total</TableCell>
-  //           </TableRow>
-  //         </TableHead>
-  //         <TableBody>
-  //           {riskFile ? (
-  //             <>
-  //               <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-  //                 <TableCell
-  //                   component="th"
-  //                   scope="row"
-  //                   sx={{
-  //                     whiteSpace: "nowrap",
-  //                   }}
-  //                 >
-  //                   <Typography variant="body1">Direct P</Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row">
-  //                   <Typography variant="body1">
-  //                     {getProbabilityScale(
-  //                       calculations[0].cr4de_results.dp_c,
-  //                       riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-  //                     )}
-  //                   </Typography>
-  //                   <Typography variant="caption">
-  //                     {Math.round(calculations[0].cr4de_results.dp_c * 10000) / 100}%
-  //                   </Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row">
-  //                   <Typography variant="body1">
-  //                     {getProbabilityScale(
-  //                       calculations[0].cr4de_results.dp_m,
-  //                       riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-  //                     )}
-  //                   </Typography>
-  //                   <Typography variant="caption">
-  //                     {Math.round(calculations[0].cr4de_results.dp_m * 10000) / 100}%
-  //                   </Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row">
-  //                   <Typography variant="body1">
-  //                     {getProbabilityScale(
-  //                       calculations[0].cr4de_results.dp_e,
-  //                       riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-  //                     )}
-  //                   </Typography>
-  //                   <Typography variant="caption">
-  //                     {Math.round(calculations[0].cr4de_results.dp_e * 10000) / 100}%
-  //                   </Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
-  //                   {Math.round(calculations[0].cr4de_results.dp * 10000) / 100}%
-  //                 </TableCell>
-  //               </TableRow>
-  //               <TableRow key={riskFile.cr4de_title} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-  //                 <TableCell
-  //                   component="th"
-  //                   scope="row"
-  //                   sx={{
-  //                     whiteSpace: "nowrap",
-  //                   }}
-  //                 >
-  //                   <Typography variant="body1">Indirect P</Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row">
-  //                   <Typography variant="body1">
-  //                     {getProbabilityScale(
-  //                       calculations[0].cr4de_results.ip_c,
-  //                       riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-  //                     )}
-  //                   </Typography>
-  //                   <Typography variant="caption">
-  //                     {Math.round(calculations[0].cr4de_results.ip_c * 10000) / 100}%
-  //                   </Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row">
-  //                   <Typography variant="body1">
-  //                     {getProbabilityScale(
-  //                       calculations[0].cr4de_results.ip_m,
-  //                       riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-  //                     )}
-  //                   </Typography>
-  //                   <Typography variant="caption">
-  //                     {Math.round(calculations[0].cr4de_results.ip_m * 10000) / 100}%
-  //                   </Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row">
-  //                   <Typography variant="body1">
-  //                     {getProbabilityScale(
-  //                       calculations[0].cr4de_results.ip_e,
-  //                       riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-  //                     )}
-  //                   </Typography>
-  //                   <Typography variant="caption">
-  //                     {Math.round(calculations[0].cr4de_results.ip_e * 10000) / 100}%
-  //                   </Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
-  //                   {Math.round(calculations[0].cr4de_results.ip * 10000) / 100}%
-  //                 </TableCell>
-  //               </TableRow>
-  //               <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-  //                 <TableCell
-  //                   component="th"
-  //                   scope="row"
-  //                   sx={{
-  //                     whiteSpace: "nowrap",
-  //                   }}
-  //                 >
-  //                   <Typography variant="body1">Total P</Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row">
-  //                   <Typography variant="body1">
-  //                     {getProbabilityScale(
-  //                       calculations[0].cr4de_results.tp_c,
-  //                       riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-  //                     )}
-  //                   </Typography>
-  //                   <Typography variant="caption">
-  //                     {Math.round(calculations[0].cr4de_results.tp_c * 10000) / 100}%
-  //                   </Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row">
-  //                   <Typography variant="body1">
-  //                     {getProbabilityScale(
-  //                       calculations[0].cr4de_results.tp_m,
-  //                       riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-  //                     )}
-  //                   </Typography>
-  //                   <Typography variant="caption">
-  //                     {Math.round(calculations[0].cr4de_results.tp_m * 10000) / 100}%
-  //                   </Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row">
-  //                   <Typography variant="body1">
-  //                     {getProbabilityScale(
-  //                       calculations[0].cr4de_results.tp_e,
-  //                       riskFile.cr4de_risk_type === "Standard Risk" ? "DP" : "M"
-  //                     )}
-  //                   </Typography>
-  //                   <Typography variant="caption">
-  //                     {Math.round(calculations[0].cr4de_results.tp_e * 10000) / 100}%
-  //                   </Typography>
-  //                 </TableCell>
-  //                 <TableCell component="th" scope="row" sx={{ textAlign: "right" }}>
-  //                   {Math.round(calculations[0].cr4de_results.tp * 10000) / 100}%
-  //                 </TableCell>
-  //               </TableRow>
-  //             </>
-  //           ) : (
-  //             [1, 2, 3].map((i) => (
-  //               <TableRow key={i} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-  //                 <TableCell>
-  //                   <Skeleton variant="rectangular" />
-  //                 </TableCell>
-  //                 <TableCell>
-  //                   <Skeleton variant="rectangular" />
-  //                 </TableCell>
-  //                 <TableCell>
-  //                   <Skeleton variant="rectangular" />
-  //                 </TableCell>
-  //                 <TableCell>
-  //                   <Skeleton variant="rectangular" />
-  //                 </TableCell>
-  //                 <TableCell>
-  //                   <Skeleton variant="rectangular" />
-  //                 </TableCell>
-  //               </TableRow>
-  //             ))
-  //           )}
-  //         </TableBody>
-  //       </Table>
-  //     </TableContainer>
-  //     <Box>
-  //       {/* {riskFile ? (
-  //         <Box
-  //           mt={3}
-  //           dangerouslySetInnerHTML={{
-  //             __html: riskFile.cr4de_di_quali_h_e || "",
-  //           }}
-  //         />
-  //       ) : (
-  //         <Box mt={3}>
-  //           <Skeleton variant="text" />
-  //           <Skeleton variant="text" />
-  //           <Skeleton variant="text" />
-  //         </Box>
-  //       )} */}
-  //     </Box>
-  //     <TableContainer component={Paper}>
-  //       <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
-  //         <TableHead>
-  //           <TableRow>
-  //             <TableCell sx={{ textAlign: "left", whiteSpace: "nowrap" }}></TableCell>
-  //             <TableCell sx={{ whiteSpace: "nowrap" }}>Considerable</TableCell>
-  //             <TableCell sx={{ whiteSpace: "nowrap" }}>Major</TableCell>
-  //             <TableCell sx={{ whiteSpace: "nowrap" }}>Extreme</TableCell>
-  //             <TableCell sx={{ whiteSpace: "nowrap", textAlign: "right" }}>Total</TableCell>
-  //           </TableRow>
-  //         </TableHead>
-  //         <TableBody>
-  //           {riskFile ? (
-  //             <>
-  //               {impactFields.map((f, i) =>
-  //                 f === null ? (
-  //                   <TableRow key={i} sx={{ backgroundColor: "#eee" }}>
-  //                     <TableCell colSpan={100}> </TableCell>
-  //                   </TableRow>
-  //                 ) : (
-  //                   <TableRow
-  //                     key={f.fieldName}
-  //                     sx={{
-  //                       "&:last-child td, &:last-child th": { border: 0 },
-  //                     }}
-  //                   >
-  //                     <TableCell
-  //                       component="th"
-  //                       scope="row"
-  //                       sx={{
-  //                         whiteSpace: "nowrap",
-  //                       }}
-  //                     >
-  //                       <Typography variant="body1">{f.name}</Typography>
-  //                     </TableCell>
-  //                     <TableCell component="th" scope="row">
-  //                       <Typography variant="body1">
-  //                         {getImpactScale(
-  //                           calculations[0].cr4de_results[
-  //                             `${f.fieldName}_c` as keyof RiskCalculation
-  //                           ] as number as number,
-  //                           f.fieldName.split("_")[1] || ""
-  //                         )}
-  //                       </Typography>
-  //                       <Typography variant="caption">
-  //                         {curFormat.format(
-  //                           calculations[0].cr4de_results[`${f.fieldName}_c` as keyof RiskCalculation] as number
-  //                         )}
-  //                       </Typography>
-  //                     </TableCell>
-  //                     <TableCell component="th" scope="row">
-  //                       <Typography variant="body1">
-  //                         {getImpactScale(
-  //                           calculations[0].cr4de_results[`${f.fieldName}_m` as keyof RiskCalculation] as number,
-  //                           f.fieldName?.split("_")[1] || ""
-  //                         )}
-  //                       </Typography>
-  //                       <Typography variant="caption">
-  //                         {curFormat.format(
-  //                           calculations[0].cr4de_results[`${f.fieldName}_m` as keyof RiskCalculation] as number
-  //                         )}
-  //                       </Typography>
-  //                     </TableCell>
-  //                     <TableCell component="th" scope="row">
-  //                       <Typography variant="body1">
-  //                         {getImpactScale(
-  //                           calculations[0].cr4de_results[`${f.fieldName}_e` as keyof RiskCalculation] as number,
-  //                           f.fieldName?.split("_")[1] || ""
-  //                         )}
-  //                       </Typography>
-  //                       <Typography variant="caption">
-  //                         {curFormat.format(
-  //                           calculations[0].cr4de_results[`${f.fieldName}_e` as keyof RiskCalculation] as number
-  //                         )}
-  //                       </Typography>
-  //                     </TableCell>
-  //                     <TableCell align="right">
-  //                       <Typography variant="body2">
-  //                         {curFormat.format(
-  //                           calculations[0].cr4de_results[f.fieldName as keyof RiskCalculation] as number
-  //                         )}
-  //                       </Typography>
-  //                     </TableCell>
-  //                   </TableRow>
-  //                 )
-  //               )}
-  //             </>
-  //           ) : (
-  //             [1, 2, 3].map((i) => (
-  //               <TableRow key={i} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-  //                 <TableCell>
-  //                   <Skeleton variant="rectangular" />
-  //                 </TableCell>
-  //                 <TableCell>
-  //                   <Skeleton variant="rectangular" />
-  //                 </TableCell>
-  //                 <TableCell>
-  //                   <Skeleton variant="rectangular" />
-  //                 </TableCell>
-  //                 <TableCell>
-  //                   <Skeleton variant="rectangular" />
-  //                 </TableCell>
-  //                 <TableCell>
-  //                   <Skeleton variant="rectangular" />
-  //                 </TableCell>
-  //               </TableRow>
-  //             ))
-  //           )}
-  //         </TableBody>
-  //       </Table>
-  //     </TableContainer>
-  //   </Container>
-  // );
 }

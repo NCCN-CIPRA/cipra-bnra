@@ -81,15 +81,15 @@ export function getMDailyProbability(scaleString: string | null) {
   return (-1 * Math.log(1 - get3YearLikelihood(scaleString))) / (3 * 365);
 }
 
-export function getAbsoluteProbability(scaleString: string | null) {
+export function getAbsoluteProbability(scaleString: string | null, scaleFactor: number = 1) {
   if (scaleString === null) return 0;
 
   if (scaleString.startsWith("DP")) {
-    return getDPDailyProbability(scaleString);
+    return getDPDailyProbability(scaleString) * scaleFactor;
   } else if (scaleString.startsWith("CP")) {
-    return CPScales[scaleString.replace("CP", "")];
+    return CPScales[scaleString.replace("CP", "")] * scaleFactor;
   } else if (scaleString.startsWith("M")) {
-    return getMDailyProbability(scaleString);
+    return getMDailyProbability(scaleString) * scaleFactor;
   }
 
   return -1;

@@ -30,19 +30,21 @@ export default function SankeyDiagram({
   setSelectedNodeId,
   type = "MAX_NODES",
   debug = false,
+  manmade = false,
 }: {
   calculations: RiskCalculation[] | null;
   selectedNodeId: string | null;
   setSelectedNodeId: (id: string | null) => void;
   type?: "MAX_NODES" | "PARETO" | "MIN_WEIGHT";
   debug?: boolean;
+  manmade?: boolean;
 }) {
   const [calculation, setCalculation] = useState<RiskCalculation | null>(null);
   const [scenario, setScenario] = useState<"wcs" | SCENARIOS>("wcs");
   const [split, setSplit] = useState<"total" | "scenario" | "impact">("impact");
   const [causes, setCauses] = useState(5);
   const [effects, setEffects] = useState(5);
-  console.log(calculations);
+
   useEffect(() => {
     if (!calculations) return;
 
@@ -62,6 +64,7 @@ export default function SankeyDiagram({
           scenario={scenario === "wcs" ? null : scenario}
           onClick={(id: string) => setSelectedNodeId(id)}
           debug={debug}
+          manmade={manmade}
         />
       </Box>
       <Stack direction="column" justifyContent="center" sx={{ width: 300, p: "50px" }}>

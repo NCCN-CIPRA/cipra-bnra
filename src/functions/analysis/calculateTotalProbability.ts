@@ -28,19 +28,15 @@ const getIP50 = (cascade: CascadeCalculation, scenario: SCENARIOS) => {
 };
 
 const setIP = (cascade: CascadeCalculation, scenario: SCENARIOS, ip: number) => {
-  const factor = cascade.cause.riskTitle === "Information operations" ? INFO_OPS_FACTOR : 1;
-
-  if (scenario === SCENARIOS.CONSIDERABLE) cascade.ip_c = ip / factor;
-  if (scenario === SCENARIOS.MAJOR) cascade.ip_m = ip / factor;
-  if (scenario === SCENARIOS.EXTREME) cascade.ip_e = ip / factor;
+  if (scenario === SCENARIOS.CONSIDERABLE) cascade.ip_c = ip;
+  if (scenario === SCENARIOS.MAJOR) cascade.ip_m = ip;
+  if (scenario === SCENARIOS.EXTREME) cascade.ip_e = ip;
 };
 
 const setIP50 = (cascade: CascadeCalculation, scenario: SCENARIOS, ip: number) => {
-  const factor = cascade.cause.riskTitle === "Information operations" ? INFO_OPS_FACTOR : 1;
-
-  if (scenario === SCENARIOS.CONSIDERABLE) cascade.ip50_c = ip / factor;
-  if (scenario === SCENARIOS.MAJOR) cascade.ip50_m = ip / factor;
-  if (scenario === SCENARIOS.EXTREME) cascade.ip50_e = ip / factor;
+  if (scenario === SCENARIOS.CONSIDERABLE) cascade.ip50_c = ip;
+  if (scenario === SCENARIOS.MAJOR) cascade.ip50_m = ip;
+  if (scenario === SCENARIOS.EXTREME) cascade.ip50_e = ip;
 };
 
 const getCP = (cascade: CascadeCalculation, fromScenario: SCENARIOS, toScenario: SCENARIOS) => {

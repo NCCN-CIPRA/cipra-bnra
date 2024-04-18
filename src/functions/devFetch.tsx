@@ -8,6 +8,7 @@ export default function patchFetch() {
   window.fetch = devFetch;
 
   window.onmessage = function (e) {
+    console.log(e);
     if (e.data && e.data.requestData) {
       responses[e.data.requestData.id] = new Response(e.data.body || undefined, {
         status: e.data.status,
@@ -19,10 +20,9 @@ export default function patchFetch() {
 
       if (e.data.userInfo.indexOf('data-id=""') > 0) {
         // Not logged in in Iframe
-        document.getElementById("loginWindow")!.style.display = "block";
-        document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/auth");
-
-        window.alert("Please log in and refresh the page");
+        // document.getElementById("loginWindow")!.style.display = "block";
+        // document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/auth");
+        // window.alert("Please log in and refresh the page");
       } else {
         document.body.appendChild(div);
       }
