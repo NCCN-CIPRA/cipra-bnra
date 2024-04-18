@@ -70,7 +70,7 @@ export default function ImpactSection({
                       <b>${Math.round((10000 * e[impactLetter] * impactTI) / calc.ti) / 100}%</b> of total impact
                     </p>
                     <p><br></p>
-                    ${e.quali || e.quali_h}
+                    ${e.quali || e[`quali_${impactLetter}`]}
                     <p><br></p>
               <p><br></p>`
       )
