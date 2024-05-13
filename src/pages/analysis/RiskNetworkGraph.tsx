@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import * as d3 from "d3";
+import { SCENARIO_SUFFIX } from "../../functions/scenarios";
 
 export interface RiskNode extends d3.SimulationNodeDatum {
   id: string;
@@ -61,7 +62,7 @@ export default function RiskNetworkGraph({
   const [graphWidth, setGraphWidth] = useState<number>(0);
 
   const [parameter, setParameter] = useState<"r" | "p" | "i">("p");
-  const [scenario, setScenario] = useState<"all" | "_c" | "_m" | "_e">("all");
+  const [scenario, setScenario] = useState<"all" | SCENARIO_SUFFIX>("all");
   const [filter, setFilter] = useState<"ALL" | "CAUSES" | "EFFECTS">("ALL");
 
   useMemo(() => {

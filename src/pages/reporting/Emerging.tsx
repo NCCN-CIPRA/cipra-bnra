@@ -1,31 +1,9 @@
 import { Box, List, ListItem, ListItemButton, Typography } from "@mui/material";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import HistoricalEventsTable from "../../components/HistoricalEventsTable";
-import ScenariosTable from "../../components/ScenariosTable";
-import * as IP from "../../functions/intensityParameters";
-import IntensityParametersTable from "../../components/IntensityParametersTable";
-import ScenarioTable from "./ScenarioTable";
-import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
-import { hexToRGB } from "../../functions/colors";
 import { DVAnalysisRun, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { getDirectImpact, getIndirectImpact } from "../../functions/Impact";
-import ImpactBarChart from "../../components/charts/ImpactBarChart";
-import SankeyDiagram from "../../components/charts/SankeyDiagram";
-import ScenarioMatrix from "../../components/charts/ScenarioMatrix";
-import HistoricalEvents from "./HistoricalEvents";
-import Scenario from "./Scenario";
-import { getYearlyProbability } from "../../functions/analysis/calculateTotalRisk";
-import ProbabilityOriginPieChart from "../../components/charts/ProbabilityOriginPieChart";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import getImpactColor from "../../functions/getImpactColor";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
-import { useMemo } from "react";
-import ProbabilitySection from "./ProbabilitySection";
-import ImpactSection from "./ImpactSection";
-import { Link } from "react-router-dom";
 import DefinitionSection from "./DefinitionSection";
-import CBSection from "./CBSection";
 import HASection from "./HASection";
 
 export default function Emerging({

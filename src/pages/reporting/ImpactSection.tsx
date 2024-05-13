@@ -1,14 +1,15 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import ProbabilityOriginPieChart from "../../components/charts/ProbabilityOriginPieChart";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { getYearlyProbability } from "../../functions/analysis/calculateTotalRisk";
+import { getYearlyProbability } from "../../functions/Probability";
 import TextInputBox from "../../components/TextInputBox";
 import { useMemo, useState } from "react";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../hooks/useAPI";
 import getImpactColor from "../../functions/getImpactColor";
-import { Effect } from "../../functions/Impact";
+import { Effect, IMPACT_CATEGORY } from "../../functions/Impact";
+import { SCENARIO_SUFFIX } from "../../functions/scenarios";
 
 export default function ImpactSection({
   riskFile,
@@ -20,13 +21,13 @@ export default function ImpactSection({
 }: {
   riskFile: DVRiskFile;
   effects: Effect[];
-  scenarioSuffix: "_c" | "_m" | "_e";
+  scenarioSuffix: SCENARIO_SUFFIX;
   impactName: "human" | "societal" | "environmental" | "financial";
   calc: RiskCalculation;
   mode: "view" | "edit";
 }) {
   const impactLetter = impactName[0] as "h" | "s" | "e" | "f";
-  const impactLetterUC = impactLetter.toUpperCase() as "H" | "S" | "E" | "F";
+  const impactLetterUC = impactLetter.toUpperCase() as IMPACT_CATEGORY;
 
   const impactTI = Math.round(
     ((calc[`ti_${impactLetterUC}a${scenarioSuffix}`] as number) || 0) +

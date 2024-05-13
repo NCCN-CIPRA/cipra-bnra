@@ -6,7 +6,7 @@ import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { SCENARIOS, Scenarios } from "../../functions/scenarios";
-import { getYearlyProbability } from "../../functions/analysis/calculateTotalRisk";
+import { getYearlyProbability } from "../../functions/Probability";
 
 const baseY = 50;
 
@@ -82,7 +82,8 @@ const PSankeyNode = ({
                     <Typography color="inherit">{payload.name}</Typography>
 
                     <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                      IP(all&rarr;{scenarioLetter}): {Math.round(1000000 * payload.cascade.ip) / 10000}% / day
+                      IP(all&rarr;{scenarioLetter}):{" "}
+                      {Math.round(1000000 * payload.cascade[`ip_${scenarioLetter}`]) / 10000}% / day
                     </Typography>
 
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>

@@ -72,6 +72,20 @@ const columns: GridColDef[] = [
     renderCell: (params: GridRenderCellParams) => getMoneyString(params.value),
   },
   {
+    field: "tr50",
+    headerName: "TR 2050",
+    width: 100,
+    valueFormatter: (params: GridValueFormatterParams) => params.value,
+    renderCell: (params: GridRenderCellParams) => getMoneyString(params.value),
+  },
+  {
+    field: "dtr50",
+    headerName: "ΔTR 2050",
+    width: 100,
+    valueFormatter: (params: GridValueFormatterParams) => params.value,
+    renderCell: (params: GridRenderCellParams) => "X " + Math.round(100 * params.value) / 100,
+  },
+  {
     field: "consensus",
     headerName: "Consensus",
     width: 100,
@@ -98,6 +112,7 @@ export default function CalculationsDataGrid({
 }) {
   const [rows, setRows] = useState<GridRowsProp | null>(null);
   const [worstCase, setWorstCase] = useState(false);
+  const [worstCase2050, setWorstCase2050] = useState(false);
 
   useMemo(() => {
     if (!data) return;
@@ -105,6 +120,7 @@ export default function CalculationsDataGrid({
     setRows(
       data.reduce((split, c) => {
         const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
+        const rs2050 = [c.tp50_c * c.ti_c, c.tp50_m * c.ti_m, c.tp50_e * c.ti_e];
 
         if (worstCase) {
           return [
@@ -118,6 +134,9 @@ export default function CalculationsDataGrid({
                 tp: c.tp_c,
                 ti: c.ti_c,
                 tr: c.tp_c * c.ti_c,
+                tp50: c.tp50_c,
+                tr50: c.tp50_c * c.ti_c,
+                dtr50: (c.tp50_c * c.ti_c) / (c.tp_c * c.ti_c),
                 consensus: c.quality === Quality.CONSENSUS,
                 keyRisk: c.keyRisk,
                 code: c.code,
@@ -130,6 +149,9 @@ export default function CalculationsDataGrid({
                 tp: c.tp_m,
                 ti: c.ti_m,
                 tr: c.tp_m * c.ti_m,
+                tp50: c.tp50_m,
+                tr50: c.tp50_m * c.ti_m,
+                dtr50: (c.tp50_m * c.ti_m) / (c.tp_m * c.ti_m),
                 consensus: c.quality === Quality.CONSENSUS,
                 keyRisk: c.keyRisk,
                 code: c.code,
@@ -142,11 +164,65 @@ export default function CalculationsDataGrid({
                 tp: c.tp_e,
                 ti: c.ti_e,
                 tr: c.tp_e * c.ti_e,
+                tp50: c.tp50_e,
+                tr50: c.tp50_e * c.ti_e,
+                dtr50: (c.tp50_e * c.ti_e) / (c.tp_e * c.ti_e),
                 consensus: c.quality === Quality.CONSENSUS,
                 keyRisk: c.keyRisk,
                 code: c.code,
               },
             ][rs.indexOf(Math.max(...rs))],
+          ];
+        } else if (worstCase2050) {
+          return [
+            ...split,
+            [
+              {
+                id: `${c.riskId}_c`,
+                riskId: c.riskId,
+                scenario: SCENARIOS.CONSIDERABLE,
+                title: c.riskTitle,
+                tp: c.tp_c,
+                ti: c.ti_c,
+                tr: c.tp_c * c.ti_c,
+                tp50: c.tp50_c,
+                tr50: c.tp50_c * c.ti_c,
+                dtr50: (c.tp50_c * c.ti_c) / (c.tp_c * c.ti_c),
+                consensus: c.quality === Quality.CONSENSUS,
+                keyRisk: c.keyRisk,
+                code: c.code,
+              },
+              {
+                id: `${c.riskId}_m`,
+                riskId: c.riskId,
+                scenario: SCENARIOS.MAJOR,
+                title: c.riskTitle,
+                tp: c.tp_m,
+                ti: c.ti_m,
+                tr: c.tp_m * c.ti_m,
+                tp50: c.tp50_m,
+                tr50: c.tp50_m * c.ti_m,
+                dtr50: (c.tp50_m * c.ti_m) / (c.tp_m * c.ti_m),
+                consensus: c.quality === Quality.CONSENSUS,
+                keyRisk: c.keyRisk,
+                code: c.code,
+              },
+              {
+                id: `${c.riskId}_e`,
+                riskId: c.riskId,
+                scenario: SCENARIOS.EXTREME,
+                title: c.riskTitle,
+                tp: c.tp_e,
+                ti: c.ti_e,
+                tr: c.tp_e * c.ti_e,
+                tp50: c.tp50_e,
+                tr50: c.tp50_e * c.ti_e,
+                dtr50: (c.tp50_e * c.ti_e) / (c.tp_e * c.ti_e),
+                consensus: c.quality === Quality.CONSENSUS,
+                keyRisk: c.keyRisk,
+                code: c.code,
+              },
+            ][rs.indexOf(Math.max(...rs2050))],
           ];
         } else {
           return [
@@ -159,6 +235,9 @@ export default function CalculationsDataGrid({
               tp: c.tp_c,
               ti: c.ti_c,
               tr: c.tp_c * c.ti_c,
+              tp50: c.tp50_c,
+              tr50: c.tp50_c * c.ti_c,
+              dtr50: (c.tp50_c * c.ti_c) / (c.tp_c * c.ti_c),
               consensus: c.quality === Quality.CONSENSUS,
               keyRisk: c.keyRisk,
               code: c.code,
@@ -171,6 +250,9 @@ export default function CalculationsDataGrid({
               tp: c.tp_m,
               ti: c.ti_m,
               tr: c.tp_m * c.ti_m,
+              tp50: c.tp50_m,
+              tr50: c.tp50_m * c.ti_m,
+              dtr50: (c.tp50_m * c.ti_m) / (c.tp_m * c.ti_m),
               consensus: c.quality === Quality.CONSENSUS,
               keyRisk: c.keyRisk,
               code: c.code,
@@ -183,6 +265,9 @@ export default function CalculationsDataGrid({
               tp: c.tp_e,
               ti: c.ti_e,
               tr: c.tp_e * c.ti_e,
+              tp50: c.tp50_e,
+              tr50: c.tp50_e * c.ti_e,
+              dtr50: (c.tp50_e * c.ti_e) / (c.tp_e * c.ti_e),
               consensus: c.quality === Quality.CONSENSUS,
               keyRisk: c.keyRisk,
               code: c.code,
@@ -222,6 +307,12 @@ export default function CalculationsDataGrid({
           <FormControlLabel
             control={<Checkbox checked={worstCase} onChange={(e) => setWorstCase(e.target.checked)} />}
             label="Show only worst case scenario"
+          />
+        </FormGroup>
+        <FormGroup sx={{}}>
+          <FormControlLabel
+            control={<Checkbox checked={worstCase2050} onChange={(e) => setWorstCase2050(e.target.checked)} />}
+            label="Show only worst case scenario in 2050"
           />
         </FormGroup>
       </AccordionActions>

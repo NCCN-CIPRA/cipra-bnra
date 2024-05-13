@@ -1,13 +1,13 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import ProbabilityOriginPieChart from "../../components/charts/ProbabilityOriginPieChart";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { getYearlyProbability } from "../../functions/analysis/calculateTotalRisk";
 import TextInputBox from "../../components/TextInputBox";
 import { useMemo, useState } from "react";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../hooks/useAPI";
-import { Cause } from "../../functions/Probability";
+import { Cause, getYearlyProbability } from "../../functions/Probability";
+import { SCENARIO_SUFFIX } from "../../functions/scenarios";
 
 export default function ProbabilitySection({
   riskFile,
@@ -18,7 +18,7 @@ export default function ProbabilitySection({
 }: {
   riskFile: DVRiskFile;
   causes: Cause[];
-  MRSSuffix: "_c" | "_m" | "_e";
+  MRSSuffix: SCENARIO_SUFFIX;
   calc: RiskCalculation;
   mode: "view" | "edit";
 }) {

@@ -24,9 +24,6 @@ import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import ImpactBarChart from "../../components/charts/ImpactBarChart";
-import { getYearlyProbability, getYearlyRisk } from "../../functions/analysis/calculateTotalRisk";
-import { getMoneyString } from "../../functions/Impact";
-import { setSyntheticLeadingComments } from "typescript";
 
 const capFirst = (s: string) => s[0].toUpperCase() + s.slice(1);
 

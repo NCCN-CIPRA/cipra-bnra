@@ -1,26 +1,13 @@
 import { M } from "../../pages/learning/QuantitativeScales/M";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
+import { getScenarioSuffix, getWorstCaseScenario } from "../scenarios";
 
 const DAMAGE_INDICATORS = ["Ha", "Hb", "Hc", "Sa", "Sb", "Sc", "Sd", "Ea", "Fa", "Fb"];
-
-const getWorstCaseScenario = (r: RiskCalculation) => {
-  if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return "_c";
-  if (r.tr_m > r.tr_c && r.tr_m > r.tr_e) return "_m";
-  return "_e";
-};
 
 export const getYearlyRisk = (dailyP: number, ti: number) => {
   const yearlyP = 1 - Math.pow(1 - dailyP, 365);
 
   return yearlyP * ti;
-};
-
-export const getYearlyProbability = (dailyP: number) => {
-  return 1 - Math.pow(1 - dailyP, 365);
-};
-
-export const getPercentageProbability = (p: number) => {
-  return `${Math.round(p * 10000) / 100}%`;
 };
 
 export default function calculateTotalRisk(r: RiskCalculation) {
@@ -30,12 +17,24 @@ export default function calculateTotalRisk(r: RiskCalculation) {
 
   r.tr = (r.tr_c + r.tr_m + r.tr_e) / 3;
 
+  r.tr50_c = r.tp50_c * r.ti_c;
+  r.tr50_m = r.tp50_m * r.ti_m;
+  r.tr50_e = r.tp50_e * r.ti_e;
+
+  r.tr50 = (r.tr50_c + r.tr50_m + r.tr50_e) / 3;
+
   r.causes.forEach((c) => {
     c.ir_c = r.tp_c === 0 ? 0 : (r.tr_c * c.ip_c) / r.tp_c;
     c.ir_m = r.tp_m === 0 ? 0 : (r.tr_m * c.ip_m) / r.tp_m;
     c.ir_e = r.tp_e === 0 ? 0 : (r.tr_e * c.ip_e) / r.tp_e;
 
     c.ir = (c.ir_c + c.ir_m + c.ir_e) / 3;
+
+    c.ir50_c = r.tp50_c === 0 ? 0 : (r.tr50_c * c.ip50_c) / r.tp50_c;
+    c.ir50_m = r.tp50_m === 0 ? 0 : (r.tr50_m * c.ip50_m) / r.tp50_m;
+    c.ir50_e = r.tp50_e === 0 ? 0 : (r.tr50_e * c.ip50_e) / r.tp50_e;
+
+    c.ir50 = (c.ir50_c + c.ir50_m + c.ir50_e) / 3;
   });
 
   r.effects.forEach((c) => {
@@ -46,7 +45,7 @@ export default function calculateTotalRisk(r: RiskCalculation) {
     c.ir = (c.ir_c + c.ir_m + c.ir_e) / 3;
   });
 
-  const wcsSuffix = getWorstCaseScenario(r);
+  const wcsSuffix = getScenarioSuffix(getWorstCaseScenario(r));
 
   r.dp = r[`dp${wcsSuffix}`];
   r.tp = r[`tp${wcsSuffix}`];

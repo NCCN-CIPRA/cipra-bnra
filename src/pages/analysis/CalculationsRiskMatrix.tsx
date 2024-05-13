@@ -29,11 +29,14 @@ import {
   MenuItem,
   Stack,
   Box,
+  Input,
 } from "@mui/material";
 import { getMoneyString } from "../../functions/Impact";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { select } from "d3";
+import { scaleLog, select } from "d3";
+import getCategoryColor from "../../functions/getCategoryColor";
+import { getYearlyProbability } from "../../functions/Probability";
 
 interface MatrixRisk {
   riskId: string;
@@ -49,13 +52,33 @@ interface MatrixRisk {
   category: string;
 }
 
-const CATEGORIES: { [key: string]: "circle" | "cross" | "diamond" | "square" | "star" | "triangle" | "wye" } = {
-  Cyber: "square",
-  EcoTech: "star",
-  Health: "diamond",
-  "Man-made": "cross",
-  Nature: "triangle",
-  Transversal: "circle",
+const CATEGORIES: {
+  [key: string]: { color: string; shape: "circle" | "cross" | "diamond" | "square" | "star" | "triangle" | "wye" };
+} = {
+  Cyber: {
+    shape: "square",
+    color: getCategoryColor("Cyber"),
+  },
+  EcoTech: {
+    shape: "star",
+    color: getCategoryColor("EcoTech"),
+  },
+  Health: {
+    shape: "diamond",
+    color: getCategoryColor("Health"),
+  },
+  "Man-made": {
+    shape: "wye",
+    color: getCategoryColor("Man-made"),
+  },
+  Nature: {
+    shape: "triangle",
+    color: getCategoryColor("Nature"),
+  },
+  Transversal: {
+    shape: "circle",
+    color: getCategoryColor("Transversal"),
+  },
 };
 
 const CATEGORY_NAMES: { [key: string]: string } = {
@@ -67,6 +90,46 @@ const CATEGORY_NAMES: { [key: string]: string } = {
   Transversal: "Societal Risks",
 };
 
+const ES_RISKS = [
+  "C05",
+  "C04",
+  "H04",
+  "H01",
+  "H08",
+  "H03",
+  "H02",
+  "M01",
+  "M14",
+  "M13",
+  "M17",
+  "M16",
+  "M06",
+  "N14",
+  "N18",
+  "N17",
+  "N01",
+  "N02",
+  "N03",
+  "N13",
+  "S03",
+  "S15",
+  "S06",
+  "S02",
+  "S01",
+  "S19",
+  "T05",
+  "T09",
+  "T16",
+];
+
+const getScaleString = (value: number) => {
+  if (value < 1) return "Very Low";
+  if (value < 2) return "Low";
+  if (value < 3) return "Medium";
+  if (value < 4) return "High";
+  return "Very High";
+};
+
 const defaultFields = (c: RiskCalculation) =>
   ({
     riskId: c.riskId,
@@ -75,6 +138,8 @@ const defaultFields = (c: RiskCalculation) =>
     code: c.code,
     category: c.category,
   } as Partial<MatrixRisk>);
+
+const pScale = scaleLog().base(100);
 
 export default function CalculationsRiskMatrix({
   calculations,
@@ -88,10 +153,11 @@ export default function CalculationsRiskMatrix({
   const [dots, setDots] = useState<MatrixRisk[] | null>(null);
   const [worstCase, setWorstCase] = useState(false);
   const [labels, setLabels] = useState(false);
+  const [es, setES] = useState(false);
   const [scales, setScales] = useState<"absolute" | "classes">("classes");
   const [nonKeyRisks, setNonKeyRisks] = useState<"show" | "fade" | "hide">("show");
-  const [categories, setCategories] = useState<"shapes" | "none">("none");
-  const [scenarios, setScenarios] = useState<"colors" | "none">("colors");
+  const [categories, setCategories] = useState<"shapes" | "colors" | "both" | "none">("none");
+  const [scenarios, setScenarios] = useState<"colors" | "shapes" | "none">("colors");
 
   const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
     if (active) {
@@ -100,10 +166,10 @@ export default function CalculationsRiskMatrix({
           <Stack sx={{ backgroundColor: "rgba(255,255,255,0.8)", border: "1px solid #eee", p: 1 }}>
             <Typography variant="subtitle1">{payload?.[0].payload.title}</Typography>
             <Typography variant="subtitle2">{`Total Probability: ${
-              Math.round((payload?.[0].value as number) * 100000) / 1000
+              Math.round((payload?.[1].value as number) * 100000) / 1000
             }%`}</Typography>
             <Typography variant="subtitle2">{`Total Impact: ${getMoneyString(
-              payload?.[1].value as number
+              payload?.[0].value as number
             )}`}</Typography>
             <Typography variant="subtitle2">{`Total Risk: ${getMoneyString(
               payload?.[0].payload.tr as number
@@ -129,101 +195,125 @@ export default function CalculationsRiskMatrix({
     return null;
   };
 
-  const recalcPI = (tp: number, ti: number) =>
-    scales === "classes"
-      ? {
-          x: 5 * (1 - Math.pow(1 - tp, 365)),
-          y: Math.log10(ti / 100000000) / 0.9,
-          tr: Math.log10(100) / Math.log10(tp * ti),
-        }
-      : {
-          x: tp,
-          y: ti,
-          tr: tp * ti,
-        };
+  const getColor = (entry: MatrixRisk) => {
+    if (scenarios === "colors") {
+      return SCENARIO_PARAMS[entry.scenario].color;
+    }
+    if (categories === "colors" || categories === "both") {
+      return CATEGORIES[entry.category].color;
+    }
+
+    return "rgba(150,150,150,1)";
+  };
+
+  const recalcPI = (tp: number, ti: number) => {
+    // scales === "classes"
+    //   ? {
+    //       x: 5 * (1 - Math.pow(1 - tp, 365)),
+    //       y: Math.log10(ti / 100000000) / 0.9,
+    //       tr: Math.log10(100) / Math.log10(tp * ti),
+    //     }
+    //   : {
+    //       x: getYearlyProbability(tp),
+    //       y: ti,
+    //       tr: tp * ti,
+    //     };
+    return {
+      x: getYearlyProbability(tp),
+      y: ti,
+      tr: tp * ti,
+    };
+  };
 
   useMemo(() => {
     if (!calculations) return;
 
     setDots(
-      calculations.reduce((split, c) => {
-        const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
+      calculations
+        .reduce((split, c) => {
+          const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
 
-        if (worstCase) {
-          if ((c.tp_c === 0 && c.tp_m === 0 && c.tp_e === 0) || (c.ti_c === 0 && c.ti_m === 0 && c.ti_e === 0))
-            return split;
+          if (worstCase) {
+            if ((c.tp_c === 0 && c.tp_m === 0 && c.tp_e === 0) || (c.ti_c === 0 && c.ti_m === 0 && c.ti_e === 0))
+              return split;
 
-          return [
-            ...split,
-            [
-              {
-                id: `${c.riskId}_c`,
-                fullTitle: `Considerable ${c.riskTitle}`,
-                scenario: SCENARIOS.CONSIDERABLE,
-                ...defaultFields(c),
-                ...recalcPI(c.tp_c, c.ti_c),
-              } as MatrixRisk,
-              {
-                id: `${c.riskId}_m`,
-                fullTitle: `Major ${c.riskTitle}`,
-                ...recalcPI(c.tp_m, c.ti_m),
-                scenario: SCENARIOS.MAJOR,
-                ...defaultFields(c),
-              } as MatrixRisk,
-              {
-                riskId: c.riskId,
-                id: `${c.riskId}_e`,
-                fullTitle: `Extreme ${c.riskTitle}`,
-                ...recalcPI(c.tp_e, c.ti_e),
-                scenario: SCENARIOS.EXTREME,
-                ...defaultFields(c),
-              } as MatrixRisk,
-            ][rs.indexOf(Math.max(...rs))],
-          ];
-        } else {
-          return [
-            ...split,
-            ...(c.tp_c === 0 || c.ti_c === 0
-              ? []
-              : [
-                  {
-                    riskId: c.riskId,
-                    id: `${c.riskId}_c`,
-                    fullTitle: `Considerable ${c.riskTitle}`,
-                    ...recalcPI(c.tp_c, c.ti_c),
-                    scenario: SCENARIOS.CONSIDERABLE,
-                    ...defaultFields(c),
-                  } as MatrixRisk,
-                ]),
-            ...(c.tp_m === 0 || c.ti_m === 0
-              ? []
-              : [
-                  {
-                    riskId: c.riskId,
-                    id: `${c.riskId}_m`,
-                    fullTitle: `Major ${c.riskTitle}`,
-                    ...recalcPI(c.tp_m, c.ti_m),
-                    scenario: SCENARIOS.MAJOR,
-                    ...defaultFields(c),
-                  } as MatrixRisk,
-                ]),
-            ...(c.tp_e === 0 || c.ti_e === 0
-              ? []
-              : [
-                  {
-                    riskId: c.riskId,
-                    id: `${c.riskId}_e`,
-                    fullTitle: `Extreme ${c.riskTitle}`,
-                    ...recalcPI(c.tp_e, c.ti_e),
-                    scenario: SCENARIOS.EXTREME,
-                    ...defaultFields(c),
-                  } as MatrixRisk,
-                ]),
-          ];
-        }
-      }, [] as MatrixRisk[])
+            return [
+              ...split,
+              [
+                {
+                  id: `${c.riskId}_c`,
+                  fullTitle: `Considerable ${c.riskTitle}`,
+                  scenario: SCENARIOS.CONSIDERABLE,
+                  ...defaultFields(c),
+                  ...recalcPI(c.tp_c, c.ti_c),
+                } as MatrixRisk,
+                {
+                  id: `${c.riskId}_m`,
+                  fullTitle: `Major ${c.riskTitle}`,
+                  ...recalcPI(c.tp_m, c.ti_m),
+                  scenario: SCENARIOS.MAJOR,
+                  ...defaultFields(c),
+                } as MatrixRisk,
+                {
+                  riskId: c.riskId,
+                  id: `${c.riskId}_e`,
+                  fullTitle: `Extreme ${c.riskTitle}`,
+                  ...recalcPI(c.tp_e, c.ti_e),
+                  scenario: SCENARIOS.EXTREME,
+                  ...defaultFields(c),
+                } as MatrixRisk,
+              ][rs.indexOf(Math.max(...rs))],
+            ];
+          } else {
+            return [
+              ...split,
+              ...(c.tp_c === 0 || c.ti_c === 0
+                ? []
+                : [
+                    {
+                      riskId: c.riskId,
+                      id: `${c.riskId}_c`,
+                      fullTitle: `Considerable ${c.riskTitle}`,
+                      ...recalcPI(c.tp_c, c.ti_c),
+                      scenario: SCENARIOS.CONSIDERABLE,
+                      ...defaultFields(c),
+                    } as MatrixRisk,
+                  ]),
+              ...(c.tp_m === 0 || c.ti_m === 0
+                ? []
+                : [
+                    {
+                      riskId: c.riskId,
+                      id: `${c.riskId}_m`,
+                      fullTitle: `Major ${c.riskTitle}`,
+                      ...recalcPI(c.tp_m, c.ti_m),
+                      scenario: SCENARIOS.MAJOR,
+                      ...defaultFields(c),
+                    } as MatrixRisk,
+                  ]),
+              ...(c.tp_e === 0 || c.ti_e === 0
+                ? []
+                : [
+                    {
+                      riskId: c.riskId,
+                      id: `${c.riskId}_e`,
+                      fullTitle: `Extreme ${c.riskTitle}`,
+                      ...recalcPI(c.tp_e, c.ti_e),
+                      scenario: SCENARIOS.EXTREME,
+                      ...defaultFields(c),
+                    } as MatrixRisk,
+                  ]),
+            ];
+          }
+        }, [] as MatrixRisk[])
+        .filter((r) => {
+          if (es) {
+            return ES_RISKS.indexOf(r.code) >= 0;
+          }
+          return true;
+        })
     );
-  }, [calculations, worstCase, scales, nonKeyRisks]);
+  }, [calculations, worstCase, scales, nonKeyRisks, es]);
 
   return (
     <Accordion disabled={!calculations}>
@@ -251,56 +341,64 @@ export default function CalculationsRiskMatrix({
             <CartesianGrid fill="url(#colorUv)" />
             {scales === "absolute" ? (
               <>
-                <XAxis
+                <YAxis
                   type="number"
                   dataKey="x"
                   name="probability"
                   unit="%"
-                  scale="log"
-                  domain={["auto", "auto"]}
+                  scale="linear"
+                  domain={[0, 1]}
                   // tickCount={10}
                   tickFormatter={(n) => `${Math.round(n * 100000) / 1000}`}
-                  ticks={[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1]}
+                  ticks={[0.2, 0.4, 0.6, 0.8, 1]}
                 />
-                <YAxis
+                <XAxis
                   type="number"
                   dataKey="y"
                   name="impact"
                   scale="log"
-                  domain={["auto", "auto"]}
-                  tickCount={10}
+                  domain={[50000000, 5000000000000]}
                   tickFormatter={getMoneyString}
+                  ticks={[50000000, 500000000, 5000000000, 50000000000, 500000000000]}
                 />
               </>
             ) : (
               <>
-                <XAxis
+                <YAxis
                   type="number"
                   dataKey="x"
                   name="probability"
                   unit=""
-                  scale="linear"
-                  domain={[0, 5]}
-                  // tickCount={10}
-                  tickFormatter={(n) => `TP${n}`}
-                  ticks={[1, 2, 3, 4, 5]}
+                  scale={pScale}
+                  domain={[0.02, 1.5]}
+                  // tickCount={5}
+                  tickFormatter={(s, n) => getScaleString(n + 1)}
+                  ticks={[0.0307, 0.0768, 0.192, 0.48, 1.2]}
                   label={{
-                    value: "Total Probability",
-                    position: "insideBottom",
-                    offset: -10,
-                    props: { fontWeight: "bold" },
+                    offset: -15,
+                    value: scales === "classes" ? "Probability" : "Yearly Probability",
+                    angle: -90,
+                    position: "insideLeft",
                   }}
                 />
-                <YAxis
+                <XAxis
                   type="number"
                   dataKey="y"
                   name="impact"
-                  scale="linear"
-                  domain={[0, 5]}
+                  scale="log"
+                  domain={[500000000, 800000000000]}
                   tickCount={6}
-                  tickFormatter={(n) => `TI${n}`}
-                  ticks={[1, 2, 3, 4, 5]}
-                  label={{ value: "Total Impact", angle: -90, position: "insideLeft" }}
+                  // tickFormatter={(s, n) => `TI${n}`}
+                  // ticks={[160000000, 800000000, 4000000000, 20000000000, 100000000000, 500000000000]}
+                  tickFormatter={(s, n) => getScaleString(n + 1)}
+                  ticks={[800000000, 4000000000, 20000000000, 100000000000, 500000000000]}
+                  label={{
+                    value: scales === "classes" ? "Impact" : "Impact of an event",
+                    position: "insideBottom",
+                    offset: -20,
+
+                    props: { fontWeight: "bold" },
+                  }}
                 />
               </>
             )}
@@ -314,9 +412,9 @@ export default function CalculationsRiskMatrix({
                   name={`${CATEGORY} Risks`}
                   data={catData}
                   fill="#8884d8"
-                  shape={categories === "shapes" ? shape : "circle"}
+                  shape={categories === "shapes" || categories === "both" ? shape.shape : "circle"}
                 >
-                  {labels && <LabelList dataKey="code" position="insideTop" offset={15} />}
+                  {labels && <LabelList dataKey="code" position="insideTop" offset={15} fontSize={20} />}
                   {catData.map((entry, index) => {
                     let opacity = 1;
                     if (selectedNodeId !== null) {
@@ -333,7 +431,7 @@ export default function CalculationsRiskMatrix({
                     return (
                       <Cell
                         key={`cell-${entry.id}`}
-                        fill={scenarios === "colors" ? SCENARIO_PARAMS[entry.scenario].color : "rgba(150,150,150,1)"}
+                        fill={getColor(entry)}
                         stroke="rgba(150,150,150,0.4)"
                         strokeWidth={1}
                         opacity={opacity}
@@ -350,18 +448,19 @@ export default function CalculationsRiskMatrix({
           </ScatterChart>
         </ResponsiveContainer>
         <Stack direction="row" sx={{ mx: 4, pb: 4, mt: 2 }} spacing={4}>
-          {categories === "shapes" && (
-            <Box sx={{ flex: 1 }}>
-              <Legend
-                wrapperStyle={{ position: "relative" }}
-                payload={Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
-                  value: CATEGORY_NAMES[CATEGORY],
-                  type: shape,
-                  color: "rgba(150,150,150,1)",
-                }))}
-              />
-            </Box>
-          )}
+          {categories === "shapes" ||
+            (categories === "both" && (
+              <Box sx={{ flex: 1 }}>
+                <Legend
+                  wrapperStyle={{ position: "relative" }}
+                  payload={Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
+                    value: CATEGORY_NAMES[CATEGORY],
+                    type: shape.shape,
+                    color: categories === "both" ? CATEGORIES[CATEGORY].color : "rgba(150,150,150,1)",
+                  }))}
+                />
+              </Box>
+            ))}
           {scenarios === "colors" && (
             <Box sx={{ flex: 1 }}>
               <Legend
@@ -386,6 +485,10 @@ export default function CalculationsRiskMatrix({
             <FormControlLabel
               control={<Checkbox checked={labels} onChange={(e) => setLabels(e.target.checked)} />}
               label="Show labels"
+            />
+            <FormControlLabel
+              control={<Checkbox checked={es} onChange={(e) => setES(e.target.checked)} />}
+              label="Show only executive summary"
             />
           </FormGroup>
           <Stack direction="column" sx={{ flex: 1 }} spacing={3}>
@@ -419,6 +522,8 @@ export default function CalculationsRiskMatrix({
                   onChange={(e) => setCategories(e.target.value as any)}
                 >
                   <MenuItem value={"shapes"}>Shapes</MenuItem>
+                  <MenuItem value={"colors"}>Colors</MenuItem>
+                  <MenuItem value={"both"}>Shapes & Colors</MenuItem>
                   <MenuItem value={"none"}>None</MenuItem>
                 </Select>
               </FormControl>
@@ -432,6 +537,12 @@ export default function CalculationsRiskMatrix({
                   <MenuItem value={"colors"}>Colors</MenuItem>
                   <MenuItem value={"none"}>None</MenuItem>
                 </Select>
+              </FormControl>
+            </Stack>
+            <Stack direction="row" spacing={5}>
+              <FormControl sx={{ flex: 1 }} fullWidth>
+                <InputLabel>Font Size</InputLabel>
+                <Input type="number" />
               </FormControl>
             </Stack>
           </Stack>

@@ -14,7 +14,6 @@ import SankeyDiagram from "../../components/charts/SankeyDiagram";
 import ScenarioMatrix from "../../components/charts/ScenarioMatrix";
 import HistoricalEvents from "./HistoricalEvents";
 import Scenario from "./Scenario";
-import { getYearlyProbability } from "../../functions/analysis/calculateTotalRisk";
 import ProbabilityOriginPieChart from "../../components/charts/ProbabilityOriginPieChart";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import getImpactColor from "../../functions/getImpactColor";

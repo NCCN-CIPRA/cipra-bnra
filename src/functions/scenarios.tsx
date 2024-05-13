@@ -1,3 +1,4 @@
+import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 import { IntensityParameter } from "./intensityParameters";
 import tableToJson from "./tableToJson";
 
@@ -6,6 +7,8 @@ export enum SCENARIOS {
   MAJOR = "major",
   EXTREME = "extreme",
 }
+
+export type SCENARIO_SUFFIX = "_c" | "_m" | "_e";
 
 export interface Scenarios {
   considerable: IntensityParameter<string>[];
@@ -83,3 +86,19 @@ export function scenariosEquals(a?: Scenarios, b?: Scenarios) {
   // TODO
   return false;
 }
+
+export const getScenarioSuffix = (scenario: SCENARIOS): SCENARIO_SUFFIX => {
+  if (scenario === SCENARIOS.CONSIDERABLE) return "_c";
+  else if (scenario === SCENARIOS.MAJOR) return "_m";
+  return "_e";
+};
+
+export const getWorstCaseScenario = (calculation: RiskCalculation) => {
+  const rs = [
+    calculation.tp_c * calculation.ti_c,
+    calculation.tp_m * calculation.ti_m,
+    calculation.tp_e * calculation.ti_e,
+  ];
+
+  return [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME][rs.indexOf(Math.max(...rs))];
+};

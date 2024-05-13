@@ -1,13 +1,10 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
-import ProbabilityOriginPieChart from "../../components/charts/ProbabilityOriginPieChart";
-import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { getYearlyProbability } from "../../functions/analysis/calculateTotalRisk";
 import TextInputBox from "../../components/TextInputBox";
 import { useMemo, useState } from "react";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../hooks/useAPI";
-import { Cause } from "../../functions/Probability";
+import { SCENARIO_SUFFIX } from "../../functions/scenarios";
 
 export default function CBSection({
   riskFile,
@@ -15,7 +12,7 @@ export default function CBSection({
   mode,
 }: {
   riskFile: DVRiskFile;
-  scenarioSuffix: "_c" | "_m" | "_e";
+  scenarioSuffix: SCENARIO_SUFFIX;
   mode: "view" | "edit";
 }) {
   const api = useAPI();

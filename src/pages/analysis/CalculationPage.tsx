@@ -38,6 +38,8 @@ import RiskNetworkGraph from "./RiskNetworkGraph";
 import CalculationsCascadeDataGrid from "./CalculationsCascadeDataGrid";
 import CalculationsSankeyGraph from "./CalculationsSankeyGraph";
 import RiskProfileGraph from "./RiskProfileGraph";
+import ClimateChangeGraph from "./ClimateChangeGraph";
+import ExecutiveSummaryGraph from "./ExecutiveSummaryGraphs";
 // import { MessageParams } from "../../functions/analysis/calculator.worker";
 
 const roundNumberField = (n: number) => {
@@ -548,6 +550,16 @@ export default function CalculationPage() {
             setSelectedNodeId={setSelectedNode}
           />
           <RiskProfileGraph
+            calculations={calculations}
+            selectedNodeId={selectedNode}
+            setSelectedNodeId={setSelectedNode}
+          />
+          <ClimateChangeGraph
+            calculations={calculations}
+            selectedNodeId={selectedNode}
+            setSelectedNodeId={setSelectedNode}
+          />
+          <ExecutiveSummaryGraph
             calculations={calculations}
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}

@@ -1,3 +1,6 @@
+import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
+import { SCENARIO_SUFFIX } from "./scenarios";
+
 export type Cause = {
   name: string;
   p: number;
@@ -116,4 +119,20 @@ export function getProbabilityScaleNumber(absoluteProbability: number, scalePref
 
 export function getProbabilityScale(absoluteProbability: number, scalePrefix: string) {
   return `${scalePrefix}${getProbabilityScaleNumber(absoluteProbability, scalePrefix)}`;
+}
+
+export const getPercentageProbability = (p: number) => {
+  return `${Math.round(p * 10000) / 100}%`;
+};
+
+export const getYearlyProbability = (dailyP: number) => {
+  return 1 - Math.pow(1 - dailyP, 365);
+};
+
+const rescaleProbability = (p: number) => {
+  return Math.round(100 * (4.8 + Math.log(p) / Math.log(2.5))) / 100;
+};
+
+export function getTotalProbabilityRelativeScale(calculation: RiskCalculation, scenarioSuffix: SCENARIO_SUFFIX) {
+  return rescaleProbability(getYearlyProbability(calculation[`tp${scenarioSuffix}`]));
 }

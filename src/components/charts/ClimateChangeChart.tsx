@@ -26,17 +26,17 @@ import {
   RiskAnalysisResults,
   RiskCalculation,
 } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
+import { SCENARIOS, SCENARIO_PARAMS, SCENARIO_SUFFIX } from "../../functions/scenarios";
 import { hexToRGB } from "../../functions/colors";
 import { useMemo } from "react";
 import { Cause as Cause2023 } from "../../functions/Probability";
-import { getPercentageProbability, getYearlyProbability } from "../../functions/analysis/calculateTotalRisk";
+import { getPercentageProbability, getYearlyProbability } from "../../functions/Probability";
 
 type Cause2050 = Cause2023 & {
   p2050: number;
 };
 
-const getTP50 = (calcs: RiskCalculation, scenarioSuffix: "_c" | "_m" | "_e") => {
+const getTP50 = (calcs: RiskCalculation, scenarioSuffix: SCENARIO_SUFFIX) => {
   return calcs[`tp50${scenarioSuffix}`] || 0.0001;
 };
 
@@ -84,7 +84,7 @@ export default function ClimateChangeChart({
   scenarioSuffix,
 }: {
   calculation: RiskCalculation;
-  scenarioSuffix: "_c" | "_m" | "_e";
+  scenarioSuffix: SCENARIO_SUFFIX;
 }) {
   const data = useMemo(() => {
     const causes = [
@@ -145,11 +145,11 @@ export default function ClimateChangeChart({
       <XAxis
         type="number"
         tickFormatter={(value) => getPercentageProbability(value)}
-        label="Probability of occurence in the next 12 months"
+        label={{ value: "Probability of occurence in the next 12 months", dy: 25 }}
       />
       <YAxis dataKey="name" type="category" width={150} />
       <Tooltip formatter={(value) => getPercentageProbability(value as number)} />
-      <Legend align="center" verticalAlign="bottom" wrapperStyle={{ paddingTop: 10 }} />
+      <Legend align="center" verticalAlign="bottom" wrapperStyle={{ paddingTop: 30 }} />
       <Bar name="Probability in 2023" dataKey="P2023" fill="#8884d8" />
       <Bar name="Probability in 2050" dataKey="P2050" fill="#ffc658" />
     </BarChart>

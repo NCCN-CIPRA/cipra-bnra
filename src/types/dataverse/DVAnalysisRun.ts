@@ -152,6 +152,12 @@ export interface CascadeCalculation {
   ir_e: number;
 
   ir: number;
+
+  ir50_c: number;
+  ir50_m: number;
+  ir50_e: number;
+
+  ir50: number;
 }
 
 export interface RiskCalculationKnownFields {
@@ -391,6 +397,13 @@ export interface RiskCalculation extends RiskCalculationKnownFields {
   tr_e: number;
 
   tr: number;
+
+  // Risk in 2050
+  tr50_c: number;
+  tr50_m: number;
+  tr50_e: number;
+
+  tr50: number;
 
   causes: CascadeCalculation[];
 

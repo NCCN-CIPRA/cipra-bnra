@@ -15,10 +15,14 @@ import { getAbsoluteImpact } from "../Impact";
 import { getAbsoluteProbability, getDPDailyProbability } from "../Probability";
 import { getAverage, getConsensusRiskFile as getConsensusRiskFileAverage } from "../inputProcessing";
 
-const SC_FACTOR = 1;
-const EA_FACTOR = 1;
+const SC_FACTOR = 1 / 10;
+const SD_FACTOR = 1 / 10;
+const EA_FACTOR = 1 / 10;
 const METEORITE_DP_FACTOR = 1 / 100;
 const INFO_OPS_CP_FACTOR = 1 / 10;
+const FOOD_SUPPLY_FACTOR = 1 / 10;
+const IAC_FACTOR = 1 / 10;
+const ATTACK_FACTOR = 1 / 10;
 
 interface Metrics {
   consensus: number;
@@ -85,8 +89,10 @@ const getConsensusRiskFile = (
       )
     : [];
 
+  const scaleFactor = riskFile.cr4de_title.indexOf("International Armed") >= 0 ? IAC_FACTOR : 1;
   const DPScaleFactor = riskFile.cr4de_title.indexOf("Meteorite") >= 0 ? METEORITE_DP_FACTOR : 1;
   const EaScaleFactor = EA_FACTOR;
+  const ExtremeFactor = riskFile.cr4de_title.indexOf("food supply") >= 0 ? FOOD_SUPPLY_FACTOR : 1;
 
   if (
     (riskFile.cr4de_consensus_date && new Date(riskFile.cr4de_consensus_date) <= new Date()) ||
@@ -99,42 +105,48 @@ const getConsensusRiskFile = (
       dp_m: getAbsoluteProbability(riskFile.cr4de_dp_quanti_m, DPScaleFactor),
       dp_e: getAbsoluteProbability(riskFile.cr4de_dp_quanti_e, DPScaleFactor),
 
-      di_Ha_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_c),
-      di_Hb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_c),
-      di_Hc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_c),
-      di_Sa_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_c),
-      di_Sb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_c),
-      di_Sc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_c) / SC_FACTOR,
-      di_Sd_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_c),
-      di_Ea_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_c) / EaScaleFactor,
-      di_Fa_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_c),
-      di_Fb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_c),
+      di_Ha_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_c) * scaleFactor,
+      di_Hb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_c) * scaleFactor,
+      di_Hc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_c) * scaleFactor,
+      di_Sa_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_c) * scaleFactor,
+      di_Sb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_c) * scaleFactor,
+      di_Sc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_c) * scaleFactor * SC_FACTOR,
+      di_Sd_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_c) * scaleFactor * SD_FACTOR,
+      di_Ea_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_c) * scaleFactor * EaScaleFactor,
+      di_Fa_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_c) * scaleFactor,
+      di_Fb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_c) * scaleFactor,
 
-      di_Ha_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_m),
-      di_Hb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_m),
-      di_Hc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_m),
-      di_Sa_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_m),
-      di_Sb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_m),
-      di_Sc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_m) / SC_FACTOR,
-      di_Sd_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_m),
-      di_Ea_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_m) / EaScaleFactor,
-      di_Fa_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_m),
-      di_Fb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_m),
+      di_Ha_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_m) * scaleFactor,
+      di_Hb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_m) * scaleFactor,
+      di_Hc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_m) * scaleFactor,
+      di_Sa_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_m) * scaleFactor,
+      di_Sb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_m) * scaleFactor,
+      di_Sc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_m) * scaleFactor * SC_FACTOR,
+      di_Sd_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_m) * scaleFactor * SD_FACTOR,
+      di_Ea_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_m) * scaleFactor * EaScaleFactor,
+      di_Fa_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_m) * scaleFactor,
+      di_Fb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_m) * scaleFactor,
 
-      di_Ha_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_e),
-      di_Hb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_e),
-      di_Hc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_e),
-      di_Sa_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_e),
-      di_Sb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_e),
-      di_Sc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_e) / SC_FACTOR,
-      di_Sd_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_e),
-      di_Ea_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_e) / EaScaleFactor,
-      di_Fa_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_e),
-      di_Fb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_e),
+      di_Ha_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_e) * scaleFactor * ExtremeFactor,
+      di_Hb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_e) * scaleFactor * ExtremeFactor,
+      di_Hc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_e) * scaleFactor * ExtremeFactor,
+      di_Sa_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_e) * scaleFactor * ExtremeFactor,
+      di_Sb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_e) * scaleFactor * ExtremeFactor,
+      di_Sc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_e) * scaleFactor * SC_FACTOR * ExtremeFactor,
+      di_Sd_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_e) * scaleFactor * SD_FACTOR * ExtremeFactor,
+      di_Ea_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_e) * scaleFactor * EaScaleFactor * ExtremeFactor,
+      di_Fa_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_e) * scaleFactor * ExtremeFactor,
+      di_Fb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_e) * scaleFactor * ExtremeFactor,
 
-      dp50_c: getAbsoluteProbability(riskFile.cr4de_climate_change_quanti_c),
-      dp50_m: getAbsoluteProbability(riskFile.cr4de_climate_change_quanti_m),
-      dp50_e: getAbsoluteProbability(riskFile.cr4de_climate_change_quanti_e),
+      dp50_c: riskFile.cr4de_climate_change_quanti_c
+        ? getAbsoluteProbability(riskFile.cr4de_climate_change_quanti_c)
+        : getAbsoluteProbability(riskFile.cr4de_dp_quanti_c, DPScaleFactor),
+      dp50_m: riskFile.cr4de_climate_change_quanti_m
+        ? getAbsoluteProbability(riskFile.cr4de_climate_change_quanti_m)
+        : getAbsoluteProbability(riskFile.cr4de_dp_quanti_m, DPScaleFactor),
+      dp50_e: riskFile.cr4de_climate_change_quanti_e
+        ? getAbsoluteProbability(riskFile.cr4de_climate_change_quanti_e)
+        : getAbsoluteProbability(riskFile.cr4de_dp_quanti_e, DPScaleFactor),
     };
 
   if (goodDAs.length > 0)
@@ -237,11 +249,20 @@ const getConsensusCascade = (
         })
     : [];
 
-  const cpScaleFactor =
+  let cpScaleFactor = 1;
+  if (
     cause.cr4de_riskfilesid === "9458db5b-aa6c-ed11-9561-000d3adf7089" ||
     effect.cr4de_riskfilesid === "9458db5b-aa6c-ed11-9561-000d3adf7089"
-      ? INFO_OPS_CP_FACTOR
-      : 1;
+  ) {
+    cpScaleFactor *= INFO_OPS_CP_FACTOR;
+  }
+  if (
+    ["M01", "MO2", "M03", "M04", "M05"].indexOf(cause.cr4de_hazard_id) >= 0 &&
+    effect.cr4de_title.indexOf("Attack") >= 0
+  ) {
+    cpScaleFactor *= ATTACK_FACTOR;
+  }
+  const extremeScaleFactor = effect.cr4de_title.indexOf("International Armed") >= 0 ? IAC_FACTOR : 1;
 
   if (
     ((effect.cr4de_consensus_date && new Date(effect.cr4de_consensus_date) <= new Date()) ||
@@ -259,13 +280,13 @@ const getConsensusCascade = (
       reliabilty: goodCAs.length,
       c2c: getAbsoluteProbability(cascade.cr4de_c2c) * cpScaleFactor,
       c2m: getAbsoluteProbability(cascade.cr4de_c2m) * cpScaleFactor,
-      c2e: getAbsoluteProbability(cascade.cr4de_c2e) * cpScaleFactor,
+      c2e: getAbsoluteProbability(cascade.cr4de_c2e) * cpScaleFactor * extremeScaleFactor,
       m2c: getAbsoluteProbability(cascade.cr4de_m2c) * cpScaleFactor,
       m2m: getAbsoluteProbability(cascade.cr4de_m2m) * cpScaleFactor,
-      m2e: getAbsoluteProbability(cascade.cr4de_m2e) * cpScaleFactor,
+      m2e: getAbsoluteProbability(cascade.cr4de_m2e) * cpScaleFactor * extremeScaleFactor,
       e2c: getAbsoluteProbability(cascade.cr4de_e2c) * cpScaleFactor,
       e2m: getAbsoluteProbability(cascade.cr4de_e2m) * cpScaleFactor,
-      e2e: getAbsoluteProbability(cascade.cr4de_e2e) * cpScaleFactor,
+      e2e: getAbsoluteProbability(cascade.cr4de_e2e) * cpScaleFactor * extremeScaleFactor,
     };
   }
 
@@ -617,6 +638,12 @@ export default function prepareRiskFiles(
 
         tr: 0,
 
+        tr50_c: 0,
+        tr50_m: 0,
+        tr50_e: 0,
+
+        tr50: 0,
+
         causes: [],
         effects: [],
       };
@@ -745,6 +772,12 @@ export default function prepareRiskFiles(
       ir_e: 0,
 
       ir: 0,
+
+      ir50_c: 0,
+      ir50_m: 0,
+      ir50_e: 0,
+
+      ir50: 0,
     };
 
     // if (
