@@ -21,6 +21,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { RiskAnalysisResults, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import useRecords from "../../hooks/useRecords";
+import { getWorstCaseScenario } from "../../functions/scenarios";
 
 const impactFields = [
   { name: "Direct Ha", fieldName: "di_Ha" },
@@ -98,11 +99,13 @@ export default function RiskPage() {
 
   if (!calculations) return null;
 
+  const mrs = getWorstCaseScenario(calculations[0]?.cr4de_results);
+
   return (
     <Container sx={{ mt: 4, pb: 8 }}>
       <Stack direction="row" sx={{ mb: 8 }}>
         <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
-          <ProbabilitySankey riskFile={riskFile} calculation={calculations[0]?.cr4de_results || null} />
+          <ProbabilitySankey riskFile={riskFile} calculation={calculations[0]?.cr4de_results || null} scenario={mrs} />
         </Box>
         <Stack direction="column" justifyContent="center" sx={{ width: 300, p: "50px" }}>
           {/* <Box
@@ -137,7 +140,7 @@ export default function RiskPage() {
           </Box>
         </Stack>
         <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
-          <ImpactSankey riskFile={riskFile} calculation={calculations[0]?.cr4de_results || null} />
+          <ImpactSankey riskFile={riskFile} calculation={calculations[0]?.cr4de_results || null} scenario={mrs} />
         </Box>
       </Stack>
       <Box>

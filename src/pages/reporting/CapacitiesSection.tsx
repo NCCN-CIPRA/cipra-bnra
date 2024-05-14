@@ -6,17 +6,22 @@ import { useState } from "react";
 import TextInputBox from "../../components/TextInputBox";
 import useAPI from "../../hooks/useAPI";
 import { LoadingButton } from "@mui/lab";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
 
 export default function Scenario({
   intensityParameters,
   riskFile,
   scenario,
   mode,
+  attachments = null,
+  updateAttachments = null,
 }: {
   intensityParameters: IntensityParameter[];
   riskFile: DVRiskFile;
   scenario: SCENARIOS;
   mode: "view" | "edit";
+  attachments?: DVAttachment[] | null;
+  updateAttachments?: null | (() => Promise<void>);
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
@@ -61,8 +66,11 @@ export default function Scenario({
       {editing && (
         <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
           <TextInputBox
+            limitedOptions
             initialValue={mrsScenario || getDefaultText()}
             setUpdatedValue={(str) => setMrsScenario(str || null)}
+            sources={attachments}
+            updateSources={updateAttachments}
           />
         </Box>
       )}

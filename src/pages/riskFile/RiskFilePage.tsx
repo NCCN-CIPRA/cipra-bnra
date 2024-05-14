@@ -127,7 +127,7 @@ export default function RiskFilePage({}) {
     return getCompletedCascadeAnalyses(riskFile, participants, cascades, directAnalyses, cascadeAnalyses);
   }, [riskFile, participants, cascades, directAnalyses, cascadeAnalyses]);
 
-  usePageTitle("BNRA 2023 - 2026 Risk File");
+  usePageTitle(riskFile ? `${riskFile.cr4de_hazard_id} - ${riskFile.cr4de_title}` : "BNRA 2023 - 2026 Risk File");
   useBreadcrumbs([...defaultBreadcrumbs, riskFile ? { name: riskFile.cr4de_title, url: "" } : null]);
 
   return (

@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS } from "../../functions/scenarios";
+import { SCENARIOS, getScenarioSuffix, getWorstCaseScenario } from "../../functions/scenarios";
 import ImpactBarChart from "./ImpactBarChart";
 import ProbabilityBars from "./ProbabilityBars";
 
@@ -29,7 +29,7 @@ export default function SankeyDiagram({
   calculations,
   selectedNodeId,
   setSelectedNodeId,
-  scenario = "wcs",
+  scenario,
   type = "MAX_NODES",
   debug = false,
   manmade = false,
@@ -37,13 +37,12 @@ export default function SankeyDiagram({
   calculations: RiskCalculation[] | null;
   selectedNodeId: string | null;
   setSelectedNodeId: (id: string | null) => void;
-  scenario?: "wcs" | SCENARIOS;
+  scenario: SCENARIOS;
   type?: "MAX_NODES" | "PARETO" | "MIN_WEIGHT";
   debug?: boolean;
   manmade?: boolean;
 }) {
   const [calculation, setCalculation] = useState<RiskCalculation | null>(null);
-  const [innerScenario, setScenario] = useState<"wcs" | SCENARIOS>("wcs");
   const [split, setSplit] = useState<"total" | "scenario" | "impact">("impact");
   const [causes, setCauses] = useState(5);
   const [effects, setEffects] = useState(5);
@@ -64,7 +63,7 @@ export default function SankeyDiagram({
           maxCauses={type === "MAX_NODES" ? causes : null}
           shownCausePortion={type === "PARETO" ? 0.8 : null}
           minCausePortion={type === "MIN_WEIGHT" ? 0.1 : null}
-          scenario={innerScenario === "wcs" ? null : innerScenario}
+          scenario={scenario}
           onClick={(id: string) => setSelectedNodeId(id)}
           debug={debug}
           manmade={manmade}
@@ -106,7 +105,7 @@ export default function SankeyDiagram({
           <Box sx={{ width: "100%", textAlign: "center", mt: 2 }}>
             <Typography variant="subtitle2">Damage Indicators</Typography>
           </Box>
-          <ImpactBarChart calculation={calculation} />
+          <ImpactBarChart calculation={calculation} scenarioSuffix={getScenarioSuffix(scenario)} />
         </Box>
       </Stack>
       <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
@@ -115,7 +114,7 @@ export default function SankeyDiagram({
           maxEffects={type === "MAX_NODES" ? effects : null}
           shownEffectPortion={type === "PARETO" ? 0.8 : null}
           minEffectPortion={type === "MIN_WEIGHT" ? 0.1 : null}
-          scenario={innerScenario === "wcs" ? null : innerScenario}
+          scenario={scenario}
           onClick={(id: string) => setSelectedNodeId(id)}
           debug={debug}
         />

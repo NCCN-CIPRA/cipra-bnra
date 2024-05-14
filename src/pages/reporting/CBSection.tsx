@@ -5,15 +5,20 @@ import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../hooks/useAPI";
 import { SCENARIO_SUFFIX } from "../../functions/scenarios";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
 
 export default function CBSection({
   riskFile,
   scenarioSuffix,
   mode,
+  attachments = null,
+  updateAttachments = null,
 }: {
   riskFile: DVRiskFile;
   scenarioSuffix: SCENARIO_SUFFIX;
   mode: "view" | "edit";
+  attachments?: DVAttachment[] | null;
+  updateAttachments?: null | (() => Promise<void>);
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
@@ -43,7 +48,13 @@ export default function CBSection({
       )}
       {editing && (
         <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
-          <TextInputBox initialValue={cb} setUpdatedValue={(str) => setCB(str || "")} />
+          <TextInputBox
+            limitedOptions
+            initialValue={cb}
+            setUpdatedValue={(str) => setCB(str || "")}
+            sources={attachments}
+            updateSources={updateAttachments}
+          />
         </Box>
       )}
       {mode === "edit" && (

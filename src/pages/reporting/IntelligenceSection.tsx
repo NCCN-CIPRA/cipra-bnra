@@ -9,6 +9,7 @@ import { LoadingButton } from "@mui/lab";
 import useAPI from "../../hooks/useAPI";
 import { Cause } from "../../functions/Probability";
 import { SCENARIO_SUFFIX } from "../../functions/scenarios";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
 
 export default function IntelligenceSection({
   riskFile,
@@ -16,12 +17,16 @@ export default function IntelligenceSection({
   MRSSuffix,
   calc,
   mode,
+  attachments = null,
+  updateAttachments = null,
 }: {
   riskFile: DVRiskFile;
   causes: Cause[];
   MRSSuffix: SCENARIO_SUFFIX;
   calc: RiskCalculation;
   mode: "view" | "edit";
+  attachments?: DVAttachment[] | null;
+  updateAttachments?: null | (() => Promise<void>);
 }) {
   const paretoCauses = useMemo(() => {
     return causes
@@ -70,7 +75,13 @@ export default function IntelligenceSection({
       )}
       {editing && (
         <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
-          <TextInputBox initialValue={probQuali} setUpdatedValue={(str) => setProbQuali(str || "")} />
+          <TextInputBox
+            limitedOptions
+            initialValue={probQuali}
+            setUpdatedValue={(str) => setProbQuali(str || "")}
+            sources={attachments}
+            updateSources={updateAttachments}
+          />
         </Box>
       )}
       {mode === "edit" && (

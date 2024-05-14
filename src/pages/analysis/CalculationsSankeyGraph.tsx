@@ -22,10 +22,9 @@ import {
 } from "@mui/material";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
+import { SCENARIOS, SCENARIO_PARAMS, getScenarioSuffix, getWorstCaseScenario } from "../../functions/scenarios";
 import ImpactBarChart from "../../components/charts/ImpactBarChart";
-
-const capFirst = (s: string) => s[0].toUpperCase() + s.slice(1);
+import { capFirst } from "../../functions/capFirst";
 
 export default function CalculationsSankeyGraph({
   calculations,
@@ -37,7 +36,7 @@ export default function CalculationsSankeyGraph({
   setSelectedNodeId: (id: string | null) => void;
 }) {
   const [calculation, setCalculation] = useState<RiskCalculation | null>(null);
-  const [scenario, setScenario] = useState<"wcs" | SCENARIOS>("wcs");
+  const [selectedScenario, setSelectedScenario] = useState<"wcs" | SCENARIOS>("wcs");
   const [split, setSplit] = useState<"total" | "scenario" | "impact">("impact");
   const [causes, setCauses] = useState(5);
   const [effects, setEffects] = useState(5);
@@ -50,13 +49,7 @@ export default function CalculationsSankeyGraph({
 
   if (!calculation) return null;
 
-  const rs = [
-    calculation.tp_c * calculation.ti_c,
-    calculation.tp_m * calculation.ti_m,
-    calculation.tp_e * calculation.ti_e,
-  ];
-
-  const wcs = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME][rs.indexOf(Math.max(...rs))];
+  const scenario = selectedScenario === "wcs" ? getWorstCaseScenario(calculation) : selectedScenario;
 
   return (
     <Accordion disabled={!calculations || !selectedNodeId}>
@@ -69,7 +62,7 @@ export default function CalculationsSankeyGraph({
             <ProbabilitySankey
               calculation={calculation}
               maxCauses={causes}
-              scenario={scenario === "wcs" ? null : scenario}
+              scenario={scenario}
               debug={true}
               onClick={(id: string) => setSelectedNodeId(id)}
             />
@@ -93,8 +86,8 @@ export default function CalculationsSankeyGraph({
       </Box> */}
             <Box sx={{ width: "100%", textAlign: "center", mb: 2 }}>
               <Typography variant="h6">{calculation.riskTitle}</Typography>
-              <Typography variant="subtitle1" color={SCENARIO_PARAMS[scenario === "wcs" ? wcs : scenario].color}>
-                {capFirst(scenario === "wcs" ? wcs : scenario)} scenario
+              <Typography variant="subtitle1" color={SCENARIO_PARAMS[scenario].color}>
+                {capFirst(scenario)} scenario
               </Typography>
             </Box>
             <Box
@@ -103,7 +96,7 @@ export default function CalculationsSankeyGraph({
                 height: 350,
               }}
             >
-              <ImpactBarChart calculation={calculation} />
+              <ImpactBarChart calculation={calculation} scenarioSuffix={getScenarioSuffix(scenario)} />
               {/* <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle2">
                   Total Probability: <b>{Math.round(10000 * getYearlyProbability(calculation.tp)) / 100}% / year</b>
@@ -118,7 +111,7 @@ export default function CalculationsSankeyGraph({
             <ImpactSankey
               calculation={calculation}
               maxEffects={effects}
-              scenario={scenario === "wcs" ? null : scenario}
+              scenario={scenario}
               onClick={(id: string) => setSelectedNodeId(id)}
               debug={true}
             />
@@ -141,7 +134,11 @@ export default function CalculationsSankeyGraph({
           </FormControl>
           <FormControl sx={{ flex: 1 }} fullWidth>
             <InputLabel>Show Scenario</InputLabel>
-            <Select value={scenario} label="Show Scenario" onChange={(e) => setScenario(e.target.value as any)}>
+            <Select
+              value={selectedScenario}
+              label="Show Scenario"
+              onChange={(e) => setSelectedScenario(e.target.value as any)}
+            >
               <MenuItem value={"wcs"}>Worst Case</MenuItem>
               <MenuItem value={"considerable"}>Considerable</MenuItem>
               <MenuItem value={"major"}>Major</MenuItem>

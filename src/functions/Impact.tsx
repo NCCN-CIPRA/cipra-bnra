@@ -4,6 +4,7 @@ import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { SCENARIO_SUFFIX } from "./scenarios";
 
 export type Effect = {
+  id: string | null;
   name: string;
   ha: number;
   hb: number;
@@ -83,6 +84,7 @@ export function getMoneyString(impactNumber: number) {
 
 export function getDirectImpact(c: RiskCalculation, rf: DVRiskFile, scenarioSuffix: SCENARIO_SUFFIX): Effect {
   return {
+    id: null,
     name: "Direct Impact",
     ha: c[`di_Ha${scenarioSuffix}`] / c[`ti_Ha${scenarioSuffix}`],
     hb: c[`di_Hb${scenarioSuffix}`] / c[`ti_Hb${scenarioSuffix}`],
@@ -126,6 +128,7 @@ export function getIndirectImpact(
   cascade?: DVRiskCascade
 ): Effect {
   return {
+    id: c.effect.riskId,
     name: c.effect.riskTitle,
     ha: c[`ii_Ha${scenarioSuffix}`] / tot[`ti_Ha${scenarioSuffix}`],
     hb: c[`ii_Hb${scenarioSuffix}`] / tot[`ti_Hb${scenarioSuffix}`],
@@ -159,6 +162,15 @@ export function getIndirectImpact(
   };
 }
 
+export const getTotalImpactRelativeScale = (calculation: RiskCalculation, scenarioSuffix: SCENARIO_SUFFIX) => {
+  const baseImpact = 800000000;
+  const ti = calculation[`ti${scenarioSuffix}`];
+
+  if (ti < baseImpact) return ti / baseImpact;
+
+  return 1 + Math.log10(ti / baseImpact) / Math.log10(5);
+};
+
 const rescaleImpact = (i: number) => {
   // return i;
   if (i < 1.5) return 0.5 * (i / 1.5);
@@ -166,16 +178,25 @@ const rescaleImpact = (i: number) => {
   return 0.5 + (4.5 * (i - 1.5)) / 3.5;
 };
 
+export const getCategoryImpact = (
+  calculation: RiskCalculation,
+  category: IMPACT_CATEGORY,
+  scenarioSuffix: SCENARIO_SUFFIX
+) => {
+  return (
+    (calculation[`ti_${category}a${scenarioSuffix}`] || 0) +
+    ((calculation[`ti_${category}b${scenarioSuffix}` as keyof RiskCalculation] as number) || 0) +
+    ((calculation[`ti_${category}c${scenarioSuffix}` as keyof RiskCalculation] as number) || 0) +
+    ((calculation[`ti_${category}d${scenarioSuffix}` as keyof RiskCalculation] as number) || 0)
+  );
+};
+
 export const getCategoryImpactRelativeScale = (
   calculation: RiskCalculation,
   category: IMPACT_CATEGORY,
   scenarioSuffix: SCENARIO_SUFFIX
 ) => {
-  const totalImpact =
-    (calculation[`ti_${category}a${scenarioSuffix}`] || 0) +
-    ((calculation[`ti_${category}b${scenarioSuffix}` as keyof RiskCalculation] as number) || 0) +
-    ((calculation[`ti_${category}c${scenarioSuffix}` as keyof RiskCalculation] as number) || 0) +
-    ((calculation[`ti_${category}d${scenarioSuffix}` as keyof RiskCalculation] as number) || 0);
+  const totalImpact = getCategoryImpact(calculation, category, scenarioSuffix);
 
   if (totalImpact < 15811388) {
     return rescaleImpact(totalImpact / (2 * 15811388));
@@ -188,10 +209,11 @@ export const getDamageIndicatorRelativeScale = (
   di: DAMAGE_INDICATOR,
   scenarioSuffix: SCENARIO_SUFFIX
 ) => {
-  const totalImpact = calculation[`ti_${di}${scenarioSuffix}`] || 0;
+  const totalImpact = getCategoryImpact(calculation, di[0] as IMPACT_CATEGORY, scenarioSuffix);
+  const diImpact = calculation[`ti_${di}${scenarioSuffix}`] || 0;
 
-  if (totalImpact < 15811388) {
-    return rescaleImpact(totalImpact / (2 * 15811388));
-  }
-  return rescaleImpact(Math.log10(Math.max(1, totalImpact) / 5) - 6);
+  const ratio = diImpact / totalImpact;
+  return (
+    Math.round(10 * ratio * getCategoryImpactRelativeScale(calculation, di[0] as IMPACT_CATEGORY, scenarioSuffix)) / 10
+  );
 };

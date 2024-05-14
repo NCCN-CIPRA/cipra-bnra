@@ -25,6 +25,14 @@ import ImpactSection from "./ImpactSection";
 import { Link } from "react-router-dom";
 import DefinitionSection from "./DefinitionSection";
 import CBSection from "./CBSection";
+import { Cause } from "../../functions/Probability";
+import useRecords from "../../hooks/useRecords";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
+import { DataTable } from "../../hooks/useAPI";
+import useLazyRecords from "../../hooks/useLazyRecords";
+import Attachments from "../../components/Attachments";
+import CCSection from "./CCSection";
+import Bibliography from "./Bibliography";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -49,6 +57,11 @@ export default function Standard({
   cascades: DVRiskCascade<SmallRisk>[];
   mode?: "view" | "edit";
 }) {
+  const { data: attachments, reloadData: reloadAttachments } = useRecords<DVAttachment>({
+    table: DataTable.ATTACHMENT,
+    query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}`,
+  });
+
   const calculations = useMemo(
     () => otherRiskFiles.map((rf) => JSON.parse(rf.cr4de_latest_calculation?.cr4de_results as string)),
     [otherRiskFiles]
@@ -79,8 +92,9 @@ export default function Standard({
   const ti_E = Math.round(calc[`ti_Ea${MRSSuffix}`]);
   const ti_F = Math.round(calc[`ti_Fa${MRSSuffix}`] + calc[`ti_Fb${MRSSuffix}`]);
 
-  const causes = [
+  const causes: Cause[] = [
     {
+      id: null,
       name: "No underlying cause",
       p: calc[`dp${MRSSuffix}`],
       quali: rf[`cr4de_dp_quali${MRSSuffix}`],
@@ -89,6 +103,7 @@ export default function Standard({
       .filter((c) => c[`ip${MRSSuffix}`] !== 0)
       .map((c) => {
         return {
+          id: c.cause.riskId,
           name: c.cause.riskTitle,
           p: c[`ip${MRSSuffix}`],
           quali: cDict[c.cascadeId].cr4de_quali,
@@ -107,7 +122,7 @@ export default function Standard({
       c.cr4de_c2c === null &&
       c.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
   );
-  const cc = cascades.filter((c) => c.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0);
+  const cc = cascades.find((c) => c.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0);
 
   return (
     <>
@@ -126,19 +141,30 @@ export default function Standard({
           setSelectedNodeId={() => {}}
           type="PARETO"
           debug={mode === "edit"}
+          scenario={MRS}
         />
 
         <Box sx={{ mt: 2 }}>
           <Typography variant="h5">Definition</Typography>
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <DefinitionSection riskFile={rf} mode={mode} />
+            <DefinitionSection
+              riskFile={rf}
+              mode={mode}
+              attachments={attachments}
+              updateAttachments={reloadAttachments}
+            />
           </Box>
         </Box>
 
         {rf.cr4de_historical_events && (
           <Box sx={{ mt: 8 }}>
             <Typography variant="h5">Historical Events</Typography>
-            <HistoricalEvents riskFile={rf} />
+            <HistoricalEvents
+              riskFile={rf}
+              mode={mode}
+              attachments={attachments}
+              updateAttachments={reloadAttachments}
+            />
           </Box>
         )}
 
@@ -150,14 +176,29 @@ export default function Standard({
 
             {/* <IntensityParametersTable initialParameters={rf.cr4de_intensity_parameters} /> */}
 
-            <Scenario intensityParameters={intensityParameters} riskFile={rf} scenario={MRS} mode={mode} />
+            <Scenario
+              intensityParameters={intensityParameters}
+              riskFile={rf}
+              scenario={MRS}
+              mode={mode}
+              attachments={attachments}
+              updateAttachments={reloadAttachments}
+            />
           </Box>
         )}
 
         <Box sx={{ mt: 8, clear: "both" }}>
           <Typography variant="h5">Probability Assessment</Typography>
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <ProbabilitySection riskFile={rf} causes={causes} MRSSuffix={MRSSuffix} calc={calc} mode={mode} />
+            <ProbabilitySection
+              riskFile={rf}
+              causes={causes}
+              MRSSuffix={MRSSuffix}
+              calc={calc}
+              mode={mode}
+              attachments={attachments}
+              updateAttachments={reloadAttachments}
+            />
           </Box>
         </Box>
 
@@ -171,6 +212,8 @@ export default function Standard({
             impactName="human"
             calc={calc}
             mode={mode}
+            attachments={attachments}
+            updateAttachments={reloadAttachments}
           />
 
           <ImpactSection
@@ -180,6 +223,8 @@ export default function Standard({
             impactName="societal"
             calc={calc}
             mode={mode}
+            attachments={attachments}
+            updateAttachments={reloadAttachments}
           />
 
           <ImpactSection
@@ -189,6 +234,8 @@ export default function Standard({
             impactName="environmental"
             calc={calc}
             mode={mode}
+            attachments={attachments}
+            updateAttachments={reloadAttachments}
           />
 
           <ImpactSection
@@ -198,49 +245,66 @@ export default function Standard({
             impactName="financial"
             calc={calc}
             mode={mode}
+            attachments={attachments}
+            updateAttachments={reloadAttachments}
           />
 
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
             <Typography variant="h6">Cross-border Impact</Typography>
-            <CBSection riskFile={riskFile} scenarioSuffix={MRSSuffix} mode={mode} />
+            <CBSection
+              riskFile={riskFile}
+              scenarioSuffix={MRSSuffix}
+              mode={mode}
+              attachments={attachments}
+              updateAttachments={reloadAttachments}
+            />
           </Box>
         </Box>
 
         <Box sx={{ mt: 8 }}>
           <Typography variant="h5">Climate Change</Typography>
 
-          <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <ClimateChangeChart calculation={calc} scenarioSuffix={MRSSuffix} />
-
-            <Box sx={{ clear: "both" }} />
-          </Box>
+          <CCSection
+            cc={cc}
+            mode={mode}
+            riskFile={rf}
+            scenarioSuffix={MRSSuffix}
+            calculation={calc}
+            attachments={attachments}
+            updateAttachments={reloadAttachments}
+          />
         </Box>
 
-        <Box sx={{ mt: 8 }}>
-          <Typography variant="h5">Other Catalysing Effects</Typography>
+        {catalyzing.length > 0 && (
+          <Box sx={{ mt: 8 }}>
+            <Typography variant="h5">Other Catalysing Effects</Typography>
 
-          <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, backgroundColor: "white" }}>
-            <Box sx={{ px: 2, pt: 2 }}>
-              <Typography variant="body2" paragraph>
-                The following emerging risks were identified as having a potential catalysing effect on the probability
-                and/or impact of this risk. Please refer to the corresponding risk files for the qualitative assessment
-                of this effect:
-              </Typography>
+            <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, backgroundColor: "white" }}>
+              <Box sx={{ px: 2, pt: 2 }}>
+                <Typography variant="body2" paragraph>
+                  The following emerging risks were identified as having a potential catalysing effect on the
+                  probability and/or impact of this risk. Please refer to the corresponding risk files for the
+                  qualitative assessment of this effect:
+                </Typography>
+              </Box>
+              <List>
+                {catalyzing.map((c, i) => (
+                  <ListItemButton
+                    LinkComponent={Link}
+                    href={`/risks/${c.cr4de_cause_hazard.cr4de_riskfilesid}?tab=analysis`}
+                    target="_blank"
+                  >
+                    <Typography variant="subtitle2" sx={{ pl: 2 }}>
+                      {c.cr4de_cause_hazard.cr4de_title}{" "}
+                    </Typography>
+                  </ListItemButton>
+                ))}
+              </List>
             </Box>
-            <List>
-              {catalyzing.map((c, i) => (
-                <ListItemButton
-                  LinkComponent={Link}
-                  href={`/risks/${c.cr4de_cause_hazard.cr4de_riskfilesid}?tab=analysis`}
-                >
-                  <Typography variant="subtitle2" sx={{ pl: 2 }}>
-                    {c.cr4de_cause_hazard.cr4de_title}{" "}
-                  </Typography>
-                </ListItemButton>
-              ))}
-            </List>
           </Box>
-        </Box>
+        )}
+
+        <Bibliography riskFile={riskFile} attachments={attachments} reloadAttachments={reloadAttachments} />
       </Box>
     </>
   );

@@ -6,22 +6,26 @@ import { useState } from "react";
 import TextInputBox from "../../components/TextInputBox";
 import useAPI from "../../hooks/useAPI";
 import { LoadingButton } from "@mui/lab";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
 
 export default function Scenario({
   intensityParameters,
   riskFile,
   scenario,
   mode,
+  attachments = null,
+  updateAttachments = null,
 }: {
   intensityParameters: IntensityParameter[];
   riskFile: DVRiskFile;
   scenario: SCENARIOS;
   mode: "view" | "edit";
+  attachments?: DVAttachment[] | null;
+  updateAttachments?: null | (() => Promise<void>);
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [mrsScenario, setMrsScenario] = useState<string | null>(riskFile.cr4de_mrs_scenario);
 
   const scenarios = unwrap(
     intensityParameters,
@@ -42,9 +46,12 @@ export default function Scenario({
     const descriptions = scenarios[scenario]
       .map(
         (ip) =>
-          `<p style="font-weight:bold;font-size:14px;">
+          `<p>&nbsp;</p><p style="font-weight:bold;font-size:10pt;">
           ${ip.name}
         </p>
+        <div style="font-weight:normal;font-size:10px !important;font-style:italic;margin-left:10px">
+          ${ip.description}
+        </div>
         <p>
             ${ip.value}
           </p>
@@ -55,13 +62,15 @@ export default function Scenario({
     return text + descriptions;
   };
 
+  const [mrsScenario, setMrsScenario] = useState<string>(riskFile.cr4de_mrs_scenario || getDefaultText());
+
   const saveScenario = async (reset = false) => {
     setSaving(true);
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
       cr4de_mrs_scenario: reset ? null : mrsScenario,
     });
     if (reset) {
-      setMrsScenario(null);
+      setMrsScenario(getDefaultText());
     }
     setEditing(false);
     // await reloadRiskFile();
@@ -74,30 +83,15 @@ export default function Scenario({
       {editing && (
         <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
           <TextInputBox
+            limitedOptions
             initialValue={mrsScenario || getDefaultText()}
-            setUpdatedValue={(str) => setMrsScenario(str || null)}
+            setUpdatedValue={(str) => setMrsScenario(str || "")}
+            sources={attachments}
+            updateSources={updateAttachments}
           />
         </Box>
       )}
-      {!editing && mrsScenario && <Box className="htmleditor" dangerouslySetInnerHTML={{ __html: mrsScenario }} />}
-      {!editing && !mrsScenario && (
-        <>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            The <i>{scenario}</i> scenario was identified as the <i>most relevant scenario</i>. This means that it
-            represent the highest amount of risk (probability x impact) of the three scenarios. It can be summarized as
-            follows:
-          </Typography>
-          {scenarios[scenario].map((ip) => (
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2">{ip.name}</Typography>
-              <Box>{ip.value}</Box>
-              {/* <Box dangerouslySetInnerHTML={{ __html: ip.description || "" }} />
-
-          <Box dangerouslySetInnerHTML={{ __html: ip.value || "" }} /> */}
-            </Box>
-          ))}
-        </>
-      )}
+      {!editing && <Box className="htmleditor" dangerouslySetInnerHTML={{ __html: mrsScenario }} />}
       <div style={{ clear: "both" }} />
       {mode === "edit" && (
         <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>

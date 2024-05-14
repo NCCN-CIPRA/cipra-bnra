@@ -2,6 +2,7 @@ import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 import { SCENARIO_SUFFIX } from "./scenarios";
 
 export type Cause = {
+  id: string | null;
   name: string;
   p: number;
   quali: string | null;
@@ -130,9 +131,25 @@ export const getYearlyProbability = (dailyP: number) => {
 };
 
 const rescaleProbability = (p: number) => {
-  return Math.round(100 * (4.8 + Math.log(p) / Math.log(2.5))) / 100;
+  return 5 + Math.log(p + 0.0103) / Math.log(2.5);
 };
 
-export function getTotalProbabilityRelativeScale(calculation: RiskCalculation, scenarioSuffix: SCENARIO_SUFFIX) {
-  return rescaleProbability(getYearlyProbability(calculation[`tp${scenarioSuffix}`]));
+export function getTotalProbabilityRelativeScale(
+  calculation: RiskCalculation,
+  scenarioSuffix: SCENARIO_SUFFIX,
+  tp50: boolean = false
+) {
+  return rescaleProbability(getYearlyProbability(calculation[`tp${tp50 ? "50" : ""}${scenarioSuffix}`]));
+}
+
+export function getPartialProbabilityRelativeScale(
+  p_daily: number,
+  calculation: RiskCalculation,
+  scenarioSuffix: SCENARIO_SUFFIX,
+  tp50: boolean = false
+) {
+  const tp = getYearlyProbability(calculation[`tp${tp50 ? "50" : ""}${scenarioSuffix}`]);
+  const ratio = getYearlyProbability(p_daily) / tp;
+
+  return ratio * rescaleProbability(tp);
 }

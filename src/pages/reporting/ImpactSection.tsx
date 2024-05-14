@@ -10,6 +10,7 @@ import useAPI from "../../hooks/useAPI";
 import getImpactColor from "../../functions/getImpactColor";
 import { Effect, IMPACT_CATEGORY } from "../../functions/Impact";
 import { SCENARIO_SUFFIX } from "../../functions/scenarios";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
 
 export default function ImpactSection({
   riskFile,
@@ -18,6 +19,8 @@ export default function ImpactSection({
   impactName,
   calc,
   mode,
+  attachments = null,
+  updateAttachments = null,
 }: {
   riskFile: DVRiskFile;
   effects: Effect[];
@@ -25,6 +28,8 @@ export default function ImpactSection({
   impactName: "human" | "societal" | "environmental" | "financial";
   calc: RiskCalculation;
   mode: "view" | "edit";
+  attachments?: DVAttachment[] | null;
+  updateAttachments?: null | (() => Promise<void>);
 }) {
   const impactLetter = impactName[0] as "h" | "s" | "e" | "f";
   const impactLetterUC = impactLetter.toUpperCase() as IMPACT_CATEGORY;
@@ -61,10 +66,11 @@ export default function ImpactSection({
         `;
 
     const descriptions = paretoEffects
-      .map(
-        (e, i) =>
-          `<p style="font-weight:bold;font-size:14px;">
-                    ${i + 1}. ${e.name} 
+      .map((e, i) => {
+        const riskName = e.id ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>` : e.name;
+
+        return `<p style="font-weight:bold;font-size:14px;">
+                    ${i + 1}. ${riskName} 
                     </p>
                     <p style="font-size:14px;">
                       <b>${Math.round(10000 * e[impactLetter]) / 100}%</b> of total ${impactName} impact -
@@ -73,8 +79,8 @@ export default function ImpactSection({
                     <p><br></p>
                     ${e.quali || e[`quali_${impactLetter}`]}
                     <p><br></p>
-              <p><br></p>`
-      )
+              <p><br></p>`;
+      })
       .join("\n");
 
     return text + descriptions;
@@ -116,7 +122,13 @@ export default function ImpactSection({
       )}
       {editing && (
         <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
-          <TextInputBox initialValue={iQuali} setUpdatedValue={(str) => setIQuali(str || "")} />
+          <TextInputBox
+            limitedOptions
+            initialValue={iQuali}
+            setUpdatedValue={(str) => setIQuali(str || "")}
+            sources={attachments}
+            updateSources={updateAttachments}
+          />
         </Box>
       )}
       {mode === "edit" && (

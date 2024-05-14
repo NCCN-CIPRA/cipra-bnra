@@ -54,15 +54,17 @@ export default function Attachments({
   riskFile,
   validation,
   isExternal = false,
+  alwaysOpen = false,
   onUpdate,
 }: {
   actions?: Action[];
   attachments: DVAttachment[] | null;
   children?: ReactNode;
-  field: string;
+  field?: string;
   riskFile?: DVRiskFile | null;
   validation?: DVValidation<DVRiskFile | undefined> | null;
   isExternal?: boolean;
+  alwaysOpen?: boolean;
   onUpdate: () => Promise<void>;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -72,7 +74,7 @@ export default function Attachments({
   const { user } = useLoggedInUser();
 
   const [openDialog, setOpenDialog] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(alwaysOpen);
 
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [isUploadingFinished, setIsUploadingFinished] = useState(false);
@@ -129,7 +131,7 @@ export default function Attachments({
         {
           "cr4de_owner@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
           cr4de_name: title || (file && file.name),
-          cr4de_reference: attachments ? attachments.reduce((max, a) => Math.max(max, a.cr4de_reference), -1) + 1 : 1,
+          // cr4de_reference: attachments ? attachments.reduce((max, a) => Math.max(max, a.cr4de_reference), -1) + 1 : 1,
           cr4de_field: field,
           cr4de_url: url,
           ...(riskFile
@@ -276,18 +278,20 @@ export default function Attachments({
             </Tooltip>
           ))}
         <Box sx={{ flex: 1 }} />
-        <Tooltip title={expanded ? t("source.button.hide") : t("source.button.show")}>
-          <IconButton onClick={() => setExpanded(!expanded)} className="attachment-expand-button">
-            <ExpandMoreIcon
-              sx={{
-                transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-                transition: theme.transitions.create("transform", {
-                  duration: theme.transitions.duration.shortest,
-                }),
-              }}
-            />
-          </IconButton>
-        </Tooltip>
+        {!alwaysOpen && (
+          <Tooltip title={expanded ? t("source.button.hide") : t("source.button.show")}>
+            <IconButton onClick={() => setExpanded(!expanded)} className="attachment-expand-button">
+              <ExpandMoreIcon
+                sx={{
+                  transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: theme.transitions.create("transform", {
+                    duration: theme.transitions.duration.shortest,
+                  }),
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+        )}
       </Stack>
 
       <Collapse in={expanded} timeout="auto" unmountOnExit>
@@ -295,6 +299,9 @@ export default function Attachments({
         <Table size="small">
           <TableHead>
             <TableRow>
+              <TableCell sx={{ width: 50 }}>
+                <Trans i18nKey="source.list.reference">Reference</Trans>
+              </TableCell>
               <TableCell>
                 <Trans i18nKey="source.list.fileName">Source filename</Trans>
               </TableCell>
@@ -306,47 +313,71 @@ export default function Attachments({
           </TableHead>
           <TableBody>
             {fieldAttachments.length > 0 ? (
-              fieldAttachments.map((a) => (
-                <TableRow key={a.cr4de_name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                  <TableCell component="th" scope="row">
-                    <Link
-                      sx={{ "&:hover": { cursor: "pointer" } }}
-                      onClick={async () => {
-                        if (a) {
-                          setIsDownloading(true);
-                        }
-                        await api.serveAttachmentFile(a);
-                        setIsDownloading(false);
-                      }}
-                    >
-                      {a.cr4de_name}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{a.cr4de_url ? t("source.type.link") : t("source.type.file")}</TableCell>
-                  <TableCell align="center" sx={{ whiteSpace: "nowrap", textAlign: "right" }}>
-                    {(!isExternal || a._cr4de_owner_value === user?.contactid) && (
-                      <>
-                        {a.cr4de_url && (
+              fieldAttachments
+                .sort((a, b) => {
+                  if (a.cr4de_reference === null && b.cr4de_reference !== null) {
+                    return 1;
+                  }
+                  if (b.cr4de_reference === null && a.cr4de_reference !== null) {
+                    return -1;
+                  }
+                  if (a.cr4de_reference === null && b.cr4de_reference === null) {
+                    if (a.cr4de_name < b.cr4de_name) {
+                      return -1;
+                    }
+                    if (a.cr4de_name > b.cr4de_name) {
+                      return 1;
+                    }
+                    return 0;
+                  }
+
+                  return a.cr4de_reference - b.cr4de_reference;
+                })
+                .map((a) => (
+                  <TableRow key={a.cr4de_name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                    <TableCell sx={{ position: "relative", textAlign: "center" }}>
+                      <a style={{ position: "absolute", top: -100 }} id={`ref-${a.cr4de_reference}`}></a>
+                      {a.cr4de_reference}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      <Link
+                        sx={{ "&:hover": { cursor: "pointer" } }}
+                        onClick={async () => {
+                          if (a) {
+                            setIsDownloading(true);
+                          }
+                          await api.serveAttachmentFile(a);
+                          setIsDownloading(false);
+                        }}
+                      >
+                        {a.cr4de_name}
+                      </Link>
+                    </TableCell>
+                    <TableCell>{a.cr4de_url ? t("source.type.link") : t("source.type.file")}</TableCell>
+                    <TableCell align="center" sx={{ whiteSpace: "nowrap", textAlign: "right" }}>
+                      {(!isExternal || a._cr4de_owner_value === user?.contactid) && (
+                        <>
+                          {a.cr4de_url && (
+                            <IconButton
+                              onClick={() => {
+                                handleEditAttachment(a);
+                              }}
+                            >
+                              <EditIcon color="primary" />
+                            </IconButton>
+                          )}
                           <IconButton
                             onClick={() => {
-                              handleEditAttachment(a);
+                              handleRemoveAttachment(a.cr4de_bnraattachmentid);
                             }}
                           >
-                            <EditIcon color="primary" />
+                            <DeleteIcon color="error" />
                           </IconButton>
-                        )}
-                        <IconButton
-                          onClick={() => {
-                            handleRemoveAttachment(a.cr4de_bnraattachmentid);
-                          }}
-                        >
-                          <DeleteIcon color="error" />
-                        </IconButton>
-                      </>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
+                        </>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
             ) : (
               <TableRow>
                 <TableCell sx={{ textAlign: "center" }} colSpan={3}>

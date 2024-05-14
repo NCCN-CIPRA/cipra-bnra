@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import HtmlEditor, { Toolbar, Item } from "devextreme-react/html-editor";
 import useDebounce from "../hooks/useDebounce";
-import { TextField } from "@mui/material";
+import { Button, Stack, TextField } from "@mui/material";
+import { DVAttachment } from "../types/dataverse/DVAttachment";
+import { Popup, ScrollView } from "devextreme-react";
+import useAPI from "../hooks/useAPI";
 
 export interface TextInputBoxGetter {
   getValue: (() => string) | null;
@@ -29,6 +32,8 @@ function TextInputBox({
   debounceInterval = 5000,
   disabled = false,
   reset,
+  sources = null,
+  updateSources = null,
 
   onSave,
   onBlur,
@@ -42,15 +47,21 @@ function TextInputBox({
   debounceInterval?: number;
   disabled?: boolean | null;
   reset?: boolean;
+  sources?: DVAttachment[] | null;
+  updateSources?: null | (() => Promise<void>);
 
   onSave?: (newValue: string | null) => void;
   onBlur?: () => void;
   setUpdatedValue?: (newValue: string | null | undefined) => void;
   onReset?: (oldValue: string | null) => void;
 }) {
+  const api = useAPI();
+  const htmlEditor = useRef<HtmlEditor>(null);
+  const cursor = useRef(0);
   const [savedValue, setSavedValue] = useState(initialValue);
   const [innerValue, setInnerValue] = useState(initialValue);
   const [debouncedValue, setDebouncedValue] = useDebounce(innerValue, debounceInterval);
+  const [sourcePopupVisible, setSourcesPopupVisible] = useState(false);
 
   useEffect(() => {
     if (onSave && debouncedValue !== savedValue) {
@@ -71,6 +82,53 @@ function TextInputBox({
     }
   }, [reset]);
 
+  const getSourcesButtonOptions = useMemo(
+    () => ({
+      // text: "Show markup",
+      icon: "attach",
+      stylingMode: "text",
+      onClick: () => {
+        setSourcesPopupVisible(true);
+        if (htmlEditor.current) {
+          cursor.current = htmlEditor.current.instance.getSelection()?.index || 0;
+        }
+      },
+    }),
+    []
+  );
+
+  const popupHiding = useCallback(() => {
+    setSourcesPopupVisible(false);
+  }, [setSourcesPopupVisible]);
+
+  const insertSourceButtonClick = (a: DVAttachment) => {
+    if (!htmlEditor.current || sources === null) return;
+
+    let ref = a.cr4de_reference;
+    if (ref === null) {
+      ref =
+        sources.reduce((max, s) => {
+          if (s.cr4de_reference !== null && s.cr4de_reference > max) return s.cr4de_reference;
+
+          return max;
+        }, 0) + 1;
+
+      api
+        .updateAttachmentFields(a.cr4de_bnraattachmentid, {
+          cr4de_reference: ref,
+        })
+        .then(updateSources);
+    }
+
+    htmlEditor.current.instance.insertEmbed(cursor.current, "link", {
+      href: `#ref-${ref}`,
+      text: `(${ref})`,
+      target: null,
+    });
+
+    setSourcesPopupVisible(false);
+  };
+
   // @ts-ignore-next-line
   if (window.Cypress) {
     return (
@@ -89,59 +147,83 @@ function TextInputBox({
   }
 
   return (
-    <HtmlEditor
-      id={id}
-      height={height}
-      value={innerValue}
-      readOnly={Boolean(disabled)}
-      onValueChanged={(e) => {
-        setInnerValue(e.value);
+    <>
+      <HtmlEditor
+        id={id}
+        ref={htmlEditor}
+        height={height}
+        value={innerValue}
+        readOnly={Boolean(disabled)}
+        onValueChanged={(e) => {
+          setInnerValue(e.value);
 
-        if (setUpdatedValue) setUpdatedValue(e.value);
-      }}
-      onFocusOut={onBlur}
-    >
-      <Toolbar multiline>
-        <Item name="undo" />
-        <Item name="redo" />
-        <Item name="separator" />
-        {!limitedOptions && <Item name="size" acceptedValues={sizeValues} />}
-        {!limitedOptions && <Item name="font" acceptedValues={fontValues} />}
-        {!limitedOptions && <Item name="separator" />}
-        <Item name="bold" />
-        <Item name="italic" />
-        <Item name="strike" />
-        <Item name="underline" />
-        <Item name="separator" />
-        {!limitedOptions && <Item name="alignLeft" />}
-        {!limitedOptions && <Item name="alignCenter" />}
-        {!limitedOptions && <Item name="alignRight" />}
-        {!limitedOptions && <Item name="alignJustify" />}
-        {!limitedOptions && <Item name="separator" />}
-        <Item name="orderedList" />
-        <Item name="bulletList" />
-        <Item name="separator" />
-        {!limitedOptions && <Item name="header" acceptedValues={headerValues} />}
-        {!limitedOptions && <Item name="separator" />}
-        {!limitedOptions && <Item name="color" />}
-        {!limitedOptions && <Item name="background" />}
-        {!limitedOptions && <Item name="separator" />}
-        <Item name="link" />
-        <Item name="separator" />
-        <Item name="clear" />
-        {!limitedOptions && <Item name="codeBlock" />}
-        {!limitedOptions && <Item name="blockquote" />}
-        {!limitedOptions && <Item name="separator" />}
-        {!limitedOptions && <Item name="insertTable" />}
-        {!limitedOptions && <Item name="deleteTable" />}
-        {!limitedOptions && <Item name="insertRowAbove" />}
-        {!limitedOptions && <Item name="insertRowBelow" />}
-        {!limitedOptions && <Item name="deleteRow" />}
-        {!limitedOptions && <Item name="insertColumnLeft" />}
-        {!limitedOptions && <Item name="insertColumnRight" />}
-        {!limitedOptions && <Item name="deleteColumn" />}
-      </Toolbar>
-    </HtmlEditor>
+          if (setUpdatedValue) setUpdatedValue(e.value);
+        }}
+        onFocusOut={onBlur}
+      >
+        <Toolbar multiline>
+          <Item name="undo" />
+          <Item name="redo" />
+          <Item name="separator" />
+          <Item name="size" acceptedValues={sizeValues} />
+          <Item name="font" acceptedValues={fontValues} />
+          <Item name="separator" />
+          <Item name="bold" />
+          <Item name="italic" />
+          <Item name="strike" />
+          <Item name="underline" />
+          <Item name="separator" />
+          <Item name="alignLeft" />
+          <Item name="alignCenter" />
+          <Item name="alignRight" />
+          <Item name="alignJustify" />
+          <Item name="separator" />
+          <Item name="orderedList" />
+          <Item name="bulletList" />
+          <Item name="separator" />
+          {!limitedOptions && <Item name="header" acceptedValues={headerValues} />}
+          {!limitedOptions && <Item name="separator" />}
+          {!limitedOptions && <Item name="color" />}
+          {!limitedOptions && <Item name="background" />}
+          {!limitedOptions && <Item name="separator" />}
+          <Item name="link" />
+          <Item name="separator" />
+          <Item name="clear" />
+          {!limitedOptions && <Item name="codeBlock" />}
+          {!limitedOptions && <Item name="blockquote" />}
+          {!limitedOptions && <Item name="separator" />}
+          {!limitedOptions && <Item name="insertTable" />}
+          {!limitedOptions && <Item name="deleteTable" />}
+          {!limitedOptions && <Item name="insertRowAbove" />}
+          {!limitedOptions && <Item name="insertRowBelow" />}
+          {!limitedOptions && <Item name="deleteRow" />}
+          {!limitedOptions && <Item name="insertColumnLeft" />}
+          {!limitedOptions && <Item name="insertColumnRight" />}
+          {!limitedOptions && <Item name="deleteColumn" />}
+          {sources !== null && <Item name="separator" />}
+          {sources !== null && <Item widget="dxButton" options={getSourcesButtonOptions} />}
+        </Toolbar>
+      </HtmlEditor>
+      {sources && (
+        <Popup
+          showTitle={true}
+          title="Insert Reference"
+          visible={sourcePopupVisible}
+          onHiding={popupHiding}
+          showCloseButton={true}
+        >
+          <ScrollView>
+            <Stack direction="column">
+              {sources.map((a) => (
+                <Button id={a.cr4de_bnraattachmentid} onClick={() => insertSourceButtonClick(a)}>
+                  {a.cr4de_name}
+                </Button>
+              ))}
+            </Stack>
+          </ScrollView>
+        </Popup>
+      )}
+    </>
   );
 }
 

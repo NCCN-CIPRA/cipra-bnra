@@ -14,7 +14,7 @@ import SankeyDiagram from "../../components/charts/SankeyDiagram";
 import ScenarioMatrix from "../../components/charts/ScenarioMatrix";
 import HistoricalEvents from "./HistoricalEvents";
 import Scenario from "./Scenario";
-import { getYearlyProbability } from "../../functions/Probability";
+import { Cause, getYearlyProbability } from "../../functions/Probability";
 import ProbabilityOriginPieChart from "../../components/charts/ProbabilityOriginPieChart";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import getImpactColor from "../../functions/getImpactColor";
@@ -28,6 +28,10 @@ import DefinitionSection from "./DefinitionSection";
 import CBSection from "./CBSection";
 import CapacitiesSection from "./CapacitiesSection";
 import IntelligenceSection from "./IntelligenceSection";
+import Bibliography from "./Bibliography";
+import { DataTable } from "../../hooks/useAPI";
+import useRecords from "../../hooks/useRecords";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -52,6 +56,11 @@ export default function ManMade({
   cascades: DVRiskCascade<SmallRisk>[];
   mode?: "view" | "edit";
 }) {
+  const { data: attachments, reloadData: reloadAttachments } = useRecords<DVAttachment>({
+    table: DataTable.ATTACHMENT,
+    query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}`,
+  });
+
   const calculations = useMemo(
     () => otherRiskFiles.map((rf) => JSON.parse(rf.cr4de_latest_calculation?.cr4de_results as string)),
     [otherRiskFiles]
@@ -82,8 +91,9 @@ export default function ManMade({
   const ti_E = Math.round(calc[`ti_Ea${MRSSuffix}`]);
   const ti_F = Math.round(calc[`ti_Fa${MRSSuffix}`] + calc[`ti_Fb${MRSSuffix}`]);
 
-  const causes = [
+  const causes: Cause[] = [
     {
+      id: null,
       name: "No underlying cause",
       p: calc[`dp${MRSSuffix}`],
       quali: rf[`cr4de_dp_quali${MRSSuffix}`],
@@ -92,6 +102,7 @@ export default function ManMade({
       .filter((c) => c[`ip${MRSSuffix}`] !== 0)
       .map((c) => {
         return {
+          id: c.cause.riskId,
           name: c.cause.riskTitle,
           p: c[`ip${MRSSuffix}`],
           quali: cDict[c.cascadeId].cr4de_quali,
@@ -130,6 +141,7 @@ export default function ManMade({
           type="PARETO"
           debug={mode === "edit"}
           manmade
+          scenario={MRS}
         />
 
         <Box sx={{ mt: 2 }}>
@@ -221,6 +233,8 @@ export default function ManMade({
             </List>
           </Box>
         </Box>
+
+        <Bibliography riskFile={riskFile} attachments={attachments} reloadAttachments={reloadAttachments} />
       </Box>
     </>
   );

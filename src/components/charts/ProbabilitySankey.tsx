@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
-import { SCENARIOS, Scenarios } from "../../functions/scenarios";
+import { SCENARIOS, Scenarios, getScenarioSuffix } from "../../functions/scenarios";
 import { getYearlyProbability } from "../../functions/Probability";
 
 const baseY = 50;
@@ -232,7 +232,7 @@ export default function ProbabilitySankey({
   maxCauses = null,
   minCausePortion = null,
   shownCausePortion = null,
-  scenario = null,
+  scenario,
   debug = false,
   manmade = false,
   onClick = null,
@@ -242,30 +242,14 @@ export default function ProbabilitySankey({
   maxCauses?: number | null;
   minCausePortion?: number | null;
   shownCausePortion?: number | null;
-  scenario?: SCENARIOS | null;
+  scenario: SCENARIOS;
   debug?: boolean;
   manmade?: boolean;
   onClick?: ((id: string) => void) | null;
 }) {
   if (!calculation) return null;
 
-  let scenarioSuffix: string;
-  if (!scenario) {
-    const rs = [
-      calculation.tp_c * calculation.ti_c,
-      calculation.tp_m * calculation.ti_m,
-      calculation.tp_e * calculation.ti_e,
-    ];
-
-    const s = ["c", "m", "e"][rs.indexOf(Math.max(...rs))];
-    scenarioSuffix = "_" + s;
-  } else if (scenario === SCENARIOS.CONSIDERABLE) {
-    scenarioSuffix = "_c";
-  } else if (scenario === SCENARIOS.MAJOR) {
-    scenarioSuffix = "_m";
-  } else {
-    scenarioSuffix = "_e";
-  }
+  const scenarioSuffix: string = getScenarioSuffix(scenario);
 
   const causes = [
     {

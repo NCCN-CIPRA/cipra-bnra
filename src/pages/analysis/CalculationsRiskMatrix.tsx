@@ -31,12 +31,12 @@ import {
   Box,
   Input,
 } from "@mui/material";
-import { getMoneyString } from "../../functions/Impact";
-import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
+import { getMoneyString, getTotalImpactRelativeScale } from "../../functions/Impact";
+import { SCENARIOS, SCENARIO_PARAMS, SCENARIO_SUFFIX } from "../../functions/scenarios";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { scaleLog, select } from "d3";
 import getCategoryColor from "../../functions/getCategoryColor";
-import { getYearlyProbability } from "../../functions/Probability";
+import { getTotalProbabilityRelativeScale, getYearlyProbability } from "../../functions/Probability";
 
 interface MatrixRisk {
   riskId: string;
@@ -179,13 +179,13 @@ export default function CalculationsRiskMatrix({
       return (
         <Stack sx={{ backgroundColor: "rgba(255,255,255,0.8)", border: "1px solid #eee", p: 1 }}>
           <Typography variant="subtitle1">{payload?.[0].payload.title}</Typography>
-          <Typography variant="subtitle2">{`Total Probability: TP${
-            Math.round((payload?.[0].value as number) * 10) / 10
-          }`}</Typography>
-          <Typography variant="subtitle2">{`Total Impact: TI${
-            Math.round((payload?.[1].value as number) * 10) / 10
-          }`}</Typography>
-          <Typography variant="subtitle2">{`Total Risk: TR${
+          <Typography variant="subtitle2">
+            {`Total Probability: ${Math.round((payload?.[1].value as number) * 10) / 10}`} / 5
+          </Typography>
+          <Typography variant="subtitle2">
+            {`Total Impact: ${Math.round((payload?.[0].value as number) * 10) / 10}`} / 5
+          </Typography>
+          <Typography variant="subtitle2">{`Total Risk: ${
             Math.round((payload?.[0].payload.tr as number) * 10) / 10
           }`}</Typography>
         </Stack>
@@ -206,7 +206,7 @@ export default function CalculationsRiskMatrix({
     return "rgba(150,150,150,1)";
   };
 
-  const recalcPI = (tp: number, ti: number) => {
+  const recalcPI = (calculation: RiskCalculation, scenarioSuffix: SCENARIO_SUFFIX) => {
     // scales === "classes"
     //   ? {
     //       x: 5 * (1 - Math.pow(1 - tp, 365)),
@@ -218,10 +218,13 @@ export default function CalculationsRiskMatrix({
     //       y: ti,
     //       tr: tp * ti,
     //     };
+    const p = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
+    const i = getTotalImpactRelativeScale(calculation, scenarioSuffix);
+
     return {
-      x: getYearlyProbability(tp),
-      y: ti,
-      tr: tp * ti,
+      tp: p,
+      ti: i,
+      tr: p * i,
     };
   };
 
@@ -245,12 +248,12 @@ export default function CalculationsRiskMatrix({
                   fullTitle: `Considerable ${c.riskTitle}`,
                   scenario: SCENARIOS.CONSIDERABLE,
                   ...defaultFields(c),
-                  ...recalcPI(c.tp_c, c.ti_c),
+                  ...recalcPI(c, "_c"),
                 } as MatrixRisk,
                 {
                   id: `${c.riskId}_m`,
                   fullTitle: `Major ${c.riskTitle}`,
-                  ...recalcPI(c.tp_m, c.ti_m),
+                  ...recalcPI(c, "_m"),
                   scenario: SCENARIOS.MAJOR,
                   ...defaultFields(c),
                 } as MatrixRisk,
@@ -258,7 +261,7 @@ export default function CalculationsRiskMatrix({
                   riskId: c.riskId,
                   id: `${c.riskId}_e`,
                   fullTitle: `Extreme ${c.riskTitle}`,
-                  ...recalcPI(c.tp_e, c.ti_e),
+                  ...recalcPI(c, "_e"),
                   scenario: SCENARIOS.EXTREME,
                   ...defaultFields(c),
                 } as MatrixRisk,
@@ -274,7 +277,7 @@ export default function CalculationsRiskMatrix({
                       riskId: c.riskId,
                       id: `${c.riskId}_c`,
                       fullTitle: `Considerable ${c.riskTitle}`,
-                      ...recalcPI(c.tp_c, c.ti_c),
+                      ...recalcPI(c, "_c"),
                       scenario: SCENARIOS.CONSIDERABLE,
                       ...defaultFields(c),
                     } as MatrixRisk,
@@ -286,7 +289,7 @@ export default function CalculationsRiskMatrix({
                       riskId: c.riskId,
                       id: `${c.riskId}_m`,
                       fullTitle: `Major ${c.riskTitle}`,
-                      ...recalcPI(c.tp_m, c.ti_m),
+                      ...recalcPI(c, "_m"),
                       scenario: SCENARIOS.MAJOR,
                       ...defaultFields(c),
                     } as MatrixRisk,
@@ -298,7 +301,7 @@ export default function CalculationsRiskMatrix({
                       riskId: c.riskId,
                       id: `${c.riskId}_e`,
                       fullTitle: `Extreme ${c.riskTitle}`,
-                      ...recalcPI(c.tp_e, c.ti_e),
+                      ...recalcPI(c, "_e"),
                       scenario: SCENARIOS.EXTREME,
                       ...defaultFields(c),
                     } as MatrixRisk,
@@ -343,7 +346,7 @@ export default function CalculationsRiskMatrix({
               <>
                 <YAxis
                   type="number"
-                  dataKey="x"
+                  dataKey="tp"
                   name="probability"
                   unit="%"
                   scale="linear"
@@ -354,7 +357,7 @@ export default function CalculationsRiskMatrix({
                 />
                 <XAxis
                   type="number"
-                  dataKey="y"
+                  dataKey="ti"
                   name="impact"
                   scale="log"
                   domain={[50000000, 5000000000000]}
@@ -366,14 +369,14 @@ export default function CalculationsRiskMatrix({
               <>
                 <YAxis
                   type="number"
-                  dataKey="x"
+                  dataKey="tp"
                   name="probability"
                   unit=""
-                  scale={pScale}
-                  domain={[0.02, 1.5]}
+                  scale="linear"
+                  domain={[0, 5.5]}
                   // tickCount={5}
-                  tickFormatter={(s, n) => getScaleString(n + 1)}
-                  ticks={[0.0307, 0.0768, 0.192, 0.48, 1.2]}
+                  // tickFormatter={(s, n) => getScaleString(n + 1)}
+                  ticks={[1, 2, 3, 4, 5]}
                   label={{
                     offset: -15,
                     value: scales === "classes" ? "Probability" : "Yearly Probability",
@@ -383,15 +386,14 @@ export default function CalculationsRiskMatrix({
                 />
                 <XAxis
                   type="number"
-                  dataKey="y"
+                  dataKey="ti"
                   name="impact"
-                  scale="log"
-                  domain={[500000000, 800000000000]}
-                  tickCount={6}
+                  domain={[0, 5.5]}
+                  // tickCount={6}
                   // tickFormatter={(s, n) => `TI${n}`}
                   // ticks={[160000000, 800000000, 4000000000, 20000000000, 100000000000, 500000000000]}
-                  tickFormatter={(s, n) => getScaleString(n + 1)}
-                  ticks={[800000000, 4000000000, 20000000000, 100000000000, 500000000000]}
+                  // tickFormatter={(s, n) => getScaleString(n + 1)}
+                  ticks={[1, 2, 3, 4, 5]}
                   label={{
                     value: scales === "classes" ? "Impact" : "Impact of an event",
                     position: "insideBottom",

@@ -4,7 +4,7 @@ import getCategoryColor from "../../functions/getCategoryColor";
 import { useNavigate } from "react-router-dom";
 import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { SCENARIOS } from "../../functions/scenarios";
+import { SCENARIOS, getScenarioSuffix } from "../../functions/scenarios";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { getMoneyString } from "../../functions/Impact";
 
@@ -235,7 +235,7 @@ export default function ImpactSankey({
   maxEffects = null,
   minEffectPortion = null,
   shownEffectPortion = null,
-  scenario = null,
+  scenario,
   debug = false,
   onClick = null,
 }: {
@@ -244,29 +244,13 @@ export default function ImpactSankey({
   maxEffects?: number | null;
   minEffectPortion?: number | null;
   shownEffectPortion?: number | null;
-  scenario?: SCENARIOS | null;
+  scenario: SCENARIOS;
   debug?: boolean;
   onClick?: ((id: string) => void) | null;
 }) {
   if (!calculation) return null;
 
-  let scenarioSuffix: string;
-  if (!scenario) {
-    const rs = [
-      calculation.tp_c * calculation.ti_c,
-      calculation.tp_m * calculation.ti_m,
-      calculation.tp_e * calculation.ti_e,
-    ];
-
-    const s = ["c", "m", "e"][rs.indexOf(Math.max(...rs))];
-    scenarioSuffix = "_" + s;
-  } else if (scenario === SCENARIOS.CONSIDERABLE) {
-    scenarioSuffix = "_c";
-  } else if (scenario === SCENARIOS.MAJOR) {
-    scenarioSuffix = "_m";
-  } else {
-    scenarioSuffix = "_e";
-  }
+  let scenarioSuffix: string = getScenarioSuffix(scenario);
 
   const effects = [
     {

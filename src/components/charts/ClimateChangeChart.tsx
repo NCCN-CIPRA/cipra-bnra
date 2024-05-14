@@ -29,8 +29,13 @@ import {
 import { SCENARIOS, SCENARIO_PARAMS, SCENARIO_SUFFIX } from "../../functions/scenarios";
 import { hexToRGB } from "../../functions/colors";
 import { useMemo } from "react";
-import { Cause as Cause2023 } from "../../functions/Probability";
+import {
+  Cause as Cause2023,
+  getPartialProbabilityRelativeScale,
+  getTotalProbabilityRelativeScale,
+} from "../../functions/Probability";
 import { getPercentageProbability, getYearlyProbability } from "../../functions/Probability";
+import round from "../../functions/roundNumberString";
 
 type Cause2050 = Cause2023 & {
   p2050: number;
@@ -90,31 +95,37 @@ export default function ClimateChangeChart({
     const causes = [
       {
         name: "No underlying cause",
-        p: calculation[`dp${scenarioSuffix}`],
-        p2050: calculation[`dp50${scenarioSuffix}`],
+        p: getPartialProbabilityRelativeScale(calculation[`dp${scenarioSuffix}`], calculation, scenarioSuffix),
+        p2050: getPartialProbabilityRelativeScale(
+          calculation[`dp50${scenarioSuffix}`],
+          calculation,
+          scenarioSuffix,
+          true
+        ),
       },
       ...(calculation.causes
         .filter((c) => c[`ip50${scenarioSuffix}`] !== 0)
         .map((c) => {
           return {
             name: c.cause.riskTitle,
-            p: c[`ip${scenarioSuffix}`],
-            p2050: c[`ip50${scenarioSuffix}`],
+            p: getPartialProbabilityRelativeScale(c[`ip${scenarioSuffix}`], calculation, scenarioSuffix),
+            p2050: getPartialProbabilityRelativeScale(c[`ip50${scenarioSuffix}`], calculation, scenarioSuffix, true),
           };
         }) || []),
     ].sort((a, b) => b.p2050 - a.p2050);
-    console.log(causes);
+
+    const tp50 = getTotalProbabilityRelativeScale(calculation, scenarioSuffix, true);
+
     return [
       {
         name: "Total probability",
-        P2023: getYearlyProbability(calculation[`tp${scenarioSuffix}`]),
-        P2050: getYearlyProbability(calculation[`tp50${scenarioSuffix}`]),
+        P2023: getTotalProbabilityRelativeScale(calculation, scenarioSuffix),
+        P2050: tp50,
       },
       ...causes
         .reduce(
-          ([cumulCauses, pCumul], c) => {
-            if (pCumul / calculation[`tp50${scenarioSuffix}`] > 0.8)
-              return [cumulCauses, pCumul] as [Cause2050[], number];
+          ([cumulCauses, pCumul], c, i) => {
+            if (pCumul / tp50 > 0.8 && i > 2) return [cumulCauses, pCumul] as [Cause2050[], number];
 
             return [[...cumulCauses, c], pCumul + c.p2050] as [Cause2050[], number];
           },
@@ -122,12 +133,12 @@ export default function ClimateChangeChart({
         )[0]
         .map((cause) => ({
           name: cause.name,
-          P2023: getYearlyProbability(cause.p),
-          P2050: getYearlyProbability(cause.p2050),
+          P2023: cause.p,
+          P2050: cause.p2050,
         })),
     ];
   }, [calculation, scenarioSuffix]);
-  console.log(data);
+
   return (
     <BarChart
       width={750}
@@ -144,11 +155,11 @@ export default function ClimateChangeChart({
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis
         type="number"
-        tickFormatter={(value) => getPercentageProbability(value)}
+        // tickFormatter={(value) => getPercentageProbability(value)}
         label={{ value: "Probability of occurence in the next 12 months", dy: 25 }}
       />
       <YAxis dataKey="name" type="category" width={150} />
-      <Tooltip formatter={(value) => getPercentageProbability(value as number)} />
+      <Tooltip formatter={(value) => `${round(value as number)} / 5`} />
       <Legend align="center" verticalAlign="bottom" wrapperStyle={{ paddingTop: 30 }} />
       <Bar name="Probability in 2023" dataKey="P2023" fill="#8884d8" />
       <Bar name="Probability in 2050" dataKey="P2050" fill="#ffc658" />

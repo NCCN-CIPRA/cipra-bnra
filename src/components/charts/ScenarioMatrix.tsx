@@ -12,48 +12,51 @@ import {
   TooltipProps,
 } from "recharts";
 import { scaleLog } from "d3-scale";
-import { getImpactScale } from "../../functions/Impact";
+import { getImpactScale, getTotalImpactRelativeScale } from "../../functions/Impact";
 import { NameType } from "recharts/types/component/DefaultTooltipContent";
-import { Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { DVAnalysisRun, RiskAnalysisResults, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import { hexToRGB } from "../../functions/colors";
+import { getProbabilityScaleNumber, getTotalProbabilityRelativeScale } from "../../functions/Probability";
+import round from "../../functions/roundNumberString";
+import { capFirst } from "../../functions/capFirst";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   if (active && payload && payload.length) {
     return (
-      <div
-        style={{
-          border: "1px solid #f5f5f5",
-          backgroundColor: "rgba(255, 255, 255, 0.8)",
-          padding: "10px",
-        }}
-      >
-        <p
-          style={{
-            margin: 0,
-            color: "#666",
-            fontWeight: 700,
-            paddingBottom: 5,
-            borderBottom: "2px solid #f5f5f5",
-          }}
-        >
-          {payload[0].payload.name}
-        </p>
-        <p>
-          <Typography variant="subtitle2">Probability</Typography>
-          <Typography variant="caption">
-            {" "}
-            {Math.round(payload[0]?.value! * 10000) / 100}% change of occuring in the next 3 years
+      <Box sx={{ border: "1px solid #ccc", padding: 1, bgcolor: "rgba(255,255,255,0.8)", mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ textDecoration: "underline" }}>
+          {capFirst(payload[0].payload.name)} scenario
+        </Typography>
+
+        <Stack direction="row" sx={{ mt: 1 }}>
+          <Typography variant="body2" sx={{ width: 100 }}>
+            Probability :
           </Typography>
-        </p>
-        <p>
-          <Typography variant="subtitle2">Impact</Typography>
-          <Typography variant="caption">{`${getImpactScale(payload[1]?.value! / 10, "")}/5`}</Typography>
-        </p>
-      </div>
+          <Typography variant="body2" sx={{ width: 50, textAlign: "right" }}>
+            {round(payload[1]?.value)} / 5
+          </Typography>
+        </Stack>
+        <Stack direction="row" sx={{ mt: 1 }}>
+          <Typography variant="body2" sx={{ width: 100 }}>
+            Impact :
+          </Typography>
+          <Typography variant="body2" sx={{ width: 50, textAlign: "right" }}>
+            {round(payload[0].value)} / 5
+          </Typography>
+        </Stack>
+        <Stack direction="row" sx={{ mt: 1 }}>
+          <Typography variant="body2" sx={{ width: 100, fontWeight: "bold" }}>
+            Total Risk :
+          </Typography>
+          <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
+            {round((payload[0].value || 0) * (payload[1].value || 0))}
+          </Typography>
+        </Stack>
+      </Box>
     );
   }
 
@@ -68,24 +71,24 @@ export default function ScenarioMatrix({ calculation, mrs }: { calculation: Risk
       id: SCENARIOS.CONSIDERABLE,
       name: SCENARIOS.CONSIDERABLE,
       color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
-      x: calculation.tp_c || 0.001,
-      y: calculation.ti_c || 1600000,
+      x: getTotalProbabilityRelativeScale(calculation, "_c"),
+      y: getTotalImpactRelativeScale(calculation, "_c"),
       z: 1,
     },
     {
       id: SCENARIOS.MAJOR,
       name: SCENARIOS.MAJOR,
       color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
-      x: calculation.tp_m || 0.001,
-      y: calculation.ti_m || 1600000,
+      x: getTotalProbabilityRelativeScale(calculation, "_m"),
+      y: getTotalImpactRelativeScale(calculation, "_m"),
       z: 1,
     },
     {
       id: SCENARIOS.EXTREME,
       name: SCENARIOS.EXTREME,
       color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
-      x: calculation.tp_e || 0.001,
-      y: calculation.ti_e || 1600000,
+      x: getTotalProbabilityRelativeScale(calculation, "_e"),
+      y: getTotalImpactRelativeScale(calculation, "_e"),
       z: 1,
     },
   ];
@@ -113,20 +116,19 @@ export default function ScenarioMatrix({ calculation, mrs }: { calculation: Risk
       <YAxis
         type="number"
         dataKey="x"
-        scale={scaleLog().base(3)}
-        domain={[0.00001, 3]}
-        ticks={[0.0001, 0.001, 0.01, 0.1, 1]}
-        tickFormatter={(v: number) => `${v * 100}%`}
+        domain={[0, 5.5]}
+        ticks={[1, 2, 3, 4, 5]}
+        // tickFormatter={(v: number) => `${v * 100}%`}
         name="probability"
         unit=""
       />
       <XAxis
         type="number"
         dataKey="y"
-        scale={scaleLog().base(10)}
-        domain={[10000000, Math.pow(10, 12.5)]}
-        ticks={[100000000, 1000000000, 10000000000, 100000000000, 1000000000000]}
-        tickFormatter={(v: number) => String(Math.round(Math.log10(v)) - 7)}
+        scale="linear"
+        domain={[0, 5.5]}
+        ticks={[1, 2, 3, 4, 5]}
+        // tickFormatter={(v: number) => String(Math.round(Math.log10(v)) - 7)}
         name="impact"
         unit=""
       />
@@ -141,7 +143,7 @@ export default function ScenarioMatrix({ calculation, mrs }: { calculation: Risk
             strokeWidth={2}
             radius={20}
             style={{ cursor: "pointer" }}
-            onClick={(e) => navigate(`/reporting/${d.id}`)}
+            // onClick={(e) => navigate(`/reporting/${d.id}`)}
           />
         ))}
       </Scatter>

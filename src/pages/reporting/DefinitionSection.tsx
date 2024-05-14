@@ -5,8 +5,19 @@ import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../hooks/useAPI";
 import { Cause } from "../../functions/Probability";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
 
-export default function DefinitionSection({ riskFile, mode }: { riskFile: DVRiskFile; mode: "view" | "edit" }) {
+export default function DefinitionSection({
+  riskFile,
+  attachments = null,
+  updateAttachments = null,
+  mode,
+}: {
+  riskFile: DVRiskFile;
+  attachments?: DVAttachment[] | null;
+  updateAttachments?: null | (() => Promise<void>);
+  mode: "view" | "edit";
+}) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -35,7 +46,13 @@ export default function DefinitionSection({ riskFile, mode }: { riskFile: DVRisk
       )}
       {editing && (
         <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
-          <TextInputBox initialValue={definition} setUpdatedValue={(str) => setDefinition(str || "")} />
+          <TextInputBox
+            limitedOptions
+            initialValue={definition}
+            setUpdatedValue={(str) => setDefinition(str || "")}
+            sources={attachments}
+            updateSources={updateAttachments}
+          />
         </Box>
       )}
       {mode === "edit" && (

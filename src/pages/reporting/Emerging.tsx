@@ -5,6 +5,10 @@ import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import DefinitionSection from "./DefinitionSection";
 import HASection from "./HASection";
+import { DataTable } from "../../hooks/useAPI";
+import useRecords from "../../hooks/useRecords";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
+import Bibliography from "./Bibliography";
 
 export default function Emerging({
   riskFile,
@@ -17,6 +21,10 @@ export default function Emerging({
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
   mode?: "view" | "edit";
 }) {
+  const { data: attachments, reloadData: reloadAttachments } = useRecords<DVAttachment>({
+    table: DataTable.ATTACHMENT,
+    query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}`,
+  });
   const rf = riskFile;
 
   const catalyzing = cascades.filter((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid);
@@ -31,14 +39,19 @@ export default function Emerging({
         <Box sx={{ mt: 2 }}>
           <Typography variant="h5">Definition</Typography>
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <DefinitionSection riskFile={rf} mode={mode} />
+            <DefinitionSection
+              riskFile={rf}
+              mode={mode}
+              attachments={attachments}
+              updateAttachments={reloadAttachments}
+            />
           </Box>
         </Box>
 
         <Box sx={{ mt: 8 }}>
           <Typography variant="h5">Horizon Analysis</Typography>
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <HASection riskFile={rf} mode={mode} />
+            <HASection riskFile={rf} mode={mode} attachments={attachments} updateAttachments={reloadAttachments} />
           </Box>
         </Box>
 
@@ -64,6 +77,8 @@ export default function Emerging({
             </Box>
           ))}
         </Box>
+
+        <Bibliography riskFile={riskFile} attachments={attachments} reloadAttachments={reloadAttachments} />
       </Box>
     </>
   );
