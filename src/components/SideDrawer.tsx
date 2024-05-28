@@ -34,11 +34,17 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
       <Toolbar />
       <Box sx={{ overflow: "auto" }}>
         <List>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} to="/" onClick={onClose}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText primary={t("sideDrawer.introduction", "Introduction")} />
+            </ListItemButton>
+          </ListItem>
           {user && (
             <>
               {user.admin && (
                 <ListItem disablePadding>
-                  <ListItemButton component={Link} to="/hazards" onClick={onClose}>
+                  <ListItemButton component={Link} to="/risks" onClick={onClose}>
                     <ListItemIcon></ListItemIcon>
                     <ListItemText primary={t("sideDrawer.hazardCatalogue", "Hazard Catalogue")} />
                   </ListItemButton>

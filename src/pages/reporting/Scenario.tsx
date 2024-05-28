@@ -21,7 +21,7 @@ export default function Scenario({
   scenario: SCENARIOS;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
-  updateAttachments?: null | (() => Promise<void>);
+  updateAttachments?: null | (() => Promise<unknown>);
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
@@ -37,7 +37,7 @@ export default function Scenario({
   const getDefaultText = () => {
     const text = `
       <p style="font-size:14px;">
-        The <i>${scenario}</i> scenario was identified as the <i>Most Relevant Scenario</i>. This means that it
+        The <i>${scenario}</i> scenario of <b>${riskFile.cr4de_title}</b> was identified as the <i>Most Relevant Scenario</i>. This means that it
         represent the highest amount of risk (probability x impact) of the three scenarios. It can be summarized as
         follows:
       </p>

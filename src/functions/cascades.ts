@@ -1,4 +1,7 @@
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
+import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
+import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
+import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { SCENARIOS } from "./scenarios";
 
 export interface CascadeAnalysisInput {
@@ -13,6 +16,52 @@ export interface CascadeAnalysisInput {
   cr4de_e2e: number | null;
 
   cr4de_quali_cascade: string | null;
+}
+
+export function getCauses<T extends DVRiskCascade>(
+  riskFile: SmallRisk,
+  cascades: T[],
+  hazardCatalogue: { [id: string]: SmallRisk }
+): T[] {
+  return cascades.filter(
+    (c) =>
+      c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+      (hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.STANDARD ||
+        hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.MANMADE)
+  );
+}
+
+export function getEffects<T extends DVRiskCascade>(riskFile: SmallRisk, cascades: T[]): T[] {
+  return cascades.filter((c) => c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid);
+}
+
+export function getCatalyzingEffects<T extends DVRiskCascade>(
+  riskFile: SmallRisk,
+  cascades: T[],
+  hazardCatalogue: { [id: string]: SmallRisk },
+  includeClimateChange: boolean = true
+): T[] {
+  return cascades.filter(
+    (c) =>
+      c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+      hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.EMERGING &&
+      (includeClimateChange || hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_title.indexOf("Climate") < 0)
+  );
+}
+
+export function getClimateChange<T extends DVRiskCascade>(
+  riskFile: SmallRisk,
+  cascades: T[],
+  hazardCatalogue: { [id: string]: SmallRisk }
+): T | null {
+  return (
+    cascades.find(
+      (c) =>
+        c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+        hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.EMERGING &&
+        hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_title.indexOf("Climate") >= 0
+    ) || null
+  );
 }
 
 export function getCascadeField(causeScenario: SCENARIOS, effectScenario: SCENARIOS): keyof CascadeAnalysisInput {

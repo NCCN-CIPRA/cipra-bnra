@@ -95,7 +95,6 @@ const ES_RISKS = [
   "C04",
   "H04",
   "H01",
-  "H08",
   "H03",
   "H02",
   "M01",
@@ -120,13 +119,14 @@ const ES_RISKS = [
   "T05",
   "T09",
   "T16",
+  "T17",
 ];
 
 const getScaleString = (value: number) => {
-  if (value < 1) return "Very Low";
-  if (value < 2) return "Low";
-  if (value < 3) return "Medium";
-  if (value < 4) return "High";
+  if (value <= 1) return "Very Low";
+  if (value <= 2) return "Low";
+  if (value <= 3) return "Medium";
+  if (value <= 4) return "High";
   return "Very High";
 };
 
@@ -375,7 +375,7 @@ export default function CalculationsRiskMatrix({
                   scale="linear"
                   domain={[0, 5.5]}
                   // tickCount={5}
-                  // tickFormatter={(s, n) => getScaleString(n + 1)}
+                  tickFormatter={(s, n) => getScaleString(s)}
                   ticks={[1, 2, 3, 4, 5]}
                   label={{
                     offset: -15,
@@ -392,7 +392,7 @@ export default function CalculationsRiskMatrix({
                   // tickCount={6}
                   // tickFormatter={(s, n) => `TI${n}`}
                   // ticks={[160000000, 800000000, 4000000000, 20000000000, 100000000000, 500000000000]}
-                  // tickFormatter={(s, n) => getScaleString(n + 1)}
+                  tickFormatter={(s, n) => getScaleString(s)}
                   ticks={[1, 2, 3, 4, 5]}
                   label={{
                     value: scales === "classes" ? "Impact" : "Impact of an event",

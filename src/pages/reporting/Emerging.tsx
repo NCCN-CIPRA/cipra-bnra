@@ -21,9 +21,9 @@ export default function Emerging({
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
   mode?: "view" | "edit";
 }) {
-  const { data: attachments, reloadData: reloadAttachments } = useRecords<DVAttachment>({
+  const { data: attachments, reloadData: reloadAttachments } = useRecords<DVAttachment<unknown, DVAttachment>>({
     table: DataTable.ATTACHMENT,
-    query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}`,
+    query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_referencedSource`,
   });
   const rf = riskFile;
 

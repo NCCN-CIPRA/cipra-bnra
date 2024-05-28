@@ -48,7 +48,7 @@ function TextInputBox({
   disabled?: boolean | null;
   reset?: boolean;
   sources?: DVAttachment[] | null;
-  updateSources?: null | (() => Promise<void>);
+  updateSources?: null | (() => Promise<unknown>);
 
   onSave?: (newValue: string | null) => void;
   onBlur?: () => void;

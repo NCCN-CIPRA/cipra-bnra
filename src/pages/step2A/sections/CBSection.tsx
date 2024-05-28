@@ -20,7 +20,7 @@ export default function CBSection({
   inputErrors: (keyof ScenarioInput)[];
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
-  onReloadAttachments: () => Promise<void>;
+  onReloadAttachments: () => Promise<unknown>;
 }) {
   return (
     <Stack sx={{}} rowGap={2}>

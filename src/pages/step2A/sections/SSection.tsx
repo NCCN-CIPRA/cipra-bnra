@@ -27,7 +27,7 @@ export default function SSection({
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   effects: DVRiskCascade<unknown, DVRiskFile>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
-  onReloadAttachments: () => Promise<void>;
+  onReloadAttachments: () => Promise<unknown>;
   onOpenEffects: () => void;
 }) {
   const { t } = useTranslation();

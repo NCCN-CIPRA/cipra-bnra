@@ -129,11 +129,11 @@ const ISankeyNode = ({
 
                     {payload.hidden.map((h: any) =>
                       h.cascade ? (
-                        <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                        <Typography key={h.name} variant="subtitle1" sx={{ mt: 1 }}>
                           {h.name} II({scenarioLetter}&rarr;all): {getMoneyString(h.i)}
                         </Typography>
                       ) : (
-                        <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                        <Typography key={h.name} variant="subtitle1" sx={{ mt: 1 }}>
                           {h.name} DI({scenarioLetter}): {getMoneyString(h.i)}
                         </Typography>
                       )
@@ -334,7 +334,7 @@ export default function ImpactSankey({
                 )
                 .slice(0, 10)
                 .map((c: CascadeCalculation) => (
-                  <Box sx={{ margin: 0, padding: 0 }}>
+                  <Box key={c.cascadeId} sx={{ margin: 0, padding: 0 }}>
                     {`${c.effect.riskTitle}:`}{" "}
                     <b>{`${
                       Math.round(
@@ -372,6 +372,7 @@ export default function ImpactSankey({
           }
           link={<ISankeyLink totalNodes={data.nodes.length} />}
           nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
+          iterations={0}
         ></Sankey>
       </ResponsiveContainer>
     </>

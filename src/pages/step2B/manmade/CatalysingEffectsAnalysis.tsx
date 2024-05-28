@@ -38,7 +38,7 @@ export default function CatalysingEffectsAnalysis({
 
   qualiError: boolean;
 
-  reloadCascadeAnalysis: () => Promise<void>;
+  reloadCascadeAnalysis: () => Promise<unknown>;
 }) {
   const [visibleCascade, setVisibleCascade] = useState(1);
   const [cascade1, setCascade1] = useState<DVRiskCascade<DVRiskFile> | null>(cascade);
@@ -158,7 +158,7 @@ function AnalysisSection({
 
   qualiError: boolean;
 
-  reloadCascadeAnalysis: () => Promise<void>;
+  reloadCascadeAnalysis: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
   const api = useAPI();

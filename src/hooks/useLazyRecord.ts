@@ -27,7 +27,7 @@ export default function useLazyRecord<T>(options: GetRecordParams<T>) {
   const api = useAPI();
 
   const [loading, setLoading] = useState(true);
-  const [isFetching, setIsFetching] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [data, setData] = useState<T | null>(null);
 
   const getData = async (lazyOptions?: Partial<GetRecordParams<T>>) => {

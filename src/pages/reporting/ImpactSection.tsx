@@ -11,6 +11,7 @@ import getImpactColor from "../../functions/getImpactColor";
 import { Effect, IMPACT_CATEGORY } from "../../functions/Impact";
 import { SCENARIO_SUFFIX } from "../../functions/scenarios";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
+import round from "../../functions/roundNumberString";
 
 export default function ImpactSection({
   riskFile,
@@ -29,7 +30,7 @@ export default function ImpactSection({
   calc: RiskCalculation;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
-  updateAttachments?: null | (() => Promise<void>);
+  updateAttachments?: null | (() => Promise<unknown>);
 }) {
   const impactLetter = impactName[0] as "h" | "s" | "e" | "f";
   const impactLetterUC = impactLetter.toUpperCase() as IMPACT_CATEGORY;
@@ -57,7 +58,7 @@ export default function ImpactSection({
   const getDefaultText = () => {
     const text = `
           <p style="font-size:14px;">
-          The ${impactName} impact represents an estimated <b>${Math.round(
+          The ${impactName} impact represents an estimated <b>${round(
       (100 * impactTI) / calc.ti
     )}%</b> of the total impact of an
         incident of this magnitude. Possible explanation for the ${impactName} impact are:
@@ -73,8 +74,8 @@ export default function ImpactSection({
                     ${i + 1}. ${riskName} 
                     </p>
                     <p style="font-size:14px;">
-                      <b>${Math.round(10000 * e[impactLetter]) / 100}%</b> of total ${impactName} impact -
-                      <b>${Math.round((10000 * e[impactLetter] * impactTI) / calc.ti) / 100}%</b> of total impact
+                      <b>${round(100 * e[impactLetter])}%</b> of total ${impactName} impact -
+                      <b>${round((100 * (e[impactLetter] * impactTI)) / calc.ti)}%</b> of total impact
                     </p>
                     <p><br></p>
                     ${e.quali || e[`quali_${impactLetter}`]}

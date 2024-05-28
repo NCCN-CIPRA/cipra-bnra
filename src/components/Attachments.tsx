@@ -40,6 +40,12 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
+const fieldIndex = {
+  definition: 0,
+  historical_events: 1,
+  scenarios: 2,
+};
+
 export interface Action {
   icon: ReactNode;
   tooltip: string;
@@ -65,7 +71,7 @@ export default function Attachments({
   validation?: DVValidation<DVRiskFile | undefined> | null;
   isExternal?: boolean;
   alwaysOpen?: boolean;
-  onUpdate: () => Promise<void>;
+  onUpdate: () => Promise<unknown>;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const api = useAPI();
@@ -306,6 +312,9 @@ export default function Attachments({
                 <Trans i18nKey="source.list.fileName">Source filename</Trans>
               </TableCell>
               <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
+                <Trans i18nKey="source.list.type">Section</Trans>
+              </TableCell>
+              <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
                 <Trans i18nKey="source.list.type">Source Type</Trans>
               </TableCell>
               <TableCell align="right" sx={{ width: 0 }}></TableCell>
@@ -321,20 +330,30 @@ export default function Attachments({
                   if (b.cr4de_reference === null && a.cr4de_reference !== null) {
                     return -1;
                   }
-                  if (a.cr4de_reference === null && b.cr4de_reference === null) {
-                    if (a.cr4de_name < b.cr4de_name) {
-                      return -1;
-                    }
-                    if (a.cr4de_name > b.cr4de_name) {
-                      return 1;
-                    }
-                    return 0;
+                  if (a.cr4de_reference !== null && b.cr4de_reference !== null) {
+                    return a.cr4de_reference - b.cr4de_reference;
                   }
 
-                  return a.cr4de_reference - b.cr4de_reference;
+                  if (a.cr4de_field === null && b.cr4de_field !== null) {
+                    return 1;
+                  }
+                  if (b.cr4de_field === null && a.cr4de_field !== null) {
+                    return -1;
+                  }
+                  if (a.cr4de_field !== null && b.cr4de_field !== null) {
+                    if (a.cr4de_field > b.cr4de_field) {
+                      return 1;
+                    }
+                    return -1;
+                  }
+
+                  if (a.cr4de_name > b.cr4de_name) {
+                    return 1;
+                  }
+                  return -1;
                 })
                 .map((a) => (
-                  <TableRow key={a.cr4de_name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                  <TableRow key={a.cr4de_bnraattachmentid} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                     <TableCell sx={{ position: "relative", textAlign: "center" }}>
                       <a style={{ position: "absolute", top: -100 }} id={`ref-${a.cr4de_reference}`}></a>
                       {a.cr4de_reference}
@@ -353,6 +372,7 @@ export default function Attachments({
                         {a.cr4de_name}
                       </Link>
                     </TableCell>
+                    <TableCell>{a.cr4de_field ? a.cr4de_field : "-"}</TableCell>
                     <TableCell>{a.cr4de_url ? t("source.type.link") : t("source.type.file")}</TableCell>
                     <TableCell align="center" sx={{ whiteSpace: "nowrap", textAlign: "right" }}>
                       {(!isExternal || a._cr4de_owner_value === user?.contactid) && (

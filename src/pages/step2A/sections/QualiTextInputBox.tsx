@@ -61,7 +61,7 @@ export default function QualiTextInputBox({
   onBlur?: () => void;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
   setUpdatedValue?: (newValue: string | null | undefined) => void;
-  onReloadAttachments: () => Promise<void>;
+  onReloadAttachments: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
   const api = useAPI();

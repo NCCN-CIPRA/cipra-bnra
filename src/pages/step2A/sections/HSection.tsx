@@ -23,7 +23,7 @@ export default function HSection({
   inputErrors: (keyof ScenarioInput)[];
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
-  onReloadAttachments: () => Promise<void>;
+  onReloadAttachments: () => Promise<unknown>;
   onOpenEffects: () => void;
 }) {
   const { t } = useTranslation();

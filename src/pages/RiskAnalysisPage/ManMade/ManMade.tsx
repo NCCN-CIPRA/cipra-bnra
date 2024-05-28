@@ -1,0 +1,210 @@
+import { Box, List, ListItemButton, Typography } from "@mui/material";
+import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import * as IP from "../../../functions/intensityParameters";
+import { SCENARIOS } from "../../../functions/scenarios";
+import { DVAnalysisRun, RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
+import { getDirectImpact, getIndirectImpact } from "../../../functions/Impact";
+import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
+import { Cause } from "../../../functions/Probability";
+import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import { useEffect, useMemo } from "react";
+import ImpactSection from "../ImpactSection";
+import { Link, useOutletContext } from "react-router-dom";
+import DefinitionSection from "../DefinitionSection";
+import CapacitiesSection from "./CapacitiesSection";
+import IntelligenceSection from "./IntelligenceSection";
+import Bibliography from "../Bibliography";
+import { DataTable } from "../../../hooks/useAPI";
+import useRecords from "../../../hooks/useRecords";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import SankeyDiagram from "../SankeyDiagram";
+import { RiskFilePageContext } from "../../BaseRiskFilePage";
+
+const getMostRelevantScenario = (r: RiskCalculation) => {
+  if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
+  if (r.tr_m > r.tr_c && r.tr_m > r.tr_e) return SCENARIOS.MAJOR;
+  return SCENARIOS.EXTREME;
+};
+
+const getScenarioSuffix = (scenario: SCENARIOS) => {
+  if (scenario === SCENARIOS.CONSIDERABLE) return "_c";
+  else if (scenario === SCENARIOS.MAJOR) return "_m";
+  return "_e";
+};
+
+export default function ManMade({
+  riskFile,
+  calculation,
+  cascades,
+  mode = "view",
+}: {
+  riskFile: DVRiskFile;
+  cascades: DVRiskCascade<SmallRisk>[];
+  calculation: RiskCalculation;
+  mode?: "view" | "edit";
+}) {
+  const { attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
+
+  useEffect(() => {
+    if (!attachments) loadAttachments();
+  }, []);
+
+  const rf = riskFile;
+
+  const intensityParameters = IP.unwrap(rf.cr4de_intensity_parameters);
+  const MRS = getMostRelevantScenario(calculation);
+  const MRSSuffix = getScenarioSuffix(MRS);
+
+  const cDict = useMemo(
+    () =>
+      cascades.reduce(
+        (acc, c) => ({
+          ...acc,
+          [c.cr4de_bnrariskcascadeid]: c,
+        }),
+        {} as { [key: string]: DVRiskCascade }
+      ),
+    [cascades]
+  );
+
+  const causes: Cause[] = [
+    {
+      id: null,
+      name: "No underlying cause",
+      p: calculation[`dp${MRSSuffix}`],
+      quali: rf[`cr4de_dp_quali${MRSSuffix}`],
+    },
+    ...(calculation.causes
+      .filter((c) => c[`ip${MRSSuffix}`] !== 0)
+      .map((c) => {
+        return {
+          id: c.cause.riskId,
+          name: c.cause.riskTitle,
+          p: c[`ip${MRSSuffix}`],
+          quali: cDict[c.cascadeId].cr4de_quali,
+        };
+      }) || []),
+  ].sort((a, b) => b.p - a.p);
+
+  const effects = [
+    getDirectImpact(calculation, riskFile, MRSSuffix),
+    ...calculation.effects.map((c) => getIndirectImpact(c, calculation, MRSSuffix, cDict[c.cascadeId])),
+  ];
+
+  const catalyzing = cascades.filter(
+    (c) =>
+      c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid &&
+      c.cr4de_c2c === null &&
+      c.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
+  );
+  const cc = cascades.filter((c) => c.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0);
+
+  return (
+    <>
+      {/* <Typography variant="h2" sx={{ mb: 4 }}>
+        Standard Risks
+      </Typography> */}
+
+      <Box sx={{ mb: 10 }}>
+        <Typography variant="h3" sx={{ mb: 4 }}>
+          {rf.cr4de_title}
+        </Typography>
+
+        <SankeyDiagram calculation={calculation} debug={mode === "edit"} manmade scenario={MRS} />
+
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="h5">Definition</Typography>
+          <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
+            <DefinitionSection riskFile={rf} mode={mode} />
+          </Box>
+        </Box>
+
+        {rf.cr4de_intensity_parameters && (
+          <Box sx={{ mt: 8 }}>
+            <Typography variant="h5">Most Relevant Actor Group</Typography>
+
+            <ScenarioMatrix calculation={calculation} mrs={MRS} />
+
+            <CapacitiesSection intensityParameters={intensityParameters} riskFile={rf} scenario={MRS} mode={mode} />
+          </Box>
+        )}
+
+        <Box sx={{ mt: 8, clear: "both" }}>
+          <Typography variant="h5">Intelligence Assessment</Typography>
+          <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
+            <IntelligenceSection riskFile={rf} causes={causes} MRSSuffix={MRSSuffix} calc={calculation} mode={mode} />
+          </Box>
+        </Box>
+
+        <Box sx={{ mt: 8 }}>
+          <Typography variant="h5">Impact Assessment</Typography>
+
+          <ImpactSection
+            riskFile={rf}
+            effects={effects}
+            scenarioSuffix={MRSSuffix}
+            impactName="human"
+            calc={calculation}
+            mode={mode}
+          />
+
+          <ImpactSection
+            riskFile={rf}
+            effects={effects}
+            scenarioSuffix={MRSSuffix}
+            impactName="societal"
+            calc={calculation}
+            mode={mode}
+          />
+
+          <ImpactSection
+            riskFile={rf}
+            effects={effects}
+            scenarioSuffix={MRSSuffix}
+            impactName="environmental"
+            calc={calculation}
+            mode={mode}
+          />
+
+          <ImpactSection
+            riskFile={rf}
+            effects={effects}
+            scenarioSuffix={MRSSuffix}
+            impactName="financial"
+            calc={calculation}
+            mode={mode}
+          />
+        </Box>
+
+        <Box sx={{ mt: 8 }}>
+          <Typography variant="h5">Catalysing Effects</Typography>
+
+          <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, backgroundColor: "white" }}>
+            <Box sx={{ px: 2, pt: 2 }}>
+              <Typography variant="body2" paragraph>
+                The following emerging risks were identified as having a potential catalysing effect on the probability
+                and/or impact of this risk. Please refer to the corresponding risk files for the qualitative assessment
+                of this effect:
+              </Typography>
+            </Box>
+            <List>
+              {catalyzing.map((c, i) => (
+                <ListItemButton
+                  LinkComponent={Link}
+                  href={`/risks/${c.cr4de_cause_hazard.cr4de_riskfilesid}?tab=analysis`}
+                >
+                  <Typography variant="subtitle2" sx={{ pl: 2 }}>
+                    {c.cr4de_cause_hazard.cr4de_title}{" "}
+                  </Typography>
+                </ListItemButton>
+              ))}
+            </List>
+          </Box>
+        </Box>
+
+        <Bibliography riskFile={riskFile} attachments={attachments} reloadAttachments={loadAttachments} />
+      </Box>
+    </>
+  );
+}

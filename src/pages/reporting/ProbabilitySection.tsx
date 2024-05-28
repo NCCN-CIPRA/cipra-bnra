@@ -9,6 +9,7 @@ import useAPI from "../../hooks/useAPI";
 import { Cause, getYearlyProbability } from "../../functions/Probability";
 import { SCENARIO_SUFFIX } from "../../functions/scenarios";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
+import round from "../../functions/roundNumberString";
 
 export default function ProbabilitySection({
   riskFile,
@@ -25,7 +26,7 @@ export default function ProbabilitySection({
   calc: RiskCalculation;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
-  updateAttachments?: null | (() => Promise<void>);
+  updateAttachments?: null | (() => Promise<unknown>);
 }) {
   const paretoCauses = useMemo(() => {
     return causes
@@ -43,7 +44,7 @@ export default function ProbabilitySection({
   const getDefaultText = () => {
     const text = `
           <p style="font-size:10pt;">
-          There is an estimated <b>${Math.round(10000 * getYearlyProbability(calc[`tp${MRSSuffix}`])) / 100}%</b> chance
+          There is an estimated <b>${round(100 * getYearlyProbability(calc[`tp${MRSSuffix}`]))}%</b> chance
           of an incident of this magnitude to happen in the 12 months. The following possible underlying causes for
           such an incident were identified:
           </p>
@@ -55,9 +56,7 @@ export default function ProbabilitySection({
         const riskName = c.id ? `<a href="/risks/${c.id}" target="_blank">${c.name}</a>` : c.name;
 
         return `<p style="font-weight:bold;font-size:10pt;">
-                    ${i + 1}. ${riskName} (${
-          Math.round((10000 * c.p) / calc[`tp${MRSSuffix}`]) / 100
-        }% of total probability)
+                    ${i + 1}. ${riskName} (${round((100 * c.p) / calc[`tp${MRSSuffix}`])}% of total probability)
                     </p>
                     <p><br></p>
                     ${c.quali}

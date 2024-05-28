@@ -35,7 +35,7 @@ export default function CCSection({
   calculation: RiskCalculation;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
-  updateAttachments?: null | (() => Promise<void>);
+  updateAttachments?: null | (() => Promise<unknown>);
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);

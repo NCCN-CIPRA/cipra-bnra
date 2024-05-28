@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CssBaseline, Box, Toolbar } from "@mui/material";
+import { CssBaseline, Box, Toolbar, Stack } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import AppContext from "../functions/AppContext";
 import SideDrawer from "../components/SideDrawer";
@@ -13,29 +13,49 @@ export default function BasePage() {
   const [pageTitle, setPageTitle] = useState("BNRA 2023 - 2026");
   const [breadcrumbs, setBreadcrumbs] = useState<(Breadcrumb | null)[]>([
     {
-      name: "BNRA 2023 - 2026",
+      name: "BNRA",
       url: "/",
     },
   ]);
+  const [bottomBarHeight, setBottomBarHeight] = useState(0);
 
   return (
     <AppContext.Provider
       value={{
         setPageTitle,
         setBreadcrumbs,
+        setBottomBarHeight,
       }}
     >
       <CssBaseline />
       <TitleBar title={pageTitle} onDrawerToggle={() => setDrawerOpen(!drawerOpen)} />
       <SideDrawer open={drawerOpen} width={drawerWidth} onClose={() => setDrawerOpen(false)} />
-      <Box>
-        <Toolbar />
-        {breadcrumbs && (
-          <Box sx={{ m: 2, ml: "76px" }}>
-            <BreadcrumbNavigation breadcrumbs={breadcrumbs} />
-          </Box>
-        )}
-        <Outlet />
+      <Box sx={{ display: "flex", flexFlow: "column nowrap", minHeight: "100vh", mb: `${bottomBarHeight}px` }}>
+        <Box sx={{ flexGrow: 1 }}>
+          <Toolbar />
+          {breadcrumbs && (
+            <Box sx={{ m: 2, ml: "76px" }}>
+              <BreadcrumbNavigation breadcrumbs={breadcrumbs} />
+            </Box>
+          )}
+          <Outlet />
+        </Box>
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: "space-evenly",
+            py: 2,
+            backgroundColor: "white",
+            borderTop: "1px solid rgba(0,0,0,0.05)",
+          }}
+        >
+          <img
+            alt="Nationaal Crisiscentrum"
+            src="https://bnra.powerappsportals.com/logo_nccn.svg"
+            style={{ height: 40 }}
+          />
+          <img alt="BNRA" src="https://bnra.powerappsportals.com/logo_text.png" style={{ height: 40 }} />
+        </Stack>
       </Box>
     </AppContext.Provider>
   );

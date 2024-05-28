@@ -14,7 +14,7 @@ const arrow = (value: number, cy: number, arrowWidth: number, graphWidth: number
   const xc = x0 + arrowWidth / 2;
   const yc = y0;
 
-  return [<path d={`M${xa} ${ya} L${xb} ${yb} L${xc} ${yc} L${xa} ${ya}`} stroke="#none" fill={color} />];
+  return <path d={`M${xa} ${ya} L${xb} ${yb} L${xc} ${yc} L${xa} ${ya}`} stroke="#none" fill={color} />;
 };
 
 const getProbabilityBars = (value: number) => {

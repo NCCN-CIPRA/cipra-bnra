@@ -19,7 +19,7 @@ export default function MSection({
   inputErrors: (keyof ScenarioInput)[];
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
-  onReloadAttachments: () => Promise<void>;
+  onReloadAttachments: () => Promise<unknown>;
 }) {
   const handleChangeDPValue = (newValue: string | null) => {
     fieldsRef.cr4de_dp_quanti = newValue;

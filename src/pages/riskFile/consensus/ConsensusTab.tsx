@@ -35,8 +35,8 @@ export default function ConsensusTab({
   participants: DVParticipation[];
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
-  reloadRiskFile: () => Promise<void>;
-  reloadCascades: () => Promise<void>;
+  reloadRiskFile: () => Promise<unknown>;
+  reloadCascades: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();

@@ -48,7 +48,7 @@ export default function CascadeAnalysis({
   quantiErrors: boolean[] | null;
   qualiError: boolean;
 
-  reloadCascadeAnalysis: () => Promise<void>;
+  reloadCascadeAnalysis: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
 
@@ -230,7 +230,7 @@ const AnalysisSection = ({
   quantiErrors: boolean[] | null;
   qualiError: boolean;
 
-  reloadCascadeAnalysis: () => Promise<void>;
+  reloadCascadeAnalysis: () => Promise<unknown>;
 }) => {
   const api = useAPI();
   const { t } = useTranslation();

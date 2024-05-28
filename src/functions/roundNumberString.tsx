@@ -3,5 +3,5 @@ export default function round(n?: number, digits: number = 2) {
 
   const m = Math.pow(10, 2);
 
-  return Math.round(m * n) / m;
+  return `${Math.round(m * n) / m}`.replace(".", ",");
 }

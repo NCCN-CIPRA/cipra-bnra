@@ -47,8 +47,8 @@ export default function ClimateChangeAnalysis({
   qualiError: boolean;
 
   onShowCauses: () => void;
-  reloadDirectAnalysis: () => Promise<void>;
-  reloadCascadeAnalysis: () => Promise<void>;
+  reloadDirectAnalysis: () => Promise<unknown>;
+  reloadCascadeAnalysis: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const { t } = useTranslation();

@@ -77,7 +77,7 @@ export default function ValidationList({
   validations: DVValidation<undefined, DVContact>[] | null;
   field: string;
   feedbackRefs: MutableRefObject<Partial<DVValidation<unknown, unknown>>[]>;
-  reloadValidations: () => Promise<void>;
+  reloadValidations: () => Promise<unknown>;
 }) {
   const theme = useTheme();
   const api = useAPI();

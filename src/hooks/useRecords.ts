@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import useLazyRecords, { GetRecordsParams } from "./useLazyRecords";
 
 /**
@@ -16,13 +16,24 @@ export default function useRecords<T>(options: GetRecordsParams<T>) {
   const { loading, isFetching, data, getData } = useLazyRecords<T>(options);
 
   const [_fired, setFired] = useState(false);
+  const resolveFn = useRef<(data: T[]) => void>();
+
+  const dataPromise = useMemo(
+    () =>
+      new Promise<T[]>((resolve) => {
+        resolveFn.current = resolve;
+      }),
+    []
+  );
 
   useEffect(() => {
     if (_fired) return;
 
-    getData();
+    getData().then((value) => {
+      resolveFn.current && resolveFn.current(value);
+    });
     setFired(true);
   }, [_fired, getData]);
 
-  return { loading, isFetching, data, reloadData: getData };
+  return { loading, isFetching, data, dataPromise, reloadData: getData };
 }

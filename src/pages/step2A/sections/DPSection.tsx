@@ -20,7 +20,7 @@ export default function DPSection({
   inputErrors: (keyof ScenarioInput)[];
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
-  onReloadAttachments: () => Promise<void>;
+  onReloadAttachments: () => Promise<unknown>;
   onOpenCauses: () => void;
 }) {
   const handleChangeDPValue = (newValue: string | null) => {

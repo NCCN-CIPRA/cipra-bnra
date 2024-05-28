@@ -121,6 +121,8 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
 
     setLoading(false);
     setIsFetching(false);
+
+    return result;
   };
 
   return { hasRun, loading, isFetching, data, getData };

@@ -24,6 +24,7 @@ import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { SCENARIOS, getScenarioSuffix, getWorstCaseScenario } from "../../functions/scenarios";
 import ImpactBarChart from "./ImpactBarChart";
 import ProbabilityBars from "./ProbabilityBars";
+import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
 
 export default function SankeyDiagram({
   calculations,
@@ -94,7 +95,10 @@ export default function SankeyDiagram({
             width: "100%",
           }}
         >
-          <ProbabilityBars tp={3} chartWidth={200} />
+          <ProbabilityBars
+            tp={getTotalProbabilityRelativeScale(calculation, getScenarioSuffix(scenario))}
+            chartWidth={200}
+          />
         </Box>
         <Box
           sx={{

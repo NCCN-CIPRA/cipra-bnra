@@ -32,6 +32,14 @@ import Step2BPage from "./pages/step2B/Step2BPage";
 import RiskFilePage from "./pages/riskFile/RiskFilePage";
 import ConsensusExpertPage from "./pages/consensus/ConsensusExpertPage";
 import AdminPage from "./pages/AdminPage";
+import HazardCataloguePage from "./pages/HazardCataloguePage/HazardCataloguePage";
+import BaseRisksPage from "./pages/BaseRisksPage";
+import BaseRiskFilePage from "./pages/BaseRiskFilePage";
+import RiskIdentificationPage from "./pages/RiskIdentificationPage/RiskIdentificationPage";
+import RiskFileSummaryPage from "./pages/RiskFileSummaryPage/RiskFileSummaryPage";
+import RiskAnalysisPage from "./pages/RiskAnalysisPage/RiskAnalysisPage";
+import RiskDataPage from "./pages/RiskDataPage/RiskDataPage";
+import RiskInputPage from "./pages/RiskInputPage/RiskInputPage";
 
 function App() {
   useEffect(() => {
@@ -63,6 +71,44 @@ function App() {
 
             {
               path: "/",
+              element: <BaseRisksPage />,
+              children: [
+                {
+                  path: "/risks",
+                  element: <HazardCataloguePage />,
+                },
+
+                {
+                  path: "/risks/:risk_file_id",
+                  element: <BaseRiskFilePage />,
+                  children: [
+                    {
+                      path: "/risks/:risk_file_id",
+                      element: <RiskFileSummaryPage />,
+                    },
+                    {
+                      path: "/risks/:risk_file_id/identification",
+                      element: <RiskIdentificationPage />,
+                    },
+                    {
+                      path: "/risks/:risk_file_id/analysis",
+                      element: <RiskAnalysisPage />,
+                    },
+                    {
+                      path: "/risks/:risk_file_id/data",
+                      element: <RiskDataPage />,
+                    },
+                    {
+                      path: "/risks/:risk_file_id/input",
+                      element: <RiskInputPage />,
+                    },
+                  ],
+                },
+              ],
+            },
+
+            {
+              path: "/",
               element: <AuthPage />,
               children: [
                 {
@@ -85,19 +131,9 @@ function App() {
                   path: "/learning/:page_name",
                   element: <LearningPage />,
                 },
-
-                {
-                  path: "/hazards",
-                  element: <EditorIntroPage />,
-                },
                 {
                   path: "/hazards/:risk_file_id",
                   element: <EditorPage />,
-                },
-
-                {
-                  path: "/risks",
-                  element: <EditorIntroPage />,
                 },
                 {
                   path: "/risks/:risk_file_id",

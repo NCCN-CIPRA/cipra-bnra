@@ -8,7 +8,6 @@ export default function patchFetch() {
   window.fetch = devFetch;
 
   window.onmessage = function (e) {
-    console.log(e);
     if (e.data && e.data.requestData) {
       responses[e.data.requestData.id] = new Response(e.data.body || undefined, {
         status: e.data.status,

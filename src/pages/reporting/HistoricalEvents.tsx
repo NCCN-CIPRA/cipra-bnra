@@ -18,7 +18,7 @@ export default function HistoricalEvents({
   riskFile: DVRiskFile;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
-  updateAttachments?: null | (() => Promise<void>);
+  updateAttachments?: null | (() => Promise<unknown>);
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);

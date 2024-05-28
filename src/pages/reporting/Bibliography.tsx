@@ -8,15 +8,22 @@ export default function Bibliography({
   riskFile,
   reloadAttachments,
 }: {
-  attachments: DVAttachment[] | null;
+  attachments: DVAttachment<unknown, DVAttachment>[] | null;
   riskFile: DVRiskFile;
-  reloadAttachments: () => Promise<void>;
+  reloadAttachments: () => Promise<unknown>;
 }) {
   return (
     <Box sx={{ mt: 8 }}>
       <Typography variant="h5">Bibliography</Typography>
       <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, backgroundColor: "white" }}>
-        <Attachments attachments={attachments} riskFile={riskFile} onUpdate={() => reloadAttachments()} alwaysOpen />
+        <Attachments
+          attachments={
+            attachments ? attachments.map((a) => (a.cr4de_referencedSource ? a.cr4de_referencedSource : a)) : null
+          }
+          riskFile={riskFile}
+          onUpdate={() => reloadAttachments()}
+          alwaysOpen
+        />
       </Box>
     </Box>
   );

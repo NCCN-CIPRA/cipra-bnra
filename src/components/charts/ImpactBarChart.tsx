@@ -29,7 +29,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
           {label}
         </Typography>
         {payload.map((p) => (
-          <Stack direction="row">
+          <Stack key={p.name} direction="row">
             <Typography variant="body2" sx={{ width: 50 }}>
               {p.name} :
             </Typography>

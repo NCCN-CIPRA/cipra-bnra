@@ -33,10 +33,10 @@ function CascadeSections({
   attachments: DVAttachment[] | null;
 
   setIsSaving: (isSaving: boolean) => void;
-  onUpdateCascades: () => Promise<void>;
+  onUpdateCascades: () => Promise<unknown>;
   getAttachments: (
     lazyOptions?: Partial<GetRecordsParams<DVAttachment<unknown, unknown>>> | undefined
-  ) => Promise<void>;
+  ) => Promise<unknown>;
 }) {
   const api = useAPI();
 

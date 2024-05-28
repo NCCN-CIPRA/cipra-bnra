@@ -15,7 +15,7 @@ export default function DefinitionSection({
 }: {
   riskFile: DVRiskFile;
   attachments?: DVAttachment[] | null;
-  updateAttachments?: null | (() => Promise<void>);
+  updateAttachments?: null | (() => Promise<unknown>);
   mode: "view" | "edit";
 }) {
   const api = useAPI();

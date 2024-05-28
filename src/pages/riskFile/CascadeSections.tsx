@@ -42,10 +42,10 @@ function CascadeSections({
 
   setIsSaving: (isSaving: boolean) => void;
 
-  getAllCauses: ({ query }: { query: string }) => Promise<void>;
-  getEffects: ({ query }: { query: string }) => Promise<void>;
-  getAttachments: ({ query }: { query: string }) => Promise<void>;
-  getValidations: () => Promise<void>;
+  getAllCauses: ({ query }: { query: string }) => Promise<unknown>;
+  getEffects: ({ query }: { query: string }) => Promise<unknown>;
+  getAttachments: ({ query }: { query: string }) => Promise<unknown>;
+  getValidations: () => Promise<unknown>;
 }) {
   const api = useAPI();
 

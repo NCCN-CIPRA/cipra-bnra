@@ -80,8 +80,8 @@ export default function ManMade({
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
-  reloadRiskFile: () => Promise<void>;
-  reloadCascades: () => Promise<void>;
+  reloadRiskFile: () => Promise<unknown>;
+  reloadCascades: () => Promise<unknown>;
 }) {
   const causes = useMemo(() => {
     return cascades.filter((ca) => ca.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING);
@@ -149,7 +149,7 @@ function ParameterSection({
   riskFile: DVRiskFile;
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
-  reloadRiskFile: () => Promise<void>;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
   const section = DIRECT_ANALYSIS_SECTIONS_MANMADE[PARAMETER.DP];
   const discussionRequired = useMemo(() => {
@@ -250,7 +250,7 @@ function ScenarioSection({
   scenario: SCENARIOS;
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
-  reloadRiskFile: () => Promise<void>;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const section = DIRECT_ANALYSIS_SECTIONS_MANMADE[PARAMETER.DP];
@@ -398,7 +398,7 @@ function CauseSection({
 }: {
   riskFile: DVRiskFile;
   cascade: DVRiskCascade<SmallRisk, SmallRisk>;
-  reloadCascades: () => Promise<void>;
+  reloadCascades: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const discussionRequired = cascade.cr4de_discussion_required_cause || DiscussionRequired.NOT_NECESSARY;
@@ -494,7 +494,7 @@ function EmergingSection({
   reloadCascades,
 }: {
   cascade: DVRiskCascade<SmallRisk>;
-  reloadCascades: () => Promise<void>;
+  reloadCascades: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const discussionRequired = cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
@@ -576,8 +576,8 @@ function CCSection({
   riskFile: DVRiskFile;
   cascade: DVRiskCascade<SmallRisk>;
   directAnalyses: DVDirectAnalysis[];
-  reloadRiskFile: () => Promise<void>;
-  reloadCascades: () => Promise<void>;
+  reloadRiskFile: () => Promise<unknown>;
+  reloadCascades: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const discussionRequired = cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;

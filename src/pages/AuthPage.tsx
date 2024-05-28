@@ -3,6 +3,7 @@ import { Box, CircularProgress } from "@mui/material";
 import { Outlet, useNavigate } from "react-router-dom";
 import useLoggedInUser from "../hooks/useLoggedInUser";
 import { DVContact } from "../types/dataverse/DVContact";
+import NCCNLoader from "../components/NCCNLoader";
 
 export interface AuthPageContext {
   user: DVContact;
@@ -25,7 +26,7 @@ export default function AuthPage() {
   if (user === undefined) {
     return (
       <Box sx={{ width: "100%", height: 500, alignItems: "center", justifyContent: "center", display: "flex" }}>
-        <CircularProgress />
+        <NCCNLoader />
       </Box>
     );
   }

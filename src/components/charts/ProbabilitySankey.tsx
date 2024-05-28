@@ -7,6 +7,7 @@ import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAna
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { SCENARIOS, Scenarios, getScenarioSuffix } from "../../functions/scenarios";
 import { getYearlyProbability } from "../../functions/Probability";
+import round from "../../functions/roundNumberString";
 
 const baseY = 50;
 
@@ -47,9 +48,10 @@ const PSankeyNode = ({
           transform="rotate(270)"
         >
           Total Probability:{" "}
-          {`${Math.round(10000 * getYearlyProbability(totalProbability)) / 100}% / year (${
-            Math.round(100000 * totalProbability) / 1000
-          }% / day)`}
+          {`${round(100 * getYearlyProbability(totalProbability))}% / year (${round(
+            100 * totalProbability,
+            3
+          )}% / day)`}
         </text>
       </Layer>
     );
@@ -131,7 +133,7 @@ const PSankeyNode = ({
                     <Typography color="inherit">Other causes:</Typography>
 
                     {payload.hidden.map((h: any) => (
-                      <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                      <Typography key={h.cause.riskId} variant="subtitle1" sx={{ mt: 1 }}>
                         {h.cause.riskTitle} IP(all&rarr;{scenarioLetter}): {Math.round(1000000 * h.ip) / 10000}% / day
                       </Typography>
                     ))}
@@ -377,6 +379,7 @@ export default function ProbabilitySankey({
           }
           link={<PSankeyLink totalNodes={data.nodes.length} />}
           nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
+          iterations={0}
         ></Sankey>
       </ResponsiveContainer>
     </>

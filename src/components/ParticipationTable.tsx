@@ -56,7 +56,7 @@ export default function ParticipationTable({
 }: {
   riskFile: DVRiskFile;
   participants: DVParticipation<DVContact>[];
-  reloadParticipants: () => Promise<void>;
+  reloadParticipants: () => Promise<unknown>;
 }) {
   const api = useAPI();
 

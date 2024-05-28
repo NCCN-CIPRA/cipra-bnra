@@ -80,8 +80,8 @@ export default function Emerging({
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
-  reloadRiskFile: () => Promise<void>;
-  reloadCascades: () => Promise<void>;
+  reloadRiskFile: () => Promise<unknown>;
+  reloadCascades: () => Promise<unknown>;
 }) {
   return (
     <>
@@ -118,7 +118,7 @@ function CatalyzedSection({
 }: {
   riskFile: DVRiskFile;
   cascade: DVRiskCascade<SmallRisk, SmallRisk>;
-  reloadCascades: () => Promise<void>;
+  reloadCascades: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const discussionRequired = cascade.cr4de_discussion_required_cause || DiscussionRequired.NOT_NECESSARY;

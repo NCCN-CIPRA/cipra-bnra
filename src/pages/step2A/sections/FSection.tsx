@@ -21,7 +21,7 @@ export default function FSection({
   inputErrors: (keyof ScenarioInput)[];
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   onOpenSourceDialog: (existingSource?: DVAttachment) => void;
-  onReloadAttachments: () => Promise<void>;
+  onReloadAttachments: () => Promise<unknown>;
   onOpenEffects: () => void;
 }) {
   const handleChangeDIValue = (newValue: string | null, field: DirectImpactField) => {

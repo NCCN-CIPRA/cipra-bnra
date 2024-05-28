@@ -37,7 +37,7 @@ export default function IdentificationTab({
   riskFile: DVRiskFile | null;
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[] | null;
   otherRisks: SmallRisk[] | null;
-  onUpdateCascades: () => Promise<void>;
+  onUpdateCascades: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const fieldsToUpdate = useRef<Partial<RiskFileEditableFields>>({});

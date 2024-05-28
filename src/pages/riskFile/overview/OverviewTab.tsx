@@ -71,8 +71,8 @@ export default function OverviewTab({
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[] | null;
   participants: DVParticipation<DVContact>[] | null;
   calculations: RiskAnalysisResults[] | null;
-  reloadRiskFile: () => Promise<void>;
-  reloadCascades: () => Promise<void>;
+  reloadRiskFile: () => Promise<unknown>;
+  reloadCascades: () => Promise<unknown>;
 }) {
   const [isSaving, setIsSaving] = useState(false);
   const [consensus, setConsensus] = useState<CONSENSUS_TYPE | string>("");
