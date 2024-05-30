@@ -1,7 +1,7 @@
 import { Box, Button, Stack } from "@mui/material";
 import { RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
 import TextInputBox from "../../../components/TextInputBox";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
@@ -17,6 +17,8 @@ export default function IntelligenceSection({
   mode,
   attachments = null,
   updateAttachments = null,
+  setIsEditing,
+  reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   causes: Cause[];
@@ -25,20 +27,9 @@ export default function IntelligenceSection({
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<void>);
+  setIsEditing: (isEditing: boolean) => void;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
-  const paretoCauses = useMemo(() => {
-    return causes
-      .sort((a, b) => b.p - a.p)
-      .reduce(
-        ([cumulCauses, pCumul], c) => {
-          if (pCumul / calc[`tp${MRSSuffix}`] > 0.8) return [cumulCauses, pCumul] as [Cause[], number];
-
-          return [[...cumulCauses, c], pCumul + c.p] as [Cause[], number];
-        },
-        [[], 0] as [Cause[], number]
-      )[0];
-  }, [riskFile, causes]);
-
   const getDefaultText = () => {
     return riskFile[`cr4de_dp_quali${MRSSuffix}`] || "";
   };
@@ -48,6 +39,10 @@ export default function IntelligenceSection({
   const [editing, setEditing] = useState(false);
   const [probQuali, setProbQuali] = useState<string>(riskFile.cr4de_mrs_probability || getDefaultText());
 
+  useEffect(() => setProbQuali(riskFile.cr4de_mrs_probability || getDefaultText()), [riskFile]);
+
+  useEffect(() => setIsEditing(editing), [editing]);
+
   const saveRiskFile = async (reset = false) => {
     setSaving(true);
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
@@ -56,6 +51,8 @@ export default function IntelligenceSection({
     if (reset) {
       setProbQuali(getDefaultText());
     }
+    reloadRiskFile();
+
     setEditing(false);
     // await reloadRiskFile();
     setSaving(false);

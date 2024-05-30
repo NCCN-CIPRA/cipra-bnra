@@ -2,7 +2,7 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { IntensityParameter } from "../../../functions/intensityParameters";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { SCENARIOS, SCENARIO_PARAMS, unwrap } from "../../../functions/scenarios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TextInputBox from "../../../components/TextInputBox";
 import useAPI from "../../../hooks/useAPI";
 import { LoadingButton } from "@mui/lab";
@@ -15,6 +15,8 @@ export default function Scenario({
   mode,
   attachments = null,
   updateAttachments = null,
+  setIsEditing,
+  reloadRiskFile,
 }: {
   intensityParameters: IntensityParameter[];
   riskFile: DVRiskFile;
@@ -22,10 +24,14 @@ export default function Scenario({
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  setIsEditing: (isEditing: boolean) => void;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
+
+  useEffect(() => setIsEditing(editing), [editing]);
 
   const scenarios = unwrap(
     intensityParameters,
@@ -64,6 +70,8 @@ export default function Scenario({
 
   const [mrsScenario, setMrsScenario] = useState<string>(riskFile.cr4de_mrs_scenario || getDefaultText());
 
+  useEffect(() => setMrsScenario(riskFile.cr4de_mrs_scenario || getDefaultText()), [riskFile]);
+
   const saveScenario = async (reset = false) => {
     setSaving(true);
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
@@ -72,6 +80,8 @@ export default function Scenario({
     if (reset) {
       setMrsScenario(getDefaultText());
     }
+    reloadRiskFile();
+
     setEditing(false);
     // await reloadRiskFile();
     setSaving(false);

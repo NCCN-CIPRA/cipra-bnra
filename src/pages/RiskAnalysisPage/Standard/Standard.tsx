@@ -41,11 +41,15 @@ export default function Standard({
   calculation,
   cascades,
   mode = "view",
+  setIsEditing,
+  reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   calculation: RiskCalculation;
   cascades: DVRiskCascade<SmallRisk>[];
   mode?: "view" | "edit";
+  setIsEditing: (isEditing: boolean) => void;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
   const { attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
 
@@ -124,6 +128,8 @@ export default function Standard({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              setIsEditing={setIsEditing}
+              reloadRiskFile={reloadRiskFile}
             />
           </Box>
         </Box>
@@ -131,7 +137,14 @@ export default function Standard({
         {rf.cr4de_historical_events && (
           <Box sx={{ mt: 8 }}>
             <Typography variant="h5">Historical Events</Typography>
-            <HistoricalEvents riskFile={rf} mode={mode} attachments={attachments} updateAttachments={loadAttachments} />
+            <HistoricalEvents
+              riskFile={rf}
+              mode={mode}
+              attachments={attachments}
+              updateAttachments={loadAttachments}
+              setIsEditing={setIsEditing}
+              reloadRiskFile={reloadRiskFile}
+            />
           </Box>
         )}
 
@@ -150,6 +163,8 @@ export default function Standard({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              setIsEditing={setIsEditing}
+              reloadRiskFile={reloadRiskFile}
             />
           </Box>
         )}
@@ -165,6 +180,8 @@ export default function Standard({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              setIsEditing={setIsEditing}
+              reloadRiskFile={reloadRiskFile}
             />
           </Box>
         </Box>
@@ -181,6 +198,8 @@ export default function Standard({
             mode={mode}
             attachments={attachments}
             updateAttachments={loadAttachments}
+            setIsEditing={setIsEditing}
+            reloadRiskFile={reloadRiskFile}
           />
 
           <ImpactSection
@@ -192,6 +211,8 @@ export default function Standard({
             mode={mode}
             attachments={attachments}
             updateAttachments={loadAttachments}
+            setIsEditing={setIsEditing}
+            reloadRiskFile={reloadRiskFile}
           />
 
           <ImpactSection
@@ -203,6 +224,8 @@ export default function Standard({
             mode={mode}
             attachments={attachments}
             updateAttachments={loadAttachments}
+            setIsEditing={setIsEditing}
+            reloadRiskFile={reloadRiskFile}
           />
 
           <ImpactSection
@@ -214,6 +237,8 @@ export default function Standard({
             mode={mode}
             attachments={attachments}
             updateAttachments={loadAttachments}
+            setIsEditing={setIsEditing}
+            reloadRiskFile={reloadRiskFile}
           />
 
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
@@ -224,6 +249,8 @@ export default function Standard({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              setIsEditing={setIsEditing}
+              reloadRiskFile={reloadRiskFile}
             />
           </Box>
         </Box>
@@ -239,6 +266,8 @@ export default function Standard({
             calculation={calculation}
             attachments={attachments}
             updateAttachments={loadAttachments}
+            setIsEditing={setIsEditing}
+            reloadRiskFile={reloadRiskFile}
           />
         </Box>
 

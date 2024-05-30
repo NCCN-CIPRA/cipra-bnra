@@ -1,6 +1,6 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import TextInputBox from "../../components/TextInputBox";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../hooks/useAPI";
@@ -12,28 +12,39 @@ export default function DefinitionSection({
   attachments = null,
   updateAttachments = null,
   mode,
+  setIsEditing,
+  reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
   mode: "view" | "edit";
+  setIsEditing: (isEditing: boolean) => void;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [definition, setDefinition] = useState<string | null>(riskFile.cr4de_definition);
 
+  useEffect(() => setIsEditing(editing), [editing]);
+
   const saveRiskFile = async (reset = false) => {
     setSaving(true);
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
       cr4de_definition: definition,
     });
+    reloadRiskFile();
 
     setEditing(false);
     // await reloadRiskFile();
     setSaving(false);
     // setOpen(false);
   };
+
+  useEffect(() => {
+    setDefinition(riskFile.cr4de_definition);
+  }, [riskFile]);
 
   return (
     <>

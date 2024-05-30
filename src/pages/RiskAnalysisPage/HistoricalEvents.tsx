@@ -4,7 +4,7 @@ import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { colors } from "../../functions/getCategoryColor";
 import HistoricalEventsTable from "../../components/HistoricalEventsTable";
 import useAPI from "../../hooks/useAPI";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LoadingButton } from "@mui/lab";
 import TextInputBox from "../../components/TextInputBox";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
@@ -14,11 +14,15 @@ export default function HistoricalEvents({
   mode,
   attachments = null,
   updateAttachments = null,
+  setIsEditing,
+  reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  setIsEditing: (isEditing: boolean) => void;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
@@ -27,6 +31,10 @@ export default function HistoricalEvents({
   const [location, setLocation] = useState<string>("");
   const [time, setTime] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+
+  useEffect(() => setIsEditing(editing >= 0), [editing]);
+
+  useEffect(() => setEvents(unwrap(riskFile.cr4de_historical_events)), [riskFile]);
 
   const colorList = Object.values(colors);
 
@@ -49,6 +57,7 @@ export default function HistoricalEvents({
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
       cr4de_historical_events: wrap(newEvents),
     });
+    reloadRiskFile();
     // console.log("Saving:");
     // console.log(wrap(newEvents));
 

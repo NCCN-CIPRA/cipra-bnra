@@ -28,6 +28,8 @@ export default function CCSection({
   mode,
   attachments = null,
   updateAttachments = null,
+  setIsEditing,
+  reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   cc: DVRiskCascade<SmallRisk, unknown> | undefined;
@@ -36,11 +38,17 @@ export default function CCSection({
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  setIsEditing: (isEditing: boolean) => void;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [ccQuali, setCCQuali] = useState<string | null>(riskFile.cr4de_mrs_cc || null);
+
+  useEffect(() => setCCQuali(riskFile.cr4de_mrs_cc || null), [riskFile]);
+
+  useEffect(() => setIsEditing(editing), [editing]);
 
   useEffect(() => {
     const tp50 = getTotalProbabilityRelativeScale(calculation, scenarioSuffix, true);
@@ -102,6 +110,7 @@ export default function CCSection({
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
       cr4de_mrs_cc: ccQuali,
     });
+    reloadRiskFile();
 
     setEditing(false);
     // await reloadRiskFile();

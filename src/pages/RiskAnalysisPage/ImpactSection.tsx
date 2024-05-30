@@ -1,7 +1,7 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import TextInputBox from "../../components/TextInputBox";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../hooks/useAPI";
@@ -20,6 +20,8 @@ export default function ImpactSection({
   mode,
   attachments = null,
   updateAttachments = null,
+  setIsEditing,
+  reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   effects: Effect[];
@@ -29,6 +31,8 @@ export default function ImpactSection({
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  setIsEditing: (isEditing: boolean) => void;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
   const impactLetter = impactName[0] as "h" | "s" | "e" | "f";
   const impactLetterUC = impactLetter.toUpperCase() as IMPACT_CATEGORY;
@@ -90,6 +94,10 @@ export default function ImpactSection({
   const [editing, setEditing] = useState(false);
   const [iQuali, setIQuali] = useState<string>(riskFile[`cr4de_mrs_impact_${impactLetter}`] || getDefaultText());
 
+  useEffect(() => setIQuali(riskFile[`cr4de_mrs_impact_${impactLetter}`] || getDefaultText()), [riskFile]);
+
+  useEffect(() => setIsEditing(editing), [editing]);
+
   const saveRiskFile = async (reset = false) => {
     setSaving(true);
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
@@ -98,6 +106,8 @@ export default function ImpactSection({
     if (reset) {
       setIQuali(getDefaultText());
     }
+    reloadRiskFile();
+
     setEditing(false);
     // await reloadRiskFile();
     setSaving(false);

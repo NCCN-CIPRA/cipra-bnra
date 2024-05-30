@@ -155,6 +155,7 @@ export default function ClimateChangeChart({
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis
         domain={[0, 5.5]}
+        ticks={[1, 2, 3, 4, 5]}
         type="number"
         // tickFormatter={(value) => getPercentageProbability(value)}
         label={{ value: "Probability of occurence in the next 12 months", dy: 25 }}

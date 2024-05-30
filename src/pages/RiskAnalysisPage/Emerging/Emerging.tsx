@@ -17,10 +17,14 @@ export default function Emerging({
   riskFile,
   cascades,
   mode = "view",
+  setIsEditing,
+  reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
   mode?: "view" | "edit";
+  setIsEditing: (isEditing: boolean) => void;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
   const { attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
 
@@ -46,6 +50,8 @@ export default function Emerging({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              setIsEditing={setIsEditing}
+              reloadRiskFile={reloadRiskFile}
             />
           </Box>
         </Box>
@@ -53,7 +59,14 @@ export default function Emerging({
         <Box sx={{ mt: 8 }}>
           <Typography variant="h5">Horizon Analysis</Typography>
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <HASection riskFile={rf} mode={mode} attachments={attachments} updateAttachments={loadAttachments} />
+            <HASection
+              riskFile={rf}
+              mode={mode}
+              attachments={attachments}
+              updateAttachments={loadAttachments}
+              setIsEditing={setIsEditing}
+              reloadRiskFile={reloadRiskFile}
+            />
           </Box>
         </Box>
 

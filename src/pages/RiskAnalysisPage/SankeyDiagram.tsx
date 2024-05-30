@@ -1,12 +1,14 @@
-import { Stack, Typography, Box } from "@mui/material";
+import { Stack, Typography, Box, Button } from "@mui/material";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, getScenarioSuffix } from "../../functions/scenarios";
+import { SCENARIOS, SCENARIO_PARAMS, getScenarioSuffix } from "../../functions/scenarios";
 import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
 import ProbabilityBars from "../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../components/charts/ImpactBarChart";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import ProbabilitySankey from "../../components/charts/ProbabilitySankey";
 import ImpactSankey from "../../components/charts/ImpactSankey";
+import { RiskFilePageContext } from "../BaseRiskFilePage";
+import { useEffect, useState } from "react";
 
 export default function SankeyDiagram({
   calculation,
@@ -20,6 +22,23 @@ export default function SankeyDiagram({
   manmade?: boolean;
 }) {
   const navigate = useNavigate();
+  const { isEditing } = useOutletContext<RiskFilePageContext>();
+  const [selectedScenario, setSelectedScenario] = useState(scenario);
+
+  useEffect(() => {
+    setSelectedScenario(scenario);
+  }, [calculation]);
+
+  const goToRiskFile = (id: string) => {
+    if (
+      !isEditing ||
+      window.confirm(
+        "Are you sure you wish to leave the page? You are still editing a field and unsaved changes will be lost."
+      )
+    ) {
+      navigate(`/risks/${id}/analysis`);
+    }
+  };
 
   return (
     <Stack direction="row" sx={{ mb: 8 }}>
@@ -29,8 +48,8 @@ export default function SankeyDiagram({
           maxCauses={null}
           shownCausePortion={0.8}
           minCausePortion={null}
-          scenario={scenario}
-          onClick={(id: string) => navigate(`/risks/${id}/analysis`)}
+          scenario={selectedScenario}
+          onClick={goToRiskFile}
           debug={debug}
           manmade={manmade}
         />
@@ -61,20 +80,97 @@ export default function SankeyDiagram({
           }}
         >
           <ProbabilityBars
-            tp={getTotalProbabilityRelativeScale(calculation, getScenarioSuffix(scenario))}
+            tp={getTotalProbabilityRelativeScale(calculation, getScenarioSuffix(selectedScenario))}
             chartWidth={200}
           />
         </Box>
         <Box
           sx={{
             width: "100%",
-            height: 400,
           }}
         >
-          <Box sx={{ width: "100%", textAlign: "center", mt: 2 }}>
+          <Box sx={{ width: "100%", textAlign: "center", mt: 0, mb: 1 }}>
+            <Typography variant="subtitle2">Scenario</Typography>
+          </Box>
+          <Stack direction="row" justifyContent="space-between">
+            <Button
+              variant="outlined"
+              sx={{
+                color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
+                fontWeight: selectedScenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
+                opacity: selectedScenario === SCENARIOS.CONSIDERABLE ? 1 : 0.3,
+                borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
+                borderRadius: "50%",
+                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
+                width: 48,
+                minWidth: 48,
+                height: 48,
+                "&:hover": {
+                  opacity: 1,
+                  backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
+                  borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
+                },
+              }}
+              onClick={() => setSelectedScenario(SCENARIOS.CONSIDERABLE)}
+            >
+              C
+            </Button>
+            <Button
+              variant="outlined"
+              sx={{
+                color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
+                fontWeight: selectedScenario === SCENARIOS.MAJOR ? "bold" : "normal",
+                opacity: selectedScenario === SCENARIOS.MAJOR ? 1 : 0.3,
+                borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
+                borderRadius: "50%",
+                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
+                width: 48,
+                minWidth: 48,
+                height: 48,
+                "&:hover": {
+                  opacity: 1,
+                  backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
+                  borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
+                },
+              }}
+              onClick={() => setSelectedScenario(SCENARIOS.MAJOR)}
+            >
+              M
+            </Button>
+            <Button
+              variant="outlined"
+              sx={{
+                color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
+                fontWeight: selectedScenario === SCENARIOS.EXTREME ? "bold" : "normal",
+                opacity: selectedScenario === SCENARIOS.EXTREME ? 1 : 0.3,
+                borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
+                borderRadius: "50%",
+                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
+                width: 48,
+                minWidth: 48,
+                height: 48,
+                "&:hover": {
+                  opacity: 1,
+                  backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
+                  borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
+                },
+              }}
+              onClick={() => setSelectedScenario(SCENARIOS.EXTREME)}
+            >
+              E
+            </Button>
+          </Stack>
+        </Box>
+        <Box
+          sx={{
+            width: "100%",
+            height: 350,
+          }}
+        >
+          <Box sx={{ width: "100%", textAlign: "center", mt: 3 }}>
             <Typography variant="subtitle2">Damage Indicators</Typography>
           </Box>
-          <ImpactBarChart calculation={calculation} scenarioSuffix={getScenarioSuffix(scenario)} />
+          <ImpactBarChart calculation={calculation} scenarioSuffix={getScenarioSuffix(selectedScenario)} />
         </Box>
       </Stack>
       <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
@@ -83,8 +179,8 @@ export default function SankeyDiagram({
           maxEffects={null}
           shownEffectPortion={0.8}
           minEffectPortion={null}
-          scenario={scenario}
-          onClick={(id: string) => navigate(`/risks/${id}/analysis`)}
+          scenario={selectedScenario}
+          onClick={goToRiskFile}
           debug={debug}
         />
       </Box>

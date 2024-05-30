@@ -1,6 +1,6 @@
 import { Box, Button, Stack } from "@mui/material";
 import TextInputBox from "../../../components/TextInputBox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
@@ -13,23 +13,32 @@ export default function CBSection({
   mode,
   attachments = null,
   updateAttachments = null,
+  setIsEditing,
+  reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   scenarioSuffix: SCENARIO_SUFFIX;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  setIsEditing: (isEditing: boolean) => void;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [cb, setCB] = useState<string | null>(riskFile[`cr4de_cross_border_impact_quali${scenarioSuffix}`]);
 
+  useEffect(() => setCB(riskFile[`cr4de_cross_border_impact_quali${scenarioSuffix}`]), [riskFile]);
+
+  useEffect(() => setIsEditing(editing), [editing]);
+
   const saveRiskFile = async (reset = false) => {
     setSaving(true);
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
       [`cr4de_cross_border_impact_quali${scenarioSuffix}`]: cb,
     });
+    reloadRiskFile();
 
     setEditing(false);
     // await reloadRiskFile();

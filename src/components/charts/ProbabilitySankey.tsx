@@ -88,39 +88,39 @@ const PSankeyNode = ({
                       {Math.round(1000000 * payload.cascade[`ip_${scenarioLetter}`]) / 10000}% / day
                     </Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                    <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
                       TP(c): {Math.round(1000000 * payload.cascade.cause.tp_c) / 10000}% / day
                     </Typography>
-                    <Typography variant="subtitle2">
+                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
                       CP(c&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`c2${scenarioLetter}`]) / 100}%
                     </Typography>
-                    <Typography variant="subtitle2">
+                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
                       IP(c&rarr;{scenarioLetter}):{" "}
                       {Math.round(1000000 * payload.cascade.cause.tp_c * payload.cascade[`c2${scenarioLetter}`]) /
                         10000}
                       % / day
                     </Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                    <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
                       TP(m): {Math.round(1000000 * payload.cascade.cause.tp_m) / 10000}% / day
                     </Typography>
-                    <Typography variant="subtitle2">
+                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
                       CP(m&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`m2${scenarioLetter}`]) / 100}%
                     </Typography>
-                    <Typography variant="subtitle2">
+                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
                       IP(m&rarr;{scenarioLetter}):{" "}
                       {Math.round(1000000 * payload.cascade.cause.tp_m * payload.cascade[`m2${scenarioLetter}`]) /
                         10000}
                       % / day
                     </Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                    <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
                       TP(e): {Math.round(1000000 * payload.cascade.cause.tp_e) / 10000}% / day
                     </Typography>
-                    <Typography variant="subtitle2">
+                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
                       CP(e&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`e2${scenarioLetter}`]) / 100}%
                     </Typography>
-                    <Typography variant="subtitle2">
+                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
                       IP(e&rarr;{scenarioLetter}):{" "}
                       {Math.round(1000000 * payload.cascade.cause.tp_e * payload.cascade[`e2${scenarioLetter}`]) /
                         10000}

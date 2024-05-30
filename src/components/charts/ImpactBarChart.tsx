@@ -40,10 +40,9 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
           <Typography variant="body2" sx={{ width: 50, fontWeight: "bold" }}>
             Total :
           </Typography>
-          <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>{`${payload.reduce(
-            (sum, p) => sum + (p.value as number),
-            0
-          )} / 5`}</Typography>
+          <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>{`${
+            Math.round(10 * payload.reduce((sum, p) => sum + (p.value as number), 0)) / 10
+          } / 5`}</Typography>
         </Stack>
       </Box>
     );

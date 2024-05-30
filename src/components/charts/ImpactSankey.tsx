@@ -83,32 +83,38 @@ const ISankeyNode = ({
                       II({scenarioLetter}&rarr;all): {getMoneyString(payload.cascade[`ii_${scenarioLetter}`])}
                     </Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                    <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
+                      TI(c): {getMoneyString(payload.cascade.effect.ti_c)}
+                    </Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
+                      CP({scenarioLetter}&rarr;c): {Math.round(10000 * payload.cascade[`${scenarioLetter}2c`]) / 100}%
+                    </Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
                       II({scenarioLetter}&rarr;c):{" "}
                       {getMoneyString(payload.cascade[`${scenarioLetter}2c`] * payload.cascade.effect.ti_c)}
                     </Typography>
-                    <Typography variant="subtitle2">
-                      CP({scenarioLetter}&rarr;c): {Math.round(10000 * payload.cascade[`${scenarioLetter}2c`]) / 100}%
-                    </Typography>
-                    <Typography variant="subtitle2">TI(c): {getMoneyString(payload.cascade.effect.ti_c)}</Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                    <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
+                      TI(m): {getMoneyString(payload.cascade.effect.ti_m)}
+                    </Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
+                      CP({scenarioLetter}&rarr;m): {Math.round(10000 * payload.cascade[`${scenarioLetter}2m`]) / 100}%
+                    </Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
                       II({scenarioLetter}&rarr;m):{" "}
                       {getMoneyString(payload.cascade[`${scenarioLetter}2m`] * payload.cascade.effect.ti_m)}
                     </Typography>
-                    <Typography variant="subtitle2">
-                      CP({scenarioLetter}&rarr;m): {Math.round(10000 * payload.cascade[`${scenarioLetter}2m`]) / 100}%
-                    </Typography>
-                    <Typography variant="subtitle2">TI(m): {getMoneyString(payload.cascade.effect.ti_m)}</Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                    <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
+                      TI(e): {getMoneyString(payload.cascade.effect.ti_e)}
+                    </Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
+                      CP({scenarioLetter}&rarr;e): {Math.round(10000 * payload.cascade[`${scenarioLetter}2e`]) / 100}%
+                    </Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
                       II({scenarioLetter}&rarr;e):{" "}
                       {getMoneyString(payload.cascade[`${scenarioLetter}2e`] * payload.cascade.effect.ti_e)}
                     </Typography>
-                    <Typography variant="subtitle2">
-                      CP({scenarioLetter}&rarr;e): {Math.round(10000 * payload.cascade[`${scenarioLetter}2e`]) / 100}%
-                    </Typography>
-                    <Typography variant="subtitle2">TI(e): {getMoneyString(payload.cascade.effect.ti_e)}</Typography>
 
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
                       CP({scenarioLetter}&rarr;0):{" "}

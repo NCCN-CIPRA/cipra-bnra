@@ -1,7 +1,7 @@
 import { Box, Button, Stack } from "@mui/material";
 import { RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
 import TextInputBox from "../../../components/TextInputBox";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
@@ -18,6 +18,8 @@ export default function ProbabilitySection({
   mode,
   attachments = null,
   updateAttachments = null,
+  setIsEditing,
+  reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   causes: Cause[];
@@ -26,6 +28,8 @@ export default function ProbabilitySection({
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  setIsEditing: (isEditing: boolean) => void;
+  reloadRiskFile: () => Promise<unknown>;
 }) {
   const scenarioSuffix = getScenarioSuffix(scenario);
 
@@ -74,6 +78,10 @@ export default function ProbabilitySection({
   const [editing, setEditing] = useState(false);
   const [probQuali, setProbQuali] = useState<string>(riskFile.cr4de_mrs_probability || getDefaultText());
 
+  useEffect(() => setProbQuali(riskFile.cr4de_mrs_probability || getDefaultText()), [riskFile]);
+
+  useEffect(() => setIsEditing(editing), [editing]);
+
   const saveRiskFile = async (reset = false) => {
     setSaving(true);
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
@@ -82,6 +90,8 @@ export default function ProbabilitySection({
     if (reset) {
       setProbQuali(getDefaultText());
     }
+    reloadRiskFile();
+
     setEditing(false);
     // await reloadRiskFile();
     setSaving(false);

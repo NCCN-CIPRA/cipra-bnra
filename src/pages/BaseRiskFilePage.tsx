@@ -34,6 +34,9 @@ type RouteParams = {
 };
 
 export interface RiskFilePageContext extends RiskPageContext {
+  isEditing: boolean;
+  setIsEditing: (isEditing: boolean) => void;
+
   riskFile: DVRiskFile;
   calculation: RiskCalculation;
   causes: DVRiskCascade<SmallRisk>[];
@@ -59,6 +62,8 @@ export default function BaseRiskFilePage() {
 
   const params = useParams() as RouteParams;
   const location = useLocation();
+
+  const [isEditing, setIsEditing] = useState(false);
 
   const { data: participants, getData: loadParticipants } = useLazyRecords<DVParticipation<DVContact>>({
     table: DataTable.PARTICIPATION,
@@ -112,6 +117,9 @@ export default function BaseRiskFilePage() {
         <Outlet
           context={satisfies<RiskFilePageContext>({
             ...riskContext,
+            isEditing,
+            setIsEditing,
+
             riskFile: riskContext.riskFiles[params.risk_file_id],
             calculation: riskContext.analyses[params.risk_file_id],
             causes: riskContext.cascades[params.risk_file_id].causes,
