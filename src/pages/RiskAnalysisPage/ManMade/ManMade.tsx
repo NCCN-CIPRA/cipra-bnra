@@ -38,6 +38,7 @@ export default function ManMade({
   calculation,
   cascades,
   mode = "view",
+  isEditing,
   setIsEditing,
   reloadRiskFile,
 }: {
@@ -45,10 +46,11 @@ export default function ManMade({
   cascades: DVRiskCascade<SmallRisk>[];
   calculation: RiskCalculation;
   mode?: "view" | "edit";
+  isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
-  const { attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
+  const { hazardCatalogue, attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
 
   useEffect(() => {
     if (!attachments) loadAttachments();
@@ -120,7 +122,14 @@ export default function ManMade({
         <Box sx={{ mt: 2 }}>
           <Typography variant="h5">Definition</Typography>
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-            <DefinitionSection riskFile={rf} mode={mode} setIsEditing={setIsEditing} reloadRiskFile={reloadRiskFile} />
+            <DefinitionSection
+              riskFile={rf}
+              mode={mode}
+              isEditingOther={isEditing}
+              setIsEditing={setIsEditing}
+              reloadRiskFile={reloadRiskFile}
+              allRisks={hazardCatalogue}
+            />
           </Box>
         </Box>
 
@@ -135,8 +144,10 @@ export default function ManMade({
               riskFile={rf}
               scenario={MRS}
               mode={mode}
+              isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
+              allRisks={hazardCatalogue}
             />
           </Box>
         )}
@@ -150,8 +161,10 @@ export default function ManMade({
               MRSSuffix={MRSSuffix}
               calc={calculation}
               mode={mode}
+              isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
+              allRisks={hazardCatalogue}
             />
           </Box>
         </Box>
@@ -166,8 +179,10 @@ export default function ManMade({
             impactName="human"
             calc={calculation}
             mode={mode}
+            isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
+            allRisks={hazardCatalogue}
           />
 
           <ImpactSection
@@ -177,8 +192,10 @@ export default function ManMade({
             impactName="societal"
             calc={calculation}
             mode={mode}
+            isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
+            allRisks={hazardCatalogue}
           />
 
           <ImpactSection
@@ -188,8 +205,10 @@ export default function ManMade({
             impactName="environmental"
             calc={calculation}
             mode={mode}
+            isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
+            allRisks={hazardCatalogue}
           />
 
           <ImpactSection
@@ -199,8 +218,10 @@ export default function ManMade({
             impactName="financial"
             calc={calculation}
             mode={mode}
+            isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
+            allRisks={hazardCatalogue}
           />
         </Box>
 

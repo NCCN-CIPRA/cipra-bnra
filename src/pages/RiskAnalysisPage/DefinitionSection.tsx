@@ -6,21 +6,26 @@ import { LoadingButton } from "@mui/lab";
 import useAPI from "../../hooks/useAPI";
 import { Cause } from "../../functions/Probability";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
+import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 
 export default function DefinitionSection({
   riskFile,
   attachments = null,
   updateAttachments = null,
   mode,
+  isEditingOther,
   setIsEditing,
   reloadRiskFile,
+  allRisks,
 }: {
   riskFile: DVRiskFile;
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
   mode: "view" | "edit";
+  isEditingOther: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
+  allRisks: SmallRisk[] | null;
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
@@ -40,6 +45,14 @@ export default function DefinitionSection({
     // await reloadRiskFile();
     setSaving(false);
     // setOpen(false);
+  };
+
+  const startEdit = () => {
+    if (isEditingOther) {
+      window.alert("You are already editing another section. Please close this section before editing another.");
+    } else {
+      setEditing(true);
+    }
   };
 
   useEffect(() => {
@@ -63,6 +76,7 @@ export default function DefinitionSection({
             setUpdatedValue={(str) => setDefinition(str || "")}
             sources={attachments}
             updateSources={updateAttachments}
+            allRisks={allRisks}
           />
         </Box>
       )}
@@ -70,7 +84,7 @@ export default function DefinitionSection({
         <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
           {!editing && (
             <>
-              <Button onClick={() => setEditing(true)}>Edit</Button>
+              <Button onClick={startEdit}>Edit</Button>
               <Box sx={{ flex: 1 }} />
             </>
           )}

@@ -311,9 +311,7 @@ export default function Attachments({
               <TableCell>
                 <Trans i18nKey="source.list.fileName">Source filename</Trans>
               </TableCell>
-              <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
-                <Trans i18nKey="source.list.type">Section</Trans>
-              </TableCell>
+              {actions && <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>Section</TableCell>}
               <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
                 <Trans i18nKey="source.list.type">Source Type</Trans>
               </TableCell>

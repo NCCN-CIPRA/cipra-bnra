@@ -5,11 +5,10 @@ import Emerging from "./Emerging/Emerging";
 import ManMade from "./ManMade/ManMade";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import NCCNLoader from "../../components/NCCNLoader";
-import { useState } from "react";
+import "./RiskAnalysisPage.css";
 
 export default function RiskAnalysisPage() {
-  const { user, hazardCatalogue, riskFile, cascades, calculation, reloadRiskFile, setIsEditing } =
+  const { user, hazardCatalogue, riskFile, cascades, calculation, reloadRiskFile, isEditing, setIsEditing } =
     useOutletContext<RiskFilePageContext>();
 
   if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD)
@@ -20,6 +19,7 @@ export default function RiskAnalysisPage() {
           cascades={cascades[riskFile.cr4de_riskfilesid].all}
           calculation={calculation}
           mode="edit"
+          isEditing={isEditing}
           setIsEditing={setIsEditing}
           reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
         />
@@ -34,6 +34,7 @@ export default function RiskAnalysisPage() {
           cascades={cascades[riskFile.cr4de_riskfilesid].all}
           calculation={calculation}
           mode="edit"
+          isEditing={isEditing}
           setIsEditing={setIsEditing}
           reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
         />
@@ -46,6 +47,7 @@ export default function RiskAnalysisPage() {
         riskFile={riskFile}
         cascades={cascades[riskFile.cr4de_riskfilesid].all}
         mode="edit"
+        isEditing={isEditing}
         setIsEditing={setIsEditing}
         reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
       />

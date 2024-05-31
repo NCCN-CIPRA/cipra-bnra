@@ -28,8 +28,10 @@ export default function CCSection({
   mode,
   attachments = null,
   updateAttachments = null,
+  isEditingOther,
   setIsEditing,
   reloadRiskFile,
+  allRisks,
 }: {
   riskFile: DVRiskFile;
   cc: DVRiskCascade<SmallRisk, unknown> | undefined;
@@ -38,8 +40,10 @@ export default function CCSection({
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  isEditingOther: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
+  allRisks: SmallRisk[] | null;
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
@@ -118,6 +122,14 @@ export default function CCSection({
     // setOpen(false);
   };
 
+  const startEdit = () => {
+    if (isEditingOther) {
+      window.alert("You are already editing another section. Please close this section before editing another.");
+    } else {
+      setEditing(true);
+    }
+  };
+
   return (
     <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
       <Box sx={{ margin: "auto", width: "750px" }}>
@@ -139,6 +151,7 @@ export default function CCSection({
               setUpdatedValue={(str) => setCCQuali(str || "")}
               sources={attachments}
               updateSources={updateAttachments}
+              allRisks={allRisks}
             />
           </Box>
         )}
@@ -146,7 +159,7 @@ export default function CCSection({
           <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
             {!editing && (
               <>
-                <Button onClick={() => setEditing(true)}>Edit</Button>
+                <Button onClick={startEdit}>Edit</Button>
                 <Box sx={{ flex: 1 }} />
                 <LoadingButton
                   color="error"

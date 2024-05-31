@@ -9,6 +9,7 @@ import { Cause, getYearlyProbability } from "../../../functions/Probability";
 import { SCENARIOS, SCENARIO_SUFFIX, getScenarioSuffix } from "../../../functions/scenarios";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import round from "../../../functions/roundNumberString";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 export default function ProbabilitySection({
   riskFile,
@@ -18,8 +19,10 @@ export default function ProbabilitySection({
   mode,
   attachments = null,
   updateAttachments = null,
+  isEditingOther,
   setIsEditing,
   reloadRiskFile,
+  allRisks,
 }: {
   riskFile: DVRiskFile;
   causes: Cause[];
@@ -28,8 +31,10 @@ export default function ProbabilitySection({
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  isEditingOther: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
+  allRisks: SmallRisk[] | null;
 }) {
   const scenarioSuffix = getScenarioSuffix(scenario);
 
@@ -98,6 +103,14 @@ export default function ProbabilitySection({
     // setOpen(false);
   };
 
+  const startEdit = () => {
+    if (isEditingOther) {
+      window.alert("You are already editing another section. Please close this section before editing another.");
+    } else {
+      setEditing(true);
+    }
+  };
+
   return (
     <>
       {!editing && (
@@ -115,6 +128,7 @@ export default function ProbabilitySection({
             setUpdatedValue={(str) => setProbQuali(str || "")}
             sources={attachments}
             updateSources={updateAttachments}
+            allRisks={allRisks}
           />
         </Box>
       )}
@@ -122,7 +136,7 @@ export default function ProbabilitySection({
         <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
           {!editing && (
             <>
-              <Button onClick={() => setEditing(true)}>Edit</Button>
+              <Button onClick={startEdit}>Edit</Button>
               <Box sx={{ flex: 1 }} />
               <LoadingButton
                 color="error"

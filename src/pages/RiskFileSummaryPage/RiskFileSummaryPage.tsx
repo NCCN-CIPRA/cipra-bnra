@@ -54,7 +54,7 @@ export default function RiskFileSummaryPage({}) {
   return (
     <Container>
       <Typography variant="h2">{riskFile.cr4de_title}</Typography>
-      <Stack direction="row" sx={{ mb: 8 }} columnGap={4}>
+      <Stack direction="row" sx={{ mb: 8, mt: 2 }} columnGap={4}>
         <Box sx={{ flex: 1 }}>
           <Stack direction="row" sx={{ mt: 1 }} columnGap={1}>
             {labels.map((l) => (
@@ -75,13 +75,13 @@ export default function RiskFileSummaryPage({}) {
               <TextInputBox
                 limitedOptions
                 initialValue={summary}
-                onSave={(str) => setSummary(str || "")}
+                setUpdatedValue={(str) => setSummary(str || "")}
                 height="600"
               />
             </Box>
           )}
         </Box>
-        <Box>
+        <Box sx={{ bgcolor: "white" }}>
           <SummaryCharts calculation={calculation} scenario={getWorstCaseScenario(calculation)} />
         </Box>
       </Stack>

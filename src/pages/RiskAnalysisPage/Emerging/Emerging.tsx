@@ -17,16 +17,18 @@ export default function Emerging({
   riskFile,
   cascades,
   mode = "view",
+  isEditing,
   setIsEditing,
   reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
   mode?: "view" | "edit";
+  isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
-  const { attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
+  const { hazardCatalogue, attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
 
   useEffect(() => {
     if (!attachments) loadAttachments();
@@ -50,8 +52,10 @@ export default function Emerging({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
+              allRisks={hazardCatalogue}
             />
           </Box>
         </Box>
@@ -64,8 +68,10 @@ export default function Emerging({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
+              allRisks={hazardCatalogue}
             />
           </Box>
         </Box>

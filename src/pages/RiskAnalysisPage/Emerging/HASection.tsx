@@ -5,21 +5,26 @@ import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 export default function HASection({
   riskFile,
   mode,
   attachments = null,
   updateAttachments = null,
+  isEditingOther,
   setIsEditing,
   reloadRiskFile,
+  allRisks,
 }: {
   riskFile: DVRiskFile;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  isEditingOther: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
+  allRisks: SmallRisk[] | null;
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
@@ -43,6 +48,14 @@ export default function HASection({
     // setOpen(false);
   };
 
+  const startEdit = () => {
+    if (isEditingOther) {
+      window.alert("You are already editing another section. Please close this section before editing another.");
+    } else {
+      setEditing(true);
+    }
+  };
+
   return (
     <>
       {!editing && (
@@ -60,6 +73,7 @@ export default function HASection({
             setUpdatedValue={(str) => setHA(str || "")}
             sources={attachments}
             updateSources={updateAttachments}
+            allRisks={allRisks}
           />
         </Box>
       )}

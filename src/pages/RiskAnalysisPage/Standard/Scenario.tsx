@@ -7,6 +7,7 @@ import TextInputBox from "../../../components/TextInputBox";
 import useAPI from "../../../hooks/useAPI";
 import { LoadingButton } from "@mui/lab";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 export default function Scenario({
   intensityParameters,
@@ -15,8 +16,10 @@ export default function Scenario({
   mode,
   attachments = null,
   updateAttachments = null,
+  isEditingOther,
   setIsEditing,
   reloadRiskFile,
+  allRisks,
 }: {
   intensityParameters: IntensityParameter[];
   riskFile: DVRiskFile;
@@ -24,8 +27,10 @@ export default function Scenario({
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  isEditingOther: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
+  allRisks: SmallRisk[] | null;
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
@@ -42,23 +47,21 @@ export default function Scenario({
 
   const getDefaultText = () => {
     const text = `
-      <p style="font-size:14px;">
-        The <i>${scenario}</i> scenario of <b>${riskFile.cr4de_title}</b> was identified as the <i>Most Relevant Scenario</i>. This means that it
-        represent the highest amount of risk (probability x impact) of the three scenarios. It can be summarized as
-        follows:
+      <p style="font-size:10pt;font-family: Arial">
+        The <i>${scenario}</i> scenario of <b>${riskFile.cr4de_title}</b> was identified as the most relevant scenario. This means that it represent the highest amount of risk (probability x impact) of the three scenarios, as visualised in the risk matrix to the right.
       </p>
       <p></p>
     `;
     const descriptions = scenarios[scenario]
       .map(
         (ip) =>
-          `<p>&nbsp;</p><p style="font-weight:bold;font-size:10pt;">
+          `<p>&nbsp;</p><p style="font-weight:bold;font-size:10pt;font-family: Arial">
           ${ip.name}
         </p>
-        <div style="font-weight:normal;font-size:10px !important;font-style:italic;margin-left:10px">
+        <div style="font-weight:normal;font-family: Arial;font-size:10px !important;font-style:italic;margin-left:10px">
           ${ip.description}
         </div>
-        <p>
+        <p style="font-size:10pt;font-family: Arial">
             ${ip.value}
           </p>
           <p></p>`
@@ -88,6 +91,14 @@ export default function Scenario({
     // setOpen(false);
   };
 
+  const startEdit = () => {
+    if (isEditingOther) {
+      window.alert("You are already editing another section. Please close this section before editing another.");
+    } else {
+      setEditing(true);
+    }
+  };
+
   return (
     <Box sx={{ borderLeft: "solid 8px " + SCENARIO_PARAMS[scenario].color, pl: 2, py: 1, mt: 2, background: "white" }}>
       {editing && (
@@ -98,6 +109,7 @@ export default function Scenario({
             setUpdatedValue={(str) => setMrsScenario(str || "")}
             sources={attachments}
             updateSources={updateAttachments}
+            allRisks={allRisks}
           />
         </Box>
       )}
@@ -107,7 +119,7 @@ export default function Scenario({
         <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
           {!editing && (
             <>
-              <Button onClick={() => setEditing(true)}>Edit</Button>
+              <Button onClick={startEdit}>Edit</Button>
               <Box sx={{ flex: 1 }} />
               <LoadingButton
                 color="error"

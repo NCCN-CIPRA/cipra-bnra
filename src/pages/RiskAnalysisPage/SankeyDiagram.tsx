@@ -98,7 +98,7 @@ export default function SankeyDiagram({
               sx={{
                 color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
                 fontWeight: selectedScenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
-                opacity: selectedScenario === SCENARIOS.CONSIDERABLE ? 1 : 0.3,
+                opacity: selectedScenario === SCENARIOS.CONSIDERABLE ? 1 : 0.15,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
                 borderRadius: "50%",
                 backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
@@ -142,7 +142,7 @@ export default function SankeyDiagram({
               sx={{
                 color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
                 fontWeight: selectedScenario === SCENARIOS.EXTREME ? "bold" : "normal",
-                opacity: selectedScenario === SCENARIOS.EXTREME ? 1 : 0.3,
+                opacity: selectedScenario === SCENARIOS.EXTREME ? 1 : 0.15,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
                 borderRadius: "50%",
                 backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,

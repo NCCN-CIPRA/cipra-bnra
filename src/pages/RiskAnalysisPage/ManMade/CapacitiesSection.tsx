@@ -7,6 +7,7 @@ import TextInputBox from "../../../components/TextInputBox";
 import useAPI from "../../../hooks/useAPI";
 import { LoadingButton } from "@mui/lab";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 export default function Scenario({
   intensityParameters,
@@ -15,8 +16,10 @@ export default function Scenario({
   mode,
   attachments = null,
   updateAttachments = null,
+  isEditingOther,
   setIsEditing,
   reloadRiskFile,
+  allRisks,
 }: {
   intensityParameters: IntensityParameter[];
   riskFile: DVRiskFile;
@@ -24,8 +27,10 @@ export default function Scenario({
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<void>);
+  isEditingOther: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
+  allRisks: SmallRisk[] | null;
 }) {
   const scenarios = unwrap(
     intensityParameters,
@@ -71,6 +76,14 @@ export default function Scenario({
     // setOpen(false);
   };
 
+  const startEdit = () => {
+    if (isEditingOther) {
+      window.alert("You are already editing another section. Please close this section before editing another.");
+    } else {
+      setEditing(true);
+    }
+  };
+
   return (
     <Box sx={{ borderLeft: "solid 8px " + SCENARIO_PARAMS[scenario].color, pl: 2, py: 1, mt: 2, background: "white" }}>
       {editing && (
@@ -100,7 +113,7 @@ export default function Scenario({
         <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
           {!editing && (
             <>
-              <Button onClick={() => setEditing(true)}>Edit</Button>
+              <Button onClick={startEdit}>Edit</Button>
               <Box sx={{ flex: 1 }} />
               <LoadingButton
                 color="error"

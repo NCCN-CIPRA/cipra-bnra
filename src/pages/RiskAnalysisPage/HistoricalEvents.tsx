@@ -8,21 +8,26 @@ import { useEffect, useState } from "react";
 import { LoadingButton } from "@mui/lab";
 import TextInputBox from "../../components/TextInputBox";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
+import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 
 export default function HistoricalEvents({
   riskFile,
   mode,
   attachments = null,
   updateAttachments = null,
+  isEditingOther,
   setIsEditing,
   reloadRiskFile,
+  allRisks,
 }: {
   riskFile: DVRiskFile;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  isEditingOther: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
+  allRisks: SmallRisk[] | null;
 }) {
   const api = useAPI();
   const [saving, setSaving] = useState(false);
@@ -39,10 +44,14 @@ export default function HistoricalEvents({
   const colorList = Object.values(colors);
 
   const handleEdit = (event: HistoricalEvent, index: number) => {
-    setEditing(index);
-    setLocation(event.location);
-    setTime(event.time);
-    setDescription(event.description);
+    if (isEditingOther) {
+      window.alert("You are already editing another section. Please close this section before editing another.");
+    } else {
+      setEditing(index);
+      setLocation(event.location);
+      setTime(event.time);
+      setDescription(event.description);
+    }
   };
 
   const saveRiskFile = async (i: number) => {
@@ -68,7 +77,7 @@ export default function HistoricalEvents({
   };
 
   return (
-    <Box sx={{ display: "flex", rowGap: 3, flexDirection: "column", mt: 2, ml: 0 }}>
+    <Box sx={{ display: "flex", rowGap: 3, flexDirection: "column", mt: 2, ml: 0 }} className="historical">
       {events.map((e, i) => {
         return (
           <Box
@@ -111,14 +120,17 @@ export default function HistoricalEvents({
                 )}
               </Stack>
               {editing === i ? (
-                <TextInputBox
-                  height="400px"
-                  initialValue={description}
-                  limitedOptions
-                  setUpdatedValue={(v) => setDescription(v || "")}
-                  sources={attachments}
-                  updateSources={updateAttachments}
-                />
+                <Box sx={{ py: 2 }}>
+                  <TextInputBox
+                    height="400px"
+                    initialValue={description}
+                    limitedOptions
+                    setUpdatedValue={(v) => setDescription(v || "")}
+                    sources={attachments}
+                    updateSources={updateAttachments}
+                    allRisks={allRisks}
+                  />
+                </Box>
               ) : (
                 <Box sx={{ ml: 4, mr: 2, my: 1 }} dangerouslySetInnerHTML={{ __html: e.description || "" }} />
               )}

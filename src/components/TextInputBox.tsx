@@ -5,6 +5,7 @@ import { Button, Stack, TextField } from "@mui/material";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
 import { Popup, ScrollView } from "devextreme-react";
 import useAPI from "../hooks/useAPI";
+import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 
 export interface TextInputBoxGetter {
   getValue: (() => string) | null;
@@ -33,6 +34,7 @@ function TextInputBox({
   disabled = false,
   reset,
   sources = null,
+  allRisks = null,
   updateSources = null,
 
   onSave,
@@ -47,6 +49,7 @@ function TextInputBox({
   debounceInterval?: number;
   disabled?: boolean | null;
   reset?: boolean;
+  allRisks?: SmallRisk[] | null;
   sources?: DVAttachment[] | null;
   updateSources?: null | (() => Promise<unknown>);
 
@@ -62,6 +65,7 @@ function TextInputBox({
   const [innerValue, setInnerValue] = useState(initialValue);
   const [debouncedValue, setDebouncedValue] = useDebounce(innerValue, debounceInterval);
   const [sourcePopupVisible, setSourcesPopupVisible] = useState(false);
+  const [riskFilesPopupVisible, setRiskFilesPopupVisible] = useState(false);
 
   useEffect(() => {
     if (onSave && debouncedValue !== savedValue) {
@@ -97,9 +101,25 @@ function TextInputBox({
     []
   );
 
+  const getRiskButtonOptions = useMemo(
+    () => ({
+      // text: "Show markup",
+      icon: "share",
+      stylingMode: "text",
+      onClick: () => {
+        setRiskFilesPopupVisible(true);
+        if (htmlEditor.current) {
+          cursor.current = htmlEditor.current.instance.getSelection()?.index || 0;
+        }
+      },
+    }),
+    []
+  );
+
   const popupHiding = useCallback(() => {
     setSourcesPopupVisible(false);
-  }, [setSourcesPopupVisible]);
+    setRiskFilesPopupVisible(false);
+  }, [setSourcesPopupVisible, setRiskFilesPopupVisible]);
 
   const insertSourceButtonClick = (a: DVAttachment) => {
     if (!htmlEditor.current || sources === null) return;
@@ -121,12 +141,30 @@ function TextInputBox({
     }
 
     htmlEditor.current.instance.insertEmbed(cursor.current, "link", {
+      class: "ref-link",
       href: `#ref-${ref}`,
       text: `(${ref})`,
       target: null,
+      font: "Arial",
+      size: "10pt",
     });
 
-    setSourcesPopupVisible(false);
+    popupHiding();
+  };
+
+  const insertRiskFileButtonClick = (a: SmallRisk) => {
+    if (!htmlEditor.current || sources === null) return;
+
+    htmlEditor.current.instance.insertEmbed(cursor.current, "link", {
+      class: "risk-link",
+      href: `/risks/${a.cr4de_riskfilesid}`,
+      text: a.cr4de_title,
+      target: "_blank",
+      font: "Arial",
+      size: "10pt",
+    });
+
+    popupHiding();
   };
 
   // @ts-ignore-next-line
@@ -200,8 +238,9 @@ function TextInputBox({
           {!limitedOptions && <Item name="insertColumnLeft" />}
           {!limitedOptions && <Item name="insertColumnRight" />}
           {!limitedOptions && <Item name="deleteColumn" />}
-          {sources !== null && <Item name="separator" />}
+          {sources !== null || (allRisks !== null && <Item name="separator" />)}
           {sources !== null && <Item widget="dxButton" options={getSourcesButtonOptions} />}
+          {allRisks !== null && <Item widget="dxButton" options={getRiskButtonOptions} />}
         </Toolbar>
       </HtmlEditor>
       {sources && (
@@ -219,6 +258,31 @@ function TextInputBox({
                   {a.cr4de_name}
                 </Button>
               ))}
+            </Stack>
+          </ScrollView>
+        </Popup>
+      )}
+      {allRisks && (
+        <Popup
+          showTitle={true}
+          title="Insert Risk File Link"
+          visible={riskFilesPopupVisible}
+          onHiding={popupHiding}
+          showCloseButton={true}
+        >
+          <ScrollView>
+            <Stack direction="column">
+              {allRisks
+                .sort((a, b) => (a.cr4de_hazard_id < b.cr4de_hazard_id ? -1 : 1))
+                .map((a) => (
+                  <Button
+                    id={a.cr4de_riskfilesid}
+                    onClick={() => insertRiskFileButtonClick(a)}
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    {a.cr4de_hazard_id} - {a.cr4de_title}
+                  </Button>
+                ))}
             </Stack>
           </ScrollView>
         </Popup>

@@ -23,6 +23,7 @@ import CCSection from "./CCSection";
 import Bibliography from "../Bibliography";
 import SankeyDiagram from "../SankeyDiagram";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
+import DisclaimerSection from "../DisclaimerSection";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -41,6 +42,7 @@ export default function Standard({
   calculation,
   cascades,
   mode = "view",
+  isEditing,
   setIsEditing,
   reloadRiskFile,
 }: {
@@ -48,10 +50,11 @@ export default function Standard({
   calculation: RiskCalculation;
   cascades: DVRiskCascade<SmallRisk>[];
   mode?: "view" | "edit";
+  isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
-  const { attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
+  const { hazardCatalogue, attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
 
   useEffect(() => {
     if (!attachments) loadAttachments();
@@ -128,8 +131,10 @@ export default function Standard({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
+              allRisks={hazardCatalogue}
             />
           </Box>
         </Box>
@@ -142,8 +147,10 @@ export default function Standard({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
+              allRisks={hazardCatalogue}
             />
           </Box>
         )}
@@ -163,11 +170,24 @@ export default function Standard({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
+              allRisks={hazardCatalogue}
             />
           </Box>
         )}
+
+        <DisclaimerSection
+          riskFile={rf}
+          mode={mode}
+          attachments={attachments}
+          updateAttachments={loadAttachments}
+          isEditingOther={isEditing}
+          setIsEditing={setIsEditing}
+          reloadRiskFile={reloadRiskFile}
+          allRisks={hazardCatalogue}
+        />
 
         <Box sx={{ mt: 8, clear: "both" }}>
           <Typography variant="h5">Probability Assessment</Typography>
@@ -180,8 +200,10 @@ export default function Standard({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
+              allRisks={hazardCatalogue}
             />
           </Box>
         </Box>
@@ -198,8 +220,10 @@ export default function Standard({
             mode={mode}
             attachments={attachments}
             updateAttachments={loadAttachments}
+            isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
+            allRisks={hazardCatalogue}
           />
 
           <ImpactSection
@@ -211,8 +235,10 @@ export default function Standard({
             mode={mode}
             attachments={attachments}
             updateAttachments={loadAttachments}
+            isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
+            allRisks={hazardCatalogue}
           />
 
           <ImpactSection
@@ -224,8 +250,10 @@ export default function Standard({
             mode={mode}
             attachments={attachments}
             updateAttachments={loadAttachments}
+            isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
+            allRisks={hazardCatalogue}
           />
 
           <ImpactSection
@@ -237,8 +265,10 @@ export default function Standard({
             mode={mode}
             attachments={attachments}
             updateAttachments={loadAttachments}
+            isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
+            allRisks={hazardCatalogue}
           />
 
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
@@ -249,8 +279,10 @@ export default function Standard({
               mode={mode}
               attachments={attachments}
               updateAttachments={loadAttachments}
+              isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
+              allRisks={hazardCatalogue}
             />
           </Box>
         </Box>
@@ -266,8 +298,10 @@ export default function Standard({
             calculation={calculation}
             attachments={attachments}
             updateAttachments={loadAttachments}
+            isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
+            allRisks={hazardCatalogue}
           />
         </Box>
 

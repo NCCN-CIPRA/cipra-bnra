@@ -10,6 +10,7 @@ import { Effect, IMPACT_CATEGORY } from "../../functions/Impact";
 import { SCENARIO_SUFFIX } from "../../functions/scenarios";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import round from "../../functions/roundNumberString";
+import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 
 export default function ImpactSection({
   riskFile,
@@ -20,8 +21,10 @@ export default function ImpactSection({
   mode,
   attachments = null,
   updateAttachments = null,
+  isEditingOther,
   setIsEditing,
   reloadRiskFile,
+  allRisks,
 }: {
   riskFile: DVRiskFile;
   effects: Effect[];
@@ -31,8 +34,10 @@ export default function ImpactSection({
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
+  isEditingOther: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
+  allRisks: SmallRisk[] | null;
 }) {
   const impactLetter = impactName[0] as "h" | "s" | "e" | "f";
   const impactLetterUC = impactLetter.toUpperCase() as IMPACT_CATEGORY;
@@ -59,7 +64,7 @@ export default function ImpactSection({
 
   const getDefaultText = () => {
     const text = `
-          <p style="font-size:14px;">
+          <p style="font-size:10pt;font-family: Arial">
           The ${impactName} impact represents an estimated <b>${round(
       (100 * impactTI) / calc.ti
     )}%</b> of the total impact of an
@@ -72,10 +77,10 @@ export default function ImpactSection({
       .map((e, i) => {
         const riskName = e.id ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>` : e.name;
 
-        return `<p style="font-weight:bold;font-size:14px;">
+        return `<p style="font-weight:bold;font-size:10pt;font-family: Arial"">
                     ${i + 1}. ${riskName} 
                     </p>
-                    <p style="font-size:14px;">
+                    <p style="font-size:10pt;font-family: Arial">
                       <b>${round(100 * e[impactLetter])}%</b> of total ${impactName} impact -
                       <b>${round((100 * (e[impactLetter] * impactTI)) / calc.ti)}%</b> of total impact
                     </p>
@@ -114,6 +119,14 @@ export default function ImpactSection({
     // setOpen(false);
   };
 
+  const startEdit = () => {
+    if (isEditingOther) {
+      window.alert("You are already editing another section. Please close this section before editing another.");
+    } else {
+      setEditing(true);
+    }
+  };
+
   return (
     <Box
       sx={{ borderLeft: "solid 8px " + getImpactColor(impactLetterUC), px: 2, py: 1, mt: 2, backgroundColor: "white" }}
@@ -137,6 +150,7 @@ export default function ImpactSection({
             setUpdatedValue={(str) => setIQuali(str || "")}
             sources={attachments}
             updateSources={updateAttachments}
+            allRisks={allRisks}
           />
         </Box>
       )}
@@ -144,7 +158,7 @@ export default function ImpactSection({
         <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
           {!editing && (
             <>
-              <Button onClick={() => setEditing(true)}>Edit</Button>
+              <Button onClick={startEdit}>Edit</Button>
               <Box sx={{ flex: 1 }} />
               <LoadingButton
                 color="error"

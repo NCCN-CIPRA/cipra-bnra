@@ -8,6 +8,7 @@ import useAPI from "../../../hooks/useAPI";
 import { Cause } from "../../../functions/Probability";
 import { SCENARIO_SUFFIX } from "../../../functions/scenarios";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 export default function IntelligenceSection({
   riskFile,
@@ -17,8 +18,10 @@ export default function IntelligenceSection({
   mode,
   attachments = null,
   updateAttachments = null,
+  isEditingOther,
   setIsEditing,
   reloadRiskFile,
+  allRisks,
 }: {
   riskFile: DVRiskFile;
   causes: Cause[];
@@ -27,8 +30,10 @@ export default function IntelligenceSection({
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<void>);
+  isEditingOther: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
+  allRisks: SmallRisk[] | null;
 }) {
   const getDefaultText = () => {
     return riskFile[`cr4de_dp_quali${MRSSuffix}`] || "";
@@ -59,6 +64,14 @@ export default function IntelligenceSection({
     // setOpen(false);
   };
 
+  const startEdit = () => {
+    if (isEditingOther) {
+      window.alert("You are already editing another section. Please close this section before editing another.");
+    } else {
+      setEditing(true);
+    }
+  };
+
   return (
     <>
       {!editing && (
@@ -76,6 +89,7 @@ export default function IntelligenceSection({
             setUpdatedValue={(str) => setProbQuali(str || "")}
             sources={attachments}
             updateSources={updateAttachments}
+            allRisks={allRisks}
           />
         </Box>
       )}
@@ -83,7 +97,7 @@ export default function IntelligenceSection({
         <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
           {!editing && (
             <>
-              <Button onClick={() => setEditing(true)}>Edit</Button>
+              <Button onClick={startEdit}>Edit</Button>
               <Box sx={{ flex: 1 }} />
               <LoadingButton
                 color="error"
