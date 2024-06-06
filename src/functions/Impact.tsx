@@ -6,6 +6,9 @@ import { SCENARIO_SUFFIX } from "./scenarios";
 export type Effect = {
   id: string | null;
   name: string;
+
+  cp: number;
+
   ha: number;
   hb: number;
   hc: number;
@@ -20,6 +23,7 @@ export type Effect = {
   s: number;
   e: number;
   f: number;
+  i: number;
   quali?: string | null;
   quali_cause?: string | null;
 
@@ -88,6 +92,9 @@ export function getDirectImpact(c: RiskCalculation, rf: DVRiskFile, scenarioSuff
   return {
     id: null,
     name: "Direct Impact",
+
+    cp: c[`dp${scenarioSuffix}`] / c[`tp${scenarioSuffix}`],
+
     ha: c[`di_Ha${scenarioSuffix}`] / c[`ti_Ha${scenarioSuffix}`],
     hb: c[`di_Hb${scenarioSuffix}`] / c[`ti_Hb${scenarioSuffix}`],
     hc: c[`di_Hc${scenarioSuffix}`] / c[`ti_Hc${scenarioSuffix}`],
@@ -116,6 +123,8 @@ export function getDirectImpact(c: RiskCalculation, rf: DVRiskFile, scenarioSuff
       (c[`di_Fa${scenarioSuffix}`] + c[`di_Fb${scenarioSuffix}`]) /
       (c[`ti_Fa${scenarioSuffix}`] + c[`ti_Fb${scenarioSuffix}`]),
 
+    i: c[`di${scenarioSuffix}`] / c[`ti${scenarioSuffix}`],
+
     quali_h: rf[`cr4de_di_quali_h${scenarioSuffix}`],
     quali_s: rf[`cr4de_di_quali_s${scenarioSuffix}`],
     quali_e: rf[`cr4de_di_quali_e${scenarioSuffix}`],
@@ -129,9 +138,14 @@ export function getIndirectImpact(
   scenarioSuffix: SCENARIO_SUFFIX,
   cascade?: DVRiskCascade
 ): Effect {
+  const scenarioLetter = scenarioSuffix[1] as "c" | "m" | "e";
+
   return {
     id: c.effect.riskId,
     name: c.effect.riskTitle,
+
+    cp: c[`${scenarioLetter}2c`] + c[`${scenarioLetter}2m`] + c[`${scenarioLetter}2e`],
+
     ha: c[`ii_Ha${scenarioSuffix}`] / tot[`ti_Ha${scenarioSuffix}`],
     hb: c[`ii_Hb${scenarioSuffix}`] / tot[`ti_Hb${scenarioSuffix}`],
     hc: c[`ii_Hc${scenarioSuffix}`] / tot[`ti_Hc${scenarioSuffix}`],
@@ -159,6 +173,8 @@ export function getIndirectImpact(
     f:
       (c[`ii_Fa${scenarioSuffix}`] + c[`ii_Fb${scenarioSuffix}`]) /
       (tot[`ti_Fa${scenarioSuffix}`] + tot[`ti_Fb${scenarioSuffix}`]),
+
+    i: c[`ii${scenarioSuffix}`] / tot[`ti${scenarioSuffix}`],
 
     quali: (cascade && cascade.cr4de_quali) || "",
     quali_cause: cascade && cascade.cr4de_quali_cause,

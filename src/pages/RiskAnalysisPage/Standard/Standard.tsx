@@ -11,7 +11,7 @@ import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { useEffect, useMemo } from "react";
 import ProbabilitySection from "./ProbabilitySection";
-import ImpactSection from "../ImpactSection";
+import ImpactSection from "./ImpactSection";
 import { Link, useOutletContext } from "react-router-dom";
 import DefinitionSection from "../DefinitionSection";
 import CBSection from "./CBSection";
@@ -117,8 +117,9 @@ export default function Standard({
       </Typography> */}
 
       <Box sx={{ mb: 10 }}>
-        <Typography variant="h3" sx={{ mb: 4 }}>
-          {rf.cr4de_title}
+        <Typography variant="h3">{rf.cr4de_title}</Typography>
+        <Typography variant="subtitle2" color="secondary" sx={{ mb: 4 }}>
+          Standard Risk File
         </Typography>
 
         <SankeyDiagram calculation={calculation} debug={mode === "edit"} scenario={MRS} />

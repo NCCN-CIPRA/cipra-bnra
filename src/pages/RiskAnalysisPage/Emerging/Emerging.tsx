@@ -39,8 +39,9 @@ export default function Emerging({
   return (
     <>
       <Box sx={{ mb: 10 }}>
-        <Typography variant="h3" sx={{ mb: 4 }}>
-          {rf.cr4de_title}
+        <Typography variant="h3">{rf.cr4de_title}</Typography>
+        <Typography variant="subtitle2" color="secondary" sx={{ mb: 4 }}>
+          Emerging Risk File
         </Typography>
 
         <Box sx={{ mt: 2 }}>

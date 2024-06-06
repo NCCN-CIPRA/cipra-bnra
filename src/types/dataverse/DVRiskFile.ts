@@ -72,6 +72,7 @@ export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableF
   cr4de_mrs_impact_s: string | null;
   cr4de_mrs_impact_e: string | null;
   cr4de_mrs_impact_f: string | null;
+  cr4de_mrs_actions: string | null;
   cr4de_mrs_cc: string | null;
 
   cr4de_subjective_importance: number;

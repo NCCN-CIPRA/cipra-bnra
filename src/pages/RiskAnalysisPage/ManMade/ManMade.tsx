@@ -9,7 +9,6 @@ import { Cause } from "../../../functions/Probability";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { useEffect, useMemo } from "react";
-import ImpactSection from "../ImpactSection";
 import { Link, useOutletContext } from "react-router-dom";
 import DefinitionSection from "../DefinitionSection";
 import CapacitiesSection from "./CapacitiesSection";
@@ -20,6 +19,7 @@ import useRecords from "../../../hooks/useRecords";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import SankeyDiagram from "../SankeyDiagram";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
+import ActionsSection from "./ActionsSection";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -94,8 +94,9 @@ export default function ManMade({
       </Typography> */}
 
       <Box sx={{ mb: 10 }}>
-        <Typography variant="h3" sx={{ mb: 4 }}>
-          {rf.cr4de_title}
+        <Typography variant="h3">{rf.cr4de_title}</Typography>
+        <Typography variant="subtitle2" color="secondary" sx={{ mb: 4 }}>
+          Malicious Actor Risk File
         </Typography>
 
         <SankeyDiagram calculation={calculation} debug={mode === "edit"} manmade scenario={MRS} />
@@ -156,58 +157,12 @@ export default function ManMade({
         </Box>
 
         <Box sx={{ mt: 8 }}>
-          <Typography variant="h5">Impact Assessment</Typography>
+          <Typography variant="h5">Prefered Malicious Actions</Typography>
 
-          <ImpactSection
+          <ActionsSection
             riskFile={rf}
             effects={effects}
             scenarioSuffix={MRSSuffix}
-            impactName="human"
-            calc={calculation}
-            mode={mode}
-            attachments={attachments}
-            updateAttachments={loadAttachments}
-            isEditingOther={isEditing}
-            setIsEditing={setIsEditing}
-            reloadRiskFile={reloadRiskFile}
-            allRisks={hazardCatalogue}
-          />
-
-          <ImpactSection
-            riskFile={rf}
-            effects={effects}
-            scenarioSuffix={MRSSuffix}
-            impactName="societal"
-            calc={calculation}
-            mode={mode}
-            attachments={attachments}
-            updateAttachments={loadAttachments}
-            isEditingOther={isEditing}
-            setIsEditing={setIsEditing}
-            reloadRiskFile={reloadRiskFile}
-            allRisks={hazardCatalogue}
-          />
-
-          <ImpactSection
-            riskFile={rf}
-            effects={effects}
-            scenarioSuffix={MRSSuffix}
-            impactName="environmental"
-            calc={calculation}
-            mode={mode}
-            attachments={attachments}
-            updateAttachments={loadAttachments}
-            isEditingOther={isEditing}
-            setIsEditing={setIsEditing}
-            reloadRiskFile={reloadRiskFile}
-            allRisks={hazardCatalogue}
-          />
-
-          <ImpactSection
-            riskFile={rf}
-            effects={effects}
-            scenarioSuffix={MRSSuffix}
-            impactName="financial"
             calc={calculation}
             mode={mode}
             attachments={attachments}
