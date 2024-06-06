@@ -43,7 +43,7 @@ export default function ManMade({
   reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
-  cascades: DVRiskCascade<SmallRisk>[];
+  cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
   calculation: RiskCalculation;
   mode?: "view" | "edit";
   isEditing: boolean;
@@ -73,25 +73,6 @@ export default function ManMade({
       ),
     [cascades]
   );
-
-  const causes: Cause[] = [
-    {
-      id: null,
-      name: "No underlying cause",
-      p: calculation[`dp${MRSSuffix}`],
-      quali: rf[`cr4de_dp_quali${MRSSuffix}`],
-    },
-    ...(calculation.causes
-      .filter((c) => c[`ip${MRSSuffix}`] !== 0)
-      .map((c) => {
-        return {
-          id: c.cause.riskId,
-          name: c.cause.riskTitle,
-          p: c[`ip${MRSSuffix}`],
-          quali: cDict[c.cascadeId].cr4de_quali,
-        };
-      }) || []),
-  ].sort((a, b) => b.p - a.p);
 
   const effects = [
     getDirectImpact(calculation, riskFile, MRSSuffix),
@@ -157,7 +138,6 @@ export default function ManMade({
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
             <IntelligenceSection
               riskFile={rf}
-              causes={causes}
               MRSSuffix={MRSSuffix}
               calc={calculation}
               mode={mode}
@@ -251,7 +231,12 @@ export default function ManMade({
           </Box>
         </Box>
 
-        <Bibliography riskFile={riskFile} attachments={attachments} reloadAttachments={loadAttachments} />
+        <Bibliography
+          riskFile={riskFile}
+          cascades={cascades}
+          attachments={attachments}
+          reloadAttachments={loadAttachments}
+        />
       </Box>
     </>
   );

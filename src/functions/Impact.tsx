@@ -21,6 +21,8 @@ export type Effect = {
   e: number;
   f: number;
   quali?: string | null;
+  quali_cause?: string | null;
+
   quali_h?: string | null;
   quali_s?: string | null;
   quali_e?: string | null;
@@ -159,6 +161,7 @@ export function getIndirectImpact(
       (tot[`ti_Fa${scenarioSuffix}`] + tot[`ti_Fb${scenarioSuffix}`]),
 
     quali: (cascade && cascade.cr4de_quali) || "",
+    quali_cause: cascade && cascade.cr4de_quali_cause,
   };
 }
 

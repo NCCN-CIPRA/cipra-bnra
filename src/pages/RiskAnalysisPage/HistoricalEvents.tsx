@@ -132,7 +132,11 @@ export default function HistoricalEvents({
                   />
                 </Box>
               ) : (
-                <Box sx={{ ml: 4, mr: 2, my: 1 }} dangerouslySetInnerHTML={{ __html: e.description || "" }} />
+                <Box
+                  className="htmleditor"
+                  sx={{ ml: 4, mr: 2, my: 1 }}
+                  dangerouslySetInnerHTML={{ __html: e.description || "" }}
+                />
               )}
             </Stack>
             {mode === "edit" && (editing < 0 || editing === i) && (

@@ -35,6 +35,7 @@ export interface RiskPageContext {
 
   loadRiskFile: (params: Partial<GetRecordParams<DVRiskFile<any>>>) => Promise<void>;
   reloadRiskFile: (params: Partial<GetRecordParams<DVRiskFile<any>>>) => Promise<void>;
+  reloadCascades: (riskFile: DVRiskFile) => Promise<void>;
 }
 
 export default function BaseRisksPage() {
@@ -53,7 +54,7 @@ export default function BaseRisksPage() {
   }, [user, refreshUser]);
 
   const [riskFiles, setRiskFiles] = useState<{ [id: string]: DVRiskFile }>({});
-  // const [srf, setSRF] = useState<{ [id: string]: SmallRisk }>({});
+  const [srf, setSRF] = useState<{ [id: string]: SmallRisk } | null>(null);
   const [cascades, setCascades] = useState({});
   const [analyses, setAnalyses] = useState({});
 
@@ -66,7 +67,7 @@ export default function BaseRisksPage() {
     query:
       "$orderby=cr4de_hazard_id&$select=cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_risk_category,cr4de_definition",
     transformResult: (data) => data.filter((r: SmallRisk) => !r.cr4de_hazard_id.startsWith("X")),
-    // onComplete: async (results) => setSRF(results.reduce((acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }), {})),
+    onComplete: async (results) => setSRF(results.reduce((acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }), {})),
   });
 
   const onCompleteRiskFile = async (rfResult: DVRiskFile<DVAnalysisRun<unknown, string>>) => {
@@ -77,43 +78,64 @@ export default function BaseRisksPage() {
     });
   };
 
-  const onCompleteReloadAll = async (rfResult: DVRiskFile<DVAnalysisRun<unknown, string>>) => {
-    const hc: { [id: string]: SmallRisk } = (await hcPromise).reduce(
-      (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),
-      {}
-    );
+  const onCompleteCascades = (riskFile: DVRiskFile) => async (rcResult: DVRiskCascade<SmallRisk, SmallRisk>[]) => {
+    const hc: { [id: string]: SmallRisk } =
+      srf || (await hcPromise).reduce((acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }), {});
 
-    loadRiskCascades({
-      query: `$filter=_cr4de_cause_hazard_value eq '${rfResult.cr4de_riskfilesid}' or _cr4de_effect_hazard_value eq '${rfResult.cr4de_riskfilesid}'`,
-      transformResult: (results: DVRiskCascade[]) =>
-        results.map((r) => {
-          return {
-            ...r,
-            cr4de_cause_hazard: hc[r._cr4de_cause_hazard_value],
-            cr4de_effect_hazard: hc[r._cr4de_effect_hazard_value],
-          };
-        }),
-      onComplete: async (rcResult: DVRiskCascade<SmallRisk, SmallRisk>[]) => {
-        const causes = getCauses(rfResult, rcResult, hc);
-        const effects = getEffects(rfResult, rcResult);
-        const catalyzingEffects = getCatalyzingEffects(rfResult, rcResult, hc);
-        const climateChange = getClimateChange(rfResult, rcResult, hc);
+    const causes = getCauses(riskFile, rcResult, hc);
+    const effects = getEffects(riskFile, rcResult);
+    const catalyzingEffects = getCatalyzingEffects(riskFile, rcResult, hc);
+    const climateChange = getClimateChange(riskFile, rcResult, hc);
 
-        await onCompleteRiskFile(rfResult);
-
-        setCascades({
-          ...cascades,
-          [rfResult.cr4de_riskfilesid]: {
-            all: rcResult,
-            causes,
-            effects,
-            catalyzingEffects,
-            climateChange,
-          },
-        });
+    setCascades({
+      ...cascades,
+      [riskFile.cr4de_riskfilesid]: {
+        all: rcResult,
+        causes,
+        effects,
+        catalyzingEffects,
+        climateChange,
       },
     });
   };
+
+  // const onCompleteReloadAll = async (rfResult: DVRiskFile<DVAnalysisRun<unknown, string>>) => {
+  //   const hc: { [id: string]: SmallRisk } = (await hcPromise).reduce(
+  //     (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),
+  //     {}
+  //   );
+
+  //   loadRiskCascades({
+  //     query: `$filter=_cr4de_cause_hazard_value eq '${rfResult.cr4de_riskfilesid}' or _cr4de_effect_hazard_value eq '${rfResult.cr4de_riskfilesid}'`,
+  //     transformResult: (results: DVRiskCascade[]) =>
+  //       results.map((r) => {
+  //         return {
+  //           ...r,
+  //           cr4de_cause_hazard: hc[r._cr4de_cause_hazard_value],
+  //           cr4de_effect_hazard: hc[r._cr4de_effect_hazard_value],
+  //         };
+  //       }),
+  //     onComplete: async (rcResult: DVRiskCascade<SmallRisk, SmallRisk>[]) => {
+  //       const causes = getCauses(rfResult, rcResult, hc);
+  //       const effects = getEffects(rfResult, rcResult);
+  //       const catalyzingEffects = getCatalyzingEffects(rfResult, rcResult, hc);
+  //       const climateChange = getClimateChange(rfResult, rcResult, hc);
+
+  //       await onCompleteRiskFile(rfResult);
+
+  //       setCascades({
+  //         ...cascades,
+  //         [rfResult.cr4de_riskfilesid]: {
+  //           all: rcResult,
+  //           causes,
+  //           effects,
+  //           catalyzingEffects,
+  //           climateChange,
+  //         },
+  //       });
+  //     },
+  //   });
+  // };
 
   const { getData: loadRiskFile, isFetching: loadingRiskFile } = useLazyRecord<
     DVRiskFile<DVAnalysisRun<unknown, string>>
@@ -121,7 +143,6 @@ export default function BaseRisksPage() {
     table: DataTable.RISK_FILE,
     id: "",
     query: "$expand=cr4de_latest_calculation",
-    onComplete: onCompleteReloadAll,
   });
 
   const { getData: loadRiskCascades } = useLazyRecords<DVRiskCascade<SmallRisk, SmallRisk>>({
@@ -142,11 +163,59 @@ export default function BaseRisksPage() {
         reloadHazardCatalogue,
         loadRiskFile: (params: GetRecordParams<DVRiskFile<any>>) => {
           if (!riskFiles[params.id] && !loadingRiskFile) {
-            loadRiskFile({ onComplete: onCompleteReloadAll, ...params });
+            loadRiskFile({
+              onComplete: async (rfResult: DVRiskFile<DVAnalysisRun<unknown, string>>) => {
+                const hc: { [id: string]: SmallRisk } =
+                  srf || (await hcPromise).reduce((acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }), {});
+
+                loadRiskCascades({
+                  query: `$filter=_cr4de_cause_hazard_value eq '${rfResult.cr4de_riskfilesid}' or _cr4de_effect_hazard_value eq '${rfResult.cr4de_riskfilesid}'`,
+                  transformResult: (results: DVRiskCascade[]) =>
+                    results.map((r) => {
+                      return {
+                        ...r,
+                        cr4de_cause_hazard: hc[r._cr4de_cause_hazard_value],
+                        cr4de_effect_hazard: hc[r._cr4de_effect_hazard_value],
+                      };
+                    }),
+                  onComplete: async (rcResult: DVRiskCascade<SmallRisk, SmallRisk>[]) => {
+                    await onCompleteCascades(rfResult)(rcResult);
+                    await onCompleteRiskFile(rfResult);
+                  },
+                });
+
+                if (params.onComplete) return params.onComplete(rfResult);
+              },
+              ...params,
+            });
           }
         },
         reloadRiskFile: (params: GetRecordParams<DVRiskFile<any>>) =>
-          loadRiskFile({ onComplete: onCompleteRiskFile, ...params }),
+          loadRiskFile({
+            onComplete: async (rfResult: DVRiskFile<DVAnalysisRun<unknown, string>>) => {
+              await onCompleteRiskFile(rfResult);
+
+              if (params.onComplete) return params.onComplete(rfResult);
+            },
+            ...params,
+          }),
+        reloadCascades: async (riskFile: DVRiskFile) => {
+          const hc: { [id: string]: SmallRisk } =
+            srf || (await hcPromise).reduce((acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }), {});
+
+          loadRiskCascades({
+            query: `$filter=_cr4de_cause_hazard_value eq '${riskFile.cr4de_riskfilesid}' or _cr4de_effect_hazard_value eq '${riskFile.cr4de_riskfilesid}'`,
+            transformResult: (results: DVRiskCascade[]) =>
+              results.map((r) => {
+                return {
+                  ...r,
+                  cr4de_cause_hazard: hc[r._cr4de_cause_hazard_value],
+                  cr4de_effect_hazard: hc[r._cr4de_effect_hazard_value],
+                };
+              }),
+            onComplete: onCompleteCascades(riskFile),
+          });
+        },
         riskFiles,
         cascades,
         analyses,

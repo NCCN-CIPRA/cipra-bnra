@@ -48,7 +48,7 @@ export default function Standard({
 }: {
   riskFile: DVRiskFile;
   calculation: RiskCalculation;
-  cascades: DVRiskCascade<SmallRisk>[];
+  cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
   mode?: "view" | "edit";
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
@@ -335,7 +335,12 @@ export default function Standard({
           </Box>
         )}
 
-        <Bibliography riskFile={riskFile} attachments={attachments} reloadAttachments={loadAttachments} />
+        <Bibliography
+          riskFile={riskFile}
+          cascades={cascades}
+          attachments={attachments}
+          reloadAttachments={loadAttachments}
+        />
       </Box>
     </>
   );

@@ -27,8 +27,8 @@ export default function HazardCataloguePage() {
 
   return (
     <>
-      <Box sx={{ mb: 2, mx: 8 }}>
-        <TableContainer component={Paper} sx={{ height: "calc(100vh - 240px)", width: "100%" }}>
+      <Box sx={{ mb: 8, mx: 8 }}>
+        <TableContainer component={Paper} sx={{ width: "100%" }}>
           <Table>
             <TableHead>
               <TableCell sx={{ pr: 4 }}>ID</TableCell>

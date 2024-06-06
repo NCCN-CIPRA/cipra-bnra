@@ -12,6 +12,7 @@ import Bibliography from "../Bibliography";
 import { useOutletContext } from "react-router-dom";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import { useEffect } from "react";
+import CatalyzingSection from "./CatalyzingSection";
 
 export default function Emerging({
   riskFile,
@@ -28,14 +29,12 @@ export default function Emerging({
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
-  const { hazardCatalogue, attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
+  const { hazardCatalogue, attachments, loadAttachments, reloadCascades } = useOutletContext<RiskFilePageContext>();
 
   useEffect(() => {
     if (!attachments) loadAttachments();
   }, []);
   const rf = riskFile;
-
-  const catalyzing = cascades.filter((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid);
 
   return (
     <>
@@ -79,27 +78,23 @@ export default function Emerging({
         <Box sx={{ mt: 8 }}>
           <Typography variant="h5">Catalysing Effects</Typography>
 
-          {catalyzing.map((c, i) => (
-            <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, px: 2, py: 1, backgroundColor: "white" }}>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                {c.cr4de_effect_hazard.cr4de_title}
-              </Typography>
-              <Typography variant="subtitle2" sx={{ pl: 0 }}>
-                {c.cr4de_cause_hazard.cr4de_title} panel:
-              </Typography>
-              <Box
-                sx={{ pl: 2, mb: 2, borderBottom: "1px solid #eee" }}
-                dangerouslySetInnerHTML={{ __html: c.cr4de_quali_cause || "" }}
-              />
-              <Typography variant="subtitle2" sx={{ pl: 0 }}>
-                {c.cr4de_effect_hazard.cr4de_title} panel:
-              </Typography>
-              <Box sx={{ pl: 2 }} dangerouslySetInnerHTML={{ __html: c.cr4de_quali || "" }} />
-            </Box>
-          ))}
+          <CatalyzingSection
+            riskFile={rf}
+            cascades={cascades}
+            mode={mode}
+            isEditingOther={isEditing}
+            setIsEditing={setIsEditing}
+            reloadCascades={reloadCascades}
+            allRisks={hazardCatalogue}
+          />
         </Box>
 
-        <Bibliography riskFile={riskFile} attachments={attachments} reloadAttachments={loadAttachments} />
+        <Bibliography
+          riskFile={riskFile}
+          cascades={cascades}
+          attachments={attachments}
+          reloadAttachments={loadAttachments}
+        />
       </Box>
     </>
   );

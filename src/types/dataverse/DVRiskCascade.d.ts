@@ -18,6 +18,9 @@ export interface DVRiskCascade<CauseType = unknown, EffectType = unknown> {
   cr4de_e2m: string | null;
   cr4de_e2e: string | null;
 
+  // Qualitative input given by the experts on the causing risk
+  cr4de_quali_cause: string | null;
+  // Qualitative input given by the experts on the effect risk
   cr4de_quali: string | null;
 
   cr4de_c2c_cause: string | null;
@@ -30,11 +33,12 @@ export interface DVRiskCascade<CauseType = unknown, EffectType = unknown> {
   cr4de_e2m_cause: string | null;
   cr4de_e2e_cause: string | null;
 
-  cr4de_quali_cause: string | null;
-
   cr4de_discussion_required: string | null;
 
   cr4de_discussion_required_cause: string | null;
 
   cr4de_damp: boolean | null;
+
+  // Consolidated description of the catalyzing effect for the BE Report
+  cr4de_description: string | null;
 }

@@ -77,7 +77,28 @@ export default function ImpactSection({
       .map((e, i) => {
         const riskName = e.id ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>` : e.name;
 
-        return `<p style="font-weight:bold;font-size:10pt;font-family: Arial"">
+        if (e.quali_cause) {
+          return `<p style="font-weight:bold;font-size:10pt;font-family: Arial"">
+                    ${i + 1}. ${riskName} 
+                    </p>
+                    <p style="font-size:10pt;font-family: Arial">
+                      <b>${round(100 * e[impactLetter])}%</b> of total ${impactName} impact -
+                      <b>${round((100 * (e[impactLetter] * impactTI)) / calc.ti)}%</b> of total impact
+                    </p>
+                    <p><br></p>
+                    <p style="font-size: 8pt;margin-bottom:0px;text-decoration:underline">Input from the ${
+                      riskFile.cr4de_title
+                    } panel:</p>
+                    ${e.quali_cause || e[`quali_${impactLetter}`]}
+                    <p><br></p>
+                    <p style="font-size: 8pt;margin-bottom:0px;text-decoration:underline">Input from the ${
+                      e.name
+                    } panel:</p>
+                    ${e.quali || e[`quali_${impactLetter}`]}
+                    <p><br></p>
+              <p><br></p>`;
+        } else {
+          return `<p style="font-weight:bold;font-size:10pt;font-family: Arial"">
                     ${i + 1}. ${riskName} 
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
@@ -88,6 +109,7 @@ export default function ImpactSection({
                     ${e.quali || e[`quali_${impactLetter}`]}
                     <p><br></p>
               <p><br></p>`;
+        }
       })
       .join("\n");
 

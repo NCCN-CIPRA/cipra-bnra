@@ -12,7 +12,6 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 export default function IntelligenceSection({
   riskFile,
-  causes,
   MRSSuffix,
   calc,
   mode,
@@ -24,7 +23,6 @@ export default function IntelligenceSection({
   allRisks,
 }: {
   riskFile: DVRiskFile;
-  causes: Cause[];
   MRSSuffix: SCENARIO_SUFFIX;
   calc: RiskCalculation;
   mode: "view" | "edit";

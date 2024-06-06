@@ -39,6 +39,8 @@ import { DVValidation } from "../types/dataverse/DVValidation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
+import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 
 const fieldIndex = {
   definition: 0,
@@ -58,6 +60,7 @@ export default function Attachments({
   children,
   field,
   riskFile,
+  cascades = null,
   validation,
   isExternal = false,
   alwaysOpen = false,
@@ -68,6 +71,7 @@ export default function Attachments({
   children?: ReactNode;
   field?: string;
   riskFile?: DVRiskFile | null;
+  cascades?: DVRiskCascade<SmallRisk, SmallRisk>[] | null;
   validation?: DVValidation<DVRiskFile | undefined> | null;
   isExternal?: boolean;
   alwaysOpen?: boolean;
@@ -236,7 +240,11 @@ export default function Attachments({
             <Trans i18nKey="source.dialog.cancel">Cancel</Trans>
           </Button>
           <Button onClick={handleSaveAttachment}>
-            <Trans i18nKey="source.dialog.addSource">Add source</Trans>
+            {existingId ? (
+              <Trans i18nKey="source.dialog.updateSource">Update source</Trans>
+            ) : (
+              <Trans i18nKey="source.dialog.addSource">Add source</Trans>
+            )}
           </Button>
         </DialogActions>
       </Dialog>
@@ -270,11 +278,13 @@ export default function Attachments({
       </Snackbar>
 
       <Stack direction="row" sx={{ mt: 2 }}>
-        <Tooltip title={t("source.button.attach")}>
-          <IconButton onClick={handleToggleDialog}>
-            <AttachFileIcon />
-          </IconButton>
-        </Tooltip>
+        {user?.admin && (
+          <Tooltip title={t("source.button.attach")}>
+            <IconButton onClick={handleToggleDialog}>
+              <AttachFileIcon />
+            </IconButton>
+          </Tooltip>
+        )}
         {actions &&
           actions.map((a, i) => (
             <Tooltip title={a.tooltip}>
@@ -311,7 +321,7 @@ export default function Attachments({
               <TableCell>
                 <Trans i18nKey="source.list.fileName">Source filename</Trans>
               </TableCell>
-              {actions && <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>Section</TableCell>}
+              {user?.admin && <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>Section</TableCell>}
               <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
                 <Trans i18nKey="source.list.type">Source Type</Trans>
               </TableCell>
@@ -370,8 +380,11 @@ export default function Attachments({
                         {a.cr4de_name}
                       </Link>
                     </TableCell>
-                    <TableCell>{a.cr4de_field ? a.cr4de_field : "-"}</TableCell>
-                    <TableCell>{a.cr4de_url ? t("source.type.link") : t("source.type.file")}</TableCell>
+                    {user?.admin && <TableCell>{a.cr4de_field ? a.cr4de_field : "-"}</TableCell>}
+                    <TableCell>
+                      {a.cr4de_url ? t("source.type.link") : t("source.type.file")}
+                      {user?.admin && a.cr4de_referencedSource ? "*" : ""}
+                    </TableCell>
                     <TableCell align="center" sx={{ whiteSpace: "nowrap", textAlign: "right" }}>
                       {(!isExternal || a._cr4de_owner_value === user?.contactid) && (
                         <>
