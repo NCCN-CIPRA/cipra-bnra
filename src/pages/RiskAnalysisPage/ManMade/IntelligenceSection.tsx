@@ -27,7 +27,7 @@ export default function IntelligenceSection({
   calc: RiskCalculation;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
-  updateAttachments?: null | (() => Promise<void>);
+  updateAttachments?: null | (() => Promise<unknown>);
   isEditingOther: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;

@@ -106,6 +106,8 @@ export default function ManMade({
             <DefinitionSection
               riskFile={rf}
               mode={mode}
+              attachments={attachments}
+              updateAttachments={loadAttachments}
               isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
@@ -125,6 +127,8 @@ export default function ManMade({
               riskFile={rf}
               scenario={MRS}
               mode={mode}
+              attachments={attachments}
+              updateAttachments={loadAttachments}
               isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
@@ -141,6 +145,8 @@ export default function ManMade({
               MRSSuffix={MRSSuffix}
               calc={calculation}
               mode={mode}
+              attachments={attachments}
+              updateAttachments={loadAttachments}
               isEditingOther={isEditing}
               setIsEditing={setIsEditing}
               reloadRiskFile={reloadRiskFile}
@@ -159,6 +165,8 @@ export default function ManMade({
             impactName="human"
             calc={calculation}
             mode={mode}
+            attachments={attachments}
+            updateAttachments={loadAttachments}
             isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
@@ -172,6 +180,8 @@ export default function ManMade({
             impactName="societal"
             calc={calculation}
             mode={mode}
+            attachments={attachments}
+            updateAttachments={loadAttachments}
             isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
@@ -185,6 +195,8 @@ export default function ManMade({
             impactName="environmental"
             calc={calculation}
             mode={mode}
+            attachments={attachments}
+            updateAttachments={loadAttachments}
             isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}
@@ -198,6 +210,8 @@ export default function ManMade({
             impactName="financial"
             calc={calculation}
             mode={mode}
+            attachments={attachments}
+            updateAttachments={loadAttachments}
             isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadRiskFile={reloadRiskFile}

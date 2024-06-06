@@ -82,6 +82,8 @@ export default function Emerging({
             riskFile={rf}
             cascades={cascades}
             mode={mode}
+            attachments={attachments}
+            updateAttachments={loadAttachments}
             isEditingOther={isEditing}
             setIsEditing={setIsEditing}
             reloadCascades={reloadCascades}

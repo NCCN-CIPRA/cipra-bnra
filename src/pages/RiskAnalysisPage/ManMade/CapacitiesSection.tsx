@@ -26,7 +26,7 @@ export default function Scenario({
   scenario: SCENARIOS;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
-  updateAttachments?: null | (() => Promise<void>);
+  updateAttachments?: null | (() => Promise<unknown>);
   isEditingOther: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
@@ -94,6 +94,7 @@ export default function Scenario({
             setUpdatedValue={(str) => setMrsScenario(str || null)}
             sources={attachments}
             updateSources={updateAttachments}
+            allRisks={allRisks}
           />
         </Box>
       )}

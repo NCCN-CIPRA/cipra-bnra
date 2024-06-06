@@ -187,6 +187,8 @@ export default function CatalyzingSection({
             riskFile={riskFile}
             cascade={c}
             mode={mode}
+            attachments={attachments}
+            updateAttachments={updateAttachments}
             isEditingOther={isEditingOther}
             setIsEditing={setIsEditing}
             reloadCascades={reloadCascades}
