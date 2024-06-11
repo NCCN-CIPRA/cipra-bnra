@@ -90,9 +90,13 @@ const getConsensusRiskFile = (
     : [];
 
   const scaleFactor = riskFile.cr4de_title.indexOf("International Armed") >= 0 ? IAC_FACTOR : 1;
-  const DPScaleFactor = riskFile.cr4de_title.indexOf("Meteorite") >= 0 ? METEORITE_DP_FACTOR : 1;
+  let DPScaleFactor = riskFile.cr4de_title.indexOf("Meteorite") >= 0 ? METEORITE_DP_FACTOR : 1;
   const EaScaleFactor = EA_FACTOR;
   const ExtremeFactor = riskFile.cr4de_title.indexOf("food supply") >= 0 ? FOOD_SUPPLY_FACTOR : 1;
+
+  if (riskFile.cr4de_title.indexOf("Attack") >= 0) {
+    DPScaleFactor *= ATTACK_FACTOR;
+  }
 
   if (
     (riskFile.cr4de_consensus_date && new Date(riskFile.cr4de_consensus_date) <= new Date()) ||
@@ -256,13 +260,7 @@ const getConsensusCascade = (
   ) {
     cpScaleFactor *= INFO_OPS_CP_FACTOR;
   }
-  if (
-    (["M01", "MO2", "M03", "M04", "M05"].indexOf(cause.cr4de_hazard_id) >= 0 &&
-      effect.cr4de_title.indexOf("Attack") >= 0) ||
-    effect.cr4de_title.indexOf("attack") >= 0
-  ) {
-    cpScaleFactor *= ATTACK_FACTOR;
-  }
+
   const extremeScaleFactor = effect.cr4de_title.indexOf("International Armed") >= 0 ? IAC_FACTOR : 1;
 
   if (
@@ -817,36 +815,6 @@ export default function prepareRiskFiles(
 
       ir50: 0,
     };
-
-    // if (
-    //   (cascadeCalculation.c2c +
-    //     cascadeCalculation.c2m +
-    //     cascadeCalculation.c2e +
-    //     cascadeCalculation.m2c +
-    //     cascadeCalculation.m2m +
-    //     cascadeCalculation.m2e +
-    //     cascadeCalculation.e2c +
-    //     cascadeCalculation.e2m +
-    //     cascadeCalculation.e2e) /
-    //     9 >
-    //   0.3
-    // ) {
-    //   console.log(
-    //     `${cascadeCalculation.cascadeTitle}: ${
-    //       (cascadeCalculation.c2c +
-    //         cascadeCalculation.c2m +
-    //         cascadeCalculation.c2e +
-    //         cascadeCalculation.m2c +
-    //         cascadeCalculation.m2m +
-    //         cascadeCalculation.m2e +
-    //         cascadeCalculation.e2c +
-    //         cascadeCalculation.e2m +
-    //         cascadeCalculation.e2e) /
-    //       9
-    //     }`
-    //   );
-    //   return;
-    // }
 
     cause.effects.push(cascadeCalculation);
     effect.causes.push(cascadeCalculation);

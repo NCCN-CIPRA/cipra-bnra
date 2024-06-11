@@ -8,7 +8,7 @@ import { NameType, ValueType } from "recharts/types/component/DefaultTooltipCont
 import { SCENARIOS, Scenarios, getScenarioLetter, getScenarioSuffix } from "../../functions/scenarios";
 import { getYearlyProbability } from "../../functions/Probability";
 import round from "../../functions/roundNumberString";
-import { getLargestCascade } from "../../functions/cascades";
+import { getAverageCP } from "../../functions/cascades";
 
 const baseY = 50;
 
@@ -28,7 +28,7 @@ const PSankeyNode = ({
 }: any) => {
   const navigate = useNavigate();
   const scenarioLetter = scenarioSuffix[1];
-  console.log(payload);
+
   if (payload.depth > 0) {
     return (
       <Layer key={`CustomNode${index}`} height="50px">
@@ -85,10 +85,10 @@ const PSankeyNode = ({
                     <Typography color="inherit">{payload.name}</Typography>
 
                     <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                      CP: {Math.round(1000 * payload.cpMax) / 10}% / event
+                      CP: {Math.round(1000 * payload.cpAvg) / 10}% / event
                     </Typography>
                     <Typography variant="subtitle1" sx={{ mt: 0 }}>
-                      Relative Preference: {Math.round((1000 * payload.cpMax) / totalProbability) / 10}%
+                      Relative Preference: {Math.round((1000 * payload.cpAvg) / totalProbability) / 10}%
                     </Typography>
 
                     {/* <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
@@ -141,10 +141,10 @@ const PSankeyNode = ({
                           {h.name}
                         </Typography>
                         <Typography key={h.name} variant="subtitle1" sx={{ mt: 0, ml: 1 }}>
-                          CP: {Math.round(1000 * h.cpMax) / 10}% / event
+                          CP: {Math.round(1000 * h.cpAvg) / 10}% / event
                         </Typography>
                         <Typography variant="subtitle1" sx={{ mt: 0, ml: 1 }}>
-                          Relative Preference: {Math.round((1000 * h.cpMax) / totalProbability) / 10}%
+                          Relative Preference: {Math.round((1000 * h.cpAvg) / totalProbability) / 10}%
                         </Typography>
                       </>
                     ))}
@@ -261,31 +261,31 @@ export default function ActionsSankey({
       id: e.effect.riskId,
       name: e.effect.riskTitle,
       cascade: e,
-      cpMax: e[getLargestCascade(scenarioLetter, e)],
+      cpAvg: getAverageCP(scenarioLetter, e),
     }))
-    .sort((a, b) => b.cpMax - a.cpMax);
+    .sort((a, b) => b.cpAvg - a.cpAvg);
 
   let minP = 0;
-  const totP = actions.reduce((p, e) => p + e.cpMax, 0.00000001);
+  const totP = actions.reduce((p, e) => p + e.cpAvg, 0.00000001);
 
   if (maxActions !== null) {
-    minP = actions[Math.min(maxActions - 1, actions.length - 1)].cpMax;
+    minP = actions[Math.min(maxActions - 1, actions.length - 1)].cpAvg;
   } else if (minActionPortion !== null) {
     minP = minActionPortion * totP;
   } else if (shownActionPortion !== null) {
     let cumulP = 0;
     for (let c of actions) {
-      cumulP += c.cpMax / totP;
+      cumulP += c.cpAvg / totP;
 
       if (cumulP >= shownActionPortion) {
-        minP = c.cpMax;
+        minP = c.cpAvg;
         break;
       }
     }
   }
 
-  const nodes: any[] = [{ name: calculation.riskTitle }, ...actions.filter((c) => c.cpMax >= minP)];
-  const otherActions = actions.filter((e) => e.cpMax < minP);
+  const nodes: any[] = [{ name: calculation.riskTitle }, ...actions.filter((c) => c.cpAvg >= minP)];
+  const otherActions = actions.filter((e) => e.cpAvg < minP);
 
   if (minP >= 0 && otherActions.length > 0) {
     nodes.push({
@@ -295,18 +295,18 @@ export default function ActionsSankey({
   }
 
   const links: any[] = actions
-    .filter((e) => e.cpMax >= minP)
+    .filter((e) => e.cpAvg >= minP)
     .map((e, i: number) => ({
       source: i + 1,
       target: 0,
-      value: Math.max(0.000000001, e.cpMax),
+      value: Math.max(0.000000001, e.cpAvg),
     }));
   if (minP > 0 && otherActions.length > 0)
     links.push({
       source: nodes.length - 1,
       target: 0,
-      value: actions.filter((e) => e.cpMax < minP).reduce((tot, e) => tot + e.cpMax, 0.000000001),
-      hidden: actions.filter((e) => e.cpMax < minP),
+      value: actions.filter((e) => e.cpAvg < minP).reduce((tot, e) => tot + e.cpAvg, 0.000000001),
+      hidden: actions.filter((e) => e.cpAvg < minP),
     });
 
   const data = {

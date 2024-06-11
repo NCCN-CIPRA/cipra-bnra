@@ -111,12 +111,17 @@ export function getCascadeInput(ca: DVCascadeAnalysis): CascadeAnalysisInput {
   };
 }
 
-export const getLargestCascade = (causeScenario: SCENARIO_LETTER, effect: CascadeCalculation): CASCADE_LETTER => {
+export const getAverageCP = (causeScenario: SCENARIO_LETTER, effect: CascadeCalculation): number => {
   const ii_s2c = effect[`${causeScenario}2c`] * effect.effect.ti_c;
   const ii_s2m = effect[`${causeScenario}2m`] * effect.effect.ti_m;
   const ii_s2e = effect[`${causeScenario}2e`] * effect.effect.ti_e;
 
-  if (ii_s2c > ii_s2m && ii_s2c > ii_s2e) return `${causeScenario}2c`;
-  if (ii_s2m > ii_s2e) return `${causeScenario}2e`;
-  return `${causeScenario}2e`;
+  const ii_tot = 0.0001 + ii_s2c + ii_s2m + ii_s2e;
+
+  return (
+    (effect[`${causeScenario}2c`] * ii_s2c +
+      effect[`${causeScenario}2m`] * ii_s2m +
+      effect[`${causeScenario}2e`] * ii_s2e) /
+    ii_tot
+  );
 };

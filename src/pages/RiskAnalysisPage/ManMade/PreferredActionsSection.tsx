@@ -18,10 +18,10 @@ import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import round from "../../../functions/roundNumberString";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { getLargestCascade } from "../../../functions/cascades";
+import { getAverageCP } from "../../../functions/cascades";
 
 type MMEffect = Effect & {
-  cpMax: number;
+  cpAvg: number;
 };
 
 export default function PreferredActionsSection({
@@ -64,25 +64,23 @@ export default function PreferredActionsSection({
   const scenarioSuffix = getScenarioSuffix(scenario);
 
   const largestEffects = calc.effects.map((e) => {
-    const largestCascade = getLargestCascade(scenarioLetter, e);
-
     return {
       ...getIndirectImpact(e, calc, scenarioSuffix, cDict[e.cascadeId]),
-      cpMax: e[largestCascade],
+      cpAvg: getAverageCP(scenarioLetter, e),
     };
   });
-  const totP = largestEffects.reduce((p, e) => p + e.cpMax, 0);
+  const totP = largestEffects.reduce((p, e) => p + e.cpAvg, 0);
 
   const impactTI = Math.round(calc[`ti${scenarioSuffix}`] as number);
 
   const paretoEffects = useMemo(() => {
     return largestEffects
-      .sort((a, b) => b.cpMax - a.cpMax)
+      .sort((a, b) => b.cpAvg - a.cpAvg)
       .reduce(
         ([cumulEffects, cpCumul], e) => {
           if (cpCumul > 0.8 && cumulEffects.length >= 3) return [cumulEffects, cpCumul] as [MMEffect[], number];
 
-          return [[...cumulEffects, e], cpCumul + e.cpMax / totP] as [MMEffect[], number];
+          return [[...cumulEffects, e], cpCumul + e.cpAvg / totP] as [MMEffect[], number];
         },
         [[], 0] as [MMEffect[], number]
       )[0];
@@ -104,7 +102,7 @@ export default function PreferredActionsSection({
                     ${i + 1}. ${riskName}
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
-                      <b>${round((100 * e.cpMax) / totP)}%</b> relative preference for this type of action -
+                      <b>${round((100 * e.cpAvg) / totP)}%</b> relative preference for this type of action -
                       <b>${round((100 * (e.i * impactTI)) / calc.ti)}%</b> of total impact
                     </p>
                     <p><br></p>

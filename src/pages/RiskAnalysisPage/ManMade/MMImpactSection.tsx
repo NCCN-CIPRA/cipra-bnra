@@ -18,10 +18,10 @@ import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import round from "../../../functions/roundNumberString";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { getLargestCascade } from "../../../functions/cascades";
+import { getAverageCP } from "../../../functions/cascades";
 
 type MMEffect = Effect & {
-  cpMax: number;
+  cpAvg: number;
 };
 
 export default function MMImpactSection({
@@ -64,24 +64,22 @@ export default function MMImpactSection({
   const scenarioSuffix = getScenarioSuffix(scenario);
 
   const largestEffects = calc.effects.map((e) => {
-    const largestCascade = getLargestCascade(scenarioLetter, e);
-
     return {
       ...getIndirectImpact(e, calc, scenarioSuffix, cDict[e.cascadeId]),
-      cpMax: e[largestCascade],
+      cpAvg: getAverageCP(scenarioLetter, e),
     };
   });
-  const totP = largestEffects.reduce((p, e) => p + e.cpMax, 0);
+  const totP = largestEffects.reduce((p, e) => p + e.cpAvg, 0);
   const impactTI = Math.round(calc[`ti${scenarioSuffix}`] as number);
 
   const CPParetoEffects = useMemo(() => {
     return largestEffects
-      .sort((a, b) => b.cpMax - a.cpMax)
+      .sort((a, b) => b.cpAvg - a.cpAvg)
       .reduce(
         ([cumulEffects, cpCumul], e) => {
           if (cpCumul > 0.8 && cumulEffects.length >= 3) return [cumulEffects, cpCumul] as [MMEffect[], number];
 
-          return [[...cumulEffects, e], cpCumul + e.cpMax / totP] as [MMEffect[], number];
+          return [[...cumulEffects, e], cpCumul + e.cpAvg / totP] as [MMEffect[], number];
         },
         [[], 0] as [MMEffect[], number]
       )[0];
