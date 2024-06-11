@@ -182,7 +182,7 @@ const PSankeyNode = ({
 
               if (onClick) return onClick(payload.id);
 
-              navigate(`/reporting/${payload.id}`);
+              navigate(`/risks/${payload.id}`);
             }}
           >
             {payload.name}

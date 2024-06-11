@@ -252,13 +252,14 @@ const getConsensusCascade = (
   let cpScaleFactor = 1;
   if (
     cause.cr4de_riskfilesid === "9458db5b-aa6c-ed11-9561-000d3adf7089" ||
-    effect.cr4de_riskfilesid === "9458db5b-aa6c-ed11-9561-000d3adf7089"
+    (effect.cr4de_riskfilesid === "9458db5b-aa6c-ed11-9561-000d3adf7089" && cause.cr4de_risk_type !== RISK_TYPE.MANMADE)
   ) {
     cpScaleFactor *= INFO_OPS_CP_FACTOR;
   }
   if (
-    ["M01", "MO2", "M03", "M04", "M05"].indexOf(cause.cr4de_hazard_id) >= 0 &&
-    effect.cr4de_title.indexOf("Attack") >= 0
+    (["M01", "MO2", "M03", "M04", "M05"].indexOf(cause.cr4de_hazard_id) >= 0 &&
+      effect.cr4de_title.indexOf("Attack") >= 0) ||
+    effect.cr4de_title.indexOf("attack") >= 0
   ) {
     cpScaleFactor *= ATTACK_FACTOR;
   }
@@ -275,6 +276,43 @@ const getConsensusCascade = (
         "Commodities shortage",
       ].indexOf(cause.cr4de_title) < 0)
   ) {
+    if (cascade.cr4de_c2c_cause !== null) {
+      return {
+        quality: Quality.CONSENSUS,
+        reliabilty: goodCAs.length,
+        c2c:
+          ((getAbsoluteProbability(cascade.cr4de_c2c) + getAbsoluteProbability(cascade.cr4de_c2c_cause)) / 2) *
+          cpScaleFactor,
+        c2m:
+          ((getAbsoluteProbability(cascade.cr4de_c2m) + getAbsoluteProbability(cascade.cr4de_c2m_cause)) / 2) *
+          cpScaleFactor,
+        c2e:
+          ((getAbsoluteProbability(cascade.cr4de_c2e) + getAbsoluteProbability(cascade.cr4de_c2e_cause)) / 2) *
+          cpScaleFactor *
+          extremeScaleFactor,
+        m2c:
+          ((getAbsoluteProbability(cascade.cr4de_m2c) + getAbsoluteProbability(cascade.cr4de_m2c_cause)) / 2) *
+          cpScaleFactor,
+        m2m:
+          ((getAbsoluteProbability(cascade.cr4de_m2m) + getAbsoluteProbability(cascade.cr4de_m2m_cause)) / 2) *
+          cpScaleFactor,
+        m2e:
+          ((getAbsoluteProbability(cascade.cr4de_m2e) + getAbsoluteProbability(cascade.cr4de_m2e_cause)) / 2) *
+          cpScaleFactor *
+          extremeScaleFactor,
+        e2c:
+          ((getAbsoluteProbability(cascade.cr4de_e2c) + getAbsoluteProbability(cascade.cr4de_e2c_cause)) / 2) *
+          cpScaleFactor,
+        e2m:
+          ((getAbsoluteProbability(cascade.cr4de_e2m) + getAbsoluteProbability(cascade.cr4de_e2m_cause)) / 2) *
+          cpScaleFactor,
+        e2e:
+          ((getAbsoluteProbability(cascade.cr4de_e2e) + getAbsoluteProbability(cascade.cr4de_e2e_cause)) / 2) *
+          cpScaleFactor *
+          extremeScaleFactor,
+      };
+    }
+
     return {
       quality: Quality.CONSENSUS,
       reliabilty: goodCAs.length,

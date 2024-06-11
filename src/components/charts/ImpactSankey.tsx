@@ -3,7 +3,7 @@ import { Box, Card, CardContent, Typography, Tooltip, Stack } from "@mui/materia
 import getCategoryColor from "../../functions/getCategoryColor";
 import { useNavigate } from "react-router-dom";
 import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { SCENARIOS, getScenarioSuffix } from "../../functions/scenarios";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { getMoneyString } from "../../functions/Impact";
@@ -189,7 +189,7 @@ const ISankeyNode = ({
 
               if (onClick) return onClick(payload.id);
 
-              navigate(`/reporting/${payload.id}`);
+              navigate(`/risks/${payload.id}`);
             }}
           >
             {payload.name}
@@ -362,7 +362,9 @@ export default function ImpactSankey({
   return (
     <>
       <Box sx={{ width: "100%", mb: 2, textAlign: "right" }}>
-        <Typography variant="h6">Impact Breakdown</Typography>
+        <Typography variant="h6">
+          {riskFile?.cr4de_risk_type === RISK_TYPE.MANMADE ? "Most Impactful Actions" : "Impact Breakdown"}
+        </Typography>
       </Box>
       <ResponsiveContainer width="100%" height="100%">
         <Sankey

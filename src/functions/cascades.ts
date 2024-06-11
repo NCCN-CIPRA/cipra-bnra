@@ -1,8 +1,11 @@
+import { CascadeCalculation } from "../types/dataverse/DVAnalysisRun";
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
-import { SCENARIOS } from "./scenarios";
+import { SCENARIOS, SCENARIO_LETTER } from "./scenarios";
+
+export type CASCADE_LETTER = "c2c" | "c2m" | "c2e" | "m2c" | "m2m" | "m2e" | "e2c" | "e2m" | "e2e";
 
 export interface CascadeAnalysisInput {
   cr4de_c2c: number | null;
@@ -107,3 +110,13 @@ export function getCascadeInput(ca: DVCascadeAnalysis): CascadeAnalysisInput {
     cr4de_quali_cascade: ca.cr4de_quali_cascade,
   };
 }
+
+export const getLargestCascade = (causeScenario: SCENARIO_LETTER, effect: CascadeCalculation): CASCADE_LETTER => {
+  const ii_s2c = effect[`${causeScenario}2c`] * effect.effect.ti_c;
+  const ii_s2m = effect[`${causeScenario}2m`] * effect.effect.ti_m;
+  const ii_s2e = effect[`${causeScenario}2e`] * effect.effect.ti_e;
+
+  if (ii_s2c > ii_s2m && ii_s2c > ii_s2e) return `${causeScenario}2c`;
+  if (ii_s2m > ii_s2e) return `${causeScenario}2e`;
+  return `${causeScenario}2e`;
+};

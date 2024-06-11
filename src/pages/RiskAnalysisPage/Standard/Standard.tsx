@@ -21,7 +21,7 @@ import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { DataTable } from "../../../hooks/useAPI";
 import CCSection from "./CCSection";
 import Bibliography from "../Bibliography";
-import SankeyDiagram from "../SankeyDiagram";
+import SankeyDiagram from "./SankeyDiagram";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import DisclaimerSection from "../DisclaimerSection";
 

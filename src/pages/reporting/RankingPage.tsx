@@ -7,7 +7,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import RiskMatrix from "../../components/charts/RiskMatrix";
+import RiskMatrix from "./RiskMatrix";
 import { DataTable } from "../../hooks/useAPI";
 import { CONSENSUS_TYPE, DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import useRecords from "../../hooks/useRecords";

@@ -31,7 +31,7 @@ export default function RiskAnalysisPage() {
       <Container sx={{ mt: 4, pb: 8 }}>
         <ManMade
           riskFile={riskFile}
-          cascades={cascades[riskFile.cr4de_riskfilesid].all}
+          cascades={cascades[riskFile.cr4de_riskfilesid]}
           calculation={calculation}
           mode="edit"
           isEditing={isEditing}

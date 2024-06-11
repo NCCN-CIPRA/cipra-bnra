@@ -25,11 +25,19 @@ const getProbabilityBars = (value: number) => {
   }));
 };
 
-export default function ProbabilityBars({ tp, chartWidth }: { tp: number; chartWidth: number }) {
+export default function ProbabilityBars({
+  tp,
+  chartWidth,
+  manmade = false,
+}: {
+  tp: number;
+  chartWidth: number;
+  manmade?: boolean;
+}) {
   return (
     <Box sx={{ mb: 4, width: chartWidth }}>
       <Typography variant="subtitle2" sx={{ mb: 0, textAlign: "center" }}>
-        Probability
+        {manmade ? "Motivation" : "Probability"}
       </Typography>
       <BarChart width={chartWidth} height={100} data={getProbabilityBars(tp)} style={{}}>
         {/* <CartesianGrid strokeDasharray="3 3" /> */}

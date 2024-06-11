@@ -113,7 +113,7 @@ export default function BaseRiskFilePage() {
 
   return (
     <>
-      {riskContext.riskFiles[params.risk_file_id] && riskContext.analyses[params.risk_file_id] ? (
+      {riskContext.riskFiles[params.risk_file_id] ? (
         <Outlet
           context={satisfies<RiskFilePageContext>({
             ...riskContext,
@@ -121,7 +121,7 @@ export default function BaseRiskFilePage() {
             setIsEditing,
 
             riskFile: riskContext.riskFiles[params.risk_file_id],
-            calculation: riskContext.analyses[params.risk_file_id],
+            calculation: riskContext.riskFiles[params.risk_file_id].cr4de_latest_calculation?.cr4de_results!,
             causes: riskContext.cascades[params.risk_file_id].causes,
             effects: riskContext.cascades[params.risk_file_id].effects,
             catalyzingEffects: riskContext.cascades[params.risk_file_id].catalyzingEffects,

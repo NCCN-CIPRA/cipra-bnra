@@ -21,7 +21,7 @@ import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import useRecords from "../../hooks/useRecords";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import { DVRiskFile, RISK_FILE_QUANTI_FIELDS } from "../../types/dataverse/DVRiskFile";
-import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
+import { DVRiskCascade, RISK_CASCADE_QUANTI_FIELDS } from "../../types/dataverse/DVRiskCascade";
 import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
@@ -109,7 +109,7 @@ export default function CalculationPage() {
     reloadData: reloadCascades,
   } = useRecords<DVRiskCascade<SmallRisk, SmallRisk>>({
     table: DataTable.RISK_CASCADE,
-    query: `$filter=_cr4de_cause_hazard_value ne '8858db5b-aa6c-ed11-9561-000d3adf7089' and _cr4de_effect_hazard_value ne '8858db5b-aa6c-ed11-9561-000d3adf7089'&$select=_cr4de_cause_hazard_value,_cr4de_effect_hazard_value,cr4de_damp,${CASCADE_ANALYSIS_QUANTI_FIELDS.join(
+    query: `$filter=_cr4de_cause_hazard_value ne '8858db5b-aa6c-ed11-9561-000d3adf7089' and _cr4de_effect_hazard_value ne '8858db5b-aa6c-ed11-9561-000d3adf7089'&$select=_cr4de_cause_hazard_value,_cr4de_effect_hazard_value,cr4de_damp,${RISK_CASCADE_QUANTI_FIELDS.join(
       ","
     )}&$expand=cr4de_cause_hazard($select=cr4de_title),cr4de_effect_hazard($select=cr4de_title)`,
     onComplete: async (data) => logger(`    Finished loading ${data.length} cascades`),

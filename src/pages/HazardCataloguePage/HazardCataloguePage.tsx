@@ -14,6 +14,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { RiskPageContext } from "../BaseRisksPage";
 import NCCNLoader from "../../components/NCCNLoader";
+import RiskMatrixAccordion from "./RiskMatrixAccordion";
 
 export default function HazardCataloguePage() {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ export default function HazardCataloguePage() {
   return (
     <>
       <Box sx={{ mb: 8, mx: 8 }}>
+        <RiskMatrixAccordion />
         <TableContainer component={Paper} sx={{ width: "100%" }}>
           <Table>
             <TableHead>

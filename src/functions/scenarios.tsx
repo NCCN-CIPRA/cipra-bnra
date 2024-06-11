@@ -8,6 +8,8 @@ export enum SCENARIOS {
   EXTREME = "extreme",
 }
 
+export type SCENARIO_LETTER = "c" | "m" | "e";
+
 export type SCENARIO_SUFFIX = "_c" | "_m" | "_e";
 
 export interface Scenarios {
@@ -91,6 +93,12 @@ export const getScenarioSuffix = (scenario: SCENARIOS): SCENARIO_SUFFIX => {
   if (scenario === SCENARIOS.CONSIDERABLE) return "_c";
   else if (scenario === SCENARIOS.MAJOR) return "_m";
   return "_e";
+};
+
+export const getScenarioLetter = (scenario: SCENARIOS): SCENARIO_LETTER => {
+  if (scenario === SCENARIOS.CONSIDERABLE) return "c";
+  else if (scenario === SCENARIOS.MAJOR) return "m";
+  return "e";
 };
 
 export const getWorstCaseScenario = (calculation: RiskCalculation) => {

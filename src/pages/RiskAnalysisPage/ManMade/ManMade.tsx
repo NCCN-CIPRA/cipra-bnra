@@ -17,9 +17,11 @@ import Bibliography from "../Bibliography";
 import { DataTable } from "../../../hooks/useAPI";
 import useRecords from "../../../hooks/useRecords";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
-import SankeyDiagram from "../SankeyDiagram";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
-import ActionsSection from "./ActionsSection";
+import ActionsSection from "./PreferredActionsSection";
+import { Cascades } from "../../BaseRisksPage";
+import MMSankeyDiagram from "./MMSankeyDiagram";
+import MMImpactSection from "./MMImpactSection";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -43,7 +45,7 @@ export default function ManMade({
   reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
-  cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
+  cascades: Cascades;
   calculation: RiskCalculation;
   mode?: "view" | "edit";
   isEditing: boolean;
@@ -62,31 +64,6 @@ export default function ManMade({
   const MRS = getMostRelevantScenario(calculation);
   const MRSSuffix = getScenarioSuffix(MRS);
 
-  const cDict = useMemo(
-    () =>
-      cascades.reduce(
-        (acc, c) => ({
-          ...acc,
-          [c.cr4de_bnrariskcascadeid]: c,
-        }),
-        {} as { [key: string]: DVRiskCascade }
-      ),
-    [cascades]
-  );
-
-  const effects = [
-    getDirectImpact(calculation, riskFile, MRSSuffix),
-    ...calculation.effects.map((c) => getIndirectImpact(c, calculation, MRSSuffix, cDict[c.cascadeId])),
-  ];
-
-  const catalyzing = cascades.filter(
-    (c) =>
-      c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid &&
-      c.cr4de_c2c === null &&
-      c.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0
-  );
-  const cc = cascades.filter((c) => c.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0);
-
   return (
     <>
       {/* <Typography variant="h2" sx={{ mb: 4 }}>
@@ -99,7 +76,7 @@ export default function ManMade({
           Malicious Actor Risk File
         </Typography>
 
-        <SankeyDiagram calculation={calculation} debug={mode === "edit"} manmade scenario={MRS} />
+        <MMSankeyDiagram calculation={calculation} debug={mode === "edit"} manmade scenario={MRS} />
 
         <Box sx={{ mt: 2 }}>
           <Typography variant="h5">Definition</Typography>
@@ -161,8 +138,26 @@ export default function ManMade({
 
           <ActionsSection
             riskFile={rf}
-            effects={effects}
-            scenarioSuffix={MRSSuffix}
+            effects={cascades.effects}
+            scenario={MRS}
+            calc={calculation}
+            mode={mode}
+            attachments={attachments}
+            updateAttachments={loadAttachments}
+            isEditingOther={isEditing}
+            setIsEditing={setIsEditing}
+            reloadRiskFile={reloadRiskFile}
+            allRisks={hazardCatalogue}
+          />
+        </Box>
+
+        <Box sx={{ mt: 8 }}>
+          <Typography variant="h5">Other Impactful Actions</Typography>
+
+          <MMImpactSection
+            riskFile={rf}
+            effects={cascades.effects}
+            scenario={MRS}
             calc={calculation}
             mode={mode}
             attachments={attachments}
@@ -186,7 +181,7 @@ export default function ManMade({
               </Typography>
             </Box>
             <List>
-              {catalyzing.map((c, i) => (
+              {cascades.catalyzingEffects.map((c, i) => (
                 <ListItemButton
                   LinkComponent={Link}
                   href={`/risks/${c.cr4de_cause_hazard.cr4de_riskfilesid}?tab=analysis`}
@@ -202,7 +197,7 @@ export default function ManMade({
 
         <Bibliography
           riskFile={riskFile}
-          cascades={cascades}
+          cascades={cascades.all}
           attachments={attachments}
           reloadAttachments={loadAttachments}
         />
