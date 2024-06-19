@@ -20,6 +20,7 @@ import {
 } from "../../functions/Impact";
 import { SCENARIO_SUFFIX } from "../../functions/scenarios";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import round from "../../functions/roundNumberString";
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
@@ -33,16 +34,20 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
             <Typography variant="body2" sx={{ width: 50 }}>
               {p.name} :
             </Typography>
-            <Typography variant="body2" sx={{ width: 50, textAlign: "right" }}>{`${p.value} / 5`}</Typography>
+            <Typography variant="body2" sx={{ width: 50, textAlign: "right" }}>{`${round(
+              p.value as number,
+              1
+            )} / 5`}</Typography>
           </Stack>
         ))}
         <Stack direction="row" sx={{ mt: 1 }}>
           <Typography variant="body2" sx={{ width: 50, fontWeight: "bold" }}>
             Total :
           </Typography>
-          <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>{`${
-            Math.round(10 * payload.reduce((sum, p) => sum + (p.value as number), 0)) / 10
-          } / 5`}</Typography>
+          <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>{`${round(
+            payload.reduce((sum, p) => sum + (p.value as number), 0),
+            1
+          )} / 5`}</Typography>
         </Stack>
       </Box>
     );

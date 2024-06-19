@@ -1,4 +1,4 @@
-import { Box, List, ListItemButton, Typography } from "@mui/material";
+import { Box, IconButton, List, ListItemButton, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import * as IP from "../../../functions/intensityParameters";
 import { SCENARIOS } from "../../../functions/scenarios";
@@ -24,6 +24,8 @@ import Bibliography from "../Bibliography";
 import SankeyDiagram from "./SankeyDiagram";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import DisclaimerSection from "../DisclaimerSection";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import { Section } from "../HelpSiderBar";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -35,6 +37,11 @@ const getScenarioSuffix = (scenario: SCENARIOS) => {
   if (scenario === SCENARIOS.CONSIDERABLE) return "_c";
   else if (scenario === SCENARIOS.MAJOR) return "_m";
   return "_e";
+};
+
+const ibsx = {
+  transition: "opacity .3s ease",
+  ml: 1,
 };
 
 export default function Standard({
@@ -54,7 +61,8 @@ export default function Standard({
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
-  const { hazardCatalogue, attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
+  const { helpOpen, setHelpFocus, hazardCatalogue, attachments, loadAttachments } =
+    useOutletContext<RiskFilePageContext>();
 
   useEffect(() => {
     if (!attachments) loadAttachments();
@@ -125,7 +133,14 @@ export default function Standard({
         <SankeyDiagram calculation={calculation} debug={mode === "edit"} scenario={MRS} />
 
         <Box sx={{ mt: 2 }}>
-          <Typography variant="h5">Definition</Typography>
+          <Typography variant="h5">
+            Definition
+            {helpOpen && (
+              <IconButton size="small" sx={ibsx} onClick={() => setHelpFocus(Section.PROB_BREAKDOWN)}>
+                <HelpOutlineIcon fontSize="inherit" />
+              </IconButton>
+            )}
+          </Typography>{" "}
           <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
             <DefinitionSection
               riskFile={rf}
@@ -142,7 +157,14 @@ export default function Standard({
 
         {rf.cr4de_historical_events && (
           <Box sx={{ mt: 8 }}>
-            <Typography variant="h5">Historical Events</Typography>
+            <Typography variant="h5">
+              Historical Events
+              {helpOpen && (
+                <IconButton size="small" sx={ibsx} onClick={() => setHelpFocus(Section.IMPACT_BREAKDOWN)}>
+                  <HelpOutlineIcon fontSize="inherit" />
+                </IconButton>
+              )}
+            </Typography>
             <HistoricalEvents
               riskFile={rf}
               mode={mode}
