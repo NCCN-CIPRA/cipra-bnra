@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { Outlet, useNavigate } from "react-router-dom";
-import useLoggedInUser from "../hooks/useLoggedInUser";
+import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
 import { DVContact } from "../types/dataverse/DVContact";
 import NCCNLoader from "../components/NCCNLoader";
 
 export interface AuthPageContext {
-  user: DVContact;
+  user: LoggedInUser;
 }
 
 export default function AuthPage() {

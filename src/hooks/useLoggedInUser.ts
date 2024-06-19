@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { DVContact } from "../types/dataverse/DVContact";
 
+export interface LoggedInUser extends DVContact {
+  viewer: boolean;
+}
+
 export default function useLoggedInUser() {
-  const [user, setUser] = useState<DVContact | null | undefined>(undefined);
+  const [user, setUser] = useState<LoggedInUser | null | undefined>(undefined);
 
   const refreshUser = () => {
     const info = document.getElementById("user-information");
@@ -20,6 +24,7 @@ export default function useLoggedInUser() {
           firstname: info?.getAttribute("data-firstname") || "",
           lastname: info?.getAttribute("data-lastname") || "",
           admin: info?.hasAttribute("data-admin"),
+          viewer: info?.hasAttribute("data-report-viewer"),
           participations: undefined,
         });
       }

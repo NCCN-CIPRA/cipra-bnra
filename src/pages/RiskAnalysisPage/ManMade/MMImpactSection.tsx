@@ -117,7 +117,7 @@ export default function MMImpactSection({
                     ${i + 1}. ${riskName} 
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
-                      <b>${round((100 * e.cp) / totP)}%</b> relative preference for this type of action -
+                      <b>${round((100 * e.cpAvg) / totP)}%</b> relative preference for this type of action -
                       <b>${round((100 * (e.i * impactTI)) / calc.ti)}%</b> of total impact
                     </p>
                     <p><br></p>

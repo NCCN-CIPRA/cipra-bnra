@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import usePageTitle from "../hooks/usePageTitle";
 import useBreadcrumbs from "../hooks/useBreadcrumbs";
 import { DVContact } from "../types/dataverse/DVContact";
-import useLoggedInUser from "../hooks/useLoggedInUser";
+import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
 import {
   CascadeAnalysisInput,
   getCatalyzingEffects,
@@ -33,7 +33,7 @@ export type Cascades = {
 };
 
 export interface RiskPageContext {
-  user: DVContact | null | undefined;
+  user: LoggedInUser | null | undefined;
   hazardCatalogue: SmallRisk[] | null;
   srf: { [riskId: string]: SmallRisk };
   riskFiles: { [riskId: string]: DVRiskFile<DVAnalysisRun> };
@@ -67,6 +67,7 @@ export default function BaseRisksPage() {
   const [riskFiles, setRiskFiles] = useState<{ [id: string]: DVRiskFile<DVAnalysisRun> }>({});
   const [srf, setSRF] = useState<{ [id: string]: SmallRisk } | null>(null);
   const [cascades, setCascades] = useState<{ [riskId: string]: Cascades }>({});
+  const [isRunning, setIsRunning] = useState(false);
 
   const {
     data: hazardCatalogue,
@@ -176,7 +177,9 @@ export default function BaseRisksPage() {
         srf: srf || {},
         reloadHazardCatalogue,
         loadRiskFile: async (params: Partial<GetRecordParams<DVRiskFile<any>>>) => {
-          if (!params.id) return;
+          if (!params.id || isRunning) return;
+
+          setIsRunning(true);
 
           if (!riskFiles[params.id] && !loadingRiskFile) {
             loadRiskFile({
@@ -200,6 +203,8 @@ export default function BaseRisksPage() {
 
                     setCascades(getCascades(rfResult, cascades, hc)(rcResult));
                     setRiskFiles(getRiskFiles(rfResult, riskFiles));
+
+                    setIsRunning(false);
                   },
                 });
 

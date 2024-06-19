@@ -76,102 +76,47 @@ const PSankeyNode = ({
           }}
         />
 
-        {showComponents ? (
-          <Tooltip
-            title={
-              <Box sx={{}}>
-                {payload.cascade && (
-                  <>
-                    <Typography color="inherit">{payload.name}</Typography>
+        <Tooltip
+          title={
+            <Box sx={{}}>
+              {payload.cascade && (
+                <>
+                  <Typography color="inherit">{payload.name}</Typography>
 
+                  {showComponents && (
                     <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                      CP: {Math.round(1000 * payload.cpAvg) / 10}% / event
+                      CP: {round(100 * payload.cpAvg, 2)}% / event
                     </Typography>
-                    <Typography variant="subtitle1" sx={{ mt: 0 }}>
-                      Relative Preference: {Math.round((1000 * payload.cpAvg) / totalProbability) / 10}%
-                    </Typography>
+                  )}
+                  <Typography variant="subtitle1" sx={{ mt: 0 }}>
+                    Relative Preference: {round((100 * payload.cpAvg) / totalProbability, 2)}%
+                  </Typography>
+                </>
+              )}
+              {payload.hidden && (
+                <>
+                  <Typography color="inherit">Other actions:</Typography>
 
-                    {/* <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
-                      TP(c): {Math.round(1000000 * payload.cascade.cause.tp_c) / 10000}% / day
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
-                      CP(c&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`c2${scenarioLetter}`]) / 100}%
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                      IP(c&rarr;{scenarioLetter}):{" "}
-                      {Math.round(1000000 * payload.cascade.cause.tp_c * payload.cascade[`c2${scenarioLetter}`]) /
-                        10000}
-                      % / day
-                    </Typography>
-
-                    <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
-                      TP(m): {Math.round(1000000 * payload.cascade.cause.tp_m) / 10000}% / day
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
-                      CP(m&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`m2${scenarioLetter}`]) / 100}%
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                      IP(m&rarr;{scenarioLetter}):{" "}
-                      {Math.round(1000000 * payload.cascade.cause.tp_m * payload.cascade[`m2${scenarioLetter}`]) /
-                        10000}
-                      % / day
-                    </Typography>
-
-                    <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
-                      TP(e): {Math.round(1000000 * payload.cascade.cause.tp_e) / 10000}% / day
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
-                      CP(e&rarr;{scenarioLetter}): {Math.round(10000 * payload.cascade[`e2${scenarioLetter}`]) / 100}%
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                      IP(e&rarr;{scenarioLetter}):{" "}
-                      {Math.round(1000000 * payload.cascade.cause.tp_e * payload.cascade[`e2${scenarioLetter}`]) /
-                        10000}
-                      % / day
-                    </Typography> */}
-                  </>
-                )}
-                {payload.hidden && (
-                  <>
-                    <Typography color="inherit">Other actions:</Typography>
-
-                    {payload.hidden.map((h: any) => (
-                      <>
-                        <Typography key={h.name} variant="subtitle2" sx={{ mt: 1 }}>
-                          {h.name}
-                        </Typography>
+                  {payload.hidden.map((h: any) => (
+                    <>
+                      <Typography key={h.name} variant="subtitle2" sx={{ mt: 1 }}>
+                        {h.name}
+                      </Typography>
+                      {showComponents && (
                         <Typography key={h.name} variant="subtitle1" sx={{ mt: 0, ml: 1 }}>
-                          CP: {Math.round(1000 * h.cpAvg) / 10}% / event
+                          CP: {round(100 * h.cpAvg, 2)}% / event
                         </Typography>
-                        <Typography variant="subtitle1" sx={{ mt: 0, ml: 1 }}>
-                          Relative Preference: {Math.round((1000 * h.cpAvg) / totalProbability) / 10}%
-                        </Typography>
-                      </>
-                    ))}
-                  </>
-                )}
-              </Box>
-            }
-          >
-            <text
-              textAnchor="start"
-              x={x + 15}
-              y={y + height / 2}
-              fontSize="14"
-              stroke="#333"
-              cursor="pointer"
-              onClick={() => {
-                if (!payload.id) return;
-
-                if (onClick) return onClick(payload.id);
-
-                navigate(`/reporting/${payload.id}`);
-              }}
-            >
-              {payload.name}
-            </text>
-          </Tooltip>
-        ) : (
+                      )}
+                      <Typography variant="subtitle1" sx={{ mt: 0, ml: 1 }}>
+                        Relative Preference: {round((100 * h.cpAvg) / totalProbability, 2)}%
+                      </Typography>
+                    </>
+                  ))}
+                </>
+              )}
+            </Box>
+          }
+        >
           <text
             textAnchor="start"
             x={x + 15}
@@ -184,12 +129,12 @@ const PSankeyNode = ({
 
               if (onClick) return onClick(payload.id);
 
-              navigate(`/risks/${payload.id}`);
+              navigate(`/reporting/${payload.id}`);
             }}
           >
             {payload.name}
           </text>
-        )}
+        </Tooltip>
         {/* <text textAnchor="start" x={x + 15} y={y + height / 2 + 18} fontSize="12" stroke="#333" strokeOpacity="0.5">
           {`${Math.round((100 * payload.value) / totalProbability)}%`}
         </text> */}

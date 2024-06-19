@@ -134,7 +134,7 @@ export default function ManMade({
         </Box>
 
         <Box sx={{ mt: 8 }}>
-          <Typography variant="h5">Prefered Malicious Actions</Typography>
+          <Typography variant="h5">Preferred Malicious Actions</Typography>
 
           <ActionsSection
             riskFile={rf}

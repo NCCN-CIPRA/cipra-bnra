@@ -58,29 +58,29 @@ async function devFetch(input: RequestInfo | URL, init?: RequestInit | undefined
 
           delete responses[requestId];
 
-          if (response.status === 403) {
-            const errorJson = await response.json();
+          // if (response.status === 403) {
+          //   const errorJson = await response.json();
 
-            if (errorJson.error && errorJson.error.code === "90040120") {
-              // Not logged in in Iframe
-              document.getElementById("loginWindow")!.style.display = "block";
-              document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/auth");
+          //   if (errorJson.error && errorJson.error.code === "90040120") {
+          //     // Not logged in in Iframe
+          //     document.getElementById("loginWindow")!.style.display = "block";
+          //     document.getElementById("loginWindow")!.setAttribute("src", "https://bnra.powerappsportals.com/auth");
 
-              const testingInterval = setInterval(async () => {
-                const testResponse = await devFetch(input, init);
+          //     const testingInterval = setInterval(async () => {
+          //       const testResponse = await devFetch(input, init);
 
-                if (testResponse.status !== 403) {
-                  clearInterval(testingInterval);
-                  document.getElementById("loginWindow")!.style.display = "none";
-                  document.getElementById("loginWindow")!.setAttribute("src", "");
+          //       if (testResponse.status !== 403) {
+          //         clearInterval(testingInterval);
+          //         document.getElementById("loginWindow")!.style.display = "none";
+          //         document.getElementById("loginWindow")!.setAttribute("src", "");
 
-                  return resolve(testResponse);
-                }
-              }, 5000);
-            }
-          } else {
-            return resolve(response);
-          }
+          //         return resolve(testResponse);
+          //       }
+          //     }, 5000);
+          //   }
+          // } else {
+          return resolve(response);
+          // }
         }
       }, 500);
     });

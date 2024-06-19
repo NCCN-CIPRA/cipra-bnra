@@ -42,20 +42,20 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
           </ListItem>
           {user && (
             <>
-              {user.admin && (
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/risks" onClick={onClose}>
+                  <ListItemIcon></ListItemIcon>
+                  <ListItemText primary={t("sideDrawer.hazardCatalogue", "Hazard Catalogue")} />
+                </ListItemButton>
+              </ListItem>
+              {!user.viewer && (
                 <ListItem disablePadding>
-                  <ListItemButton component={Link} to="/risks" onClick={onClose}>
+                  <ListItemButton component={Link} to="/overview" onClick={onClose}>
                     <ListItemIcon></ListItemIcon>
-                    <ListItemText primary={t("sideDrawer.hazardCatalogue", "Hazard Catalogue")} />
+                    <ListItemText primary={t("sideDrawer.riskAnalysis", "Risk Analysis")} />
                   </ListItemButton>
                 </ListItem>
               )}
-              <ListItem disablePadding>
-                <ListItemButton component={Link} to="/overview" onClick={onClose}>
-                  <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("sideDrawer.riskAnalysis", "Risk Analysis")} />
-                </ListItemButton>
-              </ListItem>
 
               {user.admin && (
                 <>
@@ -95,12 +95,14 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
                   <Divider />
                 </>
               )}
-              <ListItem disablePadding>
-                <ListItemButton component={Link} to="/learning" onClick={onClose}>
-                  <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("sideDrawer.informationPortal", "Information Portal")} />
-                </ListItemButton>
-              </ListItem>
+              {!user.viewer && (
+                <ListItem disablePadding>
+                  <ListItemButton component={Link} to="/learning" onClick={onClose}>
+                    <ListItemIcon></ListItemIcon>
+                    <ListItemText primary={t("sideDrawer.informationPortal", "Information Portal")} />
+                  </ListItemButton>
+                </ListItem>
+              )}
             </>
           )}
         </List>

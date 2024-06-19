@@ -109,9 +109,9 @@ export default function CalculationPage() {
     reloadData: reloadCascades,
   } = useRecords<DVRiskCascade<SmallRisk, SmallRisk>>({
     table: DataTable.RISK_CASCADE,
-    query: `$filter=_cr4de_cause_hazard_value ne '8858db5b-aa6c-ed11-9561-000d3adf7089' and _cr4de_effect_hazard_value ne '8858db5b-aa6c-ed11-9561-000d3adf7089'&$select=_cr4de_cause_hazard_value,_cr4de_effect_hazard_value,cr4de_damp,${RISK_CASCADE_QUANTI_FIELDS.join(
+    query: `$select=_cr4de_cause_hazard_value,_cr4de_effect_hazard_value,cr4de_damp,${RISK_CASCADE_QUANTI_FIELDS.join(
       ","
-    )}&$expand=cr4de_cause_hazard($select=cr4de_title),cr4de_effect_hazard($select=cr4de_title)`,
+    )}&$expand=cr4de_cause_hazard($select=cr4de_title,cr4de_hazard_id),cr4de_effect_hazard($select=cr4de_title,cr4de_hazard_id)`,
     onComplete: async (data) => logger(`    Finished loading ${data.length} cascades`),
   });
   const {

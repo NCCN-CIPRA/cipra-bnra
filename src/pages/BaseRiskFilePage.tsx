@@ -95,7 +95,7 @@ export default function BaseRiskFilePage() {
 
   useEffect(() => {
     riskContext.loadRiskFile({ id: params.risk_file_id });
-  }, [params.risk_file_id]);
+  }, []);
 
   usePageTitle(
     riskContext.riskFiles[params.risk_file_id] ? riskContext.riskFiles[params.risk_file_id].cr4de_title : "..."
@@ -150,26 +150,32 @@ export default function BaseRiskFilePage() {
               icon={<AodIcon />}
               onClick={() => navigate(`/risks/${params.risk_file_id}`)}
             />
-            <BottomNavigationAction
-              label="Risk Identification"
-              icon={<FingerprintIcon />}
-              onClick={() => navigate(`/risks/${params.risk_file_id}/identification`)}
-            />
+            {riskContext.user && riskContext.user.admin && (
+              <BottomNavigationAction
+                label="Risk Identification"
+                icon={<FingerprintIcon />}
+                onClick={() => navigate(`/risks/${params.risk_file_id}/identification`)}
+              />
+            )}
             <BottomNavigationAction
               label="Risk Analysis"
               icon={<AssessmentIcon />}
               onClick={() => navigate(`/risks/${params.risk_file_id}/analysis`)}
             />
-            <BottomNavigationAction
-              label="Raw Data"
-              icon={<PsychologyIcon />}
-              onClick={() => navigate(`/risks/${params.risk_file_id}/data`)}
-            />
-            <BottomNavigationAction
-              label="Expert Input"
-              icon={<GroupsIcon />}
-              onClick={() => navigate(`/risks/${params.risk_file_id}/input`)}
-            />
+            {riskContext.user && riskContext.user.admin && (
+              <BottomNavigationAction
+                label="Raw Data"
+                icon={<PsychologyIcon />}
+                onClick={() => navigate(`/risks/${params.risk_file_id}/data`)}
+              />
+            )}
+            {riskContext.user && riskContext.user.admin && (
+              <BottomNavigationAction
+                label="Expert Input"
+                icon={<GroupsIcon />}
+                onClick={() => navigate(`/risks/${params.risk_file_id}/input`)}
+              />
+            )}
           </BottomNavigation>
         </Paper>
       )}

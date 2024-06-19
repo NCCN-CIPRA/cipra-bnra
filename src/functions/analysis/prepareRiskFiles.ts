@@ -24,6 +24,32 @@ const FOOD_SUPPLY_FACTOR = 1 / 10;
 const IAC_FACTOR = 1 / 10;
 const ATTACK_FACTOR = 1 / 10;
 
+const ACTOR_RISKS = ["M01", "MO2", "M03", "M04", "M05"];
+const ATTACK_RISKS = [
+  "CO3",
+  "C04",
+  "C05",
+  "M06",
+  "M07",
+  "M08",
+  "M09",
+  "M10",
+  "M11",
+  "M12",
+  "M13",
+  "M14",
+  "M15",
+  "M16",
+  "M17",
+  "M18",
+  "M19",
+  "M20",
+];
+const IGNORE_RISKS = [
+  "H09", // Mass rejection of modern medicine
+  "H10", // Processes of a social psychological nature
+];
+
 interface Metrics {
   consensus: number;
   average: number;
@@ -94,7 +120,7 @@ const getConsensusRiskFile = (
   const EaScaleFactor = EA_FACTOR;
   const ExtremeFactor = riskFile.cr4de_title.indexOf("food supply") >= 0 ? FOOD_SUPPLY_FACTOR : 1;
 
-  if (riskFile.cr4de_title.indexOf("Attack") >= 0) {
+  if (ATTACK_RISKS.indexOf(riskFile.cr4de_hazard_id) >= 0) {
     DPScaleFactor *= ATTACK_FACTOR;
   }
 
@@ -259,6 +285,10 @@ const getConsensusCascade = (
     (effect.cr4de_riskfilesid === "9458db5b-aa6c-ed11-9561-000d3adf7089" && cause.cr4de_risk_type !== RISK_TYPE.MANMADE)
   ) {
     cpScaleFactor *= INFO_OPS_CP_FACTOR;
+  }
+
+  if (ACTOR_RISKS.indexOf(cause.cr4de_hazard_id) >= 0 && ATTACK_RISKS.indexOf(effect.cr4de_hazard_id) >= 0) {
+    cpScaleFactor *= ATTACK_FACTOR;
   }
 
   const extremeScaleFactor = effect.cr4de_title.indexOf("International Armed") >= 0 ? IAC_FACTOR : 1;
@@ -437,11 +467,20 @@ const getNormalizedCascade = (c: ReturnType<typeof getConsensusCascade>) => {
 export default function prepareRiskFiles(
   riskFiles: DVRiskFile[],
   riskFilesDict: { [key: string]: DVRiskFile },
-  cascades: DVRiskCascade<SmallRisk, SmallRisk>[],
+  allCascades: DVRiskCascade<SmallRisk, SmallRisk>[],
   participations: DVParticipation[],
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[],
-  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[]
+  allCascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[]
 ): RiskCalculation[] {
+  const cascades = allCascades.filter(
+    (c) =>
+      IGNORE_RISKS.indexOf(c.cr4de_cause_hazard.cr4de_hazard_id) < 0 &&
+      IGNORE_RISKS.indexOf(c.cr4de_effect_hazard.cr4de_hazard_id) < 0
+  );
+  console.log(cascades.length, allCascades.length);
+  const cascadeIds = cascades.map((c) => c.cr4de_bnrariskcascadeid);
+  const cascadeAnalyses = allCascadeAnalyses.filter((c) => cascadeIds.indexOf(c._cr4de_cascade_value) >= 0);
+
   const daDict: { [key: string]: DVDirectAnalysis<unknown, DVContact>[] } = directAnalyses.reduce((acc, da) => {
     if (!acc[da._cr4de_risk_file_value]) {
       return {

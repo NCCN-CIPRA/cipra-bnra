@@ -61,7 +61,7 @@ export default function ImpactSection({
           The ${impactName} impact represents an estimated <b>${round(
       (100 * impactTI) / calc.ti
     )}%</b> of the total impact of an
-        incident of this magnitude. Possible explanation for the ${impactName} impact are:
+        incident of this magnitude. Possible explanations for the ${impactName} impact are:
           </p>
           <p><br></p>
         `;

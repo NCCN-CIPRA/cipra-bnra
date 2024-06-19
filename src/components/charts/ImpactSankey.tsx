@@ -7,6 +7,7 @@ import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { SCENARIOS, getScenarioSuffix } from "../../functions/scenarios";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { getMoneyString } from "../../functions/Impact";
+import round from "../../functions/roundNumberString";
 
 const baseY = 50;
 
@@ -71,112 +72,100 @@ const ISankeyNode = ({
             navigate(`/reporting/${payload.id}`);
           }}
         />
-        {showComponents ? (
-          <Tooltip
-            title={
-              <Box sx={{}}>
-                {payload.cascade && (
-                  <>
-                    <Typography color="inherit">{payload.name}</Typography>
+        <Tooltip
+          title={
+            <Box sx={{}}>
+              {payload.cascade && (
+                <>
+                  <Typography color="inherit">{payload.name}</Typography>
 
-                    <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                      II({scenarioLetter}&rarr;all): {getMoneyString(payload.cascade[`ii_${scenarioLetter}`])}
-                    </Typography>
+                  <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                    {round((100 * payload.cascade[`ii_${scenarioLetter}`]) / totalImpact, 2)}% of total impact
+                  </Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
-                      TI(c): {getMoneyString(payload.cascade.effect.ti_c)}
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
-                      CP({scenarioLetter}&rarr;c): {Math.round(10000 * payload.cascade[`${scenarioLetter}2c`]) / 100}%
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                      II({scenarioLetter}&rarr;c):{" "}
-                      {getMoneyString(payload.cascade[`${scenarioLetter}2c`] * payload.cascade.effect.ti_c)}
-                    </Typography>
+                  {showComponents && (
+                    <>
+                      <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                        II({scenarioLetter}&rarr;all): {getMoneyString(payload.cascade[`ii_${scenarioLetter}`])}
+                      </Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
-                      TI(m): {getMoneyString(payload.cascade.effect.ti_m)}
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
-                      CP({scenarioLetter}&rarr;m): {Math.round(10000 * payload.cascade[`${scenarioLetter}2m`]) / 100}%
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                      II({scenarioLetter}&rarr;m):{" "}
-                      {getMoneyString(payload.cascade[`${scenarioLetter}2m`] * payload.cascade.effect.ti_m)}
-                    </Typography>
+                      <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
+                        TI(c): {getMoneyString(payload.cascade.effect.ti_c)}
+                      </Typography>
+                      <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
+                        CP({scenarioLetter}&rarr;c): {Math.round(10000 * payload.cascade[`${scenarioLetter}2c`]) / 100}%
+                      </Typography>
+                      <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+                        II({scenarioLetter}&rarr;c):{" "}
+                        {getMoneyString(payload.cascade[`${scenarioLetter}2c`] * payload.cascade.effect.ti_c)}
+                      </Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
-                      TI(e): {getMoneyString(payload.cascade.effect.ti_e)}
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
-                      CP({scenarioLetter}&rarr;e): {Math.round(10000 * payload.cascade[`${scenarioLetter}2e`]) / 100}%
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                      II({scenarioLetter}&rarr;e):{" "}
-                      {getMoneyString(payload.cascade[`${scenarioLetter}2e`] * payload.cascade.effect.ti_e)}
-                    </Typography>
+                      <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
+                        TI(m): {getMoneyString(payload.cascade.effect.ti_m)}
+                      </Typography>
+                      <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
+                        CP({scenarioLetter}&rarr;m): {Math.round(10000 * payload.cascade[`${scenarioLetter}2m`]) / 100}%
+                      </Typography>
+                      <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+                        II({scenarioLetter}&rarr;m):{" "}
+                        {getMoneyString(payload.cascade[`${scenarioLetter}2m`] * payload.cascade.effect.ti_m)}
+                      </Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                      CP({scenarioLetter}&rarr;0):{" "}
-                      {Math.round(
-                        10000 *
-                          (1 -
-                            payload.cascade[`${scenarioLetter}2c`] -
-                            payload.cascade[`${scenarioLetter}2m`] -
-                            payload.cascade[`${scenarioLetter}2e`])
-                      ) / 100}
-                      %
-                    </Typography>
-                  </>
-                )}
-                {payload.hidden && (
-                  <>
-                    <Typography color="inherit">Other effects:</Typography>
+                      <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "normal" }}>
+                        TI(e): {getMoneyString(payload.cascade.effect.ti_e)}
+                      </Typography>
+                      <Typography variant="subtitle2" sx={{ fontWeight: "normal" }}>
+                        CP({scenarioLetter}&rarr;e): {Math.round(10000 * payload.cascade[`${scenarioLetter}2e`]) / 100}%
+                      </Typography>
+                      <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+                        II({scenarioLetter}&rarr;e):{" "}
+                        {getMoneyString(payload.cascade[`${scenarioLetter}2e`] * payload.cascade.effect.ti_e)}
+                      </Typography>
 
-                    {payload.hidden.map((h: any) =>
-                      h.cascade ? (
-                        <Typography key={h.name} variant="subtitle1" sx={{ mt: 1 }}>
-                          {h.name} II({scenarioLetter}&rarr;all): {getMoneyString(h.i)}
-                        </Typography>
-                      ) : (
-                        <Typography key={h.name} variant="subtitle1" sx={{ mt: 1 }}>
-                          {h.name} DI({scenarioLetter}): {getMoneyString(h.i)}
-                        </Typography>
-                      )
-                    )}
-                  </>
-                )}
-                {!payload.cascade && !payload.hidden && (
-                  <>
-                    <Typography color="inherit">Direct Impact:</Typography>
+                      <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                        CP({scenarioLetter}&rarr;0):{" "}
+                        {Math.round(
+                          10000 *
+                            (1 -
+                              payload.cascade[`${scenarioLetter}2c`] -
+                              payload.cascade[`${scenarioLetter}2m`] -
+                              payload.cascade[`${scenarioLetter}2e`])
+                        ) / 100}
+                        %
+                      </Typography>
+                    </>
+                  )}
+                </>
+              )}
+              {payload.hidden && (
+                <>
+                  <Typography color="inherit">Other effects:</Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                      DI({scenarioLetter}): {getMoneyString(payload.i)}
-                    </Typography>
-                  </>
-                )}
-              </Box>
-            }
-          >
-            <text
-              textAnchor="end"
-              x={x - 6}
-              y={y + height / 2 + 4}
-              fontSize="14"
-              stroke="#333"
-              cursor="pointer"
-              onClick={() => {
-                if (!payload.id) return;
+                  {payload.hidden.map((h: any) =>
+                    h.cascade ? (
+                      <Typography key={h.name} variant="subtitle1" sx={{ mt: 1 }}>
+                        {h.name} II({scenarioLetter}&rarr;all): {getMoneyString(h.i)}
+                      </Typography>
+                    ) : (
+                      <Typography key={h.name} variant="subtitle1" sx={{ mt: 1 }}>
+                        {h.name} DI({scenarioLetter}): {getMoneyString(h.i)}
+                      </Typography>
+                    )
+                  )}
+                </>
+              )}
+              {!payload.cascade && !payload.hidden && (
+                <>
+                  <Typography color="inherit">Direct Impact:</Typography>
 
-                if (onClick) return onClick(payload.id);
-
-                navigate(`/reporting/${payload.id}`);
-              }}
-            >
-              {payload.name}
-            </text>
-          </Tooltip>
-        ) : (
+                  <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                    DI({scenarioLetter}): {getMoneyString(payload.i)}
+                  </Typography>
+                </>
+              )}
+            </Box>
+          }
+        >
           <text
             textAnchor="end"
             x={x - 6}
@@ -189,12 +178,12 @@ const ISankeyNode = ({
 
               if (onClick) return onClick(payload.id);
 
-              navigate(`/risks/${payload.id}`);
+              navigate(`/reporting/${payload.id}`);
             }}
           >
             {payload.name}
           </text>
-        )}
+        </Tooltip>
         {/* <text textAnchor="end" x={x - 6} y={y + height / 2 + 18} fontSize="12" stroke="#333" strokeOpacity="0.5">
           {`${Math.round((100 * payload.value) / totalImpact)}%`}
         </text> */}
@@ -272,6 +261,7 @@ export default function ImpactSankey({
   ];
 
   let minI = 0;
+  const totI = effects.reduce((t, e) => t + e.i, 0);
 
   if (maxEffects !== null) {
     minI =
@@ -324,39 +314,6 @@ export default function ImpactSankey({
   const data = {
     nodes,
     links,
-  };
-
-  const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
-    if (active && payload) {
-      if (payload[0].payload?.payload?.hidden) {
-        return (
-          <Card sx={{ backgroundColor: "rgba(255, 255, 255, 0.9)" }}>
-            <CardContent>
-              {payload[0].payload?.payload?.hidden
-                .sort(
-                  (a: CascadeCalculation, b: CascadeCalculation) =>
-                    (b[`ii${scenarioSuffix}` as keyof CascadeCalculation] as number) -
-                    (a[`ii${scenarioSuffix}` as keyof CascadeCalculation] as number)
-                )
-                .slice(0, 10)
-                .map((c: CascadeCalculation) => (
-                  <Box key={c.cascadeId} sx={{ margin: 0, padding: 0 }}>
-                    {`${c.effect.riskTitle}:`}{" "}
-                    <b>{`${
-                      Math.round(
-                        (10000 * (c[`ii${scenarioSuffix}` as keyof CascadeCalculation] as number)) /
-                          (calculation[`ti${scenarioSuffix}` as keyof RiskCalculation] as number)
-                      ) / 100
-                    }%`}</b>
-                  </Box>
-                ))}
-            </CardContent>
-          </Card>
-        );
-      }
-    }
-
-    return null;
   };
 
   return (
