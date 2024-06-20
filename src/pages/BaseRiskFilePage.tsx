@@ -72,6 +72,13 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
     }),
     marginRight: 0,
   }),
+  /**
+   * This is necessary to enable the selection of content. In the DOM, the stacking order is determined
+   * by the order of appearance. Following this rule, elements appearing later in the markup will overlay
+   * those that appear earlier. Since the Drawer comes after the Main content, this adjustment ensures
+   * proper interaction with the underlying content.
+   */
+  position: "relative",
 }));
 
 interface AppBarProps extends MuiAppBarProps {
@@ -278,6 +285,7 @@ export default function BaseRiskFilePage() {
             boxSizing: "border-box",
           },
           position: "relative",
+          pointerEvents: helpOpen ? "all" : "none",
         }}
         variant="persistent"
         anchor="right"
@@ -288,8 +296,9 @@ export default function BaseRiskFilePage() {
         <IconButton sx={{ position: "absolute", top: 60, right: 0 }} onClick={handleDrawerClose}>
           <CloseIcon />
         </IconButton>
-        <BottomNavigation />
+        {/* <BottomNavigation /> */}
       </Drawer>
+
       <Fab color="primary" onClick={handleDrawerOpen} sx={{ position: "fixed", bottom: 62, right: 5 }}>
         <QuestionMarkIcon />
       </Fab>
