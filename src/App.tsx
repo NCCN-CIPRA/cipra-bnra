@@ -1,10 +1,9 @@
 import { useEffect } from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
-import AnalysisAveragerPage from "./pages/analysis/AnalysisAveragerPage";
 import AuthenticationPage from "./pages/auth/AuthenticationPage";
 import HomePage from "./pages/main/HomePage";
 import LocalAPI from "./pages/main/LocalAPI";
-import CalculationPage from "./pages/analysis/CalculationPage";
+import CalculationPage from "./pages/CalculationPage/CalculationPage";
 import RankingPage from "./pages/reporting/RankingPage";
 import RiskReportingPage from "./pages/reporting/RiskPage";
 import ValidationIntroPage from "./pages/validation/ValidationIntroPage";
@@ -162,10 +161,6 @@ function App() {
                   element: <ConsensusExpertPage />,
                 },
 
-                {
-                  path: "/analysis/averager",
-                  element: <AnalysisAveragerPage />,
-                },
                 {
                   path: "/analysis/calculator",
                   element: <CalculationPage />,

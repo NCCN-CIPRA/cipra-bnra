@@ -67,7 +67,7 @@ export default function BaseRisksPage() {
   const [riskFiles, setRiskFiles] = useState<{ [id: string]: DVRiskFile<DVAnalysisRun> }>({});
   const [srf, setSRF] = useState<{ [id: string]: SmallRisk } | null>(null);
   const [cascades, setCascades] = useState<{ [riskId: string]: Cascades }>({});
-  const [isRunning, setIsRunning] = useState(false);
+  // const [isRunning, setIsRunning] = useState(false);
 
   const {
     data: hazardCatalogue,
@@ -177,9 +177,7 @@ export default function BaseRisksPage() {
         srf: srf || {},
         reloadHazardCatalogue,
         loadRiskFile: async (params: Partial<GetRecordParams<DVRiskFile<any>>>) => {
-          if (!params.id || isRunning) return;
-
-          setIsRunning(true);
+          if (!params.id) return;
 
           if (!riskFiles[params.id] && !loadingRiskFile) {
             loadRiskFile({
@@ -203,8 +201,6 @@ export default function BaseRisksPage() {
 
                     setCascades(getCascades(rfResult, cascades, hc)(rcResult));
                     setRiskFiles(getRiskFiles(rfResult, riskFiles));
-
-                    setIsRunning(false);
                   },
                 });
 

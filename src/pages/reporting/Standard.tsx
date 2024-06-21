@@ -62,7 +62,7 @@ export default function Standard({
     query: `$filter=_cr4de_risk_file_value eq ${riskFile?.cr4de_riskfilesid}&$expand=cr4de_referencedSource`,
   });
 
-  const calculations = useMemo(
+  const calculations: RiskCalculation[] = useMemo(
     () => otherRiskFiles.map((rf) => JSON.parse(rf.cr4de_latest_calculation?.cr4de_results as string)),
     [otherRiskFiles]
   );

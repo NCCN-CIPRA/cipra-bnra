@@ -4,7 +4,6 @@ import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { Avatar, Box, Container, Fab, Stack, Tooltip, Typography } from "@mui/material";
 import AppContext from "../../functions/AppContext";
 import getCategoryColor from "../../functions/getCategoryColor";
-import ExecutiveSummaryGraph from "../analysis/ExecutiveSummaryGraphs";
 import SummaryCharts from "../../components/charts/SummaryCharts";
 import { getWorstCaseScenario } from "../../functions/scenarios";
 import useAPI from "../../hooks/useAPI";

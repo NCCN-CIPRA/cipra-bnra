@@ -477,7 +477,7 @@ export default function prepareRiskFiles(
       IGNORE_RISKS.indexOf(c.cr4de_cause_hazard.cr4de_hazard_id) < 0 &&
       IGNORE_RISKS.indexOf(c.cr4de_effect_hazard.cr4de_hazard_id) < 0
   );
-  console.log(cascades.length, allCascades.length);
+
   const cascadeIds = cascades.map((c) => c.cr4de_bnrariskcascadeid);
   const cascadeAnalyses = allCascadeAnalyses.filter((c) => cascadeIds.indexOf(c._cr4de_cascade_value) >= 0);
 

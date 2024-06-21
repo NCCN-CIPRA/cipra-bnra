@@ -187,7 +187,7 @@ export default function BaseRiskFilePage() {
 
   useEffect(() => {
     riskContext.loadRiskFile({ id: params.risk_file_id });
-  }, []);
+  }, [params.risk_file_id]);
 
   usePageTitle(
     riskContext.riskFiles[params.risk_file_id] ? riskContext.riskFiles[params.risk_file_id].cr4de_title : "..."
