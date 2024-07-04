@@ -65,6 +65,9 @@ export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableF
   cr4de_label_impact: "Human" | "Societal" | "Environmental" | "Financial" | null;
 
   cr4de_mrs_summary: string | null;
+  cr4de_mrs_summary_nl: string | null;
+  cr4de_mrs_summary_fr: string | null;
+  cr4de_mrs_summary_de: string | null;
   cr4de_mrs_scenario: string | null;
   cr4de_mrs_disclaimer: string | null;
   cr4de_mrs_probability: string | null;

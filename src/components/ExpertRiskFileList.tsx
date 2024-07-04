@@ -259,13 +259,7 @@ function RiskFileList({
                     />
                     <ListItemText sx={{ width: "550px", flexGrow: 0 }}>
                       <Stepper activeStep={getActiveStep(p)} alternativeLabel sx={{ width: "550px" }}>
-                        <Step
-                          completed={Boolean(
-                            p.cr4de_validation_finished ||
-                              p.cr4de_risk_file.cr4de_step2a_enabled ||
-                              p.cr4de_risk_file.cr4de_step2b_enabled
-                          )}
-                        >
+                        <Step completed={Boolean(p._cr4de_validation_value)}>
                           <Tooltip title={getValidationTooltip(p)}>
                             <StepButton
                               disabled={false}

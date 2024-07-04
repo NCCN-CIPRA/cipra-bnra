@@ -148,8 +148,9 @@ export function getPartialProbabilityRelativeScale(
   scenarioSuffix: SCENARIO_SUFFIX,
   tp50: boolean = false
 ) {
-  const tp = getYearlyProbability(calculation[`tp${tp50 ? "50" : ""}${scenarioSuffix}`]);
-  const ratio = getYearlyProbability(p_daily) / tp;
+  // const tp = getYearlyProbability(calculation[`tp${tp50 ? "50" : ""}${scenarioSuffix}`]);
+  // const ratio = getYearlyProbability(p_daily) / tp;
 
-  return ratio * rescaleProbability(tp);
+  // return ratio * rescaleProbability(tp);
+  return rescaleProbability(getYearlyProbability(p_daily));
 }

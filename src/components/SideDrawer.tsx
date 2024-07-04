@@ -92,6 +92,12 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
                       <ListItemText primary={t("sideDrawer.translations", "App Translation")} />
                     </ListItemButton>
                   </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton component={Link} to="/admin/corrections" onClick={onClose}>
+                      <ListItemIcon></ListItemIcon>
+                      <ListItemText primary={"Report Corrections"} />
+                    </ListItemButton>
+                  </ListItem>
                   <Divider />
                 </>
               )}

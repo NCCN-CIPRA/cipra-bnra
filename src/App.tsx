@@ -39,6 +39,7 @@ import RiskFileSummaryPage from "./pages/RiskFileSummaryPage/RiskFileSummaryPage
 import RiskAnalysisPage from "./pages/RiskAnalysisPage/RiskAnalysisPage";
 import RiskDataPage from "./pages/RiskDataPage/RiskDataPage";
 import RiskInputPage from "./pages/RiskInputPage/RiskInputPage";
+import CorrectionsPage from "./pages/CorrectionsPage/CorrectionsPage";
 
 function App() {
   useEffect(() => {
@@ -183,6 +184,7 @@ function App() {
                 { path: "/admin/translations", element: <TranslationsPage /> },
                 { path: "/admin/process", element: <ProcessManagementPage /> },
                 { path: "/admin/experts", element: <ExpertManagementPage /> },
+                { path: "/admin/corrections", element: <CorrectionsPage /> },
               ],
             },
           ],

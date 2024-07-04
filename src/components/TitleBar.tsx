@@ -81,6 +81,15 @@ export default function TitleBar({
               >
                 nl
               </Button>
+              <Button
+                variant={i18n.languages[0] === "de" ? "outlined" : "text"}
+                color="inherit"
+                size="small"
+                sx={{ minWidth: 35 }}
+                onClick={() => i18n.changeLanguage("de")}
+              >
+                nl
+              </Button>
             </Stack>
             {showUser && user == null && (
               <Button color="inherit" component={Link} to="/auth">

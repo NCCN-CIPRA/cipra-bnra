@@ -45,45 +45,6 @@ const getTP50 = (calcs: RiskCalculation, scenarioSuffix: SCENARIO_SUFFIX) => {
   return calcs[`tp50${scenarioSuffix}`] || 0.0001;
 };
 
-const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
-  if (active && payload && payload.length) {
-    return (
-      <div
-        style={{
-          border: "1px solid #f5f5f5",
-          backgroundColor: "rgba(255, 255, 255, 0.8)",
-          padding: "10px",
-        }}
-      >
-        <p
-          style={{
-            margin: 0,
-            color: "#666",
-            fontWeight: 700,
-            paddingBottom: 5,
-            borderBottom: "2px solid #f5f5f5",
-          }}
-        >
-          {payload[0].payload.name}
-        </p>
-        <p>
-          <Typography variant="subtitle2">Probability</Typography>
-          <Typography variant="caption">
-            {" "}
-            {Math.round(payload[0]?.value! * 10000) / 100}% change of occuring in the next 3 years
-          </Typography>
-        </p>
-        <p>
-          <Typography variant="subtitle2">Impact</Typography>
-          <Typography variant="caption">{`${getImpactScale(payload[1]?.value! / 10, "")}/5`}</Typography>
-        </p>
-      </div>
-    );
-  }
-
-  return null;
-};
-
 export default function ClimateChangeChart({
   calculation,
   scenarioSuffix,
@@ -95,50 +56,79 @@ export default function ClimateChangeChart({
     const causes = [
       {
         name: "No underlying cause",
-        p: getPartialProbabilityRelativeScale(calculation[`dp${scenarioSuffix}`], calculation, scenarioSuffix),
-        p2050: getPartialProbabilityRelativeScale(
-          calculation[`dp50${scenarioSuffix}`],
-          calculation,
-          scenarioSuffix,
-          true
-        ),
+        p_c: getPartialProbabilityRelativeScale(calculation[`dp_c`], calculation, "_c"),
+        p2050_c: getPartialProbabilityRelativeScale(calculation[`dp50_c`], calculation, "_c", true),
+        p_m: getPartialProbabilityRelativeScale(calculation[`dp_m`], calculation, "_m"),
+        p2050_m: getPartialProbabilityRelativeScale(calculation[`dp50_m`], calculation, "_m", true),
+        p_e: getPartialProbabilityRelativeScale(calculation[`dp_e`], calculation, "_e"),
+        p2050_e: getPartialProbabilityRelativeScale(calculation[`dp50_e`], calculation, "_e", true),
       },
       ...(calculation.causes
-        .filter((c) => c[`ip50${scenarioSuffix}`] !== 0)
+        .filter((c) => c[`ip50_c`] !== 0)
         .map((c) => {
           return {
             name: c.cause.riskTitle,
-            p: getPartialProbabilityRelativeScale(c[`ip${scenarioSuffix}`], calculation, scenarioSuffix),
-            p2050: getPartialProbabilityRelativeScale(c[`ip50${scenarioSuffix}`], calculation, scenarioSuffix, true),
+            p_c: getPartialProbabilityRelativeScale(c[`ip_c`], calculation, "_c"),
+            p2050_c: getPartialProbabilityRelativeScale(c[`ip50_c`], calculation, "_c", true),
+            p_m: getPartialProbabilityRelativeScale(c[`ip_m`], calculation, "_m"),
+            p2050_m: getPartialProbabilityRelativeScale(c[`ip50_m`], calculation, "_m", true),
+            p_e: getPartialProbabilityRelativeScale(c[`ip_e`], calculation, "_e"),
+            p2050_e: getPartialProbabilityRelativeScale(c[`ip50_e`], calculation, "_e", true),
           };
         }) || []),
-    ].sort((a, b) => b.p2050 - a.p2050);
+    ]
+      .sort(
+        (a, b) =>
+          (b.p2050_c - b.p_c + b.p2050_m - b.p_m + b.p2050_e - b.p_e) / 3 -
+          (a.p2050_c - a.p_c + a.p2050_m - a.p_m + a.p2050_e - a.p_e) / 3
+      )
+      .slice(0, 5);
+    console.log(causes);
+    const tp50_c = getTotalProbabilityRelativeScale(calculation, "_c", true);
+    const tp50_m = getTotalProbabilityRelativeScale(calculation, "_m", true);
+    const tp50_e = getTotalProbabilityRelativeScale(calculation, "_e", true);
 
-    const tp50 = getTotalProbabilityRelativeScale(calculation, scenarioSuffix, true);
+    const tp_c = getTotalProbabilityRelativeScale(calculation, "_c");
+    const tp_m = getTotalProbabilityRelativeScale(calculation, "_m");
+    const tp_e = getTotalProbabilityRelativeScale(calculation, "_e");
 
     return [
       {
         name: "Total probability",
-        P2023: getTotalProbabilityRelativeScale(calculation, scenarioSuffix),
-        P2050: tp50,
+        P2023_c: tp50_c >= tp_c ? tp_c : tp_c - tp50_c,
+        P2050_c_inc: tp50_c >= tp_c ? tp50_c - tp_c : 0,
+        P2050_c_dec: tp50_c >= tp_c ? 0 : tp_c - tp50_c,
+        P2023_m: tp50_m >= tp_m ? tp_m : tp_m - tp50_m,
+        P2050_m_inc: tp50_m >= tp_m ? tp50_m - tp_m : 0,
+        P2050_m_dec: tp50_m >= tp_m ? 0 : tp_m - tp50_m,
+        P2023_e: tp50_e >= tp_e ? tp_e : tp_e - tp50_e,
+        P2050_e_inc: tp50_e >= tp_e ? tp50_e - tp_e : 0,
+        P2050_e_dec: tp50_e >= tp_e ? 0 : tp_e - tp50_e,
       },
       ...causes
-        .reduce(
-          ([cumulCauses, pCumul], c, i) => {
-            if (pCumul / tp50 > 0.8 && i > 2) return [cumulCauses, pCumul] as [Cause2050[], number];
+        // .reduce(
+        //   ([cumulCauses, pCumul], c, i) => {
+        //     if (pCumul / tp50 > 0.8 && i > 2) return [cumulCauses, pCumul] as [Cause2050[], number];
 
-            return [[...cumulCauses, c], pCumul + c.p2050] as [Cause2050[], number];
-          },
-          [[], 0] as [Cause2050[], number]
-        )[0]
+        //     return [[...cumulCauses, c], pCumul + c.p2050] as [Cause2050[], number];
+        //   },
+        //   [[], 0] as [Cause2050[], number]
+        // )[0]
         .map((cause) => ({
           name: cause.name,
-          P2023: cause.p,
-          P2050: cause.p2050,
+          P2023_c: cause.p2050_c >= cause.p_c ? cause.p_c : cause.p2050_c,
+          P2050_c_inc: cause.p2050_c >= cause.p_c ? cause.p2050_c - cause.p_c : 0,
+          P2050_c_dec: cause.p2050_c >= cause.p_c ? 0 : cause.p_c - cause.p2050_c,
+          P2023_m: cause.p2050_m >= cause.p_m ? cause.p_m : cause.p2050_m,
+          P2050_m_inc: cause.p2050_m >= cause.p_m ? cause.p2050_m - cause.p_m : 0,
+          P2050_m_dec: cause.p2050_m >= cause.p_m ? 0 : cause.p_m - cause.p2050_m,
+          P2023_e: cause.p2050_e >= cause.p_e ? cause.p_e : cause.p2050_e,
+          P2050_e_inc: cause.p2050_e >= cause.p_e ? cause.p2050_e - cause.p_e : 0,
+          P2050_e_dec: cause.p2050_e >= cause.p_e ? 0 : cause.p_e - cause.p2050_e,
         })),
     ];
   }, [calculation, scenarioSuffix]);
-
+  console.log(calculation);
   return (
     <BarChart
       width={750}
@@ -151,6 +141,7 @@ export default function ClimateChangeChart({
         bottom: 30,
       }}
       layout="vertical"
+      barCategoryGap="15%"
     >
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis
@@ -163,8 +154,15 @@ export default function ClimateChangeChart({
       <YAxis dataKey="name" type="category" width={150} />
       <Tooltip formatter={(value) => `${round(value as number)} / 5`} />
       <Legend align="center" verticalAlign="bottom" wrapperStyle={{ paddingTop: 30 }} />
-      <Bar name="Probability in 2023" dataKey="P2023" fill="#8884d8" />
-      <Bar name="Probability in 2050" dataKey="P2050" fill="#ffc658" />
+      <Bar name="Considerable scenario" dataKey="P2023_c" stackId="c" fill={SCENARIO_PARAMS.considerable.color} />
+      <Bar name="Major scenario" dataKey="P2023_m" stackId="m" fill={SCENARIO_PARAMS.major.color} />
+      <Bar name="Extreme scenario" dataKey="P2023_e" stackId="e" fill={SCENARIO_PARAMS.extreme.color} />
+      <Bar name="Increased probability in 2050" dataKey="P2050_c_inc" stackId="c" fill="red" />
+      <Bar legendType="none" dataKey="P2050_m_inc" stackId="m" fill="red" />
+      <Bar legendType="none" dataKey="P2050_e_inc" stackId="e" fill="red" />
+      <Bar name="Decreased probability in 2050" dataKey="P2050_c_dec" stackId="c" fill="green" />
+      <Bar legendType="none" dataKey="P2050_m_dec" stackId="m" fill="green" />
+      <Bar legendType="none" dataKey="P2050_e_dec" stackId="e" fill="green" />
     </BarChart>
   );
 }

@@ -91,9 +91,11 @@ function CatalyzingEffect({
 
   return (
     <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, px: 2, py: 1, backgroundColor: "white" }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        {cascade.cr4de_effect_hazard.cr4de_title}
-      </Typography>
+      <a href={`/risks/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}`}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          {cascade.cr4de_effect_hazard.cr4de_title}
+        </Typography>
+      </a>
       {!editing && (
         <Box
           className="htmleditor"

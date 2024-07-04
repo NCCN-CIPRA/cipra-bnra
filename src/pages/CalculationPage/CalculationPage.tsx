@@ -322,7 +322,7 @@ export default function CalculationPage() {
       });
 
       //   logger(`Saving calculations (${i + 1}/${results.length})`, 1);
-      setCalculationProgress(i + 1 / calculations.length);
+      setCalculationProgress((i + 1) / calculations.length);
     }
 
     // logger("Done");

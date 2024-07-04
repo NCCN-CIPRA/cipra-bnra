@@ -11,14 +11,19 @@ import TextInputBox from "../../components/TextInputBox";
 import { AuthPageContext } from "../AuthPage";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
+import { useTranslation } from "react-i18next";
 
 export default function RiskFileSummaryPage({}) {
   const api = useAPI();
-  const { user, riskFile, calculation } = useOutletContext<RiskFilePageContext>();
+  const { i18n } = useTranslation();
+  const { user, riskFile, reloadRiskFile, calculation } = useOutletContext<RiskFilePageContext>();
 
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [summary, setSummary] = useState(riskFile.cr4de_mrs_summary || "<h6>Not available</h6>");
+  const [summaryNL, setSummaryNL] = useState(riskFile.cr4de_mrs_summary_nl || "<h6>Not available</h6>");
+  const [summaryFR, setSummaryFR] = useState(riskFile.cr4de_mrs_summary_fr || "<h6>Not available</h6>");
+  const [summaryDE, setSummaryDE] = useState(riskFile.cr4de_mrs_summary_de || "<h6>Not available</h6>");
 
   const labels: { name: string; label: string; color: string }[] = [
     {
@@ -44,12 +49,16 @@ export default function RiskFileSummaryPage({}) {
     setSaving(true);
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
       cr4de_mrs_summary: summary,
+      cr4de_mrs_summary_nl: summaryNL,
+      cr4de_mrs_summary_fr: summaryFR,
+      cr4de_mrs_summary_de: summaryDE,
     });
+    await reloadRiskFile({ id: riskFile.cr4de_riskfilesid });
 
     setEditing(false);
     setSaving(false);
   };
-
+  console.log(i18n.language);
   return (
     <Container>
       <Typography variant="h2">{riskFile.cr4de_title}</Typography>
@@ -62,22 +71,73 @@ export default function RiskFileSummaryPage({}) {
               </Tooltip>
             ))}
           </Stack>
-          {!editing && (
+          {!editing && i18n.language === "en" && (
             <Box
               className="htmleditor"
               sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
               dangerouslySetInnerHTML={{ __html: summary }}
             />
           )}
+          {!editing && i18n.language === "nl" && (
+            <Box
+              className="htmleditor"
+              sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+              dangerouslySetInnerHTML={{ __html: summaryNL }}
+            />
+          )}
+          {!editing && i18n.language === "fr" && (
+            <Box
+              className="htmleditor"
+              sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+              dangerouslySetInnerHTML={{ __html: summaryFR }}
+            />
+          )}
+          {!editing && i18n.language === "de" && (
+            <Box
+              className="htmleditor"
+              sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+              dangerouslySetInnerHTML={{ __html: summaryDE }}
+            />
+          )}
           {editing && (
-            <Box sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
-              <TextInputBox
-                limitedOptions
-                initialValue={summary}
-                setUpdatedValue={(str) => setSummary(str || "")}
-                height="600"
-              />
-            </Box>
+            <>
+              <Box sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+                <Typography variant="h6">English</Typography>
+                <TextInputBox
+                  limitedOptions
+                  initialValue={summary}
+                  setUpdatedValue={(str) => setSummary(str || "")}
+                  height="600"
+                />
+              </Box>
+              <Box sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+                <Typography variant="h6">Nederlands</Typography>
+                <TextInputBox
+                  limitedOptions
+                  initialValue={summaryNL}
+                  setUpdatedValue={(str) => setSummaryNL(str || "")}
+                  height="600"
+                />
+              </Box>
+              <Box sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+                <Typography variant="h6">Français</Typography>
+                <TextInputBox
+                  limitedOptions
+                  initialValue={summaryFR}
+                  setUpdatedValue={(str) => setSummaryFR(str || "")}
+                  height="600"
+                />
+              </Box>
+              <Box sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+                <Typography variant="h6">Deutsh</Typography>
+                <TextInputBox
+                  limitedOptions
+                  initialValue={summaryDE}
+                  setUpdatedValue={(str) => setSummaryDE(str || "")}
+                  height="600"
+                />
+              </Box>
+            </>
           )}
         </Box>
         <Box sx={{ bgcolor: "white" }}>
