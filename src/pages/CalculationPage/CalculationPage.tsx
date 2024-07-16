@@ -578,6 +578,7 @@ export default function CalculationPage() {
             setSelectedNodeId={setSelectedNode}
           />
           <ExecutiveSummaryGraph
+            riskFile={riskFiles?.find((r) => r.cr4de_riskfilesid === selectedNode) || ({} as DVRiskFile)}
             calculations={calculations}
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}

@@ -13,6 +13,7 @@ import { useCurrentPng, useGenerateImage } from "recharts-to-png";
 import { useOutletContext } from "react-router-dom";
 import { AuthPageContext } from "../../pages/AuthPage";
 import SaveIcon from "@mui/icons-material/Download";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 
 const RADIAN = Math.PI / 180;
 const data = [
@@ -67,27 +68,33 @@ const needle = (value: number, data: any[], cx: number, cy: number, iR: number, 
 };
 
 export default function SummaryCharts({
+  riskFile,
   calculation,
   scenario,
 }: {
+  riskFile: DVRiskFile;
   calculation: RiskCalculation;
   scenario: SCENARIOS;
 }) {
   const { user } = useOutletContext<AuthPageContext>();
 
   // useCurrentPng usage (isLoading is optional)
-  const [getDivJpeg, { ref, isLoading }] = useGenerateImage({ type: "image/png", quality: 1 });
+  const [getDivJpeg, { ref, isLoading }] = useGenerateImage({
+    type: "image/png",
+    quality: 1,
+    options: { scale: 4 } as any,
+  });
 
   // Can also pass in options for html2canvas
   // const [getPng, { ref }] = useCurrentPng({ backgroundColor: '#000' });
 
   const handleDownload = useCallback(async () => {
     const png = await getDivJpeg();
-    console.log(png);
+
     // Verify that png is not undefined
     if (png) {
       // Download with FileSaver
-      FileSaver.saveAs(png, `${calculation.riskId}-summary.png`);
+      FileSaver.saveAs(png, `${riskFile.cr4de_hazard_id}-summary.png`);
     }
   }, [getDivJpeg]);
 

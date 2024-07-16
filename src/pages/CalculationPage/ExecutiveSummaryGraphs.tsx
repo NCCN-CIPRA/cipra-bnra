@@ -26,10 +26,12 @@ import { SCENARIOS, SCENARIO_PARAMS, getScenarioSuffix, getWorstCaseScenario } f
 import SummaryCharts from "../../components/charts/SummaryCharts";
 
 export default function ExecutiveSummaryGraph({
+  riskFile,
   calculations,
   selectedNodeId,
   setSelectedNodeId,
 }: {
+  riskFile: DVRiskFile;
   calculations: RiskCalculation[] | null;
   selectedNodeId: string | null;
   setSelectedNodeId: (id: string | null) => void;
@@ -53,7 +55,7 @@ export default function ExecutiveSummaryGraph({
         <Typography variant="subtitle2">Executive Summary diagrams</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{}}>
-        <SummaryCharts calculation={calculation} scenario={trueScenario} />
+        <SummaryCharts riskFile={riskFile} calculation={calculation} scenario={trueScenario} />
       </AccordionDetails>
       <AccordionActions>
         <Stack direction="row" spacing={5} sx={{ flex: 1 }}>

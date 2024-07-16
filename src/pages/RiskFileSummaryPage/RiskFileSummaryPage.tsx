@@ -141,7 +141,7 @@ export default function RiskFileSummaryPage({}) {
           )}
         </Box>
         <Box sx={{ bgcolor: "white" }}>
-          <SummaryCharts calculation={calculation} scenario={getWorstCaseScenario(calculation)} />
+          <SummaryCharts riskFile={riskFile} calculation={calculation} scenario={getWorstCaseScenario(calculation)} />
         </Box>
       </Stack>
       {user && user.admin && (
