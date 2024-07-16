@@ -42,7 +42,10 @@ const replacements: string[][] = [
   ["Hybrid threat", "Hybrid actor"],
   ["Left-wing extremism/terrorism", "Left-wing extremist actor"],
   ["Right-wing extremism/terrorism", "Right-wing extremist actor"],
-  // ["Organized crime", "Organized crime actor"],
+  ["Organized", "Organised"],
+  ["organized", "organised"],
+  ["rganization", "rganisation"],
+  ["rganize", "rganise"],
   ["Religious extremism/terrorism", "Religious extremist actor"],
   ["CBRN-e", "CBRNe"],
   ["CBRN-E", "CBRNe"],
@@ -55,6 +58,32 @@ const replacements: string[][] = [
   ["This means that it represent the highest", "This means that it represents the highest"],
   [". No underlying cause", '. <a href="">No underlying cause</a>'],
   [". Direct Impact", '. <a href="">Direct Impact</a>'],
+  ["ptimization", "ptimisation"],
+  ["ptimize", "ptimise"],
+  ["ersonalized", "ersonalised"],
+  ["ustomize", "ustomise"],
+  ["nalyzing", "nalysing"],
+  ["nalyze", "nalyse"],
+  ["efense", "efence"],
+  ["mphasizes", "mphasises"],
+  ["igitalization", "igitalisation"],
+  ["ecentralized", "ecentralised"],
+  ["tilizing", "tilising"],
+  ["A\\.I\\.", "AI"],
+  ["ynchronization", "ynchronisation"],
+  ["odeling", "odelling"],
+  ["rioritizing", "rioritising"],
+  ["eneralized", "eneralised"],
+  ["ummarized", "ummarised"],
+  ["haracterized", "haracterised"],
+  ["apitalize", "apitalise"],
+  ["evolutionize", "evolutionise"],
+  ["avoring", "avouring"],
+  ["udgment", "udgement"],
+  ["nauthorized", "nauthorised"],
+  ["raveling", "ravelling"],
+  ["overnement", "overnment"],
+  ["zation", "sation"],
 ];
 
 const rfFields: (keyof DVRiskFile)[] = [
@@ -90,6 +119,10 @@ const last = (arr: any[]) => arr.slice(-1)[0];
 export default function CorrectionsPage() {
   const api = useAPI();
   const [calculationProgress, setCalculationProgress] = useState<number | null>(null);
+  const [additionalErrors, setAdditionalErrors] = useState<string>("");
+  const [additionalCorrections, setAdditionalCorrections] = useState<string>("");
+  const [inputError, setInputError] = useState<string | null>(null);
+  const [corrections, setCorrections] = useState<Correction[] | null>(null);
 
   const {
     data: riskFiles,
@@ -112,15 +145,41 @@ export default function CorrectionsPage() {
     reloadRiskFiles();
   };
 
-  const corrections = useMemo(() => {
+  const findCorrections = () => {
     if (!riskFiles) return [];
 
     const cors: Correction[] = [];
+    const allReplacements = [...replacements];
+
+    const es = additionalErrors.split("\n");
+    const cs = additionalCorrections.split("\n");
+
+    if (es.indexOf("") >= 0) {
+      if (es[0] === "") {
+        es.shift();
+        cs.shift();
+      } else {
+        setInputError("Please remove empty lines from the left box");
+      }
+    }
+
+    if (es.length !== cs.length) {
+      setInputError("Each error line in the left box must have a corresponding correction line in the right box");
+      return;
+    } else {
+      setInputError(null);
+    }
+
+    for (let i in es) {
+      allReplacements.push([es[i], cs[i]]);
+    }
 
     for (let rf of riskFiles) {
       for (let f of rfFields) {
-        for (let r of replacements) {
-          for (let i of [...(rf[f] || "").toString().matchAll(new RegExp(r[0], "g"))].map((a) => a.index as number)) {
+        for (let r of allReplacements) {
+          for (let m of (rf[f] || "").toString().matchAll(new RegExp(r[0], "g"))) {
+            const i = m.index;
+            console.log(m);
             if (cors.length <= 0 || last(cors).riskFile.cr4de_riskfilesid !== rf.cr4de_riskfilesid) {
               cors.push({ riskFile: rf, fields: [] });
             }
@@ -136,8 +195,8 @@ export default function CorrectionsPage() {
               last(last(last(cors).fields).replacements).match !== r[0]
             ) {
               last(last(cors).fields).replacements.push({
-                match: r[0],
-                replaceWith: r[1],
+                match: m[0],
+                replaceWith: m[0].replace(new RegExp(r[0], "g"), r[1]),
                 indices: [],
               });
             }
@@ -148,8 +207,8 @@ export default function CorrectionsPage() {
       }
     }
 
-    return cors;
-  }, [riskFiles]);
+    setCorrections(cors);
+  };
 
   const saveCorrections = async () => {
     if (!corrections) return;
@@ -172,8 +231,8 @@ export default function CorrectionsPage() {
 
         fields[f.field] = base;
       }
-      console.log(fields);
-      // await api.updateRiskFile(rf.riskFile.cr4de_riskfilesid, fields);
+      // console.log(fields);
+      await api.updateRiskFile(rf.riskFile.cr4de_riskfilesid, fields);
 
       //   logger(`Saving calculations (${i + 1}/${results.length})`, 1);
       setCalculationProgress((100 * (i + 1)) / corrections.length);
@@ -207,6 +266,40 @@ export default function CorrectionsPage() {
                 </Stack>
               </Stack>
             </Box>
+            <Box sx={{ py: 2, px: 1 }}>
+              <Typography variant="subtitle1">Additional corrections (1 per line)</Typography>
+              <Stack direction="row" columnGap={4} sx={{ pt: 1 }}>
+                <Box sx={{ flex: 1 }}>
+                  <TextField
+                    label="Errors"
+                    multiline
+                    rows={4}
+                    defaultValue=""
+                    variant="filled"
+                    sx={{ width: "100%" }}
+                    value={additionalErrors}
+                    onChange={(e) => setAdditionalErrors(e.target.value)}
+                  />
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <TextField
+                    label="Corrections"
+                    multiline
+                    rows={4}
+                    defaultValue=""
+                    variant="filled"
+                    sx={{ width: "100%" }}
+                    value={additionalCorrections}
+                    onChange={(e) => setAdditionalCorrections(e.target.value)}
+                  />
+                </Box>
+              </Stack>
+              {inputError && (
+                <Typography variant="caption" color="red">
+                  {inputError}
+                </Typography>
+              )}
+            </Box>
             <Box sx={{ height: 8, mt: 2, mx: 1 }}>
               {calculationProgress !== null && <LinearProgress variant="determinate" value={calculationProgress} />}
             </Box>
@@ -214,6 +307,9 @@ export default function CorrectionsPage() {
           <CardActions>
             <Button disabled={isLoading} onClick={reloadData}>
               Reload data
+            </Button>
+            <Button disabled={isLoading} onClick={findCorrections}>
+              Find corrections
             </Button>
             <Box sx={{ flex: 1 }} />
             <Button color="warning" disabled={corrections === null} onClick={saveCorrections}>

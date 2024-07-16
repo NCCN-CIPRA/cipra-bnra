@@ -322,6 +322,22 @@ export default function HomePage() {
           </Box>
         </Container>
       </Box>
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: "space-evenly",
+          py: 2,
+          backgroundColor: "white",
+          borderTop: "1px solid rgba(0,0,0,0.05)",
+        }}
+      >
+        <img
+          alt="Nationaal Crisiscentrum"
+          src="https://bnra.powerappsportals.com/logo_nccn.svg"
+          style={{ height: 40 }}
+        />
+        <img alt="BNRA" src="https://bnra.powerappsportals.com/logo_text.png" style={{ height: 40 }} />
+      </Stack>
     </>
   );
 }

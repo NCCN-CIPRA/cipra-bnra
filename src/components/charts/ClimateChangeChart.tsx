@@ -79,8 +79,8 @@ export default function ClimateChangeChart({
     ]
       .sort(
         (a, b) =>
-          (b.p2050_c - b.p_c + b.p2050_m - b.p_m + b.p2050_e - b.p_e) / 3 -
-          (a.p2050_c - a.p_c + a.p2050_m - a.p_m + a.p2050_e - a.p_e) / 3
+          (Math.abs(b.p2050_c - b.p_c) + Math.abs(b.p2050_m - b.p_m) + Math.abs(b.p2050_e - b.p_e)) / 3 -
+          (Math.abs(a.p2050_c - a.p_c) + Math.abs(a.p2050_m - a.p_m) + Math.abs(a.p2050_e - a.p_e)) / 3
       )
       .slice(0, 5);
     console.log(causes);
@@ -95,13 +95,13 @@ export default function ClimateChangeChart({
     return [
       {
         name: "Total probability",
-        P2023_c: tp50_c >= tp_c ? tp_c : tp_c - tp50_c,
+        P2023_c: tp50_c >= tp_c ? tp_c : tp50_c,
         P2050_c_inc: tp50_c >= tp_c ? tp50_c - tp_c : 0,
         P2050_c_dec: tp50_c >= tp_c ? 0 : tp_c - tp50_c,
-        P2023_m: tp50_m >= tp_m ? tp_m : tp_m - tp50_m,
+        P2023_m: tp50_m >= tp_m ? tp_m : tp50_m,
         P2050_m_inc: tp50_m >= tp_m ? tp50_m - tp_m : 0,
         P2050_m_dec: tp50_m >= tp_m ? 0 : tp_m - tp50_m,
-        P2023_e: tp50_e >= tp_e ? tp_e : tp_e - tp50_e,
+        P2023_e: tp50_e >= tp_e ? tp_e : tp50_e,
         P2050_e_inc: tp50_e >= tp_e ? tp50_e - tp_e : 0,
         P2050_e_dec: tp50_e >= tp_e ? 0 : tp_e - tp50_e,
       },

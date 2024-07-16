@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import ProbabilityBars from "./ProbabilityBars";
 import { Cell, Pie, PieChart } from "recharts";
 import getScaleString from "../../functions/getScaleString";
@@ -7,6 +7,12 @@ import { SCENARIOS, getScenarioSuffix } from "../../functions/scenarios";
 import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
 import { IMPACT_CATEGORY, getCategoryImpactRelativeScale } from "../../functions/Impact";
 import { IMPACT_COLOR_SCALES } from "../../functions/getImpactColor";
+import { useCallback } from "react";
+import FileSaver from "file-saver";
+import { useCurrentPng, useGenerateImage } from "recharts-to-png";
+import { useOutletContext } from "react-router-dom";
+import { AuthPageContext } from "../../pages/AuthPage";
+import SaveIcon from "@mui/icons-material/Download";
 
 const RADIAN = Math.PI / 180;
 const data = [
@@ -67,6 +73,24 @@ export default function SummaryCharts({
   calculation: RiskCalculation;
   scenario: SCENARIOS;
 }) {
+  const { user } = useOutletContext<AuthPageContext>();
+
+  // useCurrentPng usage (isLoading is optional)
+  const [getDivJpeg, { ref, isLoading }] = useGenerateImage({ type: "image/png", quality: 1 });
+
+  // Can also pass in options for html2canvas
+  // const [getPng, { ref }] = useCurrentPng({ backgroundColor: '#000' });
+
+  const handleDownload = useCallback(async () => {
+    const png = await getDivJpeg();
+    console.log(png);
+    // Verify that png is not undefined
+    if (png) {
+      // Download with FileSaver
+      FileSaver.saveAs(png, `${calculation.riskId}-summary.png`);
+    }
+  }, [getDivJpeg]);
+
   const scenarioSuffix = getScenarioSuffix(scenario);
 
   const tp = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
@@ -77,124 +101,129 @@ export default function SummaryCharts({
   const F = getCategoryImpactRelativeScale(calculation, "F", scenarioSuffix);
 
   return (
-    <Box sx={{ p: 2, pb: 1, border: "1px solid #ddd", display: "inline-block" }}>
-      <ProbabilityBars tp={tp} chartWidth={pieWidth} />
-      <Stack direction="column" spacing={4} sx={{ mb: 4, width: pieWidth }}>
-        <Stack direction="column">
-          <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
-            Human Impact
-          </Typography>
-          <PieChart width={pieWidth} height={pieHeight}>
-            <Pie
-              dataKey="value"
-              startAngle={180}
-              endAngle={0}
-              data={getBars("H")}
-              cx={cx}
-              cy={cy}
-              innerRadius={iR}
-              outerRadius={oR}
-              fill="#8884d8"
-              stroke="none"
-              paddingAngle={1}
-            >
-              {getBars("H").map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            {needle(H, data, cx, cy, iR, oR, "#555")}
-          </PieChart>
-          <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-            {getScaleString(H)}
-          </Typography>
+    <Box sx={{ position: "relative" }}>
+      <Box ref={ref} sx={{ p: 2, pb: 1, border: "1px solid #ddd", display: "inline-block" }}>
+        <ProbabilityBars tp={tp} chartWidth={pieWidth} />
+        <Stack direction="column" spacing={4} sx={{ mb: 4, width: pieWidth }}>
+          <Stack direction="column">
+            <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
+              Human Impact
+            </Typography>
+            <PieChart width={pieWidth} height={pieHeight}>
+              <Pie
+                dataKey="value"
+                startAngle={180}
+                endAngle={0}
+                data={getBars("H")}
+                cx={cx}
+                cy={cy}
+                innerRadius={iR}
+                outerRadius={oR}
+                fill="#8884d8"
+                stroke="none"
+                paddingAngle={1}
+              >
+                {getBars("H").map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              {needle(H, data, cx, cy, iR, oR, "#555")}
+            </PieChart>
+            <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
+              {getScaleString(H)}
+            </Typography>
+          </Stack>
+          <Stack direction="column">
+            <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
+              Societal Impact
+            </Typography>
+            <PieChart width={pieWidth} height={pieHeight}>
+              <Pie
+                dataKey="value"
+                startAngle={180}
+                endAngle={0}
+                data={getBars("H")}
+                cx={cx}
+                cy={cy}
+                innerRadius={iR}
+                outerRadius={oR}
+                fill="#8884d8"
+                stroke="none"
+                paddingAngle={1}
+              >
+                {getBars("S").map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              {needle(S, data, cx, cy, iR, oR, "#555")}
+            </PieChart>
+            <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
+              {getScaleString(S)}
+            </Typography>
+          </Stack>
         </Stack>
-        <Stack direction="column">
-          <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
-            Societal Impact
-          </Typography>
-          <PieChart width={pieWidth} height={pieHeight}>
-            <Pie
-              dataKey="value"
-              startAngle={180}
-              endAngle={0}
-              data={getBars("H")}
-              cx={cx}
-              cy={cy}
-              innerRadius={iR}
-              outerRadius={oR}
-              fill="#8884d8"
-              stroke="none"
-              paddingAngle={1}
-            >
-              {getBars("S").map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            {needle(S, data, cx, cy, iR, oR, "#555")}
-          </PieChart>
-          <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-            {getScaleString(S)}
-          </Typography>
+        <Stack direction="column" spacing={4} sx={{ mb: 1, width: pieWidth }}>
+          <Stack direction="column">
+            <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
+              Environmental Impact
+            </Typography>
+            <PieChart width={pieWidth} height={pieHeight} style={{}}>
+              <Pie
+                dataKey="value"
+                startAngle={180}
+                endAngle={0}
+                data={getBars("H")}
+                cx={cx}
+                cy={cy}
+                innerRadius={iR}
+                outerRadius={oR}
+                fill="#8884d8"
+                stroke="none"
+                paddingAngle={1}
+              >
+                {getBars("E").map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              {needle(E, data, cx, cy, iR, oR, "#555")}
+            </PieChart>
+            <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
+              {getScaleString(E)}
+            </Typography>
+          </Stack>
+          <Stack direction="column">
+            <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
+              Financial Impact
+            </Typography>
+            <PieChart width={pieWidth} height={pieHeight}>
+              <Pie
+                dataKey="value"
+                startAngle={180}
+                endAngle={0}
+                data={getBars("F")}
+                cx={cx}
+                cy={cy}
+                innerRadius={iR}
+                outerRadius={oR}
+                fill="#8884d8"
+                stroke="none"
+                paddingAngle={1}
+              >
+                {getBars("F").map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              {needle(F, data, cx, cy, iR, oR, "#555")}
+            </PieChart>
+            <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
+              {getScaleString(F)}
+            </Typography>
+          </Stack>
         </Stack>
-      </Stack>
-      <Stack direction="column" spacing={4} sx={{ mb: 1, width: pieWidth }}>
-        <Stack direction="column">
-          <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
-            Environmental Impact
-          </Typography>
-          <PieChart width={pieWidth} height={pieHeight} style={{}}>
-            <Pie
-              dataKey="value"
-              startAngle={180}
-              endAngle={0}
-              data={getBars("H")}
-              cx={cx}
-              cy={cy}
-              innerRadius={iR}
-              outerRadius={oR}
-              fill="#8884d8"
-              stroke="none"
-              paddingAngle={1}
-            >
-              {getBars("E").map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            {needle(E, data, cx, cy, iR, oR, "#555")}
-          </PieChart>
-          <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-            {getScaleString(E)}
-          </Typography>
-        </Stack>
-        <Stack direction="column">
-          <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
-            Financial Impact
-          </Typography>
-          <PieChart width={pieWidth} height={pieHeight}>
-            <Pie
-              dataKey="value"
-              startAngle={180}
-              endAngle={0}
-              data={getBars("F")}
-              cx={cx}
-              cy={cy}
-              innerRadius={iR}
-              outerRadius={oR}
-              fill="#8884d8"
-              stroke="none"
-              paddingAngle={1}
-            >
-              {getBars("F").map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            {needle(F, data, cx, cy, iR, oR, "#555")}
-          </PieChart>
-          <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-            {getScaleString(F)}
-          </Typography>
-        </Stack>
-      </Stack>
+      </Box>
+      <IconButton sx={{ position: "absolute", top: 5, left: 5 }} onClick={handleDownload}>
+        <SaveIcon />
+      </IconButton>
     </Box>
   );
 }

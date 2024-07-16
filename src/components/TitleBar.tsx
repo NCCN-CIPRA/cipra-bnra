@@ -88,7 +88,7 @@ export default function TitleBar({
                 sx={{ minWidth: 35 }}
                 onClick={() => i18n.changeLanguage("de")}
               >
-                nl
+                de
               </Button>
             </Stack>
             {showUser && user == null && (

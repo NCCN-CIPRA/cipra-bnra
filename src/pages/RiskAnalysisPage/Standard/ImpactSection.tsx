@@ -75,7 +75,7 @@ export default function ImpactSection({
 
     const descriptions = paretoEffects
       .map((e, i) => {
-        const riskName = e.id ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>` : e.name;
+        const riskName = e.id ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>` : `<a href="">e.name</a>`;
 
         if (e.quali_cause) {
           return `<p style="font-weight:bold;font-size:10pt;font-family: Arial"">

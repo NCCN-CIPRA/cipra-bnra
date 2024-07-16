@@ -40,7 +40,7 @@ const PSankeyNode = ({
           fill={getCategoryColor(payload.category)}
           fillOpacity="1"
         />
-        <text
+        {/* <text
           textAnchor="middle"
           x={-y - height / 2 - 18}
           y={x - 15}
@@ -53,7 +53,7 @@ const PSankeyNode = ({
             100 * totalProbability,
             3
           )}% / day)`}
-        </text>
+        </text> */}
       </Layer>
     );
   } else {

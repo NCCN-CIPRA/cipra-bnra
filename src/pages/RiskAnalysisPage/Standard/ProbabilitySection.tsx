@@ -63,7 +63,7 @@ export default function ProbabilitySection({
 
     const descriptions = paretoCauses
       .map((c, i) => {
-        const riskName = c.id ? `<a href="/risks/${c.id}" target="_blank">${c.name}</a>` : c.name;
+        const riskName = c.id ? `<a href="/risks/${c.id}" target="_blank">${c.name}</a>` : `<a href="">c.name</a>`;
 
         return `<p style="font-weight:bold;font-size:10pt;">
                     ${i + 1}. ${riskName} (${round((100 * c.p) / calc[`tp${scenarioSuffix}`])}% of total probability)

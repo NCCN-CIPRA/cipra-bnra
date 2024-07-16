@@ -42,9 +42,9 @@ export default function ProbabilityBars({
       <BarChart width={chartWidth} height={100} data={getProbabilityBars(tp)} style={{}}>
         {/* <CartesianGrid strokeDasharray="3 3" /> */}
         <YAxis domain={[0, 5]} hide />
-        <Bar dataKey="uv" fill="#8884d8" stackId="a" />
-        <Bar dataKey="pv" fill="#8884d840" stackId="a" />
-        {arrow(tp, 100, 10, chartWidth, "#101010")}
+        <Bar dataKey="uv" fill="#00A49A" stackId="a" />
+        <Bar dataKey="pv" fill="#00A49A40" stackId="a" />
+        {arrow(tp, 100, 10, chartWidth, "#00A49A")}
       </BarChart>
       <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
         {getScaleString(tp)}

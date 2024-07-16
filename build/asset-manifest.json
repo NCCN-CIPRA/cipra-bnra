@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/css/main.b80f44b2.css",
-    "main.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.2e4ac466.js",
+    "main.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.13465040.js",
     "static/js/83.76b4af5e.chunk.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/83.76b4af5e.chunk.js",
     "static/js/787.3fe0f5ae.chunk.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/787.3fe0f5ae.chunk.js",
     "static/media/roboto-all-500-normal.woff": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/roboto-all-500-normal.0ab669b7a0d19b178f57.woff",
@@ -42,12 +42,12 @@
     "static/media/roboto-greek-ext-700-normal.woff2": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/roboto-greek-ext-700-normal.bd9854c751441ccc1a70.woff2",
     "index.html": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/index.html",
     "main.b80f44b2.css.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/css/main.b80f44b2.css.map",
-    "main.2e4ac466.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.2e4ac466.js.map",
+    "main.13465040.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.13465040.js.map",
     "83.76b4af5e.chunk.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/83.76b4af5e.chunk.js.map",
     "787.3fe0f5ae.chunk.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/787.3fe0f5ae.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b80f44b2.css",
-    "static/js/main.2e4ac466.js"
+    "static/js/main.13465040.js"
   ]
 }

@@ -15,6 +15,7 @@ import {
   Grow,
   Tabs,
   Tab,
+  Card,
 } from "@mui/material";
 import { useState } from "react";
 import { styled } from "@mui/material/styles";
@@ -36,6 +37,8 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import { DP1, DP2, DP3, DP4, DP5 } from "./QuantitativeScales/P";
 import * as DP50 from "./QuantitativeScales/P2050";
+import CCExampleChart from "../../components/charts/CCExampleChart";
+import CCTempChart from "../../components/charts/CCTempChart";
 
 const drawerWidth = 320;
 
@@ -361,6 +364,10 @@ export default function QuantitativeScalesPage({}) {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                  <CCTempChart />
+                <Card sx={{ width: "100%", height: 500, my: 8, p: 2 }}>
+                  <CCExampleChart />
+                </Card>
               </Box>
             </TabPanel>
 

@@ -30,17 +30,17 @@ export default function BasePage() {
       <CssBaseline />
       <TitleBar title={pageTitle} onDrawerToggle={() => setDrawerOpen(!drawerOpen)} />
       <SideDrawer open={drawerOpen} width={drawerWidth} onClose={() => setDrawerOpen(false)} />
-      <Box sx={{ display: "flex", flexFlow: "column nowrap", minHeight: "100vh", mb: `${bottomBarHeight}px` }}>
-        <Box sx={{ flexGrow: 1 }}>
-          <Toolbar />
-          {breadcrumbs && (
-            <Box sx={{ m: 2, ml: "76px" }}>
-              <BreadcrumbNavigation breadcrumbs={breadcrumbs} />
-            </Box>
-          )}
-          <Outlet />
-        </Box>
-        <Stack
+      {/* <Box sx={{ display: "flex", flexFlow: "column nowrap", minHeight: "100vh", mb: `${bottomBarHeight}px` }}> */}
+      <Box sx={{ flexGrow: 1 }}>
+        <Toolbar />
+        {breadcrumbs && (
+          <Box sx={{ m: 2, ml: "76px" }}>
+            <BreadcrumbNavigation breadcrumbs={breadcrumbs} />
+          </Box>
+        )}
+        <Outlet />
+      </Box>
+      {/* <Stack
           direction="row"
           sx={{
             justifyContent: "space-evenly",
@@ -55,8 +55,8 @@ export default function BasePage() {
             style={{ height: 40 }}
           />
           <img alt="BNRA" src="https://bnra.powerappsportals.com/logo_text.png" style={{ height: 40 }} />
-        </Stack>
-      </Box>
+        </Stack> */}
+      {/* </Box> */}
     </AppContext.Provider>
   );
 }
