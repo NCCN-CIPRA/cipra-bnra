@@ -18,7 +18,7 @@ export default function RiskAnalysisPage() {
           riskFile={riskFile}
           cascades={cascades[riskFile.cr4de_riskfilesid].all}
           calculation={calculation}
-          mode="edit"
+          mode={user && user.roles.analist ? "edit" : "view"}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
@@ -33,7 +33,7 @@ export default function RiskAnalysisPage() {
           riskFile={riskFile}
           cascades={cascades[riskFile.cr4de_riskfilesid]}
           calculation={calculation}
-          mode="edit"
+          mode={user && user.roles.analist ? "edit" : "view"}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
@@ -46,7 +46,7 @@ export default function RiskAnalysisPage() {
       <Emerging
         riskFile={riskFile}
         cascades={cascades[riskFile.cr4de_riskfilesid].all}
-        mode="edit"
+        mode={user && user.roles.analist ? "edit" : "view"}
         isEditing={isEditing}
         setIsEditing={setIsEditing}
         reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}

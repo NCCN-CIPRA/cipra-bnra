@@ -1,6 +1,5 @@
 import { ViewKanbanTwoTone } from "@mui/icons-material";
 import { Box, Button, Card, CardActionArea, CardActions, CardContent, Typography } from "@mui/material";
-import { Canvg } from "canvg";
 import FileSaver from "file-saver";
 import {
   LineChart,
@@ -255,7 +254,7 @@ const MRHLabel = ({
 };
 
 export default function CCTempChart({}) {
-  const [getPng, { ref, isLoading }] = useCurrentPng({ backgroundColor: null });
+  const [getPng, { ref, isLoading }] = useCurrentPng({ backgroundColor: "white", scale: 4 });
 
   const exportPNG = async () => {
     const png = await getPng();
@@ -263,7 +262,7 @@ export default function CCTempChart({}) {
     // Verify that png is not undefined
     if (png) {
       // Download with FileSaver
-      FileSaver.saveAs(png, "myChart.png");
+      FileSaver.saveAs(png, "climate-change.png");
     }
   };
 

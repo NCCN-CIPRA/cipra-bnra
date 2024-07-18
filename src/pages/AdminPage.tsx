@@ -30,7 +30,7 @@ export default function AdminPage() {
     );
   }
 
-  if (user === null || !user.admin) {
+  if (user === null || !user.roles.admin) {
     navigate("/auth");
   }
 

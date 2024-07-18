@@ -27,7 +27,7 @@ const PSankeyNode = ({
 }: any) => {
   const navigate = useNavigate();
   const scenarioLetter = scenarioSuffix[1];
-
+  console.log(payload, showComponents);
   if (payload.depth > 0) {
     return (
       <Layer key={`CustomNode${index}`} height="50px">
@@ -132,11 +132,17 @@ const PSankeyNode = ({
                   <>
                     <Typography color="inherit">Other causes:</Typography>
 
-                    {payload.hidden.map((h: any) => (
-                      <Typography key={h.cause.riskId} variant="subtitle1" sx={{ mt: 1 }}>
-                        {h.cause.riskTitle} IP(all&rarr;{scenarioLetter}): {Math.round(1000000 * h.ip) / 10000}% / day
-                      </Typography>
-                    ))}
+                    {payload.hidden.map((h: any) =>
+                      h.cascade ? (
+                        <Typography key={h.name} variant="subtitle1" sx={{ mt: 1 }}>
+                          {h.name} IP(all&rarr;{scenarioLetter}): {Math.round(1000000 * h.p) / 10000}% / day
+                        </Typography>
+                      ) : (
+                        <Typography key={h.name} variant="subtitle1" sx={{ mt: 1 }}>
+                          {h.name} DP: {Math.round(1000000 * h.p) / 10000}% / day
+                        </Typography>
+                      )
+                    )}
                   </>
                 )}
                 {!payload.cascade && !payload.hidden && (
@@ -252,7 +258,7 @@ export default function ProbabilitySankey({
   if (!calculation) return null;
 
   const scenarioSuffix: string = getScenarioSuffix(scenario);
-
+  console.log(debug);
   const causes = [
     {
       name: manmade ? "Motivation" : "Direct Probability",
@@ -295,10 +301,8 @@ export default function ProbabilitySankey({
   }
 
   const nodes: any[] = [{ name: calculation.riskTitle }, ...causes.filter((c) => c.p >= minP)];
-  const otherCauses = calculation.causes.filter(
-    (e: any, i: number) => (e[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number) < minP
-  );
-
+  const otherCauses = causes.filter((c: any, i: number) => c.p < minP);
+  console.log(otherCauses);
   if (minP >= 0 && !manmade && otherCauses.length > 0) {
     nodes.push({
       name: "Other",
@@ -317,12 +321,8 @@ export default function ProbabilitySankey({
     links.push({
       source: nodes.length - 1,
       target: 0,
-      value: calculation.causes
-        .filter((e: any, i: number) => (e[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number) < minP)
-        .reduce((tot, e) => tot + (e[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number), 0.000000001),
-      hidden: calculation.causes.filter(
-        (e: any, i: number) => (e[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number) < minP
-      ),
+      value: causes.filter((e: any, i: number) => e.p < minP).reduce((tot, e) => tot + e.p, 0.000000001),
+      hidden: causes.filter((e: any, i: number) => e.p < minP),
     });
 
   const data = {

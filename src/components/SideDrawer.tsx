@@ -48,7 +48,7 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
                   <ListItemText primary={t("sideDrawer.hazardCatalogue", "Hazard Catalogue")} />
                 </ListItemButton>
               </ListItem>
-              {!user.viewer && (
+              {!user.roles.expert && (
                 <ListItem disablePadding>
                   <ListItemButton component={Link} to="/overview" onClick={onClose}>
                     <ListItemIcon></ListItemIcon>
@@ -57,7 +57,7 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
                 </ListItem>
               )}
 
-              {user.admin && (
+              {user.roles.admin && (
                 <>
                   <Divider />
                   <ListItem disablePadding>
@@ -101,7 +101,7 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
                   <Divider />
                 </>
               )}
-              {!user.viewer && (
+              {user.roles.verified && (
                 <ListItem disablePadding>
                   <ListItemButton component={Link} to="/learning" onClick={onClose}>
                     <ListItemIcon></ListItemIcon>

@@ -149,6 +149,8 @@ export default function BaseRiskFilePage() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [helpFocus, setHelpFocus] = useState<Section | undefined>();
 
+  const user = riskContext.user;
+
   const handleDrawerOpen = () => {
     setHelpOpen(true);
   };
@@ -246,26 +248,28 @@ export default function BaseRiskFilePage() {
                 icon={<AodIcon />}
                 onClick={() => navigate(`/risks/${params.risk_file_id}`)}
               />
-              {riskContext.user && riskContext.user.admin && (
+              {user && user.roles.internal && (
                 <BottomNavigationAction
                   label="Risk Identification"
                   icon={<FingerprintIcon />}
                   onClick={() => navigate(`/risks/${params.risk_file_id}/identification`)}
                 />
               )}
-              <BottomNavigationAction
-                label="Risk Analysis"
-                icon={<AssessmentIcon />}
-                onClick={() => navigate(`/risks/${params.risk_file_id}/analysis`)}
-              />
-              {riskContext.user && riskContext.user.admin && (
+              {user && user.roles.beReader && (
+                <BottomNavigationAction
+                  label="Risk Analysis"
+                  icon={<AssessmentIcon />}
+                  onClick={() => navigate(`/risks/${params.risk_file_id}/analysis`)}
+                />
+              )}
+              {user && user.roles.expert && (
                 <BottomNavigationAction
                   label="Raw Data"
                   icon={<PsychologyIcon />}
                   onClick={() => navigate(`/risks/${params.risk_file_id}/data`)}
                 />
               )}
-              {riskContext.user && riskContext.user.admin && (
+              {user && user.roles.analist && (
                 <BottomNavigationAction
                   label="Expert Input"
                   icon={<GroupsIcon />}

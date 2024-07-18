@@ -144,7 +144,7 @@ export default function RiskFileSummaryPage({}) {
           <SummaryCharts riskFile={riskFile} calculation={calculation} scenario={getWorstCaseScenario(calculation)} />
         </Box>
       </Stack>
-      {user && user.admin && (
+      {user && user.roles.admin && (
         <Box sx={{ position: "fixed", bottom: 96, right: 40 }}>
           {!editing && (
             <Fab color="secondary" aria-label="edit" onClick={() => setEditing(true)}>

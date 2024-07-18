@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { DVContact } from "../types/dataverse/DVContact";
+import { getAuthRoles, UserRoles } from "../functions/authRoles";
 
 export interface LoggedInUser extends DVContact {
   viewer: boolean;
+  roles: UserRoles;
 }
 
 export default function useLoggedInUser() {
@@ -26,6 +28,7 @@ export default function useLoggedInUser() {
           admin: info?.hasAttribute("data-admin"),
           viewer: info?.hasAttribute("data-report-viewer"),
           participations: undefined,
+          roles: getAuthRoles(info?.getAttribute("data-roles") || ""),
         });
       }
     } else {
