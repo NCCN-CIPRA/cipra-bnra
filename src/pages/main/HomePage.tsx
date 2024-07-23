@@ -12,9 +12,12 @@ import { Link as RouterLink } from "react-router-dom";
 import { timelineOppositeContentClasses } from "@mui/lab/TimelineOppositeContent";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { Trans, useTranslation } from "react-i18next";
+import usePageTitle from "../../hooks/usePageTitle";
 
 export default function HomePage() {
-  useTranslation();
+  const { t } = useTranslation();
+
+  usePageTitle(t("homepage.bnraLong", "Belgian National Risk Assessment"));
 
   useBreadcrumbs(null);
 
@@ -52,7 +55,7 @@ export default function HomePage() {
               style={{ width: 300, marginBottom: 20 }}
             />
             <Typography variant="subtitle1" paragraph>
-              <Trans i18nKey="homepage.bnraLong">Belgian National Risk Assessment 2023 - 2026</Trans>
+              <Trans i18nKey="homepage.bnraLong">Belgian National Risk Assessment</Trans>
             </Typography>
           </Stack>
         </Container>

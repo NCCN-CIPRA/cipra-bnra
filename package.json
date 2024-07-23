@@ -29,6 +29,7 @@
     "i18next": "^21.10.0",
     "i18next-browser-languagedetector": "^6.1.6",
     "material-react-table": "^1.14.0",
+    "msal": "^1.4.18",
     "react": "^18.2.0",
     "react-animate-height": "^3.1.1",
     "react-dom": "^18.2.0",

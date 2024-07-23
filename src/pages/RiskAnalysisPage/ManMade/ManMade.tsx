@@ -22,6 +22,7 @@ import ActionsSection from "./PreferredActionsSection";
 import { Cascades } from "../../BaseRisksPage";
 import MMSankeyDiagram from "./MMSankeyDiagram";
 import MMImpactSection from "./MMImpactSection";
+import { useTranslation } from "react-i18next";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -52,6 +53,7 @@ export default function ManMade({
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
+  const { t } = useTranslation();
   const { hazardCatalogue, attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
 
   useEffect(() => {
@@ -71,7 +73,7 @@ export default function ManMade({
       </Typography> */}
 
       <Box sx={{ mb: 10 }}>
-        <Typography variant="h3">{rf.cr4de_title}</Typography>
+        <Typography variant="h3">{t(`risk.${rf.cr4de_hazard_id}.name`, rf.cr4de_title)}</Typography>
         <Typography variant="subtitle2" color="secondary" sx={{ mb: 4 }}>
           Malicious Actor Risk File
         </Typography>

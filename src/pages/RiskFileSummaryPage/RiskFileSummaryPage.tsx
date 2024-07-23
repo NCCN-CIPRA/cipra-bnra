@@ -58,7 +58,7 @@ export default function RiskFileSummaryPage({}) {
     setEditing(false);
     setSaving(false);
   };
-  console.log(i18n.language);
+
   return (
     <Container>
       <Typography variant="h2">{riskFile.cr4de_title}</Typography>

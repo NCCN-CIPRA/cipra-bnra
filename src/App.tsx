@@ -40,6 +40,8 @@ import RiskAnalysisPage from "./pages/RiskAnalysisPage/RiskAnalysisPage";
 import RiskDataPage from "./pages/RiskDataPage/RiskDataPage";
 import RiskInputPage from "./pages/RiskInputPage/RiskInputPage";
 import CorrectionsPage from "./pages/CorrectionsPage/CorrectionsPage";
+import PermissionDeniedPage from "./pages/PermissionDeniedPage/PermissionDeniedPage";
+import UserManagementPage from "./pages/UserManagementPage/UserManagementPage";
 
 function App() {
   useEffect(() => {
@@ -67,6 +69,10 @@ function App() {
             {
               path: "/",
               element: <HomePage />,
+            },
+            {
+              path: "/403",
+              element: <PermissionDeniedPage />,
             },
 
             {
@@ -185,6 +191,7 @@ function App() {
                 { path: "/admin/process", element: <ProcessManagementPage /> },
                 { path: "/admin/experts", element: <ExpertManagementPage /> },
                 { path: "/admin/corrections", element: <CorrectionsPage /> },
+                { path: "/admin/users", element: <UserManagementPage /> },
               ],
             },
           ],

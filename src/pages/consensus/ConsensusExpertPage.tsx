@@ -51,7 +51,7 @@ export default function ConsensusExpertPage() {
   useBreadcrumbs([
     { name: t("bnra.shortName"), url: "/" },
     { name: t("step3.breadcrumb", "Risk File Consensus"), url: "/overview" },
-    directAnalysis ? { name: directAnalysis[0].cr4de_risk_file.cr4de_title, url: "" } : null,
+    directAnalysis && directAnalysis[0] ? { name: directAnalysis[0].cr4de_risk_file.cr4de_title, url: "" } : null,
   ]);
 
   return (

@@ -13,6 +13,7 @@ import { useOutletContext } from "react-router-dom";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import { useEffect } from "react";
 import CatalyzingSection from "./CatalyzingSection";
+import { useTranslation } from "react-i18next";
 
 export default function Emerging({
   riskFile,
@@ -29,6 +30,7 @@ export default function Emerging({
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
+  const { t } = useTranslation();
   const { hazardCatalogue, attachments, loadAttachments, reloadCascades } = useOutletContext<RiskFilePageContext>();
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export default function Emerging({
   return (
     <>
       <Box sx={{ mb: 10 }}>
-        <Typography variant="h3">{rf.cr4de_title}</Typography>
+        <Typography variant="h3">{t(`risk.${rf.cr4de_hazard_id}.name`, rf.cr4de_title)}</Typography>
         <Typography variant="subtitle2" color="secondary" sx={{ mb: 4 }}>
           Emerging Risk File
         </Typography>

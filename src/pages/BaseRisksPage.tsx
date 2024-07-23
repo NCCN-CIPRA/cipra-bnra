@@ -50,8 +50,6 @@ export interface RiskPageContext {
 }
 
 export default function BaseRisksPage() {
-  const { t } = useTranslation();
-
   const { user, refreshUser } = useLoggedInUser();
 
   useEffect(() => {
@@ -108,7 +106,7 @@ export default function BaseRisksPage() {
   const transformRiskFile = (rf: DVRiskFile<DVAnalysisRun<unknown, string>>): DVRiskFile<DVAnalysisRun> => ({
     ...rf,
     cr4de_latest_calculation:
-      rf.cr4de_latest_calculation !== null
+      rf.cr4de_latest_calculation != null
         ? {
             ...rf.cr4de_latest_calculation,
             cr4de_results: JSON.parse(rf.cr4de_latest_calculation?.cr4de_results as unknown as string),
@@ -162,12 +160,6 @@ export default function BaseRisksPage() {
       });
     },
   });
-
-  usePageTitle(t("sideDrawer.hazardCatalogue", "Hazard Catalogue"));
-  useBreadcrumbs([
-    { name: t("bnra.shortName"), url: "/" },
-    { name: t("sideDrawer.hazardCatalogue", "Hazard Catalogue"), url: "" },
-  ]);
 
   return (
     <Outlet

@@ -16,15 +16,17 @@ import { RiskPageContext } from "../BaseRisksPage";
 import NCCNLoader from "../../components/NCCNLoader";
 import RiskMatrixAccordion from "./RiskMatrixAccordion";
 import { AuthPageContext } from "../AuthPage";
+import { useTranslation } from "react-i18next";
 
 export default function HazardCataloguePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, hazardCatalogue } = useOutletContext<RiskPageContext>();
 
-  usePageTitle("Hazard Catalogue");
+  usePageTitle(t("sideDrawer.hazardCatalogue", "Hazard Catalogue"));
   useBreadcrumbs([
-    { name: "BNRA", url: "/" },
-    { name: "Hazard Catalogue", url: "/hazards" },
+    { name: t("bnra.shortName"), url: "/" },
+    { name: t("sideDrawer.hazardCatalogue", "Hazard Catalogue"), url: "" },
   ]);
 
   return (
@@ -53,8 +55,15 @@ export default function HazardCataloguePage() {
                 hazardCatalogue.map((h) => (
                   <TableRow key={h.cr4de_riskfilesid} hover onClick={() => navigate(`/risks/${h.cr4de_riskfilesid}`)}>
                     <TableCell sx={{ pr: 4 }}>{h.cr4de_hazard_id}</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>{h.cr4de_title}</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", px: 4 }}>{h.cr4de_risk_category}</TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      {t(`risk.${h.cr4de_hazard_id}.name`, h.cr4de_title)}
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap", px: 4 }}>
+                      {t(
+                        `risk.category.${h.cr4de_risk_category.toLocaleLowerCase().replace(" ", "_")}`,
+                        h.cr4de_risk_category
+                      )}
+                    </TableCell>
                     <TableCell sx={{ whiteSpace: "nowrap", px: 4 }}></TableCell>
                   </TableRow>
                 ))}

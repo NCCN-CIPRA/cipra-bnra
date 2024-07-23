@@ -26,6 +26,7 @@ import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import DisclaimerSection from "../DisclaimerSection";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { Section } from "../HelpSiderBar";
+import { useTranslation } from "react-i18next";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -61,6 +62,7 @@ export default function Standard({
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
+  const { t } = useTranslation();
   const { helpOpen, setHelpFocus, hazardCatalogue, attachments, loadAttachments } =
     useOutletContext<RiskFilePageContext>();
 
@@ -125,7 +127,7 @@ export default function Standard({
       </Typography> */}
 
       <Box sx={{ mb: 10 }}>
-        <Typography variant="h3">{rf.cr4de_title}</Typography>
+        <Typography variant="h3">{t(`risk.${rf.cr4de_hazard_id}.name`, rf.cr4de_title)}</Typography>
         <Typography variant="subtitle2" color="secondary" sx={{ mb: 4 }}>
           Standard Risk File
         </Typography>

@@ -125,6 +125,8 @@ export interface API {
   getAnalysisRuns<T = DVAnalysisRun>(query?: string): Promise<T[]>;
   getAnalysisRun<T = DVAnalysisRun>(id: string, query?: string): Promise<T>;
   createAnalysisRun(fields: object): Promise<CreateResponse>;
+
+  getContactRoles<T = DVContact>(query?: string): Promise<T[]>;
 }
 
 export default function useAPI(): API {
@@ -862,6 +864,12 @@ export default function useAPI(): API {
       });
 
       return { id: response.headers.get("entityId") as string };
+    },
+
+    getContactRoles: async function <T = DVContact>(query?: string): Promise<T[]> {
+      const response = await fetch(`https://bnra.powerappsportals.com/_api/adx_webroles`);
+
+      return (await response.json()).value;
     },
   };
 }
