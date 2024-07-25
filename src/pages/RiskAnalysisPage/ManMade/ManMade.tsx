@@ -23,6 +23,7 @@ import { Cascades } from "../../BaseRisksPage";
 import MMSankeyDiagram from "./MMSankeyDiagram";
 import MMImpactSection from "./MMImpactSection";
 import { useTranslation } from "react-i18next";
+import CCSection from "../Standard/CCSection";
 
 const getMostRelevantScenario = (r: RiskCalculation) => {
   if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
@@ -170,6 +171,26 @@ export default function ManMade({
             allRisks={hazardCatalogue}
           />
         </Box>
+
+        {cascades.climateChange && (
+          <Box sx={{ mt: 8 }}>
+            <Typography variant="h5">Climate Change</Typography>
+
+            <CCSection
+              cc={cascades.climateChange}
+              mode={mode}
+              riskFile={rf}
+              scenarioSuffix={MRSSuffix}
+              calculation={calculation}
+              attachments={attachments}
+              updateAttachments={loadAttachments}
+              isEditingOther={isEditing}
+              setIsEditing={setIsEditing}
+              reloadRiskFile={reloadRiskFile}
+              allRisks={hazardCatalogue}
+            />
+          </Box>
+        )}
 
         <Box sx={{ mt: 8 }}>
           <Typography variant="h5">Catalysing Effects</Typography>
