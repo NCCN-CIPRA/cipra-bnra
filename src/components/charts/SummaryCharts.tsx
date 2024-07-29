@@ -14,6 +14,7 @@ import { useOutletContext } from "react-router-dom";
 import { AuthPageContext } from "../../pages/AuthPage";
 import SaveIcon from "@mui/icons-material/Download";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { Trans, useTranslation } from "react-i18next";
 
 const RADIAN = Math.PI / 180;
 const data = [
@@ -76,6 +77,7 @@ export default function SummaryCharts({
   calculation: RiskCalculation;
   scenario: SCENARIOS;
 }) {
+  const { t } = useTranslation();
   const { user } = useOutletContext<AuthPageContext>();
 
   // useCurrentPng usage (isLoading is optional)
@@ -114,7 +116,7 @@ export default function SummaryCharts({
         <Stack direction="column" spacing={4} sx={{ mb: 4, width: pieWidth }}>
           <Stack direction="column">
             <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
-              Human Impact
+              <Trans i18nKey="learning.impact.h.title">Human Impact</Trans>
             </Typography>
             <PieChart width={pieWidth} height={pieHeight}>
               <Pie
@@ -137,12 +139,12 @@ export default function SummaryCharts({
               {needle(H, data, cx, cy, iR, oR, "#555")}
             </PieChart>
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {getScaleString(H)}
+              {t(getScaleString(H))}
             </Typography>
           </Stack>
           <Stack direction="column">
             <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
-              Societal Impact
+              <Trans i18nKey="learning.impact.s.title">Societal Impact</Trans>
             </Typography>
             <PieChart width={pieWidth} height={pieHeight}>
               <Pie
@@ -165,14 +167,14 @@ export default function SummaryCharts({
               {needle(S, data, cx, cy, iR, oR, "#555")}
             </PieChart>
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {getScaleString(S)}
+              {t(getScaleString(S))}
             </Typography>
           </Stack>
         </Stack>
         <Stack direction="column" spacing={4} sx={{ mb: 1, width: pieWidth }}>
           <Stack direction="column">
             <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
-              Environmental Impact
+              <Trans i18nKey="learning.impact.e.title">Environmental Impact</Trans>
             </Typography>
             <PieChart width={pieWidth} height={pieHeight} style={{}}>
               <Pie
@@ -195,12 +197,12 @@ export default function SummaryCharts({
               {needle(E, data, cx, cy, iR, oR, "#555")}
             </PieChart>
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {getScaleString(E)}
+              {t(getScaleString(E))}
             </Typography>
           </Stack>
           <Stack direction="column">
             <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
-              Financial Impact
+              <Trans i18nKey="learning.impact.f.title">Financial Impact</Trans>
             </Typography>
             <PieChart width={pieWidth} height={pieHeight}>
               <Pie
@@ -223,7 +225,7 @@ export default function SummaryCharts({
               {needle(F, data, cx, cy, iR, oR, "#555")}
             </PieChart>
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {getScaleString(F)}
+              {t(getScaleString(F))}
             </Typography>
           </Stack>
         </Stack>

@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 
 export default function RiskFileSummaryPage({}) {
   const api = useAPI();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, riskFile, reloadRiskFile, calculation } = useOutletContext<RiskFilePageContext>();
 
   const [saving, setSaving] = useState(false);

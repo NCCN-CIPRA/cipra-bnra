@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { Bar, BarChart, YAxis } from "recharts";
 import getScaleString from "../../functions/getScaleString";
+import { useTranslation } from "react-i18next";
 
 const arrow = (value: number, cy: number, arrowWidth: number, graphWidth: number, color: string) => {
   const ratio = graphWidth - 20;
@@ -34,10 +35,14 @@ export default function ProbabilityBars({
   chartWidth: number;
   manmade?: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <Box sx={{ mb: 4, width: chartWidth }}>
       <Typography variant="subtitle2" sx={{ mb: 0, textAlign: "center" }}>
-        {manmade ? "Motivation" : "Probability"}
+        {manmade
+          ? t("learning.motivation.text.title", "Motivation")
+          : t("learning.probability.2.text.title", "Probability")}
       </Typography>
       <BarChart width={chartWidth} height={100} data={getProbabilityBars(tp)} style={{}}>
         {/* <CartesianGrid strokeDasharray="3 3" /> */}
@@ -47,7 +52,7 @@ export default function ProbabilityBars({
         {arrow(tp, 100, 10, chartWidth, "#000000b0")}
       </BarChart>
       <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-        {getScaleString(tp)}
+        {t(getScaleString(tp))}
       </Typography>
     </Box>
   );
