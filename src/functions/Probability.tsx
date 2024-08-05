@@ -142,6 +142,10 @@ export function getTotalProbabilityRelativeScale(
   return rescaleProbability(getYearlyProbability(calculation[`tp${tp50 ? "50" : ""}${scenarioSuffix}`]));
 }
 
+export function getYearlyProbabilityFromRelative(p: number) {
+  return Math.pow(Math.E, (p - 5) * Math.log(2.5)) - 0.0103;
+}
+
 export function getPartialProbabilityRelativeScale(
   p_daily: number,
   calculation: RiskCalculation,

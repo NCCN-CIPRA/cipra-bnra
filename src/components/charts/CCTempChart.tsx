@@ -1,6 +1,8 @@
 import { ViewKanbanTwoTone } from "@mui/icons-material";
 import { Box, Button, Card, CardActionArea, CardActions, CardContent, Typography } from "@mui/material";
 import FileSaver from "file-saver";
+import { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 import {
   LineChart,
   Line,
@@ -35,6 +37,7 @@ const EvolutionArrow = ({
   viewBox: { x: number; y: number; width: number; height: number };
   offset: number;
 }) => {
+  const { t } = useTranslation();
   const l = viewBox.x;
   const b = viewBox.height + viewBox.y;
   const coor = (x: number, y: number) => `${l + viewBox.width * (x / 9)} ${b - viewBox.height * (y / 0.5)}`;
@@ -42,7 +45,7 @@ const EvolutionArrow = ({
   return (
     <>
       <text x={l + viewBox.width * (4.5 / 9)} y={b - viewBox.height * 0.85} textAnchor="middle">
-        Increase in mean temperature
+        {t("cchart.increase", "Increase in mean temperature")}
       </text>
       <polygon
         points={`${coor(3.9, norm(0) * 0.95)} ${coor(4.9, norm(0) * 0.95)} ${coor(4.9, norm(0) * 0.97)} ${coor(
@@ -62,6 +65,7 @@ const LCLabel = ({
   viewBox: { x: number; y: number; width: number; height: number };
   offset: number;
 }) => {
+  const { t } = useTranslation();
   const l = viewBox.x;
   const b = viewBox.height + viewBox.y;
 
@@ -69,13 +73,13 @@ const LCLabel = ({
     <>
       <text x={l + viewBox.width * (1 / 9)} y={b - viewBox.height * 0.2} font-size="15" dy="0" textAnchor="center">
         <tspan x={l + viewBox.width * (1 / 9)} dy="-2.4em" text-anchor="middle">
-          Less
+          {t("Less")}
         </tspan>
         <tspan x={l + viewBox.width * (1 / 9)} dy="1.2em" text-anchor="middle" fill="#00A49A" fontWeight="bold">
-          cold
+          {t("cold")}
         </tspan>
         <tspan x={l + viewBox.width * (1 / 9)} dy="1.2em" text-anchor="middle">
-          weather
+          {t("weather")}
         </tspan>
       </text>
       <path
@@ -102,6 +106,7 @@ const NCLabel = ({
   viewBox: { x: number; y: number; width: number; height: number };
   offset: number;
 }) => {
+  const { t } = useTranslation();
   const l = viewBox.x;
   const b = viewBox.height + viewBox.y;
 
@@ -115,10 +120,10 @@ const NCLabel = ({
         textAnchor="center"
       >
         <tspan x={l + viewBox.width * (4 / 9) + 20} dy="-0.2em" text-anchor="middle">
-          New
+          {t("New")}
         </tspan>
         <tspan x={l + viewBox.width * (4 / 9) + 20} dy="1.2em" text-anchor="middle">
-          climate
+          {t("climate")}
         </tspan>
       </text>
       <path
@@ -142,6 +147,7 @@ const PCLabel = ({
   viewBox: { x: number; y: number; width: number; height: number };
   offset: number;
 }) => {
+  const { t } = useTranslation();
   const l = viewBox.x;
   const b = viewBox.height + viewBox.y;
 
@@ -155,10 +161,10 @@ const PCLabel = ({
         textAnchor="center"
       >
         <tspan x={l + viewBox.width * (2 / 9) - 30} dy="-0.2em" text-anchor="middle">
-          Previous
+          {t("Previous")}
         </tspan>
         <tspan x={l + viewBox.width * (2 / 9) - 30} dy="1.2em" text-anchor="middle">
-          climate
+          {t("climate")}
         </tspan>
       </text>
       <path
@@ -182,6 +188,7 @@ const MHLabel = ({
   viewBox: { x: number; y: number; width: number; height: number };
   offset: number;
 }) => {
+  const { t } = useTranslation();
   const l = viewBox.x;
   const b = viewBox.height + viewBox.y;
 
@@ -189,13 +196,13 @@ const MHLabel = ({
     <>
       <text x={l + viewBox.width * (6.5 / 9)} y={b - viewBox.height * 0.65} font-size="15" dy="0" textAnchor="center">
         <tspan x={l + viewBox.width * (6.5 / 9)} dy="-2.4em" text-anchor="middle">
-          More
+          {t("More")}
         </tspan>
         <tspan x={l + viewBox.width * (6.5 / 9)} dy="1.2em" text-anchor="middle" fill="#ffdf1c" fontWeight="bold">
-          hot
+          {t("hot")}
         </tspan>
         <tspan x={l + viewBox.width * (6.5 / 9)} dy="1.2em" text-anchor="middle">
-          weather
+          {t("weather")}
         </tspan>
       </text>
       <path
@@ -221,6 +228,7 @@ const MRHLabel = ({
   viewBox: { x: number; y: number; width: number; height: number };
   offset: number;
 }) => {
+  const { t } = useTranslation();
   const l = viewBox.x;
   const b = viewBox.height + viewBox.y;
 
@@ -228,13 +236,13 @@ const MRHLabel = ({
     <>
       <text x={l + viewBox.width * (7.5 / 9)} y={b - viewBox.height * 0.25} font-size="15" dy="0" textAnchor="center">
         <tspan x={l + viewBox.width * (7.5 / 9)} dy="-2.4em" text-anchor="middle">
-          More
+          {t("More")}
         </tspan>
         <tspan x={l + viewBox.width * (7.5 / 9)} dy="1.2em" text-anchor="middle" fill="#f0492e" fontWeight="bold">
-          record hot
+          {t("record hot")}
         </tspan>
         <tspan x={l + viewBox.width * (7.5 / 9)} dy="1.2em" text-anchor="middle">
-          weather
+          {t("weather")}
         </tspan>
       </text>
       <path
@@ -254,6 +262,7 @@ const MRHLabel = ({
 };
 
 export default function CCTempChart({}) {
+  const { t } = useTranslation();
   const [getPng, { ref, isLoading }] = useCurrentPng({ backgroundColor: "white", scale: 4 });
 
   const exportPNG = async () => {
@@ -287,9 +296,9 @@ export default function CCTempChart({}) {
               dataKey="i"
               //   ticks={[1, 4, 7]}
               tickFormatter={(v: number) => {
-                if (v === 1) return "Cold";
-                if (v === 4) return "Average";
-                if (v === 7) return "Hot";
+                if (v === 1) return t("Cold");
+                if (v === 4) return t("Average");
+                if (v === 7) return t("Hot");
                 return "";
               }}
               tickLine={false}
@@ -297,7 +306,7 @@ export default function CCTempChart({}) {
             <YAxis
               domain={[0, 0.5]}
               label={{
-                value: "Probability of occurrence",
+                value: t("learning.probability.2.text.title", "Probability"),
                 style: { textAnchor: "middle" },
                 angle: -90,
                 position: "left",
@@ -305,8 +314,8 @@ export default function CCTempChart({}) {
               }}
               ticks={[0, 0.5]}
               tickFormatter={(v) => {
-                if (v === 0) return "Low";
-                if (v === 0.5) return "High";
+                if (v === 0) return t("Low");
+                if (v === 0.5) return t("High");
                 return "";
               }}
             />

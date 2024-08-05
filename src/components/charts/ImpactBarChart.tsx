@@ -18,9 +18,10 @@ import {
   getDamageIndicatorRelativeScale,
   getMoneyString,
 } from "../../functions/Impact";
-import { SCENARIO_SUFFIX } from "../../functions/scenarios";
+import { getScenarioParameter, SCENARIO_SUFFIX, SCENARIOS } from "../../functions/scenarios";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import round from "../../functions/roundNumberString";
+import { useTranslation } from "react-i18next";
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
@@ -56,41 +57,36 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
   return null;
 };
 
-export default function ImpactBarChart({
-  calculation,
-  scenarioSuffix,
-}: {
-  calculation: RiskCalculation | null;
-  scenarioSuffix: SCENARIO_SUFFIX;
-}) {
-  if (!calculation) return null;
+export default function ImpactBarChart({ riskFile, scenario }: { riskFile: DVRiskFile | null; scenario: SCENARIOS }) {
+  const { t } = useTranslation();
+  if (!riskFile) return null;
 
   const data = [
     {
-      name: "Human",
-      H: getCategoryImpactRelativeScale(calculation, "H", scenarioSuffix),
-      Ha: getDamageIndicatorRelativeScale(calculation, "Ha", scenarioSuffix),
-      Hb: getDamageIndicatorRelativeScale(calculation, "Hb", scenarioSuffix),
-      Hc: getDamageIndicatorRelativeScale(calculation, "Hc", scenarioSuffix),
+      name: t("Human"),
+      H: getScenarioParameter(riskFile, "TI_H", scenario),
+      Ha: getScenarioParameter(riskFile, "TI_Ha", scenario),
+      Hb: getScenarioParameter(riskFile, "TI_Hb", scenario),
+      Hc: getScenarioParameter(riskFile, "TI_Hc", scenario),
     },
     {
-      name: "Societal",
-      S: getCategoryImpactRelativeScale(calculation, "S", scenarioSuffix),
-      Sa: getDamageIndicatorRelativeScale(calculation, "Sa", scenarioSuffix),
-      Sb: getDamageIndicatorRelativeScale(calculation, "Sb", scenarioSuffix),
-      Sc: getDamageIndicatorRelativeScale(calculation, "Sc", scenarioSuffix),
-      Sd: getDamageIndicatorRelativeScale(calculation, "Sd", scenarioSuffix),
+      name: t("Societal"),
+      S: getScenarioParameter(riskFile, "TI_S", scenario),
+      Sa: getScenarioParameter(riskFile, "TI_Sa", scenario),
+      Sb: getScenarioParameter(riskFile, "TI_Sb", scenario),
+      Sc: getScenarioParameter(riskFile, "TI_Sc", scenario),
+      Sd: getScenarioParameter(riskFile, "TI_Sd", scenario),
     },
     {
-      name: "Environmental",
-      E: getCategoryImpactRelativeScale(calculation, "E", scenarioSuffix),
-      Ea: getDamageIndicatorRelativeScale(calculation, "Ea", scenarioSuffix),
+      name: t("Environmental"),
+      E: getScenarioParameter(riskFile, "TI_E", scenario),
+      Ea: getScenarioParameter(riskFile, "TI_Ea", scenario),
     },
     {
-      name: "Financial",
-      F: getCategoryImpactRelativeScale(calculation, "F", scenarioSuffix),
-      Fa: getDamageIndicatorRelativeScale(calculation, "Fa", scenarioSuffix),
-      Fb: getDamageIndicatorRelativeScale(calculation, "Fb", scenarioSuffix),
+      name: t("Financial"),
+      F: getScenarioParameter(riskFile, "TI_F", scenario),
+      Fa: getScenarioParameter(riskFile, "TI_Fa", scenario),
+      Fb: getScenarioParameter(riskFile, "TI_Fb", scenario),
     },
   ];
 

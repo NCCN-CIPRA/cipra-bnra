@@ -1,6 +1,6 @@
-import { Box, List, ListItem, ListItemButton, Typography } from "@mui/material";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import { DVAnalysisRun, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
+import { Box, Typography } from "@mui/material";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { DVAnalysisRun } from "../../types/dataverse/DVAnalysisRun";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import DefinitionSection from "./DefinitionSection";
@@ -12,12 +12,10 @@ import Bibliography from "./Bibliography";
 
 export default function Emerging({
   riskFile,
-  otherRiskFiles,
   cascades,
   mode = "view",
 }: {
   riskFile: DVRiskFile<DVAnalysisRun<unknown, string>>;
-  otherRiskFiles: DVRiskFile<DVAnalysisRun<unknown, string>>[];
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
   mode?: "view" | "edit";
 }) {

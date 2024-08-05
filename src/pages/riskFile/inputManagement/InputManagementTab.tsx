@@ -1,17 +1,15 @@
-import { useState, useEffect } from "react";
-import { Box, Container, Tab, BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
+import { useState } from "react";
+import { Box, Tab } from "@mui/material";
 import { TabContext, TabPanel, TabList } from "@mui/lab";
 import Step2APage from "./Step2ATab";
 import { DVRiskFile, RISK_TYPE } from "../../../types/dataverse/DVRiskFile";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
-import { DIRECT_ANALYSIS_EDITABLE_FIELDS, DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
-import { DataTable } from "../../../hooks/useAPI";
-import useLazyRecords from "../../../hooks/useLazyRecords";
+import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { useParams, useSearchParams } from "react-router-dom";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import Step2BTab from "./Step2BTab";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
+import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import InputOverviewTab from "./InputOverviewTab";
 

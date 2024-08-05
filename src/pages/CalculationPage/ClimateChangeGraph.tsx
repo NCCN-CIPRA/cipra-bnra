@@ -1,7 +1,4 @@
 import { useEffect, useState } from "react";
-import ImpactDistributionPieChart from "../../components/charts/ImpactDistributionPieChart";
-import ImpactSankey from "../../components/charts/ImpactSankey";
-import ProbabilitySankey from "../../components/charts/ProbabilitySankey";
 import {
   Stack,
   Typography,
@@ -9,67 +6,57 @@ import {
   AccordionActions,
   AccordionDetails,
   AccordionSummary,
-  Checkbox,
-  FormGroup,
-  FormControlLabel,
-  Box,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  TextField,
-  Tooltip,
 } from "@mui/material";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, SCENARIO_PARAMS, getScenarioSuffix } from "../../functions/scenarios";
+import { SCENARIOS, getScenarioSuffix } from "../../functions/scenarios";
 import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
-
-const capFirst = (s: string) => s[0].toUpperCase() + s.slice(1);
+import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
+import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 
 export default function ClimateChangeGraph({
-  calculations,
-  selectedNodeId,
-  setSelectedNodeId,
+  riskFile,
+  cascades,
 }: {
-  calculations: RiskCalculation[] | null;
-  selectedNodeId: string | null;
-  setSelectedNodeId: (id: string | null) => void;
+  riskFile: DVRiskFile | null;
+  cascades: DVRiskCascade<SmallRisk, unknown>[] | null;
 }) {
   const [calculation, setCalculation] = useState<RiskCalculation | null>(null);
   const [scenario, setScenario] = useState<"wcs" | SCENARIOS>("wcs");
-  const [split, setSplit] = useState<"total" | "scenario" | "impact">("impact");
-  const [causes, setCauses] = useState(5);
+  const [causes, setCauses] = useState<DVRiskCascade<SmallRisk>[] | null>(null);
+  const [causesCount, setCausesCount] = useState(5);
   const [effects, setEffects] = useState(5);
 
   useEffect(() => {
-    if (!calculations) return;
+    if (!riskFile || !cascades) return;
 
-    setCalculation(calculations.find((c) => c.riskId === selectedNodeId) || null);
-  }, [selectedNodeId, calculations]);
-
-  if (!calculation) return null;
-
-  const rs = [
-    calculation.tp_c * calculation.ti_c,
-    calculation.tp_m * calculation.ti_m,
-    calculation.tp_e * calculation.ti_e,
-  ];
-
-  const scenarioSuffix = getScenarioSuffix(
-    scenario === "wcs"
-      ? [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME][rs.indexOf(Math.max(...rs))]
-      : scenario
-  );
+    setCauses(
+      cascades.filter(
+        (c) =>
+          c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+          c.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING
+      )
+    );
+  }, [riskFile, cascades]);
 
   return (
-    <Accordion disabled={!calculations || !selectedNodeId}>
+    <Accordion disabled={!riskFile || !causes}>
       <AccordionSummary>
         <Typography variant="subtitle2">Climate Change diagram</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{}}>
         <Stack direction="row" sx={{ mb: 8 }}>
-          <ClimateChangeChart calculation={calculation} scenarioSuffix={scenarioSuffix} />
+          {riskFile && causes && (
+            <ClimateChangeChart
+              riskFile={riskFile}
+              causes={causes}
+              scenario={scenario === "wcs" ? riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE : scenario}
+            />
+          )}
         </Stack>
       </AccordionDetails>
       <AccordionActions>

@@ -55,7 +55,7 @@ export default function ExecutiveSummaryGraph({
         <Typography variant="subtitle2">Executive Summary diagrams</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{}}>
-        <SummaryCharts riskFile={riskFile} calculation={calculation} scenario={trueScenario} />
+        <SummaryCharts riskFile={riskFile} scenario={trueScenario} />
       </AccordionDetails>
       <AccordionActions>
         <Stack direction="row" spacing={5} sx={{ flex: 1 }}>

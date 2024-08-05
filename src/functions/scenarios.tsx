@@ -1,4 +1,7 @@
 import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
+import { CASCADE_RESULT_SNAPSHOT, DVRiskCascade } from "../types/dataverse/DVRiskCascade";
+import { DVRiskFile, RISKFILE_RESULT_FIELD } from "../types/dataverse/DVRiskFile";
+import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { IntensityParameter } from "./intensityParameters";
 import tableToJson from "./tableToJson";
 
@@ -40,12 +43,27 @@ const noScenarios = {
   extreme: [],
 };
 
-export const unwrapScenario = (scenario: string, parameters: IntensityParameter[]) => {
+export const unwrapScenario = (
+  scenarioJSON: string,
+  parameters: IntensityParameter[]
+): IntensityParameter<string>[] => {
   try {
-    return JSON.parse(scenario);
+    const scenario = JSON.parse(scenarioJSON) as IntensityParameter<string>[];
+
+    return scenario.map((p) => {
+      const realParam = parameters.find((p2) => p.name === p2.name);
+
+      if (realParam)
+        return {
+          ...p,
+          description: realParam.description,
+        };
+
+      return p;
+    });
   } catch (e) {
     // Old HTML format
-    const json = tableToJson(scenario);
+    const json = tableToJson(scenarioJSON);
 
     if (!json) return [];
 
@@ -60,7 +78,7 @@ export const unwrapScenario = (scenario: string, parameters: IntensityParameter[
 
     return parameters.map((p, i) => ({
       ...p,
-      value: json[i],
+      value: json[i] as unknown as string,
     }));
   }
 };
@@ -93,6 +111,64 @@ export const getScenarioSuffix = (scenario: SCENARIOS): SCENARIO_SUFFIX => {
   if (scenario === SCENARIOS.CONSIDERABLE) return "_c";
   else if (scenario === SCENARIOS.MAJOR) return "_m";
   return "_e";
+};
+
+export const getScenarioParameter = (
+  rf: SmallRisk,
+  parameter: RISKFILE_RESULT_FIELD,
+  scenario: SCENARIOS
+): number | null => {
+  if (!rf.results) return null;
+
+  return rf.results[scenario][parameter];
+};
+
+const cascadeScenarios: { [key in SCENARIOS]: "C" | "M" | "E" } = {
+  considerable: "C",
+  major: "M",
+  extreme: "E",
+};
+
+export type CASCADE_RESULT_FIELD =
+  | "IP"
+  | "IP50"
+  | "CP_AVG"
+  | "II"
+  | "II_H"
+  | "II_Ha"
+  | "II_Hb"
+  | "II_Hc"
+  | "II_S"
+  | "II_Sa"
+  | "II_Sb"
+  | "II_Sc"
+  | "II_Sd"
+  | "II_E"
+  | "II_Ea"
+  | "II_F"
+  | "II_Fa"
+  | "II_Fb";
+
+export const getCascadeParameter = (
+  cascade: DVRiskCascade,
+  mainScenario: SCENARIOS,
+  parameter: CASCADE_RESULT_FIELD
+): number | null => {
+  if (!cascade.results) return null;
+
+  if (parameter === "IP" || parameter === "IP50")
+    return cascade.results[`${parameter}_All2${cascadeScenarios[mainScenario]}`];
+
+  if (parameter === "CP_AVG") return cascade.results[`${parameter}_${cascadeScenarios[mainScenario]}2All`];
+
+  if (parameter.indexOf("II_") >= 0)
+    return cascade.results[
+      `II_${cascadeScenarios[mainScenario]}2All_${parameter.slice(3)}` as keyof CASCADE_RESULT_SNAPSHOT
+    ];
+
+  if (parameter === "II") return cascade.results[`II_${cascadeScenarios[mainScenario]}2All`];
+
+  return null;
 };
 
 export const getScenarioLetter = (scenario: SCENARIOS): SCENARIO_LETTER => {

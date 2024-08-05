@@ -7,32 +7,34 @@ import {
   CardContent,
   Button,
   Box,
-  TextField,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
   Stack,
   LinearProgress,
-  Accordion,
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import useRecords from "../../hooks/useRecords";
 import useAPI, { DataTable } from "../../hooks/useAPI";
-import { DVRiskFile, RISK_FILE_QUANTI_FIELDS, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import { DVRiskCascade, RISK_CASCADE_QUANTI_FIELDS } from "../../types/dataverse/DVRiskCascade";
+import {
+  DVRiskFile,
+  RESULT_SNAPSHOT,
+  RISK_FILE_QUANTI_FIELDS,
+  RISK_TYPE,
+  RISKFILE_RESULT_FIELD,
+} from "../../types/dataverse/DVRiskFile";
+import {
+  CASCADE_RESULT_SNAPSHOT,
+  DVRiskCascade,
+  RISK_CASCADE_QUANTI_FIELDS,
+} from "../../types/dataverse/DVRiskCascade";
 import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { CASCADE_ANALYSIS_QUANTI_FIELDS, DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import { CascadeCalculation, DVAnalysisRun, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { v4 as uuid } from "uuid";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVContact } from "../../types/dataverse/DVContact";
-import calculateMetrics from "../../functions/analysis/calculateMetrics";
-import runAnalysis from "../../functions/analysis/runAnalysis";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import RiskFilesDataGrid from "./RiskFilesDataGrid";
-import { CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis } from "recharts";
 import RiskMatrix from "./RiskMatrix";
 import RiskNetworkGraph from "./RiskNetworkGraph";
 import CascadeDataGrid from "./CascadeDataGrid";
@@ -41,6 +43,11 @@ import RiskProfileGraph from "./RiskProfileGraph";
 import ClimateChangeGraph from "./ClimateChangeGraph";
 import ExecutiveSummaryGraph from "./ExecutiveSummaryGraphs";
 import CalculationsDelta from "./CalculationsDelta";
+import { getTotalImpactRelativeScale } from "../../functions/Impact";
+import { getScenarioLetter, getScenarioSuffix, SCENARIOS } from "../../functions/scenarios";
+import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
+import roundString from "../../functions/roundNumberString";
+import { getAverageCP } from "../../functions/cascades";
 // import { MessageParams } from "../../functions/analysis/calculator.worker";
 
 const roundNumberField = (n: number) => {
@@ -48,6 +55,8 @@ const roundNumberField = (n: number) => {
 
   return Math.round(1000 * n) / 1000;
 };
+
+const round = (v: number, dig: number) => parseFloat(roundString(v, dig).replace(",", "."));
 
 const roundNumberFields = (obj: object) => {
   return (Object.keys(obj) as Array<keyof typeof obj>).reduce(
@@ -61,6 +70,99 @@ const roundNumberFields = (obj: object) => {
 
 const roundPerc = (v: number) => Math.round(v * 10000) / 100 + "%";
 
+const getScenarioResult = (calculation: RiskCalculation, s: SCENARIOS): { [key in RISKFILE_RESULT_FIELD]: number } => {
+  const scenarioSuffix = getScenarioSuffix(s);
+
+  const tp = calculation[`tp${scenarioSuffix}`];
+  const tp50 = calculation[`tp50${scenarioSuffix}`];
+  const tp_rel = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
+  const tp50_rel = getTotalProbabilityRelativeScale(calculation, scenarioSuffix, true);
+  const tp_diff = Math.abs(tp50 - tp);
+  const tp_diff_rel = Math.abs(tp50_rel - tp_rel);
+  const ti = calculation[`ti${scenarioSuffix}`];
+  const ti_rel = getTotalImpactRelativeScale(calculation, scenarioSuffix);
+
+  return {
+    TP: round(tp_rel, 5),
+    TP50: round(tp50_rel, 5),
+
+    TI: round((calculation[`ti${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI_H: round(
+      ((calculation[`ti_Ha${scenarioSuffix}`] +
+        calculation[`ti_Hb${scenarioSuffix}`] +
+        calculation[`ti_Hc${scenarioSuffix}`]) /
+        ti) *
+        ti_rel,
+      5
+    ),
+    TI_Ha: round((calculation[`ti_Ha${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI_Hb: round((calculation[`ti_Hb${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI_Hc: round((calculation[`ti_Hc${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI_S: round(
+      ((calculation[`ti_Sa${scenarioSuffix}`] +
+        calculation[`ti_Sb${scenarioSuffix}`] +
+        calculation[`ti_Sc${scenarioSuffix}`] +
+        calculation[`ti_Sd${scenarioSuffix}`]) /
+        ti) *
+        ti_rel,
+      5
+    ),
+    TI_Sa: round((calculation[`ti_Sa${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI_Sb: round((calculation[`ti_Sb${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI_Sc: round((calculation[`ti_Sc${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI_Sd: round((calculation[`ti_Sd${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI_E: round((calculation[`ti_Ea${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI_Ea: round((calculation[`ti_Ea${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI_F: round(((calculation[`ti_Fa${scenarioSuffix}`] + calculation[`ti_Fb${scenarioSuffix}`]) / ti) * ti_rel, 5),
+    TI_Fa: round((calculation[`ti_Fa${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI_Fb: round((calculation[`ti_Fb${scenarioSuffix}`] / ti) * ti_rel, 5),
+
+    DP: round((calculation[`dp${scenarioSuffix}`] / tp) * tp_rel, 5),
+    DP50: round(
+      (calculation[`dp${scenarioSuffix}`] / tp) * tp_rel +
+        ((calculation[`dp50${scenarioSuffix}`] - calculation[`dp${scenarioSuffix}`]) / tp_diff) * tp_diff_rel,
+      5
+    ),
+
+    DI: round((calculation[`di${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_H: round(
+      ((calculation[`di_Ha${scenarioSuffix}`] +
+        calculation[`di_Hb${scenarioSuffix}`] +
+        calculation[`di_Hc${scenarioSuffix}`]) /
+        ti) *
+        ti_rel,
+      5
+    ),
+    DI_Ha: round((calculation[`di_Ha${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Hb: round((calculation[`di_Hb${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Hc: round((calculation[`di_Hc${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_S: round(
+      ((calculation[`di_Sa${scenarioSuffix}`] +
+        calculation[`di_Sb${scenarioSuffix}`] +
+        calculation[`di_Sc${scenarioSuffix}`] +
+        calculation[`di_Sd${scenarioSuffix}`]) /
+        ti) *
+        ti_rel,
+      5
+    ),
+    DI_Sa: round((calculation[`di_Sa${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Sb: round((calculation[`di_Sb${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Sc: round((calculation[`di_Sc${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Sd: round((calculation[`di_Sd${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_E: round((calculation[`di_Ea${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Ea: round((calculation[`di_Ea${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_F: round(((calculation[`di_Fa${scenarioSuffix}`] + calculation[`di_Fb${scenarioSuffix}`]) / ti) * ti_rel, 5),
+    DI_Fa: round((calculation[`di_Fa${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Fb: round((calculation[`di_Fb${scenarioSuffix}`] / ti) * ti_rel, 5),
+  };
+};
+
+const getMostRelevantScenario = (r: RiskCalculation) => {
+  if (r.tr_c > r.tr_m && r.tr_c > r.tr_e) return SCENARIOS.CONSIDERABLE;
+  if (r.tr_m > r.tr_c && r.tr_m > r.tr_e) return SCENARIOS.MAJOR;
+  return SCENARIOS.EXTREME;
+};
+
 export default function CalculationPage() {
   const api = useAPI();
   const logLines = useRef<string[]>(["Loading data..."]);
@@ -69,11 +171,13 @@ export default function CalculationPage() {
   const [calculationProgress, setCalculationProgress] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
-  const [results, setResults] = useState<RiskCalculation[] | null>(null);
+  const [latestAnalysisId, setLatestAnalysisId] = useState<string | null>("test");
 
   const [useableDAs, setUseableDAs] = useState<DVDirectAnalysis<unknown, DVContact>[] | null>(null);
   const [useableCAs, setUseableCAs] = useState<DVCascadeAnalysis<unknown, unknown, DVContact>[] | null>(null);
   const [calculations, setCalculations] = useState<RiskCalculation[] | null>(null);
+  const [results, setResults] = useState<DVRiskFile[] | null>(null);
+  const [resultsRC, setResultsRC] = useState<DVRiskCascade<SmallRisk>[] | null>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [simRuns, setSimRuns] = useState<number>(30);
   const [damping, setDamping] = useState<string>("0.35");
@@ -192,20 +296,141 @@ export default function CalculationPage() {
           setCalculationProgress(e.data.value);
         }
         if (e.data.type === "result") {
-          setCalculations(
-            e.data.value.map((c: RiskCalculation) => {
-              const risk = riskFiles?.find((r) => r.cr4de_riskfilesid === c.riskId);
+          const newCalcs = e.data.value.map((c: RiskCalculation) => {
+            const risk = riskFiles?.find((r) => r.cr4de_riskfilesid === c.riskId);
 
-              if (!risk) return c;
+            if (!risk) return c;
 
-              return {
-                ...c,
-                keyRisk: risk.cr4de_key_risk,
-                code: risk.cr4de_hazard_id,
-                category: risk.cr4de_risk_category,
+            return {
+              ...c,
+              keyRisk: risk.cr4de_key_risk,
+              code: risk.cr4de_hazard_id,
+              category: risk.cr4de_risk_category,
+            };
+          });
+
+          setCalculations(newCalcs);
+
+          if (riskFiles && cascades) {
+            const cDict: { [key: string]: DVRiskCascade<SmallRisk, SmallRisk> } = cascades.reduce(
+              (acc, c) => ({
+                ...acc,
+                [c.cr4de_bnrariskcascadeid]: {
+                  ...c,
+                  results: {},
+                },
+              }),
+              {}
+            );
+
+            let newResults: DVRiskFile[] = [];
+
+            newCalcs.forEach((calculation: RiskCalculation) => {
+              const riskFile = riskFiles.find((rf) => rf.cr4de_riskfilesid === calculation.riskId);
+
+              if (!riskFile) return;
+
+              const result: RESULT_SNAPSHOT = {
+                [SCENARIOS.CONSIDERABLE]: getScenarioResult(calculation, SCENARIOS.CONSIDERABLE),
+                [SCENARIOS.MAJOR]: getScenarioResult(calculation, SCENARIOS.MAJOR),
+                [SCENARIOS.EXTREME]: getScenarioResult(calculation, SCENARIOS.EXTREME),
               };
-            })
-          );
+
+              newResults.push({
+                ...riskFile,
+                results: result,
+              });
+
+              calculation.causes.forEach((c) => {
+                const cascade = cDict[c.cascadeId];
+                const cResult = cDict[c.cascadeId].results;
+
+                if (!cascade || !cResult) throw new Error("Huh?");
+
+                [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].forEach((s) => {
+                  const scenarioSuffix = getScenarioSuffix(s);
+
+                  const tp = calculation[`tp${scenarioSuffix}`];
+                  const tp50 = calculation[`tp50${scenarioSuffix}`];
+                  // const tp_yearly = getYearlyProbability(tp);
+                  const tp_rel = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
+                  const tp50_rel = getTotalProbabilityRelativeScale(calculation, scenarioSuffix, true);
+                  const tp_diff = Math.abs(tp50 - tp);
+                  const tp_diff_rel = Math.abs(tp50_rel - tp_rel);
+
+                  const ip = (c[`ip${scenarioSuffix}`] / tp) * tp_rel;
+
+                  cResult[`IP_All2${s[0].toUpperCase() as "C" | "M" | "E"}`] = ip;
+
+                  cResult[`IP50_All2${s[0].toUpperCase() as "C" | "M" | "E"}`] =
+                    ip + ((c[`ip50${scenarioSuffix}`] - c[`ip${scenarioSuffix}`]) / tp_diff) * tp_diff_rel;
+                });
+              });
+              calculation.effects.forEach((e) => {
+                const cascade = cDict[e.cascadeId];
+                const cResult = cDict[e.cascadeId].results;
+
+                if (!cascade || !cResult) throw new Error("Huh?");
+
+                [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].forEach((s) => {
+                  const scenarioSuffix = getScenarioSuffix(s);
+                  const scenarioLetter = getScenarioLetter(s);
+
+                  const tp = calculation[`tp${scenarioSuffix}`];
+                  const ti = calculation[`ti${scenarioSuffix}`];
+                  // const tp_yearly = getYearlyProbability(tp);
+                  const tp_rel = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
+                  const ti_rel = getTotalImpactRelativeScale(calculation, scenarioSuffix);
+
+                  cResult[`CP_AVG_${s[0].toUpperCase() as "C" | "M" | "E"}2All`] = getAverageCP(scenarioLetter, e);
+
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All`] = (e[`ii${scenarioSuffix}`] / ti) * ti_rel;
+
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_H`] =
+                    ((e[`ii_Ha${scenarioSuffix}`] + e[`ii_Hb${scenarioSuffix}`] + e[`ii_Hc${scenarioSuffix}`]) / ti) *
+                    ti_rel;
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Ha`] =
+                    (e[`ii_Ha${scenarioSuffix}`] / ti) * ti_rel;
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Hb`] =
+                    (e[`ii_Hb${scenarioSuffix}`] / ti) * ti_rel;
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Hc`] =
+                    (e[`ii_Hc${scenarioSuffix}`] / ti) * ti_rel;
+
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_S`] =
+                    ((e[`ii_Sa${scenarioSuffix}`] +
+                      e[`ii_Sb${scenarioSuffix}`] +
+                      e[`ii_Sc${scenarioSuffix}`] +
+                      e[`ii_Sd${scenarioSuffix}`]) /
+                      ti) *
+                    ti_rel;
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sa`] =
+                    (e[`ii_Sa${scenarioSuffix}`] / ti) * ti_rel;
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sb`] =
+                    (e[`ii_Sb${scenarioSuffix}`] / ti) * ti_rel;
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sc`] =
+                    (e[`ii_Sc${scenarioSuffix}`] / ti) * ti_rel;
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sd`] =
+                    (e[`ii_Sd${scenarioSuffix}`] / ti) * ti_rel;
+
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_E`] =
+                    (e[`ii_Ea${scenarioSuffix}`] / ti) * ti_rel;
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Ea`] =
+                    (e[`ii_Ea${scenarioSuffix}`] / ti) * ti_rel;
+
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_F`] =
+                    ((e[`ii_Fa${scenarioSuffix}`] + e[`ii_Fb${scenarioSuffix}`]) / ti) * ti_rel;
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Fa`] =
+                    (e[`ii_Fa${scenarioSuffix}`] / ti) * ti_rel;
+                  cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Fb`] =
+                    (e[`ii_Fb${scenarioSuffix}`] / ti) * ti_rel;
+                });
+              });
+            });
+
+            setResults(newResults);
+            setResultsRC(Object.values(cDict));
+          }
+
           setIsCalculating(false);
         }
       };
@@ -252,6 +477,140 @@ export default function CalculationPage() {
     reloadCAs();
   };
 
+  const saveSnapshot = async () => {
+    if (!calculations || !cascades) return;
+
+    const rDict: { [key: string]: RiskCalculation } = calculations.reduce(
+      (acc, c) => ({
+        ...acc,
+        [c.riskId]: c,
+      }),
+      {}
+    );
+    const cDict: { [key: string]: DVRiskCascade<SmallRisk, SmallRisk> } = cascades.reduce(
+      (acc, c) => ({
+        ...acc,
+        [c.cr4de_bnrariskcascadeid]: c,
+      }),
+      {}
+    );
+    const cRDict: { [key: string]: Partial<CASCADE_RESULT_SNAPSHOT> } = cascades.reduce(
+      (acc, c) => ({
+        ...acc,
+        [c.cr4de_bnrariskcascadeid]: {},
+      }),
+      {}
+    );
+
+    for (let i = 0; i < calculations.length; i++) {
+      const calculation = calculations[i];
+
+      const riskId = calculation.riskId;
+
+      const result: RESULT_SNAPSHOT = {
+        [SCENARIOS.CONSIDERABLE]: getScenarioResult(calculation, SCENARIOS.CONSIDERABLE),
+        [SCENARIOS.MAJOR]: getScenarioResult(calculation, SCENARIOS.MAJOR),
+        [SCENARIOS.EXTREME]: getScenarioResult(calculation, SCENARIOS.EXTREME),
+      };
+
+      await api.updateRiskFile(riskId, {
+        cr4de_result_snapshot: JSON.stringify(result),
+        // cr4de_mrs: getMostRelevantScenario(calculation),
+      });
+
+      calculation.causes.forEach((c) => {
+        const cascade = cDict[c.cascadeId];
+        const cResult = cRDict[c.cascadeId];
+
+        if (!cascade || !cResult) throw new Error("Huh?");
+
+        [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].forEach((s) => {
+          const scenarioSuffix = getScenarioSuffix(s);
+
+          const tp = calculation[`tp${scenarioSuffix}`];
+          const tp50 = calculation[`tp50${scenarioSuffix}`];
+          // const tp_yearly = getYearlyProbability(tp);
+          const tp_rel = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
+          const tp50_rel = getTotalProbabilityRelativeScale(calculation, scenarioSuffix, true);
+          const tp_diff = Math.abs(tp50 - tp);
+          const tp_diff_rel = Math.abs(tp50_rel - tp_rel);
+
+          const ip = (c[`ip${scenarioSuffix}`] / tp) * tp_rel;
+
+          cResult[`IP_All2${s[0].toUpperCase() as "C" | "M" | "E"}`] = ip;
+
+          cResult[`IP50_All2${s[0].toUpperCase() as "C" | "M" | "E"}`] =
+            ip + ((c[`ip50${scenarioSuffix}`] - c[`ip${scenarioSuffix}`]) / tp_diff) * tp_diff_rel;
+        });
+      });
+      calculation.effects.forEach((e) => {
+        const cascade = cDict[e.cascadeId];
+        const cResult = cRDict[e.cascadeId];
+
+        [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].forEach((s) => {
+          const scenarioSuffix = getScenarioSuffix(s);
+          const scenarioLetter = getScenarioLetter(s);
+
+          const tp = calculation[`tp${scenarioSuffix}`];
+          const ti = calculation[`ti${scenarioSuffix}`];
+          // const tp_yearly = getYearlyProbability(tp);
+          const tp_rel = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
+          const ti_rel = getTotalImpactRelativeScale(calculation, scenarioSuffix);
+
+          cResult[`CP_AVG_${s[0].toUpperCase() as "C" | "M" | "E"}2All`] = getAverageCP(scenarioLetter, e);
+
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All`] = (e[`ii${scenarioSuffix}`] / ti) * ti_rel;
+
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_H`] =
+            ((e[`ii_Ha${scenarioSuffix}`] + e[`ii_Hb${scenarioSuffix}`] + e[`ii_Hc${scenarioSuffix}`]) / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Ha`] = (e[`ii_Ha${scenarioSuffix}`] / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Hb`] = (e[`ii_Hb${scenarioSuffix}`] / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Hc`] = (e[`ii_Hc${scenarioSuffix}`] / ti) * ti_rel;
+
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_S`] =
+            ((e[`ii_Sa${scenarioSuffix}`] +
+              e[`ii_Sb${scenarioSuffix}`] +
+              e[`ii_Sc${scenarioSuffix}`] +
+              e[`ii_Sd${scenarioSuffix}`]) /
+              ti) *
+            ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sa`] = (e[`ii_Sa${scenarioSuffix}`] / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sb`] = (e[`ii_Sb${scenarioSuffix}`] / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sc`] = (e[`ii_Sc${scenarioSuffix}`] / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sd`] = (e[`ii_Sd${scenarioSuffix}`] / ti) * ti_rel;
+
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_E`] = (e[`ii_Ea${scenarioSuffix}`] / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Ea`] = (e[`ii_Ea${scenarioSuffix}`] / ti) * ti_rel;
+
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_F`] =
+            ((e[`ii_Fa${scenarioSuffix}`] + e[`ii_Fb${scenarioSuffix}`]) / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Fa`] = (e[`ii_Fa${scenarioSuffix}`] / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Fb`] = (e[`ii_Fb${scenarioSuffix}`] / ti) * ti_rel;
+        });
+      });
+
+      //   logger(`Saving calculations (${i + 1}/${results.length})`, 1);
+      setCalculationProgress((100 * (i + 1)) / (calculations.length + Object.keys(cRDict).length));
+    }
+
+    let i = calculations.length;
+
+    for (let [cId, cR] of Object.entries(cRDict)) {
+      if (Object.keys(cR).length <= 0) {
+        continue;
+      }
+
+      await api.updateCascade(cId, {
+        cr4de_result_snapshot: JSON.stringify(cR),
+      });
+
+      setCalculationProgress((100 * (i + 1)) / (calculations.length + Object.keys(cRDict).length));
+      i += 1;
+    }
+
+    // logger("Done");
+  };
+
   const saveResults = async () => {
     if (!calculations) return;
 
@@ -295,6 +654,7 @@ export default function CalculationPage() {
     // logger(`Saving calculations (0/${results.length})`);
 
     const analysisId = uuid();
+    setLatestAnalysisId(analysisId);
 
     for (let i = 0; i < calculations.length; i++) {
       const calculation = calculations[i];
@@ -304,7 +664,6 @@ export default function CalculationPage() {
         causes: calculation.causes.map((cause) => flattenCause(cause)),
         effects: calculation.effects.map((effect) => flattenEffect(effect)),
       };
-      console.log(JSON.stringify(flatCalculation));
 
       //   const metrics = calculateMetrics(calculatedFields, results, riskFiles, participations);
 
@@ -459,6 +818,8 @@ export default function CalculationPage() {
     }
   }, [selectedNode]);
 
+  const riskFile = (results ? results.find((r) => r.cr4de_riskfilesid === selectedNode) : null) || null;
+
   return (
     <>
       <Container sx={{ mt: 4, pb: 8 }}>
@@ -544,6 +905,13 @@ export default function CalculationPage() {
             <Button color="warning" disabled={calculations === null || isCalculating} onClick={saveResults}>
               Save results
             </Button>
+            <Button
+              color="warning"
+              disabled={calculations === null || isCalculating || !latestAnalysisId}
+              onClick={saveSnapshot}
+            >
+              Save snapshot
+            </Button>
           </CardActions>
         </Card>
 
@@ -572,11 +940,7 @@ export default function CalculationPage() {
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}
           />
-          <ClimateChangeGraph
-            calculations={calculations}
-            selectedNodeId={selectedNode}
-            setSelectedNodeId={setSelectedNode}
-          />
+          <ClimateChangeGraph riskFile={riskFile} cascades={resultsRC} />
           <ExecutiveSummaryGraph
             riskFile={riskFiles?.find((r) => r.cr4de_riskfilesid === selectedNode) || ({} as DVRiskFile)}
             calculations={calculations}

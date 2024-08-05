@@ -42,6 +42,8 @@ import RiskInputPage from "./pages/RiskInputPage/RiskInputPage";
 import CorrectionsPage from "./pages/CorrectionsPage/CorrectionsPage";
 import PermissionDeniedPage from "./pages/PermissionDeniedPage/PermissionDeniedPage";
 import UserManagementPage from "./pages/UserManagementPage/UserManagementPage";
+import RiskMatrixPage from "./pages/RiskMatrixPage/RiskMatrixPage";
+import RiskEvolutionPage from "./pages/RiskEvolution/RiskEvolutionPage";
 
 function App() {
   useEffect(() => {
@@ -77,46 +79,54 @@ function App() {
 
             {
               path: "/",
-              element: <BaseRisksPage />,
+              element: <AuthPage />,
               children: [
                 {
-                  path: "/risks",
-                  element: <HazardCataloguePage />,
-                },
-
-                {
-                  path: "/risks/:risk_file_id",
-                  element: <BaseRiskFilePage />,
+                  path: "/",
+                  element: <BaseRisksPage />,
                   children: [
                     {
+                      path: "/risks",
+                      element: <HazardCataloguePage />,
+                    },
+                    {
+                      path: "/risks/matrix",
+                      element: <RiskMatrixPage />,
+                    },
+
+                    {
                       path: "/risks/:risk_file_id",
-                      element: <RiskFileSummaryPage />,
-                    },
-                    {
-                      path: "/risks/:risk_file_id/identification",
-                      element: <RiskIdentificationPage />,
-                    },
-                    {
-                      path: "/risks/:risk_file_id/analysis",
-                      element: <RiskAnalysisPage />,
-                    },
-                    {
-                      path: "/risks/:risk_file_id/data",
-                      element: <RiskDataPage />,
-                    },
-                    {
-                      path: "/risks/:risk_file_id/input",
-                      element: <RiskInputPage />,
+                      element: <BaseRiskFilePage />,
+                      children: [
+                        {
+                          path: "/risks/:risk_file_id",
+                          element: <RiskFileSummaryPage />,
+                        },
+                        {
+                          path: "/risks/:risk_file_id/identification",
+                          element: <RiskIdentificationPage />,
+                        },
+                        {
+                          path: "/risks/:risk_file_id/analysis",
+                          element: <RiskAnalysisPage />,
+                        },
+                        {
+                          path: "/risks/:risk_file_id/evolution",
+                          element: <RiskEvolutionPage />,
+                        },
+                        {
+                          path: "/risks/:risk_file_id/data",
+                          element: <RiskDataPage />,
+                        },
+                        {
+                          path: "/risks/:risk_file_id/input",
+                          element: <RiskInputPage />,
+                        },
+                      ],
                     },
                   ],
                 },
-              ],
-            },
 
-            {
-              path: "/",
-              element: <AuthPage />,
-              children: [
                 {
                   path: "/learning",
                   element: <LearningOverviewPage />,

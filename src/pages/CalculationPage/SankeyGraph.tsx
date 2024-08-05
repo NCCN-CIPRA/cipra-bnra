@@ -59,13 +59,13 @@ export default function SankeyGraph({
       <AccordionDetails sx={{}}>
         <Stack direction="row" sx={{ mb: 8 }}>
           <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
-            <ProbabilitySankey
+            {/* <ProbabilitySankey
               calculation={calculation}
               maxCauses={causes}
               scenario={scenario}
               debug={true}
               onClick={(id: string) => setSelectedNodeId(id)}
-            />
+            /> */}
           </Box>
           <Stack direction="column" justifyContent="center" sx={{ width: 300, p: "50px" }}>
             {/* <Box
@@ -96,7 +96,7 @@ export default function SankeyGraph({
                 height: 350,
               }}
             >
-              <ImpactBarChart calculation={calculation} scenarioSuffix={getScenarioSuffix(scenario)} />
+              {/* <ImpactBarChart calculation={calculation} scenarioSuffix={getScenarioSuffix(scenario)} /> */}
               {/* <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle2">
                   Total Probability: <b>{Math.round(10000 * getYearlyProbability(calculation.tp)) / 100}% / year</b>
@@ -108,13 +108,13 @@ export default function SankeyGraph({
             </Box>
           </Stack>
           <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
-            <ImpactSankey
+            {/* <ImpactSankey
               calculation={calculation}
               maxEffects={effects}
               scenario={scenario}
               onClick={(id: string) => setSelectedNodeId(id)}
               debug={true}
-            />
+            /> */}
           </Box>
         </Stack>
       </AccordionDetails>

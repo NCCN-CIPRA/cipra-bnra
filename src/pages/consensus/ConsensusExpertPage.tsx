@@ -4,10 +4,9 @@ import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import usePageTitle from "../../hooks/usePageTitle";
-import useRecord from "../../hooks/useRecord";
 import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import { Box, Button, Paper, Fade, Container } from "@mui/material";
+import { Box, Button, Paper, Fade } from "@mui/material";
 import { AuthPageContext } from "../AuthPage";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import useRecords from "../../hooks/useRecords";
@@ -27,7 +26,6 @@ export default function ConsensusExpertPage() {
   const { t } = useTranslation();
   const routeParams = useParams() as RouteParams;
   const navigate = useNavigate();
-  const api = useAPI();
   const { user } = useOutletContext<AuthPageContext>();
 
   const [fade, setFade] = useState(true);

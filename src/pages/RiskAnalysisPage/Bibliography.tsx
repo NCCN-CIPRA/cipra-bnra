@@ -4,6 +4,7 @@ import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
+import { useTranslation } from "react-i18next";
 
 export default function Bibliography({
   attachments,
@@ -16,9 +17,11 @@ export default function Bibliography({
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[] | null;
   reloadAttachments: () => Promise<unknown>;
 }) {
+  const { t } = useTranslation();
+
   return (
     <Box sx={{ mt: 8 }}>
-      <Typography variant="h5">Bibliography</Typography>
+      <Typography variant="h5">{t("Bibliography")}</Typography>
       <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, backgroundColor: "white" }}>
         <Attachments
           attachments={

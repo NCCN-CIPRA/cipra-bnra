@@ -5,8 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
-import { Cause, getYearlyProbability } from "../../../functions/Probability";
-import { SCENARIOS, SCENARIO_SUFFIX, getScenarioSuffix } from "../../../functions/scenarios";
+import { Cause, getYearlyProbability, getYearlyProbabilityFromRelative } from "../../../functions/Probability";
+import { SCENARIOS, SCENARIO_SUFFIX, getScenarioParameter, getScenarioSuffix } from "../../../functions/scenarios";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import round from "../../../functions/roundNumberString";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
@@ -15,7 +15,6 @@ export default function ProbabilitySection({
   riskFile,
   causes,
   scenario,
-  calc,
   mode,
   attachments = null,
   updateAttachments = null,
@@ -27,7 +26,6 @@ export default function ProbabilitySection({
   riskFile: DVRiskFile;
   causes: Cause[];
   scenario: SCENARIOS;
-  calc: RiskCalculation;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
@@ -37,13 +35,14 @@ export default function ProbabilitySection({
   allRisks: SmallRisk[] | null;
 }) {
   const scenarioSuffix = getScenarioSuffix(scenario);
+  const tp = getScenarioParameter(riskFile, "TP", scenario) || 0.00001;
 
   const paretoCauses = useMemo(() => {
     return causes
       .sort((a, b) => b.p - a.p)
       .reduce(
         ([cumulCauses, pCumul], c) => {
-          if (pCumul / calc[`tp${scenarioSuffix}`] > 0.8) return [cumulCauses, pCumul] as [Cause[], number];
+          if (pCumul / tp > 0.8) return [cumulCauses, pCumul] as [Cause[], number];
 
           return [[...cumulCauses, c], pCumul + c.p] as [Cause[], number];
         },
@@ -54,7 +53,7 @@ export default function ProbabilitySection({
   const getDefaultText = () => {
     const text = `
           <p style="font-size:10pt;">
-          There is an estimated <b>${round(100 * getYearlyProbability(calc[`tp${scenarioSuffix}`]))}%</b> chance
+          There is an estimated <b>${round(100 * getYearlyProbabilityFromRelative(tp))}%</b> chance
           for a ${scenario} ${riskFile.cr4de_title.toLocaleLowerCase()} to occur in the next 12 months. The following possible underlying causes for
           such an incident were identified:
           </p>
@@ -66,7 +65,7 @@ export default function ProbabilitySection({
         const riskName = c.id ? `<a href="/risks/${c.id}" target="_blank">${c.name}</a>` : `<a href="">c.name</a>`;
 
         return `<p style="font-weight:bold;font-size:10pt;">
-                    ${i + 1}. ${riskName} (${round((100 * c.p) / calc[`tp${scenarioSuffix}`])}% of total probability)
+                    ${i + 1}. ${riskName} (${round((100 * c.p) / tp)}% of total probability)
                     </p>
                     <p><br></p>
                     ${c.quali}
@@ -174,4 +173,6 @@ export default function ProbabilitySection({
       )}
     </>
   );
+
+  return null;
 }

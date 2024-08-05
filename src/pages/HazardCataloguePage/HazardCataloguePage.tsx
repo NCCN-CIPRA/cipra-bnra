@@ -7,21 +7,69 @@ import {
   Table,
   TableCell,
   TableBody,
-  CircularProgress,
   TableRow,
+  Button,
+  LinearProgress,
+  Card,
+  CardContent,
+  FormControl,
+  InputLabel,
+  InputAdornment,
+  Input,
 } from "@mui/material";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { RiskPageContext } from "../BaseRisksPage";
 import NCCNLoader from "../../components/NCCNLoader";
-import RiskMatrixAccordion from "./RiskMatrixAccordion";
-import { AuthPageContext } from "../AuthPage";
 import { useTranslation } from "react-i18next";
+import { SCENARIO_PARAMS } from "../../functions/scenarios";
+import SearchIcon from "@mui/icons-material/Search";
+import { useEffect, useState } from "react";
+import TableHeader from "./TableHeader";
+import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
+import { CategoryIcon } from "../../functions/getCategoryColor";
+
+function SearchBar({ onSearch }: { onSearch: (v: string) => void }) {
+  const [committedSearch, setCommittedSearch] = useState("");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (search !== committedSearch) {
+      const t = setTimeout(() => {
+        setCommittedSearch(search);
+        onSearch(search);
+      }, 500);
+
+      return () => clearTimeout(t);
+    }
+  }, [search]);
+
+  return (
+    <FormControl sx={{ m: 0 }} variant="standard" fullWidth>
+      <InputLabel htmlFor="outlined-adornment">Search Risk Catalogue</InputLabel>
+      <Input
+        id="outlined-adornment"
+        type="text"
+        endAdornment={
+          <InputAdornment position="end">
+            <SearchIcon />
+          </InputAdornment>
+        }
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+    </FormControl>
+  );
+}
 
 export default function HazardCataloguePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, hazardCatalogue } = useOutletContext<RiskPageContext>();
+
+  const [search, setSearch] = useState("");
+  const [sortField, setSortField] = useState<null | string>(null);
+  const [sortDir, setSortDir] = useState<"ASC" | "DESC">("ASC");
 
   usePageTitle(t("sideDrawer.hazardCatalogue", "Hazard Catalogue"));
   useBreadcrumbs([
@@ -32,15 +80,87 @@ export default function HazardCataloguePage() {
   return (
     <>
       <Box sx={{ mb: 8, mx: 8 }}>
-        <RiskMatrixAccordion />
+        <Card sx={{ mb: 2 }}>
+          <CardContent sx={{ px: 2, pt: 1 }}>
+            <Box>
+              <SearchBar onSearch={setSearch} />
+            </Box>
+          </CardContent>
+        </Card>
         <TableContainer component={Paper} sx={{ width: "100%" }}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ pr: 4 }}>ID</TableCell>
-                <TableCell sx={{ width: "100%" }}>Name</TableCell>
-                <TableCell sx={{ px: 4 }}>Category</TableCell>
-                <TableCell sx={{ px: 4 }}>Labels</TableCell>
+                <TableHeader
+                  name={t("hazardCatalogue.id", "ID")}
+                  sort={sortField === "cr4de_hazard_id" ? sortDir : null}
+                  onSort={(v) => {
+                    if (v === null) setSortField(null);
+                    else {
+                      setSortField("cr4de_hazard_id");
+                      setSortDir(v);
+                    }
+                  }}
+                />
+                <TableHeader
+                  name={t("hazardCatalogue.name", "Name")}
+                  width="100%"
+                  sort={sortField === "cr4de_title" ? sortDir : null}
+                  onSort={(v) => {
+                    if (v === null) setSortField(null);
+                    else {
+                      setSortField("cr4de_title");
+                      setSortDir(v);
+                    }
+                  }}
+                />
+                <TableHeader
+                  name={t("hazardCatalogue.category", "Category")}
+                  sort={sortField === "cr4de_risk_category" ? sortDir : null}
+                  onSort={(v) => {
+                    if (v === null) setSortField(null);
+                    else {
+                      setSortField("cr4de_risk_category");
+                      setSortDir(v);
+                    }
+                  }}
+                />
+                <TableHeader name={t("hazardCatalogue.labels", "Labels")} />
+                <TableHeader
+                  name={t("hazardCatalogue.mrs", "Most Relevant Scenario")}
+                  sort={sortField === "cr4de_mrs" ? sortDir : null}
+                  onSort={(v) => {
+                    if (v === null) setSortField(null);
+                    else {
+                      setSortField("cr4de_mrs");
+                      setSortDir(v);
+                    }
+                  }}
+                />
+                <TableHeader
+                  name={t("learning.probability.2.text.title", "Probability")}
+                  minWidth="200px"
+                  sort={sortField === "tp" ? sortDir : null}
+                  onSort={(v) => {
+                    if (v === null) setSortField(null);
+                    else {
+                      setSortField("tp");
+                      setSortDir(v);
+                    }
+                  }}
+                />
+                <TableHeader
+                  name={t("hazardCatalogue.impact", "Impact")}
+                  minWidth="200px"
+                  sort={sortField === "ti" ? sortDir : null}
+                  onSort={(v) => {
+                    if (v === null) setSortField(null);
+                    else {
+                      setSortField("ti");
+                      setSortDir(v);
+                    }
+                  }}
+                />
               </TableRow>
             </TableHead>
             <TableBody>
@@ -52,21 +172,106 @@ export default function HazardCataloguePage() {
                 </TableRow>
               )}
               {hazardCatalogue !== null &&
-                hazardCatalogue.map((h) => (
-                  <TableRow key={h.cr4de_riskfilesid} hover onClick={() => navigate(`/risks/${h.cr4de_riskfilesid}`)}>
-                    <TableCell sx={{ pr: 4 }}>{h.cr4de_hazard_id}</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {t(`risk.${h.cr4de_hazard_id}.name`, h.cr4de_title)}
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", px: 4 }}>
-                      {t(
-                        `risk.category.${h.cr4de_risk_category.toLocaleLowerCase().replace(" ", "_")}`,
-                        h.cr4de_risk_category
-                      )}
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", px: 4 }}></TableCell>
-                  </TableRow>
-                ))}
+                hazardCatalogue
+                  .filter(
+                    (h) =>
+                      search === "" ||
+                      t(`risk.${h.cr4de_hazard_id}.name`, h.cr4de_title).toLowerCase().indexOf(search.toLowerCase()) >=
+                        0 ||
+                      t(h.cr4de_risk_category).toLowerCase().indexOf(search.toLowerCase()) >= 0 ||
+                      (h.cr4de_mrs ? t(h.cr4de_mrs) : "").toLowerCase().indexOf(search.toLowerCase()) >= 0
+                  )
+                  .map((h) => ({
+                    ...h,
+                    tp: h.results && h.cr4de_mrs ? h.results[h.cr4de_mrs].TP : null,
+                    ti: h.results && h.cr4de_mrs ? h.results[h.cr4de_mrs].TI : null,
+                  }))
+                  .sort((a, b) => {
+                    if (!sortField) return 0;
+
+                    if (a[sortField as keyof SmallRisk] === null) {
+                      if (sortDir === "ASC") return -1;
+                      return 1;
+                    }
+
+                    if (b[sortField as keyof SmallRisk] === null) {
+                      if (sortDir === "ASC") return 1;
+                      return -1;
+                    }
+
+                    // Determine if the array contains numbers or strings
+                    const isNumeric = typeof a[sortField as keyof SmallRisk] === "number";
+
+                    // Sort the array using appropriate comparison
+                    if (isNumeric) {
+                      if (sortDir === "ASC")
+                        return (
+                          (a[sortField as keyof SmallRisk] as unknown as number) -
+                          (b[sortField as keyof SmallRisk] as unknown as number)
+                        );
+                      return (
+                        (b[sortField as keyof SmallRisk] as unknown as number) -
+                        (a[sortField as keyof SmallRisk] as unknown as number)
+                      );
+                    } else {
+                      if (sortDir === "ASC")
+                        return (a[sortField as keyof SmallRisk] as string).localeCompare(
+                          b[sortField as keyof SmallRisk] as string
+                        );
+                      return (b[sortField as keyof SmallRisk] as string).localeCompare(
+                        a[sortField as keyof SmallRisk] as string
+                      );
+                    }
+                  })
+                  .map((h) => (
+                    <TableRow key={h.cr4de_riskfilesid} hover onClick={() => navigate(`/risks/${h.cr4de_riskfilesid}`)}>
+                      <TableCell sx={{ pr: 4 }}>{h.cr4de_hazard_id}</TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap" }}>
+                        {t(`risk.${h.cr4de_hazard_id}.name`, h.cr4de_title)}
+                      </TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}>
+                        <Box sx={{ width: 30, height: 30 }}>
+                          <CategoryIcon category={h.cr4de_risk_category} />
+                        </Box>
+                      </TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}></TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}>
+                        {h.cr4de_mrs ? (
+                          <Button
+                            variant="outlined"
+                            sx={{
+                              color: SCENARIO_PARAMS[h.cr4de_mrs].color,
+                              borderColor: SCENARIO_PARAMS[h.cr4de_mrs].color,
+                              borderRadius: "50%",
+                              backgroundColor: `${SCENARIO_PARAMS[h.cr4de_mrs].color}20`,
+                              width: 30,
+                              minWidth: 30,
+                              height: 30,
+                              pointerEvents: "none",
+                            }}
+                          >
+                            {h.cr4de_mrs[0].toUpperCase()}
+                          </Button>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}>
+                        {h.results && h.cr4de_mrs ? (
+                          <LinearProgress variant="determinate" value={h.results[h.cr4de_mrs].TP * 20} />
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}>
+                        {h.results && h.cr4de_mrs ? (
+                          <LinearProgress variant="determinate" value={h.results[h.cr4de_mrs].TI * 20} />
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
         </TableContainer>

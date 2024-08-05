@@ -48,6 +48,12 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
                   <ListItemText primary={t("sideDrawer.hazardCatalogue", "Hazard Catalogue")} />
                 </ListItemButton>
               </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/risks/matrix" onClick={onClose}>
+                  <ListItemIcon></ListItemIcon>
+                  <ListItemText primary={t("sideDrawer.riskMatrix", "Risk Matrix")} />
+                </ListItemButton>
+              </ListItem>
               {user.roles.expert && (
                 <ListItem disablePadding>
                   <ListItemButton component={Link} to="/overview" onClick={onClose}>

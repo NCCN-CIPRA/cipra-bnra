@@ -1,13 +1,12 @@
-import { Layer, Rectangle, ResponsiveContainer, Sankey, TooltipProps } from "recharts";
-import { Box, Card, CardContent, Typography, Tooltip, Stack } from "@mui/material";
+import { Layer, Rectangle, ResponsiveContainer, Sankey } from "recharts";
+import { Box, Typography, Tooltip } from "@mui/material";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { useNavigate } from "react-router-dom";
-import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import { SCENARIOS, getScenarioSuffix } from "../../functions/scenarios";
-import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
-import { getMoneyString } from "../../functions/Impact";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { SCENARIOS, getCascadeParameter, getScenarioParameter, getScenarioSuffix } from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
+import { Cascades } from "../../pages/BaseRisksPage";
+import { useTranslation } from "react-i18next";
 
 const baseY = 50;
 
@@ -25,6 +24,7 @@ const ISankeyNode = ({
   scenarioSuffix,
   onClick,
 }: any) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const scenarioLetter = scenarioSuffix[1];
 
@@ -47,7 +47,7 @@ const ISankeyNode = ({
           stroke="#333"
           transform="rotate(270)"
         >
-          Total Impact: {`${getMoneyString(totalImpact)} / event`}
+          {`${t("Total Impact")}: ${round(totalImpact, 2)} / 5`}
         </text>
       </Layer>
     );
@@ -69,25 +69,25 @@ const ISankeyNode = ({
 
             if (onClick) return onClick(payload.id);
 
-            navigate(`/reporting/${payload.id}`);
+            navigate(`/risks/${payload.id}/analysis`);
           }}
         />
+        <Tooltip
+          title={
+            <Box sx={{}}>
+              {payload.cascade && (
+                <>
+                  <Typography variant="subtitle1" color="inherit">
+                    {payload.name}
+                  </Typography>
 
-        {showComponents ? (
-          <Tooltip
-            title={
-              <Box sx={{}}>
-                {payload.cascade && (
-                  <>
-                    <Typography color="inherit">{payload.name}</Typography>
+                  <Typography variant="body1" sx={{ mt: 1 }}>
+                    {t("analysis.effect.explained", {
+                      percentage: round((100 * payload.i) / totalImpact, 2),
+                    })}
+                  </Typography>
 
-                    <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                      {round((100 * payload.cascade[`ii_${scenarioLetter}`]) / totalImpact, 2)}% of total impact
-                    </Typography>
-
-                    {showComponents && (
-                      <>
-                        <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                  {/* <Typography variant="subtitle1" sx={{ mt: 1 }}>
                           II({scenarioLetter}&rarr;all): {getMoneyString(payload.cascade[`ii_${scenarioLetter}`])}
                         </Typography>
 
@@ -137,59 +137,53 @@ const ISankeyNode = ({
                                 payload.cascade[`${scenarioLetter}2e`])
                           ) / 100}
                           %
-                        </Typography>
-                      </>
-                    )}
-                  </>
-                )}
-                {payload.hidden && (
-                  <>
-                    <Typography color="inherit">Other effects:</Typography>
+                        </Typography> */}
+                </>
+              )}
+              {payload.hidden && (
+                <>
+                  <Typography variant="subtitle1" color="inherit">
+                    {t("Other effects")}:
+                  </Typography>
 
-                    {payload.hidden.map((h: any) =>
-                      h.cascade ? (
-                        <Typography key={h.name} variant="subtitle1" sx={{ mt: 1 }}>
-                          {h.name} II({scenarioLetter}&rarr;all): {getMoneyString(h.i)}
-                        </Typography>
-                      ) : (
-                        <Typography key={h.name} variant="subtitle1" sx={{ mt: 1 }}>
-                          {h.name} DI({scenarioLetter}): {getMoneyString(h.i)}
-                        </Typography>
-                      )
-                    )}
-                  </>
-                )}
-                {!payload.cascade && !payload.hidden && (
-                  <>
-                    <Typography color="inherit">Direct Impact:</Typography>
+                  {payload.hidden.map((h: any) =>
+                    h.cascade ? (
+                      <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
+                        <b>{h.name}:</b>{" "}
+                        {t("analysis.effect.other.explained", {
+                          percentage: round((100 * h.i) / totalImpact, 2),
+                        })}
+                      </Typography>
+                    ) : (
+                      <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
+                        <b>{t("2A.dp.title", "Direct Impact")}</b>
+                        {": "}
+                        {t("analysis.effect.other.explained", {
+                          percentage: round((100 * h.i) / totalImpact, 2),
+                        })}
+                      </Typography>
+                    )
+                  )}
+                </>
+              )}
+              {!payload.cascade && !payload.hidden && (
+                <>
+                  <Typography variant="subtitle1" color="inherit">
+                    {payload.name}
+                  </Typography>
 
-                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                      DI({scenarioLetter}): {getMoneyString(payload.i)}
-                    </Typography>
-                  </>
-                )}
-              </Box>
-            }
-          >
-            <text
-              textAnchor="end"
-              x={x - 6}
-              y={y + height / 2 + 4}
-              fontSize="14"
-              stroke="#333"
-              cursor="pointer"
-              onClick={() => {
-                if (!payload.id) return;
-
-                if (onClick) return onClick(payload.id);
-
-                navigate(`/risks/${payload.id}/analysis`);
-              }}
-            >
-              {payload.name}
-            </text>
-          </Tooltip>
-        ) : (
+                  <Typography variant="body1" sx={{ mt: 1 }}>
+                    <b>{t("2A.dp.title", "Direct Impact")}</b>
+                    {": "}
+                    {t("analysis.di.explained", {
+                      percentage: round((100 * payload.i) / totalImpact, 2),
+                    })}
+                  </Typography>
+                </>
+              )}
+            </Box>
+          }
+        >
           <text
             textAnchor="end"
             x={x - 6}
@@ -202,15 +196,12 @@ const ISankeyNode = ({
 
               if (onClick) return onClick(payload.id);
 
-              navigate(`/risk/${payload.id}/analysis`);
+              navigate(`/risks/${payload.id}/analysis`);
             }}
           >
             {payload.name}
           </text>
-        )}
-        {/* <text textAnchor="end" x={x - 6} y={y + height / 2 + 18} fontSize="12" stroke="#333" strokeOpacity="0.5">
-          {`${Math.round((100 * payload.value) / totalImpact)}%`}
-        </text> */}
+        </Tooltip>
       </Layer>
     );
   }
@@ -250,7 +241,7 @@ const ISankeyLink = (props: any) => {
 
 export default function ImpactSankey({
   riskFile = null,
-  calculation,
+  cascades = null,
   maxEffects = null,
   minEffectPortion = null,
   shownEffectPortion = null,
@@ -259,7 +250,7 @@ export default function ImpactSankey({
   onClick = null,
 }: {
   riskFile?: DVRiskFile | null;
-  calculation: RiskCalculation | null;
+  cascades?: Cascades | null;
   maxEffects?: number | null;
   minEffectPortion?: number | null;
   shownEffectPortion?: number | null;
@@ -267,20 +258,21 @@ export default function ImpactSankey({
   debug?: boolean;
   onClick?: ((id: string) => void) | null;
 }) {
-  if (!calculation) return null;
+  const { t } = useTranslation();
+  if (!riskFile || !cascades) return null;
 
   let scenarioSuffix: string = getScenarioSuffix(scenario);
 
   const effects = [
     {
-      name: "Direct Impact",
-      i: calculation[`di${scenarioSuffix}` as keyof RiskCalculation] as number,
+      name: t("Direct Impact"),
+      i: getScenarioParameter(riskFile, "DI", scenario) || 0,
     },
-    ...calculation.effects.map((c) => ({
-      id: c.effect.riskId,
-      name: c.effect.riskTitle,
-      i: c[`ii${scenarioSuffix}` as keyof CascadeCalculation] as number,
-      cascade: c,
+    ...cascades.effects.map((e) => ({
+      id: e.cr4de_effect_hazard.cr4de_riskfilesid,
+      name: t(`risk.${e.cr4de_effect_hazard.cr4de_hazard_id}.name`, e.cr4de_effect_hazard.cr4de_title),
+      i: getCascadeParameter(e, scenario, "II") || 0,
+      cascade: e,
     })),
   ];
 
@@ -309,10 +301,13 @@ export default function ImpactSankey({
     }
   }
 
-  const nodes: any[] = [{ name: calculation.riskTitle }, ...effects.filter((c) => c.i >= minI)];
+  const nodes: any[] = [
+    { name: t(`risk.${riskFile.cr4de_hazard_id}.name`, riskFile.cr4de_title) },
+    ...effects.filter((c) => c.i >= minI),
+  ];
   if (minI >= 0)
     nodes.push({
-      name: "Other",
+      name: t("Other"),
       hidden: effects.filter((e: any, i: number) => e.i < minI),
     });
 
@@ -327,12 +322,8 @@ export default function ImpactSankey({
     links.push({
       source: 0,
       target: nodes.length - 1,
-      value: calculation.effects
-        .filter((e: any, i: number) => (e[`ii${scenarioSuffix}` as keyof CascadeCalculation] as number) < minI)
-        .reduce((tot, e) => tot + (e[`ii${scenarioSuffix}` as keyof CascadeCalculation] as number), 0.000000001),
-      hidden: calculation.effects.filter(
-        (e: any, i: number) => (e[`ii${scenarioSuffix}` as keyof CascadeCalculation] as number) < minI
-      ),
+      value: effects.filter((e: any, i: number) => e.i < minI).reduce((tot, e) => tot + e.i, 0.000000001),
+      hidden: effects.filter((e: any, i: number) => e.i < minI),
     });
 
   const data = {
@@ -342,10 +333,10 @@ export default function ImpactSankey({
 
   return (
     <>
-      <Box sx={{ width: "100%", mb: 2, textAlign: "right" }}>
-        <Typography variant="h6">
+      <Box sx={{ width: "100%", height: 30, mb: 2, textAlign: "right" }}>
+        {/* <Typography variant="h6">
           {riskFile?.cr4de_risk_type === RISK_TYPE.MANMADE ? "Most Impactful Actions" : "Impact Breakdown"}
-        </Typography>
+        </Typography> */}
       </Box>
       <ResponsiveContainer width="100%" height="100%">
         <Sankey
@@ -353,7 +344,7 @@ export default function ImpactSankey({
           node={
             <ISankeyNode
               onClick={onClick}
-              totalImpact={calculation[`ti${scenarioSuffix}` as keyof RiskCalculation]}
+              totalImpact={getScenarioParameter(riskFile, "TI", scenario) || 0}
               totalNodes={data.nodes.length}
               showComponents={debug}
               scenarioSuffix={scenarioSuffix}

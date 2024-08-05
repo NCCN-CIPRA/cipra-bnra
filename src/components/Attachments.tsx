@@ -411,7 +411,7 @@ export default function Attachments({
                 ))
             ) : (
               <TableRow>
-                <TableCell sx={{ textAlign: "center" }} colSpan={3}>
+                <TableCell sx={{ textAlign: "center" }} colSpan={4}>
                   <Trans i18nKey="source.list.noSources">No sources attached</Trans>
                 </TableCell>
               </TableRow>

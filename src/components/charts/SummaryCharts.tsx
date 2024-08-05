@@ -3,7 +3,7 @@ import ProbabilityBars from "./ProbabilityBars";
 import { Cell, Pie, PieChart } from "recharts";
 import getScaleString from "../../functions/getScaleString";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, getScenarioSuffix } from "../../functions/scenarios";
+import { SCENARIOS, getScenarioParameter, getScenarioSuffix } from "../../functions/scenarios";
 import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
 import { IMPACT_CATEGORY, getCategoryImpactRelativeScale } from "../../functions/Impact";
 import { IMPACT_COLOR_SCALES } from "../../functions/getImpactColor";
@@ -70,12 +70,12 @@ const needle = (value: number, data: any[], cx: number, cy: number, iR: number, 
 
 export default function SummaryCharts({
   riskFile,
-  calculation,
   scenario,
+  manmade = false,
 }: {
   riskFile: DVRiskFile;
-  calculation: RiskCalculation;
   scenario: SCENARIOS;
+  manmade?: boolean;
 }) {
   const { t } = useTranslation();
   const { user } = useOutletContext<AuthPageContext>();
@@ -101,18 +101,18 @@ export default function SummaryCharts({
   }, [getDivJpeg]);
 
   const scenarioSuffix = getScenarioSuffix(scenario);
+  console.log(riskFile);
+  const tp = getScenarioParameter(riskFile, "TP", scenario) || 0;
 
-  const tp = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
-
-  const H = getCategoryImpactRelativeScale(calculation, "H", scenarioSuffix);
-  const S = getCategoryImpactRelativeScale(calculation, "S", scenarioSuffix);
-  const E = getCategoryImpactRelativeScale(calculation, "E", scenarioSuffix);
-  const F = getCategoryImpactRelativeScale(calculation, "F", scenarioSuffix);
+  const H = getScenarioParameter(riskFile, "TI_H", scenario) || 0;
+  const S = getScenarioParameter(riskFile, "TI_S", scenario) || 0;
+  const E = getScenarioParameter(riskFile, "TI_E", scenario) || 0;
+  const F = getScenarioParameter(riskFile, "TI_F", scenario) || 0;
 
   return (
     <Box sx={{ position: "relative" }}>
       <Box ref={ref} sx={{ p: 2, pb: 1, border: "1px solid #ddd", display: "inline-block" }}>
-        <ProbabilityBars tp={tp} chartWidth={pieWidth} />
+        <ProbabilityBars tp={tp} chartWidth={pieWidth} manmade={manmade} />
         <Stack direction="column" spacing={4} sx={{ mb: 4, width: pieWidth }}>
           <Stack direction="column">
             <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>

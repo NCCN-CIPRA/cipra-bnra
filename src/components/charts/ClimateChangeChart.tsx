@@ -1,79 +1,42 @@
-import { useNavigate } from "react-router-dom";
-import {
-  ScatterChart,
-  Scatter,
-  Cell,
-  XAxis,
-  YAxis,
-  ZAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  TooltipProps,
-  BarChart,
-  Legend,
-  Bar,
-} from "recharts";
-import { scaleLog } from "d3-scale";
-import { getImpactScale } from "../../functions/Impact";
-import { NameType } from "recharts/types/component/DefaultTooltipContent";
-import { Typography } from "@mui/material";
-import getCategoryColor from "../../functions/getCategoryColor";
+import { XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Legend, Bar } from "recharts";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import {
-  CascadeCalculation,
-  DVAnalysisRun,
-  RiskAnalysisResults,
-  RiskCalculation,
-} from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, SCENARIO_PARAMS, SCENARIO_SUFFIX } from "../../functions/scenarios";
-import { hexToRGB } from "../../functions/colors";
+import { SCENARIOS, SCENARIO_PARAMS, getCascadeParameter, getScenarioParameter } from "../../functions/scenarios";
 import { useMemo } from "react";
-import {
-  Cause as Cause2023,
-  getPartialProbabilityRelativeScale,
-  getTotalProbabilityRelativeScale,
-} from "../../functions/Probability";
-import { getPercentageProbability, getYearlyProbability } from "../../functions/Probability";
 import round from "../../functions/roundNumberString";
-
-type Cause2050 = Cause2023 & {
-  p2050: number;
-};
-
-const getTP50 = (calcs: RiskCalculation, scenarioSuffix: SCENARIO_SUFFIX) => {
-  return calcs[`tp50${scenarioSuffix}`] || 0.0001;
-};
+import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
+import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 
 export default function ClimateChangeChart({
-  calculation,
-  scenarioSuffix,
+  riskFile,
+  causes,
+  scenario,
 }: {
-  calculation: RiskCalculation;
-  scenarioSuffix: SCENARIO_SUFFIX;
+  riskFile: DVRiskFile;
+  causes: DVRiskCascade<SmallRisk, unknown>[];
+  scenario: SCENARIOS;
 }) {
   const data = useMemo(() => {
-    const causes = [
+    const enhCauses = [
       {
         name: "No underlying cause",
-        p_c: getPartialProbabilityRelativeScale(calculation[`dp_c`], calculation, "_c"),
-        p2050_c: getPartialProbabilityRelativeScale(calculation[`dp50_c`], calculation, "_c", true),
-        p_m: getPartialProbabilityRelativeScale(calculation[`dp_m`], calculation, "_m"),
-        p2050_m: getPartialProbabilityRelativeScale(calculation[`dp50_m`], calculation, "_m", true),
-        p_e: getPartialProbabilityRelativeScale(calculation[`dp_e`], calculation, "_e"),
-        p2050_e: getPartialProbabilityRelativeScale(calculation[`dp50_e`], calculation, "_e", true),
+        p_c: getScenarioParameter(riskFile, "DP", SCENARIOS.CONSIDERABLE) || 0.000001,
+        p2050_c: getScenarioParameter(riskFile, "DP50", SCENARIOS.CONSIDERABLE) || 0.000001,
+        p_m: getScenarioParameter(riskFile, "DP", SCENARIOS.MAJOR) || 0.000001,
+        p2050_m: getScenarioParameter(riskFile, "DP50", SCENARIOS.MAJOR) || 0.000001,
+        p_e: getScenarioParameter(riskFile, "DP", SCENARIOS.EXTREME) || 0.000001,
+        p2050_e: getScenarioParameter(riskFile, "DP50", SCENARIOS.EXTREME) || 0.000001,
       },
-      ...(calculation.causes
-        .filter((c) => c[`ip50_c`] !== 0)
+      ...(causes
+        .filter((c) => getCascadeParameter(c, SCENARIOS.CONSIDERABLE, "IP50") !== 0)
         .map((c) => {
           return {
-            name: c.cause.riskTitle,
-            p_c: getPartialProbabilityRelativeScale(c[`ip_c`], calculation, "_c"),
-            p2050_c: getPartialProbabilityRelativeScale(c[`ip50_c`], calculation, "_c", true),
-            p_m: getPartialProbabilityRelativeScale(c[`ip_m`], calculation, "_m"),
-            p2050_m: getPartialProbabilityRelativeScale(c[`ip50_m`], calculation, "_m", true),
-            p_e: getPartialProbabilityRelativeScale(c[`ip_e`], calculation, "_e"),
-            p2050_e: getPartialProbabilityRelativeScale(c[`ip50_e`], calculation, "_e", true),
+            name: c.cr4de_cause_hazard.cr4de_title,
+            p_c: getCascadeParameter(c, SCENARIOS.CONSIDERABLE, "IP") || 0.000001,
+            p2050_c: getCascadeParameter(c, SCENARIOS.CONSIDERABLE, "IP50") || 0.000001,
+            p_m: getCascadeParameter(c, SCENARIOS.MAJOR, "IP") || 0.000001,
+            p2050_m: getCascadeParameter(c, SCENARIOS.MAJOR, "IP50") || 0.000001,
+            p_e: getCascadeParameter(c, SCENARIOS.EXTREME, "IP") || 0.000001,
+            p2050_e: getCascadeParameter(c, SCENARIOS.EXTREME, "IP50") || 0.000001,
           };
         }) || []),
     ]
@@ -83,14 +46,14 @@ export default function ClimateChangeChart({
           (Math.abs(a.p2050_c - a.p_c) + Math.abs(a.p2050_m - a.p_m) + Math.abs(a.p2050_e - a.p_e)) / 3
       )
       .slice(0, 5);
-    console.log(causes);
-    const tp50_c = getTotalProbabilityRelativeScale(calculation, "_c", true);
-    const tp50_m = getTotalProbabilityRelativeScale(calculation, "_m", true);
-    const tp50_e = getTotalProbabilityRelativeScale(calculation, "_e", true);
 
-    const tp_c = getTotalProbabilityRelativeScale(calculation, "_c");
-    const tp_m = getTotalProbabilityRelativeScale(calculation, "_m");
-    const tp_e = getTotalProbabilityRelativeScale(calculation, "_e");
+    const tp50_c = getScenarioParameter(riskFile, "TP50", SCENARIOS.CONSIDERABLE) || 0.000001;
+    const tp50_m = getScenarioParameter(riskFile, "TP50", SCENARIOS.MAJOR) || 0.000001;
+    const tp50_e = getScenarioParameter(riskFile, "TP50", SCENARIOS.EXTREME) || 0.000001;
+
+    const tp_c = getScenarioParameter(riskFile, "TP", SCENARIOS.CONSIDERABLE) || 0.000001;
+    const tp_m = getScenarioParameter(riskFile, "TP", SCENARIOS.MAJOR) || 0.000001;
+    const tp_e = getScenarioParameter(riskFile, "TP", SCENARIOS.EXTREME) || 0.000001;
 
     return [
       {
@@ -105,7 +68,7 @@ export default function ClimateChangeChart({
         P2050_e_inc: tp50_e >= tp_e ? tp50_e - tp_e : 0,
         P2050_e_dec: tp50_e >= tp_e ? 0 : tp_e - tp50_e,
       },
-      ...causes
+      ...enhCauses
         // .reduce(
         //   ([cumulCauses, pCumul], c, i) => {
         //     if (pCumul / tp50 > 0.8 && i > 2) return [cumulCauses, pCumul] as [Cause2050[], number];
@@ -127,8 +90,8 @@ export default function ClimateChangeChart({
           P2050_e_dec: cause.p2050_e >= cause.p_e ? 0 : cause.p_e - cause.p2050_e,
         })),
     ];
-  }, [calculation, scenarioSuffix]);
-  console.log(calculation);
+  }, [riskFile, causes, scenario]);
+
   return (
     <BarChart
       width={750}

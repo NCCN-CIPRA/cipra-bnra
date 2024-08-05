@@ -8,6 +8,9 @@ export interface DVRiskCascade<CauseType = unknown, EffectType = unknown> {
 
   cr4de_reason: string;
 
+  cr4de_result_snapshot: string | null;
+  results?: CASCADE_RESULT_SNAPSHOT | null;
+
   cr4de_c2c: string | null;
   cr4de_c2m: string | null;
   cr4de_c2e: string | null;
@@ -68,3 +71,73 @@ export const RISK_CASCADE_QUANTI_FIELDS: (keyof DVRiskCascade)[] = [
   "cr4de_e2m_cause",
   "cr4de_e2e_cause",
 ];
+
+export type CASCADE_RESULT_SNAPSHOT = {
+  IP_All2C: number | null;
+  IP_All2M: number | null;
+  IP_All2E: number | null;
+
+  IP50_All2C: number | null;
+  IP50_All2M: number | null;
+  IP50_All2E: number | null;
+
+  CP_AVG_C2All: number | null;
+  CP_AVG_M2All: number | null;
+  CP_AVG_E2All: number | null;
+
+  II_C2All: number | null;
+  II_M2All: number | null;
+  II_E2All: number | null;
+
+  II_C2All_H: number | null;
+  II_M2All_H: number | null;
+  II_E2All_H: number | null;
+  II_C2All_Ha: number | null;
+  II_M2All_Ha: number | null;
+  II_E2All_Ha: number | null;
+  II_C2All_Hb: number | null;
+  II_M2All_Hb: number | null;
+  II_E2All_Hb: number | null;
+  II_C2All_Hc: number | null;
+  II_M2All_Hc: number | null;
+  II_E2All_Hc: number | null;
+
+  II_C2All_S: number | null;
+  II_M2All_S: number | null;
+  II_E2All_S: number | null;
+  II_C2All_Sa: number | null;
+  II_M2All_Sa: number | null;
+  II_E2All_Sa: number | null;
+  II_C2All_Sb: number | null;
+  II_M2All_Sb: number | null;
+  II_E2All_Sb: number | null;
+  II_C2All_Sc: number | null;
+  II_M2All_Sc: number | null;
+  II_E2All_Sc: number | null;
+  II_C2All_Sd: number | null;
+  II_M2All_Sd: number | null;
+  II_E2All_Sd: number | null;
+
+  II_C2All_E: number | null;
+  II_M2All_E: number | null;
+  II_E2All_E: number | null;
+  II_C2All_Ea: number | null;
+  II_M2All_Ea: number | null;
+  II_E2All_Ea: number | null;
+
+  II_C2All_F: number | null;
+  II_M2All_F: number | null;
+  II_E2All_F: number | null;
+  II_C2All_Fa: number | null;
+  II_M2All_Fa: number | null;
+  II_E2All_Fa: number | null;
+  II_C2All_Fb: number | null;
+  II_M2All_Fb: number | null;
+  II_E2All_Fb: number | null;
+};
+
+export const getCascadeResultSnapshot = (cascade: DVRiskCascade): CASCADE_RESULT_SNAPSHOT | null => {
+  if (cascade.cr4de_result_snapshot === null || cascade.cr4de_result_snapshot === "") return null;
+
+  return JSON.parse(cascade.cr4de_result_snapshot);
+};

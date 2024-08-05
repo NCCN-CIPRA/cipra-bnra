@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Box, Typography, Paper, Divider, Container } from "@mui/material";
 import TextInputBox from "../../../components/TextInputBox";
 import { DVRiskFile, RiskFileEditableFields } from "../../../types/dataverse/DVRiskFile";
@@ -16,10 +15,7 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import Attachments from "../../../components/Attachments";
 import { DVValidation } from "../../../types/dataverse/DVValidation";
-import { DVContact } from "../../../types/dataverse/DVContact";
 import CascadeSections from "./CascadeSections";
-import useProcess from "../../../hooks/useProcess";
-import { DVFeedback } from "../../../types/dataverse/DVFeedback";
 import LoadingTab from "../LoadingTab";
 
 export interface ProcessedRiskFile extends DVRiskFile {

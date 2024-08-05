@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ScatterChart,
   Scatter,
@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import SaveIcon from "@mui/icons-material/Download";
 import {
   Typography,
   Accordion,
@@ -31,14 +32,26 @@ import {
   Box,
   Input,
   Button,
+  IconButton,
 } from "@mui/material";
-import { getMoneyString, getTotalImpactRelativeScale } from "../../functions/Impact";
-import { SCENARIOS, SCENARIO_PARAMS, SCENARIO_SUFFIX } from "../../functions/scenarios";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { getMoneyString, getTotalImpactRelativeScale, IMPACT_CATEGORY } from "../../functions/Impact";
+import {
+  SCENARIOS,
+  SCENARIO_PARAMS,
+  SCENARIO_SUFFIX,
+  getScenarioParameter,
+  getScenarioSuffix,
+} from "../../functions/scenarios";
+import { CATEGORY_NAMES, DVRiskFile, RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
 import { scaleLog, select } from "d3";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { getTotalProbabilityRelativeScale, getYearlyProbability } from "../../functions/Probability";
 import { hexToRGB } from "../../functions/colors";
+import { capFirst } from "../../functions/capFirst";
+import { useGenerateImage } from "recharts-to-png";
+import FileSaver from "file-saver";
+import { useTranslation } from "react-i18next";
+import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 
 interface MatrixRisk {
   riskId: string;
@@ -49,15 +62,17 @@ interface MatrixRisk {
   y: number;
   tr: number;
   scenario: SCENARIOS;
-  keyRisk: boolean;
   code: string;
-  category: string;
-  worstCase: boolean;
+  category: RISK_CATEGORY;
+  mrs: boolean;
 }
 
-const CATEGORIES: {
-  [key: string]: { color: string; shape: "circle" | "cross" | "diamond" | "square" | "star" | "triangle" | "wye" };
-} = {
+const CATEGORIES: Partial<{
+  [key in RISK_CATEGORY]: {
+    color: string;
+    shape: "circle" | "cross" | "diamond" | "square" | "star" | "triangle" | "wye";
+  };
+}> = {
   Cyber: {
     shape: "square",
     color: getCategoryColor("Cyber"),
@@ -82,15 +97,6 @@ const CATEGORIES: {
     shape: "circle",
     color: getCategoryColor("Transversal"),
   },
-};
-
-const CATEGORY_NAMES: { [key: string]: string } = {
-  Cyber: "Cyber Risks",
-  EcoTech: "Economical and Technological Risks",
-  Health: "Health Risks",
-  "Man-made": "Man-made Risks and Malicious Actors",
-  Nature: "Natural Risks",
-  Transversal: "Societal Risks",
 };
 
 const ES_RISKS = [
@@ -133,53 +139,67 @@ const getScaleString = (value: number) => {
   return "Very High";
 };
 
-const defaultFields = (c: RiskCalculation) =>
+const defaultFields = (c: SmallRisk) =>
   ({
-    riskId: c.riskId,
-    title: c.riskTitle,
-    keyRisk: Boolean(c.keyRisk),
-    executiveSummary: ES_RISKS.indexOf(c.code || "") >= 0,
-    code: c.code,
-    category: c.category,
+    riskId: c.cr4de_riskfilesid,
+    title: c.cr4de_title,
+    executiveSummary: ES_RISKS.indexOf(c.cr4de_hazard_id || "") >= 0,
+    code: c.cr4de_hazard_id,
+    category: c.cr4de_risk_category,
   } as Partial<MatrixRisk>);
 
 const pScale = scaleLog().base(100);
 
 export default function RiskMatrix({
-  calculations,
+  riskFiles,
   selectedNodeId = null,
   setSelectedNodeId,
+
+  scenario = "MRS",
+  labels = false,
+  onlyES = false,
+  category = "All",
+  impact = "All",
+  categoryDisplay = "shapes",
+  scenarioDisplay = "colors",
 }: {
-  calculations: RiskCalculation[] | null;
+  riskFiles: SmallRisk[] | null;
   selectedNodeId?: string | null;
   setSelectedNodeId: (id: string | null) => void;
+
+  scenario?: "All" | "MRS" | SCENARIOS;
+  labels?: Boolean;
+  onlyES?: Boolean;
+  category?: "All" | RISK_CATEGORY;
+  impact?: "All" | IMPACT_CATEGORY;
+  categoryDisplay?: "shapes" | "colors" | "both" | "none";
+  scenarioDisplay?: "colors" | "shapes" | "none";
 }) {
+  const { t } = useTranslation();
   const [dots, setDots] = useState<MatrixRisk[] | null>(null);
-  const [worstCase, setWorstCase] = useState(true);
-  const [labels, setLabels] = useState(false);
-  const [es, setES] = useState(false);
-  const [scales, setScales] = useState<"absolute" | "classes">("classes");
-  const [nonKeyRisks, setNonKeyRisks] = useState<"show" | "fade" | "hide">("show");
-  const [categories, setCategories] = useState<"shapes" | "colors" | "both" | "none">("colors");
-  const [scenarios, setScenarios] = useState<"colors" | "shapes" | "none">("none");
+
+  // useCurrentPng usage (isLoading is optional)
+  const [getDivJpeg, { ref, isLoading }] = useGenerateImage({
+    type: "image/png",
+    quality: 1,
+    options: { scale: 4 } as any,
+  });
+
+  // Can also pass in options for html2canvas
+  // const [getPng, { ref }] = useCurrentPng({ backgroundColor: '#000' });
+
+  const handleDownload = useCallback(async () => {
+    const png = await getDivJpeg();
+
+    // Verify that png is not undefined
+    if (png) {
+      // Download with FileSaver
+      FileSaver.saveAs(png, `riskMatrix.png`);
+    }
+  }, [getDivJpeg]);
 
   const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
     if (active) {
-      if (scales === "absolute")
-        return (
-          <Stack sx={{ backgroundColor: "rgba(255,255,255,0.8)", border: "1px solid #eee", p: 1 }}>
-            <Typography variant="subtitle1">{payload?.[0].payload.title}</Typography>
-            <Typography variant="subtitle2">{`Total Probability: ${
-              Math.round((payload?.[1].value as number) * 100000) / 1000
-            }%`}</Typography>
-            <Typography variant="subtitle2">{`Total Impact: ${getMoneyString(
-              payload?.[0].value as number
-            )}`}</Typography>
-            <Typography variant="subtitle2">{`Total Risk: ${getMoneyString(
-              payload?.[0].payload.tr as number
-            )}`}</Typography>
-          </Stack>
-        );
       return (
         <Stack sx={{ backgroundColor: "rgba(255,255,255,0.8)", border: "1px solid #eee", p: 1 }}>
           <Typography variant="subtitle1">{payload?.[0].payload.title}</Typography>
@@ -200,11 +220,11 @@ export default function RiskMatrix({
   };
 
   const getColor = (entry: MatrixRisk, opacity: number = 1) => {
-    if (scenarios === "colors") {
+    if (scenarioDisplay === "colors") {
       return hexToRGB(SCENARIO_PARAMS[entry.scenario].color, opacity);
     }
-    if (categories === "colors" || categories === "both") {
-      return hexToRGB(CATEGORIES[entry.category].color, opacity);
+    if (categoryDisplay === "colors" || categoryDisplay === "both") {
+      return hexToRGB(CATEGORIES[entry.category]?.color || `rgba(150,150,150,${opacity})`, opacity);
     }
 
     return `rgba(150,150,150,${opacity})`;
@@ -240,73 +260,54 @@ export default function RiskMatrix({
   };
 
   useMemo(() => {
-    if (!calculations) return;
+    if (!riskFiles) return;
 
-    const d = calculations.reduce((split, c) => {
-      const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
+    const allDots = riskFiles
+      .filter((rf) => rf.cr4de_risk_category !== RISK_CATEGORY.EMERGING)
+      .reduce((d, rf) => {
+        const tmp = [...d];
 
-      if ((c.tp_c === 0 && c.tp_m === 0 && c.tp_e === 0) || (c.ti_c === 0 && c.ti_m === 0 && c.ti_e === 0))
-        return split;
+        [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].forEach((s) => {
+          const tp = getScenarioParameter(rf, "TP", s);
+          const ti = impact === "All" ? getScenarioParameter(rf, "TI", s) : getScenarioParameter(rf, `TI_${impact}`, s);
 
-      const wcIndex = rs.reduce((iMax, x, i, arr) => (x > arr[iMax] ? i : iMax), 0);
+          if (tp !== null && ti !== null) {
+            tmp.push({
+              id: `${rf.cr4de_riskfilesid}${getScenarioSuffix(s)}`,
+              fullTitle: `${capFirst(s)} ${rf.cr4de_title}`,
+              scenario: s,
+              tp: tp,
+              ti: ti,
+              tr: tp * ti,
+              ...defaultFields(rf),
+              mrs: rf.cr4de_mrs === s,
+            } as MatrixRisk);
+          }
+        });
 
-      return [
-        ...split,
-        ...(c.tp_c === 0 || c.ti_c === 0
-          ? []
-          : [
-              {
-                id: `${c.riskId}_c`,
-                fullTitle: `Considerable ${c.riskTitle}`,
-                scenario: SCENARIOS.CONSIDERABLE,
-                ...defaultFields(c),
-                ...recalcPI(c, "_c"),
-                worstCase: wcIndex === 0,
-              } as MatrixRisk,
-            ]),
-        ...(c.tp_m === 0 || c.ti_m === 0
-          ? []
-          : [
-              {
-                id: `${c.riskId}_m`,
-                fullTitle: `Major ${c.riskTitle}`,
-                ...recalcPI(c, "_m"),
-                scenario: SCENARIOS.MAJOR,
-                ...defaultFields(c),
-                worstCase: wcIndex === 0,
-              } as MatrixRisk,
-            ]),
-        ...(c.tp_e === 0 || c.ti_e === 0
-          ? []
-          : [
-              {
-                riskId: c.riskId,
-                id: `${c.riskId}_e`,
-                fullTitle: `Extreme ${c.riskTitle}`,
-                ...recalcPI(c, "_e"),
-                scenario: SCENARIOS.EXTREME,
-                ...defaultFields(c),
-                worstCase: wcIndex === 0,
-              } as MatrixRisk,
-            ]),
-      ];
-    }, [] as MatrixRisk[]);
+        return tmp;
+      }, [] as MatrixRisk[]);
 
-    d.sort((a, b) => (a.id > b.id ? -1 : 1));
+    allDots.sort((a, b) => (a.id > b.id ? -1 : 1));
 
-    setDots(d);
-  }, [calculations]);
+    setDots(allDots);
+  }, [riskFiles, impact]);
+
+  const categoryLegend = categoryDisplay !== "none" && category === "All";
+  const scenarioLegend = scenarioDisplay === "colors";
+
+  const legendMargin = 0 + (categoryLegend ? 60 : 0) + (scenarioLegend ? 30 : 0);
 
   return (
-    <Stack direction="row" sx={{ width: "100%", height: "100%" }}>
-      <Box sx={{ flex: 1, height: "100%" }}>
+    <Stack direction="row" sx={{ width: "100%", height: "100%", position: "relative" }}>
+      <Box ref={ref} sx={{ flex: 1, height: "100%", p: 2 }}>
         <ResponsiveContainer width="100%">
           <ScatterChart
             margin={{
               top: 20,
               right: 20,
-              bottom: 20,
-              left: 30,
+              bottom: 30 + legendMargin,
+              left: 60,
             }}
             onClick={() => setSelectedNodeId(null)}
           >
@@ -318,114 +319,46 @@ export default function RiskMatrix({
               </linearGradient>
             </defs>
             <CartesianGrid fill="url(#colorUv)" />
-            {scales === "absolute" ? (
-              <>
-                <YAxis
-                  type="number"
-                  dataKey="tp"
-                  name="probability"
-                  unit="%"
-                  scale="linear"
-                  domain={[0, 1]}
-                  // tickCount={10}
-                  tickFormatter={(n) => `${Math.round(n * 100000) / 1000}`}
-                  ticks={[0.2, 0.4, 0.6, 0.8, 1]}
-                />
-                <XAxis
-                  type="number"
-                  dataKey="ti"
-                  name="impact"
-                  scale="log"
-                  domain={[50000000, 5000000000000]}
-                  tickFormatter={getMoneyString}
-                  ticks={[50000000, 500000000, 5000000000, 50000000000, 500000000000]}
-                />
-              </>
-            ) : (
-              <>
-                <YAxis
-                  type="number"
-                  dataKey="tp"
-                  name="probability"
-                  unit=""
-                  scale="linear"
-                  domain={[0, 5.5]}
-                  // tickCount={5}
-                  tickFormatter={(s, n) => getScaleString(s)}
-                  ticks={[1, 2, 3, 4, 5]}
-                  label={{
-                    offset: -25,
-                    value: scales === "classes" ? "Probability" : "Yearly Probability",
-                    angle: -90,
-                    position: "insideLeft",
-                  }}
-                />
-                <XAxis
-                  type="number"
-                  dataKey="ti"
-                  name="impact"
-                  domain={[0, 5.5]}
-                  // tickCount={6}
-                  // tickFormatter={(s, n) => `TI${n}`}
-                  // ticks={[160000000, 800000000, 4000000000, 20000000000, 100000000000, 500000000000]}
-                  tickFormatter={(s, n) => getScaleString(s)}
-                  ticks={[1, 2, 3, 4, 5]}
-                  label={{
-                    value: scales === "classes" ? "Impact" : "Impact of an event",
-                    position: "insideBottom",
-                    offset: -20,
 
-                    props: { fontWeight: "bold" },
-                  }}
-                />
-              </>
-            )}
+            <YAxis
+              type="number"
+              dataKey="tp"
+              name="probability"
+              unit=""
+              scale="linear"
+              domain={[0, 5.5]}
+              // tickCount={5}
+              tickFormatter={(s, n) => t(getScaleString(s))}
+              ticks={[1, 2, 3, 4, 5]}
+              label={{
+                offset: -45,
+                // value: scales === "classes" ? "Probability" : "Yearly Probability",
+                value: t("learning.probability.2.text.title", "Probability"),
+                angle: -90,
+                position: "insideLeft",
+              }}
+            />
+            <XAxis
+              type="number"
+              dataKey="ti"
+              name="impact"
+              domain={[0, 5.5]}
+              // tickCount={6}
+              // tickFormatter={(s, n) => `TI${n}`}
+              // ticks={[160000000, 800000000, 4000000000, 20000000000, 100000000000, 500000000000]}
+              tickFormatter={(s, n) => t(getScaleString(s))}
+              ticks={[1, 2, 3, 4, 5]}
+              label={{
+                // value: scales === "classes" ? "Impact" : "Impact of an event",
+                value: "Impact",
+                position: "insideBottom",
+                offset: -20,
+
+                props: { fontWeight: "bold" },
+              }}
+            />
             <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
-            <Scatter
-              data={dots || []}
-              fill="#8884d8"
-              // shape={categories === "shapes" || categories === "both" ? shape.shape : "circle"}
-            >
-              {/* {labels && <LabelList dataKey="code" position="insideTop" offset={15} fontSize={20} />} */}
-              {(dots || []).map((entry, index) => {
-                let opacity = 1;
-                if (selectedNodeId !== null) {
-                  if (selectedNodeId !== entry.riskId) opacity = opacity * 0.2;
-                }
-
-                if (nonKeyRisks !== "show" && !entry.keyRisk) {
-                  if (nonKeyRisks === "fade") {
-                    opacity = opacity * 0.2;
-                  } else {
-                    opacity = 0;
-                  }
-                }
-
-                if (worstCase && !entry.worstCase) {
-                  opacity = 0;
-                }
-
-                return (
-                  <Cell
-                    id={`cell-${entry.id}`}
-                    key={`cell-${entry.id}`}
-                    // fill={}
-                    stroke="rgba(150,150,150,0.4)"
-                    strokeWidth={1}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedNodeId(entry.riskId);
-                    }}
-                    style={{
-                      // opacity: entry.visible ? opacity : 0,
-                      fill: getColor(entry, opacity),
-                      transition: "all 1s ease",
-                    }}
-                  />
-                );
-              })}
-            </Scatter>
-            {/* {Object.entries(CATEGORIES).map(([CATEGORY, shape]) => {
+            {Object.entries(CATEGORIES).map(([CATEGORY, shape]) => {
               const catData = dots?.filter((d) => d.category === CATEGORY) || [];
 
               return (
@@ -434,28 +367,61 @@ export default function RiskMatrix({
                   name={`${CATEGORY} Risks`}
                   data={catData}
                   fill="#8884d8"
-                  shape={categories === "shapes" || categories === "both" ? shape.shape : "circle"}
+                  shape={categoryDisplay === "shapes" || categoryDisplay === "both" ? shape.shape : "circle"}
                 >
-                  {labels && <LabelList dataKey="code" position="insideTop" offset={15} fontSize={20} />}
+                  {labels && (category === "All" || category === CATEGORY) && (
+                    <LabelList dataKey="code" position="insideTop" offset={15} fontSize={20} />
+                  )}
                   {catData.map((entry, index) => {
                     let opacity = 1;
+                    let strokeOpacity = 0.4;
                     if (selectedNodeId !== null) {
                       if (selectedNodeId !== entry.riskId) opacity = opacity * 0.2;
                     }
-                    if (nonKeyRisks !== "show" && !entry.keyRisk) {
-                      if (nonKeyRisks === "fade") {
-                        opacity = opacity * 0.2;
+
+                    if (onlyES && ES_RISKS.indexOf(entry.code) < 0) {
+                      opacity = 0;
+                      strokeOpacity = 0;
+                    }
+
+                    if (scenario === "MRS") {
+                      if (!entry.mrs) {
+                        opacity = 0;
+                        strokeOpacity = 0;
+                      }
+                    } else if (scenario !== "All" && scenario !== entry.scenario) {
+                      opacity = 0;
+                      strokeOpacity = 0;
+                    }
+
+                    if (category !== "All" && entry.category !== category) {
+                      if (onlyES) {
+                        opacity *= 0.2;
+                        strokeOpacity *= 0.2;
                       } else {
                         opacity = 0;
+                        strokeOpacity = 0;
                       }
                     }
 
+                    // if (nonKeyRisks !== "show" && !entry.keyRisk) {
+                    //   if (nonKeyRisks === "fade") {
+                    //     opacity = opacity * 0.2;
+                    //   } else {
+                    //     opacity = 0;
+                    //   }
+                    // }
+
+                    // if (worstCase && !entry.worstCase) {
+                    //   opacity = 0;
+                    // }
+
                     return (
                       <Cell
-                        id={entry.id}
+                        id={`cell-${entry.id}`}
                         key={`cell-${entry.id}`}
                         // fill={}
-                        stroke="rgba(150,150,150,0.4)"
+                        stroke={`rgba(150,150,150,${strokeOpacity})`}
                         strokeWidth={1}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -463,7 +429,7 @@ export default function RiskMatrix({
                         }}
                         style={{
                           // opacity: entry.visible ? opacity : 0,
-                          fill: getColor(entry, entry.visible ? opacity : 0),
+                          fill: getColor(entry, opacity),
                           transition: "all 1s ease",
                         }}
                       />
@@ -471,111 +437,46 @@ export default function RiskMatrix({
                   })}
                 </Scatter>
               );
-            })} */}
+            })}
           </ScatterChart>
         </ResponsiveContainer>
-      </Box>
-      <Box sx={{ width: "20%", height: "100%" }}>
-        <Stack direction="column" sx={{ mx: 4, pb: 4, mt: 2, height: "100%" }} spacing={4}>
-          <FormGroup sx={{}}>
-            <FormControlLabel
-              control={<Checkbox checked={worstCase} onChange={(e) => setWorstCase(e.target.checked)} />}
-              label="Show only worst case scenario"
-            />
-            <FormControlLabel
-              control={<Checkbox checked={labels} onChange={(e) => setLabels(e.target.checked)} />}
-              label="Show labels"
-            />
-            {/* <FormControlLabel
-              control={<Checkbox checked={es} onChange={(e) => setES(e.target.checked)} />}
-              label="Show only executive summary"
-            /> */}
-          </FormGroup>
-          <Stack direction="column" sx={{ flex: 1 }} spacing={3}>
-            <Stack direction="column" spacing={5}>
-              <FormControl sx={{ flex: 1 }} fullWidth>
-                <InputLabel>Scale Display</InputLabel>
-                <Select value={scales} label="Scale Display" onChange={(e) => setScales(e.target.value as any)}>
-                  <MenuItem value={"classes"}>Classes</MenuItem>
-                  <MenuItem value={"absolute"}>Absolute</MenuItem>
-                </Select>
-              </FormControl>
-              {/* <FormControl sx={{ flex: 1 }} fullWidth>
-                <InputLabel>Non-key Risks</InputLabel>
-                <Select
-                  value={nonKeyRisks}
-                  label="Non-key Risks"
-                  onChange={(e) => setNonKeyRisks(e.target.value as any)}
-                >
-                  <MenuItem value={"show"}>Show</MenuItem>
-                  <MenuItem value={"fade"}>Fade</MenuItem>
-                  <MenuItem value={"hide"}>Hide</MenuItem>
-                </Select>
-              </FormControl> */}
-            </Stack>
-            <Stack direction="column" spacing={5}>
-              <FormControl sx={{ flex: 1 }} fullWidth>
-                <InputLabel>Categories display</InputLabel>
-                <Select
-                  value={categories}
-                  label="Categories display"
-                  onChange={(e) => setCategories(e.target.value as any)}
-                >
-                  <MenuItem value={"shapes"}>Shapes</MenuItem>
-                  <MenuItem value={"colors"}>Colors</MenuItem>
-                  <MenuItem value={"both"}>Shapes & Colors</MenuItem>
-                  <MenuItem value={"none"}>None</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl sx={{ flex: 1 }} fullWidth>
-                <InputLabel>Scenarios display</InputLabel>
-                <Select
-                  value={scenarios}
-                  label="Scenarios display"
-                  onChange={(e) => setScenarios(e.target.value as any)}
-                >
-                  <MenuItem value={"colors"}>Colors</MenuItem>
-                  <MenuItem value={"none"}>None</MenuItem>
-                </Select>
-              </FormControl>
-            </Stack>
-            {/* <Stack direction="row" spacing={5}>
-              <FormControl sx={{ flex: 1 }} fullWidth>
-                <InputLabel>Font Size</InputLabel>
-                <Input type="number" />
-              </FormControl>
-            </Stack> */}
-          </Stack>
-          <Box sx={{ flex: 1 }} />
-          {categories === "shapes" ||
-            (categories === "both" && (
-              <Box sx={{ flex: 1 }}>
-                <Legend
-                  wrapperStyle={{ position: "relative" }}
-                  align="left"
-                  payload={Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
-                    value: CATEGORY_NAMES[CATEGORY],
-                    type: shape.shape,
-                    color: categories === "both" ? CATEGORIES[CATEGORY].color : "rgba(150,150,150,1)",
-                  }))}
-                />
-              </Box>
-            ))}
-          {scenarios === "colors" && (
-            <Box sx={{ flex: 1 }}>
+        <Box sx={{ position: "absolute", bottom: 0, width: "100%" }}>
+          {categoryLegend && (
+            <Box className="custom-legend-wrapper" sx={{ flex: 1, height: 60 }}>
               <Legend
                 wrapperStyle={{ position: "relative" }}
-                align="left"
+                align="center"
+                payload={Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
+                  value: t(CATEGORY, CATEGORY_NAMES[CATEGORY as RISK_CATEGORY]),
+                  type: categoryDisplay === "both" || categoryDisplay === "shapes" ? shape.shape : "circle",
+                  color:
+                    categoryDisplay === "both" || categoryDisplay === "colors"
+                      ? CATEGORIES[CATEGORY as RISK_CATEGORY]?.color || "rgba(150,150,150,1)"
+                      : "rgba(150,150,150,1)",
+                }))}
+              />
+            </Box>
+          )}
+          {scenarioLegend && (
+            <Box className="custom-legend-wrapper" sx={{ flex: 1, height: 30, textAlign: "center" }}>
+              <Legend
+                chartHeight={30}
+                height={30}
+                wrapperStyle={{ position: "relative" }}
+                align="center"
                 payload={Object.entries(SCENARIO_PARAMS).map(([scenario, params]) => ({
-                  value: `${scenario[0].toUpperCase()}${scenario.slice(1)} Scenario`,
+                  value: t(`2A.${scenario}.title`, `${scenario[0].toUpperCase()}${scenario.slice(1)} Scenario`),
                   type: "circle",
                   color: params.color,
                 }))}
               />
             </Box>
           )}
-        </Stack>
+        </Box>
       </Box>
+      <IconButton sx={{ position: "absolute", top: 45, right: 45 }} onClick={handleDownload}>
+        <SaveIcon />
+      </IconButton>
     </Stack>
   );
 }

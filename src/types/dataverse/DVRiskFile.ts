@@ -1,3 +1,4 @@
+import { SCENARIOS } from "../../functions/scenarios";
 import { DiscussionRequired } from "../DiscussionRequired";
 import { DVAnalysisRun } from "./DVAnalysisRun";
 
@@ -6,6 +7,26 @@ export enum RISK_TYPE {
   MANMADE = "Malicious Man-made Risk",
   EMERGING = "Emerging Risk",
 }
+
+export enum RISK_CATEGORY {
+  CYBER = "Cyber",
+  ECOTECH = "EcoTech",
+  HEALTH = "Health",
+  MANMADE = "Man-made",
+  NATURE = "Nature",
+  TRANSVERSAL = "Transversal",
+  EMERGING = "Emerging Risk",
+  TEST = "Test",
+}
+
+export const CATEGORY_NAMES: Partial<{ [key in RISK_CATEGORY]: string }> = {
+  Cyber: "Cyber Risks",
+  EcoTech: "Economical and Technological Risks",
+  Health: "Health Risks",
+  "Man-made": "Man-made Risks and Malicious Actors",
+  Nature: "Natural Risks",
+  Transversal: "Societal Risks",
+};
 
 export enum CONSENSUS_TYPE {
   MEETING = 0,
@@ -56,7 +77,7 @@ export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableF
 
   cr4de_title: string;
   cr4de_risk_type: RISK_TYPE;
-  cr4de_risk_category: string;
+  cr4de_risk_category: RISK_CATEGORY;
   cr4de_key_risk: boolean;
 
   cr4de_label_hilp: boolean | null;
@@ -64,6 +85,7 @@ export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableF
   cr4de_label_cb: boolean | null;
   cr4de_label_impact: "Human" | "Societal" | "Environmental" | "Financial" | null;
 
+  cr4de_mrs: SCENARIOS | null;
   cr4de_mrs_summary: string | null;
   cr4de_mrs_summary_nl: string | null;
   cr4de_mrs_summary_fr: string | null;
@@ -165,6 +187,9 @@ export interface DVRiskFile<CalculationType = unknown> extends RiskFileEditableF
   cr4de_latest_calculation: CalculationType | null;
   _cr4de_latest_calculation_value: string | null;
 
+  cr4de_result_snapshot: string | null;
+  results?: RESULT_SNAPSHOT | null;
+
   createdon: string;
   modifiedon: string;
 }
@@ -211,3 +236,43 @@ export const RISK_FILE_QUANTI_FIELDS: (keyof DVRiskFile)[] = [
   "cr4de_climate_change_quanti_m",
   "cr4de_climate_change_quanti_e",
 ];
+
+export type RISKFILE_RESULT_FIELD =
+  | "TP"
+  | "TP50"
+  | "TI"
+  | "TI_H"
+  | "TI_Ha"
+  | "TI_Hb"
+  | "TI_Hc"
+  | "TI_S"
+  | "TI_Sa"
+  | "TI_Sb"
+  | "TI_Sc"
+  | "TI_Sd"
+  | "TI_E"
+  | "TI_Ea"
+  | "TI_F"
+  | "TI_Fa"
+  | "TI_Fb"
+  | "DP"
+  | "DP50"
+  | "DI"
+  | "DI_H"
+  | "DI_Ha"
+  | "DI_Hb"
+  | "DI_Hc"
+  | "DI_S"
+  | "DI_Sa"
+  | "DI_Sb"
+  | "DI_Sc"
+  | "DI_Sd"
+  | "DI_E"
+  | "DI_Ea"
+  | "DI_F"
+  | "DI_Fa"
+  | "DI_Fb";
+
+export type RESULT_SNAPSHOT = {
+  [key in SCENARIOS]: { [key in RISKFILE_RESULT_FIELD]: number };
+};

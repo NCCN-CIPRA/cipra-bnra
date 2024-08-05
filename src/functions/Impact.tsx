@@ -1,7 +1,16 @@
+import { isParameter } from "typescript";
 import { CascadeCalculation, RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
-import { DVRiskFile } from "../types/dataverse/DVRiskFile";
-import { SCENARIO_SUFFIX } from "./scenarios";
+import { DVRiskFile, RISKFILE_RESULT_FIELD } from "../types/dataverse/DVRiskFile";
+import {
+  CASCADE_RESULT_FIELD,
+  getCascadeParameter,
+  getScenarioParameter,
+  getScenarioSuffix,
+  SCENARIO_SUFFIX,
+  SCENARIOS,
+} from "./scenarios";
+import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 
 export type Effect = {
   id: string | null;
@@ -88,42 +97,35 @@ export function getMoneyString(impactNumber: number) {
   return `€ ${(Math.round(impactNumber / 10000000000) / 100).toLocaleString()}T`;
 }
 
-export function getDirectImpact(c: RiskCalculation, rf: DVRiskFile, scenarioSuffix: SCENARIO_SUFFIX): Effect {
+const gsp = (rf: DVRiskFile, parameter: RISKFILE_RESULT_FIELD, scenario: SCENARIOS) =>
+  getScenarioParameter(rf, parameter, scenario) || 0.00000001;
+
+export function getDirectImpact(rf: DVRiskFile, scenario: SCENARIOS): Effect {
+  const scenarioSuffix = getScenarioSuffix(scenario);
+
   return {
     id: null,
     name: "Direct Impact",
 
-    cp: c[`dp${scenarioSuffix}`] / c[`tp${scenarioSuffix}`],
+    cp: gsp(rf, "DP", scenario) / gsp(rf, "TP", scenario),
 
-    ha: c[`di_Ha${scenarioSuffix}`] / c[`ti_Ha${scenarioSuffix}`],
-    hb: c[`di_Hb${scenarioSuffix}`] / c[`ti_Hb${scenarioSuffix}`],
-    hc: c[`di_Hc${scenarioSuffix}`] / c[`ti_Hc${scenarioSuffix}`],
-    sa: c[`di_Sa${scenarioSuffix}`] / c[`ti_Sa${scenarioSuffix}`],
-    sb: c[`di_Sb${scenarioSuffix}`] / c[`ti_Sb${scenarioSuffix}`],
-    sc: c[`di_Sc${scenarioSuffix}`] / c[`ti_Sc${scenarioSuffix}`],
-    sd: c[`di_Sd${scenarioSuffix}`] / c[`ti_Sd${scenarioSuffix}`],
-    ea: c[`di_Ea${scenarioSuffix}`] / c[`ti_Ea${scenarioSuffix}`],
-    fa: c[`di_Fa${scenarioSuffix}`] / c[`ti_Fa${scenarioSuffix}`],
-    fb: c[`di_Fb${scenarioSuffix}`] / c[`ti_Fb${scenarioSuffix}`],
+    ha: gsp(rf, "DI_Ha", scenario) / gsp(rf, "TI_Ha", scenario),
+    hb: gsp(rf, "DI_Hb", scenario) / gsp(rf, "TI_Hb", scenario),
+    hc: gsp(rf, "DI_Hc", scenario) / gsp(rf, "TI_Hc", scenario),
+    sa: gsp(rf, "DI_Sa", scenario) / gsp(rf, "TI_Sa", scenario),
+    sb: gsp(rf, "DI_Sb", scenario) / gsp(rf, "TI_Sb", scenario),
+    sc: gsp(rf, "DI_Sc", scenario) / gsp(rf, "TI_Sc", scenario),
+    sd: gsp(rf, "DI_Sd", scenario) / gsp(rf, "TI_Sd", scenario),
+    ea: gsp(rf, "DI_Ea", scenario) / gsp(rf, "TI_Ea", scenario),
+    fa: gsp(rf, "DI_Fa", scenario) / gsp(rf, "TI_Fa", scenario),
+    fb: gsp(rf, "DI_Fb", scenario) / gsp(rf, "TI_Fb", scenario),
 
-    h:
-      (c[`di_Ha${scenarioSuffix}`] + c[`di_Hb${scenarioSuffix}`] + c[`di_Hc${scenarioSuffix}`]) /
-      (c[`ti_Ha${scenarioSuffix}`] + c[`ti_Hb${scenarioSuffix}`] + c[`ti_Hc${scenarioSuffix}`]),
-    s:
-      (c[`di_Sa${scenarioSuffix}`] +
-        c[`di_Sb${scenarioSuffix}`] +
-        c[`di_Sc${scenarioSuffix}`] +
-        c[`di_Sd${scenarioSuffix}`]) /
-      (c[`ti_Sa${scenarioSuffix}`] +
-        c[`ti_Sb${scenarioSuffix}`] +
-        c[`ti_Sc${scenarioSuffix}`] +
-        c[`ti_Sd${scenarioSuffix}`]),
-    e: c[`di_Ea${scenarioSuffix}`] / c[`ti_Ea${scenarioSuffix}`],
-    f:
-      (c[`di_Fa${scenarioSuffix}`] + c[`di_Fb${scenarioSuffix}`]) /
-      (c[`ti_Fa${scenarioSuffix}`] + c[`ti_Fb${scenarioSuffix}`]),
+    h: gsp(rf, "DI_H", scenario) / gsp(rf, "TI_H", scenario),
+    s: gsp(rf, "DI_S", scenario) / gsp(rf, "TI_S", scenario),
+    e: gsp(rf, "DI_E", scenario) / gsp(rf, "TI_E", scenario),
+    f: gsp(rf, "DI_F", scenario) / gsp(rf, "TI_F", scenario),
 
-    i: c[`di${scenarioSuffix}`] / c[`ti${scenarioSuffix}`],
+    i: gsp(rf, "DI", scenario) / gsp(rf, "TI", scenario),
 
     quali_h: rf[`cr4de_di_quali_h${scenarioSuffix}`],
     quali_s: rf[`cr4de_di_quali_s${scenarioSuffix}`],
@@ -132,52 +134,38 @@ export function getDirectImpact(c: RiskCalculation, rf: DVRiskFile, scenarioSuff
   };
 }
 
-export function getIndirectImpact(
-  c: CascadeCalculation,
-  tot: RiskCalculation,
-  scenarioSuffix: SCENARIO_SUFFIX,
-  cascade?: DVRiskCascade
-): Effect {
-  const scenarioLetter = scenarioSuffix[1] as "c" | "m" | "e";
+const gcp = (c: DVRiskCascade, parameter: CASCADE_RESULT_FIELD, scenario: SCENARIOS) =>
+  getCascadeParameter(c, scenario, parameter) || 0.00000001;
+
+export function getIndirectImpact(c: DVRiskCascade<SmallRisk, SmallRisk>, rf: DVRiskFile, scenario: SCENARIOS): Effect {
+  // const scenarioLetter = scenarioSuffix[1] as "c" | "m" | "e";
 
   return {
-    id: c.effect.riskId,
-    name: c.effect.riskTitle,
+    id: c.cr4de_effect_hazard.cr4de_riskfilesid,
+    name: c.cr4de_effect_hazard.cr4de_title,
 
-    cp: c[`${scenarioLetter}2c`] + c[`${scenarioLetter}2m`] + c[`${scenarioLetter}2e`],
+    cp: 0, //c[`${scenarioLetter}2c`] + c[`${scenarioLetter}2m`] + c[`${scenarioLetter}2e`],
 
-    ha: c[`ii_Ha${scenarioSuffix}`] / tot[`ti_Ha${scenarioSuffix}`],
-    hb: c[`ii_Hb${scenarioSuffix}`] / tot[`ti_Hb${scenarioSuffix}`],
-    hc: c[`ii_Hc${scenarioSuffix}`] / tot[`ti_Hc${scenarioSuffix}`],
-    sa: c[`ii_Sa${scenarioSuffix}`] / tot[`ti_Sa${scenarioSuffix}`],
-    sb: c[`ii_Sb${scenarioSuffix}`] / tot[`ti_Sb${scenarioSuffix}`],
-    sc: c[`ii_Sc${scenarioSuffix}`] / tot[`ti_Sc${scenarioSuffix}`],
-    sd: c[`ii_Sd${scenarioSuffix}`] / tot[`ti_Sd${scenarioSuffix}`],
-    ea: c[`ii_Ea${scenarioSuffix}`] / tot[`ti_Ea${scenarioSuffix}`],
-    fa: c[`ii_Fa${scenarioSuffix}`] / tot[`ti_Fa${scenarioSuffix}`],
-    fb: c[`ii_Fb${scenarioSuffix}`] / tot[`ti_Fb${scenarioSuffix}`],
+    ha: gcp(c, "II_Ha", scenario) / gsp(rf, "TI_Ha", scenario),
+    hb: gcp(c, "II_Hb", scenario) / gsp(rf, "TI_Hb", scenario),
+    hc: gcp(c, "II_Hc", scenario) / gsp(rf, "TI_Hc", scenario),
+    sa: gcp(c, "II_Sa", scenario) / gsp(rf, "TI_Sa", scenario),
+    sb: gcp(c, "II_Sb", scenario) / gsp(rf, "TI_Sb", scenario),
+    sc: gcp(c, "II_Sc", scenario) / gsp(rf, "TI_Sc", scenario),
+    sd: gcp(c, "II_Sd", scenario) / gsp(rf, "TI_Sd", scenario),
+    ea: gcp(c, "II_Ea", scenario) / gsp(rf, "TI_Ea", scenario),
+    fa: gcp(c, "II_Fa", scenario) / gsp(rf, "TI_Fa", scenario),
+    fb: gcp(c, "II_Fb", scenario) / gsp(rf, "TI_Fb", scenario),
 
-    h:
-      (c[`ii_Ha${scenarioSuffix}`] + c[`ii_Hb${scenarioSuffix}`] + c[`ii_Hc${scenarioSuffix}`]) /
-      (tot[`ti_Ha${scenarioSuffix}`] + tot[`ti_Hb${scenarioSuffix}`] + tot[`ti_Hc${scenarioSuffix}`]),
-    s:
-      (c[`ii_Sa${scenarioSuffix}`] +
-        c[`ii_Sb${scenarioSuffix}`] +
-        c[`ii_Sc${scenarioSuffix}`] +
-        c[`ii_Sd${scenarioSuffix}`]) /
-      (tot[`ti_Sa${scenarioSuffix}`] +
-        tot[`ti_Sb${scenarioSuffix}`] +
-        tot[`ti_Sc${scenarioSuffix}`] +
-        tot[`ti_Sd${scenarioSuffix}`]),
-    e: c[`ii_Ea${scenarioSuffix}`] / tot[`ti_Ea${scenarioSuffix}`],
-    f:
-      (c[`ii_Fa${scenarioSuffix}`] + c[`ii_Fb${scenarioSuffix}`]) /
-      (tot[`ti_Fa${scenarioSuffix}`] + tot[`ti_Fb${scenarioSuffix}`]),
+    h: gcp(c, "II_H", scenario) / gsp(rf, "TI_H", scenario),
+    s: gcp(c, "II_S", scenario) / gsp(rf, "TI_S", scenario),
+    e: gcp(c, "II_E", scenario) / gsp(rf, "TI_E", scenario),
+    f: gcp(c, "II_F", scenario) / gsp(rf, "TI_F", scenario),
 
-    i: c[`ii${scenarioSuffix}`] / tot[`ti${scenarioSuffix}`],
+    i: gcp(c, "II", scenario) / gsp(rf, "TI", scenario),
 
-    quali: (cascade && cascade.cr4de_quali) || "",
-    quali_cause: cascade && cascade.cr4de_quali_cause,
+    quali: c.cr4de_quali || "",
+    quali_cause: c.cr4de_quali_cause,
   };
 }
 

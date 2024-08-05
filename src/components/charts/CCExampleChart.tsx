@@ -1,4 +1,5 @@
 import { ViewKanbanTwoTone } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import {
   LineChart,
   Line,
@@ -59,6 +60,8 @@ const EvolutionArrow = ({
 };
 
 export default function CCExampleChart({}) {
+  const { t } = useTranslation();
+
   const gradientOffset = () => {
     const dataMax = Math.max(...data.map((i) => i.p));
     const dataMin = Math.min(...data.map((i) => i.p));
@@ -95,9 +98,9 @@ export default function CCExampleChart({}) {
           dataKey="i"
           //   ticks={[1, 4, 7]}
           tickFormatter={(v: number) => {
-            if (v === 5) return "Considerable";
-            if (v === 6) return "Major";
-            if (v === 7) return "Extreme";
+            if (v === 5) return t("considerable");
+            if (v === 6) return t("major");
+            if (v === 7) return t("extreme");
             return "";
           }}
           tickLine={false}
@@ -105,7 +108,7 @@ export default function CCExampleChart({}) {
         <YAxis
           domain={[0, 0.5]}
           label={{
-            value: "Probability of occurrence",
+            value: t("learning.probability.2.text.title", "Probability"),
             style: { textAnchor: "middle" },
             angle: -90,
             position: "left",
@@ -113,8 +116,8 @@ export default function CCExampleChart({}) {
           }}
           ticks={[0, 0.5]}
           tickFormatter={(v) => {
-            if (v === 0) return "Low";
-            if (v === 0.5) return "High";
+            if (v === 0) return t("Low");
+            if (v === 0.5) return t("High");
             return "";
           }}
         />

@@ -112,7 +112,7 @@ export default function CCSection({
   return (
     <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
       <Box sx={{ margin: "auto", width: "750px" }}>
-        <ClimateChangeChart calculation={calculation} scenarioSuffix={scenarioSuffix} />
+        {/* <ClimateChangeChart calculation={calculation} scenarioSuffix={scenarioSuffix} /> */}
       </Box>
       <Box>
         {!editing && (

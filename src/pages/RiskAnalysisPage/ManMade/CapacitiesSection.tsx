@@ -9,7 +9,7 @@ import { LoadingButton } from "@mui/lab";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
-export default function Scenario({
+export default function CapacitiesSection({
   intensityParameters,
   riskFile,
   scenario,

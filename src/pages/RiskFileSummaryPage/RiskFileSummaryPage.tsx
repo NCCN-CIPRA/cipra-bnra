@@ -3,20 +3,22 @@ import { useContext, useEffect, useState } from "react";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { Avatar, Box, Container, Fab, Stack, Tooltip, Typography } from "@mui/material";
 import AppContext from "../../functions/AppContext";
-import getCategoryColor from "../../functions/getCategoryColor";
+import getCategoryColor, { CategoryIcon, RiskTypeIcon } from "../../functions/getCategoryColor";
 import SummaryCharts from "../../components/charts/SummaryCharts";
-import { getWorstCaseScenario } from "../../functions/scenarios";
+import { getWorstCaseScenario, SCENARIOS } from "../../functions/scenarios";
 import useAPI from "../../hooks/useAPI";
 import TextInputBox from "../../components/TextInputBox";
 import { AuthPageContext } from "../AuthPage";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import { useTranslation } from "react-i18next";
+import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import RiskFileTitle from "../../components/RiskFileTitle";
 
 export default function RiskFileSummaryPage({}) {
   const api = useAPI();
   const { t, i18n } = useTranslation();
-  const { user, riskFile, reloadRiskFile, calculation } = useOutletContext<RiskFilePageContext>();
+  const { user, riskFile, reloadRiskFile } = useOutletContext<RiskFilePageContext>();
 
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -60,42 +62,35 @@ export default function RiskFileSummaryPage({}) {
   };
 
   return (
-    <Container>
-      <Typography variant="h2">{riskFile.cr4de_title}</Typography>
-      <Stack direction="row" sx={{ mb: 8, mt: 2 }} columnGap={4}>
+    <Container sx={{ mt: 2, pb: 8 }}>
+      <RiskFileTitle riskFile={riskFile} />
+      <Stack direction="row" sx={{ mb: 8, mt: 8 }} columnGap={4}>
         <Box sx={{ flex: 1 }}>
-          <Stack direction="row" sx={{ mt: 1 }} columnGap={1}>
-            {labels.map((l) => (
-              <Tooltip key={l.name} title={l.name}>
-                <Avatar sx={{ bgcolor: l.color, fontSize: 14 }}>{l.label}</Avatar>
-              </Tooltip>
-            ))}
-          </Stack>
           {!editing && i18n.language === "en" && (
             <Box
               className="htmleditor"
-              sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+              sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
               dangerouslySetInnerHTML={{ __html: summary }}
             />
           )}
           {!editing && i18n.language === "nl" && (
             <Box
               className="htmleditor"
-              sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+              sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
               dangerouslySetInnerHTML={{ __html: summaryNL }}
             />
           )}
           {!editing && i18n.language === "fr" && (
             <Box
               className="htmleditor"
-              sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+              sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
               dangerouslySetInnerHTML={{ __html: summaryFR }}
             />
           )}
           {!editing && i18n.language === "de" && (
             <Box
               className="htmleditor"
-              sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+              sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
               dangerouslySetInnerHTML={{ __html: summaryDE }}
             />
           )}
@@ -140,9 +135,15 @@ export default function RiskFileSummaryPage({}) {
             </>
           )}
         </Box>
-        <Box sx={{ bgcolor: "white" }}>
-          <SummaryCharts riskFile={riskFile} calculation={calculation} scenario={getWorstCaseScenario(calculation)} />
-        </Box>
+        {riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING && (
+          <Box sx={{ bgcolor: "white" }}>
+            <SummaryCharts
+              riskFile={riskFile}
+              scenario={riskFile.cr4de_mrs || SCENARIOS.MAJOR}
+              manmade={riskFile.cr4de_risk_type === RISK_TYPE.MANMADE}
+            />
+          </Box>
+        )}
       </Stack>
       {user && user.roles.admin && (
         <Box sx={{ position: "fixed", bottom: 96, right: 40 }}>

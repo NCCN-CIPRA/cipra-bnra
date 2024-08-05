@@ -1,6 +1,6 @@
 import { Stack, Typography, Box, Button } from "@mui/material";
 import { RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, SCENARIO_PARAMS, getScenarioSuffix } from "../../../functions/scenarios";
+import { SCENARIOS, SCENARIO_PARAMS, getScenarioParameter, getScenarioSuffix } from "../../../functions/scenarios";
 import { getTotalProbabilityRelativeScale } from "../../../functions/Probability";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBarChart";
@@ -9,25 +9,31 @@ import ProbabilitySankey from "../../../components/charts/ProbabilitySankey";
 import ImpactSankey from "../../../components/charts/ImpactSankey";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import { useEffect, useState } from "react";
+import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { Cascades } from "../../BaseRisksPage";
+import { useTranslation } from "react-i18next";
 
 export default function SankeyDiagram({
-  calculation,
+  riskFile,
+  cascades,
   scenario,
   debug = false,
   manmade = false,
 }: {
-  calculation: RiskCalculation;
+  riskFile: DVRiskFile;
+  cascades: Cascades;
   scenario: SCENARIOS;
   debug?: boolean;
   manmade?: boolean;
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isEditing } = useOutletContext<RiskFilePageContext>();
   const [selectedScenario, setSelectedScenario] = useState(scenario);
 
   useEffect(() => {
     setSelectedScenario(scenario);
-  }, [calculation]);
+  }, [riskFile, cascades]);
 
   const goToRiskFile = (id: string) => {
     if (
@@ -44,7 +50,8 @@ export default function SankeyDiagram({
     <Stack direction="row" sx={{ mb: 8 }}>
       <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
         <ProbabilitySankey
-          calculation={calculation}
+          riskFile={riskFile}
+          cascades={cascades}
           maxCauses={null}
           shownCausePortion={0.8}
           minCausePortion={null}
@@ -79,10 +86,7 @@ export default function SankeyDiagram({
             width: "100%",
           }}
         >
-          <ProbabilityBars
-            tp={getTotalProbabilityRelativeScale(calculation, getScenarioSuffix(selectedScenario))}
-            chartWidth={200}
-          />
+          <ProbabilityBars tp={getScenarioParameter(riskFile, "TP", scenario) || 0} chartWidth={200} />
         </Box>
         <Box
           sx={{
@@ -90,7 +94,7 @@ export default function SankeyDiagram({
           }}
         >
           <Box sx={{ width: "100%", textAlign: "center", mt: 0, mb: 1 }}>
-            <Typography variant="subtitle2">Scenario</Typography>
+            <Typography variant="subtitle2">{t("Scenario")}</Typography>
           </Box>
           <Stack direction="row" justifyContent="space-between">
             <Button
@@ -168,14 +172,15 @@ export default function SankeyDiagram({
           }}
         >
           <Box sx={{ width: "100%", textAlign: "center", mt: 3 }}>
-            <Typography variant="subtitle2">Damage Indicators</Typography>
+            <Typography variant="subtitle2">{t("Damage Indicators")}</Typography>
           </Box>
-          <ImpactBarChart calculation={calculation} scenarioSuffix={getScenarioSuffix(selectedScenario)} />
+          <ImpactBarChart riskFile={riskFile} scenario={selectedScenario} />
         </Box>
       </Stack>
       <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
         <ImpactSankey
-          calculation={calculation}
+          riskFile={riskFile}
+          cascades={cascades}
           maxEffects={null}
           shownEffectPortion={0.8}
           minEffectPortion={null}

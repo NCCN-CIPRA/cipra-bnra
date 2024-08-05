@@ -2,6 +2,7 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { IntensityParameter } from "../../../functions/intensityParameters";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { SCENARIOS, SCENARIO_PARAMS, unwrap } from "../../../functions/scenarios";
+import * as IP from "../../../functions/intensityParameters";
 import { useEffect, useState } from "react";
 import TextInputBox from "../../../components/TextInputBox";
 import useAPI from "../../../hooks/useAPI";
@@ -10,7 +11,6 @@ import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 export default function Scenario({
-  intensityParameters,
   riskFile,
   scenario,
   mode,
@@ -21,7 +21,6 @@ export default function Scenario({
   reloadRiskFile,
   allRisks,
 }: {
-  intensityParameters: IntensityParameter[];
   riskFile: DVRiskFile;
   scenario: SCENARIOS;
   mode: "view" | "edit";
@@ -38,6 +37,7 @@ export default function Scenario({
 
   useEffect(() => setIsEditing(editing), [editing]);
 
+  const intensityParameters = IP.unwrap(riskFile.cr4de_intensity_parameters);
   const scenarios = unwrap(
     intensityParameters,
     riskFile.cr4de_scenario_considerable,

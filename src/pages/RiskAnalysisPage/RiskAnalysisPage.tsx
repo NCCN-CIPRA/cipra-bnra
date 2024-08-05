@@ -8,16 +8,15 @@ import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import "./RiskAnalysisPage.css";
 
 export default function RiskAnalysisPage() {
-  const { user, hazardCatalogue, riskFile, cascades, calculation, reloadRiskFile, isEditing, setIsEditing } =
+  const { user, hazardCatalogue, riskFile, cascades, reloadRiskFile, isEditing, setIsEditing } =
     useOutletContext<RiskFilePageContext>();
 
   if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD)
     return (
-      <Container sx={{ mt: 4, pb: 8 }}>
+      <Container sx={{ mt: 2, pb: 8 }}>
         <Standard
           riskFile={riskFile}
-          cascades={cascades[riskFile.cr4de_riskfilesid].all}
-          calculation={calculation}
+          cascades={cascades[riskFile.cr4de_riskfilesid]}
           mode={user && user.roles.analist ? "edit" : "view"}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
@@ -28,11 +27,10 @@ export default function RiskAnalysisPage() {
 
   if (riskFile.cr4de_risk_type === RISK_TYPE.MANMADE)
     return (
-      <Container sx={{ mt: 4, pb: 8 }}>
+      <Container sx={{ mt: 2, pb: 8 }}>
         <ManMade
           riskFile={riskFile}
           cascades={cascades[riskFile.cr4de_riskfilesid]}
-          calculation={calculation}
           mode={user && user.roles.analist ? "edit" : "view"}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
@@ -42,7 +40,7 @@ export default function RiskAnalysisPage() {
     );
 
   return (
-    <Container sx={{ mt: 4, pb: 8 }}>
+    <Container sx={{ mt: 2, pb: 8 }}>
       <Emerging
         riskFile={riskFile}
         cascades={cascades[riskFile.cr4de_riskfilesid].all}

@@ -1,13 +1,12 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
 import TextInputBox from "../../../components/TextInputBox";
 import { useEffect, useMemo, useState } from "react";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISKFILE_RESULT_FIELD } from "../../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
 import getImpactColor from "../../../functions/getImpactColor";
 import { Effect, IMPACT_CATEGORY } from "../../../functions/Impact";
-import { SCENARIO_SUFFIX } from "../../../functions/scenarios";
+import { getScenarioParameter, SCENARIOS } from "../../../functions/scenarios";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import round from "../../../functions/roundNumberString";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
@@ -15,9 +14,8 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 export default function ImpactSection({
   riskFile,
   effects,
-  scenarioSuffix,
+  scenario,
   impactName,
-  calc,
   mode,
   attachments = null,
   updateAttachments = null,
@@ -28,9 +26,8 @@ export default function ImpactSection({
 }: {
   riskFile: DVRiskFile;
   effects: Effect[];
-  scenarioSuffix: SCENARIO_SUFFIX;
+  scenario: SCENARIOS;
   impactName: "human" | "societal" | "environmental" | "financial";
-  calc: RiskCalculation;
   mode: "view" | "edit";
   attachments?: DVAttachment[] | null;
   updateAttachments?: null | (() => Promise<unknown>);
@@ -42,12 +39,8 @@ export default function ImpactSection({
   const impactLetter = impactName[0] as "h" | "s" | "e" | "f";
   const impactLetterUC = impactLetter.toUpperCase() as IMPACT_CATEGORY;
 
-  const impactTI = Math.round(
-    ((calc[`ti_${impactLetterUC}a${scenarioSuffix}`] as number) || 0) +
-      ((calc[`ti_${impactLetterUC}b${scenarioSuffix}` as keyof typeof calc] as number) || 0) +
-      ((calc[`ti_${impactLetterUC}c${scenarioSuffix}` as keyof typeof calc] as number) || 0) +
-      ((calc[`ti_${impactLetterUC}d${scenarioSuffix}` as keyof typeof calc] as number) || 0)
-  );
+  const ti = getScenarioParameter(riskFile, "TI", scenario) || 0.00001;
+  const impactTI = getScenarioParameter(riskFile, `TI_${impactLetterUC}` as RISKFILE_RESULT_FIELD, scenario) || 0.00001;
 
   const paretoEffects = useMemo(() => {
     return effects
@@ -66,7 +59,7 @@ export default function ImpactSection({
     const text = `
           <p style="font-size:10pt;font-family: Arial">
           The ${impactName} impact represents an estimated <b>${round(
-      (100 * impactTI) / calc.ti
+      (100 * impactTI) / ti
     )}%</b> of the total impact of an
         incident of this magnitude. Possible explanations for the ${impactName} impact are:
           </p>
@@ -79,11 +72,11 @@ export default function ImpactSection({
 
         if (e.quali_cause) {
           return `<p style="font-weight:bold;font-size:10pt;font-family: Arial"">
-                    ${i + 1}. ${riskName} 
+                    ${i + 1}. ${riskName}
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
                       <b>${round(100 * e[impactLetter])}%</b> of total ${impactName} impact -
-                      <b>${round((100 * (e[impactLetter] * impactTI)) / calc.ti)}%</b> of total impact
+                      <b>${round((100 * (e[impactLetter] * impactTI)) / ti)}%</b> of total impact
                     </p>
                     <p><br></p>
                     <p style="font-size: 8pt;margin-bottom:0px;text-decoration:underline">Input from the ${
@@ -99,11 +92,11 @@ export default function ImpactSection({
               <p><br></p>`;
         } else {
           return `<p style="font-weight:bold;font-size:10pt;font-family: Arial"">
-                    ${i + 1}. ${riskName} 
+                    ${i + 1}. ${riskName}
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
                       <b>${round(100 * e[impactLetter])}%</b> of total ${impactName} impact -
-                      <b>${round((100 * (e[impactLetter] * impactTI)) / calc.ti)}%</b> of total impact
+                      <b>${round((100 * (e[impactLetter] * impactTI)) / ti)}%</b> of total impact
                     </p>
                     <p><br></p>
                     ${e.quali || e[`quali_${impactLetter}`]}

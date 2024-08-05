@@ -18,7 +18,7 @@ import { Box, Stack, Typography } from "@mui/material";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { DVAnalysisRun, RiskAnalysisResults, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
+import { SCENARIOS, SCENARIO_PARAMS, getScenarioParameter } from "../../functions/scenarios";
 import { hexToRGB } from "../../functions/colors";
 import { getProbabilityScaleNumber, getTotalProbabilityRelativeScale } from "../../functions/Probability";
 import round from "../../functions/roundNumberString";
@@ -63,35 +63,17 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   return null;
 };
 
-export default function ScenarioMatrix({ calculation, mrs }: { calculation: RiskCalculation; mrs: SCENARIOS }) {
+export default function ScenarioMatrix({ riskFile, mrs }: { riskFile: DVRiskFile; mrs: SCENARIOS }) {
   const navigate = useNavigate();
 
-  const data = [
-    {
-      id: SCENARIOS.CONSIDERABLE,
-      name: SCENARIOS.CONSIDERABLE,
-      color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
-      x: getTotalProbabilityRelativeScale(calculation, "_c"),
-      y: getTotalImpactRelativeScale(calculation, "_c"),
-      z: 1,
-    },
-    {
-      id: SCENARIOS.MAJOR,
-      name: SCENARIOS.MAJOR,
-      color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
-      x: getTotalProbabilityRelativeScale(calculation, "_m"),
-      y: getTotalImpactRelativeScale(calculation, "_m"),
-      z: 1,
-    },
-    {
-      id: SCENARIOS.EXTREME,
-      name: SCENARIOS.EXTREME,
-      color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
-      x: getTotalProbabilityRelativeScale(calculation, "_e"),
-      y: getTotalImpactRelativeScale(calculation, "_e"),
-      z: 1,
-    },
-  ];
+  const data = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].map((s) => ({
+    id: s,
+    name: s,
+    color: SCENARIO_PARAMS[s].color,
+    x: getScenarioParameter(riskFile, "TP", s),
+    y: getScenarioParameter(riskFile, "TI", s),
+    z: 1,
+  }));
 
   return (
     <ScatterChart

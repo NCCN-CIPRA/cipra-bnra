@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import useRecords from "../hooks/useRecords";
-import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
 import { DVAnalysisRun, RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { DataTable } from "../hooks/useAPI";
@@ -48,6 +48,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import CloseIcon from "@mui/icons-material/Close";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import HelpSideBar, { Section } from "./RiskAnalysisPage/HelpSiderBar";
+import QueryStatsIcon from "@mui/icons-material/QueryStats";
 
 type RouteParams = {
   risk_file_id: string;
@@ -116,7 +117,7 @@ export interface RiskFilePageContext extends RiskPageContext {
   setIsEditing: (isEditing: boolean) => void;
 
   riskFile: DVRiskFile;
-  calculation: RiskCalculation;
+  // calculation: RiskCalculation;
   causes: DVRiskCascade<SmallRisk>[];
   effects: DVRiskCascade<unknown, SmallRisk>[];
   catalyzingEffects: DVRiskCascade<SmallRisk>[];
@@ -143,7 +144,7 @@ export default function BaseRiskFilePage() {
   const theme = useTheme();
 
   const params = useParams() as RouteParams;
-  const location = useLocation();
+  const { pathname } = useLocation();
 
   const [isEditing, setIsEditing] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -158,6 +159,10 @@ export default function BaseRiskFilePage() {
   const handleDrawerClose = () => {
     setHelpOpen(false);
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   const { data: participants, getData: loadParticipants } = useLazyRecords<DVParticipation<DVContact>>({
     table: DataTable.PARTICIPATION,
@@ -182,10 +187,16 @@ export default function BaseRiskFilePage() {
   });
 
   let tab = 0;
-  if (location.pathname.indexOf("identification") >= 0) tab = 1;
-  if (location.pathname.indexOf("analysis") >= 0) tab = 2;
-  if (location.pathname.indexOf("data") >= 0) tab = 3;
-  if (location.pathname.indexOf("input") >= 0) tab = 4;
+  const extraTab =
+    riskContext.riskFiles[params.risk_file_id] &&
+    riskContext.riskFiles[params.risk_file_id].cr4de_risk_type !== RISK_TYPE.EMERGING
+      ? 1
+      : 0;
+  if (pathname.indexOf("identification") >= 0) tab = 1;
+  if (pathname.indexOf("analysis") >= 0) tab = 2;
+  if (pathname.indexOf("evolution") >= 0) tab = 3;
+  if (pathname.indexOf("data") >= 0) tab = 3 + extraTab;
+  if (pathname.indexOf("input") >= 0) tab = 4 + extraTab;
 
   useEffect(() => {
     riskContext.loadRiskFile({ id: params.risk_file_id });
@@ -198,7 +209,12 @@ export default function BaseRiskFilePage() {
     { name: t("bnra.shortName"), url: "/" },
     { name: t("sideDrawer.hazardCatalogue", "Hazard Catalogue"), url: "/risks" },
     {
-      name: riskContext.riskFiles[params.risk_file_id] ? riskContext.riskFiles[params.risk_file_id].cr4de_title : "...",
+      name: riskContext.riskFiles[params.risk_file_id]
+        ? t(
+            `risk.${riskContext.riskFiles[params.risk_file_id].cr4de_hazard_id}.name`,
+            riskContext.riskFiles[params.risk_file_id].cr4de_title
+          )
+        : "...",
       url: "",
     },
   ]);
@@ -216,7 +232,7 @@ export default function BaseRiskFilePage() {
               setIsEditing,
 
               riskFile: riskContext.riskFiles[params.risk_file_id],
-              calculation: riskContext.riskFiles[params.risk_file_id].cr4de_latest_calculation?.cr4de_results!,
+              // calculation: riskContext.riskFiles[params.risk_file_id].cr4de_latest_calculation?.cr4de_results!,
               causes: riskContext.cascades[params.risk_file_id].causes,
               effects: riskContext.cascades[params.risk_file_id].effects,
               catalyzingEffects: riskContext.cascades[params.risk_file_id].catalyzingEffects,
@@ -244,34 +260,38 @@ export default function BaseRiskFilePage() {
           <Paper sx={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1201 }} elevation={3}>
             <BottomNavigation showLabels value={tab}>
               <BottomNavigationAction
-                label="Summary"
+                label={t("risk.bottombar.summary", "Summary")}
                 icon={<AodIcon />}
                 onClick={() => navigate(`/risks/${params.risk_file_id}`)}
               />
-              {user && user.roles.internal && (
-                <BottomNavigationAction
-                  label="Risk Identification"
-                  icon={<FingerprintIcon />}
-                  onClick={() => navigate(`/risks/${params.risk_file_id}/identification`)}
-                />
-              )}
-              {user && user.roles.beReader && (
-                <BottomNavigationAction
-                  label="Risk Analysis"
-                  icon={<AssessmentIcon />}
-                  onClick={() => navigate(`/risks/${params.risk_file_id}/analysis`)}
-                />
-              )}
+              <BottomNavigationAction
+                label={t("risk.bottombar.riskIdentification", "Risk Identification")}
+                icon={<FingerprintIcon />}
+                onClick={() => navigate(`/risks/${params.risk_file_id}/identification`)}
+              />
+              <BottomNavigationAction
+                label={t("risk.bottombar.riskAnalysis", "Risk Analysis")}
+                icon={<AssessmentIcon />}
+                onClick={() => navigate(`/risks/${params.risk_file_id}/analysis`)}
+              />
+              {riskContext.riskFiles[params.risk_file_id] &&
+                riskContext.riskFiles[params.risk_file_id].cr4de_risk_type !== RISK_TYPE.EMERGING && (
+                  <BottomNavigationAction
+                    label={t("risk.bottombar.riskEvolution", "Risk Evolution")}
+                    icon={<QueryStatsIcon />}
+                    onClick={() => navigate(`/risks/${params.risk_file_id}/evolution`)}
+                  />
+                )}
               {user && user.roles.expert && (
                 <BottomNavigationAction
-                  label="Raw Data"
+                  label={t("risk.bottombar.rawData", "Raw Data")}
                   icon={<PsychologyIcon />}
                   onClick={() => navigate(`/risks/${params.risk_file_id}/data`)}
                 />
               )}
               {user && user.roles.analist && (
                 <BottomNavigationAction
-                  label="Expert Input"
+                  label={t("risk.bottombar.expertInput", "Expert Input")}
                   icon={<GroupsIcon />}
                   onClick={() => navigate(`/risks/${params.risk_file_id}/input`)}
                 />
