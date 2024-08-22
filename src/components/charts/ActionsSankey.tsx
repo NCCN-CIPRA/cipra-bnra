@@ -9,6 +9,7 @@ import { SCENARIOS, getScenarioLetter, getScenarioParameter, getScenarioSuffix }
 import round from "../../functions/roundNumberString";
 import { Cascades } from "../../pages/BaseRisksPage";
 import { useTranslation } from "react-i18next";
+import { getIndirectImpact } from "../../functions/Impact";
 
 const baseY = 50;
 
@@ -362,33 +363,31 @@ export default function ActionsSankey({
       id: e.cr4de_effect_hazard.cr4de_riskfilesid,
       name: e.cr4de_effect_hazard.cr4de_title,
       cascade: e,
-      // TODO:
-      // cpAvg: getAverageCP(scenarioLetter, e),
-      cpAvg: 0,
+      cp: getIndirectImpact(e, riskFile, scenario).cp,
     }))
-    .sort((a, b) => b.cpAvg - a.cpAvg);
+    .sort((a, b) => b.cp - a.cp);
 
   let minP = 0;
-  const totP = actions.reduce((p, e) => p + e.cpAvg, 0.00000001);
+  const totP = actions.reduce((p, e) => p + e.cp, 0.00000001);
 
   if (maxActions !== null) {
-    minP = actions[Math.min(maxActions - 1, actions.length - 1)].cpAvg;
+    minP = actions[Math.min(maxActions - 1, actions.length - 1)].cp;
   } else if (minActionPortion !== null) {
     minP = minActionPortion * totP;
   } else if (shownActionPortion !== null) {
     let cumulP = 0;
     for (let c of actions) {
-      cumulP += c.cpAvg / totP;
+      cumulP += c.cp / totP;
 
       if (cumulP >= shownActionPortion) {
-        minP = c.cpAvg;
+        minP = c.cp;
         break;
       }
     }
   }
 
-  const nodes: any[] = [{ name: riskFile.cr4de_title }, ...actions.filter((c) => c.cpAvg >= minP)];
-  const otherActions = actions.filter((e) => e.cpAvg < minP);
+  const nodes: any[] = [{ name: riskFile.cr4de_title }, ...actions.filter((c) => c.cp >= minP)];
+  const otherActions = actions.filter((e) => e.cp < minP);
 
   if (minP >= 0 && otherActions.length > 0) {
     nodes.push({
@@ -398,18 +397,18 @@ export default function ActionsSankey({
   }
 
   const links: any[] = actions
-    .filter((e) => e.cpAvg >= minP)
+    .filter((e) => e.cp >= minP)
     .map((e, i: number) => ({
       source: i + 1,
       target: 0,
-      value: Math.max(0.000000001, e.cpAvg),
+      value: Math.max(0.000000001, e.cp),
     }));
   if (minP > 0 && otherActions.length > 0)
     links.push({
       source: nodes.length - 1,
       target: 0,
-      value: actions.filter((e) => e.cpAvg < minP).reduce((tot, e) => tot + e.cpAvg, 0.000000001),
-      hidden: actions.filter((e) => e.cpAvg < minP),
+      value: actions.filter((e) => e.cp < minP).reduce((tot, e) => tot + e.cp, 0.000000001),
+      hidden: actions.filter((e) => e.cp < minP),
     });
 
   const data = {

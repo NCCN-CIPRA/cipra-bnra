@@ -43,7 +43,11 @@ import RiskProfileGraph from "./RiskProfileGraph";
 import ClimateChangeGraph from "./ClimateChangeGraph";
 import ExecutiveSummaryGraph from "./ExecutiveSummaryGraphs";
 import CalculationsDelta from "./CalculationsDelta";
-import { getTotalImpactRelativeScale } from "../../functions/Impact";
+import {
+  getCategoryImpactRelativeScale,
+  getDamageIndicatorRelativeScale,
+  getTotalImpactRelativeScale,
+} from "../../functions/Impact";
 import { getScenarioLetter, getScenarioSuffix, SCENARIOS } from "../../functions/scenarios";
 import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
 import roundString from "../../functions/roundNumberString";
@@ -86,36 +90,21 @@ const getScenarioResult = (calculation: RiskCalculation, s: SCENARIOS): { [key i
     TP: round(tp_rel, 5),
     TP50: round(tp50_rel, 5),
 
-    TI: round((calculation[`ti${scenarioSuffix}`] / ti) * ti_rel, 5),
-    TI_H: round(
-      ((calculation[`ti_Ha${scenarioSuffix}`] +
-        calculation[`ti_Hb${scenarioSuffix}`] +
-        calculation[`ti_Hc${scenarioSuffix}`]) /
-        ti) *
-        ti_rel,
-      5
-    ),
-    TI_Ha: round((calculation[`ti_Ha${scenarioSuffix}`] / ti) * ti_rel, 5),
-    TI_Hb: round((calculation[`ti_Hb${scenarioSuffix}`] / ti) * ti_rel, 5),
-    TI_Hc: round((calculation[`ti_Hc${scenarioSuffix}`] / ti) * ti_rel, 5),
-    TI_S: round(
-      ((calculation[`ti_Sa${scenarioSuffix}`] +
-        calculation[`ti_Sb${scenarioSuffix}`] +
-        calculation[`ti_Sc${scenarioSuffix}`] +
-        calculation[`ti_Sd${scenarioSuffix}`]) /
-        ti) *
-        ti_rel,
-      5
-    ),
-    TI_Sa: round((calculation[`ti_Sa${scenarioSuffix}`] / ti) * ti_rel, 5),
-    TI_Sb: round((calculation[`ti_Sb${scenarioSuffix}`] / ti) * ti_rel, 5),
-    TI_Sc: round((calculation[`ti_Sc${scenarioSuffix}`] / ti) * ti_rel, 5),
-    TI_Sd: round((calculation[`ti_Sd${scenarioSuffix}`] / ti) * ti_rel, 5),
-    TI_E: round((calculation[`ti_Ea${scenarioSuffix}`] / ti) * ti_rel, 5),
-    TI_Ea: round((calculation[`ti_Ea${scenarioSuffix}`] / ti) * ti_rel, 5),
-    TI_F: round(((calculation[`ti_Fa${scenarioSuffix}`] + calculation[`ti_Fb${scenarioSuffix}`]) / ti) * ti_rel, 5),
-    TI_Fa: round((calculation[`ti_Fa${scenarioSuffix}`] / ti) * ti_rel, 5),
-    TI_Fb: round((calculation[`ti_Fb${scenarioSuffix}`] / ti) * ti_rel, 5),
+    TI: ti_rel,
+    TI_H: getCategoryImpactRelativeScale(calculation, "H", scenarioSuffix),
+    TI_Ha: getDamageIndicatorRelativeScale(calculation, "Ha", scenarioSuffix),
+    TI_Hb: getDamageIndicatorRelativeScale(calculation, "Hb", scenarioSuffix),
+    TI_Hc: getDamageIndicatorRelativeScale(calculation, "Hc", scenarioSuffix),
+    TI_S: getCategoryImpactRelativeScale(calculation, "S", scenarioSuffix),
+    TI_Sa: getDamageIndicatorRelativeScale(calculation, "Sa", scenarioSuffix),
+    TI_Sb: getDamageIndicatorRelativeScale(calculation, "Sb", scenarioSuffix),
+    TI_Sc: getDamageIndicatorRelativeScale(calculation, "Sc", scenarioSuffix),
+    TI_Sd: getDamageIndicatorRelativeScale(calculation, "Sd", scenarioSuffix),
+    TI_E: getCategoryImpactRelativeScale(calculation, "E", scenarioSuffix),
+    TI_Ea: getDamageIndicatorRelativeScale(calculation, "Ea", scenarioSuffix),
+    TI_F: getCategoryImpactRelativeScale(calculation, "F", scenarioSuffix),
+    TI_Fa: getDamageIndicatorRelativeScale(calculation, "Fa", scenarioSuffix),
+    TI_Fb: getDamageIndicatorRelativeScale(calculation, "Fb", scenarioSuffix),
 
     DP: round((calculation[`dp${scenarioSuffix}`] / tp) * tp_rel, 5),
     DP50: round(
@@ -600,9 +589,9 @@ export default function CalculationPage() {
         continue;
       }
 
-      await api.updateCascade(cId, {
-        cr4de_result_snapshot: JSON.stringify(cR),
-      });
+      // await api.updateCascade(cId, {
+      //   cr4de_result_snapshot: JSON.stringify(cR),
+      // });
 
       setCalculationProgress((100 * (i + 1)) / (calculations.length + Object.keys(cRDict).length));
       i += 1;

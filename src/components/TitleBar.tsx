@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { IconButton, Menu, MenuItem, Stack } from "@mui/material";
+import { FormControl, IconButton, InputLabel, Menu, MenuItem, Select, Stack } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import useLoggedInUser from "../hooks/useLoggedInUser";
@@ -21,7 +21,8 @@ export default function TitleBar({
   onDrawerToggle?: () => void;
 }) {
   const { i18n } = useTranslation();
-  const { user } = useLoggedInUser();
+  const { user, setFakeRole } = useLoggedInUser();
+  const [role, setRole] = useState(user?.admin ? "Beheerders" : "");
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -32,7 +33,7 @@ export default function TitleBar({
   const handleClose = () => {
     setAnchorEl(null);
   };
-
+  console.log(user);
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
@@ -53,6 +54,29 @@ export default function TitleBar({
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               {title}
             </Typography>
+            {user?.realRoles?.admin && (
+              <FormControl sx={{ width: 200, mr: 4 }} size="small">
+                <InputLabel id="demo-simple-select-label">Role</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={role}
+                  label="Role"
+                  onChange={(e) => {
+                    setRole(e.target.value);
+                    setFakeRole(e.target.value);
+                  }}
+                  sx={{ bgcolor: "white" }}
+                >
+                  <MenuItem value={"Beheerders"}>Admin</MenuItem>
+                  <MenuItem value={"Analisten"}>Analist</MenuItem>
+                  <MenuItem value={"Intern NCCN"}>Intern NCCN</MenuItem>
+                  <MenuItem value={"Experten"}>Expert</MenuItem>
+                  <MenuItem value={"Geverifieerde gebruikers"}>Rapport Lezer</MenuItem>
+                  <MenuItem value={"Anonymous"}>Anoniem</MenuItem>
+                </Select>
+              </FormControl>
+            )}
             <Stack direction="row" sx={{ mr: 4 }}>
               <Button
                 variant={i18n.languages[0] === "en" ? "outlined" : "text"}

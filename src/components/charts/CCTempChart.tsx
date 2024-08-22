@@ -73,14 +73,16 @@ const LCLabel = ({
     <>
       <text x={l + viewBox.width * (1 / 9)} y={b - viewBox.height * 0.2} font-size="15" dy="0" textAnchor="center">
         <tspan x={l + viewBox.width * (1 / 9)} dy="-2.4em" text-anchor="middle">
-          {t("Less")}
+          {t("ccchart.lessColdWeath.1", "Less")}
         </tspan>
         <tspan x={l + viewBox.width * (1 / 9)} dy="1.2em" text-anchor="middle" fill="#00A49A" fontWeight="bold">
-          {t("cold")}
+          {t("ccchart.lessColdWeath.2", "cold")}
         </tspan>
-        <tspan x={l + viewBox.width * (1 / 9)} dy="1.2em" text-anchor="middle">
-          {t("weather")}
-        </tspan>
+        {t("ccchart.lessColdWeath.3", "weather") !== "-" && (
+          <tspan x={l + viewBox.width * (1 / 9)} dy="1.2em" text-anchor="middle">
+            {t("ccchart.lessColdWeath.3", "weather")}
+          </tspan>
+        )}
       </text>
       <path
         id="arrow-line"
@@ -120,10 +122,10 @@ const NCLabel = ({
         textAnchor="center"
       >
         <tspan x={l + viewBox.width * (4 / 9) + 20} dy="-0.2em" text-anchor="middle">
-          {t("New")}
+          {t("ccchart.newClimate.1", "New")}
         </tspan>
         <tspan x={l + viewBox.width * (4 / 9) + 20} dy="1.2em" text-anchor="middle">
-          {t("climate")}
+          {t("ccchart.newClimate.2", "climate")}
         </tspan>
       </text>
       <path
@@ -161,10 +163,10 @@ const PCLabel = ({
         textAnchor="center"
       >
         <tspan x={l + viewBox.width * (2 / 9) - 30} dy="-0.2em" text-anchor="middle">
-          {t("Previous")}
+          {t("ccchart.previousClimate.1", "Previous")}
         </tspan>
         <tspan x={l + viewBox.width * (2 / 9) - 30} dy="1.2em" text-anchor="middle">
-          {t("climate")}
+          {t("ccchart.previousClimate.2", "climate")}
         </tspan>
       </text>
       <path
@@ -196,14 +198,16 @@ const MHLabel = ({
     <>
       <text x={l + viewBox.width * (6.5 / 9)} y={b - viewBox.height * 0.65} font-size="15" dy="0" textAnchor="center">
         <tspan x={l + viewBox.width * (6.5 / 9)} dy="-2.4em" text-anchor="middle">
-          {t("More")}
+          {t("ccchart.moreHotWeather.1", "More")}
         </tspan>
         <tspan x={l + viewBox.width * (6.5 / 9)} dy="1.2em" text-anchor="middle" fill="#ffdf1c" fontWeight="bold">
-          {t("hot")}
+          {t("ccchart.moreHotWeather.2", "hot")}
         </tspan>
-        <tspan x={l + viewBox.width * (6.5 / 9)} dy="1.2em" text-anchor="middle">
-          {t("weather")}
-        </tspan>
+        {t("ccchart.moreHotWeather.3", "weather") !== "-" && (
+          <tspan x={l + viewBox.width * (6.5 / 9)} dy="1.2em" text-anchor="middle">
+            {t("ccchart.moreHotWeather.3", "weather")}
+          </tspan>
+        )}
       </text>
       <path
         id="arrow-line"
@@ -236,14 +240,16 @@ const MRHLabel = ({
     <>
       <text x={l + viewBox.width * (7.5 / 9)} y={b - viewBox.height * 0.25} font-size="15" dy="0" textAnchor="center">
         <tspan x={l + viewBox.width * (7.5 / 9)} dy="-2.4em" text-anchor="middle">
-          {t("More")}
+          {t("ccchart.moreRecordHotWeather.1", "More")}
         </tspan>
         <tspan x={l + viewBox.width * (7.5 / 9)} dy="1.2em" text-anchor="middle" fill="#f0492e" fontWeight="bold">
-          {t("record hot")}
+          {t("ccchart.moreRecordHotWeather.2", "record hot")}
         </tspan>
-        <tspan x={l + viewBox.width * (7.5 / 9)} dy="1.2em" text-anchor="middle">
-          {t("weather")}
-        </tspan>
+        {t("ccchart.moreRecordHotWeather.3", "weather") !== "-" && (
+          <tspan x={l + viewBox.width * (7.5 / 9)} dy="1.2em" text-anchor="middle">
+            {t("ccchart.moreRecordHotWeather.3", "weather")}
+          </tspan>
+        )}
       </text>
       <path
         id="arrow-line"

@@ -5,6 +5,7 @@ import { DVRiskFile, RISKFILE_RESULT_FIELD } from "../types/dataverse/DVRiskFile
 import {
   CASCADE_RESULT_FIELD,
   getCascadeParameter,
+  getScenarioLetter,
   getScenarioParameter,
   getScenarioSuffix,
   SCENARIO_SUFFIX,
@@ -138,13 +139,13 @@ const gcp = (c: DVRiskCascade, parameter: CASCADE_RESULT_FIELD, scenario: SCENAR
   getCascadeParameter(c, scenario, parameter) || 0.00000001;
 
 export function getIndirectImpact(c: DVRiskCascade<SmallRisk, SmallRisk>, rf: DVRiskFile, scenario: SCENARIOS): Effect {
-  // const scenarioLetter = scenarioSuffix[1] as "c" | "m" | "e";
+  const scenarioLetter = getScenarioLetter(scenario);
 
   return {
     id: c.cr4de_effect_hazard.cr4de_riskfilesid,
     name: c.cr4de_effect_hazard.cr4de_title,
 
-    cp: 0, //c[`${scenarioLetter}2c`] + c[`${scenarioLetter}2m`] + c[`${scenarioLetter}2e`],
+    cp: gcp(c, "CP_AVG", scenario), //c[`${scenarioLetter}2c`] + c[`${scenarioLetter}2m`] + c[`${scenarioLetter}2e`],
 
     ha: gcp(c, "II_Ha", scenario) / gsp(rf, "TI_Ha", scenario),
     hb: gcp(c, "II_Hb", scenario) / gsp(rf, "TI_Hb", scenario),

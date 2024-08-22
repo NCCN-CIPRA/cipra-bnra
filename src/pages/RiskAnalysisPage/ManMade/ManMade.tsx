@@ -14,6 +14,7 @@ import MMSankeyDiagram from "./MMSankeyDiagram";
 import MMImpactSection from "./MMImpactSection";
 import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../../components/RiskFileTitle";
+import { getIndirectImpact } from "../../../functions/Impact";
 
 export default function ManMade({
   riskFile,
@@ -41,6 +42,8 @@ export default function ManMade({
 
   const intensityParameters = IP.unwrap(rf.cr4de_intensity_parameters);
   const MRS = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
+
+  const effects = cascades.effects.map((c) => getIndirectImpact(c, riskFile, MRS));
 
   return (
     <>
@@ -79,7 +82,7 @@ export default function ManMade({
 
           <ActionsSection
             riskFile={rf}
-            effects={cascades.effects}
+            effects={effects}
             scenario={MRS}
             mode={mode}
             attachments={attachments}
@@ -96,7 +99,7 @@ export default function ManMade({
 
           <MMImpactSection
             riskFile={rf}
-            effects={cascades.effects}
+            effects={effects}
             scenario={MRS}
             mode={mode}
             attachments={attachments}

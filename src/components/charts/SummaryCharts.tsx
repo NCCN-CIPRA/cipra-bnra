@@ -2,10 +2,15 @@ import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import ProbabilityBars from "./ProbabilityBars";
 import { Cell, Pie, PieChart } from "recharts";
 import getScaleString from "../../functions/getScaleString";
-import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
+import { DVAnalysisRun, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { SCENARIOS, getScenarioParameter, getScenarioSuffix } from "../../functions/scenarios";
 import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
-import { IMPACT_CATEGORY, getCategoryImpactRelativeScale } from "../../functions/Impact";
+import {
+  IMPACT_CATEGORY,
+  getCategoryImpactRelativeScale,
+  getDamageIndicatorRelativeScale,
+  getTotalImpactRelativeScale,
+} from "../../functions/Impact";
 import { IMPACT_COLOR_SCALES } from "../../functions/getImpactColor";
 import { useCallback } from "react";
 import FileSaver from "file-saver";
@@ -15,6 +20,9 @@ import { AuthPageContext } from "../../pages/AuthPage";
 import SaveIcon from "@mui/icons-material/Download";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { Trans, useTranslation } from "react-i18next";
+import useRecord from "../../hooks/useRecord";
+import { DataTable } from "../../hooks/useAPI";
+import useRecords from "../../hooks/useRecords";
 
 const RADIAN = Math.PI / 180;
 const data = [
@@ -79,6 +87,24 @@ export default function SummaryCharts({
 }) {
   const { t } = useTranslation();
   const { user } = useOutletContext<AuthPageContext>();
+
+  useRecord<DVAnalysisRun>({
+    table: DataTable.ANALYSIS_RUN,
+    id: riskFile._cr4de_latest_calculation_value || "",
+    onComplete: async (data) => {
+      console.log(data.cr4de_results);
+      if (data.cr4de_results === null) return;
+
+      console.log(getTotalImpactRelativeScale(data.cr4de_results, "_e"));
+      console.log(getCategoryImpactRelativeScale(data.cr4de_results, "H", "_e"));
+      console.log(getDamageIndicatorRelativeScale(data.cr4de_results, "Ha", "_e"));
+      console.log(getDamageIndicatorRelativeScale(data.cr4de_results, "Hb", "_e"));
+      console.log(getDamageIndicatorRelativeScale(data.cr4de_results, "Hc", "_e"));
+      console.log(
+        (data.cr4de_results.ti_Ha_e + data.cr4de_results.ti_Hb_e + data.cr4de_results.ti_Hc_e) / data.cr4de_results.ti_e
+      );
+    },
+  });
 
   // useCurrentPng usage (isLoading is optional)
   const [getDivJpeg, { ref, isLoading }] = useGenerateImage({

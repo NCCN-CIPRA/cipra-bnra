@@ -5,10 +5,20 @@ import { getAuthRoles, UserRoles } from "../functions/authRoles";
 export interface LoggedInUser extends DVContact {
   viewer: boolean;
   roles: UserRoles;
+  realRoles?: UserRoles;
 }
 
 export default function useLoggedInUser() {
   const [user, setUser] = useState<LoggedInUser | null | undefined>(undefined);
+
+  const setFakeRole = (role: string) => {
+    if (user?.realRoles?.admin || user?.roles.admin) {
+      setUser({
+        ...user,
+        roles: getAuthRoles(role),
+      });
+    }
+  };
 
   const refreshUser = () => {
     const info = document.getElementById("user-information");
@@ -29,6 +39,7 @@ export default function useLoggedInUser() {
           viewer: info?.hasAttribute("data-report-viewer"),
           participations: undefined,
           roles: getAuthRoles(info?.getAttribute("data-roles") || ""),
+          realRoles: getAuthRoles(info?.getAttribute("data-roles") || ""),
         });
       }
     } else {
@@ -39,5 +50,5 @@ export default function useLoggedInUser() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(refreshUser);
 
-  return { user, refreshUser };
+  return { user, refreshUser, setFakeRole };
 }

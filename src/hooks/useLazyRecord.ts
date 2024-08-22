@@ -63,6 +63,25 @@ export default function useLazyRecord<T>(options: GetRecordParams<T>) {
         response = await api.getDirectAnalysis<T>(o.id, o.query);
       } else if (o.table === DataTable.CASCADE_ANALYSIS) {
         response = await api.getCascadeAnalysis<T>(o.id, o.query);
+      } else if (o.table === DataTable.ANALYSIS_RUN) {
+        response = await api.getAnalysisRun<T>(o.id, o.query);
+
+        const customTransformResult = o.transformResult;
+
+        o.transformResult = (r: any) => {
+          const parsedResult = {
+            ...r,
+            cr4de_metrics: r.cr4de_metrics != null ? JSON.parse(r.cr4de_metrics) : null,
+            cr4de_risk_file_metrics: r.cr4de_risk_file_metrics != null ? JSON.parse(r.cr4de_risk_file_metrics) : null,
+            cr4de_results: r.cr4de_results != null ? JSON.parse(r.cr4de_results) : null,
+          };
+
+          if (customTransformResult) {
+            return customTransformResult(parsedResult);
+          }
+
+          return parsedResult;
+        };
       } else {
         // (o.table === DataTable.PAGE) {
         response = await api.getPage<T>(o.id, o.query);
