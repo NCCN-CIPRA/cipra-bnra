@@ -96,8 +96,6 @@ export default function ResetPasswordPage() {
 
   return (
     <>
-      <CssBaseline />
-      <TitleBar title={t("auth.resetPassword.title", "BNRA 2023 - 2026 Password Reset")} />
       <Container maxWidth="md" component={Paper} sx={{ mt: 20 }}>
         <Box sx={{ width: "100%", mb: 12 }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>

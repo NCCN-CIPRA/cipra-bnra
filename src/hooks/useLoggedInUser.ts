@@ -10,7 +10,7 @@ export interface LoggedInUser extends DVContact {
 
 export default function useLoggedInUser() {
   const [user, setUser] = useState<LoggedInUser | null | undefined>(undefined);
-
+  console.log("Hook reload");
   const setFakeRole = (role: string) => {
     if (user?.realRoles?.admin || user?.roles.admin) {
       setUser({
@@ -48,7 +48,7 @@ export default function useLoggedInUser() {
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(refreshUser);
+  useEffect(refreshUser, []);
 
   return { user, refreshUser, setFakeRole };
 }

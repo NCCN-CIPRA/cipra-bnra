@@ -28,12 +28,20 @@ export default function getCategoryColor(category: string) {
   return "rgb(0, 164, 154)";
 }
 
-export function CategoryIcon({ category }: { category: RISK_CATEGORY }) {
+export function CategoryIcon({
+  category,
+  size = 30,
+  tooltip = true,
+}: {
+  category: RISK_CATEGORY;
+  size?: number;
+  tooltip?: boolean;
+}) {
   const { t } = useTranslation();
 
   return (
-    <Tooltip title={t(category, category)}>
-      <Box sx={{ width: 30, height: 30 }}>
+    <Tooltip title={tooltip ? t(category, category) : ""}>
+      <Box sx={{ width: size, height: size }}>
         {category === RISK_CATEGORY.CYBER && <CyberIcon />}
         {category === RISK_CATEGORY.EMERGING && <EmergingIcon />}
         {category === RISK_CATEGORY.ECOTECH && <EcotechIcon />}

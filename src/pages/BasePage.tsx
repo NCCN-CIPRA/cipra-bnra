@@ -5,10 +5,20 @@ import AppContext from "../functions/AppContext";
 import SideDrawer from "../components/SideDrawer";
 import TitleBar from "../components/TitleBar";
 import BreadcrumbNavigation, { Breadcrumb } from "../components/BreadcrumbNavigation";
+import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
+import satisfies from "../types/satisfies";
+
+export interface BasePageContext {
+  user: LoggedInUser | null | undefined;
+  refreshUser: () => void;
+  setFakeRole: (role: string) => void;
+}
 
 const drawerWidth = 320;
 
 export default function BasePage() {
+  const { user, refreshUser, setFakeRole } = useLoggedInUser();
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [pageTitle, setPageTitle] = useState("BNRA 2023 - 2026");
   const [breadcrumbs, setBreadcrumbs] = useState<(Breadcrumb | null)[]>([
@@ -28,8 +38,13 @@ export default function BasePage() {
       }}
     >
       <CssBaseline />
-      <TitleBar title={pageTitle} onDrawerToggle={() => setDrawerOpen(!drawerOpen)} />
-      <SideDrawer open={drawerOpen} width={drawerWidth} onClose={() => setDrawerOpen(false)} />
+      <TitleBar
+        user={user}
+        setFakeRole={setFakeRole}
+        title={pageTitle}
+        onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
+      />
+      <SideDrawer user={user} open={drawerOpen} width={drawerWidth} onClose={() => setDrawerOpen(false)} />
       {/* <Box sx={{ display: "flex", flexFlow: "column nowrap", minHeight: "100vh", mb: `${bottomBarHeight}px` }}> */}
       <Box sx={{ flexGrow: 1 }}>
         <Toolbar />
@@ -38,7 +53,13 @@ export default function BasePage() {
             <BreadcrumbNavigation breadcrumbs={breadcrumbs} />
           </Box>
         )}
-        <Outlet />
+        <Outlet
+          context={satisfies<BasePageContext>({
+            user,
+            refreshUser,
+            setFakeRole,
+          })}
+        />
       </Box>
       {/* <Stack
           direction="row"

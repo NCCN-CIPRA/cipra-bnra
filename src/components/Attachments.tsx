@@ -28,7 +28,6 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
-import useLoggedInUser from "../hooks/useLoggedInUser";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { Trans } from "react-i18next";
@@ -41,6 +40,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
+import { useOutletContext } from "react-router-dom";
+import { AuthPageContext } from "../pages/AuthPage";
 
 const fieldIndex = {
   definition: 0,
@@ -81,7 +82,7 @@ export default function Attachments({
   const api = useAPI();
   const theme = useTheme();
   const { t } = useTranslation();
-  const { user } = useLoggedInUser();
+  const { user } = useOutletContext<AuthPageContext>();
 
   const [openDialog, setOpenDialog] = useState(false);
   const [expanded, setExpanded] = useState(alwaysOpen);

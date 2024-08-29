@@ -502,10 +502,10 @@ export default function CalculationPage() {
         [SCENARIOS.EXTREME]: getScenarioResult(calculation, SCENARIOS.EXTREME),
       };
 
-      await api.updateRiskFile(riskId, {
-        cr4de_result_snapshot: JSON.stringify(result),
-        // cr4de_mrs: getMostRelevantScenario(calculation),
-      });
+      // await api.updateRiskFile(riskId, {
+      //   cr4de_result_snapshot: JSON.stringify(result),
+      //   // cr4de_mrs: getMostRelevantScenario(calculation),
+      // });
 
       calculation.causes.forEach((c) => {
         const cascade = cDict[c.cascadeId];
@@ -589,9 +589,9 @@ export default function CalculationPage() {
         continue;
       }
 
-      // await api.updateCascade(cId, {
-      //   cr4de_result_snapshot: JSON.stringify(cR),
-      // });
+      await api.updateCascade(cId, {
+        cr4de_result_snapshot: JSON.stringify(cR),
+      });
 
       setCalculationProgress((100 * (i + 1)) / (calculations.length + Object.keys(cRDict).length));
       i += 1;

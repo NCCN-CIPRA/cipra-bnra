@@ -20,7 +20,6 @@ import {
   DialogActions,
   DialogTitle,
 } from "@mui/material";
-import useLoggedInUser from "../../hooks/useLoggedInUser";
 import Progress, { ScenarioErrors } from "./information/Progress";
 import InformationButton from "./information/InformationButton";
 import useLazyRecords from "../../hooks/useLazyRecords";

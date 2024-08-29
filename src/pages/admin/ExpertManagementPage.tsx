@@ -35,11 +35,12 @@ import { useDifferentDebounce as useDebounce } from "../../hooks/useDebounce";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import CircularProgress from "@mui/material/CircularProgress";
 import Backdrop from "@mui/material/Backdrop";
-import useLoggedInUser from "../../hooks/useLoggedInUser";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import { useOutletContext } from "react-router-dom";
+import { AuthPageContext } from "../AuthPage";
 
 interface SelectableContact extends DVContact<DVParticipation<undefined, DVRiskFile>[], DVInvitation[]> {
   selected: boolean;
@@ -533,7 +534,7 @@ const ParticipantInput = ({
 
 export default function ExpertManagementPage() {
   const api = useAPI();
-  const { user } = useLoggedInUser();
+  const { user } = useOutletContext<AuthPageContext>();
 
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState<string | null>(null);

@@ -29,10 +29,10 @@ import { DVValidation } from "../types/dataverse/DVValidation";
 import { DVParticipation } from "../types/dataverse/DVParticipation";
 import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import useAPI from "../hooks/useAPI";
-import useLoggedInUser from "../hooks/useLoggedInUser";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
+import { AuthPageContext } from "../pages/AuthPage";
 
 export interface FinishableRiskFile extends DVRiskFile {
   finished?: boolean;
@@ -63,7 +63,7 @@ function RiskFileList({
   participations: DVParticipation<undefined, DVRiskFile>[] | null;
   finishedTooltip?: string;
 }) {
-  const { user } = useLoggedInUser();
+  const { user } = useOutletContext<AuthPageContext>();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const api = useAPI();

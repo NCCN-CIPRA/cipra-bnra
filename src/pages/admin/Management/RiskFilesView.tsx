@@ -14,9 +14,10 @@ import {
   IconButton,
 } from "@mui/material";
 import { Virtuoso } from "react-virtuoso";
-import useLoggedInUser from "../../../hooks/useLoggedInUser";
 import RiskFileListItem from "./RiskFileListItem";
 import ContactFilterField from "./ContactFilterField";
+import { useOutletContext } from "react-router-dom";
+import { AuthPageContext } from "../../AuthPage";
 
 const SPECIAL_FILTERS = {
   MY_RISK_FILES: false,
@@ -50,7 +51,7 @@ export default function RiskFilesView({
   selectRiskFile: (rf: SelectableRiskFile) => void;
   selectAll: (reset?: boolean) => void;
 }) {
-  const { user } = useLoggedInUser();
+  const { user } = useOutletContext<AuthPageContext>();
 
   const [isLoading, setIsLoading] = useState(false);
   const [filteredRiskFiles, setFilteredRiskFiles] = useState<SelectableRiskFile[]>(riskFiles);

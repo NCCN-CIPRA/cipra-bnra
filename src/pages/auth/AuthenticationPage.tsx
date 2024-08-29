@@ -92,8 +92,6 @@ export default function AuthenticationPage() {
 
   return (
     <>
-      <CssBaseline />
-      <TitleBar title={t("auth.login.title", "BNRA 2023 - 2026 Login")} />
       <Container maxWidth="md" component={Paper} sx={{ mt: 20 }}>
         <Box sx={{ width: "100%" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>

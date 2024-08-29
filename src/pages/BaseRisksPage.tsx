@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import usePageTitle from "../hooks/usePageTitle";
 import useBreadcrumbs from "../hooks/useBreadcrumbs";
 import { DVContact } from "../types/dataverse/DVContact";
-import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
+import { LoggedInUser } from "../hooks/useLoggedInUser";
 import {
   CascadeAnalysisInput,
   getCatalyzingEffects,
@@ -23,6 +23,7 @@ import {
   getEffects,
 } from "../functions/cascades";
 import satisfies from "../types/satisfies";
+import { AuthPageContext } from "./AuthPage";
 
 export type Cascades = {
   all: DVRiskCascade<SmallRisk, SmallRisk>[];
@@ -50,7 +51,7 @@ export interface RiskPageContext {
 }
 
 export default function BaseRisksPage() {
-  const { user, refreshUser } = useLoggedInUser();
+  const { user, refreshUser } = useOutletContext<AuthPageContext>();
 
   useEffect(() => {
     let interval: any;

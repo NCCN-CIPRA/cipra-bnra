@@ -20,7 +20,6 @@ import { Trans, useTranslation } from "react-i18next";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import useAPI, { DataTable } from "../../../hooks/useAPI";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import useLoggedInUser from "../../../hooks/useLoggedInUser";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";

@@ -1,5 +1,6 @@
 export interface DVTranslation {
   cr4de_bnratranslationid: string;
+  createdon: string;
 
   cr4de_name: string;
 

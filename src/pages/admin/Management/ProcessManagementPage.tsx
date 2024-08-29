@@ -11,10 +11,9 @@ import {
   CircularProgress,
   IconButton,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dayDifference from "../../../functions/days";
 import useAPI from "../../../hooks/useAPI";
-import useLoggedInUser from "../../../hooks/useLoggedInUser";
 import { DVInvitation } from "../../../types/dataverse/DVInvitation";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
@@ -214,6 +213,32 @@ export default function ProcessManagementPage() {
     { name: "BNRA 2023 - 2026", url: "/" },
     { name: "Process Management", url: "/admin/process" },
   ]);
+
+  // const expertsCSV = useMemo(() => {
+  //   if (!riskFiles) return null;
+
+  //   return riskFiles
+  //     .map((rf) => {
+  //       let s = `${rf.cr4de_hazard_id},${rf.cr4de_title}\n`;
+
+  //       s += rf.participants
+  //         .filter((p) => p.cr4de_contact.emailaddress1.indexOf("nccn.fgov.be") < 0)
+  //         .map(
+  //           (p) =>
+  //             `,${p.cr4de_contact.firstname} ${p.cr4de_contact.lastname}, ${p.cr4de_contact.emailaddress1}, ${
+  //               p.cr4de_validation_finished ? "-" : "Validation Finished"
+  //             }, ${p.cr4de_direct_analysis_finished ? "-" : "Step 2A Finished"}, ${
+  //               p.cr4de_cascade_analysis_finished ? "-" : "Step 2B Finished"
+  //             }`
+  //         )
+  //         .join("\n");
+
+  //       return s;
+  //     })
+  //     .join("\n");
+  // }, [riskFiles]);
+
+  // console.log(expertsCSV);
 
   return (
     <Container sx={{ mb: 8, mt: 4 }}>

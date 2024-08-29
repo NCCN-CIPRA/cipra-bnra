@@ -10,14 +10,24 @@ import {
   Box,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-import useLoggedInUser from "../hooks/useLoggedInUser";
+import { Link, useOutletContext } from "react-router-dom";
+import { AuthPageContext } from "../pages/AuthPage";
+import { LoggedInUser } from "../hooks/useLoggedInUser";
 
-export default function SideDrawer({ open, width, onClose }: { open: boolean; width: number; onClose: () => void }) {
+export default function SideDrawer({
+  user,
+  open,
+  width,
+  onClose,
+}: {
+  user: LoggedInUser | null | undefined;
+  open: boolean;
+  width: number;
+  onClose: () => void;
+}) {
   const { t } = useTranslation();
 
-  const { user } = useLoggedInUser();
-
+  console.log(user);
   return (
     <Drawer
       open={open}
@@ -66,12 +76,12 @@ export default function SideDrawer({ open, width, onClose }: { open: boolean; wi
               {user.roles.admin && (
                 <>
                   <Divider />
-                  <ListItem disablePadding>
+                  {/* <ListItem disablePadding>
                     <ListItemButton component={Link} to="/reporting" onClick={onClose}>
                       <ListItemIcon></ListItemIcon>
                       <ListItemText primary={t("sideDrawer.reporting", "Reporting")} />
                     </ListItemButton>
-                  </ListItem>
+                  </ListItem> */}
                   {/* <Divider /> */}
                   {/* <ListItem disablePadding>
                     <ListItemButton component={Link} to="/analysis/averager" onClick={onClose}>

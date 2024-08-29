@@ -10,7 +10,7 @@ export default function ErrorPage() {
   return (
     <>
       <CssBaseline />
-      <TitleBar title={"BNRA 2023 - 2026"} showUser={false} />
+      <TitleBar user={null} setFakeRole={() => {}} title={"BNRA 2023 - 2026"} showUser={false} />
       <Box
         sx={{
           display: "flex",

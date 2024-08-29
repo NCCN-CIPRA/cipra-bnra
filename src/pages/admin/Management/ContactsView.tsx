@@ -18,7 +18,8 @@ import ContactListItem from "./ContactListItem";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { SelectableContact } from "./Selectables";
 import dayDifference from "../../../functions/days";
-import useLoggedInUser from "../../../hooks/useLoggedInUser";
+import { useOutletContext } from "react-router-dom";
+import { AuthPageContext } from "../../AuthPage";
 
 const SPECIAL_FILTERS = {
   MY_RISK_FILES: false,
@@ -46,7 +47,7 @@ export default function ContactsView({
   selectContact: (c: SelectableContact) => void;
   selectAll: () => void;
 }) {
-  const { user } = useLoggedInUser();
+  const { user } = useOutletContext<AuthPageContext>();
 
   const [isLoading, setIsLoading] = useState(false);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);

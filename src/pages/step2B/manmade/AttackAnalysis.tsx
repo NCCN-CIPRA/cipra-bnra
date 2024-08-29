@@ -40,7 +40,6 @@ import AutoHeight from "../../../components/AutoHeight";
 import { DVCascadeAnalysis } from "../../../types/dataverse/DVCascadeAnalysis";
 import useRecords from "../../../hooks/useRecords";
 import useAPI, { DataTable } from "../../../hooks/useAPI";
-import useLoggedInUser from "../../../hooks/useLoggedInUser";
 import { DVContact } from "../../../types/dataverse/DVContact";
 import TextInputBox from "../../../components/TextInputBox";
 import { CascadeAnalysisInput, getCascadeField } from "../../../functions/cascades";

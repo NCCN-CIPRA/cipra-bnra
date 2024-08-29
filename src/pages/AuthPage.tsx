@@ -1,29 +1,31 @@
 import { useEffect } from "react";
 import { Box, CircularProgress } from "@mui/material";
-import { Outlet, useNavigate } from "react-router-dom";
-import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
+import { Outlet, useNavigate, useOutletContext } from "react-router-dom";
+import { LoggedInUser } from "../hooks/useLoggedInUser";
 import { DVContact } from "../types/dataverse/DVContact";
 import NCCNLoader from "../components/NCCNLoader";
+import satisfies from "../types/satisfies";
+import { BasePageContext } from "./BasePage";
 
-export interface AuthPageContext {
+export interface AuthPageContext extends BasePageContext {
   user: LoggedInUser;
 }
 
 export default function AuthPage() {
-  const { user, refreshUser } = useLoggedInUser();
+  const basePageContext = useOutletContext<BasePageContext>();
   const navigate = useNavigate();
 
   useEffect(() => {
     let interval: any;
 
-    if (user === undefined) {
-      interval = setInterval(refreshUser, 1000);
+    if (basePageContext.user === undefined) {
+      interval = setInterval(basePageContext.refreshUser, 1000);
     }
 
     return () => interval && clearInterval(interval);
-  }, [user, refreshUser]);
+  }, [basePageContext.user, basePageContext.refreshUser]);
 
-  if (user === undefined) {
+  if (basePageContext.user === undefined) {
     return (
       <Box sx={{ width: "100%", height: 500, alignItems: "center", justifyContent: "center", display: "flex" }}>
         <NCCNLoader />
@@ -31,9 +33,11 @@ export default function AuthPage() {
     );
   }
 
-  if (user === null) {
+  if (basePageContext.user === null) {
     navigate("/auth");
+
+    return null;
   }
 
-  return <Outlet context={{ user }} />;
+  return <Outlet context={satisfies<AuthPageContext>({ ...basePageContext, user: basePageContext.user })} />;
 }

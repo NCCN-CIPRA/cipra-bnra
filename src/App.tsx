@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import AuthenticationPage from "./pages/auth/AuthenticationPage";
-import HomePage from "./pages/main/HomePage";
+import LandingPage from "./pages/LandingPage/LandingPage";
 import LocalAPI from "./pages/main/LocalAPI";
 import CalculationPage from "./pages/CalculationPage/CalculationPage";
 import RankingPage from "./pages/reporting/RankingPage";
@@ -17,7 +17,7 @@ import EditorPage from "./pages/riskFile/EditorPage";
 import LearningOverviewPage from "./pages/learning/LearningOverviewPage";
 import OverviewPage from "./pages/main/OverviewPage";
 import AuthPage from "./pages/AuthPage";
-import TranslationsPage from "./pages/admin/TranslationsPage";
+import TranslationsPage from "./pages/TranslationsPage/TranslationsPage";
 import LearningPage from "./pages/learning/LearningPage";
 import RiskCataloguePage from "./pages/learning/RiskCataloguePage";
 import QuantitativeScalesPage from "./pages/learning/QuantitativeScalesPage";
@@ -70,11 +70,24 @@ function App() {
           children: [
             {
               path: "/",
-              element: <HomePage />,
+              element: <LandingPage />,
             },
             {
               path: "/403",
               element: <PermissionDeniedPage />,
+            },
+
+            {
+              path: "/auth",
+              element: <AuthenticationPage />,
+            },
+            {
+              path: "/auth/register/:registration_code",
+              element: <RegistrationPage />,
+            },
+            {
+              path: "/auth/resetPassword",
+              element: <ResetPasswordPage />,
             },
 
             {
@@ -205,18 +218,6 @@ function App() {
               ],
             },
           ],
-        },
-        {
-          path: "/auth",
-          element: <AuthenticationPage />,
-        },
-        {
-          path: "/auth/register/:registration_code",
-          element: <RegistrationPage />,
-        },
-        {
-          path: "/auth/resetPassword",
-          element: <ResetPasswordPage />,
         },
 
         // DEV ONLY

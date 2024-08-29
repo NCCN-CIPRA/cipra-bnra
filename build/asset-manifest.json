@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/css/main.b452075e.css",
-    "main.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.0c58a6ba.js",
+    "main.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.b98d33dc.js",
     "static/js/83.020785f9.chunk.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/83.020785f9.chunk.js",
     "static/js/787.3fe0f5ae.chunk.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/787.3fe0f5ae.chunk.js",
     "static/media/roboto-all-500-normal.woff": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/roboto-all-500-normal.0ab669b7a0d19b178f57.woff",
@@ -39,7 +39,7 @@
     "static/media/man_made_risk_icon.svg": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/man_made_risk_icon.274ebfadfc183f4288c9e343efe3edf5.svg",
     "static/media/cyber_icon.svg": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/cyber_icon.5cf571a938ec6fde98cf5693d8f7a852.svg",
     "static/media/calculator.worker.ts": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/calculator.worker.0d7d053cee14a695dae4.ts",
-    "static/media/health_risk_icon.svg": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/health_risk_icon.eecc6b69b2e584cc99ba4b7c78dabe3f.svg",
+    "static/media/health_risk_icon.svg": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/health_risk_icon.fdd12d08b2890eb570f70e34202da5f3.svg",
     "static/media/eco_tech_risk_icon.svg": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/eco_tech_risk_icon.ce4970900622b79a13c54488309bf32d.svg",
     "static/media/roboto-greek-ext-500-normal.woff2": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/roboto-greek-ext-500-normal.6fb9cffb1d3e72bf9293.woff2",
     "static/media/roboto-greek-ext-400-normal.woff2": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/roboto-greek-ext-400-normal.169619821ea93019d1bb.woff2",
@@ -49,12 +49,12 @@
     "static/media/emerging_risk_icon.svg": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/emerging_risk_icon.b8eb4450eee331aea123412a957a5625.svg",
     "index.html": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/index.html",
     "main.b452075e.css.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/css/main.b452075e.css.map",
-    "main.0c58a6ba.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.0c58a6ba.js.map",
+    "main.b98d33dc.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.b98d33dc.js.map",
     "83.020785f9.chunk.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/83.020785f9.chunk.js.map",
     "787.3fe0f5ae.chunk.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/787.3fe0f5ae.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b452075e.css",
-    "static/js/main.0c58a6ba.js"
+    "static/js/main.b98d33dc.js"
   ]
 }

@@ -21,7 +21,6 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import useAPI, { DataTable } from "../../../hooks/useAPI";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import useLoggedInUser from "../../../hooks/useLoggedInUser";
 import useLazyRecords from "../../../hooks/useLazyRecords";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { useOutletContext } from "react-router-dom";

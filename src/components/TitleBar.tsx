@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useOutletContext } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -8,21 +8,24 @@ import Button from "@mui/material/Button";
 import { FormControl, IconButton, InputLabel, Menu, MenuItem, Select, Stack } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import useLoggedInUser from "../hooks/useLoggedInUser";
 import { Trans, useTranslation } from "react-i18next";
+import { LoggedInUser } from "../hooks/useLoggedInUser";
 
 export default function TitleBar({
   title,
   showUser = true,
   onDrawerToggle,
+  user,
+  setFakeRole,
 }: {
   title: string;
   showUser?: boolean;
   onDrawerToggle?: () => void;
+  user: LoggedInUser | null | undefined;
+  setFakeRole: (role: string) => void;
 }) {
   const { i18n } = useTranslation();
-  const { user, setFakeRole } = useLoggedInUser();
-  const [role, setRole] = useState(user?.admin ? "Beheerders" : "");
+  const [role, setRole] = useState(user?.realRoles?.admin ? "Beheerders" : "");
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -33,7 +36,11 @@ export default function TitleBar({
   const handleClose = () => {
     setAnchorEl(null);
   };
-  console.log(user);
+
+  useEffect(() => {
+    if (role === "") setRole(user?.realRoles?.admin ? "Beheerders" : "");
+  }, [user]);
+
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
@@ -55,7 +62,7 @@ export default function TitleBar({
               {title}
             </Typography>
             {user?.realRoles?.admin && (
-              <FormControl sx={{ width: 200, mr: 4 }} size="small">
+              <FormControl variant="filled" sx={{ width: 200, mr: 4 }} size="small">
                 <InputLabel id="demo-simple-select-label">Role</InputLabel>
                 <Select
                   labelId="demo-simple-select-label"

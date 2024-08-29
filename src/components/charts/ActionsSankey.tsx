@@ -98,8 +98,8 @@ const PSankeyNode = ({
                   </Typography>
 
                   <Typography variant="body1" sx={{ mt: 1 }}>
-                    {t("analysis.cause.explained", {
-                      percentage: round((100 * payload.p) / totalProbability, 2),
+                    {t("analysis.action.explained", {
+                      percentage: round((100 * payload.cp) / totalProbability, 2),
                     })}
                   </Typography>
 
@@ -151,39 +151,14 @@ const PSankeyNode = ({
                     {t("Other causes")}:
                   </Typography>
 
-                  {payload.hidden.map((h: any) =>
-                    h.cascade ? (
-                      <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
-                        <b>{h.name}:</b>{" "}
-                        {t("analysis.cause.other.explained", {
-                          percentage: round((100 * h.p) / totalProbability, 2),
-                        })}
-                      </Typography>
-                    ) : (
-                      <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
-                        <b>{t("2A.dp.title", "Direct Probability")}</b>
-                        {": "}
-                        {t("analysis.cause.other.explained", {
-                          percentage: round((100 * h.p) / totalProbability, 2),
-                        })}
-                      </Typography>
-                    )
-                  )}
-                </>
-              )}
-              {!payload.cascade && !payload.hidden && (
-                <>
-                  <Typography variant="subtitle1" color="inherit">
-                    {payload.name}
-                  </Typography>
-
-                  <Typography variant="body1" sx={{ mt: 1 }}>
-                    <b>{t("2A.dp.title", "Direct Probability")}</b>
-                    {": "}
-                    {t("analysis.dp.explained", {
-                      percentage: round((100 * payload.p) / totalProbability, 2),
-                    })}
-                  </Typography>
+                  {payload.hidden.map((h: any) => (
+                    <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
+                      <b>{h.name}:</b>{" "}
+                      {t("analysis.action.other.explained", {
+                        percentage: round((100 * h.cp) / totalProbability, 2),
+                      })}
+                    </Typography>
+                  ))}
                 </>
               )}
             </Box>

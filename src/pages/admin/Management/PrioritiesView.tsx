@@ -15,7 +15,6 @@ import {
   Box,
 } from "@mui/material";
 import { Virtuoso } from "react-virtuoso";
-import useLoggedInUser from "../../../hooks/useLoggedInUser";
 import RiskFileListItem from "./RiskFileListItem";
 import ContactFilterField from "./ContactFilterField";
 import PrioritiesListItem from "./PrioritiesListItem";
@@ -24,6 +23,8 @@ import { DataTable } from "../../../hooks/useAPI";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { DataGrid, GridColDef, GridValueGetterParams } from "@mui/x-data-grid";
+import { useOutletContext } from "react-router-dom";
+import { AuthPageContext } from "../../AuthPage";
 
 const SPECIAL_FILTERS = {
   MY_RISK_FILES: false,
@@ -71,7 +72,7 @@ const getSize = (rf: RiskFile) => {
 };
 
 export default function PrioritiesView({ baseRiskFiles }: { baseRiskFiles: SelectableRiskFile[] }) {
-  const { user } = useLoggedInUser();
+  const { user } = useOutletContext<AuthPageContext>();
 
   const [isLoading, setIsLoading] = useState(false);
   const [riskFiles, setRiskFiles] = useState<RiskFile[] | null>(null);
