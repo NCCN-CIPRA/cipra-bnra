@@ -51,9 +51,9 @@ export function Slider({
   initialValue: string | null;
   name?: keyof DVRiskFile;
   type?: RISK_TYPE;
-  spread: number[];
+  spread: number[] | null;
   mx?: number;
-  onChange: (newValue: string) => Promise<void>;
+  onChange: ((newValue: string) => Promise<void>) | null;
 }) {
   let prefix: string, number: number;
 
@@ -71,12 +71,12 @@ export function Slider({
   };
 
   const handleChangeCommitted = (event: unknown, newValue: number | number[]) => {
-    onChange(`${prefix}${newValue}`);
+    if (onChange) onChange(`${prefix}${newValue}`);
   };
 
   const max = 5.5;
-  const spreadMin = (100 * spread[0]) / max;
-  const spreadMax = (100 * spread[1]) / max;
+  const spreadMin = spread ? (100 * spread[0]) / max : 0;
+  const spreadMax = spread ? (100 * spread[1]) / max : 0;
 
   return (
     <Box
@@ -93,8 +93,8 @@ export function Slider({
     >
       <MuiSlider
         value={value}
-        onChange={handleChangeValue}
-        onChangeCommitted={handleChangeCommitted}
+        onChange={onChange !== null ? handleChangeValue : undefined}
+        onChangeCommitted={onChange !== null ? handleChangeCommitted : undefined}
         valueLabelDisplay="auto"
         step={0.5}
         min={0}

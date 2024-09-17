@@ -264,17 +264,23 @@ export default function BaseRiskFilePage() {
                 icon={<AodIcon />}
                 onClick={() => navigate(`/risks/${params.risk_file_id}`)}
               />
-              <BottomNavigationAction
-                label={t("risk.bottombar.riskIdentification", "Risk Identification")}
-                icon={<FingerprintIcon />}
-                onClick={() => navigate(`/risks/${params.risk_file_id}/identification`)}
-              />
-              <BottomNavigationAction
-                label={t("risk.bottombar.riskAnalysis", "Risk Analysis")}
-                icon={<AssessmentIcon />}
-                onClick={() => navigate(`/risks/${params.risk_file_id}/analysis`)}
-              />
-              {riskContext.riskFiles[params.risk_file_id] &&
+              {user && user.roles.beReader && (
+                <BottomNavigationAction
+                  label={t("risk.bottombar.riskIdentification", "Risk Identification")}
+                  icon={<FingerprintIcon />}
+                  onClick={() => navigate(`/risks/${params.risk_file_id}/identification`)}
+                />
+              )}
+              {user && user.roles.beReader && (
+                <BottomNavigationAction
+                  label={t("risk.bottombar.riskAnalysis", "Risk Analysis")}
+                  icon={<AssessmentIcon />}
+                  onClick={() => navigate(`/risks/${params.risk_file_id}/analysis`)}
+                />
+              )}
+              {user &&
+                user.roles.beReader &&
+                riskContext.riskFiles[params.risk_file_id] &&
                 riskContext.riskFiles[params.risk_file_id].cr4de_risk_type !== RISK_TYPE.EMERGING && (
                   <BottomNavigationAction
                     label={t("risk.bottombar.riskEvolution", "Risk Evolution")}

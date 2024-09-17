@@ -32,6 +32,8 @@ import { DVContact } from "../../types/dataverse/DVContact";
 import CascadeMatrix from "./CascadeMatrix";
 import TornadoIcon from "@mui/icons-material/Tornado";
 import { useTranslation } from "react-i18next";
+import { useOutletContext } from "react-router-dom";
+import { AuthPageContext } from "../AuthPage";
 
 const capFirst = (s: string) => {
   return `${s[0].toUpperCase()}${s.slice(1)}`;
@@ -68,30 +70,23 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 
 export default function Standard({
   riskFile,
-  cascades,
+  causes,
+  catalyzingEffects,
+  climateChange,
   directAnalyses,
   cascadeAnalyses,
   reloadRiskFile,
   reloadCascades,
 }: {
   riskFile: DVRiskFile;
-  cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
+  causes: DVRiskCascade<SmallRisk, unknown>[];
+  catalyzingEffects: DVRiskCascade<SmallRisk, unknown>[];
+  climateChange: DVRiskCascade<SmallRisk, unknown> | null;
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
   reloadRiskFile: () => Promise<unknown>;
   reloadCascades: () => Promise<unknown>;
 }) {
-  const causes = useMemo(() => {
-    return cascades.filter(
-      (ca) =>
-        ca.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING &&
-        ca.cr4de_effect_hazard.cr4de_riskfilesid === riskFile.cr4de_riskfilesid
-    );
-  }, [cascades]);
-  const emerging = useMemo(() => {
-    return cascades.filter((ca) => ca.cr4de_cause_hazard.cr4de_risk_type === RISK_TYPE.EMERGING);
-  }, [cascades]);
-  console.log(cascades, causes);
   return (
     <>
       <Box sx={{ mx: 4 }}>
@@ -158,20 +153,19 @@ export default function Standard({
           ))}
         </Box>
         <Box sx={{ mb: 8 }}>
-          {emerging.map((ca) =>
-            ca.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 ? (
-              <CCSection
-                key={ca.cr4de_bnrariskcascadeid}
-                riskFile={riskFile}
-                cascade={ca}
-                directAnalyses={directAnalyses}
-                reloadRiskFile={reloadRiskFile}
-                reloadCascades={reloadCascades}
-              />
-            ) : (
-              <EmergingSection key={ca.cr4de_bnrariskcascadeid} cascade={ca} reloadCascades={reloadCascades} />
-            )
+          {climateChange && (
+            <CCSection
+              key={climateChange.cr4de_bnrariskcascadeid}
+              riskFile={riskFile}
+              cascade={climateChange}
+              directAnalyses={directAnalyses}
+              reloadRiskFile={reloadRiskFile}
+              reloadCascades={reloadCascades}
+            />
           )}
+          {catalyzingEffects.map((ca) => (
+            <EmergingSection key={ca.cr4de_bnrariskcascadeid} cascade={ca} reloadCascades={reloadCascades} />
+          ))}
         </Box>
       </Box>
     </>
@@ -191,6 +185,8 @@ function ParameterSection({
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
   reloadRiskFile: () => Promise<unknown>;
 }) {
+  const { user } = useOutletContext<AuthPageContext>();
+
   const section = DIRECT_ANALYSIS_SECTIONS_STANDARD[parameter];
   const discussionRequired = useMemo(() => {
     if (!riskFile.cr4de_discussion_required) return false;
@@ -233,17 +229,17 @@ function ParameterSection({
     <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />} onClick={() => setOpen(!open)}>
         <Typography sx={{ flex: 1 }}>{section.label}</Typography>
-        {discussionRequired === DiscussionRequired.REQUIRED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.REQUIRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="warning" />
           </Tooltip>
         )}
-        {discussionRequired === DiscussionRequired.PREFERRED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.PREFERRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="info" />
           </Tooltip>
         )}
-        {discussionRequired === DiscussionRequired.RESOLVED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.RESOLVED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <CheckCircleIcon color="success" />
           </Tooltip>
@@ -297,6 +293,7 @@ function ScenarioSection({
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const api = useAPI();
+  const { user } = useOutletContext<AuthPageContext>();
   const section = DIRECT_ANALYSIS_SECTIONS_STANDARD[parameter];
   const discussionRequired = useMemo(() => {
     if (!riskFile.cr4de_discussion_required) return false;
@@ -353,17 +350,17 @@ function ScenarioSection({
         <Typography variant="subtitle1" sx={{ flex: 1 }}>
           {capFirst(scenario)}
         </Typography>
-        {discussionRequired === DiscussionRequired.REQUIRED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.REQUIRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="warning" />
           </Tooltip>
         )}
-        {discussionRequired === DiscussionRequired.PREFERRED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.PREFERRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="info" />
           </Tooltip>
         )}
-        {discussionRequired === DiscussionRequired.RESOLVED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.RESOLVED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <CheckCircleIcon color="success" />
           </Tooltip>
@@ -374,13 +371,22 @@ function ScenarioSection({
         <Box sx={{ p: 2 }}>
           <Typography variant="subtitle2">Final Consensus Results:</Typography>
           <Box sx={{ mt: 2, mb: 4 }}>
-            <TextInputBox
-              initialValue={quali}
-              setUpdatedValue={(newValue) => {
-                setQuali(newValue || null);
-              }}
-              // onSave={async (newValue) => handleSave(qualiName, newValue)}
-            />
+            {user.roles.analist ? (
+              <TextInputBox
+                initialValue={quali}
+                setUpdatedValue={(newValue) => {
+                  setQuali(newValue || null);
+                }}
+                // onSave={async (newValue) => handleSave(qualiName, newValue)}
+              />
+            ) : (
+              <Box
+                dangerouslySetInnerHTML={{
+                  __html: quali || "",
+                }}
+                sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+              />
+            )}
 
             {quantiNames.length > 0 && (
               <Stack direction="column" sx={{ mt: 2 }}>
@@ -394,12 +400,16 @@ function ScenarioSection({
                         <Slider
                           initialValue={riskFile[n as keyof DVRiskFile] as string}
                           name={n}
-                          spread={getDASpread(directAnalyses, n as keyof DVDirectAnalysis)}
-                          onChange={async (newValue) => {
-                            await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-                              [n]: newValue,
-                            });
-                          }}
+                          spread={user.roles.analist ? getDASpread(directAnalyses, n as keyof DVDirectAnalysis) : null}
+                          onChange={
+                            user.roles.analist
+                              ? async (newValue) => {
+                                  await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+                                    [n]: newValue,
+                                  });
+                                }
+                              : null
+                          }
                         />
                       ) : (
                         <Typography variant="subtitle2">N/A</Typography>
@@ -428,11 +438,13 @@ function ScenarioSection({
               setReloadAttachments(true);
             }}
           /> */}
-          <Box sx={{ textAlign: "center" }}>
-            <LoadingButton loading={saving} variant="outlined" onClick={handleSave}>
-              Save & Close
-            </LoadingButton>
-          </Box>
+          {user.roles.analist && (
+            <Box sx={{ textAlign: "center" }}>
+              <LoadingButton loading={saving} variant="outlined" onClick={handleSave}>
+                Save & Close
+              </LoadingButton>
+            </Box>
+          )}
         </Box>
       )}
     </Stack>
@@ -445,10 +457,11 @@ function CauseSection({
   reloadCascades,
 }: {
   riskFile: DVRiskFile;
-  cascade: DVRiskCascade<SmallRisk, SmallRisk>;
+  cascade: DVRiskCascade<SmallRisk, unknown>;
   reloadCascades: () => Promise<unknown>;
 }) {
   const api = useAPI();
+  const { user } = useOutletContext<AuthPageContext>();
   const discussionRequired = cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
 
   const [open, setOpen] = useState(
@@ -477,21 +490,21 @@ function CauseSection({
             {cascade.cr4de_cause_hazard.cr4de_title}
           </Link>{" "}
           causes{" "}
-          <Link href={`/learning/risk/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}`} target="_blank">
-            {cascade.cr4de_effect_hazard.cr4de_title}
+          <Link href={`/learning/risk/${riskFile.cr4de_riskfilesid}`} target="_blank">
+            {riskFile.cr4de_title}
           </Link>
         </Typography>
-        {discussionRequired === DiscussionRequired.REQUIRED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.REQUIRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="warning" />
           </Tooltip>
         )}
-        {discussionRequired === DiscussionRequired.PREFERRED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.PREFERRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="info" />
           </Tooltip>
         )}
-        {discussionRequired === DiscussionRequired.RESOLVED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.RESOLVED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <CheckCircleIcon color="success" />
           </Tooltip>
@@ -517,17 +530,28 @@ function CauseSection({
             <Typography variant="subtitle2" sx={{ mb: 2 }}>
               Final Consensus Results:
             </Typography>
-            <TextInputBox
-              initialValue={quali}
-              setUpdatedValue={(newValue) => {
-                setQuali(newValue || null);
-              }}
-            />
-            <Box sx={{ textAlign: "center", mt: 4 }}>
-              <LoadingButton loading={saving} onClick={handleSave} variant="outlined">
-                Save & Close
-              </LoadingButton>
-            </Box>
+            {user.roles.analist ? (
+              <TextInputBox
+                initialValue={quali}
+                setUpdatedValue={(newValue) => {
+                  setQuali(newValue || null);
+                }}
+              />
+            ) : (
+              <Box
+                dangerouslySetInnerHTML={{
+                  __html: quali || "",
+                }}
+                sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+              />
+            )}
+            {user.roles.analist && (
+              <Box sx={{ textAlign: "center", mt: 4 }}>
+                <LoadingButton loading={saving} onClick={handleSave} variant="outlined">
+                  Save & Close
+                </LoadingButton>
+              </Box>
+            )}
           </Box>
         </Stack>
       </AccordionDetails>
@@ -543,6 +567,7 @@ function EmergingSection({
   reloadCascades: () => Promise<unknown>;
 }) {
   const api = useAPI();
+  const { user } = useOutletContext<AuthPageContext>();
   const discussionRequired = cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
 
   const [open, setOpen] = useState(
@@ -572,17 +597,17 @@ function EmergingSection({
             {cascade.cr4de_cause_hazard.cr4de_title}
           </Link>
         </Typography>
-        {discussionRequired === DiscussionRequired.REQUIRED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.REQUIRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="warning" />
           </Tooltip>
         )}
-        {discussionRequired === DiscussionRequired.PREFERRED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.PREFERRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="info" />
           </Tooltip>
         )}
-        {discussionRequired === DiscussionRequired.RESOLVED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.RESOLVED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <CheckCircleIcon color="success" />
           </Tooltip>
@@ -594,17 +619,28 @@ function EmergingSection({
             <Typography variant="subtitle2" sx={{ mb: 2 }}>
               Final Consensus Results:
             </Typography>
-            <TextInputBox
-              initialValue={quali}
-              setUpdatedValue={(newValue) => {
-                setQuali(newValue || null);
-              }}
-            />
-            <Box sx={{ textAlign: "center", mt: 4 }}>
-              <LoadingButton loading={saving} onClick={handleSave} variant="outlined">
-                Save & Close
-              </LoadingButton>
-            </Box>
+            {user.roles.analist ? (
+              <TextInputBox
+                initialValue={quali}
+                setUpdatedValue={(newValue) => {
+                  setQuali(newValue || null);
+                }}
+              />
+            ) : (
+              <Box
+                dangerouslySetInnerHTML={{
+                  __html: quali || "",
+                }}
+                sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+              />
+            )}
+            {user.roles.analist && (
+              <Box sx={{ textAlign: "center", mt: 4 }}>
+                <LoadingButton loading={saving} onClick={handleSave} variant="outlined">
+                  Save & Close
+                </LoadingButton>
+              </Box>
+            )}
           </Box>
         </Stack>
       </AccordionDetails>
@@ -626,6 +662,7 @@ function CCSection({
   reloadCascades: () => Promise<unknown>;
 }) {
   const api = useAPI();
+  const { user } = useOutletContext<AuthPageContext>();
   const discussionRequired = cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
 
   const [open, setOpen] = useState(
@@ -656,17 +693,17 @@ function CCSection({
             {cascade.cr4de_cause_hazard.cr4de_title}
           </Link>
         </Typography>
-        {discussionRequired === DiscussionRequired.REQUIRED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.REQUIRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="warning" />
           </Tooltip>
         )}
-        {discussionRequired === DiscussionRequired.PREFERRED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.PREFERRED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <ErrorIcon color="info" />
           </Tooltip>
         )}
-        {discussionRequired === DiscussionRequired.RESOLVED && (
+        {user.roles.analist && discussionRequired === DiscussionRequired.RESOLVED && (
           <Tooltip title="The input received for this section was divergent and may require further discussion">
             <CheckCircleIcon color="success" />
           </Tooltip>
@@ -678,12 +715,21 @@ function CCSection({
             <Typography variant="subtitle2" sx={{ mb: 2 }}>
               Final Consensus Results:
             </Typography>
-            <TextInputBox
-              initialValue={quali}
-              setUpdatedValue={(newValue) => {
-                setQuali(newValue || null);
-              }}
-            />
+            {user.roles.analist ? (
+              <TextInputBox
+                initialValue={quali}
+                setUpdatedValue={(newValue) => {
+                  setQuali(newValue || null);
+                }}
+              />
+            ) : (
+              <Box
+                dangerouslySetInnerHTML={{
+                  __html: quali || "",
+                }}
+                sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+              />
+            )}
             <Stack direction="column" sx={{ mt: 2 }}>
               {(
                 [
@@ -725,15 +771,20 @@ function CCSection({
                           mx={0}
                           initialValue={(riskFile[n as keyof DVRiskFile] as string) || "DP0"}
                           name={n}
-                          spread={getDASpread(
-                            directAnalyses,
-                            `cr4de_dp50_quanti${n.slice(-2)}` as keyof DVDirectAnalysis
-                          )}
-                          onChange={async (newValue) => {
-                            await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-                              [n]: newValue,
-                            });
-                          }}
+                          spread={
+                            user.roles.analist
+                              ? getDASpread(directAnalyses, `cr4de_dp50_quanti${n.slice(-2)}` as keyof DVDirectAnalysis)
+                              : null
+                          }
+                          onChange={
+                            user.roles.analist
+                              ? async (newValue) => {
+                                  await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+                                    [n]: newValue,
+                                  });
+                                }
+                              : null
+                          }
                         />
                       </Box>
                     ) : (
@@ -743,11 +794,13 @@ function CCSection({
                 </Stack>
               ))}
             </Stack>
-            <Box sx={{ textAlign: "center", mt: 4 }}>
-              <LoadingButton loading={saving} onClick={handleSave} variant="outlined">
-                Save & Close
-              </LoadingButton>
-            </Box>
+            {user.roles.analist && (
+              <Box sx={{ textAlign: "center", mt: 4 }}>
+                <LoadingButton loading={saving} onClick={handleSave} variant="outlined">
+                  Save & Close
+                </LoadingButton>
+              </Box>
+            )}
           </Box>
         </Stack>
       </AccordionDetails>

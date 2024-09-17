@@ -18,6 +18,10 @@ const transitionDelay = 500;
 export default function RiskDataPage({}) {
   const {
     riskFile,
+    causes,
+    effects,
+    catalyzingEffects,
+    climateChange,
     cascades,
     directAnalyses,
     cascadeAnalyses,
@@ -46,7 +50,9 @@ export default function RiskDataPage({}) {
         {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && (
           <Standard
             riskFile={riskFile}
-            cascades={cascades[riskFile.cr4de_riskfilesid].all}
+            causes={causes}
+            catalyzingEffects={catalyzingEffects}
+            climateChange={climateChange}
             directAnalyses={directAnalyses}
             cascadeAnalyses={cascadeAnalyses}
             reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
@@ -56,7 +62,9 @@ export default function RiskDataPage({}) {
         {riskFile.cr4de_risk_type === RISK_TYPE.MANMADE && (
           <ManMade
             riskFile={riskFile}
-            cascades={cascades[riskFile.cr4de_riskfilesid].all}
+            effects={effects}
+            catalyzingEffects={catalyzingEffects}
+            climateChange={climateChange}
             directAnalyses={directAnalyses}
             cascadeAnalyses={cascadeAnalyses}
             reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
@@ -66,10 +74,7 @@ export default function RiskDataPage({}) {
         {riskFile.cr4de_risk_type === RISK_TYPE.EMERGING && (
           <Emerging
             riskFile={riskFile}
-            cascades={cascades[riskFile.cr4de_riskfilesid].all}
-            directAnalyses={directAnalyses}
-            cascadeAnalyses={cascadeAnalyses}
-            reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+            effects={effects}
             reloadCascades={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
           />
         )}

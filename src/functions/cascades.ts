@@ -21,21 +21,37 @@ export interface CascadeAnalysisInput {
   cr4de_quali_cascade: string | null;
 }
 
-export function getCauses<T extends DVRiskCascade>(
+export function getCauses(
   riskFile: SmallRisk,
-  cascades: T[],
+  cascades: DVRiskCascade[],
   hazardCatalogue: { [id: string]: SmallRisk }
-): T[] {
-  return cascades.filter(
-    (c) =>
-      c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
-      (hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.STANDARD ||
-        hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.MANMADE)
-  );
+): DVRiskCascade<SmallRisk, SmallRisk>[] {
+  return cascades
+    .filter(
+      (c) =>
+        c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+        (hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.STANDARD ||
+          hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.MANMADE)
+    )
+    .map((c) => ({
+      ...c,
+      cr4de_cause_hazard: hazardCatalogue[c._cr4de_cause_hazard_value],
+      cr4de_effect_hazard: hazardCatalogue[c._cr4de_effect_hazard_value],
+    }));
 }
 
-export function getEffects<T extends DVRiskCascade>(riskFile: SmallRisk, cascades: T[]): T[] {
-  return cascades.filter((c) => c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid);
+export function getEffects(
+  riskFile: SmallRisk,
+  cascades: DVRiskCascade[],
+  hazardCatalogue: { [id: string]: SmallRisk }
+): DVRiskCascade<SmallRisk, SmallRisk>[] {
+  return cascades
+    .filter((c) => c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid)
+    .map((c) => ({
+      ...c,
+      cr4de_cause_hazard: hazardCatalogue[c._cr4de_cause_hazard_value],
+      cr4de_effect_hazard: hazardCatalogue[c._cr4de_effect_hazard_value],
+    }));
 }
 
 export function getCatalyzingEffects<T extends DVRiskCascade>(

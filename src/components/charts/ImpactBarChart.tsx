@@ -25,23 +25,21 @@ import { useTranslation } from "react-i18next";
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
+    console.log(active, payload);
     return (
       <Box sx={{ border: "1px solid #ccc", padding: 1, bgcolor: "rgba(255,255,255,0.8)", mb: 1 }}>
-        <Typography variant="subtitle2" sx={{ textDecoration: "underline" }}>
-          {label}
+        <Typography variant="subtitle2" sx={{ textDecoration: "underline", mb: 1 }}>
+          {label} Impact
         </Typography>
         {payload.map((p) => (
-          <Stack key={p.name} direction="row">
-            <Typography variant="body2" sx={{ width: 50 }}>
-              {p.name} :
+          <Stack key={p.name} direction="row" rowGap={0.5}>
+            <Typography variant="body2" sx={{ width: 50, fontWeight: "bold" }}>
+              {p.name}
+              {p.payload[`${p.name}_abs`]}
             </Typography>
-            <Typography variant="body2" sx={{ width: 50, textAlign: "right" }}>{`${round(
-              p.value as number,
-              1
-            )} / 5`}</Typography>
           </Stack>
         ))}
-        <Stack direction="row" sx={{ mt: 1 }}>
+        {/* <Stack direction="row" sx={{ mt: 1 }}>
           <Typography variant="body2" sx={{ width: 50, fontWeight: "bold" }}>
             Total :
           </Typography>
@@ -49,7 +47,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
             payload.reduce((sum, p) => sum + (p.value as number), 0),
             1
           )} / 5`}</Typography>
-        </Stack>
+        </Stack> */}
       </Box>
     );
   }
@@ -68,6 +66,9 @@ export default function ImpactBarChart({ riskFile, scenario }: { riskFile: DVRis
       Ha: getScenarioParameter(riskFile, "TI_Ha", scenario),
       Hb: getScenarioParameter(riskFile, "TI_Hb", scenario),
       Hc: getScenarioParameter(riskFile, "TI_Hc", scenario),
+      Ha_abs: getScenarioParameter(riskFile, "TI_Ha_abs", scenario),
+      Hb_abs: getScenarioParameter(riskFile, "TI_Hb_abs", scenario),
+      Hc_abs: getScenarioParameter(riskFile, "TI_Hc_abs", scenario),
     },
     {
       name: t("Societal"),
@@ -76,17 +77,24 @@ export default function ImpactBarChart({ riskFile, scenario }: { riskFile: DVRis
       Sb: getScenarioParameter(riskFile, "TI_Sb", scenario),
       Sc: getScenarioParameter(riskFile, "TI_Sc", scenario),
       Sd: getScenarioParameter(riskFile, "TI_Sd", scenario),
+      Sa_abs: getScenarioParameter(riskFile, "TI_Sa_abs", scenario),
+      Sb_abs: getScenarioParameter(riskFile, "TI_Sb_abs", scenario),
+      Sc_abs: getScenarioParameter(riskFile, "TI_Sc_abs", scenario),
+      Sd_abs: getScenarioParameter(riskFile, "TI_Sd_abs", scenario),
     },
     {
       name: t("Environmental"),
       E: getScenarioParameter(riskFile, "TI_E", scenario),
       Ea: getScenarioParameter(riskFile, "TI_Ea", scenario),
+      Ea_abs: getScenarioParameter(riskFile, "TI_Ea_abs", scenario),
     },
     {
       name: t("Financial"),
       F: getScenarioParameter(riskFile, "TI_F", scenario),
       Fa: getScenarioParameter(riskFile, "TI_Fa", scenario),
       Fb: getScenarioParameter(riskFile, "TI_Fb", scenario),
+      Fa_abs: getScenarioParameter(riskFile, "TI_Fa_abs", scenario),
+      Fb_abs: getScenarioParameter(riskFile, "TI_Fb_abs", scenario),
     },
   ];
 

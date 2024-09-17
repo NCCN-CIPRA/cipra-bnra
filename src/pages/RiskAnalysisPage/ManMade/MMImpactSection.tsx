@@ -86,7 +86,7 @@ export default function MMImpactSection({
 
     const descriptions = impactEffects
       .map((e, i) => {
-        const riskName = e.id ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>` : `<a href="">e.name</a>`;
+        const riskName = e.id ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>` : `<a href="">${e.name}</a>`;
 
         return `<p style="font-weight:bold;font-size:10pt;font-family: Arial"">
                     ${i + 1}. ${riskName}

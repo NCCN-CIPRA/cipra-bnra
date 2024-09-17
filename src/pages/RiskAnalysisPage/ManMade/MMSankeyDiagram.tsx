@@ -18,22 +18,23 @@ export default function MMSankeyDiagram({
   riskFile,
   cascades,
   scenario,
+  setScenario,
   debug = false,
   manmade = false,
 }: {
   riskFile: DVRiskFile;
   cascades: Cascades;
   scenario: SCENARIOS;
+  setScenario: (s: SCENARIOS) => void;
   debug?: boolean;
   manmade?: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isEditing } = useOutletContext<RiskFilePageContext>();
-  const [selectedScenario, setSelectedScenario] = useState(scenario);
 
   useEffect(() => {
-    setSelectedScenario(scenario);
+    setScenario(scenario);
   }, [riskFile]);
 
   const goToRiskFile = (id: string) => {
@@ -56,7 +57,7 @@ export default function MMSankeyDiagram({
           maxActions={null}
           shownActionPortion={0.8}
           minActionPortion={null}
-          scenario={selectedScenario}
+          scenario={scenario}
           onClick={goToRiskFile}
           debug={debug}
           manmade={manmade}
@@ -102,8 +103,8 @@ export default function MMSankeyDiagram({
               variant="outlined"
               sx={{
                 color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
-                fontWeight: selectedScenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
-                opacity: selectedScenario === SCENARIOS.CONSIDERABLE ? 1 : 0.15,
+                fontWeight: scenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
+                opacity: scenario === SCENARIOS.CONSIDERABLE ? 1 : 0.15,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
                 borderRadius: "50%",
                 backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
@@ -116,7 +117,7 @@ export default function MMSankeyDiagram({
                   borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
                 },
               }}
-              onClick={() => setSelectedScenario(SCENARIOS.CONSIDERABLE)}
+              onClick={() => setScenario(SCENARIOS.CONSIDERABLE)}
             >
               C
             </Button>
@@ -124,8 +125,8 @@ export default function MMSankeyDiagram({
               variant="outlined"
               sx={{
                 color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
-                fontWeight: selectedScenario === SCENARIOS.MAJOR ? "bold" : "normal",
-                opacity: selectedScenario === SCENARIOS.MAJOR ? 1 : 0.3,
+                fontWeight: scenario === SCENARIOS.MAJOR ? "bold" : "normal",
+                opacity: scenario === SCENARIOS.MAJOR ? 1 : 0.3,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
                 borderRadius: "50%",
                 backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
@@ -138,7 +139,7 @@ export default function MMSankeyDiagram({
                   borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
                 },
               }}
-              onClick={() => setSelectedScenario(SCENARIOS.MAJOR)}
+              onClick={() => setScenario(SCENARIOS.MAJOR)}
             >
               M
             </Button>
@@ -146,8 +147,8 @@ export default function MMSankeyDiagram({
               variant="outlined"
               sx={{
                 color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
-                fontWeight: selectedScenario === SCENARIOS.EXTREME ? "bold" : "normal",
-                opacity: selectedScenario === SCENARIOS.EXTREME ? 1 : 0.15,
+                fontWeight: scenario === SCENARIOS.EXTREME ? "bold" : "normal",
+                opacity: scenario === SCENARIOS.EXTREME ? 1 : 0.15,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
                 borderRadius: "50%",
                 backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
@@ -160,7 +161,7 @@ export default function MMSankeyDiagram({
                   borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
                 },
               }}
-              onClick={() => setSelectedScenario(SCENARIOS.EXTREME)}
+              onClick={() => setScenario(SCENARIOS.EXTREME)}
             >
               E
             </Button>
@@ -175,7 +176,7 @@ export default function MMSankeyDiagram({
           <Box sx={{ width: "100%", textAlign: "center", mt: 3 }}>
             <Typography variant="subtitle2">{t("Damage Indicators")}</Typography>
           </Box>
-          <ImpactBarChart riskFile={riskFile} scenario={selectedScenario} />
+          <ImpactBarChart riskFile={riskFile} scenario={scenario} />
         </Box>
       </Stack>
       <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
@@ -185,7 +186,7 @@ export default function MMSankeyDiagram({
           maxEffects={null}
           shownEffectPortion={0.8}
           minEffectPortion={null}
-          scenario={selectedScenario}
+          scenario={scenario}
           onClick={goToRiskFile}
           debug={debug}
         />

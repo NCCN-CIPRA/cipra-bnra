@@ -4,16 +4,12 @@ import AuthenticationPage from "./pages/auth/AuthenticationPage";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import LocalAPI from "./pages/main/LocalAPI";
 import CalculationPage from "./pages/CalculationPage/CalculationPage";
-import RankingPage from "./pages/reporting/RankingPage";
-import RiskReportingPage from "./pages/reporting/RiskPage";
 import ValidationIntroPage from "./pages/validation/ValidationIntroPage";
 import ValidationPage from "./pages/validation/ValidationPage";
 import RiskPage from "./pages/learning/RiskPage";
 
 import "./App.css";
 import BasePage from "./pages/BasePage";
-import EditorIntroPage from "./pages/riskFile/EditorIntroPage";
-import EditorPage from "./pages/riskFile/EditorPage";
 import LearningOverviewPage from "./pages/learning/LearningOverviewPage";
 import OverviewPage from "./pages/main/OverviewPage";
 import AuthPage from "./pages/AuthPage";
@@ -28,7 +24,6 @@ import Step2APage from "./pages/step2A/Step2APage";
 import ProcessManagementPage from "./pages/admin/Management/ProcessManagementPage";
 import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
 import Step2BPage from "./pages/step2B/Step2BPage";
-import RiskFilePage from "./pages/riskFile/RiskFilePage";
 import ConsensusExpertPage from "./pages/consensus/ConsensusExpertPage";
 import AdminPage from "./pages/AdminPage";
 import HazardCataloguePage from "./pages/HazardCataloguePage/HazardCataloguePage";
@@ -160,14 +155,6 @@ function App() {
                   path: "/learning/:page_name",
                   element: <LearningPage />,
                 },
-                {
-                  path: "/hazards/:risk_file_id",
-                  element: <EditorPage />,
-                },
-                {
-                  path: "/risks/:risk_file_id",
-                  element: <RiskFilePage />,
-                },
 
                 {
                   path: "/overview",
@@ -194,15 +181,6 @@ function App() {
                 {
                   path: "/analysis/calculator",
                   element: <CalculationPage />,
-                },
-
-                {
-                  path: "/reporting",
-                  element: <RankingPage />,
-                },
-                {
-                  path: "/reporting/:risk_id",
-                  element: <RiskReportingPage />,
                 },
               ],
             },

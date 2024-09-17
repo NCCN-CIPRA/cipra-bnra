@@ -1,11 +1,11 @@
-import { Box, Typography } from "@mui/material";
+import { Alert, Box, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { getCascadeParameter, getScenarioParameter, SCENARIOS } from "../../../functions/scenarios";
 import { getDirectImpact, getIndirectImpact } from "../../../functions/Impact";
 import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import Scenario from "./Scenario";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProbabilitySection from "./ProbabilitySection";
 import ImpactSection from "./ImpactSection";
 import { useOutletContext } from "react-router-dom";
@@ -49,26 +49,15 @@ export default function Standard({
   const { helpOpen, setHelpFocus, hazardCatalogue, attachments, loadAttachments } =
     useOutletContext<RiskFilePageContext>();
 
+  const MRS = riskFile.cr4de_mrs || SCENARIOS.EXTREME;
+  const [scenario, setScenario] = useState(MRS);
+
   useEffect(() => {
     if (!attachments) loadAttachments();
   }, []);
 
   const rf = riskFile;
-
-  const MRS = riskFile.cr4de_mrs || SCENARIOS.EXTREME;
   const MRSSuffix = getScenarioSuffix(MRS);
-
-  const cDict = useMemo(
-    () =>
-      cascades.all.reduce(
-        (acc, c) => ({
-          ...acc,
-          [c.cr4de_bnrariskcascadeid]: c,
-        }),
-        {} as { [key: string]: DVRiskCascade }
-      ),
-    [cascades]
-  );
 
   const causes: Cause[] = [
     {
@@ -98,8 +87,25 @@ export default function Standard({
       <Box sx={{ mt: 8 }}>
         <Typography variant="h5">{t("risks.ananylis.quantiResults", "Quantitative Analysis Results")}</Typography>
 
-        <SankeyDiagram riskFile={riskFile} cascades={cascades} debug={mode === "edit"} scenario={MRS} />
+        <SankeyDiagram
+          riskFile={riskFile}
+          cascades={cascades}
+          debug={mode === "edit"}
+          scenario={scenario}
+          setScenario={setScenario}
+        />
       </Box>
+
+      {scenario !== MRS && (
+        <Box>
+          <Alert severity="warning">
+            {t(
+              "risks.analysis.scenarioChange",
+              "You have changed the scenario is the sankey diagram above. Please be aware the the qualitative analysis results below only apply to the Most Relevant Scenario."
+            )}
+          </Alert>
+        </Box>
+      )}
 
       {rf.cr4de_intensity_parameters && (
         <Box sx={{ mt: 8 }}>

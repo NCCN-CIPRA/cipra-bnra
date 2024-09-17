@@ -76,18 +76,26 @@ export default function RiskMatrixPage() {
           <Stack direction="column" sx={{ pb: 4, mt: 2, height: "100%" }} spacing={4}>
             <FormGroup sx={{}}>
               <FormControl sx={{ flex: 1 }} fullWidth>
-                <InputLabel>Show Scenarios</InputLabel>
-                <Select value={scenario} label="Show Scenarios" onChange={(e) => setScenario(e.target.value as any)}>
+                <InputLabel>{t("riskMatrix.show_scenarios", "Show Scenarios")}</InputLabel>
+                <Select
+                  value={scenario}
+                  label={t("riskMatrix.show_scenarios", "Show Scenarios")}
+                  onChange={(e) => setScenario(e.target.value as any)}
+                >
                   <MenuItem value={"All"}>{t("All", "All")}</MenuItem>
-                  <MenuItem value={"MRS"}>Most Relevant Scenario</MenuItem>
-                  <MenuItem value={SCENARIOS.CONSIDERABLE}>Considerable</MenuItem>
-                  <MenuItem value={SCENARIOS.MAJOR}>Major</MenuItem>
-                  <MenuItem value={SCENARIOS.EXTREME}>Extreme</MenuItem>
+                  <MenuItem value={"MRS"}>{t("Most Relevant Scenario")}</MenuItem>
+                  <MenuItem value={SCENARIOS.CONSIDERABLE}>{t("considerable", "Considerable")}</MenuItem>
+                  <MenuItem value={SCENARIOS.MAJOR}>{t("major", "Major")}Major</MenuItem>
+                  <MenuItem value={SCENARIOS.EXTREME}>{t("extreme", "Extreme")}</MenuItem>
                 </Select>
               </FormControl>
               <FormControl sx={{ flex: 1, mt: 2 }} fullWidth>
-                <InputLabel>Show Category</InputLabel>
-                <Select value={category} label="Show Category" onChange={(e) => setCategory(e.target.value as any)}>
+                <InputLabel>{t("riskMatrix.show_category", "Show Category")}</InputLabel>
+                <Select
+                  value={category}
+                  label={t("riskMatrix.show_category", "Show Category")}
+                  onChange={(e) => setCategory(e.target.value as any)}
+                >
                   <MenuItem value="All">{t("All", "All")}</MenuItem>
                   <MenuItem value={RISK_CATEGORY.CYBER}>
                     {t(RISK_CATEGORY.CYBER, CATEGORY_NAMES[RISK_CATEGORY.CYBER])}
@@ -110,8 +118,12 @@ export default function RiskMatrixPage() {
                 </Select>
               </FormControl>
               <FormControl sx={{ flex: 1, mt: 2 }} fullWidth>
-                <InputLabel>Show Impact</InputLabel>
-                <Select value={impact} label="Show Category" onChange={(e) => setImpact(e.target.value as any)}>
+                <InputLabel>{t("riskMatrix.show_impact", "Show Impact")}</InputLabel>
+                <Select
+                  value={impact}
+                  label={t("riskMatrix.show_impact", "Show Impact")}
+                  onChange={(e) => setImpact(e.target.value as any)}
+                >
                   <MenuItem value="All">{t("All", "All")}</MenuItem>
                   {["h", "s", "e", "f"].map((i) => (
                     <MenuItem value={i.toUpperCase()}>{t(`learning.impact.${i}.title`)}</MenuItem>
@@ -120,34 +132,34 @@ export default function RiskMatrixPage() {
               </FormControl>
               <FormControlLabel
                 control={<Checkbox checked={es} onChange={(e) => setES(e.target.checked)} />}
-                label="Show only executive summary"
+                label={t("riskMatrix.executive_summary", "Show only executive summary")}
               />
               <FormControlLabel
                 control={<Checkbox checked={labels} onChange={(e) => setLabels(e.target.checked)} />}
-                label="Show labels"
+                label={t("riskMatrix.show_labels", "Show labels")}
               />
               <FormControl sx={{ flex: 1, mt: 2 }} fullWidth>
-                <InputLabel>Categories display</InputLabel>
+                <InputLabel>{t("riskMatrix.categories", "Categories display")}</InputLabel>
                 <Select
                   value={categoryDisplay}
-                  label="Categories display"
+                  label={t("riskMatrix.categories", "Categories display")}
                   onChange={(e) => setCategoryDisplay(e.target.value as any)}
                 >
-                  <MenuItem value={"shapes"}>Shapes</MenuItem>
-                  <MenuItem value={"colors"}>Colors</MenuItem>
-                  <MenuItem value={"both"}>Shapes & Colors</MenuItem>
-                  <MenuItem value={"none"}>None</MenuItem>
+                  <MenuItem value={"shapes"}>{t("riskMatrix.shapes", "Shapes")}</MenuItem>
+                  <MenuItem value={"colors"}>{t("riskMatrix.colors", "Colors")}</MenuItem>
+                  <MenuItem value={"both"}>{t("riskMatrix.shapesandcolors", "Shapes & Colors")}</MenuItem>
+                  <MenuItem value={"none"}>{t("riskMatrix.none", "None")}</MenuItem>
                 </Select>
               </FormControl>
               <FormControl sx={{ flex: 1, mt: 2 }} fullWidth>
-                <InputLabel>Scenarios display</InputLabel>
+                <InputLabel>{t("riskMatrix.scenarios", "Scenarios display")}</InputLabel>
                 <Select
                   value={scenarioDisplay}
-                  label="Scenarios display"
+                  label={t("riskMatrix.scenarios", "Scenarios display")}
                   onChange={(e) => setScenarioDisplay(e.target.value as any)}
                 >
-                  <MenuItem value={"colors"}>Colors</MenuItem>
-                  <MenuItem value={"none"}>None</MenuItem>
+                  <MenuItem value={"colors"}>{t("riskMatrix.colors", "Colors")}</MenuItem>
+                  <MenuItem value={"none"}>{t("riskMatrix.none", "None")}</MenuItem>
                 </Select>
               </FormControl>
             </FormGroup>

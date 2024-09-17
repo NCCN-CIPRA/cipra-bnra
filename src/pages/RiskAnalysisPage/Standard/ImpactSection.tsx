@@ -5,7 +5,7 @@ import { DVRiskFile, RISKFILE_RESULT_FIELD } from "../../../types/dataverse/DVRi
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
 import getImpactColor from "../../../functions/getImpactColor";
-import { Effect, IMPACT_CATEGORY } from "../../../functions/Impact";
+import { Effect, getImpactCategoryRatio, IMPACT_CATEGORY } from "../../../functions/Impact";
 import { getScenarioParameter, SCENARIOS } from "../../../functions/scenarios";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import round from "../../../functions/roundNumberString";
@@ -40,15 +40,17 @@ export default function ImpactSection({
   const impactLetterUC = impactLetter.toUpperCase() as IMPACT_CATEGORY;
 
   const ti = getScenarioParameter(riskFile, "TI", scenario) || 0.00001;
-  const impactTI = getScenarioParameter(riskFile, `TI_${impactLetterUC}` as RISKFILE_RESULT_FIELD, scenario) || 0.00001;
+  // const impactTI = getScenarioParameter(riskFile, `TI_${impactLetterUC}` as RISKFILE_RESULT_FIELD, scenario) || 0.00001;
+  const impactTI = getImpactCategoryRatio(riskFile, impactLetterUC, scenario);
 
   const paretoEffects = useMemo(() => {
+    console.log(ti, impactTI, effects);
     return effects
       .sort((a, b) => b[impactLetter] - a[impactLetter])
       .reduce(
         ([cumulEffects, iCumul], e) => {
-          if (iCumul > 0.8 && cumulEffects.length >= 3) return [cumulEffects, iCumul] as [Effect[], number];
-
+          if (iCumul > 0.8 * impactTI && cumulEffects.length >= 3) return [cumulEffects, iCumul] as [Effect[], number];
+          // console.log(iCumul, e.name, e[impactLetter]);
           return [[...cumulEffects, e], iCumul + e[impactLetter]] as [Effect[], number];
         },
         [[], 0] as [Effect[], number]
@@ -58,9 +60,7 @@ export default function ImpactSection({
   const getDefaultText = () => {
     const text = `
           <p style="font-size:10pt;font-family: Arial">
-          The ${impactName} impact represents an estimated <b>${round(
-      (100 * impactTI) / ti
-    )}%</b> of the total impact of an
+          The ${impactName} impact represents an estimated <b>${round(100 * impactTI)}%</b> of the total impact of an
         incident of this magnitude. Possible explanations for the ${impactName} impact are:
           </p>
           <p><br></p>
@@ -68,15 +68,15 @@ export default function ImpactSection({
 
     const descriptions = paretoEffects
       .map((e, i) => {
-        const riskName = e.id ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>` : `<a href="">e.name</a>`;
+        const riskName = e.id ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>` : `<a href="">${e.name}</a>`;
 
         if (e.quali_cause) {
           return `<p style="font-weight:bold;font-size:10pt;font-family: Arial"">
                     ${i + 1}. ${riskName}
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
-                      <b>${round(100 * e[impactLetter])}%</b> of total ${impactName} impact -
-                      <b>${round((100 * (e[impactLetter] * impactTI)) / ti)}%</b> of total impact
+                      <b>${round((100 * e[impactLetter]) / impactTI)}%</b> of total ${impactName} impact -
+                      <b>${round((100 * e[impactLetter]) / ti)}%</b> of total impact
                     </p>
                     <p><br></p>
                     <p style="font-size: 8pt;margin-bottom:0px;text-decoration:underline">Input from the ${
@@ -95,8 +95,8 @@ export default function ImpactSection({
                     ${i + 1}. ${riskName}
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
-                      <b>${round(100 * e[impactLetter])}%</b> of total ${impactName} impact -
-                      <b>${round((100 * (e[impactLetter] * impactTI)) / ti)}%</b> of total impact
+                      <b>${round((100 * e[impactLetter]) / impactTI)}%</b> of total ${impactName} impact -
+                      <b>${round((100 * e[impactLetter]) / ti)}%</b> of total impact
                     </p>
                     <p><br></p>
                     ${e.quali || e[`quali_${impactLetter}`]}

@@ -94,7 +94,7 @@ export default function BaseRisksPage() {
     (riskFile: DVRiskFile, cs: { [riskId: string]: Cascades }, hc: { [id: string]: SmallRisk }) =>
     (rcResult: DVRiskCascade<SmallRisk, SmallRisk>[]) => {
       const causes = getCauses(riskFile, rcResult, hc);
-      const effects = getEffects(riskFile, rcResult);
+      const effects = getEffects(riskFile, rcResult, hc);
       const catalyzingEffects = getCatalyzingEffects(riskFile, rcResult, hc, false);
       const climateChange = getClimateChange(riskFile, rcResult, hc);
 

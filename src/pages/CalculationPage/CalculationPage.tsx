@@ -45,6 +45,7 @@ import ExecutiveSummaryGraph from "./ExecutiveSummaryGraphs";
 import CalculationsDelta from "./CalculationsDelta";
 import {
   getCategoryImpactRelativeScale,
+  getDamageIndicatorAbsoluteScale,
   getDamageIndicatorRelativeScale,
   getTotalImpactRelativeScale,
 } from "../../functions/Impact";
@@ -86,6 +87,25 @@ const getScenarioResult = (calculation: RiskCalculation, s: SCENARIOS): { [key i
   const ti = calculation[`ti${scenarioSuffix}`];
   const ti_rel = getTotalImpactRelativeScale(calculation, scenarioSuffix);
 
+  const DP50_offset =
+    tp_diff !== 0
+      ? ((calculation[`dp50${scenarioSuffix}`] - calculation[`dp${scenarioSuffix}`]) / tp_diff) * tp_diff_rel
+      : 0;
+
+  if (calculation.riskTitle.indexOf("Cold") >= 0) {
+    console.log(
+      s,
+      tp,
+      tp50,
+      tp_rel,
+      tp50_rel,
+      tp_diff,
+      tp_diff_rel,
+
+      round((calculation[`dp${scenarioSuffix}`] / tp) * tp_rel + DP50_offset, 5)
+    );
+  }
+
   return {
     TP: round(tp_rel, 5),
     TP50: round(tp50_rel, 5),
@@ -106,12 +126,19 @@ const getScenarioResult = (calculation: RiskCalculation, s: SCENARIOS): { [key i
     TI_Fa: getDamageIndicatorRelativeScale(calculation, "Fa", scenarioSuffix),
     TI_Fb: getDamageIndicatorRelativeScale(calculation, "Fb", scenarioSuffix),
 
+    TI_Ha_abs: getDamageIndicatorAbsoluteScale(calculation, "Ha", scenarioSuffix),
+    TI_Hb_abs: getDamageIndicatorAbsoluteScale(calculation, "Hb", scenarioSuffix),
+    TI_Hc_abs: getDamageIndicatorAbsoluteScale(calculation, "Hc", scenarioSuffix),
+    TI_Sa_abs: getDamageIndicatorAbsoluteScale(calculation, "Sa", scenarioSuffix),
+    TI_Sb_abs: getDamageIndicatorAbsoluteScale(calculation, "Sb", scenarioSuffix),
+    TI_Sc_abs: getDamageIndicatorAbsoluteScale(calculation, "Sc", scenarioSuffix),
+    TI_Sd_abs: getDamageIndicatorAbsoluteScale(calculation, "Sd", scenarioSuffix),
+    TI_Ea_abs: getDamageIndicatorAbsoluteScale(calculation, "Ea", scenarioSuffix),
+    TI_Fa_abs: getDamageIndicatorAbsoluteScale(calculation, "Fa", scenarioSuffix),
+    TI_Fb_abs: getDamageIndicatorAbsoluteScale(calculation, "Fb", scenarioSuffix),
+
     DP: round((calculation[`dp${scenarioSuffix}`] / tp) * tp_rel, 5),
-    DP50: round(
-      (calculation[`dp${scenarioSuffix}`] / tp) * tp_rel +
-        ((calculation[`dp50${scenarioSuffix}`] - calculation[`dp${scenarioSuffix}`]) / tp_diff) * tp_diff_rel,
-      5
-    ),
+    DP50: round((calculation[`dp${scenarioSuffix}`] / tp) * tp_rel + DP50_offset, 5),
 
     DI: round((calculation[`di${scenarioSuffix}`] / ti) * ti_rel, 5),
     DI_H: round(
@@ -502,10 +529,10 @@ export default function CalculationPage() {
         [SCENARIOS.EXTREME]: getScenarioResult(calculation, SCENARIOS.EXTREME),
       };
 
-      // await api.updateRiskFile(riskId, {
-      //   cr4de_result_snapshot: JSON.stringify(result),
-      //   // cr4de_mrs: getMostRelevantScenario(calculation),
-      // });
+      await api.updateRiskFile(riskId, {
+        cr4de_result_snapshot: JSON.stringify(result),
+        // cr4de_mrs: getMostRelevantScenario(calculation),
+      });
 
       calculation.causes.forEach((c) => {
         const cascade = cDict[c.cascadeId];
@@ -589,9 +616,9 @@ export default function CalculationPage() {
         continue;
       }
 
-      await api.updateCascade(cId, {
-        cr4de_result_snapshot: JSON.stringify(cR),
-      });
+      // await api.updateCascade(cId, {
+      //   cr4de_result_snapshot: JSON.stringify(cR),
+      // });
 
       setCalculationProgress((100 * (i + 1)) / (calculations.length + Object.keys(cRDict).length));
       i += 1;
@@ -808,7 +835,7 @@ export default function CalculationPage() {
   }, [selectedNode]);
 
   const riskFile = (results ? results.find((r) => r.cr4de_riskfilesid === selectedNode) : null) || null;
-
+  //console.log(calculations);
   return (
     <>
       <Container sx={{ mt: 4, pb: 8 }}>

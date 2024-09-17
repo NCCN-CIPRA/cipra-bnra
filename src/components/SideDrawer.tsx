@@ -27,7 +27,6 @@ export default function SideDrawer({
 }) {
   const { t } = useTranslation();
 
-  console.log(user);
   return (
     <Drawer
       open={open}

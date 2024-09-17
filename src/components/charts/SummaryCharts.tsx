@@ -92,17 +92,7 @@ export default function SummaryCharts({
     table: DataTable.ANALYSIS_RUN,
     id: riskFile._cr4de_latest_calculation_value || "",
     onComplete: async (data) => {
-      console.log(data.cr4de_results);
       if (data.cr4de_results === null) return;
-
-      console.log(getTotalImpactRelativeScale(data.cr4de_results, "_e"));
-      console.log(getCategoryImpactRelativeScale(data.cr4de_results, "H", "_e"));
-      console.log(getDamageIndicatorRelativeScale(data.cr4de_results, "Ha", "_e"));
-      console.log(getDamageIndicatorRelativeScale(data.cr4de_results, "Hb", "_e"));
-      console.log(getDamageIndicatorRelativeScale(data.cr4de_results, "Hc", "_e"));
-      console.log(
-        (data.cr4de_results.ti_Ha_e + data.cr4de_results.ti_Hb_e + data.cr4de_results.ti_Hc_e) / data.cr4de_results.ti_e
-      );
     },
   });
 

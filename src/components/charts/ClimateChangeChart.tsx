@@ -54,7 +54,7 @@ export default function ClimateChangeChart({
     const tp_c = getScenarioParameter(riskFile, "TP", SCENARIOS.CONSIDERABLE) || 0.000001;
     const tp_m = getScenarioParameter(riskFile, "TP", SCENARIOS.MAJOR) || 0.000001;
     const tp_e = getScenarioParameter(riskFile, "TP", SCENARIOS.EXTREME) || 0.000001;
-
+    console.log(riskFile);
     return [
       {
         name: "Total probability",
