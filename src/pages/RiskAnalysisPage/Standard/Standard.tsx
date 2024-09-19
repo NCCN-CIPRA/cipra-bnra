@@ -79,6 +79,7 @@ export default function Standard({
   ].sort((a, b) => b.p - a.p);
 
   const effects = [getDirectImpact(riskFile, MRS), ...cascades.effects.map((c) => getIndirectImpact(c, riskFile, MRS))];
+  // effects.map((e, i) => console.log(e, i === 0 ? riskFile : cascades.effects[i - 1]));
 
   return (
     <Box sx={{ mb: 10 }}>

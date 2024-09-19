@@ -223,6 +223,11 @@ export const getCategoryImpact = (
   );
 };
 
+/**
+ * Disclaimer:  This function is absolutely fucked and makes no real sense in
+ * relation to the other calculations, but due to historical reason and past
+ * publications it can currently not be changed
+ */
 export const getCategoryImpactRelativeScale = (
   calculation: RiskCalculation,
   category: IMPACT_CATEGORY,
@@ -233,7 +238,8 @@ export const getCategoryImpactRelativeScale = (
   if (totalImpact < 15811388) {
     return rescaleImpact(totalImpact / (2 * 15811388));
   }
-  return rescaleImpact(Math.log10(Math.max(1, totalImpact) / 5) - 6);
+
+  return rescaleImpact(Math.log10(totalImpact / 5) - 6);
 };
 
 export const getDamageIndicatorRelativeScale = (
