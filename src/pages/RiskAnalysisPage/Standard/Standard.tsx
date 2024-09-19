@@ -80,7 +80,7 @@ export default function Standard({
 
   const effects = [getDirectImpact(riskFile, MRS), ...cascades.effects.map((c) => getIndirectImpact(c, riskFile, MRS))];
   // effects.map((e, i) => console.log(e, i === 0 ? riskFile : cascades.effects[i - 1]));
-
+  // console.log(riskFile, cascades.effects);
   return (
     <Box sx={{ mb: 10 }}>
       <RiskFileTitle riskFile={riskFile} />

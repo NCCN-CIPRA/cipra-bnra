@@ -85,14 +85,14 @@ export type CASCADE_RESULT_SNAPSHOT = {
   CP_AVG_M2All: number | null;
   CP_AVG_E2All: number | null;
 
-  II_C2All: number | null;
+  II_C2All: number | null; // Total impact of the cascade as a ratio to TI of the risk (0 - 1)
   II_M2All: number | null;
   II_E2All: number | null;
 
-  II_C2All_H: number | null;
+  II_C2All_H: number | null; // Total human impact of the cascade as a ratio to TI of the risk (0 - 1)
   II_M2All_H: number | null;
   II_E2All_H: number | null;
-  II_C2All_Ha: number | null;
+  II_C2All_Ha: number | null; // Total Ha impact of the cascade as a ratio to TI of the risk (0 - 1)
   II_M2All_Ha: number | null;
   II_E2All_Ha: number | null;
   II_C2All_Hb: number | null;

@@ -44,15 +44,16 @@ import ClimateChangeGraph from "./ClimateChangeGraph";
 import ExecutiveSummaryGraph from "./ExecutiveSummaryGraphs";
 import CalculationsDelta from "./CalculationsDelta";
 import {
-  getCategoryImpactRelativeScale,
-  getDamageIndicatorAbsoluteScale,
-  getDamageIndicatorRelativeScale,
-  getTotalImpactRelativeScale,
-} from "../../functions/Impact";
+  // getDamageIndicatorAbsoluteScale,
+  getTotalImpactRelative,
+  getCategoryImpactRelative,
+  getDamageIndicatorImpactRelative,
+} from "../../functions/TotalImpact";
 import { getScenarioLetter, getScenarioSuffix, SCENARIOS } from "../../functions/scenarios";
 import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
 import roundString from "../../functions/roundNumberString";
 import { getAverageCP } from "../../functions/cascades";
+import { getDamageIndicatorAbsoluteScale } from "../../functions/Impact";
 // import { MessageParams } from "../../functions/analysis/calculator.worker";
 
 const roundNumberField = (n: number) => {
@@ -85,46 +86,46 @@ const getScenarioResult = (calculation: RiskCalculation, s: SCENARIOS): { [key i
   const tp_diff = Math.abs(tp50 - tp);
   const tp_diff_rel = Math.abs(tp50_rel - tp_rel);
   const ti = calculation[`ti${scenarioSuffix}`];
-  const ti_rel = getTotalImpactRelativeScale(calculation, scenarioSuffix);
+  const ti_rel = getTotalImpactRelative(calculation, scenarioSuffix);
 
   const DP50_offset =
     tp_diff !== 0
       ? ((calculation[`dp50${scenarioSuffix}`] - calculation[`dp${scenarioSuffix}`]) / tp_diff) * tp_diff_rel
       : 0;
 
-  if (calculation.riskTitle.indexOf("Cold") >= 0) {
-    console.log(
-      s,
-      tp,
-      tp50,
-      tp_rel,
-      tp50_rel,
-      tp_diff,
-      tp_diff_rel,
+  // if (calculation.riskTitle.indexOf("Cold") >= 0) {
+  //   console.log(
+  //     s,
+  //     tp,
+  //     tp50,
+  //     tp_rel,
+  //     tp50_rel,
+  //     tp_diff,
+  //     tp_diff_rel,
 
-      round((calculation[`dp${scenarioSuffix}`] / tp) * tp_rel + DP50_offset, 5)
-    );
-  }
+  //     round((calculation[`dp${scenarioSuffix}`] / tp) * tp_rel + DP50_offset, 5)
+  //   );
+  // }
 
   return {
     TP: round(tp_rel, 5),
     TP50: round(tp50_rel, 5),
 
-    TI: ti_rel,
-    TI_H: getCategoryImpactRelativeScale(calculation, "H", scenarioSuffix),
-    TI_Ha: getDamageIndicatorRelativeScale(calculation, "Ha", scenarioSuffix),
-    TI_Hb: getDamageIndicatorRelativeScale(calculation, "Hb", scenarioSuffix),
-    TI_Hc: getDamageIndicatorRelativeScale(calculation, "Hc", scenarioSuffix),
-    TI_S: getCategoryImpactRelativeScale(calculation, "S", scenarioSuffix),
-    TI_Sa: getDamageIndicatorRelativeScale(calculation, "Sa", scenarioSuffix),
-    TI_Sb: getDamageIndicatorRelativeScale(calculation, "Sb", scenarioSuffix),
-    TI_Sc: getDamageIndicatorRelativeScale(calculation, "Sc", scenarioSuffix),
-    TI_Sd: getDamageIndicatorRelativeScale(calculation, "Sd", scenarioSuffix),
-    TI_E: getCategoryImpactRelativeScale(calculation, "E", scenarioSuffix),
-    TI_Ea: getDamageIndicatorRelativeScale(calculation, "Ea", scenarioSuffix),
-    TI_F: getCategoryImpactRelativeScale(calculation, "F", scenarioSuffix),
-    TI_Fa: getDamageIndicatorRelativeScale(calculation, "Fa", scenarioSuffix),
-    TI_Fb: getDamageIndicatorRelativeScale(calculation, "Fb", scenarioSuffix),
+    TI: round(ti_rel, 5),
+    TI_H: round(getCategoryImpactRelative(calculation, "H", scenarioSuffix), 5),
+    TI_Ha: round(getDamageIndicatorImpactRelative(calculation, "Ha", scenarioSuffix), 5),
+    TI_Hb: round(getDamageIndicatorImpactRelative(calculation, "Hb", scenarioSuffix), 5),
+    TI_Hc: round(getDamageIndicatorImpactRelative(calculation, "Hc", scenarioSuffix), 5),
+    TI_S: round(getCategoryImpactRelative(calculation, "S", scenarioSuffix), 5),
+    TI_Sa: round(getDamageIndicatorImpactRelative(calculation, "Sa", scenarioSuffix), 5),
+    TI_Sb: round(getDamageIndicatorImpactRelative(calculation, "Sb", scenarioSuffix), 5),
+    TI_Sc: round(getDamageIndicatorImpactRelative(calculation, "Sc", scenarioSuffix), 5),
+    TI_Sd: round(getDamageIndicatorImpactRelative(calculation, "Sd", scenarioSuffix), 5),
+    TI_E: round(getCategoryImpactRelative(calculation, "E", scenarioSuffix), 5),
+    TI_Ea: round(getDamageIndicatorImpactRelative(calculation, "Ea", scenarioSuffix), 5),
+    TI_F: round(getCategoryImpactRelative(calculation, "F", scenarioSuffix), 5),
+    TI_Fa: round(getDamageIndicatorImpactRelative(calculation, "Fa", scenarioSuffix), 5),
+    TI_Fb: round(getDamageIndicatorImpactRelative(calculation, "Fb", scenarioSuffix), 5),
 
     TI_Ha_abs: getDamageIndicatorAbsoluteScale(calculation, "Ha", scenarioSuffix),
     TI_Hb_abs: getDamageIndicatorAbsoluteScale(calculation, "Hb", scenarioSuffix),
@@ -396,7 +397,7 @@ export default function CalculationPage() {
                   const ti = calculation[`ti${scenarioSuffix}`];
                   // const tp_yearly = getYearlyProbability(tp);
                   const tp_rel = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
-                  const ti_rel = getTotalImpactRelativeScale(calculation, scenarioSuffix);
+                  const ti_rel = getTotalImpactRelative(calculation, scenarioSuffix);
 
                   cResult[`CP_AVG_${s[0].toUpperCase() as "C" | "M" | "E"}2All`] = getAverageCP(scenarioLetter, e);
 
@@ -571,37 +572,79 @@ export default function CalculationPage() {
           const ti = calculation[`ti${scenarioSuffix}`];
           // const tp_yearly = getYearlyProbability(tp);
           const tp_rel = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
-          const ti_rel = getTotalImpactRelativeScale(calculation, scenarioSuffix);
+          const ti_rel = getTotalImpactRelative(calculation, scenarioSuffix);
 
           cResult[`CP_AVG_${s[0].toUpperCase() as "C" | "M" | "E"}2All`] = getAverageCP(scenarioLetter, e);
 
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All`] = (e[`ii${scenarioSuffix}`] / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All`] = round(
+            (e[`ii${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
 
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_H`] =
-            ((e[`ii_Ha${scenarioSuffix}`] + e[`ii_Hb${scenarioSuffix}`] + e[`ii_Hc${scenarioSuffix}`]) / ti) * ti_rel;
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Ha`] = (e[`ii_Ha${scenarioSuffix}`] / ti) * ti_rel;
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Hb`] = (e[`ii_Hb${scenarioSuffix}`] / ti) * ti_rel;
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Hc`] = (e[`ii_Hc${scenarioSuffix}`] / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_H`] = round(
+            ((e[`ii_Ha${scenarioSuffix}`] + e[`ii_Hb${scenarioSuffix}`] + e[`ii_Hc${scenarioSuffix}`]) / ti) * ti_rel,
+            5
+          );
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Ha`] = round(
+            (e[`ii_Ha${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Hb`] = round(
+            (e[`ii_Hb${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Hc`] = round(
+            (e[`ii_Hc${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
 
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_S`] =
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_S`] = round(
             ((e[`ii_Sa${scenarioSuffix}`] +
               e[`ii_Sb${scenarioSuffix}`] +
               e[`ii_Sc${scenarioSuffix}`] +
               e[`ii_Sd${scenarioSuffix}`]) /
               ti) *
-            ti_rel;
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sa`] = (e[`ii_Sa${scenarioSuffix}`] / ti) * ti_rel;
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sb`] = (e[`ii_Sb${scenarioSuffix}`] / ti) * ti_rel;
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sc`] = (e[`ii_Sc${scenarioSuffix}`] / ti) * ti_rel;
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sd`] = (e[`ii_Sd${scenarioSuffix}`] / ti) * ti_rel;
+              ti_rel,
+            5
+          );
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sa`] = round(
+            (e[`ii_Sa${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sb`] = round(
+            (e[`ii_Sb${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sc`] = round(
+            (e[`ii_Sc${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Sd`] = round(
+            (e[`ii_Sd${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
 
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_E`] = (e[`ii_Ea${scenarioSuffix}`] / ti) * ti_rel;
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Ea`] = (e[`ii_Ea${scenarioSuffix}`] / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_E`] = round(
+            (e[`ii_Ea${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Ea`] = round(
+            (e[`ii_Ea${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
 
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_F`] =
-            ((e[`ii_Fa${scenarioSuffix}`] + e[`ii_Fb${scenarioSuffix}`]) / ti) * ti_rel;
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Fa`] = (e[`ii_Fa${scenarioSuffix}`] / ti) * ti_rel;
-          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Fb`] = (e[`ii_Fb${scenarioSuffix}`] / ti) * ti_rel;
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_F`] = round(
+            ((e[`ii_Fa${scenarioSuffix}`] + e[`ii_Fb${scenarioSuffix}`]) / ti) * ti_rel,
+            5
+          );
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Fa`] = round(
+            (e[`ii_Fa${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
+          cResult[`II_${s[0].toUpperCase() as "C" | "M" | "E"}2All_Fb`] = round(
+            (e[`ii_Fb${scenarioSuffix}`] / ti) * ti_rel,
+            5
+          );
         });
       });
 

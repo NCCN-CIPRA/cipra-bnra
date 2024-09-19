@@ -12,7 +12,7 @@ import {
   TooltipProps,
 } from "recharts";
 import { scaleLog } from "d3-scale";
-import { getImpactScale, getTotalImpactRelativeScale } from "../../functions/Impact";
+import { getImpactScale } from "../../functions/Impact";
 import { NameType } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Stack, Typography } from "@mui/material";
 import getCategoryColor from "../../functions/getCategoryColor";

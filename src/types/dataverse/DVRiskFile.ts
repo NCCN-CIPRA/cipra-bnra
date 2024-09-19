@@ -240,10 +240,10 @@ export const RISK_FILE_QUANTI_FIELDS: (keyof DVRiskFile)[] = [
 export type RISKFILE_RESULT_FIELD =
   | "TP"
   | "TP50"
-  | "TI"
-  | "TI_H"
-  | "TI_Ha"
-  | "TI_Hb"
+  | "TI" // Total Impact of the risk in relative scale (0 - 5)
+  | "TI_H" // Total human impact of the risk as a ratio to TI (0 - 1)
+  | "TI_Ha" // Total Ha impact of the risk as a ratio to TI (0 - 1)
+  | "TI_Hb" // Etc...
   | "TI_Hc"
   | "TI_S"
   | "TI_Sa"

@@ -10,7 +10,7 @@ import RiskPage from "./pages/learning/RiskPage";
 
 import "./App.css";
 import BasePage from "./pages/BasePage";
-import LearningOverviewPage from "./pages/learning/LearningOverviewPage";
+import InformationPortalPage from "./pages/InformationPortalPage/InformationPortalPage";
 import OverviewPage from "./pages/main/OverviewPage";
 import AuthPage from "./pages/AuthPage";
 import TranslationsPage from "./pages/TranslationsPage/TranslationsPage";
@@ -137,7 +137,7 @@ function App() {
 
                 {
                   path: "/learning",
-                  element: <LearningOverviewPage />,
+                  element: <InformationPortalPage />,
                 },
                 {
                   path: "/learning/risk-catalogue",

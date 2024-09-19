@@ -34,7 +34,7 @@ import {
   Button,
   IconButton,
 } from "@mui/material";
-import { getMoneyString, getTotalImpactRelativeScale, IMPACT_CATEGORY } from "../../functions/Impact";
+import { getMoneyString, IMPACT_CATEGORY } from "../../functions/Impact";
 import {
   SCENARIOS,
   SCENARIO_PARAMS,
@@ -52,6 +52,7 @@ import { useGenerateImage } from "recharts-to-png";
 import FileSaver from "file-saver";
 import { useTranslation } from "react-i18next";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
+import { getTotalImpactRelative } from "../../functions/TotalImpact";
 
 interface MatrixRisk {
   riskId: string;
@@ -250,7 +251,7 @@ export default function RiskMatrix({
     //       tr: tp * ti,
     //     };
     const p = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
-    const i = getTotalImpactRelativeScale(calculation, scenarioSuffix);
+    const i = getTotalImpactRelative(calculation, scenarioSuffix);
 
     return {
       tp: p,

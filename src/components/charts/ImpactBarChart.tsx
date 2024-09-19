@@ -13,11 +13,6 @@ import {
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { Box, Stack, Typography } from "@mui/material";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import {
-  getCategoryImpactRelativeScale,
-  getDamageIndicatorRelativeScale,
-  getMoneyString,
-} from "../../functions/Impact";
 import { getScenarioParameter, SCENARIO_SUFFIX, SCENARIOS } from "../../functions/scenarios";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import round from "../../functions/roundNumberString";

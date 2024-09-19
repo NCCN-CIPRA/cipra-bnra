@@ -40,7 +40,8 @@ import { getCauses, getEffects } from "../../functions/cascades";
 import { getCascadeParameter, getScenarioParameter, getWorstCaseScenario, SCENARIOS } from "../../functions/scenarios";
 import { Cause, getYearlyProbabilityFromRelative } from "../../functions/Probability";
 import round from "../../functions/roundNumberString";
-import { Effect, getDirectImpact, getImpactCategoryRatio, getIndirectImpact } from "../../functions/Impact";
+import { Effect, getDirectImpact, getIndirectImpact } from "../../functions/Impact";
+import { getCategoryImpactRelative } from "../../functions/TotalImpact";
 
 const replacements: string[][] = [
   ["Animal diseases \\(not zoonoses\\)", "Animal diseases excluding zoonoses"],
@@ -540,9 +541,9 @@ export default function CorrectionsPage() {
           },
           [[], 0] as [Effect[], number]
         )[0];
-      const HTI = round(100 * enhEffects.reduce((tot, e) => tot + e.h, 0));
-      // const HTI = round(100 * getImpactCategoryRatio(rf, "H", mrs) || 0.00001);
-      const hti = getScenarioParameter(rf, "TI_H", mrs) || 0.00001;
+
+      const impactTI_H = getScenarioParameter(rf, `TI_H`, mrs) || 0.00001;
+      const HTI = round((100 * impactTI_H) / ti);
 
       if (!TIHMatch) addProblem(rf, `Missing total human impact, should be: ${HTI}%`);
       else if (!isNegligibleTI(HTI, TIHMatch[1])) {
@@ -550,23 +551,24 @@ export default function CorrectionsPage() {
       }
 
       const dih = paretoEffectsH.find((pc) => pc.name === "Direct Impact");
-      if (dih && !DIHMatch && dih.h >= 0.1)
-        addProblem(rf, `Missing direct human impact, should be: ${round(100 * dih.h)}%`);
-      else if (dih && DIHMatch && !isNegligible(round(100 * dih.h), DIHMatch[2])) {
-        addProblem(rf, `Diverging direct human impact, should be: ${round(100 * dih.h)} but was: ${DIHMatch[2]}`);
+      const dihRatio = dih ? (dih.h * impactTI_H) / ti : 0;
+      if (dih && !DIHMatch && dihRatio >= 0.1)
+        addProblem(rf, `Missing direct human impact, should be: ${round(100 * dihRatio)}%`);
+      else if (dih && DIHMatch && !isNegligible(round(100 * dihRatio), DIHMatch[2])) {
+        addProblem(rf, `Diverging direct human impact, should be: ${round(100 * dihRatio)} but was: ${DIHMatch[2]}`);
       }
 
       for (let pc of paretoEffectsH) {
         if (pc.name === "Direct Impact") continue;
 
         const match = hEffectMatches.find((cm) => cm && cm[1].replace("&amp;", "&") === pc.name);
-
-        if (!match && pc.h > 0.1 && (getImpactCategoryRatio(rf, "H", mrs) || 0.00001) > 0.13) {
-          addProblem(rf, `Missing effect "${pc.name}" with human impact: ${round(100 * pc.h)}%`);
-        } else if (match && !isNegligible(round(100 * pc.h), match[3]))
+        const ihRatio = (pc.h * impactTI_H) / ti;
+        if (!match && ihRatio > 0.1) {
+          addProblem(rf, `Missing effect "${pc.name}" with human impact: ${round(100 * ihRatio)}%`);
+        } else if (match && !isNegligible(round(100 * ihRatio), match[3]))
           addProblem(
             rf,
-            `Diverging indirect human impact for effect ${pc.name}, should be: ${round(100 * pc.h)}% but was: ${
+            `Diverging indirect human impact for effect ${pc.name}, should be: ${round(100 * ihRatio)}% but was: ${
               match[3]
             }%`
           );
@@ -582,9 +584,9 @@ export default function CorrectionsPage() {
           },
           [[], 0] as [Effect[], number]
         )[0];
-      const STI = round(100 * enhEffects.reduce((tot, e) => tot + e.s, 0));
-      // const STI = round(100 * getImpactCategoryRatio(rf, "S", mrs) || 0.00001);
-      const sti = getScenarioParameter(rf, "TI_S", mrs) || 0.00001;
+
+      const impactTI_S = getScenarioParameter(rf, `TI_S`, mrs) || 0.00001;
+      const STI = round((100 * impactTI_S) / ti);
 
       if (!TISMatch) addProblem(rf, `Missing total societal impact, should be: ${STI}%`);
       else if (!isNegligibleTI(STI, TISMatch[1])) {
@@ -592,23 +594,25 @@ export default function CorrectionsPage() {
       }
 
       const dis = paretoEffectsS.find((pc) => pc.name === "Direct Impact");
-      if (dis && !DISMatch && dis.s >= 0.1)
-        addProblem(rf, `Missing direct societal impact, should be: ${round(100 * dis.s)}%`);
-      else if (dis && DISMatch && !isNegligible(round(100 * dis.s), DISMatch[2])) {
-        addProblem(rf, `Diverging direct societal impact, should be: ${round(100 * dis.s)} but was: ${DISMatch[2]}`);
+      const disRatio = dis ? (dis.s * impactTI_S) / ti : 0;
+      if (dis && !DISMatch && disRatio >= 0.1)
+        addProblem(rf, `Missing direct societal impact, should be: ${round(100 * disRatio)}%`);
+      else if (dis && DISMatch && !isNegligible(round(100 * disRatio), DISMatch[2])) {
+        addProblem(rf, `Diverging direct societal impact, should be: ${round(100 * disRatio)} but was: ${DISMatch[2]}`);
       }
 
       for (let pc of paretoEffectsS) {
         if (pc.name === "Direct Impact") continue;
 
         const match = sEffectMatches.find((cm) => cm && cm[1].replace("&amp;", "&") === pc.name);
+        const isRatio = (pc.s * impactTI_S) / ti;
 
-        if (!match && pc.s > 0.1 && (getImpactCategoryRatio(rf, "S", mrs) || 0.00001) > 0.1) {
-          addProblem(rf, `Missing effect "${pc.name}" with societal impact: ${round(100 * pc.s)}%`);
-        } else if (match && !isNegligible(round(100 * pc.s), match[3]))
+        if (!match && isRatio > 0.1) {
+          addProblem(rf, `Missing effect "${pc.name}" with societal impact: ${round(100 * isRatio)}%`);
+        } else if (match && !isNegligible(round(100 * isRatio), match[3]))
           addProblem(
             rf,
-            `Diverging indirect societal impact for effect ${pc.name}, should be: ${round(100 * pc.s)}% but was: ${
+            `Diverging indirect societal impact for effect ${pc.name}, should be: ${round(100 * isRatio)}% but was: ${
               match[3]
             }%`
           );
@@ -624,9 +628,9 @@ export default function CorrectionsPage() {
           },
           [[], 0] as [Effect[], number]
         )[0];
-      const ETI = round(100 * enhEffects.reduce((tot, e) => tot + e.e, 0));
-      // const ETI = round(100 * getImpactCategoryRatio(rf, "E", mrs) || 0.00001);
-      const eti = getScenarioParameter(rf, "TI_E", mrs) || 0.00001;
+
+      const impactTI_E = getScenarioParameter(rf, `TI_E`, mrs) || 0.00001;
+      const ETI = round((100 * impactTI_E) / ti);
 
       if (!TIEMatch) addProblem(rf, `Missing total environmental impact, should be: ${ETI}%`);
       else if (!isNegligibleTI(ETI, TIEMatch[1])) {
@@ -634,9 +638,10 @@ export default function CorrectionsPage() {
       }
 
       const die = paretoEffectsE.find((pc) => pc.name === "Direct Impact");
-      if (die && !DIEMatch && die.e >= 0.1)
-        addProblem(rf, `Missing direct environmental impact, should be: ${round(100 * die.e)}%`);
-      else if (die && DIEMatch && !isNegligible(round(100 * die.e), DIEMatch[2])) {
+      const dieRatio = die ? (die.e * impactTI_E) / ti : 0;
+      if (die && !DIEMatch && dieRatio >= 0.1)
+        addProblem(rf, `Missing direct environmental impact, should be: ${round(100 * dieRatio)}%`);
+      else if (die && DIEMatch && !isNegligible(round(100 * dieRatio), DIEMatch[2])) {
         addProblem(
           rf,
           `Diverging direct environmental impact, should be: ${round(100 * die.e)} but was: ${DIEMatch[2]}`
@@ -647,15 +652,16 @@ export default function CorrectionsPage() {
         if (pc.name === "Direct Impact") continue;
 
         const match = eEffectMatches.find((cm) => cm && cm[1].replace("&amp;", "&") === pc.name);
+        const ieRatio = (pc.e * impactTI_E) / ti;
 
-        if (!match && pc.e > 0.1 && (getImpactCategoryRatio(rf, "E", mrs) || 0.00001) > 0.12) {
-          addProblem(rf, `Missing effect "${pc.name}" with environmental impact: ${round(100 * pc.e)}%`);
-        } else if (match && !isNegligible(round(100 * pc.e), match[3]))
+        if (!match && ieRatio > 0.1) {
+          addProblem(rf, `Missing effect "${pc.name}" with environmental impact: ${round(100 * ieRatio)}%`);
+        } else if (match && !isNegligible(round(100 * ieRatio), match[3]))
           addProblem(
             rf,
-            `Diverging indirect environmental impact for effect ${pc.name}, should be: ${round(100 * pc.e)}% but was: ${
-              match[3]
-            }%`
+            `Diverging indirect environmental impact for effect ${pc.name}, should be: ${round(
+              100 * ieRatio
+            )}% but was: ${match[3]}%`
           );
       }
 
@@ -669,9 +675,9 @@ export default function CorrectionsPage() {
           },
           [[], 0] as [Effect[], number]
         )[0];
-      const FTI = round(100 * enhEffects.reduce((tot, e) => tot + e.f, 0));
-      // const FTI = round(100 * getImpactCategoryRatio(rf, "F", mrs) || 0.00001);
-      const fti = getScenarioParameter(rf, "TI_F", mrs) || 0.00001;
+
+      const impactTI_F = getScenarioParameter(rf, `TI_F`, mrs) || 0.00001;
+      const FTI = round((100 * impactTI_F) / ti);
 
       if (!TIFMatch) addProblem(rf, `Missing total financial impact, should be: ${FTI}%`);
       else if (!isNegligibleTI(FTI, TIFMatch[1])) {
@@ -679,23 +685,28 @@ export default function CorrectionsPage() {
       }
 
       const dif = paretoEffectsF.find((pc) => pc.name === "Direct Impact");
-      if (dif && !DIFMatch && dif.f >= 0.1)
-        addProblem(rf, `Missing direct financial impact, should be: ${round(100 * dif.f)}%`);
-      else if (dif && DIFMatch && !isNegligible(round(100 * dif.f), DIFMatch[2])) {
-        addProblem(rf, `Diverging direct financial impact, should be: ${round(100 * dif.f)} but was: ${DIFMatch[2]}`);
+      const difRatio = dif ? (dif.f * impactTI_F) / ti : 0;
+      if (dif && !DIFMatch && difRatio >= 0.1)
+        addProblem(rf, `Missing direct financial impact, should be: ${round(100 * difRatio)}%`);
+      else if (dif && DIFMatch && !isNegligible(round(100 * difRatio), DIFMatch[2])) {
+        addProblem(
+          rf,
+          `Diverging direct financial impact, should be: ${round(100 * difRatio)} but was: ${DIFMatch[2]}`
+        );
       }
 
       for (let pc of paretoEffectsF) {
         if (pc.name === "Direct Impact") continue;
 
         const match = fEffectMatches.find((cm) => cm && cm[1].replace("&amp;", "&") === pc.name);
+        const ifRatio = (pc.f * impactTI_F) / ti;
 
-        if (!match && pc.f > 0.1 && (getImpactCategoryRatio(rf, "F", mrs) || 0.00001) > 0.1) {
-          addProblem(rf, `Missing effect "${pc.name}" with financial impact: ${round(100 * pc.f)}%`);
-        } else if (match && !isNegligible(round(100 * pc.f), match[3]))
+        if (!match && ifRatio > 0.1) {
+          addProblem(rf, `Missing effect "${pc.name}" with financial impact: ${round(100 * ifRatio)}%`);
+        } else if (match && !isNegligible(round(100 * ifRatio), match[3]))
           addProblem(
             rf,
-            `Diverging indirect financial impact for effect ${pc.name}, should be: ${round(100 * pc.f)}% but was: ${
+            `Diverging indirect financial impact for effect ${pc.name}, should be: ${round(100 * ifRatio)}% but was: ${
               match[3]
             }%`
           );

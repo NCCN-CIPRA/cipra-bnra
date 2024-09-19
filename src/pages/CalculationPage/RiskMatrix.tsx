@@ -31,12 +31,13 @@ import {
   Box,
   Input,
 } from "@mui/material";
-import { getMoneyString, getTotalImpactRelativeScale } from "../../functions/Impact";
+import { getMoneyString } from "../../functions/Impact";
 import { SCENARIOS, SCENARIO_PARAMS, SCENARIO_SUFFIX } from "../../functions/scenarios";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { scaleLog, select } from "d3";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { getTotalProbabilityRelativeScale, getYearlyProbability } from "../../functions/Probability";
+import { getTotalImpactRelative } from "../../functions/TotalImpact";
 
 interface MatrixRisk {
   riskId: string;
@@ -219,7 +220,7 @@ export default function RiskMatrix({
     //       tr: tp * ti,
     //     };
     const p = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
-    const i = getTotalImpactRelativeScale(calculation, scenarioSuffix);
+    const i = getTotalImpactRelative(calculation, scenarioSuffix);
 
     return {
       tp: p,

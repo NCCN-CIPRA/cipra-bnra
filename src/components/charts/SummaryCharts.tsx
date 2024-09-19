@@ -5,12 +5,7 @@ import getScaleString from "../../functions/getScaleString";
 import { DVAnalysisRun, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { SCENARIOS, getScenarioParameter, getScenarioSuffix } from "../../functions/scenarios";
 import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
-import {
-  IMPACT_CATEGORY,
-  getCategoryImpactRelativeScale,
-  getDamageIndicatorRelativeScale,
-  getTotalImpactRelativeScale,
-} from "../../functions/Impact";
+import { IMPACT_CATEGORY } from "../../functions/Impact";
 import { IMPACT_COLOR_SCALES } from "../../functions/getImpactColor";
 import { useCallback } from "react";
 import FileSaver from "file-saver";
