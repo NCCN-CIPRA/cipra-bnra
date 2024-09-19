@@ -42,7 +42,7 @@ export default function ImpactSection({
   const ti = getScenarioParameter(riskFile, "TI", scenario) || 0.00001;
   const impactTI = effects.reduce((tot, e) => tot + e[impactLetter], 0);
   const impactTIratio = getImpactCategoryRatio(riskFile, impactLetterUC, scenario);
-  console.log(effects.map((e) => e.h + e.s + e.e + e.f).reduce((tot, i) => i + tot));
+
   const paretoEffects = useMemo(() => {
     return effects
       .sort((a, b) => b[impactLetter] - a[impactLetter])
@@ -59,9 +59,7 @@ export default function ImpactSection({
   const getDefaultText = () => {
     const text = `
           <p style="font-size:10pt;font-family: Arial">
-          The ${impactName} impact represents an estimated <b>${round(
-      100 * impactTIratio
-    )}%</b> of the total impact of an
+          The ${impactName} impact represents an estimated <b>${round(100 * impactTI)}%</b> of the total impact of an
         incident of this magnitude. Possible explanations for the ${impactName} impact are:
           </p>
           <p><br></p>
@@ -76,7 +74,7 @@ export default function ImpactSection({
                     ${i + 1}. ${riskName}
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
-                      <b>${round((100 * e[impactLetter]) / impactTIratio)}%</b> of total ${impactName} impact -
+                      <b>${round((100 * e[impactLetter]) / impactTI)}%</b> of total ${impactName} impact -
                       <b>${round(100 * e[impactLetter])}%</b> of total impact
                     </p>
                     <p><br></p>
@@ -96,7 +94,7 @@ export default function ImpactSection({
                     ${i + 1}. ${riskName}
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
-                      <b>${round((100 * e[impactLetter]) / impactTIratio)}%</b> of total ${impactName} impact -
+                      <b>${round((100 * e[impactLetter]) / impactTI)}%</b> of total ${impactName} impact -
                       <b>${round(100 * e[impactLetter])}%</b> of total impact
                     </p>
                     <p><br></p>

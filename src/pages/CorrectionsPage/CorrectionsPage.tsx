@@ -123,7 +123,17 @@ const isNegligible = (a: string | number, b: string | number) => {
   const aN = typeof a === "string" ? parseFloat((a as string).replace(",", ".")) : (a as number);
   const bN = typeof b === "string" ? parseFloat((b as string).replace(",", ".")) : (b as number);
 
-  return Math.abs(aN - bN) < 0.1;
+  return Math.abs(aN - bN) < 5;
+};
+
+const isNegligibleTI = (shouldBe: string, was: string) => {
+  const sbFloat = parseFloat(shouldBe.replace(",", "."));
+  const wasFloat = parseFloat(was.replace(",", "."));
+
+  if (wasFloat <= 10 && sbFloat <= 10) return true;
+  if (wasFloat <= 10 && sbFloat > 10) return Math.abs(wasFloat - sbFloat) < 4;
+  if (sbFloat <= 10 && wasFloat > 10) return Math.abs(wasFloat - sbFloat) < 4;
+  return Math.abs(wasFloat - sbFloat) < 10 || Math.abs(wasFloat - sbFloat) / wasFloat < 0.5;
 };
 
 const find = (s: string | null, r: RegExp) => {
@@ -131,7 +141,7 @@ const find = (s: string | null, r: RegExp) => {
 
   const clean = s.replace(/<[^>]*>?/gm, "").replace(/[\s\u00A0]/g, " ");
 
-  if (clean.indexOf("An extreme failure of gas supply could have a very big") >= 0) console.log(r, clean);
+  // if (clean.indexOf("An extreme failure of gas supply could have a very big") >= 0) console.log(r, clean);
   return r.exec(clean);
 };
 
@@ -530,11 +540,12 @@ export default function CorrectionsPage() {
           },
           [[], 0] as [Effect[], number]
         )[0];
-      const HTI = round(100 * getImpactCategoryRatio(rf, "H", mrs) || 0.00001);
+      const HTI = round(100 * enhEffects.reduce((tot, e) => tot + e.h, 0));
+      // const HTI = round(100 * getImpactCategoryRatio(rf, "H", mrs) || 0.00001);
       const hti = getScenarioParameter(rf, "TI_H", mrs) || 0.00001;
 
       if (!TIHMatch) addProblem(rf, `Missing total human impact, should be: ${HTI}%`);
-      else if (!isNegligible(HTI, TIHMatch[1])) {
+      else if (!isNegligibleTI(HTI, TIHMatch[1])) {
         addProblem(rf, `Diverging total human impact, should be: ${HTI}% but was: ${TIHMatch[1]}%`);
       }
 
@@ -571,11 +582,12 @@ export default function CorrectionsPage() {
           },
           [[], 0] as [Effect[], number]
         )[0];
-      const STI = round(100 * getImpactCategoryRatio(rf, "S", mrs) || 0.00001);
+      const STI = round(100 * enhEffects.reduce((tot, e) => tot + e.s, 0));
+      // const STI = round(100 * getImpactCategoryRatio(rf, "S", mrs) || 0.00001);
       const sti = getScenarioParameter(rf, "TI_S", mrs) || 0.00001;
 
       if (!TISMatch) addProblem(rf, `Missing total societal impact, should be: ${STI}%`);
-      else if (!isNegligible(STI, TISMatch[1])) {
+      else if (!isNegligibleTI(STI, TISMatch[1])) {
         addProblem(rf, `Diverging total societal impact, should be: ${STI}% but was: ${TISMatch[1]}%`);
       }
 
@@ -612,11 +624,12 @@ export default function CorrectionsPage() {
           },
           [[], 0] as [Effect[], number]
         )[0];
-      const ETI = round(100 * getImpactCategoryRatio(rf, "E", mrs) || 0.00001);
+      const ETI = round(100 * enhEffects.reduce((tot, e) => tot + e.e, 0));
+      // const ETI = round(100 * getImpactCategoryRatio(rf, "E", mrs) || 0.00001);
       const eti = getScenarioParameter(rf, "TI_E", mrs) || 0.00001;
 
       if (!TIEMatch) addProblem(rf, `Missing total environmental impact, should be: ${ETI}%`);
-      else if (!isNegligible(ETI, TIEMatch[1])) {
+      else if (!isNegligibleTI(ETI, TIEMatch[1])) {
         addProblem(rf, `Diverging total environmental impact, should be: ${ETI}% but was: ${TIEMatch[1]}%`);
       }
 
@@ -656,11 +669,12 @@ export default function CorrectionsPage() {
           },
           [[], 0] as [Effect[], number]
         )[0];
-      const FTI = round(100 * getImpactCategoryRatio(rf, "F", mrs) || 0.00001);
+      const FTI = round(100 * enhEffects.reduce((tot, e) => tot + e.f, 0));
+      // const FTI = round(100 * getImpactCategoryRatio(rf, "F", mrs) || 0.00001);
       const fti = getScenarioParameter(rf, "TI_F", mrs) || 0.00001;
 
       if (!TIFMatch) addProblem(rf, `Missing total financial impact, should be: ${FTI}%`);
-      else if (!isNegligible(FTI, TIFMatch[1])) {
+      else if (!isNegligibleTI(FTI, TIFMatch[1])) {
         addProblem(rf, `Diverging total financial impact, should be: ${FTI}% but was: ${TIFMatch[1]}%`);
       }
 

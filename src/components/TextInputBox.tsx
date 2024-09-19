@@ -254,7 +254,11 @@ function TextInputBox({
           <ScrollView>
             <Stack direction="column">
               {sources.map((a) => (
-                <Button id={a.cr4de_bnraattachmentid} onClick={() => insertSourceButtonClick(a)}>
+                <Button
+                  key={a.cr4de_bnraattachmentid}
+                  id={a.cr4de_bnraattachmentid}
+                  onClick={() => insertSourceButtonClick(a)}
+                >
                   {a.cr4de_name}
                 </Button>
               ))}
@@ -276,6 +280,7 @@ function TextInputBox({
                 .sort((a, b) => (a.cr4de_hazard_id < b.cr4de_hazard_id ? -1 : 1))
                 .map((a) => (
                   <Button
+                    key={a.cr4de_riskfilesid}
                     id={a.cr4de_riskfilesid}
                     onClick={() => insertRiskFileButtonClick(a)}
                     sx={{ justifyContent: "flex-start" }}
