@@ -18,6 +18,7 @@ import { Trans, useTranslation } from "react-i18next";
 import useRecord from "../../hooks/useRecord";
 import { DataTable } from "../../hooks/useAPI";
 import useRecords from "../../hooks/useRecords";
+import { getCategoryImpactRescaled } from "../../functions/CategoryImpact";
 
 const RADIAN = Math.PI / 180;
 const data = [
@@ -112,13 +113,13 @@ export default function SummaryCharts({
   }, [getDivJpeg]);
 
   const scenarioSuffix = getScenarioSuffix(scenario);
-  console.log(riskFile);
+
   const tp = getScenarioParameter(riskFile, "TP", scenario) || 0;
 
-  const H = getScenarioParameter(riskFile, "TI_H", scenario) || 0;
-  const S = getScenarioParameter(riskFile, "TI_S", scenario) || 0;
-  const E = getScenarioParameter(riskFile, "TI_E", scenario) || 0;
-  const F = getScenarioParameter(riskFile, "TI_F", scenario) || 0;
+  const H = getCategoryImpactRescaled(riskFile, "H", scenario);
+  const S = getCategoryImpactRescaled(riskFile, "S", scenario);
+  const E = getCategoryImpactRescaled(riskFile, "E", scenario);
+  const F = getCategoryImpactRescaled(riskFile, "F", scenario);
 
   return (
     <Box sx={{ position: "relative" }}>

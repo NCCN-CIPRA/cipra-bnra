@@ -124,7 +124,7 @@ const isNegligible = (a: string | number, b: string | number) => {
   const aN = typeof a === "string" ? parseFloat((a as string).replace(",", ".")) : (a as number);
   const bN = typeof b === "string" ? parseFloat((b as string).replace(",", ".")) : (b as number);
 
-  return Math.abs(aN - bN) < 5;
+  return Math.abs(aN - bN) < 0.01;
 };
 
 const isNegligibleTI = (shouldBe: string, was: string) => {
@@ -138,11 +138,12 @@ const isNegligibleTI = (shouldBe: string, was: string) => {
 };
 
 const find = (s: string | null, r: RegExp) => {
+  // if (s === null) console.log(r);
   if (s === null) return r.exec("");
 
   const clean = s.replace(/<[^>]*>?/gm, "").replace(/[\s\u00A0]/g, " ");
 
-  // if (clean.indexOf("An extreme failure of gas supply could have a very big") >= 0) console.log(r, clean);
+  // if (clean.indexOf(`extreme failure of emergency organisations directly p`) >= 0) console.log(r, clean);
   return r.exec(clean);
 };
 
@@ -338,12 +339,8 @@ export default function CorrectionsPage() {
       const causes = getCauses(rf, cascades, hc);
       const effects = getEffects(rf, cascades, hc);
 
-      const TPmatch = /There is an estimated[\s\u00A0]<\/span><strong style=".*">([\d\,]*)%<\/strong>/.exec(
-        rf.cr4de_mrs_probability || ""
-      );
-      const DPmatch = /No underlying cause(?:<\/[au]>)? \(([\d\,]*)% of total probability\)/.exec(
-        rf.cr4de_mrs_probability || ""
-      );
+      const TPmatch = find(rf.cr4de_mrs_probability, /There is an estimated ([\d\,]*)%/);
+      const DPmatch = find(rf.cr4de_mrs_probability, /No underlying cause\ ?\(([\d\,]*)% of total probability\)/);
       const causeMatches = causes
         .map((c) => {
           const regex = `(${c.cr4de_cause_hazard.cr4de_title
@@ -413,6 +410,7 @@ export default function CorrectionsPage() {
         rf.cr4de_mrs_impact_e,
         /The environmental impact represents an estimated ([\d\,]*)% of the total impact/
       );
+      // if (rf.cr4de_title.indexOf("CBRN") >= 0) console.log(rf.cr4de_title, rf.cr4de_mrs_impact_e, TIEMatch);
       const DIEMatch =
         find(
           rf.cr4de_mrs_impact_e,
@@ -555,7 +553,7 @@ export default function CorrectionsPage() {
       if (dih && !DIHMatch && dihRatio >= 0.1)
         addProblem(rf, `Missing direct human impact, should be: ${round(100 * dihRatio)}%`);
       else if (dih && DIHMatch && !isNegligible(round(100 * dihRatio), DIHMatch[2])) {
-        addProblem(rf, `Diverging direct human impact, should be: ${round(100 * dihRatio)} but was: ${DIHMatch[2]}`);
+        addProblem(rf, `Diverging direct human impact, should be: ${round(100 * dihRatio)}% but was: ${DIHMatch[2]}%`);
       }
 
       for (let pc of paretoEffectsH) {
@@ -598,7 +596,10 @@ export default function CorrectionsPage() {
       if (dis && !DISMatch && disRatio >= 0.1)
         addProblem(rf, `Missing direct societal impact, should be: ${round(100 * disRatio)}%`);
       else if (dis && DISMatch && !isNegligible(round(100 * disRatio), DISMatch[2])) {
-        addProblem(rf, `Diverging direct societal impact, should be: ${round(100 * disRatio)} but was: ${DISMatch[2]}`);
+        addProblem(
+          rf,
+          `Diverging direct societal impact, should be: ${round(100 * disRatio)}% but was: ${DISMatch[2]}%`
+        );
       }
 
       for (let pc of paretoEffectsS) {
@@ -644,7 +645,7 @@ export default function CorrectionsPage() {
       else if (die && DIEMatch && !isNegligible(round(100 * dieRatio), DIEMatch[2])) {
         addProblem(
           rf,
-          `Diverging direct environmental impact, should be: ${round(100 * die.e)} but was: ${DIEMatch[2]}`
+          `Diverging direct environmental impact, should be: ${round(100 * dieRatio)}% but was: ${DIEMatch[2]}%`
         );
       }
 
@@ -691,7 +692,7 @@ export default function CorrectionsPage() {
       else if (dif && DIFMatch && !isNegligible(round(100 * difRatio), DIFMatch[2])) {
         addProblem(
           rf,
-          `Diverging direct financial impact, should be: ${round(100 * difRatio)} but was: ${DIFMatch[2]}`
+          `Diverging direct financial impact, should be: ${round(100 * difRatio)}% but was: ${DIFMatch[2]}%`
         );
       }
 

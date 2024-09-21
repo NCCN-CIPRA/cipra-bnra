@@ -40,9 +40,8 @@ export default function ImpactSection({
   const impactLetterUC = impactLetter.toUpperCase() as IMPACT_CATEGORY;
 
   const ti = getScenarioParameter(riskFile, "TI", scenario) || 0.00001;
-  // const impactTI = effects.reduce((tot, e) => tot + e[impactLetter], 0) ;
   const impactTI = getScenarioParameter(riskFile, `TI_${impactLetterUC}`, scenario) || 0.00001;
-  console.log(effects.reduce((tot, e) => tot + e.h, 0));
+
   const paretoEffects = useMemo(() => {
     return effects
       .sort((a, b) => b[impactLetter] - a[impactLetter])

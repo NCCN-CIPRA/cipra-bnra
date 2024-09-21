@@ -17,10 +17,10 @@ import { getScenarioParameter, SCENARIO_SUFFIX, SCENARIOS } from "../../function
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import round from "../../functions/roundNumberString";
 import { useTranslation } from "react-i18next";
+import { getCategoryImpactRescaled, getDamageIndicatorToCategoryImpactRatio } from "../../functions/CategoryImpact";
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
-    console.log(active, payload);
     return (
       <Box sx={{ border: "1px solid #ccc", padding: 1, bgcolor: "rgba(255,255,255,0.8)", mb: 1 }}>
         <Typography variant="subtitle2" sx={{ textDecoration: "underline", mb: 1 }}>
@@ -31,6 +31,8 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
             <Typography variant="body2" sx={{ width: 50, fontWeight: "bold" }}>
               {p.name}
               {p.payload[`${p.name}_abs`]}
+
+              {p.payload[`${p.name}`]}
             </Typography>
           </Stack>
         ))}
@@ -54,24 +56,29 @@ export default function ImpactBarChart({ riskFile, scenario }: { riskFile: DVRis
   const { t } = useTranslation();
   if (!riskFile) return null;
 
+  const H = getCategoryImpactRescaled(riskFile, "H", scenario);
+  const S = getCategoryImpactRescaled(riskFile, "S", scenario);
+  const E = getCategoryImpactRescaled(riskFile, "E", scenario);
+  const F = getCategoryImpactRescaled(riskFile, "F", scenario);
+
   const data = [
     {
       name: t("Human"),
-      H: getScenarioParameter(riskFile, "TI_H", scenario),
-      Ha: getScenarioParameter(riskFile, "TI_Ha", scenario),
-      Hb: getScenarioParameter(riskFile, "TI_Hb", scenario),
-      Hc: getScenarioParameter(riskFile, "TI_Hc", scenario),
+      H: H,
+      Ha: getDamageIndicatorToCategoryImpactRatio(riskFile, "Ha", scenario) * H,
+      Hb: getDamageIndicatorToCategoryImpactRatio(riskFile, "Hb", scenario) * H,
+      Hc: getDamageIndicatorToCategoryImpactRatio(riskFile, "Hc", scenario) * H,
       Ha_abs: getScenarioParameter(riskFile, "TI_Ha_abs", scenario),
       Hb_abs: getScenarioParameter(riskFile, "TI_Hb_abs", scenario),
       Hc_abs: getScenarioParameter(riskFile, "TI_Hc_abs", scenario),
     },
     {
       name: t("Societal"),
-      S: getScenarioParameter(riskFile, "TI_S", scenario),
-      Sa: getScenarioParameter(riskFile, "TI_Sa", scenario),
-      Sb: getScenarioParameter(riskFile, "TI_Sb", scenario),
-      Sc: getScenarioParameter(riskFile, "TI_Sc", scenario),
-      Sd: getScenarioParameter(riskFile, "TI_Sd", scenario),
+      S: S,
+      Sa: getDamageIndicatorToCategoryImpactRatio(riskFile, "Sa", scenario) * S,
+      Sb: getDamageIndicatorToCategoryImpactRatio(riskFile, "Sb", scenario) * S,
+      Sc: getDamageIndicatorToCategoryImpactRatio(riskFile, "Sc", scenario) * S,
+      Sd: getDamageIndicatorToCategoryImpactRatio(riskFile, "Sd", scenario) * S,
       Sa_abs: getScenarioParameter(riskFile, "TI_Sa_abs", scenario),
       Sb_abs: getScenarioParameter(riskFile, "TI_Sb_abs", scenario),
       Sc_abs: getScenarioParameter(riskFile, "TI_Sc_abs", scenario),
@@ -79,15 +86,15 @@ export default function ImpactBarChart({ riskFile, scenario }: { riskFile: DVRis
     },
     {
       name: t("Environmental"),
-      E: getScenarioParameter(riskFile, "TI_E", scenario),
-      Ea: getScenarioParameter(riskFile, "TI_Ea", scenario),
+      E: E,
+      Ea: getDamageIndicatorToCategoryImpactRatio(riskFile, "Ea", scenario) * E,
       Ea_abs: getScenarioParameter(riskFile, "TI_Ea_abs", scenario),
     },
     {
       name: t("Financial"),
-      F: getScenarioParameter(riskFile, "TI_F", scenario),
-      Fa: getScenarioParameter(riskFile, "TI_Fa", scenario),
-      Fb: getScenarioParameter(riskFile, "TI_Fb", scenario),
+      F: F,
+      Fa: getDamageIndicatorToCategoryImpactRatio(riskFile, "Fa", scenario) * F,
+      Fb: getDamageIndicatorToCategoryImpactRatio(riskFile, "Fb", scenario) * F,
       Fa_abs: getScenarioParameter(riskFile, "TI_Fa_abs", scenario),
       Fb_abs: getScenarioParameter(riskFile, "TI_Fb_abs", scenario),
     },

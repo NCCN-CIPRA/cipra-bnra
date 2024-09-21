@@ -178,53 +178,12 @@ export function getIndirectImpact(c: DVRiskCascade<SmallRisk, SmallRisk>, rf: DV
   };
 }
 
-// const rescaleImpact = (i: number) => {
-//   // return i;
-//   if (i < 1.5) return 0.5 * (i / 1.5);
-//   // if (i > 3.5) return 4.5 + 0.5 * ((i - 3.5) / 1.5);
-//   return 0.5 + (4.5 * (i - 1.5)) / 3.5;
-// };
-
 // const unscaleImpact = (j: number) => {
 //   if (j < 0.5) {
 //     return (j * 1.5) / 0.5;
 //   }
 
 //   return ((j - 0.5) * 3.5) / 4.5 + 1.5;
-// };
-
-/**
- * Disclaimer:  This function is absolutely fucked and makes no real sense in
- * relation to the other calculations, but due to historical reason and past
- * publications it can currently not be changed
- */
-// export const getCategoryImpactRelativeScale = (
-//   calculation: RiskCalculation,
-//   category: IMPACT_CATEGORY,
-//   scenarioSuffix: SCENARIO_SUFFIX
-// ) => {
-//   const totalImpact = getCategoryImpact(calculation, category, scenarioSuffix);
-
-//   if (totalImpact < 15811388) {
-//     return rescaleImpact(totalImpact / (2 * 15811388));
-//   }
-
-//   return rescaleImpact(Math.log10(totalImpact / 5) - 6);
-// };
-
-// export const getDamageIndicatorRelativeScale = (
-//   calculation: RiskCalculation,
-//   di: DAMAGE_INDICATOR,
-//   scenarioSuffix: SCENARIO_SUFFIX
-// ) => {
-//   const totalImpact = getCategoryImpact(calculation, di[0] as IMPACT_CATEGORY, scenarioSuffix);
-//   const diImpact = calculation[`ti_${di}${scenarioSuffix}`] || 0;
-
-//   const ratio = diImpact / totalImpact;
-
-//   return (
-//     Math.round(10 * ratio * getCategoryImpactRelativeScale(calculation, di[0] as IMPACT_CATEGORY, scenarioSuffix)) / 10
-//   );
 // };
 
 export const getDamageIndicatorAbsoluteScale = (
