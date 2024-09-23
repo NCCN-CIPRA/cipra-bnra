@@ -31,8 +31,6 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
             <Typography variant="body2" sx={{ width: 50, fontWeight: "bold" }}>
               {p.name}
               {p.payload[`${p.name}_abs`]}
-
-              {p.payload[`${p.name}`]}
             </Typography>
           </Stack>
         ))}

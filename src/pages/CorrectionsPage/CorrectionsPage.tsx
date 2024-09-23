@@ -124,7 +124,7 @@ const isNegligible = (a: string | number, b: string | number) => {
   const aN = typeof a === "string" ? parseFloat((a as string).replace(",", ".")) : (a as number);
   const bN = typeof b === "string" ? parseFloat((b as string).replace(",", ".")) : (b as number);
 
-  return Math.abs(aN - bN) < 0.01;
+  return Math.abs(aN - bN) < 5;
 };
 
 const isNegligibleTI = (shouldBe: string, was: string) => {
@@ -572,6 +572,12 @@ export default function CorrectionsPage() {
           );
       }
 
+      for (let m of hEffectMatches) {
+        if (m && !paretoEffectsH.find((pe) => m && m[1].replace("&amp;", "&") === pe.name)) {
+          addProblem(rf, `Obsolete effect "${m[1]}" with human impact: ${m[3]}%`);
+        }
+      }
+
       const paretoEffectsS = enhEffects
         .sort((a, b) => b.s - a.s)
         .reduce(
@@ -617,6 +623,12 @@ export default function CorrectionsPage() {
               match[3]
             }%`
           );
+      }
+
+      for (let m of sEffectMatches) {
+        if (m && !paretoEffectsS.find((pe) => m && m[1].replace("&amp;", "&") === pe.name)) {
+          addProblem(rf, `Obsolete effect "${m[1]}" with societal impact: ${m[3]}%`);
+        }
       }
 
       const paretoEffectsE = enhEffects
@@ -666,6 +678,12 @@ export default function CorrectionsPage() {
           );
       }
 
+      for (let m of eEffectMatches) {
+        if (m && !paretoEffectsE.find((pe) => m && m[1].replace("&amp;", "&") === pe.name)) {
+          addProblem(rf, `Obsolete effect "${m[1]}" with environmental impact: ${m[3]}%`);
+        }
+      }
+
       const paretoEffectsF = enhEffects
         .sort((a, b) => b.f - a.f)
         .reduce(
@@ -711,6 +729,12 @@ export default function CorrectionsPage() {
               match[3]
             }%`
           );
+      }
+
+      for (let m of fEffectMatches) {
+        if (m && !paretoEffectsF.find((pe) => m && m[1].replace("&amp;", "&") === pe.name)) {
+          addProblem(rf, `Obsolete effect "${m[1]}" with financial impact: ${m[3]}%`);
+        }
       }
     }
 
