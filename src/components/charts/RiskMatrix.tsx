@@ -53,6 +53,8 @@ import FileSaver from "file-saver";
 import { useTranslation } from "react-i18next";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { getTotalImpactRelative } from "../../functions/TotalImpact";
+import { BasePageContext } from "../../pages/BasePage";
+import { useOutletContext } from "react-router-dom";
 
 interface MatrixRisk {
   riskId: string;
@@ -176,6 +178,7 @@ export default function RiskMatrix({
   categoryDisplay?: "shapes" | "colors" | "both" | "none";
   scenarioDisplay?: "colors" | "shapes" | "none";
 }) {
+  const { user } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
   const [dots, setDots] = useState<MatrixRisk[] | null>(null);
 
@@ -442,42 +445,50 @@ export default function RiskMatrix({
           </ScatterChart>
         </ResponsiveContainer>
         <Box sx={{ position: "absolute", bottom: 0, width: "100%" }}>
-          {categoryLegend && (
-            <Box className="custom-legend-wrapper" sx={{ flex: 1, height: 60 }}>
-              <Legend
-                wrapperStyle={{ position: "relative" }}
-                align="center"
-                payload={Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
-                  value: t(CATEGORY, CATEGORY_NAMES[CATEGORY as RISK_CATEGORY]),
-                  type: categoryDisplay === "both" || categoryDisplay === "shapes" ? shape.shape : "circle",
-                  color:
-                    categoryDisplay === "both" || categoryDisplay === "colors"
-                      ? CATEGORIES[CATEGORY as RISK_CATEGORY]?.color || "rgba(150,150,150,1)"
-                      : "rgba(150,150,150,1)",
-                }))}
-              />
-            </Box>
-          )}
-          {scenarioLegend && (
-            <Box className="custom-legend-wrapper" sx={{ flex: 1, height: 30, textAlign: "center" }}>
-              <Legend
-                chartHeight={30}
-                height={30}
-                wrapperStyle={{ position: "relative" }}
-                align="center"
-                payload={Object.entries(SCENARIO_PARAMS).map(([scenario, params]) => ({
-                  value: t(`2A.${scenario}.title`, `${scenario[0].toUpperCase()}${scenario.slice(1)} Scenario`),
-                  type: "circle",
-                  color: params.color,
-                }))}
-              />
-            </Box>
-          )}
+          <Box className="custom-legend-wrapper" sx={{ flex: 1, height: 60 }}>
+            <Legend
+              chartHeight={30}
+              height={30}
+              wrapperStyle={{ position: "relative" }}
+              align="center"
+              payload={
+                categoryLegend
+                  ? Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
+                      value: t(CATEGORY, CATEGORY_NAMES[CATEGORY as RISK_CATEGORY]),
+                      type: categoryDisplay === "both" || categoryDisplay === "shapes" ? shape.shape : "circle",
+                      color:
+                        categoryDisplay === "both" || categoryDisplay === "colors"
+                          ? CATEGORIES[CATEGORY as RISK_CATEGORY]?.color || "rgba(150,150,150,1)"
+                          : "rgba(150,150,150,1)",
+                    }))
+                  : []
+              }
+            />
+          </Box>
+          <Box className="custom-legend-wrapper" sx={{ flex: 1, height: 30, textAlign: "center" }}>
+            <Legend
+              chartHeight={30}
+              height={30}
+              wrapperStyle={{ position: "relative" }}
+              align="center"
+              payload={
+                scenarioLegend
+                  ? Object.entries(SCENARIO_PARAMS).map(([scenario, params]) => ({
+                      value: t(`2A.${scenario}.title`, `${scenario[0].toUpperCase()}${scenario.slice(1)} Scenario`),
+                      type: "circle",
+                      color: params.color,
+                    }))
+                  : []
+              }
+            />
+          </Box>
         </Box>
       </Box>
-      <IconButton sx={{ position: "absolute", top: 45, right: 45 }} onClick={handleDownload}>
-        <SaveIcon />
-      </IconButton>
+      {user?.roles.internal && (
+        <IconButton sx={{ position: "absolute", top: 45, right: 45 }} onClick={handleDownload}>
+          <SaveIcon />
+        </IconButton>
+      )}
     </Stack>
   );
 }

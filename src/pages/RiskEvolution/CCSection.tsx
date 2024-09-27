@@ -53,13 +53,31 @@ export default function CCSection({
   const scenarioSuffix = getScenarioSuffix(scenario);
   useEffect(() => {
     const tp50 = getScenarioParameter(riskFile, "TP50", scenario) || 0.000001;
+    const dTPAvg =
+      (Math.abs(
+        (getScenarioParameter(riskFile, "TP50", SCENARIOS.CONSIDERABLE) || 0.000001) -
+          (getScenarioParameter(riskFile, "TP", SCENARIOS.CONSIDERABLE) || 0.000001)
+      ) +
+        Math.abs(
+          (getScenarioParameter(riskFile, "TP50", SCENARIOS.MAJOR) || 0.000001) -
+            (getScenarioParameter(riskFile, "TP", SCENARIOS.MAJOR) || 0.000001)
+        ) +
+        Math.abs(
+          (getScenarioParameter(riskFile, "TP50", SCENARIOS.EXTREME) || 0.000001) -
+            (getScenarioParameter(riskFile, "TP", SCENARIOS.EXTREME) || 0.000001)
+        )) /
+      3;
 
     const allCauses = [
       {
         id: null,
         name: "No underlying cause",
-        p: getScenarioParameter(riskFile, "DP", scenario) || 0.000001,
-        p2050: getScenarioParameter(riskFile, "DP50", scenario) || 0.000001,
+        p_c: getScenarioParameter(riskFile, "DP", SCENARIOS.CONSIDERABLE) || 0.000001,
+        p2050_c: getScenarioParameter(riskFile, "DP50", SCENARIOS.CONSIDERABLE) || 0.000001,
+        p_m: getScenarioParameter(riskFile, "DP", SCENARIOS.MAJOR) || 0.000001,
+        p2050_m: getScenarioParameter(riskFile, "DP50", SCENARIOS.MAJOR) || 0.000001,
+        p_e: getScenarioParameter(riskFile, "DP", SCENARIOS.EXTREME) || 0.000001,
+        p2050_e: getScenarioParameter(riskFile, "DP50", SCENARIOS.EXTREME) || 0.000001,
       },
       ...(causes
         .filter((c) => getCascadeParameter(c, scenario, "IP50") !== 0)
@@ -67,21 +85,32 @@ export default function CCSection({
           return {
             id: c.cr4de_cause_hazard.cr4de_riskfilesid,
             name: c.cr4de_cause_hazard.cr4de_title,
-            p: getCascadeParameter(c, scenario, "IP") || 0.000001,
-            p2050: getCascadeParameter(c, scenario, "IP50") || 0.000001,
+            p_c: getCascadeParameter(c, SCENARIOS.CONSIDERABLE, "IP") || 0.000001,
+            p2050_c: getCascadeParameter(c, SCENARIOS.CONSIDERABLE, "IP50") || 0.000001,
+            p_m: getCascadeParameter(c, SCENARIOS.MAJOR, "IP") || 0.000001,
+            p2050_m: getCascadeParameter(c, SCENARIOS.MAJOR, "IP50") || 0.000001,
+            p_e: getCascadeParameter(c, SCENARIOS.EXTREME, "IP") || 0.000001,
+            p2050_e: getCascadeParameter(c, SCENARIOS.EXTREME, "IP50") || 0.000001,
           };
         }) || []),
     ]
-      .sort((a, b) => b.p2050 - a.p2050)
+      .sort(
+        (a, b) =>
+          (Math.abs(b.p2050_c - b.p_c) + Math.abs(b.p2050_m - b.p_m) + Math.abs(b.p2050_e - b.p_e)) / 3 -
+          (Math.abs(a.p2050_c - a.p_c) + Math.abs(a.p2050_m - a.p_m) + Math.abs(a.p2050_e - a.p_e)) / 3
+      )
       .reduce(
         ([cumulCauses, pCumul], c, i) => {
-          if (pCumul / tp50 > 0.8 && i > 2) return [cumulCauses, pCumul] as [Cause2050[], number];
+          if (pCumul / dTPAvg > 0.8 && i > 2) return [cumulCauses, pCumul] as [Cause2050[], number];
 
-          return [[...cumulCauses, c], pCumul + c.p2050] as [Cause2050[], number];
+          return [
+            [...cumulCauses, c],
+            pCumul + (Math.abs(c.p2050_c - c.p_c) + Math.abs(c.p2050_m - c.p_m) + Math.abs(c.p2050_e - c.p_e)) / 3,
+          ] as [Cause2050[], number];
         },
         [[], 0] as [Cause2050[], number]
       )[0];
-    console.log(allCauses, causes);
+
     setCCQuanti(allCauses);
 
     if (ccQuali === null) {
@@ -91,11 +120,7 @@ export default function CCSection({
             if (c.id) return `<a href="/risks/${c.id}" target="_blank">${c.name}</a>`;
 
             return (
-              "<p style='font-weight:bold'>No underlying cause</p><p>" +
-              cc?.cr4de_quali +
-              "</p><p>" +
-              cc?.cr4de_quali_cause +
-              "</p>"
+              "<a href=''>No underlying cause</a><p>" + cc?.cr4de_quali + "</p><p>" + cc?.cr4de_quali_cause + "</p>"
             );
           })
           .join("<br />")

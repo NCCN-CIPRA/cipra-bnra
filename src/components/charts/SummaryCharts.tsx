@@ -242,9 +242,11 @@ export default function SummaryCharts({
           </Stack>
         </Stack>
       </Box>
-      <IconButton sx={{ position: "absolute", top: 5, left: 5 }} onClick={handleDownload}>
-        <SaveIcon />
-      </IconButton>
+      {user && user.roles.internal && (
+        <IconButton sx={{ position: "absolute", top: 5, left: 5 }} onClick={handleDownload}>
+          <SaveIcon />
+        </IconButton>
+      )}
     </Box>
   );
 }

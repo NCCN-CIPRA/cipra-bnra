@@ -35,6 +35,7 @@ function TextInputBox({
   reset,
   sources = null,
   allRisks = null,
+  editorStyle = {},
   updateSources = null,
 
   onSave,
@@ -51,6 +52,7 @@ function TextInputBox({
   reset?: boolean;
   allRisks?: SmallRisk[] | null;
   sources?: DVAttachment[] | null;
+  editorStyle?: any;
   updateSources?: null | (() => Promise<unknown>);
 
   onSave?: (newValue: string | null) => void;
@@ -153,8 +155,12 @@ function TextInputBox({
   };
 
   const insertRiskFileButtonClick = (a: SmallRisk) => {
-    if (!htmlEditor.current || sources === null) return;
+    if (!htmlEditor.current || sources === null) {
+      console.log(htmlEditor.current, sources);
+      return;
+    }
 
+    console.log("Test");
     htmlEditor.current.instance.insertEmbed(cursor.current, "link", {
       class: "risk-link",
       href: `/risks/${a.cr4de_riskfilesid}`,
@@ -198,6 +204,7 @@ function TextInputBox({
           if (setUpdatedValue) setUpdatedValue(e.value);
         }}
         onFocusOut={onBlur}
+        style={editorStyle}
       >
         <Toolbar multiline>
           <Item name="undo" />

@@ -1,7 +1,18 @@
 import { useOutletContext } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
-import { Avatar, Box, Container, Fab, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Container,
+  Fab,
+  SpeedDial,
+  SpeedDialAction,
+  SpeedDialIcon,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import AppContext from "../../functions/AppContext";
 import getCategoryColor, { CategoryIcon, RiskTypeIcon } from "../../functions/getCategoryColor";
 import SummaryCharts from "../../components/charts/SummaryCharts";
@@ -9,11 +20,13 @@ import { getWorstCaseScenario, SCENARIOS } from "../../functions/scenarios";
 import useAPI from "../../hooks/useAPI";
 import TextInputBox from "../../components/TextInputBox";
 import { AuthPageContext } from "../AuthPage";
-import EditIcon from "@mui/icons-material/Edit";
+import CancelIcon from "@mui/icons-material/Cancel";
 import SaveIcon from "@mui/icons-material/Save";
 import { useTranslation } from "react-i18next";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import RiskFileTitle from "../../components/RiskFileTitle";
+import BNRASpeedDial from "../../components/BNRASpeedDial";
+import RiskFileSummaryTutorial from "./RiskFileSummaryTutorial";
 
 export default function RiskFileSummaryPage({}) {
   const api = useAPI();
@@ -65,7 +78,7 @@ export default function RiskFileSummaryPage({}) {
     <Container sx={{ mt: 2, pb: 8 }}>
       <RiskFileTitle riskFile={riskFile} />
       <Stack direction="row" sx={{ mb: 8, mt: 8 }} columnGap={4}>
-        <Box sx={{ flex: 1 }}>
+        <Box id="summary-text" sx={{ flex: 1 }}>
           {!editing && i18n.language === "en" && (
             <Box
               className="htmleditor"
@@ -103,6 +116,7 @@ export default function RiskFileSummaryPage({}) {
                   initialValue={summary}
                   setUpdatedValue={(str) => setSummary(str || "")}
                   height="600"
+                  editorStyle={{ backgroundColor: "white" }}
                 />
               </Box>
               <Box sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
@@ -112,6 +126,7 @@ export default function RiskFileSummaryPage({}) {
                   initialValue={summaryNL}
                   setUpdatedValue={(str) => setSummaryNL(str || "")}
                   height="600"
+                  editorStyle={{ backgroundColor: "white" }}
                 />
               </Box>
               <Box sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
@@ -121,6 +136,7 @@ export default function RiskFileSummaryPage({}) {
                   initialValue={summaryFR}
                   setUpdatedValue={(str) => setSummaryFR(str || "")}
                   height="600"
+                  editorStyle={{ backgroundColor: "white" }}
                 />
               </Box>
               <Box sx={{ my: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
@@ -130,32 +146,58 @@ export default function RiskFileSummaryPage({}) {
                   initialValue={summaryDE}
                   setUpdatedValue={(str) => setSummaryDE(str || "")}
                   height="600"
+                  editorStyle={{ backgroundColor: "white" }}
                 />
               </Box>
             </>
           )}
         </Box>
         {riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING && (
-          <Box sx={{ bgcolor: "white" }}>
-            <SummaryCharts
-              riskFile={riskFile}
-              scenario={riskFile.cr4de_mrs || SCENARIOS.MAJOR}
-              manmade={riskFile.cr4de_risk_type === RISK_TYPE.MANMADE}
-            />
+          <Box>
+            <Box id="summary-charts" sx={{ bgcolor: "white" }}>
+              <SummaryCharts
+                riskFile={riskFile}
+                scenario={riskFile.cr4de_mrs || SCENARIOS.MAJOR}
+                manmade={riskFile.cr4de_risk_type === RISK_TYPE.MANMADE}
+              />
+            </Box>
           </Box>
         )}
       </Stack>
       {user && user.roles.admin && (
         <Box sx={{ position: "fixed", bottom: 96, right: 40 }}>
           {!editing && (
-            <Fab color="secondary" aria-label="edit" onClick={() => setEditing(true)}>
-              <EditIcon />
-            </Fab>
+            <BNRASpeedDial
+              offset={{ x: 0, y: 56 }}
+              editAction={() => setEditing(true)}
+              HelpComponent={RiskFileSummaryTutorial}
+            />
           )}
           {editing && (
-            <Fab color="secondary" aria-label="edit" onClick={() => saveRiskFile()}>
-              <SaveIcon />
-            </Fab>
+            <SpeedDial
+              ariaLabel="BNRA Speeddial"
+              sx={{ position: "fixed", bottom: 72, right: 16 }}
+              icon={<SpeedDialIcon />}
+            >
+              {user && user.roles.analist && (
+                <SpeedDialAction
+                  icon={<CancelIcon />}
+                  tooltipTitle={"Cancel"}
+                  onClick={() => {
+                    if (!window.confirm("This will erase all your changes. Are you sure?")) return;
+
+                    setSummary(riskFile.cr4de_mrs_summary || "<h6>Not available</h6>");
+                    setSummaryNL(riskFile.cr4de_mrs_summary_nl || "<h6>Not available</h6>");
+                    setSummaryFR(riskFile.cr4de_mrs_summary_fr || "<h6>Not available</h6>");
+                    setSummaryDE(riskFile.cr4de_mrs_summary_de || "<h6>Not available</h6>");
+                    setEditing(false);
+                  }}
+                />
+              )}
+              {user && user.roles.analist && (
+                <SpeedDialAction icon={<SaveIcon />} tooltipTitle={"Save Page"} onClick={() => saveRiskFile()} />
+              )}
+            </SpeedDial>
           )}
         </Box>
       )}

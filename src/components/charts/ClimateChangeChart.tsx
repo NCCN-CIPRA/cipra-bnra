@@ -5,6 +5,16 @@ import { useMemo } from "react";
 import round from "../../functions/roundNumberString";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
+import { Cause as Cause2023 } from "../../functions/Probability";
+
+type Cause2050 = Cause2023 & {
+  p_c: number;
+  p2050_c: number;
+  p_m: number;
+  p2050_m: number;
+  p_e: number;
+  p2050_e: number;
+};
 
 export default function ClimateChangeChart({
   riskFile,
@@ -16,6 +26,21 @@ export default function ClimateChangeChart({
   scenario: SCENARIOS;
 }) {
   const data = useMemo(() => {
+    const dTPAvg =
+      (Math.abs(
+        (getScenarioParameter(riskFile, "TP50", SCENARIOS.CONSIDERABLE) || 0.000001) -
+          (getScenarioParameter(riskFile, "TP", SCENARIOS.CONSIDERABLE) || 0.000001)
+      ) +
+        Math.abs(
+          (getScenarioParameter(riskFile, "TP50", SCENARIOS.MAJOR) || 0.000001) -
+            (getScenarioParameter(riskFile, "TP", SCENARIOS.MAJOR) || 0.000001)
+        ) +
+        Math.abs(
+          (getScenarioParameter(riskFile, "TP50", SCENARIOS.EXTREME) || 0.000001) -
+            (getScenarioParameter(riskFile, "TP", SCENARIOS.EXTREME) || 0.000001)
+        )) /
+      3;
+
     const enhCauses = [
       {
         name: "No underlying cause",
@@ -45,7 +70,17 @@ export default function ClimateChangeChart({
           (Math.abs(b.p2050_c - b.p_c) + Math.abs(b.p2050_m - b.p_m) + Math.abs(b.p2050_e - b.p_e)) / 3 -
           (Math.abs(a.p2050_c - a.p_c) + Math.abs(a.p2050_m - a.p_m) + Math.abs(a.p2050_e - a.p_e)) / 3
       )
-      .slice(0, 5);
+      .reduce(
+        ([cumulCauses, pCumul], c, i) => {
+          if (pCumul / dTPAvg > 0.8 && i > 2) return [cumulCauses, pCumul] as [Cause2050[], number];
+
+          return [
+            [...cumulCauses, c],
+            pCumul + (Math.abs(c.p2050_c - c.p_c) + Math.abs(c.p2050_m - c.p_m) + Math.abs(c.p2050_e - c.p_e)) / 3,
+          ] as [Cause2050[], number];
+        },
+        [[], 0] as [Cause2050[], number]
+      )[0];
 
     const tp50_c = getScenarioParameter(riskFile, "TP50", SCENARIOS.CONSIDERABLE) || 0.000001;
     const tp50_m = getScenarioParameter(riskFile, "TP50", SCENARIOS.MAJOR) || 0.000001;
@@ -54,7 +89,7 @@ export default function ClimateChangeChart({
     const tp_c = getScenarioParameter(riskFile, "TP", SCENARIOS.CONSIDERABLE) || 0.000001;
     const tp_m = getScenarioParameter(riskFile, "TP", SCENARIOS.MAJOR) || 0.000001;
     const tp_e = getScenarioParameter(riskFile, "TP", SCENARIOS.EXTREME) || 0.000001;
-    console.log(riskFile);
+
     return [
       {
         name: "Total probability",

@@ -27,7 +27,9 @@ export default function TableHeader({
   //   const [filter, setFilter] = useFilter<string | null>(null);
 
   return (
-    <TableCell sx={{ pr: 3, width, minWidth, whiteSpace: "nowrap", ":hover .sortIcon": { opacity: 0.4 } }}>
+    <TableCell
+      sx={{ pr: 3, width, minWidth, whiteSpace: "nowrap", ":hover .sortIcon": { opacity: 0.4 }, bgcolor: "white" }}
+    >
       {name}
       {onSort && (
         <IconButton

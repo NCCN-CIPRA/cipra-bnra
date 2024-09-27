@@ -124,7 +124,7 @@ const isNegligible = (a: string | number, b: string | number) => {
   const aN = typeof a === "string" ? parseFloat((a as string).replace(",", ".")) : (a as number);
   const bN = typeof b === "string" ? parseFloat((b as string).replace(",", ".")) : (b as number);
 
-  return Math.abs(aN - bN) < 5;
+  return Math.abs(aN - bN) < 0.01;
 };
 
 const isNegligibleTI = (shouldBe: string, was: string) => {

@@ -56,7 +56,7 @@ export default function RiskMatrixPage() {
 
   return (
     <Card sx={{ my: 4, mx: 9 }}>
-      <CardContent sx={{ display: "flex", flexDirection: "row" }}>
+      <CardContent sx={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
         <Box sx={{ flex: 1, aspectRatio: "1", maxHeight: "calc(100vh - 220px)", my: 4, pl: 2, mt: -4, pr: 2 }}>
           <RiskMatrix
             riskFiles={hazardCatalogue}
@@ -85,7 +85,7 @@ export default function RiskMatrixPage() {
                   <MenuItem value={"All"}>{t("All", "All")}</MenuItem>
                   <MenuItem value={"MRS"}>{t("Most Relevant Scenario")}</MenuItem>
                   <MenuItem value={SCENARIOS.CONSIDERABLE}>{t("considerable", "Considerable")}</MenuItem>
-                  <MenuItem value={SCENARIOS.MAJOR}>{t("major", "Major")}Major</MenuItem>
+                  <MenuItem value={SCENARIOS.MAJOR}>{t("major", "Major")}</MenuItem>
                   <MenuItem value={SCENARIOS.EXTREME}>{t("extreme", "Extreme")}</MenuItem>
                 </Select>
               </FormControl>

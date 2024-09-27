@@ -28,6 +28,8 @@ import { useEffect, useState } from "react";
 import TableHeader from "./TableHeader";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { CategoryIcon } from "../../functions/getCategoryColor";
+import BNRASpeedDial from "../../components/BNRASpeedDial";
+import HazardCatalogueTutorial from "./HazardCatalogueTutorial";
 
 function SearchBar({ onSearch }: { onSearch: (v: string) => void }) {
   const [committedSearch, setCommittedSearch] = useState("");
@@ -45,7 +47,7 @@ function SearchBar({ onSearch }: { onSearch: (v: string) => void }) {
   }, [search]);
 
   return (
-    <FormControl sx={{ m: 0 }} variant="standard" fullWidth>
+    <FormControl sx={{ m: 0 }} variant="standard" fullWidth id="search-bar">
       <InputLabel htmlFor="outlined-adornment">Search Risk Catalogue</InputLabel>
       <Input
         id="outlined-adornment"
@@ -79,7 +81,7 @@ export default function HazardCataloguePage() {
 
   return (
     <>
-      <Box sx={{ mb: 8, mx: 8 }}>
+      <Box sx={{ mb: 0, mx: 8 }}>
         <Card sx={{ mb: 2 }}>
           <CardContent sx={{ px: 2, pt: 1 }}>
             <Box>
@@ -87,8 +89,8 @@ export default function HazardCataloguePage() {
             </Box>
           </CardContent>
         </Card>
-        <TableContainer component={Paper} sx={{ width: "100%" }}>
-          <Table>
+        <TableContainer component={Paper} sx={{ width: "100%", maxHeight: "calc(100vh - 260px)" }}>
+          <Table stickyHeader>
             <TableHead>
               <TableRow>
                 <TableHeader
@@ -125,7 +127,7 @@ export default function HazardCataloguePage() {
                     }
                   }}
                 />
-                <TableHeader name={t("hazardCatalogue.labels", "Labels")} />
+                {/* <TableHeader name={t("hazardCatalogue.labels", "Labels")} /> */}
                 <TableHeader
                   name={t("hazardCatalogue.mrs", "Most Relevant Scenario")}
                   sort={sortField === "cr4de_mrs" ? sortDir : null}
@@ -224,17 +226,22 @@ export default function HazardCataloguePage() {
                     }
                   })
                   .map((h) => (
-                    <TableRow key={h.cr4de_riskfilesid} hover onClick={() => navigate(`/risks/${h.cr4de_riskfilesid}`)}>
+                    <TableRow
+                      key={h.cr4de_riskfilesid}
+                      hover
+                      onClick={() => navigate(`/risks/${h.cr4de_riskfilesid}`)}
+                      sx={{ cursor: "pointer" }}
+                    >
                       <TableCell sx={{ pr: 4 }}>{h.cr4de_hazard_id}</TableCell>
                       <TableCell sx={{ whiteSpace: "nowrap" }}>
                         {t(`risk.${h.cr4de_hazard_id}.name`, h.cr4de_title)}
                       </TableCell>
                       <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}>
-                        <Box sx={{ width: 30, height: 30 }}>
+                        <Box sx={{ width: 30, height: 30, ml: 1.5 }}>
                           <CategoryIcon category={h.cr4de_risk_category} />
                         </Box>
                       </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}></TableCell>
+                      {/* <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}></TableCell> */}
                       <TableCell sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}>
                         {h.cr4de_mrs ? (
                           <Button
@@ -248,6 +255,7 @@ export default function HazardCataloguePage() {
                               minWidth: 30,
                               height: 30,
                               pointerEvents: "none",
+                              ml: 7,
                             }}
                           >
                             {h.cr4de_mrs[0].toUpperCase()}
@@ -275,6 +283,7 @@ export default function HazardCataloguePage() {
             </TableBody>
           </Table>
         </TableContainer>
+        <BNRASpeedDial HelpComponent={HazardCatalogueTutorial} />
       </Box>
     </>
   );

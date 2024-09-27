@@ -328,10 +328,6 @@ export default function BaseRiskFilePage() {
         </IconButton>
         {/* <BottomNavigation /> */}
       </Drawer>
-
-      <Fab color="primary" onClick={handleDrawerOpen} sx={{ position: "fixed", bottom: 62, right: 5 }}>
-        <QuestionMarkIcon />
-      </Fab>
     </Box>
   );
 }

@@ -15,6 +15,8 @@ import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import Scenario from "../../RiskAnalysisPage/Standard/Scenario";
 import Bibliography from "../../RiskAnalysisPage/Bibliography";
 import RiskFileTitle from "../../../components/RiskFileTitle";
+import BNRASpeedDial from "../../../components/BNRASpeedDial";
+import StandardIdentificationTutorial from "./StandardIdentificationTutorial";
 
 const ibsx = {
   transition: "opacity .3s ease",
@@ -122,6 +124,8 @@ export default function Standard({
         attachments={attachments}
         reloadAttachments={loadAttachments}
       />
+
+      <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={StandardIdentificationTutorial} />
     </Box>
   );
 }

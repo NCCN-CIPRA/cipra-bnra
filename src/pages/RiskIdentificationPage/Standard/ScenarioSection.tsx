@@ -62,75 +62,6 @@ export default function ScenarioSection({
         )}
       </Typography>
 
-      <Stack direction="row" justifyContent="flex-start" spacing={2} sx={{ mt: 1 }}>
-        <Button
-          variant="outlined"
-          sx={{
-            color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
-            fontWeight: selectedScenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
-            opacity: selectedScenario === SCENARIOS.CONSIDERABLE ? 1 : 0.35,
-            borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
-            borderRadius: "50%",
-            backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
-            width: 48,
-            minWidth: 48,
-            height: 48,
-            "&:hover": {
-              opacity: 1,
-              backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
-              borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
-            },
-          }}
-          onClick={() => setSelectedScenario(SCENARIOS.CONSIDERABLE)}
-        >
-          C
-        </Button>
-        <Button
-          variant="outlined"
-          sx={{
-            color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
-            fontWeight: selectedScenario === SCENARIOS.MAJOR ? "bold" : "normal",
-            opacity: selectedScenario === SCENARIOS.MAJOR ? 1 : 0.55,
-            borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
-            borderRadius: "50%",
-            backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
-            width: 48,
-            minWidth: 48,
-            height: 48,
-            "&:hover": {
-              opacity: 1,
-              backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
-              borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
-            },
-          }}
-          onClick={() => setSelectedScenario(SCENARIOS.MAJOR)}
-        >
-          M
-        </Button>
-        <Button
-          variant="outlined"
-          sx={{
-            color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
-            fontWeight: selectedScenario === SCENARIOS.EXTREME ? "bold" : "normal",
-            opacity: selectedScenario === SCENARIOS.EXTREME ? 1 : 0.25,
-            borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
-            borderRadius: "50%",
-            backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
-            width: 48,
-            minWidth: 48,
-            height: 48,
-            "&:hover": {
-              opacity: 1,
-              backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
-              borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
-            },
-          }}
-          onClick={() => setSelectedScenario(SCENARIOS.EXTREME)}
-        >
-          E
-        </Button>
-      </Stack>
-
       <Box
         sx={{
           borderLeft: `solid 8px ${SCENARIO_PARAMS[selectedScenario].color}`,
@@ -140,6 +71,74 @@ export default function ScenarioSection({
           backgroundColor: "white",
         }}
       >
+        <Stack direction="row" justifyContent="flex-start" spacing={2} sx={{ mt: 1, mb: 4 }}>
+          <Button
+            variant="outlined"
+            sx={{
+              color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
+              fontWeight: selectedScenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
+              opacity: selectedScenario === SCENARIOS.CONSIDERABLE ? 1 : 0.15,
+              borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
+              borderRadius: "50%",
+              backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
+              width: 48,
+              minWidth: 48,
+              height: 48,
+              "&:hover": {
+                opacity: 1,
+                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
+                borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
+              },
+            }}
+            onClick={() => setSelectedScenario(SCENARIOS.CONSIDERABLE)}
+          >
+            C
+          </Button>
+          <Button
+            variant="outlined"
+            sx={{
+              color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
+              fontWeight: selectedScenario === SCENARIOS.MAJOR ? "bold" : "normal",
+              opacity: selectedScenario === SCENARIOS.MAJOR ? 1 : 0.35,
+              borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
+              borderRadius: "50%",
+              backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
+              width: 48,
+              minWidth: 48,
+              height: 48,
+              "&:hover": {
+                opacity: 1,
+                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
+                borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
+              },
+            }}
+            onClick={() => setSelectedScenario(SCENARIOS.MAJOR)}
+          >
+            M
+          </Button>
+          <Button
+            variant="outlined"
+            sx={{
+              color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
+              fontWeight: selectedScenario === SCENARIOS.EXTREME ? "bold" : "normal",
+              opacity: selectedScenario === SCENARIOS.EXTREME ? 1 : 0.1,
+              borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
+              borderRadius: "50%",
+              backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
+              width: 48,
+              minWidth: 48,
+              height: 48,
+              "&:hover": {
+                opacity: 1,
+                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
+                borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
+              },
+            }}
+            onClick={() => setSelectedScenario(SCENARIOS.EXTREME)}
+          >
+            E
+          </Button>
+        </Stack>
         <Stack>
           {scenarios[selectedScenario].map((p) => {
             return (

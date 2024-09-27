@@ -7,6 +7,8 @@ import Bibliography from "../RiskAnalysisPage/Bibliography";
 import { useTranslation } from "react-i18next";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import RiskFileTitle from "../../components/RiskFileTitle";
+import DisclaimerSection from "../RiskAnalysisPage/DisclaimerSection";
+import { useEffect } from "react";
 
 export default function RiskEvolutionPage({}) {
   const { t } = useTranslation();
@@ -25,10 +27,25 @@ export default function RiskEvolutionPage({}) {
     loadAttachments,
   } = useOutletContext<RiskFilePageContext>();
 
+  useEffect(() => {
+    if (!attachments) loadAttachments();
+  }, []);
+
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
       <Box sx={{ mb: 10 }}>
         <RiskFileTitle riskFile={riskFile} />
+
+        <DisclaimerSection
+          riskFile={riskFile}
+          mode={user && user.roles.analist ? "edit" : "view"}
+          attachments={attachments}
+          updateAttachments={loadAttachments}
+          isEditingOther={isEditing}
+          setIsEditing={setIsEditing}
+          reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+          allRisks={hazardCatalogue}
+        />
 
         <Box sx={{ mt: 2 }}>
           <Typography variant="h5">Climate Change</Typography>

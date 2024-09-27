@@ -63,14 +63,14 @@ export default function SideDrawer({
                   <ListItemText primary={t("sideDrawer.riskMatrix", "Risk Matrix")} />
                 </ListItemButton>
               </ListItem>
-              {user.roles.expert && (
+              {/* {user.roles.expert && (
                 <ListItem disablePadding>
                   <ListItemButton component={Link} to="/overview" onClick={onClose}>
                     <ListItemIcon></ListItemIcon>
                     <ListItemText primary={t("sideDrawer.riskAnalysis", "Risk Analysis")} />
                   </ListItemButton>
                 </ListItem>
-              )}
+              )} */}
 
               {user.roles.admin && (
                 <>
