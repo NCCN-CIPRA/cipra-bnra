@@ -54,5 +54,7 @@ export const getDamageIndicatorToCategoryImpactRatio = (
     (getScenarioParameter(riskFile, `TI_${di[0]}c` as RISKFILE_RESULT_FIELD, scenario) || 0) +
     (getScenarioParameter(riskFile, `TI_${di[0]}d` as RISKFILE_RESULT_FIELD, scenario) || 0);
 
+  if (categoryImpact <= 0) return 0;
+
   return diImpact / categoryImpact;
 };

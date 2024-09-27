@@ -12,6 +12,7 @@ import {
   SCENARIOS,
 } from "./scenarios";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
+import round from "./roundNumberString";
 
 export type Effect = {
   id: string | null;
@@ -192,6 +193,11 @@ export const getDamageIndicatorAbsoluteScale = (
   scenarioSuffix: SCENARIO_SUFFIX
 ) => {
   const diImpact = calculation[`ti_${di}${scenarioSuffix}`] || 0;
+
+  if (diImpact <= 0) return 0;
+
+  if (diImpact < 1000 * scales["0.5"])
+    return Math.round((10 * 0.5 * (1000 * scales["0.5"] - diImpact)) / (1000 * scales["0.5"])) / 10;
 
   return Math.round(10 * getImpactScaleFloat(diImpact)) / 10;
 };
