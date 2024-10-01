@@ -39,6 +39,8 @@ import PermissionDeniedPage from "./pages/PermissionDeniedPage/PermissionDeniedP
 import UserManagementPage from "./pages/UserManagementPage/UserManagementPage";
 import RiskMatrixPage from "./pages/RiskMatrixPage/RiskMatrixPage";
 import RiskEvolutionPage from "./pages/RiskEvolution/RiskEvolutionPage";
+import ExportRiskFilePage from "./pages/ExportRiskFilePage/ExportRiskFilePage";
+import ExportBNRAPage from "./pages/ExportBNRAPage/ExportBNRAPage";
 
 function App() {
   useEffect(() => {
@@ -196,6 +198,14 @@ function App() {
               ],
             },
           ],
+        },
+        {
+          path: "/risks/:risk_file_id/export",
+          element: <ExportRiskFilePage />,
+        },
+        {
+          path: "/risks/export",
+          element: <ExportBNRAPage />,
         },
 
         // DEV ONLY

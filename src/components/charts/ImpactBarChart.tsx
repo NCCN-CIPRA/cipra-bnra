@@ -58,7 +58,7 @@ export default function ImpactBarChart({ riskFile, scenario }: { riskFile: DVRis
   const S = getCategoryImpactRescaled(riskFile, "S", scenario);
   const E = getCategoryImpactRescaled(riskFile, "E", scenario);
   const F = getCategoryImpactRescaled(riskFile, "F", scenario);
-  console.log(H, S, E, F, getDamageIndicatorToCategoryImpactRatio(riskFile, "Ha", scenario));
+
   const data = [
     {
       name: t("Human"),

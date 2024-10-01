@@ -18,6 +18,11 @@ import DisclaimerSection from "../DisclaimerSection";
 import { useTranslation } from "react-i18next";
 import { Cascades } from "../../BaseRisksPage";
 import RiskFileTitle from "../../../components/RiskFileTitle";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import BNRASpeedDial from "../../../components/BNRASpeedDial";
+import StandardIdentificationTutorial from "../../RiskIdentificationPage/Standard/StandardIdentificationTutorial";
+import StandardAnalysisTutorial from "./StandardAnalysisTutorial";
 
 const getScenarioSuffix = (scenario: SCENARIOS) => {
   if (scenario === SCENARIOS.CONSIDERABLE) return "_c";
@@ -35,6 +40,9 @@ export default function Standard({
   cascades,
   mode = "view",
   isEditing,
+  attachments,
+  loadAttachments,
+  hazardCatalogue,
   setIsEditing,
   reloadRiskFile,
 }: {
@@ -42,19 +50,16 @@ export default function Standard({
   cascades: Cascades;
   mode?: "view" | "edit";
   isEditing: boolean;
+  attachments: DVAttachment<unknown, DVAttachment<unknown, unknown>>[];
+  hazardCatalogue: SmallRisk[] | null;
+  loadAttachments: () => Promise<unknown>;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const { helpOpen, setHelpFocus, hazardCatalogue, attachments, loadAttachments } =
-    useOutletContext<RiskFilePageContext>();
 
   const MRS = riskFile.cr4de_mrs || SCENARIOS.EXTREME;
   const [scenario, setScenario] = useState(MRS);
-
-  useEffect(() => {
-    if (!attachments) loadAttachments();
-  }, []);
 
   const rf = riskFile;
   const MRSSuffix = getScenarioSuffix(MRS);
@@ -109,7 +114,7 @@ export default function Standard({
       )}
 
       {rf.cr4de_intensity_parameters && (
-        <Box sx={{ mt: 8 }}>
+        <Box className="mrs" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Most Relevant Scenario")}</Typography>
 
           <ScenarioMatrix riskFile={riskFile} mrs={MRS} />
@@ -141,7 +146,7 @@ export default function Standard({
         allRisks={hazardCatalogue}
       />
 
-      <Box sx={{ mt: 8, clear: "both" }}>
+      <Box className="probability-assess" sx={{ mt: 8, clear: "both" }}>
         <Typography variant="h5">{t("Probability Assessment")}</Typography>
         <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
           <ProbabilitySection
@@ -159,7 +164,7 @@ export default function Standard({
         </Box>
       </Box>
 
-      <Box sx={{ mt: 8 }}>
+      <Box className="impact-assess" sx={{ mt: 8 }}>
         <Typography variant="h5">{t("Impact Assessment")}</Typography>
 
         <ImpactSection
@@ -218,7 +223,7 @@ export default function Standard({
           allRisks={hazardCatalogue}
         />
 
-        <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
+        <Box className="cb-impact" sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
           <Typography variant="h6">Cross-border Impact</Typography>
           <CBSection
             riskFile={riskFile}
@@ -240,6 +245,8 @@ export default function Standard({
         attachments={attachments}
         reloadAttachments={loadAttachments}
       />
+
+      <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={StandardAnalysisTutorial} />
     </Box>
   );
 }

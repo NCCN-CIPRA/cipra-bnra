@@ -15,12 +15,20 @@ import MMImpactSection from "./MMImpactSection";
 import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../../components/RiskFileTitle";
 import { getIndirectImpact } from "../../../functions/Impact";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import BNRASpeedDial from "../../../components/BNRASpeedDial";
+import MMAnalysisTutorial from "./MMAnalysisTutorial";
 
 export default function ManMade({
   riskFile,
   cascades,
   mode = "view",
   isEditing,
+  attachments,
+  loadAttachments,
+  hazardCatalogue,
+
   setIsEditing,
   reloadRiskFile,
 }: {
@@ -28,18 +36,16 @@ export default function ManMade({
   cascades: Cascades;
   mode?: "view" | "edit";
   isEditing: boolean;
+  attachments: DVAttachment<unknown, DVAttachment<unknown, unknown>>[];
+  hazardCatalogue: SmallRisk[] | null;
+  loadAttachments: () => Promise<unknown>;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const { hazardCatalogue, attachments, loadAttachments } = useOutletContext<RiskFilePageContext>();
 
   const MRS = riskFile.cr4de_mrs || SCENARIOS.EXTREME;
   const [scenario, setScenario] = useState(MRS);
-
-  useEffect(() => {
-    if (!attachments) loadAttachments();
-  }, []);
 
   const rf = riskFile;
 
@@ -77,7 +83,7 @@ export default function ManMade({
         )}
 
         {rf.cr4de_intensity_parameters && (
-          <Box sx={{ mt: 8 }}>
+          <Box className="mrag" sx={{ mt: 8 }}>
             <Typography variant="h5">{t("Most Relevant Actor Group")}</Typography>
 
             <ScenarioMatrix riskFile={riskFile} mrs={MRS} />
@@ -97,7 +103,7 @@ export default function ManMade({
           </Box>
         )}
 
-        <Box sx={{ mt: 8 }}>
+        <Box className="actions-assess" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Preferred Malicious Actions")}</Typography>
 
           <ActionsSection
@@ -114,7 +120,7 @@ export default function ManMade({
           />
         </Box>
 
-        <Box sx={{ mt: 8 }}>
+        <Box className="impact-assess" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Other Impactful Actions")}</Typography>
 
           <MMImpactSection
@@ -137,6 +143,7 @@ export default function ManMade({
           attachments={attachments}
           reloadAttachments={loadAttachments}
         />
+        <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={MMAnalysisTutorial} />
       </Box>
     </>
   );

@@ -8,6 +8,7 @@ import { RiskFilePageContext } from "../BaseRiskFilePage";
 import Standard from "./Standard/Standard";
 import Emerging from "./Emerging/Emerging";
 import Manmade from "./Manmade/Manmade";
+import { useEffect } from "react";
 
 export interface ProcessedRiskFile extends DVRiskFile {
   historicalEvents: HE.HistoricalEvent[];
@@ -16,8 +17,21 @@ export interface ProcessedRiskFile extends DVRiskFile {
 }
 
 export default function RiskIdentificationPage() {
-  const { user, hazardCatalogue, riskFile, cascades, reloadRiskFile, isEditing, setIsEditing } =
-    useOutletContext<RiskFilePageContext>();
+  const {
+    user,
+    hazardCatalogue,
+    riskFile,
+    cascades,
+    reloadRiskFile,
+    isEditing,
+    setIsEditing,
+    attachments,
+    loadAttachments,
+  } = useOutletContext<RiskFilePageContext>();
+
+  useEffect(() => {
+    if (!attachments) loadAttachments();
+  }, [attachments, loadAttachments]);
 
   if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD)
     return (
@@ -29,6 +43,9 @@ export default function RiskIdentificationPage() {
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+          attachments={attachments || []}
+          hazardCatalogue={hazardCatalogue}
+          loadAttachments={loadAttachments}
         />
       </Container>
     );
@@ -43,6 +60,9 @@ export default function RiskIdentificationPage() {
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+          attachments={attachments || []}
+          hazardCatalogue={hazardCatalogue}
+          loadAttachments={loadAttachments}
         />
       </Container>
     );
@@ -56,6 +76,9 @@ export default function RiskIdentificationPage() {
         isEditing={isEditing}
         setIsEditing={setIsEditing}
         reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+        attachments={attachments || []}
+        hazardCatalogue={hazardCatalogue}
+        loadAttachments={loadAttachments}
       />
     </Container>
   );

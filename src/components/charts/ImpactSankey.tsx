@@ -30,7 +30,7 @@ const ISankeyNode = ({
 
   if (payload.depth <= 0) {
     return (
-      <Layer key={`CustomNode${index}`}>
+      <Layer className="total-impact" key={`CustomNode${index}`}>
         <Rectangle
           x={x}
           y={baseY}
@@ -55,7 +55,7 @@ const ISankeyNode = ({
     if (payload.value <= 0) return null;
 
     return (
-      <Layer key={`CustomNode${index}`}>
+      <Layer className="impact-effect" key={`CustomNode${index}`}>
         <Rectangle
           x={x}
           y={totalNodes <= 2 ? baseY : y}

@@ -7,7 +7,7 @@ export default function RiskFileTitle({ riskFile }: { riskFile: DVRiskFile }) {
   const { t } = useTranslation();
 
   return (
-    <Box>
+    <Box className="risk-title" sx={{ mb: 8 }}>
       <Typography variant="h2">{t(`risk.${riskFile.cr4de_hazard_id}.name`, riskFile.cr4de_title)}</Typography>
       <Stack direction="row" sx={{ mt: 1 }} columnGap={1}>
         {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && <RiskTypeIcon riskFile={riskFile} />}

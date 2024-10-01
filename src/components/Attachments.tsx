@@ -322,11 +322,13 @@ export default function Attachments({
               <TableCell>
                 <Trans i18nKey="source.list.fileName">Source filename</Trans>
               </TableCell>
-              {user?.admin && <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>Section</TableCell>}
+              {user?.roles.analist && !isExternal && (
+                <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>Section</TableCell>
+              )}
               <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
                 <Trans i18nKey="source.list.type">Source Type</Trans>
               </TableCell>
-              <TableCell align="right" sx={{ width: 0 }}></TableCell>
+              {user?.roles.analist && !isExternal && <TableCell align="right" sx={{ width: 0 }}></TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -381,33 +383,35 @@ export default function Attachments({
                         {a.cr4de_name}
                       </Link>
                     </TableCell>
-                    {user?.admin && <TableCell>{a.cr4de_field ? a.cr4de_field : "-"}</TableCell>}
+                    {user?.admin && !isExternal && <TableCell>{a.cr4de_field ? a.cr4de_field : "-"}</TableCell>}
                     <TableCell>
                       {a.cr4de_url ? t("source.type.link") : t("source.type.file")}
                       {user?.admin && a.cr4de_referencedSource ? "*" : ""}
                     </TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap", textAlign: "right" }}>
-                      {(!isExternal || a._cr4de_owner_value === user?.contactid) && (
-                        <>
-                          {a.cr4de_url && (
+                    {user?.roles.analist && !isExternal && (
+                      <TableCell align="center" sx={{ whiteSpace: "nowrap", textAlign: "right" }}>
+                        {(!isExternal || a._cr4de_owner_value === user?.contactid) && (
+                          <>
+                            {a.cr4de_url && (
+                              <IconButton
+                                onClick={() => {
+                                  handleEditAttachment(a);
+                                }}
+                              >
+                                <EditIcon color="primary" />
+                              </IconButton>
+                            )}
                             <IconButton
                               onClick={() => {
-                                handleEditAttachment(a);
+                                handleRemoveAttachment(a.cr4de_bnraattachmentid);
                               }}
                             >
-                              <EditIcon color="primary" />
+                              <DeleteIcon color="error" />
                             </IconButton>
-                          )}
-                          <IconButton
-                            onClick={() => {
-                              handleRemoveAttachment(a.cr4de_bnraattachmentid);
-                            }}
-                          >
-                            <DeleteIcon color="error" />
-                          </IconButton>
-                        </>
-                      )}
-                    </TableCell>
+                          </>
+                        )}
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
             ) : (

@@ -132,9 +132,6 @@ export interface RiskFilePageContext extends RiskPageContext {
   loadDirectAnalyses: () => Promise<unknown>;
   loadCascadeAnalyses: () => Promise<unknown>;
   loadAttachments: () => Promise<unknown>;
-
-  helpOpen: boolean;
-  setHelpFocus: (section: Section) => void;
 }
 
 export default function BaseRiskFilePage() {
@@ -147,18 +144,8 @@ export default function BaseRiskFilePage() {
   const { pathname } = useLocation();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpFocus, setHelpFocus] = useState<Section | undefined>();
 
   const user = riskContext.user;
-
-  const handleDrawerOpen = () => {
-    setHelpOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setHelpOpen(false);
-  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -223,7 +210,7 @@ export default function BaseRiskFilePage() {
 
   return (
     <Box sx={{ display: "flex" }}>
-      <Main open={helpOpen}>
+      <Main>
         {riskContext.riskFiles[params.risk_file_id] ? (
           <Outlet
             context={satisfies<RiskFilePageContext>({
@@ -246,9 +233,6 @@ export default function BaseRiskFilePage() {
               loadCascadeAnalyses,
               attachments,
               loadAttachments,
-
-              helpOpen,
-              setHelpFocus,
             })}
           />
         ) : (
@@ -315,17 +299,14 @@ export default function BaseRiskFilePage() {
             boxSizing: "border-box",
           },
           position: "relative",
-          pointerEvents: helpOpen ? "all" : "none",
+          pointerEvents: "none",
         }}
         variant="persistent"
         anchor="right"
-        open={helpOpen}
+        open={false}
       >
         <Toolbar />
-        <HelpSideBar focused={helpFocus} />
-        <IconButton sx={{ position: "absolute", top: 60, right: 0 }} onClick={handleDrawerClose}>
-          <CloseIcon />
-        </IconButton>
+        <HelpSideBar focused={undefined} />
         {/* <BottomNavigation /> */}
       </Drawer>
     </Box>

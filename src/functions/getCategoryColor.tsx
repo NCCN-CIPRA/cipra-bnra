@@ -1,11 +1,11 @@
 import { DVRiskFile, RISK_CATEGORY, RISK_TYPE } from "../types/dataverse/DVRiskFile";
-import { ReactComponent as CyberIcon } from "../icons/cyber_icon.svg";
-import { ReactComponent as EcotechIcon } from "../icons/eco_tech_risk_icon.svg";
-import { ReactComponent as EmergingIcon } from "../icons/emerging_risk_icon.svg";
-import { ReactComponent as HealthIcon } from "../icons/health_risk_icon.svg";
-import { ReactComponent as ManMadeIcon } from "../icons/man_made_risk_icon.svg";
-import { ReactComponent as NaturalIcon } from "../icons/natural_risk_icon.svg";
-import { ReactComponent as SocietalIcon } from "../icons/Societal_risk_icon.svg";
+import { ReactComponent as CyberIcon } from "../assets/icons/cyber_icon.svg";
+import { ReactComponent as EcotechIcon } from "../assets/icons/eco_tech_risk_icon.svg";
+import { ReactComponent as EmergingIcon } from "../assets/icons/emerging_risk_icon.svg";
+import { ReactComponent as HealthIcon } from "../assets/icons/health_risk_icon.svg";
+import { ReactComponent as ManMadeIcon } from "../assets/icons/man_made_risk_icon.svg";
+import { ReactComponent as NaturalIcon } from "../assets/icons/natural_risk_icon.svg";
+import { ReactComponent as SocietalIcon } from "../assets/icons/Societal_risk_icon.svg";
 import { Box, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import SensorOccupiedIcon from "@mui/icons-material/SensorOccupied";

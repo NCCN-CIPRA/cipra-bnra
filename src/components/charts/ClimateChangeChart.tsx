@@ -155,10 +155,10 @@ export default function ClimateChangeChart({
       <Bar name="Considerable scenario" dataKey="P2023_c" stackId="c" fill={SCENARIO_PARAMS.considerable.color} />
       <Bar name="Major scenario" dataKey="P2023_m" stackId="m" fill={SCENARIO_PARAMS.major.color} />
       <Bar name="Extreme scenario" dataKey="P2023_e" stackId="e" fill={SCENARIO_PARAMS.extreme.color} />
-      <Bar name="Increased probability in 2050" dataKey="P2050_c_inc" stackId="c" fill="red" />
+      <Bar name="Increased probability in 2050" dataKey="P2050_c_inc" stackId="c" fill="red" barSize={1} />
       <Bar legendType="none" dataKey="P2050_m_inc" stackId="m" fill="red" />
       <Bar legendType="none" dataKey="P2050_e_inc" stackId="e" fill="red" />
-      <Bar name="Decreased probability in 2050" dataKey="P2050_c_dec" stackId="c" fill="green" />
+      <Bar name="Decreased probability in 2050" dataKey="P2050_c_dec" stackId="c" fill="green" barSize={1} id="test" />
       <Bar legendType="none" dataKey="P2050_m_dec" stackId="m" fill="green" />
       <Bar legendType="none" dataKey="P2050_e_dec" stackId="e" fill="green" />
     </BarChart>

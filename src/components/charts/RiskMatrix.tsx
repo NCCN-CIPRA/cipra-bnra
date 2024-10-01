@@ -156,10 +156,11 @@ const pScale = scaleLog().base(100);
 export default function RiskMatrix({
   riskFiles,
   selectedNodeId = null,
-  setSelectedNodeId,
+  setSelectedNodeId = () => {},
 
   scenario = "MRS",
   labels = false,
+  labelSize = null,
   onlyES = false,
   category = "All",
   impact = "All",
@@ -168,10 +169,11 @@ export default function RiskMatrix({
 }: {
   riskFiles: SmallRisk[] | null;
   selectedNodeId?: string | null;
-  setSelectedNodeId: (id: string | null) => void;
+  setSelectedNodeId?: (id: string | null) => void;
 
   scenario?: "All" | "MRS" | SCENARIOS;
   labels?: Boolean;
+  labelSize?: number | null;
   onlyES?: Boolean;
   category?: "All" | RISK_CATEGORY;
   impact?: "All" | IMPACT_CATEGORY;
@@ -374,7 +376,7 @@ export default function RiskMatrix({
                   shape={categoryDisplay === "shapes" || categoryDisplay === "both" ? shape.shape : "circle"}
                 >
                   {labels && (category === "All" || category === CATEGORY) && (
-                    <LabelList dataKey="code" position="insideTop" offset={15} fontSize={20} />
+                    <LabelList dataKey="code" position="insideTop" offset={15} fontSize={labelSize || 20} />
                   )}
                   {catData.map((entry, index) => {
                     let opacity = 1;
@@ -485,7 +487,7 @@ export default function RiskMatrix({
         </Box>
       </Box>
       {user?.roles.internal && (
-        <IconButton sx={{ position: "absolute", top: 45, right: 45 }} onClick={handleDownload}>
+        <IconButton className="admin-button" sx={{ position: "absolute", top: 45, right: 45 }} onClick={handleDownload}>
           <SaveIcon />
         </IconButton>
       )}

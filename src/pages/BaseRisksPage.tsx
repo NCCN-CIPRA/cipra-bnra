@@ -24,6 +24,7 @@ import {
 } from "../functions/cascades";
 import satisfies from "../types/satisfies";
 import { AuthPageContext } from "./AuthPage";
+import { DVAttachment } from "../types/dataverse/DVAttachment";
 
 export type Cascades = {
   all: DVRiskCascade<SmallRisk, SmallRisk>[];
@@ -39,15 +40,19 @@ export interface RiskPageContext {
   srf: { [riskId: string]: SmallRisk };
   riskFiles: { [riskId: string]: DVRiskFile };
   cascades: { [riskId: string]: Cascades };
+  allAttachments: DVAttachment<unknown, DVAttachment>[];
 
   allRiskFilesLoading: boolean;
   allRiskFilesLoaded: boolean;
+  allAttachmentsLoading: boolean;
+  allAttachmentsLoaded: boolean;
 
   reloadHazardCatalogue: (lazyOptions?: Partial<GetRecordsParams<SmallRisk>> | undefined) => Promise<unknown>;
   loadRiskFile: (params: Partial<GetRecordParams<DVRiskFile<any>>>) => Promise<unknown>;
   reloadRiskFile: (params: Partial<GetRecordParams<DVRiskFile<any>>>) => Promise<unknown>;
   reloadCascades: (riskFile: DVRiskFile) => Promise<unknown>;
   loadAllRiskFiles: (params?: Partial<GetRecordsParams<DVRiskFile>>) => Promise<unknown>;
+  loadAllAttachments: (params?: Partial<GetRecordsParams<DVAttachment<unknown, DVAttachment>>>) => Promise<unknown>;
 }
 
 export default function BaseRisksPage() {
@@ -66,6 +71,7 @@ export default function BaseRisksPage() {
   const [riskFiles, setRiskFiles] = useState<{ [id: string]: DVRiskFile }>({});
   const [srf, setSRF] = useState<{ [id: string]: SmallRisk } | null>(null);
   const [cascades, setCascades] = useState<{ [riskId: string]: Cascades }>({});
+  const [attachments, setAttachments] = useState<DVAttachment<unknown, DVAttachment>[]>([]);
   // const [isRunning, setIsRunning] = useState(false);
 
   const {
@@ -178,6 +184,18 @@ export default function BaseRisksPage() {
     },
   });
 
+  const {
+    hasRun: allAttachmentsRun,
+    getData: loadAllAttachments,
+    isFetching: loadingAllAttachments,
+  } = useLazyRecords<DVAttachment<unknown, DVAttachment>>({
+    table: DataTable.ATTACHMENT,
+    query: `$expand=cr4de_referencedSource`,
+    onComplete: async (result) => {
+      setAttachments(result);
+    },
+  });
+
   return (
     <Outlet
       context={satisfies<RiskPageContext>({
@@ -256,6 +274,10 @@ export default function BaseRisksPage() {
         allRiskFilesLoaded: allRiskFilesRun && !loadingAllRiskFiles,
         riskFiles,
         cascades,
+        loadAllAttachments,
+        allAttachmentsLoading: loadingAllAttachments,
+        allAttachmentsLoaded: allAttachmentsRun && !loadingAllAttachments,
+        allAttachments: attachments,
       })}
     />
   );

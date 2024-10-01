@@ -9,28 +9,35 @@ import { useEffect } from "react";
 import CatalyzingSection from "./CatalyzingSection";
 import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../../components/RiskFileTitle";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import BNRASpeedDial from "../../../components/BNRASpeedDial";
+import EmergingAnalysisTutorial from "./EmergingAnalysisTutorial";
 
 export default function Emerging({
   riskFile,
   cascades,
   mode = "view",
   isEditing,
+  attachments,
+  loadAttachments,
+  hazardCatalogue,
   setIsEditing,
   reloadRiskFile,
+  reloadCascades,
 }: {
   riskFile: DVRiskFile;
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
   mode?: "view" | "edit";
+  attachments: DVAttachment<unknown, DVAttachment<unknown, unknown>>[];
+  hazardCatalogue: SmallRisk[] | null;
+  loadAttachments: () => Promise<unknown>;
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
+  reloadCascades: (riskFile: DVRiskFile<unknown>) => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const { hazardCatalogue, attachments, loadAttachments, reloadCascades } = useOutletContext<RiskFilePageContext>();
 
-  useEffect(() => {
-    if (!attachments) loadAttachments();
-  }, []);
   const rf = riskFile;
 
   return (
@@ -38,7 +45,7 @@ export default function Emerging({
       <Box sx={{ mb: 10 }}>
         <RiskFileTitle riskFile={riskFile} />
 
-        <Box sx={{ mt: 8 }}>
+        <Box className="catalyzing" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Catalysing Effects")}</Typography>
 
           <CatalyzingSection
@@ -60,6 +67,7 @@ export default function Emerging({
           attachments={attachments}
           reloadAttachments={loadAttachments}
         />
+        <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={EmergingAnalysisTutorial} />
       </Box>
     </>
   );

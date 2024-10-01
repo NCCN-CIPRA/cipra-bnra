@@ -246,31 +246,31 @@ export default function OverviewTab({
   const fixConsensus = async () => {
     const weights = getConsensusRiskFile(getCompletedDirectAnalyses(riskFile, participants, directAnalyses));
 
-    console.log(
-      RISK_FILE_QUANTI_FIELDS.filter((f) => {
-        if (
-          riskFile.cr4de_discussion_required &&
-          riskFile.cr4de_discussion_required[getParameter(f) as keyof DiscussionsRequired] ===
-            DiscussionRequired.RESOLVED
-        ) {
-          return false;
-        }
-        if (
-          riskFile[f] === test.noWeights[f] &&
-          riskFile[f] === test.weights[f] &&
-          test.weights[f] === test.noWeights[f]
-        ) {
-          return false;
-        }
-        return true;
-      }).reduce(
-        (u, f) => ({
-          ...u,
-          [f]: test.weights[f],
-        }),
-        {} as Partial<DVRiskFile>
-      )
-    );
+    // console.log(
+    //   RISK_FILE_QUANTI_FIELDS.filter((f) => {
+    //     if (
+    //       riskFile.cr4de_discussion_required &&
+    //       riskFile.cr4de_discussion_required[getParameter(f) as keyof DiscussionsRequired] ===
+    //         DiscussionRequired.RESOLVED
+    //     ) {
+    //       return false;
+    //     }
+    //     if (
+    //       riskFile[f] === test.noWeights[f] &&
+    //       riskFile[f] === test.weights[f] &&
+    //       test.weights[f] === test.noWeights[f]
+    //     ) {
+    //       return false;
+    //     }
+    //     return true;
+    //   }).reduce(
+    //     (u, f) => ({
+    //       ...u,
+    //       [f]: test.weights[f],
+    //     }),
+    //     {} as Partial<DVRiskFile>
+    //   )
+    // );
 
     await api.updateRiskFile(
       riskFile.cr4de_riskfilesid,

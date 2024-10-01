@@ -9,6 +9,8 @@ import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import RiskFileTitle from "../../components/RiskFileTitle";
 import DisclaimerSection from "../RiskAnalysisPage/DisclaimerSection";
 import { useEffect } from "react";
+import BNRASpeedDial from "../../components/BNRASpeedDial";
+import RiskEvolutionTutorial from "./RiskEvolutionTutorial";
 
 export default function RiskEvolutionPage({}) {
   const { t } = useTranslation();
@@ -47,7 +49,7 @@ export default function RiskEvolutionPage({}) {
           allRisks={hazardCatalogue}
         />
 
-        <Box sx={{ mt: 2 }}>
+        <Box className="climate-change" sx={{ mt: 2 }}>
           <Typography variant="h5">Climate Change</Typography>
 
           <CCSection
@@ -66,7 +68,7 @@ export default function RiskEvolutionPage({}) {
         </Box>
 
         {catalyzingEffects.length > 0 && (
-          <Box sx={{ mt: 8 }}>
+          <Box className="catalyzing-effects" sx={{ mt: 8 }}>
             <Typography variant="h5">Other Catalysing Effects</Typography>
 
             <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, backgroundColor: "white" }}>
@@ -101,6 +103,8 @@ export default function RiskEvolutionPage({}) {
           attachments={attachments}
           reloadAttachments={loadAttachments}
         />
+
+        <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={RiskEvolutionTutorial} />
       </Box>
     </Container>
   );

@@ -77,6 +77,7 @@ export default function ScenarioMatrix({ riskFile, mrs }: { riskFile: DVRiskFile
 
   return (
     <ScatterChart
+      id="scenario-matrix"
       width={300}
       height={270}
       margin={{

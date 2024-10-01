@@ -17,6 +17,8 @@ import Bibliography from "../../RiskAnalysisPage/Bibliography";
 import RiskFileTitle from "../../../components/RiskFileTitle";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import StandardIdentificationTutorial from "./StandardIdentificationTutorial";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 const ibsx = {
   transition: "opacity .3s ease",
@@ -28,6 +30,9 @@ export default function Standard({
   cascades,
   mode = "view",
   isEditing,
+  attachments,
+  loadAttachments,
+  hazardCatalogue,
   setIsEditing,
   reloadRiskFile,
 }: {
@@ -35,31 +40,21 @@ export default function Standard({
   cascades: Cascades;
   mode?: "view" | "edit";
   isEditing: boolean;
+  attachments: DVAttachment<unknown, DVAttachment<unknown, unknown>>[];
+  hazardCatalogue: SmallRisk[] | null;
+  loadAttachments: () => Promise<unknown>;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const { helpOpen, setHelpFocus, hazardCatalogue, attachments, loadAttachments } =
-    useOutletContext<RiskFilePageContext>();
-
-  useEffect(() => {
-    if (!attachments) loadAttachments();
-  }, []);
 
   return (
     <Box sx={{ mb: 10 }}>
       <RiskFileTitle riskFile={riskFile} />
 
-      <Box sx={{ mt: 8 }}>
-        <Typography variant="h5">
-          {t("riskFile.definition.title", "Definition")}
-          {helpOpen && (
-            <IconButton size="small" sx={ibsx} onClick={() => setHelpFocus(Section.PROB_BREAKDOWN)}>
-              <HelpOutlineIcon fontSize="inherit" />
-            </IconButton>
-          )}
-        </Typography>{" "}
-        <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
+      <Box>
+        <Typography variant="h5">{t("riskFile.definition.title", "Definition")}</Typography>{" "}
+        <Box id="definition" sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
           <DefinitionSection
             riskFile={riskFile}
             mode={mode}
@@ -74,15 +69,8 @@ export default function Standard({
       </Box>
 
       {riskFile.cr4de_historical_events && (
-        <Box sx={{ mt: 8 }}>
-          <Typography variant="h5">
-            {t("riskFile.historicalEvents.title", "Historical Events")}
-            {helpOpen && (
-              <IconButton size="small" sx={ibsx} onClick={() => setHelpFocus(Section.IMPACT_BREAKDOWN)}>
-                <HelpOutlineIcon fontSize="inherit" />
-              </IconButton>
-            )}
-          </Typography>
+        <Box id="historical-events" sx={{ mt: 8 }}>
+          <Typography variant="h5">{t("riskFile.historicalEvents.title", "Historical Events")}</Typography>
           <HistoricalEvents
             riskFile={riskFile}
             mode={mode}
@@ -96,11 +84,11 @@ export default function Standard({
         </Box>
       )}
 
-      <Box sx={{ mt: 8 }}>
-        <ScenarioSection riskFile={riskFile} helpOpen={helpOpen} setHelpFocus={setHelpFocus} />
+      <Box id="scenarios" sx={{ mt: 8 }}>
+        <ScenarioSection riskFile={riskFile} />
       </Box>
 
-      <Box sx={{ mt: 8 }}>
+      <Box id="mrs" sx={{ mt: 8 }}>
         <Typography variant="h5">Most Relevant Scenario</Typography>
 
         <ScenarioMatrix riskFile={riskFile} mrs={riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE} />
@@ -118,12 +106,14 @@ export default function Standard({
         />
       </Box>
 
-      <Bibliography
-        riskFile={riskFile}
-        cascades={cascades.all}
-        attachments={attachments}
-        reloadAttachments={loadAttachments}
-      />
+      <Box id="sources">
+        <Bibliography
+          riskFile={riskFile}
+          cascades={cascades.all}
+          attachments={attachments}
+          reloadAttachments={loadAttachments}
+        />
+      </Box>
 
       <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={StandardIdentificationTutorial} />
     </Box>

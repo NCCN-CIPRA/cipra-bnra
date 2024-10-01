@@ -156,11 +156,9 @@ function TextInputBox({
 
   const insertRiskFileButtonClick = (a: SmallRisk) => {
     if (!htmlEditor.current || sources === null) {
-      console.log(htmlEditor.current, sources);
       return;
     }
 
-    console.log("Test");
     htmlEditor.current.instance.insertEmbed(cursor.current, "link", {
       class: "risk-link",
       href: `/risks/${a.cr4de_riskfilesid}`,

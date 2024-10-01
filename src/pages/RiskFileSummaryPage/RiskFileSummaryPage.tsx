@@ -1,4 +1,4 @@
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import {
@@ -31,6 +31,7 @@ import RiskFileSummaryTutorial from "./RiskFileSummaryTutorial";
 export default function RiskFileSummaryPage({}) {
   const api = useAPI();
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { user, riskFile, reloadRiskFile } = useOutletContext<RiskFilePageContext>();
 
   const [saving, setSaving] = useState(false);
@@ -77,7 +78,7 @@ export default function RiskFileSummaryPage({}) {
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
       <RiskFileTitle riskFile={riskFile} />
-      <Stack direction="row" sx={{ mb: 8, mt: 8 }} columnGap={4}>
+      <Stack direction="row" sx={{ mb: 8 }} columnGap={4}>
         <Box id="summary-text" sx={{ flex: 1 }}>
           {!editing && i18n.language === "en" && (
             <Box
@@ -170,6 +171,7 @@ export default function RiskFileSummaryPage({}) {
             <BNRASpeedDial
               offset={{ x: 0, y: 56 }}
               editAction={() => setEditing(true)}
+              exportAction={() => navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)}
               HelpComponent={RiskFileSummaryTutorial}
             />
           )}

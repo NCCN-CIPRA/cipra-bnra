@@ -123,8 +123,8 @@ export default function CascadeMatrix({
   isCause?: boolean;
   onChange: (field: keyof DVRiskCascade, newValue: string) => Promise<void>;
 }) {
-  console.log(cascade);
   const theme = useTheme();
+
   return (
     <Grid container spacing={1}>
       <Grid xs={4.5}></Grid>

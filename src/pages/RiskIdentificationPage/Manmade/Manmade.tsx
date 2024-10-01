@@ -15,6 +15,10 @@ import RiskFileTitle from "../../../components/RiskFileTitle";
 import IntelligenceSection from "./IntelligenceSection";
 import CapacitiesSection from "../../RiskAnalysisPage/ManMade/CapacitiesSection";
 import * as IP from "../../../functions/intensityParameters";
+import { DVAttachment } from "../../../types/dataverse/DVAttachment";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import ManmadeIdentificationTutorial from "./ManmadeIdentificationTutorial";
+import BNRASpeedDial from "../../../components/BNRASpeedDial";
 
 const ibsx = {
   transition: "opacity .3s ease",
@@ -26,6 +30,9 @@ export default function Manmade({
   cascades,
   mode = "view",
   isEditing,
+  attachments,
+  loadAttachments,
+  hazardCatalogue,
   setIsEditing,
   reloadRiskFile,
 }: {
@@ -33,16 +40,13 @@ export default function Manmade({
   cascades: Cascades;
   mode?: "view" | "edit";
   isEditing: boolean;
+  attachments: DVAttachment<unknown, DVAttachment<unknown, unknown>>[];
+  loadAttachments: () => Promise<unknown>;
+  hazardCatalogue: SmallRisk[] | null;
   setIsEditing: (isEditing: boolean) => void;
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const { helpOpen, setHelpFocus, hazardCatalogue, attachments, loadAttachments } =
-    useOutletContext<RiskFilePageContext>();
-
-  useEffect(() => {
-    if (!attachments) loadAttachments();
-  }, []);
 
   const intensityParameters = IP.unwrap(riskFile.cr4de_intensity_parameters);
   const MRS = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
@@ -52,16 +56,9 @@ export default function Manmade({
     <Box sx={{ mb: 10 }}>
       <RiskFileTitle riskFile={riskFile} />
 
-      <Box sx={{ mt: 8 }}>
-        <Typography variant="h5">
-          {t("riskFile.definition.title", "Definition")}
-          {helpOpen && (
-            <IconButton size="small" sx={ibsx} onClick={() => setHelpFocus(Section.PROB_BREAKDOWN)}>
-              <HelpOutlineIcon fontSize="inherit" />
-            </IconButton>
-          )}
-        </Typography>{" "}
-        <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
+      <Box>
+        <Typography variant="h5">{t("riskFile.definition.title", "Definition")}</Typography>{" "}
+        <Box id="definition" sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
           <DefinitionSection
             riskFile={riskFile}
             mode={mode}
@@ -75,25 +72,22 @@ export default function Manmade({
         </Box>
       </Box>
 
-      <Box sx={{ mt: 8, clear: "both" }}>
-        <Typography variant="h5">Intelligence Assessment</Typography>
-        <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-          <IntelligenceSection
-            riskFile={riskFile}
-            MRSSuffix={MRSSuffix}
-            mode={mode}
-            attachments={attachments}
-            updateAttachments={loadAttachments}
-            isEditingOther={isEditing}
-            setIsEditing={setIsEditing}
-            reloadRiskFile={reloadRiskFile}
-            allRisks={hazardCatalogue}
-          />
-        </Box>
-      </Box>
+      {/* <Box id="intelligence" sx={{ mt: 8, clear: "both" }}>
+        <IntelligenceSection
+          riskFile={riskFile}
+          MRSSuffix={MRSSuffix}
+          mode={mode}
+          attachments={attachments}
+          updateAttachments={loadAttachments}
+          isEditingOther={isEditing}
+          setIsEditing={setIsEditing}
+          reloadRiskFile={reloadRiskFile}
+          allRisks={hazardCatalogue}
+        />
+      </Box> */}
 
       {riskFile.cr4de_intensity_parameters && (
-        <Box sx={{ mt: 8 }}>
+        <Box id="mrag" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Most Relevant Actor Group")}</Typography>
 
           <ScenarioMatrix riskFile={riskFile} mrs={MRS} />
@@ -113,12 +107,16 @@ export default function Manmade({
         </Box>
       )}
 
-      <Bibliography
-        riskFile={riskFile}
-        cascades={cascades.all}
-        attachments={attachments}
-        reloadAttachments={loadAttachments}
-      />
+      <Box id="sources">
+        <Bibliography
+          riskFile={riskFile}
+          cascades={cascades.all}
+          attachments={attachments}
+          reloadAttachments={loadAttachments}
+        />
+      </Box>
+
+      <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={ManmadeIdentificationTutorial} />
     </Box>
   );
 }

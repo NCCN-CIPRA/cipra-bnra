@@ -84,13 +84,13 @@ export default function SummaryCharts({
   const { t } = useTranslation();
   const { user } = useOutletContext<AuthPageContext>();
 
-  useRecord<DVAnalysisRun>({
-    table: DataTable.ANALYSIS_RUN,
-    id: riskFile._cr4de_latest_calculation_value || "",
-    onComplete: async (data) => {
-      if (data.cr4de_results === null) return;
-    },
-  });
+  // useRecord<DVAnalysisRun>({
+  //   table: DataTable.ANALYSIS_RUN,
+  //   id: riskFile._cr4de_latest_calculation_value || "",
+  //   onComplete: async (data) => {
+  //     if (data.cr4de_results === null) return;
+  //   },
+  // });
 
   // useCurrentPng usage (isLoading is optional)
   const [getDivJpeg, { ref, isLoading }] = useGenerateImage({
@@ -243,7 +243,7 @@ export default function SummaryCharts({
         </Stack>
       </Box>
       {user && user.roles.internal && (
-        <IconButton sx={{ position: "absolute", top: 5, left: 5 }} onClick={handleDownload}>
+        <IconButton className="admin-button" sx={{ position: "absolute", top: 5, left: 5 }} onClick={handleDownload}>
           <SaveIcon />
         </IconButton>
       )}

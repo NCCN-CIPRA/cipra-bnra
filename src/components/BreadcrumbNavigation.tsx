@@ -11,7 +11,7 @@ export default function BreadcrumbNavigation({ breadcrumbs }: { breadcrumbs: (Br
   if (!breadcrumbs) return null;
 
   return (
-    <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />}>
+    <Breadcrumbs id="bnra-breadcrumbs" aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />}>
       {breadcrumbs.map((b, i) => {
         if (!b) return <Skeleton key={i} variant="text" width="200px" />;
 

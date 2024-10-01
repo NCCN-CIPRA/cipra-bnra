@@ -21,11 +21,12 @@ export enum RISK_CATEGORY {
 
 export const CATEGORY_NAMES: Partial<{ [key in RISK_CATEGORY]: string }> = {
   Cyber: "Cyber Risks",
-  EcoTech: "Economical and Technological Risks",
+  EcoTech: "Economic and Technological Risks",
   Health: "Health Risks",
   "Man-made": "Man-made Risks and Malicious Actors",
   Nature: "Natural Risks",
   Transversal: "Societal Risks",
+  "Emerging Risk": "Emerging Risks",
 };
 
 export enum CONSENSUS_TYPE {

@@ -1,12 +1,15 @@
-import { Box, Button, Stack } from "@mui/material";
+import { Box, Button, Stack, Tooltip, Typography } from "@mui/material";
 import TextInputBox from "../../../components/TextInputBox";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
-import { SCENARIO_SUFFIX } from "../../../functions/scenarios";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import { IntensityParameter, unwrap, wrap } from "../../../functions/intensityParameters";
+import { SCENARIO_PARAMS, SCENARIO_SUFFIX, SCENARIOS, unwrap as unwrapScenarios } from "../../../functions/scenarios";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import { useTranslation } from "react-i18next";
 
 export default function IntelligenceSection({
   riskFile,
@@ -29,104 +32,113 @@ export default function IntelligenceSection({
   reloadRiskFile: () => Promise<unknown>;
   allRisks: SmallRisk[] | null;
 }) {
-  const getDefaultText = () => {
-    return riskFile[`cr4de_dp_quali${MRSSuffix}`] || "";
-  };
-
   const api = useAPI();
-  const [saving, setSaving] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [probQuali, setProbQuali] = useState<string>(riskFile.cr4de_mrs_probability || getDefaultText());
+  const { t } = useTranslation();
+  const [selectedScenario, setSelectedScenario] = useState(riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE);
 
-  useEffect(() => setProbQuali(riskFile.cr4de_mrs_probability || getDefaultText()), [riskFile]);
-
-  useEffect(() => setIsEditing(editing), [editing]);
-
-  const saveRiskFile = async (reset = false) => {
-    setSaving(true);
-    await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-      cr4de_mrs_probability: reset ? null : probQuali,
-    });
-    if (reset) {
-      setProbQuali(getDefaultText());
-    }
-    reloadRiskFile();
-
-    setEditing(false);
-    // await reloadRiskFile();
-    setSaving(false);
-    // setOpen(false);
-  };
-
-  const startEdit = () => {
-    if (isEditingOther) {
-      window.alert("You are already editing another section. Please close this section before editing another.");
-    } else {
-      setEditing(true);
-    }
-  };
+  const parameters = useMemo(() => unwrap(riskFile.cr4de_intensity_parameters), [riskFile]);
+  const scenarios = useMemo(
+    () =>
+      unwrapScenarios(
+        parameters,
+        riskFile.cr4de_scenario_considerable,
+        riskFile.cr4de_scenario_major,
+        riskFile.cr4de_scenario_extreme
+      ),
+    [parameters, riskFile]
+  );
 
   return (
     <>
-      {!editing && (
-        <Box
-          className="htmleditor"
-          sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
-          dangerouslySetInnerHTML={{ __html: probQuali }}
-        />
-      )}
-      {editing && (
-        <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
-          <TextInputBox
-            limitedOptions
-            initialValue={probQuali}
-            setUpdatedValue={(str) => setProbQuali(str || "")}
-            sources={attachments}
-            updateSources={updateAttachments}
-            allRisks={allRisks}
-          />
-        </Box>
-      )}
-      {mode === "edit" && (
-        <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
-          {!editing && (
-            <>
-              <Button onClick={startEdit}>Edit</Button>
-              <Box sx={{ flex: 1 }} />
-              <LoadingButton
-                color="error"
-                loading={saving}
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      "Are you sure you wish to reset this field to default? All changes made to this field will be gone."
-                    )
-                  )
-                    saveRiskFile(true);
-                }}
-              >
-                Reset to default
-              </LoadingButton>
-            </>
-          )}
-          {editing && (
-            <>
-              <LoadingButton loading={saving} onClick={() => saveRiskFile()}>
-                Save
-              </LoadingButton>
-              <Box sx={{ flex: 1 }} />
-              <Button
-                color="warning"
-                onClick={() => {
-                  if (window.confirm("Are you sure you wish to discard your changes?")) setEditing(false);
-                }}
-              >
-                Discard Changes
-              </Button>
-            </>
-          )}
+      <Typography variant="h5">{t("riskFile.capabilities.title", "Actor Capabilities")}</Typography>
+
+      <Box
+        sx={{
+          borderLeft: `solid 8px ${SCENARIO_PARAMS[selectedScenario].color}`,
+          px: 2,
+          py: 1,
+          mt: 2,
+          backgroundColor: "white",
+        }}
+      >
+        <Stack id="scenario-buttons" direction="row" justifyContent="flex-start" spacing={2} sx={{ mt: 1, mb: 4 }}>
+          <Button
+            variant="outlined"
+            sx={{
+              color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
+              fontWeight: selectedScenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
+              opacity: selectedScenario === SCENARIOS.CONSIDERABLE ? 1 : 0.15,
+              borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
+              borderRadius: "50%",
+              backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
+              width: 48,
+              minWidth: 48,
+              height: 48,
+              "&:hover": {
+                opacity: 1,
+                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
+                borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
+              },
+            }}
+            onClick={() => setSelectedScenario(SCENARIOS.CONSIDERABLE)}
+          >
+            C
+          </Button>
+          <Button
+            variant="outlined"
+            sx={{
+              color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
+              fontWeight: selectedScenario === SCENARIOS.MAJOR ? "bold" : "normal",
+              opacity: selectedScenario === SCENARIOS.MAJOR ? 1 : 0.35,
+              borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
+              borderRadius: "50%",
+              backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
+              width: 48,
+              minWidth: 48,
+              height: 48,
+              "&:hover": {
+                opacity: 1,
+                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
+                borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
+              },
+            }}
+            onClick={() => setSelectedScenario(SCENARIOS.MAJOR)}
+          >
+            M
+          </Button>
+          <Button
+            variant="outlined"
+            sx={{
+              color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
+              fontWeight: selectedScenario === SCENARIOS.EXTREME ? "bold" : "normal",
+              opacity: selectedScenario === SCENARIOS.EXTREME ? 1 : 0.1,
+              borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
+              borderRadius: "50%",
+              backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
+              width: 48,
+              minWidth: 48,
+              height: 48,
+              "&:hover": {
+                opacity: 1,
+                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
+                borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
+              },
+            }}
+            onClick={() => setSelectedScenario(SCENARIOS.EXTREME)}
+          >
+            E
+          </Button>
         </Stack>
-      )}
+        <Stack>
+          {scenarios[selectedScenario].map((p) => {
+            return (
+              <Box key={`${riskFile.cr4de_riskfilesid}-${p.name}`} sx={{ mb: 4 }}>
+                <Box dangerouslySetInnerHTML={{ __html: p.value || "" }} />
+              </Box>
+            );
+          })}
+        </Stack>
+      </Box>
     </>
   );
 }

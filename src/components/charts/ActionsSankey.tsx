@@ -33,7 +33,7 @@ const PSankeyNode = ({
 
   if (payload.depth > 0) {
     return (
-      <Layer key={`CustomNode${index}`} height="50px">
+      <Layer className="total-probability" key={`CustomNode${index}`} height="50px">
         <Rectangle
           x={x}
           y={baseY}
@@ -70,7 +70,7 @@ const PSankeyNode = ({
     );
   } else {
     return (
-      <Layer key={`CustomNode${index}`}>
+      <Layer className="probability-cause" key={`CustomNode${index}`}>
         <Rectangle
           x={x}
           y={totalNodes <= 2 ? baseY : y}

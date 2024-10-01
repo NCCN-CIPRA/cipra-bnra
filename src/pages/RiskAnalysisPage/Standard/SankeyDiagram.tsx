@@ -48,8 +48,8 @@ export default function SankeyDiagram({
   };
 
   return (
-    <Stack direction="row" sx={{ mb: 8 }}>
-      <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
+    <Stack className="bnra-sankey" direction="row" sx={{ mb: 8 }}>
+      <Box className="sankey-probability" sx={{ width: "calc(50% - 150px)", height: 600 }}>
         <ProbabilitySankey
           riskFile={riskFile}
           cascades={cascades}
@@ -62,7 +62,7 @@ export default function SankeyDiagram({
           manmade={manmade}
         />
       </Box>
-      <Stack direction="column" justifyContent="center" sx={{ width: 300, p: "50px" }}>
+      <Stack className="sankey-charts" direction="column" justifyContent="center" sx={{ width: 300, p: "50px" }}>
         {/* <Box
         sx={{
           width: 200,
@@ -83,6 +83,7 @@ export default function SankeyDiagram({
           <Typography variant="h6">{calculation.riskTitle}</Typography>
         </Box> */}
         <Box
+          className="sankey-probability-bars"
           sx={{
             width: "100%",
           }}
@@ -90,6 +91,7 @@ export default function SankeyDiagram({
           <ProbabilityBars tp={getScenarioParameter(riskFile, "TP", scenario) || 0} chartWidth={200} />
         </Box>
         <Box
+          className="sankey-scenarios"
           sx={{
             width: "100%",
           }}
@@ -167,6 +169,7 @@ export default function SankeyDiagram({
           </Stack>
         </Box>
         <Box
+          className="category-impacts"
           sx={{
             width: "100%",
             height: 350,
@@ -178,7 +181,7 @@ export default function SankeyDiagram({
           <ImpactBarChart riskFile={riskFile} scenario={scenario} />
         </Box>
       </Stack>
-      <Box sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
+      <Box className="sankey-impact" sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
         <ImpactSankey
           riskFile={riskFile}
           cascades={cascades}

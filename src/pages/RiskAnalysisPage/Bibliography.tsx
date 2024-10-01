@@ -10,19 +10,21 @@ export default function Bibliography({
   attachments,
   riskFile,
   cascades,
+  isExternal = false,
   reloadAttachments,
 }: {
   attachments: DVAttachment<unknown, DVAttachment>[] | null;
   riskFile: DVRiskFile;
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[] | null;
+  isExternal?: boolean;
   reloadAttachments: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ mt: 8 }}>
+    <Box className="risk-file-sources" sx={{ mt: 8 }}>
       <Typography variant="h5">{t("Bibliography")}</Typography>
-      <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, backgroundColor: "white" }}>
+      <Box sx={{ borderLeft: "solid 8px #eee", px: 2, mt: 2, backgroundColor: "white" }}>
         <Attachments
           attachments={
             attachments
@@ -42,6 +44,7 @@ export default function Bibliography({
           cascades={cascades}
           onUpdate={() => reloadAttachments()}
           alwaysOpen
+          isExternal={isExternal}
         />
       </Box>
     </Box>

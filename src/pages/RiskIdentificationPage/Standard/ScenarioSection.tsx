@@ -27,15 +27,7 @@ const ibsx = {
   ml: 1,
 };
 
-export default function ScenarioSection({
-  riskFile,
-  helpOpen,
-  setHelpFocus,
-}: {
-  riskFile: DVRiskFile;
-  helpOpen: boolean;
-  setHelpFocus: (v: Section) => void;
-}) {
+export default function ScenarioSection({ riskFile }: { riskFile: DVRiskFile }) {
   const { t } = useTranslation();
   const [selectedScenario, setSelectedScenario] = useState(riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE);
 
@@ -55,11 +47,6 @@ export default function ScenarioSection({
     <>
       <Typography variant="h5">
         {t("riskFile.intensityParameters.title", "Intensity Parameters")} & {t("riskFile.scenarios.title", "Scenarios")}
-        {helpOpen && (
-          <IconButton size="small" sx={ibsx} onClick={() => setHelpFocus(Section.IMPACT_BREAKDOWN)}>
-            <HelpOutlineIcon fontSize="inherit" />
-          </IconButton>
-        )}
       </Typography>
 
       <Box
@@ -71,7 +58,7 @@ export default function ScenarioSection({
           backgroundColor: "white",
         }}
       >
-        <Stack direction="row" justifyContent="flex-start" spacing={2} sx={{ mt: 1, mb: 4 }}>
+        <Stack id="scenario-buttons" direction="row" justifyContent="flex-start" spacing={2} sx={{ mt: 1, mb: 4 }}>
           <Button
             variant="outlined"
             sx={{
@@ -142,7 +129,7 @@ export default function ScenarioSection({
         <Stack>
           {scenarios[selectedScenario].map((p) => {
             return (
-              <Box sx={{ mb: 4 }}>
+              <Box key={`${riskFile.cr4de_riskfilesid}-${p.name}`} sx={{ mb: 4 }}>
                 <Typography variant="subtitle2">
                   {p.name}{" "}
                   <Tooltip title={<Box dangerouslySetInnerHTML={{ __html: p.description || "" }} />}>

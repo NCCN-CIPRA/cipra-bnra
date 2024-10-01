@@ -151,10 +151,10 @@ export default function CCSection({
 
   return (
     <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
-      <Box sx={{ margin: "auto", width: "750px" }}>
+      <Box className="cc-chart" sx={{ margin: "auto", width: "750px" }}>
         <ClimateChangeChart riskFile={riskFile} causes={causes} scenario={scenario} />
       </Box>
-      <Box>
+      <Box className="cc-quali">
         {!editing && (
           <Box
             className="htmleditor"

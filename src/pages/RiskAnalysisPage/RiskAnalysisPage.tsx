@@ -8,8 +8,18 @@ import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import "./RiskAnalysisPage.css";
 
 export default function RiskAnalysisPage() {
-  const { user, hazardCatalogue, riskFile, cascades, reloadRiskFile, isEditing, setIsEditing } =
-    useOutletContext<RiskFilePageContext>();
+  const {
+    user,
+    hazardCatalogue,
+    riskFile,
+    cascades,
+    reloadRiskFile,
+    isEditing,
+    setIsEditing,
+    attachments,
+    loadAttachments,
+    reloadCascades,
+  } = useOutletContext<RiskFilePageContext>();
 
   if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD)
     return (
@@ -21,6 +31,9 @@ export default function RiskAnalysisPage() {
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+          attachments={attachments || []}
+          hazardCatalogue={hazardCatalogue}
+          loadAttachments={loadAttachments}
         />
       </Container>
     );
@@ -35,6 +48,9 @@ export default function RiskAnalysisPage() {
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+          attachments={attachments || []}
+          hazardCatalogue={hazardCatalogue}
+          loadAttachments={loadAttachments}
         />
       </Container>
     );
@@ -48,6 +64,10 @@ export default function RiskAnalysisPage() {
         isEditing={isEditing}
         setIsEditing={setIsEditing}
         reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+        attachments={attachments || []}
+        hazardCatalogue={hazardCatalogue}
+        loadAttachments={loadAttachments}
+        reloadCascades={reloadCascades}
       />
     </Container>
   );

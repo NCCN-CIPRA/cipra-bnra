@@ -1,0 +1,83 @@
+#bnra-export header.MuiAppBar-root,
+#bnra-export .MuiToolbar-root,
+#bnra-export #bnra-breadcrumbs,
+#bnra-export .MuiBottomNavigation-root,
+#bnra-export #identification .risk-title,
+#bnra-export #analysis .risk-title,
+#bnra-export #identification .risk-file-sources,
+#bnra-export #analysis .risk-file-sources,
+#bnra-export #identification #mrs,
+#bnra-export .admin-button,
+#bnra-export .MuiSpeedDial-root {
+  display: none !important;
+}
+
+#bnra-export {
+  background-color: #ddd;
+}
+
+#bnra-export .bnra-sankey {
+  position: relative;
+  margin-bottom: 400px;
+}
+
+#bnra-export .sankey-probability,
+#bnra-export .sankey-impact {
+  width: 50%;
+}
+
+#bnra-export .sankey-charts {
+  position: absolute;
+  top: 100%;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+  padding: 0;
+  padding-right: 2cm;
+  padding-left: 2cm;
+  gap: 3cm;
+}
+
+#bnra-export .sankey-charts .sankey-probability-bars > div {
+  width: auto;
+}
+
+#bnra-export .sankey-charts .sankey-probability-bars .recharts-wrapper {
+  width: auto !important;
+  height: 205px !important;
+}
+
+#bnra-export .sankey-scenarios {
+  display: none;
+}
+
+@media print {
+  body {
+    background-color: white;
+  }
+
+  #bnra-export {
+    background-color: white;
+  }
+
+  header.MuiAppBar-root,
+  .MuiToolbar-root,
+  #bnra-breadcrumbs,
+  .MuiBottomNavigation-root {
+    display: none !important;
+  }
+
+  #bnra-export .break {
+    page-break-after: always;
+  }
+
+  #bnra-export p,
+  .historical-event-wrapper {
+    page-break-inside: avoid;
+  }
+
+  #bnra-export p:has(strong),
+  #bnra-export h5 {
+    page-break-after: avoid;
+  }
+}

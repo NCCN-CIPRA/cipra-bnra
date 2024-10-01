@@ -1,4 +1,4 @@
-import { SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
+import { Fab, SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import PrintIcon from "@mui/icons-material/Print";
 import EditIcon from "@mui/icons-material/Edit";
@@ -25,6 +25,21 @@ export default function BNRASpeedDial({
   const { user } = useOutletContext<BasePageContext>();
 
   const [runTutorial, setRunTutorial] = useState(false);
+
+  if (HelpComponent && !(user && user.roles.internal && exportAction) && !(user && user.roles.analist && editAction)) {
+    return (
+      <>
+        <Fab
+          sx={{ position: "fixed", bottom: 16 + offset.y, right: 16 + offset.x }}
+          color="primary"
+          onClick={() => setRunTutorial(true)}
+        >
+          <QuestionMarkIcon />
+        </Fab>
+        {HelpComponent && <HelpComponent run={runTutorial} setRun={setRunTutorial} />}
+      </>
+    );
+  }
 
   return (
     <>

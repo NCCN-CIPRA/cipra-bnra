@@ -28,74 +28,130 @@ export default function StandardIdentificationTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfSummary.tutorial.1.1">
-              This is the first page of the risk file: The Risk File Summary.
+            <Trans i18nKey="rfDescription.tutorial.1.1">
+              This is the <i>Risk Description</i> page.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfSummary.tutorial.1.2">It contains a very high-level overview of the risk file.</Trans>
+            <Trans i18nKey="rfDescription.tutorial.1.2">
+              It contains some general information about the risk that was used as the basis for subsequent analyses by
+              experts.
+            </Trans>
           </Typography>
         </Box>
       ),
     },
     {
-      target: ".MuiBottomNavigation-root",
+      target: "#definition",
       // placement: "center",
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfSummary.tutorial.2.1">
-              From here, you may use the bottom navigation bar to explore the more in-depth sections of the risk file.
+            <Trans i18nKey="rfDescription.s.tutorial.2.1">
+              The base of each risk file is the definition. It determines the scope of the risk under study and in some
+              cases it also specifies which elements fall outside the scope.
+            </Trans>
+          </Typography>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfDescription.s.tutorial.2.2">
+              This section also specifies, if relevant, the differences between the risk studied and the other risks
+              studied within the framework of this Belgian National Risk Assessment.
             </Trans>
           </Typography>
         </Box>
       ),
     },
     {
-      target: "#summary-text",
-      placement: "bottom",
+      target: "#historical-events",
+      // placement: "center",
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfSummary.tutorial.3.1">
-              These sections contain a highly processed and summarized version of the respective pages of the risk file,
-              which are accessible using the bottom navigation bar.
+            <Trans i18nKey="rfDescription.s.tutorial.3.1">
+              This section provides some examples of events related to the risk that occurred in Belgium or abroad.
             </Trans>
           </Typography>
-          <ul>
-            <li>
-              <Typography variant="body1">
-                <Trans i18nKey="hazardCatalogue.tutorial.3.2">
-                  The Risk Description (i.e. definition, scenario parameters, ...)
-                </Trans>
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body1">
-                <Trans i18nKey="hazardCatalogue.tutorial.3.3">
-                  The Risk Analysis (i.e. qualitative and quantitative results)
-                </Trans>
-              </Typography>
-            </li>
-          </ul>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfDescription.s.tutorial.3.2">It is by no means meant to be an exhaustive list.</Trans>
+          </Typography>
         </Box>
       ),
     },
     {
-      target: "#summary-charts",
-      placement: "left",
+      target: "#scenarios",
+      // placement: "center",
       content: (
-        <Box sx={{ textAlign: "left", maxWidth: 600 }}>
+        <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="hazardCatalogue.tutorial.4.1">
-              On the right is a summary of the quantitative results, i.e. the probability and impact of the most
-              relevant scenario of the risk.
+            <Trans i18nKey="rfDescription.s.tutorial.4.1">
+              Each risk of the BNRA is characterised using 3 intensity scenarios; a “<i>considerable</i>", a “
+              <i>major</i>" and an "<i>extreme</i>" scenario. These are built using risk-specific{" "}
+              <b>intensity parameters</b>.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="hazardCatalogue.tutorial.4.2">
-              These parameters are all logarithmically scaled between 1 and 5, where each number corresponds to a
-              qualitative value (Very Low, Low, Medium, High and Very High).
+            <Trans i18nKey="rfDescription.s.tutorial.4.2">
+              The <b>intensity parameters</b> are risk-specific factors that influence the development and consequences
+              of the risk.
+            </Trans>
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      target: "#scenario-buttons",
+      // placement: "center",
+      content: (
+        <Box sx={{ textAlign: "left" }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfDescription.s.tutorial.4.3">
+              The different scenario may be inspected using the buttons provided.
+            </Trans>
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      target: "#mrs",
+      // placement: "center",
+      content: (
+        <Box sx={{ textAlign: "left" }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfDescription.s.tutorial.5.1">
+              This sections provides a more in-depth description of the <i>Most Relevant Scenario</i>.
+            </Trans>
+          </Typography>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfDescription.s.tutorial.5.2">
+              The <i>Most Relevant Scenario</i> is defined as the scenario that poses the highest total risk, i.e. total
+              probability X total expected impact of the scenario.
+            </Trans>
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      target: "#scenario-matrix",
+      // placement: "center",
+      content: (
+        <Box sx={{ textAlign: "left" }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfDescription.s.tutorial.5.3">
+              The graph on the right shows this visually. The 3 scenarios are plotted according to their impact (on the
+              X-axis) and their probability (on the Y-axis).
+            </Trans>
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      target: "#sources",
+      // placement: "center",
+      content: (
+        <Box sx={{ textAlign: "left" }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfDescription.s.tutorial.6.1">
+              Every source that is referenced in the sections above can be found here.
             </Trans>
           </Typography>
         </Box>
@@ -133,13 +189,13 @@ export default function StandardIdentificationTutorial({
             zIndex: 5000,
           },
         }}
-        // floaterProps={{
-        //   styles: {
-        //     floaterWithComponent: {
-        //       maxWidth: 600,
-        //     },
-        //   },
-        // }}
+        floaterProps={{
+          styles: {
+            floaterWithComponent: {
+              maxWidth: 600,
+            },
+          },
+        }}
         callback={handleTutorialCallback}
         scrollOffset={500}
         // disableScrolling={true},
@@ -151,7 +207,7 @@ export default function StandardIdentificationTutorial({
           skip: t("button.skip", "Skip"),
         }}
         tooltipComponent={TourTooltip}
-        disableScrolling={stepIndex === 1}
+        disableScrolling={stepIndex === 6}
       />
     </>
   );

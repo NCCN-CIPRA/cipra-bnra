@@ -82,6 +82,7 @@ export default function HistoricalEvents({
         return (
           <Box
             key={e.id}
+            className="historical-event-wrapper"
             sx={{
               backgroundColor: "white",
               borderLeft: "8px solid " + colorList[i],

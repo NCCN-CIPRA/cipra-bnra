@@ -61,7 +61,7 @@ export default function runAnalysis(
 
   return calculations.map((c, i) => {
     const graph = getEffectGraph(getCausalGraph(c));
-    console.log("ok");
+
     // if (c.riskTitle.indexOf("lectricity") < 0) return c;
 
     calculateTotalProbability(graph);
