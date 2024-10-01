@@ -16,8 +16,15 @@ import usePageTitle from "../../hooks/usePageTitle";
 import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
 import { CategoryIcon } from "../../functions/getCategoryColor";
 
+const onDownload = (filename: string) => {
+  const link = document.createElement("a");
+  link.download = filename;
+  link.href = `https://bnra.powerappsportals.com/${filename}`;
+  link.click();
+};
+
 export default function LandingPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   usePageTitle(t("homepage.bnraLong", "Belgian National Risk Assessment"));
@@ -95,19 +102,19 @@ export default function LandingPage() {
                     de crise.
                   </Trans>
                 </Typography>
-                <Typography variant="body1" paragraph>
+                {/* <Typography variant="body1" paragraph>
                   <Trans i18nKey="landingpage.introtext3">
                     Vous voulez en savoir plus sur la BNRA, sa méthodologie et ses résultats ? Regardez la vidéo
                     ci-dessous:
                   </Trans>
-                </Typography>
+                </Typography> */}
               </Box>
             </Stack>
           </Box>
         </Container>
       </Box>
 
-      <Box>
+      {/* <Box>
         <Container>
           <Box sx={{ my: 8, height: 0, pb: "56.25%", position: "relative" }}>
             <iframe
@@ -127,11 +134,11 @@ export default function LandingPage() {
             ></iframe>
           </Box>
         </Container>
-      </Box>
+      </Box> */}
 
       <Box sx={{ bgcolor: "white", width: "100%", pt: 4, pb: 12 }}>
         <Container>
-          <Box sx={{ mt: 4, display: "flex", flexDirection: "column" }}>
+          {/* <Box sx={{ mt: 4, display: "flex", flexDirection: "column" }}>
             <Typography variant="body1" paragraph sx={{ textAlign: "justify" }}>
               <Trans i18nKey="landingpage.accesstext1">
                 L'accès à la plateforme est donné aux experts qui ont collaboré à la BNRA. Sur la plateforme, vous
@@ -143,7 +150,7 @@ export default function LandingPage() {
             <Button variant="contained" sx={{ mx: "auto", mt: 4 }} to="/learning" component={RouterLink}>
               <Trans i18nKey="landingpage.button.access">Demande d'accès</Trans>
             </Button>
-          </Box>
+          </Box> */}
           <Box sx={{ mt: 12, display: "flex", flexDirection: "column" }}>
             <Typography variant="body1" paragraph sx={{ textAlign: "justify" }}>
               <Trans i18nKey="landingpage.categorytext1">Dans la BNRA, sept catégories de risques sont définies:</Trans>
@@ -408,22 +415,62 @@ export default function LandingPage() {
           <Box sx={{ mt: 4, display: "flex", flexDirection: "column" }}>
             <Typography variant="body1" paragraph sx={{ textAlign: "justify" }}>
               <Trans i18nKey="landingpage.infotext1">
-                Vous trouverez ci-dessous le Guide des Risques. Ce Guide reprend les principaux risques par catégorie
-                (valeurs de probabilité et/ou d'impact élevées), complétés par certains risques qui ont été récemment
-                portés à l'attention du public.
+                Vous trouverez ci-dessous le Guide des Risques et le Fact Sheet. Ce Guide reprend les principaux risques
+                par catégorie (valeurs de probabilité et/ou d'impact élevées), complétés par certains risques qui ont
+                été récemment portés à l'attention du public.
               </Trans>
             </Typography>
 
-            <Button variant="contained" sx={{ mx: "auto", mt: 4 }} to="/learning" component={RouterLink}>
-              <Trans i18nKey="landingpage.button.riskguide">Télécharge le Guide des Risques</Trans>
-            </Button>
+            <Stack direction="row" justifyContent="center" gap={10} sx={{ my: 6 }}>
+              <Button
+                variant="contained"
+                sx={{ mt: 4 }}
+                onClick={() => onDownload(`BNRA-risk-guide-${i18n.language}.pdf`)}
+              >
+                <Trans i18nKey="landingpage.button.riskguide">Télécharge le Guide des Risques</Trans>
+              </Button>
+
+              <Button
+                variant="contained"
+                sx={{ mt: 4 }}
+                onClick={() => onDownload(`BNRA-fact-sheet-${i18n.language}.pdf`)}
+              >
+                <Trans i18nKey="landingpage.button.factsheet">Télécharge le Fact Sheet</Trans>
+              </Button>
+            </Stack>
           </Box>
           <Box sx={{ mt: 12, display: "flex", flexDirection: "column" }}>
             <Typography variant="body1" paragraph sx={{ textAlign: "justify" }}>
               <Trans i18nKey="landingpage.infotext2">Des informations sur les 118 risques sont disponibles sur </Trans>
-              <Link href="https://crisiscentrum.be">
+              <Link href={`https://crisiscentrum.be/${i18n.language}/risicos-belgie`}>
                 <Trans i18nKey="landingpage.infotext3">le site web du NCCN</Trans>
               </Link>
+            </Typography>
+          </Box>
+        </Container>
+      </Box>
+
+      <Box>
+        <Container>
+          <Box
+            sx={{
+              bgcolor: "rgba(255,255,255,0.7)",
+              border: "1px solid #fff",
+              mx: "auto",
+              my: 8,
+              width: 500,
+              px: 10,
+              py: 4,
+              textAlign: "center",
+            }}
+          >
+            <Typography variant="body1" paragraph sx={{ textAlign: "center" }}>
+              <Trans i18nKey="landingpage.questions1">
+                Questions, suggestions or other? Please don't hesitate to contact us!
+              </Trans>
+            </Typography>
+            <Typography variant="body1" paragraph sx={{ textAlign: "center" }}>
+              <Link href={`mailto:dist.nccn.cipra@nccn.fgov.be`}>dist.nccn.cipra@nccn.fgov.be</Link>
             </Typography>
           </Box>
         </Container>
