@@ -40,7 +40,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               {round(payload[0].value as number)} / 5
             </Typography>
           </Stack>
-          {Math.round(payload[3].value as number) > 0 && (
+          {(payload[3].value as number) > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[3] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
                 Increased probability in 2050
