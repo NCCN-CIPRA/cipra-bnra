@@ -19,7 +19,7 @@ import { CategoryIcon } from "../../functions/getCategoryColor";
 const onDownload = (filename: string) => {
   const link = document.createElement("a");
   link.download = filename;
-  link.href = `https://bnra.powerappsportals.com/${filename}`;
+  link.href = `https://raw.githubusercontent.com/NCCN-CIPRA/cipra-bnra/refs/heads/main/src/assets/pdf/${filename}`;
   link.click();
 };
 
@@ -420,6 +420,11 @@ export default function LandingPage() {
                 été récemment portés à l'attention du public.
               </Trans>
             </Typography>
+            <Typography variant="body1" color="error" paragraph sx={{ textAlign: "justify" }}>
+              <Trans i18nKey="landingpage.restricted">
+                Please consider the reports below as "Limited Distribution" until 25/10/2024.
+              </Trans>
+            </Typography>
 
             <Stack direction="row" justifyContent="center" gap={10} sx={{ my: 6 }}>
               <Button
@@ -430,13 +435,13 @@ export default function LandingPage() {
                 <Trans i18nKey="landingpage.button.riskguide">Télécharge le Guide des Risques</Trans>
               </Button>
 
-              <Button
+              {/* <Button
                 variant="contained"
                 sx={{ mt: 4 }}
                 onClick={() => onDownload(`BNRA-fact-sheet-${i18n.language}.pdf`)}
               >
                 <Trans i18nKey="landingpage.button.factsheet">Télécharge le Fact Sheet</Trans>
-              </Button>
+              </Button> */}
             </Stack>
           </Box>
           <Box sx={{ mt: 12, display: "flex", flexDirection: "column" }}>

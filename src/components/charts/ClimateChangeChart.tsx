@@ -1,4 +1,4 @@
-import { XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Legend, Bar } from "recharts";
+import { XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Legend, Bar, TooltipProps } from "recharts";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { SCENARIOS, SCENARIO_PARAMS, getCascadeParameter, getScenarioParameter } from "../../functions/scenarios";
 import { useMemo } from "react";
@@ -6,6 +6,8 @@ import round from "../../functions/roundNumberString";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { Cause as Cause2023 } from "../../functions/Probability";
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import { Box, Stack, Typography } from "@mui/material";
 
 type Cause2050 = Cause2023 & {
   p_c: number;
@@ -14,6 +16,136 @@ type Cause2050 = Cause2023 & {
   p2050_m: number;
   p_e: number;
   p2050_e: number;
+};
+
+const getPercentage = (orig: number, n: number) => {
+  if (Math.round(100 * orig) / 100 <= 0) return "0";
+
+  return round((100 * Math.round(100 * n)) / Math.round(100 * orig));
+};
+
+const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType>) => {
+  if (active && payload && payload.length) {
+    return (
+      <Box sx={{ border: "1px solid #ccc", padding: 1, bgcolor: "rgba(255,255,255,0.9)", mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ textDecoration: "underline", mb: 1 }}>
+          Effects of Climate Change
+        </Typography>
+        <Stack direction="column" rowGap={0.5}>
+          <Stack direction="row" sx={{ color: (payload[0] as any).fill }}>
+            <Typography variant="body2" sx={{ width: 230, flex: 1, fontWeight: "bold" }}>
+              Considerable Scenario
+            </Typography>
+            <Typography variant="body2" sx={{ width: 50, mr: "88px", fontWeight: "bold", textAlign: "right" }}>
+              {round(payload[0].value as number)} / 5
+            </Typography>
+          </Stack>
+          {Math.round(payload[3].value as number) > 0 && (
+            <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[3] as any).fill }}>
+              <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
+                Increased probability in 2050
+              </Typography>
+              <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
+                {round((payload[0].value as number) + (payload[3].value as number))} / 5
+              </Typography>
+              <Typography variant="caption" sx={{ ml: 1, width: 80, fontWeight: "bold", textAlign: "left" }}>
+                (+{getPercentage(payload[0].value as number, payload[3].value as number)}
+                %)
+              </Typography>
+            </Stack>
+          )}
+          {(payload[6].value as number) > 0 && (
+            <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[6] as any).fill }}>
+              <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
+                Decreased probability in 2050
+              </Typography>
+              <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
+                {round((payload[0].value as number) - (payload[6].value as number))} / 5
+              </Typography>
+              <Typography variant="caption" sx={{ ml: 1, width: 80, fontWeight: "bold", textAlign: "left" }}>
+                (-{getPercentage(payload[0].value as number, payload[6].value as number)}
+                %)
+              </Typography>
+            </Stack>
+          )}
+          <Stack direction="row" sx={{ color: (payload[1] as any).fill }}>
+            <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
+              Major Scenario
+            </Typography>
+            <Typography variant="body2" sx={{ width: 50, mr: "88px", fontWeight: "bold", textAlign: "right" }}>
+              {round(payload[1].value as number)} / 5
+            </Typography>
+          </Stack>
+          {(payload[4].value as number) > 0 && (
+            <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[4] as any).fill }}>
+              <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
+                Increased probability in 2050
+              </Typography>
+              <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
+                {round((payload[1].value as number) + (payload[4].value as number))} / 5
+              </Typography>
+              <Typography variant="caption" sx={{ ml: 1, width: 80, fontWeight: "bold", textAlign: "left" }}>
+                (+{getPercentage(payload[1].value as number, payload[4].value as number)}
+                %)
+              </Typography>
+            </Stack>
+          )}
+          {(payload[7].value as number) > 0 && (
+            <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[7] as any).fill }}>
+              <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
+                Decreased probability in 2050
+              </Typography>
+              <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
+                {round((payload[1].value as number) - (payload[7].value as number))} / 5
+              </Typography>
+              <Typography variant="caption" sx={{ ml: 1, width: 80, fontWeight: "bold", textAlign: "left" }}>
+                (-{getPercentage(payload[1].value as number, payload[7].value as number)}
+                %)
+              </Typography>
+            </Stack>
+          )}
+          <Stack direction="row" sx={{ color: (payload[2] as any).fill }}>
+            <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
+              Extreme Scenario
+            </Typography>
+            <Typography variant="body2" sx={{ width: 50, mr: "88px", fontWeight: "bold", textAlign: "right" }}>
+              {round(payload[2].value as number)} / 5
+            </Typography>
+          </Stack>
+          {(payload[5].value as number) > 0 && (
+            <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[5] as any).fill }}>
+              <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
+                Increased probability in 2050
+              </Typography>
+              <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
+                {round((payload[2].value as number) + (payload[5].value as number))} / 5
+              </Typography>
+              <Typography variant="caption" sx={{ ml: 1, width: 80, fontWeight: "bold", textAlign: "left" }}>
+                (+{getPercentage(payload[2].value as number, payload[5].value as number)}
+                %)
+              </Typography>
+            </Stack>
+          )}
+          {(payload[8].value as number) > 0 && (
+            <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[8] as any).fill }}>
+              <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
+                Decreased probability in 2050
+              </Typography>
+              <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
+                {round((payload[2].value as number) - (payload[8].value as number))} / 5
+              </Typography>
+              <Typography variant="caption" sx={{ ml: 1, width: 80, fontWeight: "bold", textAlign: "left" }}>
+                (-{getPercentage(payload[2].value as number, payload[8].value as number)}
+                %)
+              </Typography>
+            </Stack>
+          )}
+        </Stack>
+      </Box>
+    );
+  }
+
+  return null;
 };
 
 export default function ClimateChangeChart({
@@ -150,7 +282,7 @@ export default function ClimateChangeChart({
         label={{ value: "Probability of occurence in the next 12 months", dy: 25 }}
       />
       <YAxis dataKey="name" type="category" width={150} />
-      <Tooltip formatter={(value) => `${round(value as number)} / 5`} />
+      <Tooltip content={<CustomTooltip />} formatter={(value) => `${round(value as number)} / 5`} />
       <Legend align="center" verticalAlign="bottom" wrapperStyle={{ paddingTop: 30 }} />
       <Bar name="Considerable scenario" dataKey="P2023_c" stackId="c" fill={SCENARIO_PARAMS.considerable.color} />
       <Bar name="Major scenario" dataKey="P2023_m" stackId="m" fill={SCENARIO_PARAMS.major.color} />
