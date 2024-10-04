@@ -237,7 +237,8 @@ export default function RiskNetworkGraph({
       .attr("class", "link")
       .attr("fill", "none")
       .attr("stroke-width", function (d) {
-        return 5 + (8 * (d.value - minIp)) / (maxIp - minIp);
+        return 1;
+        // return 5 + (8 * (d.value - minIp)) / (maxIp - minIp);
       })
       .attr("stroke", function (d) {
         return "#aaa";
@@ -283,7 +284,7 @@ export default function RiskNetworkGraph({
         d3
           .forceLink<RiskNode, CascadeLink>(links)
           .id((d) => d.id)
-          .strength((d) => Math.min(1, d.value / (50 * maxIp)))
+          .strength((d) => Math.min(1, (10 * d.value) / (50 * maxIp)))
       )
       .force(
         "collide",

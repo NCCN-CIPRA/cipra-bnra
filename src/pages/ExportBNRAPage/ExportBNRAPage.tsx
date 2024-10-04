@@ -16,6 +16,7 @@ import { CATEGORY_NAMES, RISK_CATEGORY } from "../../types/dataverse/DVRiskFile"
 import { Document, Image, Page, PDFViewer, Text, View } from "@react-pdf/renderer";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Canvg } from "canvg";
+import svg2PDF from "../../functions/svg2PDF";
 
 const categories = [
   RISK_CATEGORY.MANMADE,
@@ -37,35 +38,19 @@ const SPLASH: Partial<{ [key in RISK_CATEGORY]: string }> = {
   EcoTech: "splash4.png",
 };
 
-const svgToDataUri = async (svgString: string) => {
-  try {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    if (context) {
-      const v = Canvg.fromString(context, svgString.trim());
-      await v.render();
-      const dataUri = canvas.toDataURL("image/png");
-      return dataUri;
-    }
-  } catch (error) {
-    console.error("Error occurred:", error);
-    return null;
-  }
-};
-
 export default function ExportBNRAPage({}) {
   const [detailSVG, setDetailSVG] = useState("");
   const [nccnLogoSVG, setNccnLogoSVG] = useState("");
   const [bnraLogoSVG, setBnraLogoSVG] = useState("");
 
   useEffect(() => {
-    svgToDataUri(renderToStaticMarkup(<NCCN_Detail style={{ position: "absolute", bottom: 0, left: 0 }} />)).then(
-      (uri) => setDetailSVG(uri || "")
+    svg2PDF(renderToStaticMarkup(<NCCN_Detail style={{ position: "absolute", bottom: 0, left: 0 }} />)).then((uri) =>
+      setDetailSVG(uri || "")
     );
-    svgToDataUri(renderToStaticMarkup(<NCCN_Logo style={{ position: "absolute", bottom: 0, left: 0 }} />)).then((uri) =>
+    svg2PDF(renderToStaticMarkup(<NCCN_Logo style={{ position: "absolute", bottom: 0, left: 0 }} />)).then((uri) =>
       setNccnLogoSVG(uri || "")
     );
-    svgToDataUri(renderToStaticMarkup(<BNRA_Logo style={{ position: "absolute", bottom: 0, left: 0 }} />)).then((uri) =>
+    svg2PDF(renderToStaticMarkup(<BNRA_Logo style={{ position: "absolute", bottom: 0, left: 0 }} />)).then((uri) =>
       setBnraLogoSVG(uri || "")
     );
   }, []);

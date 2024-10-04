@@ -16,6 +16,13 @@ import usePageTitle from "../../hooks/usePageTitle";
 import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
 import { CategoryIcon } from "../../functions/getCategoryColor";
 
+const NCCNUrls = {
+  en: "https://crisiscenter.be/en/risks-belgium",
+  nl: "https://crisiscentrum.be/nl/risicos-belgie",
+  fr: "https://centredecrise.be/fr/risques-en-belgique",
+  de: "https://krisenzentrum.be/de/risiken-belgien",
+};
+
 const onDownload = (filename: string) => {
   const link = document.createElement("a");
   link.download = filename;
@@ -447,7 +454,7 @@ export default function LandingPage() {
           <Box sx={{ mt: 12, display: "flex", flexDirection: "column" }}>
             <Typography variant="body1" paragraph sx={{ textAlign: "justify" }}>
               <Trans i18nKey="landingpage.infotext2">Des informations sur les 118 risques sont disponibles sur </Trans>
-              <Link href={`https://crisiscentrum.be/${i18n.language}/risicos-belgie`}>
+              <Link href={NCCNUrls[i18n.language as "en" | "nl" | "fr" | "de"]} target="_blank">
                 <Trans i18nKey="landingpage.infotext3">le site web du NCCN</Trans>
               </Link>
             </Typography>
