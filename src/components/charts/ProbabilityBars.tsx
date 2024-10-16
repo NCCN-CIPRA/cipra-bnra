@@ -18,7 +18,7 @@ const arrow = (value: number, cy: number, arrowWidth: number, graphWidth: number
   return <path d={`M${xa} ${ya} L${xb} ${yb} L${xc} ${yc} L${xa} ${ya}`} stroke="#none" fill={color} />;
 };
 
-const getProbabilityBars = (value: number) => {
+export const getProbabilityBars = (value: number) => {
   return [0, 1, 2, 3, 4].map((i) => ({
     name: i,
     uv: value >= i ? i + 1 : 0,

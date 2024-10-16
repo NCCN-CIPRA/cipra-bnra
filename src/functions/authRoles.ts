@@ -12,7 +12,11 @@ export function getAuthRoles(roleString: string) {
   const analist = admin || roleString.indexOf("Analisten") >= 0;
   const internal = analist || roleString.indexOf("Intern NCCN") >= 0;
   const expert = analist || roleString.indexOf("Experten") >= 0;
-  const beReader = internal || expert || roleString.indexOf("Rapport Lezer") >= 0;
+  const beReader =
+    internal ||
+    expert ||
+    roleString.indexOf("Rapport Lezer") >= 0 ||
+    roleString.indexOf("Geverifieerde gebruikers") >= 0;
   const verified = beReader || roleString.indexOf("Geverifieerde gebruikers") >= 0;
 
   return {

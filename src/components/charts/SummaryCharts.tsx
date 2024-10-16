@@ -30,12 +30,6 @@ const data = [
 ];
 const pieWidth = 200;
 const pieHeight = 100;
-const piePadding = 5;
-const cx = pieWidth / 2 - piePadding;
-const cy = pieHeight - piePadding;
-const oR = Math.min(pieHeight, pieWidth / 2);
-const iR = oR / 2;
-const value = 2.5;
 
 const getBars = (impact: IMPACT_CATEGORY) => [
   { name: "1", value: 1, color: IMPACT_COLOR_SCALES[impact][0] },
@@ -45,7 +39,16 @@ const getBars = (impact: IMPACT_CATEGORY) => [
   { name: "5", value: 1, color: IMPACT_COLOR_SCALES[impact][4] },
 ];
 
-const needle = (value: number, data: any[], cx: number, cy: number, iR: number, oR: number, color: string) => {
+const needle = (
+  value: number,
+  data: any[],
+  cx: number,
+  cy: number,
+  iR: number,
+  oR: number,
+  color: string,
+  padding: number
+) => {
   let total = 0;
   data.forEach((v) => {
     total += v.value;
@@ -55,7 +58,7 @@ const needle = (value: number, data: any[], cx: number, cy: number, iR: number, 
   const sin = Math.sin(-RADIAN * ang);
   const cos = Math.cos(-RADIAN * ang);
   const r = 5;
-  const x0 = cx + piePadding;
+  const x0 = cx + padding;
   const y0 = cy + r;
   const xba = x0 + r * sin;
   const yba = y0 - r * cos;
@@ -72,17 +75,60 @@ const needle = (value: number, data: any[], cx: number, cy: number, iR: number, 
   );
 };
 
+export const SvgChart = ({
+  width = pieWidth,
+  height = pieHeight,
+  category,
+  value,
+}: {
+  category: IMPACT_CATEGORY;
+  value: number;
+  width?: number;
+  height?: number;
+}) => {
+  const piePadding = width / 40;
+  const cx = width / 2 - piePadding;
+  const cy = height - piePadding;
+  const oR = Math.min(height, width / 2);
+  const iR = oR / 2;
+
+  return (
+    <PieChart width={width} height={height}>
+      <Pie
+        dataKey="value"
+        startAngle={180}
+        endAngle={0}
+        data={getBars(category)}
+        cx={cx}
+        cy={cy}
+        innerRadius={iR}
+        outerRadius={oR}
+        fill="#8884d8"
+        stroke="none"
+        paddingAngle={1}
+      >
+        {getBars(category).map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={entry.color} />
+        ))}
+      </Pie>
+      {needle(value, data, cx, cy, iR, oR, "#555", piePadding)}
+    </PieChart>
+  );
+};
+
 export default function SummaryCharts({
   riskFile,
   scenario,
   manmade = false,
+  canDownload = false,
 }: {
   riskFile: DVRiskFile;
   scenario: SCENARIOS;
   manmade?: boolean;
+  canDownload?: boolean;
 }) {
   const { t } = useTranslation();
-  const { user } = useOutletContext<AuthPageContext>();
+  // const { user } = useOutletContext<AuthPageContext>();
 
   // useRecord<DVAnalysisRun>({
   //   table: DataTable.ANALYSIS_RUN,
@@ -130,26 +176,7 @@ export default function SummaryCharts({
             <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
               <Trans i18nKey="learning.impact.h.title">Human Impact</Trans>
             </Typography>
-            <PieChart width={pieWidth} height={pieHeight}>
-              <Pie
-                dataKey="value"
-                startAngle={180}
-                endAngle={0}
-                data={getBars("H")}
-                cx={cx}
-                cy={cy}
-                innerRadius={iR}
-                outerRadius={oR}
-                fill="#8884d8"
-                stroke="none"
-                paddingAngle={1}
-              >
-                {getBars("H").map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              {needle(H, data, cx, cy, iR, oR, "#555")}
-            </PieChart>
+            <SvgChart category="H" value={H} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
               {t(getScaleString(H))}
             </Typography>
@@ -158,26 +185,7 @@ export default function SummaryCharts({
             <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
               <Trans i18nKey="learning.impact.s.title">Societal Impact</Trans>
             </Typography>
-            <PieChart width={pieWidth} height={pieHeight}>
-              <Pie
-                dataKey="value"
-                startAngle={180}
-                endAngle={0}
-                data={getBars("H")}
-                cx={cx}
-                cy={cy}
-                innerRadius={iR}
-                outerRadius={oR}
-                fill="#8884d8"
-                stroke="none"
-                paddingAngle={1}
-              >
-                {getBars("S").map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              {needle(S, data, cx, cy, iR, oR, "#555")}
-            </PieChart>
+            <SvgChart category="S" value={S} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
               {t(getScaleString(S))}
             </Typography>
@@ -188,26 +196,7 @@ export default function SummaryCharts({
             <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
               <Trans i18nKey="learning.impact.e.title">Environmental Impact</Trans>
             </Typography>
-            <PieChart width={pieWidth} height={pieHeight} style={{}}>
-              <Pie
-                dataKey="value"
-                startAngle={180}
-                endAngle={0}
-                data={getBars("H")}
-                cx={cx}
-                cy={cy}
-                innerRadius={iR}
-                outerRadius={oR}
-                fill="#8884d8"
-                stroke="none"
-                paddingAngle={1}
-              >
-                {getBars("E").map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              {needle(E, data, cx, cy, iR, oR, "#555")}
-            </PieChart>
+            <SvgChart category="E" value={E} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
               {t(getScaleString(E))}
             </Typography>
@@ -216,33 +205,14 @@ export default function SummaryCharts({
             <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
               <Trans i18nKey="learning.impact.f.title">Financial Impact</Trans>
             </Typography>
-            <PieChart width={pieWidth} height={pieHeight}>
-              <Pie
-                dataKey="value"
-                startAngle={180}
-                endAngle={0}
-                data={getBars("F")}
-                cx={cx}
-                cy={cy}
-                innerRadius={iR}
-                outerRadius={oR}
-                fill="#8884d8"
-                stroke="none"
-                paddingAngle={1}
-              >
-                {getBars("F").map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              {needle(F, data, cx, cy, iR, oR, "#555")}
-            </PieChart>
+            <SvgChart category="F" value={F} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
               {t(getScaleString(F))}
             </Typography>
           </Stack>
         </Stack>
       </Box>
-      {user && user.roles.internal && (
+      {canDownload && (
         <IconButton className="admin-button" sx={{ position: "absolute", top: 5, left: 5 }} onClick={handleDownload}>
           <SaveIcon />
         </IconButton>

@@ -160,6 +160,7 @@ export default function RiskFileSummaryPage({}) {
                 riskFile={riskFile}
                 scenario={riskFile.cr4de_mrs || SCENARIOS.MAJOR}
                 manmade={riskFile.cr4de_risk_type === RISK_TYPE.MANMADE}
+                canDownload={Boolean(user && user.roles.internal)}
               />
             </Box>
           </Box>

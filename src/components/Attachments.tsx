@@ -383,10 +383,10 @@ export default function Attachments({
                         {a.cr4de_name}
                       </Link>
                     </TableCell>
-                    {user?.admin && !isExternal && <TableCell>{a.cr4de_field ? a.cr4de_field : "-"}</TableCell>}
+                    {user?.roles.analist && !isExternal && <TableCell>{a.cr4de_field ? a.cr4de_field : "-"}</TableCell>}
                     <TableCell>
                       {a.cr4de_url ? t("source.type.link") : t("source.type.file")}
-                      {user?.admin && a.cr4de_referencedSource ? "*" : ""}
+                      {user?.roles.analist && a.cr4de_referencedSource ? "*" : ""}
                     </TableCell>
                     {user?.roles.analist && !isExternal && (
                       <TableCell align="center" sx={{ whiteSpace: "nowrap", textAlign: "right" }}>

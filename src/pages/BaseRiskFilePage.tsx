@@ -265,7 +265,7 @@ export default function BaseRiskFilePage() {
               {user &&
                 user.roles.beReader &&
                 riskContext.riskFiles[params.risk_file_id] &&
-                riskContext.riskFiles[params.risk_file_id].cr4de_risk_type !== RISK_TYPE.EMERGING && (
+                riskContext.riskFiles[params.risk_file_id].cr4de_risk_type === RISK_TYPE.STANDARD && (
                   <BottomNavigationAction
                     label={t("risk.bottombar.riskEvolution", "Risk Evolution")}
                     icon={<QueryStatsIcon />}

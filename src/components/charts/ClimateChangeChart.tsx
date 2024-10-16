@@ -8,6 +8,7 @@ import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { Cause as Cause2023 } from "../../functions/Probability";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Stack, Typography } from "@mui/material";
+import { Trans } from "react-i18next";
 
 type Cause2050 = Cause2023 & {
   p_c: number;
@@ -19,7 +20,7 @@ type Cause2050 = Cause2023 & {
 };
 
 const getPercentage = (orig: number, n: number) => {
-  if (Math.round(100 * orig) / 100 <= 0) return "0";
+  if (Math.round(100 * orig) / 100 <= 0) return "100%";
 
   return round((100 * Math.round(100 * n)) / Math.round(100 * orig));
 };
@@ -40,10 +41,10 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               {round(payload[0].value as number)} / 5
             </Typography>
           </Stack>
-          {(payload[3].value as number) > 0 && (
+          {Math.round((100 * (payload[3].value as number)) / 100) > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[3] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
-                Increased probability in 2050
+                <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
               </Typography>
               <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
                 {round((payload[0].value as number) + (payload[3].value as number))} / 5
@@ -54,10 +55,10 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
-          {(payload[6].value as number) > 0 && (
+          {Math.round((100 * (payload[6].value as number)) / 100) && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[6] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
-                Decreased probability in 2050
+                <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
               </Typography>
               <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
                 {round((payload[0].value as number) - (payload[6].value as number))} / 5
@@ -68,6 +69,14 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
+          {Math.round((100 * (payload[3].value as number)) / 100) <= 0 &&
+            Math.round((100 * (payload[6].value as number)) / 100) <= 0 && (
+              <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[0] as any).fill }}>
+                <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
+                  <Trans i18nKey="ccchart.nochange">No change in 2050</Trans>
+                </Typography>
+              </Stack>
+            )}
           <Stack direction="row" sx={{ color: (payload[1] as any).fill }}>
             <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
               Major Scenario
@@ -76,10 +85,10 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               {round(payload[1].value as number)} / 5
             </Typography>
           </Stack>
-          {(payload[4].value as number) > 0 && (
+          {Math.round((100 * (payload[4].value as number)) / 100) > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[4] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
-                Increased probability in 2050
+                <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
               </Typography>
               <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
                 {round((payload[1].value as number) + (payload[4].value as number))} / 5
@@ -90,10 +99,10 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
-          {(payload[7].value as number) > 0 && (
+          {Math.round((100 * (payload[7].value as number)) / 100) > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[7] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
-                Decreased probability in 2050
+                <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
               </Typography>
               <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
                 {round((payload[1].value as number) - (payload[7].value as number))} / 5
@@ -104,6 +113,14 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
+          {Math.round((100 * (payload[4].value as number)) / 100) <= 0 &&
+            Math.round((100 * (payload[7].value as number)) / 100) <= 0 && (
+              <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[0] as any).fill }}>
+                <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
+                  <Trans i18nKey="ccchart.nochange">No change in 2050</Trans>
+                </Typography>
+              </Stack>
+            )}
           <Stack direction="row" sx={{ color: (payload[2] as any).fill }}>
             <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
               Extreme Scenario
@@ -112,10 +129,10 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               {round(payload[2].value as number)} / 5
             </Typography>
           </Stack>
-          {(payload[5].value as number) > 0 && (
+          {Math.round((100 * (payload[5].value as number)) / 100) > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[5] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
-                Increased probability in 2050
+                <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
               </Typography>
               <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
                 {round((payload[2].value as number) + (payload[5].value as number))} / 5
@@ -126,10 +143,10 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
-          {(payload[8].value as number) > 0 && (
+          {Math.round((100 * (payload[8].value as number)) / 100) > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[8] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
-                Decreased probability in 2050
+                <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
               </Typography>
               <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
                 {round((payload[2].value as number) - (payload[8].value as number))} / 5
@@ -140,6 +157,14 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
+          {Math.round((100 * (payload[5].value as number)) / 100) <= 0 &&
+            Math.round((100 * (payload[8].value as number)) / 100) <= 0 && (
+              <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[0] as any).fill }}>
+                <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
+                  <Trans i18nKey="ccchart.nochange">No change in 2050</Trans>
+                </Typography>
+              </Stack>
+            )}
         </Stack>
       </Box>
     );
