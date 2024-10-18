@@ -13,6 +13,7 @@ export default function useLoggedInUser() {
 
   const setFakeRole = (role: string) => {
     if (user?.realRoles?.admin || user?.roles.admin) {
+      console.log(role, getAuthRoles(role));
       setUser({
         ...user,
         roles: getAuthRoles(role),
