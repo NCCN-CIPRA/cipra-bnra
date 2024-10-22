@@ -16,6 +16,7 @@ import {
   InputLabel,
   InputAdornment,
   Input,
+  Typography,
 } from "@mui/material";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
@@ -30,6 +31,7 @@ import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { CategoryIcon } from "../../functions/getCategoryColor";
 import BNRASpeedDial from "../../components/BNRASpeedDial";
 import HazardCatalogueTutorial from "./HazardCatalogueTutorial";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 function SearchBar({ onSearch }: { onSearch: (v: string) => void }) {
   const [committedSearch, setCommittedSearch] = useState("");
@@ -127,7 +129,19 @@ export default function HazardCataloguePage() {
                     }
                   }}
                 />
-                {/* <TableHeader name={t("hazardCatalogue.labels", "Labels")} /> */}
+                {user && user.participations && user.participations.length > 0 && (
+                  <TableHeader
+                    name={t("hazardCatalogue.participated", "Participated")}
+                    sort={sortField === "participated" ? sortDir : null}
+                    onSort={(v) => {
+                      if (v === null) setSortField(null);
+                      else {
+                        setSortField("participated");
+                        setSortDir(v);
+                      }
+                    }}
+                  />
+                )}
                 <TableHeader
                   name={t("hazardCatalogue.mrs", "Most Relevant Scenario")}
                   sort={sortField === "cr4de_mrs" ? sortDir : null}
@@ -187,6 +201,12 @@ export default function HazardCataloguePage() {
                     ...h,
                     tp: h.results && h.cr4de_mrs ? h.results[h.cr4de_mrs].TP : null,
                     ti: h.results && h.cr4de_mrs ? h.results[h.cr4de_mrs].TI : null,
+                    participated:
+                      user &&
+                      user.participations &&
+                      user.participations.find((p) => p._cr4de_risk_file_value === h.cr4de_riskfilesid)
+                        ? -1
+                        : 0,
                   }))
                   .sort((a, b) => {
                     if (!sortField) return 0;
@@ -241,6 +261,16 @@ export default function HazardCataloguePage() {
                           <CategoryIcon category={h.cr4de_risk_category} />
                         </Box>
                       </TableCell>
+
+                      {user && user.participations && user.participations.length > 0 && (
+                        <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}>
+                          {h.participated !== 0 && (
+                            <Box sx={{ width: 30, height: 30, ml: 2.5 }}>
+                              <TaskAltIcon color="primary" />
+                            </Box>
+                          )}
+                        </TableCell>
+                      )}
                       {/* <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}></TableCell> */}
                       <TableCell sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}>
                         {h.cr4de_mrs ? (
@@ -261,7 +291,18 @@ export default function HazardCataloguePage() {
                             {h.cr4de_mrs[0].toUpperCase()}
                           </Button>
                         ) : (
-                          "-"
+                          <Typography
+                            sx={{
+                              borderRadius: "50%",
+                              width: 30,
+                              minWidth: 30,
+                              height: 30,
+                              pointerEvents: "none",
+                              ml: 8.5,
+                            }}
+                          >
+                            -
+                          </Typography>
                         )}
                       </TableCell>
                       <TableCell sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}>

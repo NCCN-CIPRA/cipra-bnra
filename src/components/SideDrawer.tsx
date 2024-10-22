@@ -49,7 +49,7 @@ export default function SideDrawer({
               <ListItemText primary={t("sideDrawer.introduction", "Introduction")} />
             </ListItemButton>
           </ListItem>
-          {user && (
+          {user?.roles.beReader && (
             <>
               <ListItem disablePadding>
                 <ListItemButton component={Link} to="/risks" onClick={onClose}>

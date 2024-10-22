@@ -27,6 +27,7 @@ const getPercentage = (orig: number, n: number) => {
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType>) => {
   if (active && payload && payload.length) {
+    console.log(payload[3].value, Math.round(100 * (payload[3].value as number)) / 100);
     return (
       <Box sx={{ border: "1px solid #ccc", padding: 1, bgcolor: "rgba(255,255,255,0.9)", mb: 1 }}>
         <Typography variant="subtitle2" sx={{ textDecoration: "underline", mb: 1 }}>
@@ -41,7 +42,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               {round(payload[0].value as number)} / 5
             </Typography>
           </Stack>
-          {Math.round((100 * (payload[3].value as number)) / 100) > 0 && (
+          {Math.round(100 * (payload[3].value as number)) / 100 > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[3] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
                 <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
@@ -55,7 +56,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
-          {Math.round((100 * (payload[6].value as number)) / 100) && (
+          {Math.round(100 * (payload[6].value as number)) / 100 > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[6] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
                 <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
@@ -69,8 +70,8 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
-          {Math.round((100 * (payload[3].value as number)) / 100) <= 0 &&
-            Math.round((100 * (payload[6].value as number)) / 100) <= 0 && (
+          {Math.round(100 * (payload[3].value as number)) / 100 <= 0 &&
+            Math.round(100 * (payload[6].value as number)) / 100 <= 0 && (
               <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[0] as any).fill }}>
                 <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
                   <Trans i18nKey="ccchart.nochange">No change in 2050</Trans>
@@ -85,7 +86,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               {round(payload[1].value as number)} / 5
             </Typography>
           </Stack>
-          {Math.round((100 * (payload[4].value as number)) / 100) > 0 && (
+          {Math.round(100 * (payload[4].value as number)) / 100 > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[4] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
                 <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
@@ -99,7 +100,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
-          {Math.round((100 * (payload[7].value as number)) / 100) > 0 && (
+          {Math.round(100 * (payload[7].value as number)) / 100 > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[7] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
                 <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
@@ -113,8 +114,8 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
-          {Math.round((100 * (payload[4].value as number)) / 100) <= 0 &&
-            Math.round((100 * (payload[7].value as number)) / 100) <= 0 && (
+          {Math.round(100 * (payload[4].value as number)) / 100 <= 0 &&
+            Math.round(100 * (payload[7].value as number)) / 100 <= 0 && (
               <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[0] as any).fill }}>
                 <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
                   <Trans i18nKey="ccchart.nochange">No change in 2050</Trans>
@@ -129,7 +130,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               {round(payload[2].value as number)} / 5
             </Typography>
           </Stack>
-          {Math.round((100 * (payload[5].value as number)) / 100) > 0 && (
+          {Math.round(100 * (payload[5].value as number)) / 100 > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[5] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
                 <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
@@ -143,7 +144,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
-          {Math.round((100 * (payload[8].value as number)) / 100) > 0 && (
+          {Math.round(100 * (payload[8].value as number)) / 100 > 0 && (
             <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[8] as any).fill }}>
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
                 <Trans i18nKey="ccchart.probability">Probability in 2050</Trans>
@@ -157,8 +158,8 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, NameType
               </Typography>
             </Stack>
           )}
-          {Math.round((100 * (payload[5].value as number)) / 100) <= 0 &&
-            Math.round((100 * (payload[8].value as number)) / 100) <= 0 && (
+          {Math.round(100 * (payload[5].value as number)) / 100 <= 0 &&
+            Math.round(100 * (payload[8].value as number)) / 100 <= 0 && (
               <Stack direction="row" sx={{ ml: 2, mb: 1, color: (payload[0] as any).fill }}>
                 <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
                   <Trans i18nKey="ccchart.nochange">No change in 2050</Trans>

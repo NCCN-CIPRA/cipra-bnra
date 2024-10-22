@@ -13,10 +13,18 @@ import { ReactComponent as NCCN_Logo } from "../../assets/icons/NCCN_Logo.svg";
 import { ReactComponent as NCCN_Detail } from "../../assets/icons/Triangles_detail.svg";
 import RiskMatrix from "../../components/charts/RiskMatrix";
 import { CATEGORY_NAMES, RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
-import { Document, Image, Page, PDFViewer, Text, View } from "@react-pdf/renderer";
+import { Document, Font, Image, Page, PDFViewer, Text, View } from "@react-pdf/renderer";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Canvg } from "canvg";
 import svg2PDF from "../../functions/svg2PDF";
+import NH15 from "../../assets/fonts/NHaasGroteskDSPro-15UltTh.ttf";
+import NH25 from "../../assets/fonts/NHaasGroteskDSPro-25Th.ttf";
+import NH45 from "../../assets/fonts/NHaasGroteskDSPro-45Lt.ttf";
+import NH46 from "../../assets/fonts/NHaasGroteskDSPro-46LtIt.ttf";
+import NH55 from "../../assets/fonts/NHaasGroteskDSPro-55Rg.ttf";
+import NH65 from "../../assets/fonts/NHaasGroteskDSPro-65Md.ttf";
+import NH66 from "../../assets/fonts/NHaasGroteskDSPro-66MdIt.ttf";
+import NH75 from "../../assets/fonts/NHaasGroteskDSPro-75Bd.ttf";
 
 const categories = [
   RISK_CATEGORY.MANMADE,
@@ -37,6 +45,47 @@ const SPLASH: Partial<{ [key in RISK_CATEGORY]: string }> = {
   Transversal: "spalsh3.png",
   EcoTech: "splash4.png",
 };
+
+Font.register({
+  family: "NH",
+  fonts: [
+    {
+      src: NH15,
+      fontWeight: 100,
+    },
+    {
+      src: NH25,
+      fontWeight: 200,
+    },
+    {
+      src: NH45,
+      fontWeight: 300,
+    },
+    {
+      src: NH46,
+      fontWeight: 300,
+      fontStyle: "italic",
+    },
+    {
+      src: NH55,
+      fontWeight: 400,
+    },
+    {
+      src: NH65,
+      fontWeight: 500,
+    },
+    {
+      src: NH66,
+      fontWeight: 500,
+      fontStyle: "italic",
+    },
+    {
+      src: NH75,
+      fontWeight: 700,
+    },
+  ],
+});
+Font.registerHyphenationCallback((word) => [word]);
 
 export default function ExportBNRAPage({}) {
   const [detailSVG, setDetailSVG] = useState("");
@@ -74,17 +123,17 @@ export default function ExportBNRAPage({}) {
                 marginBottom: 0,
               }}
             >
-              <Text style={{ fontFamily: "Inter", fontSize: "30pt", color: "white", fontWeight: "bold" }}>
+              <Text style={{ fontFamily: "NH", fontSize: "30pt", color: "white", fontWeight: "bold" }}>
                 Belgian National Risk Assessment
               </Text>
             </View>
             <View
               style={{ width: "80%", margin: "auto", textAlign: "center", marginTop: "10pt", marginBottom: "30pt" }}
             >
-              <Text style={{ fontFamily: "Inter", fontSize: "20pt", color: "white", fontWeight: "normal" }}>
+              <Text style={{ fontFamily: "NH", fontSize: "20pt", color: "white", fontWeight: "normal" }}>
                 Full Report
               </Text>
-              <Text style={{ fontFamily: "Inter", fontSize: "20pt", color: "white", fontWeight: "normal" }}>
+              <Text style={{ fontFamily: "NH", fontSize: "20pt", color: "white", fontWeight: "normal" }}>
                 2023 - 2026
               </Text>
             </View>
@@ -124,7 +173,7 @@ export default function ExportBNRAPage({}) {
                 marginBottom: "100px",
               }}
             >
-              <Text style={{ fontFamily: "Inter", fontSize: "16pt", color: "white", fontWeight: "semibold" }}>
+              <Text style={{ fontFamily: "NH", fontSize: "16pt", color: "white", fontWeight: "semibold" }}>
                 Better prepared. Better response.
               </Text>
             </View>

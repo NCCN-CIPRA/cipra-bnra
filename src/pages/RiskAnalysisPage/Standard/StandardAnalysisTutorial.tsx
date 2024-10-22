@@ -28,19 +28,15 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Page Intro
-          </Typography>
-          {/* <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.tutorial.1.1">
-              This is the <i>Risk Description</i> page.
+            <Trans i18nKey="rfAnalysis.tutorial.1.1">
+              This is the <i>Risk Analysis</i> page.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.tutorial.1.2">
-              It contains some general information about the risk that was used as the basis for subsequent analyses by
-              experts.
+            <Trans i18nKey="rfAnalysis.tutorial.1.2">
+              It displays the consolidated results of the BNRA analysis process for this risk file.
             </Trans>
-          </Typography> */}
+          </Typography>
         </Box>
       ),
     },
@@ -50,7 +46,9 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Quantitative Results Overview
+            <Trans i18nKey="rfAnalysis.tutorial.2.1">
+              This section visualises the quantitative results of the analyses and the subsequent risk calculations.
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -61,7 +59,13 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Probability Sankey
+            <Trans i18nKey="rfAnalysis.tutorial.3.1">On the left are the results of the probability analysis.</Trans>
+          </Typography>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfAnalysis.tutorial.3.3">
+              The causes displayed here should explain about 80% of the total probability of the risk. Any other
+              potential cause can be found under "Other".{" "}
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -72,7 +76,10 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Total probability
+            <Trans i18nKey="rfAnalysis.tutorial.3.2">
+              The total probability is calculated as the sum of potential underlying causes (i.e. other risks in the
+              risk catalogue) and the direct probability (i.e. internal causes that are not in the risk library).
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -83,7 +90,16 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Probability sankey cause
+            <Trans i18nKey="rfAnalysis.tutorial.5.1">
+              For each cause, experts were asked to estimate the strength of the link between these two risks, which is
+              reflected in the size of the sankey leg.
+            </Trans>
+          </Typography>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfAnalysis.tutorial.5.2">
+              You can hover over each cause (when this tutorial is finished) to get some more information about the
+              link, or click on it to navigate to the respective risk file.
+            </Trans>
           </Typography>
         </Box>
       ),

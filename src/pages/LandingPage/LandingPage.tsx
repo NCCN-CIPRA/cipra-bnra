@@ -93,8 +93,8 @@ export default function LandingPage() {
                 <Box>
                   <img
                     alt="risicocyclus"
-                    src="https://crisiscentrum.be/sites/default/files/documents/images/Risicoanalyse.png"
-                    style={{ width: 400 }}
+                    src={`https://bnra.powerappsportals.com/risicoCyclus${i18n.language.toUpperCase()}.png`}
+                    style={{ width: 400, padding: 20 }}
                   ></img>
                 </Box>
               </Box>
@@ -109,60 +109,69 @@ export default function LandingPage() {
                     de crise.
                   </Trans>
                 </Typography>
-                {/* <Typography variant="body1" paragraph>
-                  <Trans i18nKey="landingpage.introtext3">
-                    Vous voulez en savoir plus sur la BNRA, sa méthodologie et ses résultats ? Regardez la vidéo
-                    ci-dessous:
-                  </Trans>
-                </Typography> */}
               </Box>
             </Stack>
           </Box>
-        </Container>
-      </Box>
-
-      {/* <Box>
-        <Container>
+          <Typography variant="body1" paragraph sx={{ mt: 4 }}>
+            <Trans i18nKey="landingpage.introtext3">
+              Vous voulez en savoir plus sur la BNRA, sa méthodologie et ses résultats ? Regardez la vidéo ci-dessous:
+            </Trans>
+          </Typography>
           <Box sx={{ my: 8, height: 0, pb: "56.25%", position: "relative" }}>
-            <iframe
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-              }}
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=D9nqIt3QQbUbNrZx"
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            ></iframe>
+            {i18n.language === "nl" && (
+              <iframe
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+                src="https://www.youtube.com/embed/JhkZkEYmIKQ?si=r2XqBmEohKras3wJ"
+                title="Video BNRA NL"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              ></iframe>
+            )}
+            {(i18n.language === "en" || i18n.language === "de") && (
+              <iframe
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+                src="https://www.youtube.com/embed/ojCfJ37jkTg?si=T3-GSaHZNiGvX4w7"
+                title="Video BNRA EN"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              ></iframe>
+            )}
+            {i18n.language === "fr" && (
+              <iframe
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+                src="https://www.youtube.com/embed/NAQ6kKq0jO0?si=cm3HWurTzESHC_Wl"
+                title="Video BNRA FR"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              ></iframe>
+            )}
           </Box>
-        </Container>
-      </Box> */}
-
-      <Box sx={{ bgcolor: "white", width: "100%", pt: 4, pb: 12 }}>
-        <Container>
-          {/* <Box sx={{ mt: 4, display: "flex", flexDirection: "column" }}>
-            <Typography variant="body1" paragraph sx={{ textAlign: "justify" }}>
-              <Trans i18nKey="landingpage.accesstext1">
-                L'accès à la plateforme est donné aux experts qui ont collaboré à la BNRA. Sur la plateforme, vous
-                trouverez des informations sur la méthodologie, le catalogue des risques ainsi que les analyses des
-                différents risques. Vous souhaitez obtenir un accès ?
-              </Trans>
-            </Typography>
-
-            <Button variant="contained" sx={{ mx: "auto", mt: 4 }} to="/learning" component={RouterLink}>
-              <Trans i18nKey="landingpage.button.access">Demande d'accès</Trans>
-            </Button>
-          </Box> */}
-          <Box sx={{ mt: 12, display: "flex", flexDirection: "column" }}>
+          {/* <Box sx={{ mt: 12, display: "flex", flexDirection: "column" }}>
             <Typography variant="body1" paragraph sx={{ textAlign: "justify" }}>
               <Trans i18nKey="landingpage.categorytext1">Dans la BNRA, sept catégories de risques sont définies:</Trans>
             </Typography>
-          </Box>
+          </Box> */}
         </Container>
       </Box>
 
@@ -194,8 +203,8 @@ export default function LandingPage() {
                 variant="subtitle2"
                 sx={{
                   position: "absolute",
-                  bottom: -30,
-                  whiteSpace: "nowrap",
+                  top: 120,
+                  // whiteSpace: "nowrap",
                   left: "calc(50% - 80px)",
                   width: 160,
                   textAlign: "center",
@@ -229,8 +238,8 @@ export default function LandingPage() {
                 variant="subtitle2"
                 sx={{
                   position: "absolute",
-                  bottom: -30,
-                  whiteSpace: "nowrap",
+                  top: 120,
+                  // whiteSpace: "nowrap",
                   left: "calc(50% - 80px)",
                   width: 160,
                   textAlign: "center",
@@ -264,7 +273,8 @@ export default function LandingPage() {
                 variant="subtitle2"
                 sx={{
                   position: "absolute",
-                  bottom: -52,
+                  top: 120,
+                  // whiteSpace: "nowrap",
                   left: "calc(50% - 85px)",
                   width: 170,
                   textAlign: "center",
@@ -298,8 +308,8 @@ export default function LandingPage() {
                 variant="subtitle2"
                 sx={{
                   position: "absolute",
-                  bottom: -30,
-                  whiteSpace: "nowrap",
+                  top: 120,
+                  // whiteSpace: "nowrap",
                   left: "calc(50% - 80px)",
                   width: 160,
                   textAlign: "center",
@@ -333,8 +343,8 @@ export default function LandingPage() {
                 variant="subtitle2"
                 sx={{
                   position: "absolute",
-                  bottom: -30,
-                  whiteSpace: "nowrap",
+                  top: 120,
+                  // whiteSpace: "nowrap",
                   left: "calc(50% - 80px)",
                   width: 160,
                   textAlign: "center",
@@ -368,8 +378,8 @@ export default function LandingPage() {
                 variant="subtitle2"
                 sx={{
                   position: "absolute",
-                  bottom: -30,
-                  whiteSpace: "nowrap",
+                  top: 120,
+                  // whiteSpace: "nowrap",
                   left: "calc(50% - 80px)",
                   width: 170,
                   textAlign: "center",
@@ -403,8 +413,8 @@ export default function LandingPage() {
                 variant="subtitle2"
                 sx={{
                   position: "absolute",
-                  bottom: -30,
-                  whiteSpace: "nowrap",
+                  top: 120,
+                  // whiteSpace: "nowrap",
                   left: "calc(50% - 80px)",
                   width: 160,
                   textAlign: "center",

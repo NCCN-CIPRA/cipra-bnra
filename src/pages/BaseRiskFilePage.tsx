@@ -272,13 +272,17 @@ export default function BaseRiskFilePage() {
                     onClick={() => navigate(`/risks/${params.risk_file_id}/evolution`)}
                   />
                 )}
-              {user && user.roles.expert && (
-                <BottomNavigationAction
-                  label={t("risk.bottombar.rawData", "Raw Data")}
-                  icon={<PsychologyIcon />}
-                  onClick={() => navigate(`/risks/${params.risk_file_id}/data`)}
-                />
-              )}
+              {user &&
+                (user.roles.analist ||
+                  (user.roles.expert &&
+                    user.participations &&
+                    user.participations.find((p) => p._cr4de_risk_file_value === params.risk_file_id))) && (
+                  <BottomNavigationAction
+                    label={t("risk.bottombar.rawData", "Raw Data")}
+                    icon={<PsychologyIcon />}
+                    onClick={() => navigate(`/risks/${params.risk_file_id}/data`)}
+                  />
+                )}
               {user && user.roles.analist && (
                 <BottomNavigationAction
                   label={t("risk.bottombar.expertInput", "Expert Input")}
