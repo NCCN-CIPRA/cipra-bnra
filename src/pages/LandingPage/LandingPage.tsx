@@ -127,7 +127,7 @@ export default function LandingPage() {
                   width: "100%",
                   height: "100%",
                 }}
-                src="https://www.youtube.com/embed/JhkZkEYmIKQ?si=r2XqBmEohKras3wJ"
+                src="https://www.youtube.com/embed/3kk2eXEpwrI?si=qLuOkQ36GA5o6O0T"
                 title="Video BNRA NL"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 referrerPolicy="strict-origin-when-cross-origin"
@@ -143,7 +143,7 @@ export default function LandingPage() {
                   width: "100%",
                   height: "100%",
                 }}
-                src="https://www.youtube.com/embed/ojCfJ37jkTg?si=T3-GSaHZNiGvX4w7"
+                src="https://www.youtube.com/embed/mS86tmjG1zQ?si=_cVkQZpMtdHhMGXY"
                 title="Video BNRA EN"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 referrerPolicy="strict-origin-when-cross-origin"
@@ -159,7 +159,7 @@ export default function LandingPage() {
                   width: "100%",
                   height: "100%",
                 }}
-                src="https://www.youtube.com/embed/NAQ6kKq0jO0?si=cm3HWurTzESHC_Wl"
+                src="https://www.youtube.com/embed/TNzBmCwdU44?si=ghm1HfwwZwbk9Wgc"
                 title="Video BNRA FR"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 referrerPolicy="strict-origin-when-cross-origin"

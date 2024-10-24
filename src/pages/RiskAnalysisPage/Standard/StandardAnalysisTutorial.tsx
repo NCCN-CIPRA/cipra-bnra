@@ -64,7 +64,7 @@ export default function StandardAnalysisTutorial({
           <Typography variant="body1" my={2}>
             <Trans i18nKey="rfAnalysis.tutorial.3.3">
               The causes displayed here should explain about 80% of the total probability of the risk. Any other
-              potential cause can be found under "Other".{" "}
+              potential cause can be found under "Other".
             </Trans>
           </Typography>
         </Box>
@@ -110,7 +110,13 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Impact Sankey
+            <Trans i18nKey="rfAnalysis.tutorial.6.1">On the right are the results of the impact analysis.</Trans>
+          </Typography>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfAnalysis.tutorial.6.2">
+              The effects displayed here should explain about 80% of the total impact of the risk. Any other potential
+              effect can be found under "Other".
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -121,7 +127,10 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Total impact
+            <Trans i18nKey="rfAnalysis.tutorial.7.1">
+              The total impact is calculated as the sum of expected impact of potential consequences (i.e. other risks
+              in the risk catalogue) and the direct impact (i.e. impact not due to potential consequences).
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -132,18 +141,16 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Impact Sankey Effect
+            <Trans i18nKey="rfAnalysis.tutorial.8.1">
+              For each potential consequence, experts were asked to estimate the strength of the link between these two
+              risks, which is reflected in the size of the sankey leg.
+            </Trans>
           </Typography>
-        </Box>
-      ),
-    },
-    {
-      target: ".sankey-charts",
-      // placement: "center",
-      content: (
-        <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Center Charts
+            <Trans i18nKey="rfAnalysis.tutorial.8.2">
+              You can hover over each effect (when this tutorial is finished) to get some more information about the
+              link, or click on it to navigate to the respective risk file.
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -154,7 +161,9 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Probability Bars
+            <Trans i18nKey="rfAnalysis.tutorial.9.1">
+              This graph shows the total probability in the same format as on the summary page.
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -165,7 +174,15 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Sankey scenario buttons
+            <Trans i18nKey="rfAnalysis.tutorial.10.2">
+              These buttons allow you to choose the scenario for which to show the quantitative results.
+            </Trans>
+          </Typography>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfAnalysis.tutorial.10.2">
+              Please note that only the <b>quantitative results</b> in these charts will update. The <b>qualitative</b>{" "}
+              data below will not update and is only valid for the <i>most relevant scenario</i>.
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -176,7 +193,10 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Impact per category/damage indicators
+            <Trans i18nKey="rfAnalysis.tutorial.11.1">
+              This charts allows you to compare the different impact categories at a glance, as well as their relative
+              importance compared to other risks on a scale of 5.
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -187,7 +207,15 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Most relevant scenario
+            <Trans i18nKey="rfDescription.s.tutorial.12.1">
+              This sections provides a more in-depth description of the <i>Most Relevant Scenario</i>.
+            </Trans>
+          </Typography>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfDescription.s.tutorial.12.2">
+              The <i>Most Relevant Scenario</i> is defined as the scenario that poses the highest total risk, i.e. total
+              probability X total expected impact of the scenario.
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -198,18 +226,9 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Probability assessment
-          </Typography>
-        </Box>
-      ),
-    },
-    {
-      target: ".impact-assess",
-      // placement: "center",
-      content: (
-        <Box sx={{ textAlign: "left" }}>
-          <Typography variant="body1" my={2}>
-            Impact assessment
+            <Trans i18nKey="rfDescription.s.tutorial.13.1">
+              The sections below provide a thourough, qualitative explanation about the quantitative results above.
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -220,7 +239,10 @@ export default function StandardAnalysisTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            Cross border impact
+            <Trans i18nKey="rfDescription.s.tutorial.14.1">
+              And finally, this section provides a quick analysis of any potential cross-border effects associated with
+              the risk.
+            </Trans>
           </Typography>
         </Box>
       ),

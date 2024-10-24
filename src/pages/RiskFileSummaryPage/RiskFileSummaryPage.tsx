@@ -166,7 +166,7 @@ export default function RiskFileSummaryPage({}) {
           </Box>
         )}
       </Stack>
-      {user && user.roles.admin && (
+      {user && (
         <Box sx={{ position: "fixed", bottom: 96, right: 40 }}>
           {!editing && (
             <BNRASpeedDial
@@ -176,30 +176,26 @@ export default function RiskFileSummaryPage({}) {
               HelpComponent={RiskFileSummaryTutorial}
             />
           )}
-          {editing && (
+          {editing && user.roles.admin && (
             <SpeedDial
               ariaLabel="BNRA Speeddial"
               sx={{ position: "fixed", bottom: 72, right: 16 }}
               icon={<SpeedDialIcon />}
             >
-              {user && user.roles.analist && (
-                <SpeedDialAction
-                  icon={<CancelIcon />}
-                  tooltipTitle={"Cancel"}
-                  onClick={() => {
-                    if (!window.confirm("This will erase all your changes. Are you sure?")) return;
+              <SpeedDialAction
+                icon={<CancelIcon />}
+                tooltipTitle={"Cancel"}
+                onClick={() => {
+                  if (!window.confirm("This will erase all your changes. Are you sure?")) return;
 
-                    setSummary(riskFile.cr4de_mrs_summary || "<h6>Not available</h6>");
-                    setSummaryNL(riskFile.cr4de_mrs_summary_nl || "<h6>Not available</h6>");
-                    setSummaryFR(riskFile.cr4de_mrs_summary_fr || "<h6>Not available</h6>");
-                    setSummaryDE(riskFile.cr4de_mrs_summary_de || "<h6>Not available</h6>");
-                    setEditing(false);
-                  }}
-                />
-              )}
-              {user && user.roles.analist && (
-                <SpeedDialAction icon={<SaveIcon />} tooltipTitle={"Save Page"} onClick={() => saveRiskFile()} />
-              )}
+                  setSummary(riskFile.cr4de_mrs_summary || "<h6>Not available</h6>");
+                  setSummaryNL(riskFile.cr4de_mrs_summary_nl || "<h6>Not available</h6>");
+                  setSummaryFR(riskFile.cr4de_mrs_summary_fr || "<h6>Not available</h6>");
+                  setSummaryDE(riskFile.cr4de_mrs_summary_de || "<h6>Not available</h6>");
+                  setEditing(false);
+                }}
+              />
+              <SpeedDialAction icon={<SaveIcon />} tooltipTitle={"Save Page"} onClick={() => saveRiskFile()} />
             </SpeedDial>
           )}
         </Box>

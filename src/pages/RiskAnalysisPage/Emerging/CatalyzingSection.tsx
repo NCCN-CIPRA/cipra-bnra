@@ -91,7 +91,7 @@ function CatalyzingEffect({
 
   return (
     <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, px: 2, py: 1, backgroundColor: "white" }}>
-      <a href={`/risks/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}`}>
+      <a href={`/risks/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}/evolution`}>
         <Typography variant="h6" sx={{ mb: 2 }}>
           {cascade.cr4de_effect_hazard.cr4de_title}
         </Typography>
