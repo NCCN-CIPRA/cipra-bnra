@@ -16,11 +16,11 @@ import usePageTitle from "../../hooks/usePageTitle";
 import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
 import { CategoryIcon } from "../../functions/getCategoryColor";
 
-const NCCNUrls = {
-  en: "https://crisiscenter.be/en/risks-belgium",
-  nl: "https://crisiscentrum.be/nl/risicos-belgie",
-  fr: "https://centredecrise.be/fr/risques-en-belgique",
-  de: "https://krisenzentrum.be/de/risiken-belgien",
+const getCleanLanguage = (language: string) => {
+  if (language.indexOf("en") >= 0) return "en";
+  if (language.indexOf("nl") >= 0) return "nl";
+  if (language.indexOf("fr") >= 0) return "fr";
+  if (language.indexOf("de") >= 0) return "de";
 };
 
 const onDownload = (filename: string) => {
@@ -447,7 +447,7 @@ export default function LandingPage() {
               <Button
                 variant="contained"
                 sx={{ mt: 4 }}
-                onClick={() => onDownload(`BNRA-risk-guide-${i18n.language}.pdf`)}
+                onClick={() => onDownload(`BNRA-risk-guide-${getCleanLanguage(i18n.language)}.pdf`)}
               >
                 <Trans i18nKey="landingpage.button.riskguide">Télécharge le Guide des Risques</Trans>
               </Button>
@@ -464,7 +464,7 @@ export default function LandingPage() {
           <Box sx={{ mt: 12, display: "flex", flexDirection: "column" }}>
             <Typography variant="body1" paragraph sx={{ textAlign: "justify" }}>
               <Trans i18nKey="landingpage.infotext2">Des informations sur les 118 risques sont disponibles sur </Trans>
-              <Link href={NCCNUrls[i18n.language as "en" | "nl" | "fr" | "de"]} target="_blank">
+              <Link href={`https://crisiscenter.be/${getCleanLanguage(i18n.language)}/risks-belgium`} target="_blank">
                 <Trans i18nKey="landingpage.infotext3">le site web du NCCN</Trans>
               </Link>
             </Typography>
