@@ -1,4 +1,14 @@
-import { Box, Container, Button, Stack, Typography, Link } from "@mui/material";
+import {
+  Box,
+  Container,
+  Button,
+  Stack,
+  Typography,
+  Link,
+  Unstable_TrapFocus as TrapFocus,
+  Fade,
+  Paper,
+} from "@mui/material";
 import {
   Timeline,
   TimelineItem,
@@ -8,13 +18,15 @@ import {
   TimelineDot,
   TimelineOppositeContent,
 } from "@mui/lab";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useOutletContext } from "react-router-dom";
 import { timelineOppositeContentClasses } from "@mui/lab/TimelineOppositeContent";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { Trans, useTranslation } from "react-i18next";
 import usePageTitle from "../../hooks/usePageTitle";
 import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
 import { CategoryIcon } from "../../functions/getCategoryColor";
+import { useState } from "react";
+import { BasePageContext } from "../BasePage";
 
 const getCleanLanguage = (language: string) => {
   if (language.indexOf("en") >= 0) return "en";
@@ -33,10 +45,16 @@ const onDownload = (filename: string) => {
 export default function LandingPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const [bannerOpen, setBannerOpen] = useState(true);
+  const { user } = useOutletContext<BasePageContext>();
 
   usePageTitle(t("homepage.bnraLong", "Belgian National Risk Assessment"));
 
   useBreadcrumbs(null);
+
+  const closeBanner = () => {
+    setBannerOpen(false);
+  };
 
   return (
     <>
@@ -497,6 +515,108 @@ export default function LandingPage() {
           </Box>
         </Container>
       </Box>
+
+      {user && user.roles.verified && (
+        <TrapFocus open disableAutoFocus disableEnforceFocus>
+          <Fade appear={false} in={bannerOpen}>
+            <Paper
+              role="dialog"
+              aria-modal="false"
+              aria-label="Cookie banner"
+              square
+              variant="outlined"
+              tabIndex={-1}
+              sx={{
+                position: "fixed",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                m: 0,
+                p: 2,
+                borderWidth: 0,
+                borderTopWidth: 1,
+              }}
+            >
+              <Stack direction={{ xs: "column", sm: "column" }} sx={{ justifyContent: "space-between", gap: 2 }}>
+                <Box sx={{ flexShrink: 1, alignSelf: { xs: "flex-start", sm: "center" } }}>
+                  <Typography variant="h6" paragraph>
+                    <Trans i18nKey="disclaimer.title">Disclaimer</Trans>
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="disclaimer.1">
+                      De methodologie en resultaten van de BNRA zijn het intellectuele eigendom van het NCCN. De BNRA
+                      als geheel wordt ondersteund door de geïnformeerde input van de experten die voor elk van de
+                      risico’s werden ingeschakeld. Noch CIPRA, noch het NCCN kan bijgevolg rechtstreeks
+                      verantwoordelijk gehouden voor de eindresultaten.
+                    </Trans>
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="disclaimer.2">
+                      Gebruikers van BNRA-gegevens moeten zich ervan bewust zijn dat de resultaten in principe slechts 3
+                      jaar geldig zijn, in overeenstemming met de regelgeving van de Europese Commissie. Bovendien
+                      moeten alle risico’s en resultaten in hun volledige context en met voldoende nuance
+                      geïnterpreteerd en gebruikt worden.
+                    </Trans>
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    <Trans i18nKey="disclaimer.3">
+                      Tot slot is het essentieel om erop te wijzen wat de BNRA niet doet:
+                    </Trans>
+                  </Typography>
+                  <ul>
+                    <li>
+                      <Typography variant="body1">
+                        <Trans i18nKey="disclaimer.4">
+                          Er wordt niet getracht toekomstige gebeurtenissen of zogenaamde <i>Black Swan Events</i> te
+                          voorspellen
+                        </Trans>
+                      </Typography>
+                    </li>
+                    <li>
+                      <Typography variant="body1">
+                        <Trans i18nKey="disclaimer.5">
+                          Er wordt geen absolute ranking gemaakt van risico’s (de cijfers moeten als grootteordes
+                          geïnterpreteerd worden en niet als exact vergelijkbaar)
+                        </Trans>
+                      </Typography>
+                    </li>
+                    <li>
+                      <Typography variant="body1">
+                        <Trans i18nKey="disclaimer.6">
+                          Er wordt volledige abstractie gemaakt van alle geospatiale element van risico’s (bv. we kijken
+                          niet specifiek naar de kernreactoren van Doel, maar naar een abstracte gemiddelde kernreactor
+                          in België)
+                        </Trans>
+                      </Typography>
+                    </li>
+                  </ul>
+                  <Typography variant="body1" paragraph color="error">
+                    <Trans i18nKey="disclaimer.7">
+                      Indien u een deel van de BNRA wilt delen met externe partners, wordt het ten zeerste op prijs
+                      gesteld indien CIPRA hiervan op de hoogte wordt gebracht en de BNRA als bron vermeld wordt.
+                    </Trans>
+                  </Typography>
+                </Box>
+                <Stack
+                  direction={{
+                    xs: "row-reverse",
+                    sm: "row",
+                  }}
+                  sx={{
+                    gap: 2,
+                    flexShrink: 0,
+                    alignSelf: "flex-end",
+                  }}
+                >
+                  <Button size="small" onClick={closeBanner} variant="contained">
+                    OK
+                  </Button>
+                </Stack>
+              </Stack>
+            </Paper>
+          </Fade>
+        </TrapFocus>
+      )}
 
       {/* <Box sx={{ mt: 8, pb: 4 }}>
             <Timeline
