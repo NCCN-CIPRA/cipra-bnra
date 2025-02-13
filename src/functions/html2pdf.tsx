@@ -119,8 +119,8 @@ const parseTag = (html: string): HTMLTag => {
   let closingTagIndex = currentHtml.indexOf("</");
 
   const tagNameEnd = Math.min(
-    currentHtml.indexOf(" "),
-    currentHtml.indexOf(">")
+    currentHtml.indexOf(" ") < 0 ? 1000000000 : currentHtml.indexOf(" "),
+    currentHtml.indexOf(">") < 0 ? 1000000000 : currentHtml.indexOf(">")
   );
   const tagName = currentHtml.slice(1, tagNameEnd);
 
@@ -173,6 +173,10 @@ const tag2PDF = (
 
   let styles = {} as any;
 
+  if (parent === null) {
+    styles = { ...styles, ...bodyStyle };
+  }
+
   if (typeof tag.content === "string") {
     if (tag.tagName === "strong") {
       if (tag.content.indexOf("margin of error") < 0) {
@@ -185,7 +189,7 @@ const tag2PDF = (
     }
 
     return (
-      <Text style={styles} debug={true}>
+      <Text style={styles} debug={false}>
         {fixText(tag.content as string)}
       </Text>
     );
@@ -202,10 +206,69 @@ const tag2PDF = (
       styles = { ...h5Style };
     }
 
+    if (section === "analysis") {
+      // Empty line (for spacing?)
+      if (
+        tag.content.some(
+          (s) =>
+            typeof s.content === "string" &&
+            s.content.indexOf("of total impact") >= 0
+        ) ||
+        (tag.content.length === 1 && tag.content[0].content === " ")
+      ) {
+        styles = { ...styles, marginTop: "-8pt", fontSize: "8pt" };
+      }
+
+      // Empty line (for spacing?)
+      if (
+        tag.content.some(
+          (s) =>
+            typeof s.content === "string" &&
+            s.content.indexOf("fall within the margin of error") >= 0
+        ) ||
+        (tag.content.length === 1 && tag.content[0].content === " ")
+      ) {
+        styles = {
+          ...styles,
+          ...h5Style,
+          fontSize: "8pt",
+          marginBottom: "0pt",
+        };
+      }
+
+      // Risk file title
+      if (
+        tag.content.length === 1 &&
+        tag.content[0].tagName === "strong" &&
+        tag.content[0].content.length === 2
+      ) {
+        styles = { ...styles, textDecoration: "underline" };
+      }
+    }
+
+    if (tag.content.length <= 0) {
+      return null;
+    }
+
     return (
       <Text style={styles} debug={false}>
         {tag.content.map((e) => tag2PDF(e, tag, section))}
       </Text>
+    );
+  }
+
+  if (tag.tagName === "ol") {
+    return (
+      <View style={{ marginLeft: "10pt" }}>
+        {tag.content.map((li, i) => (
+          <View style={{ flexDirection: "row" }} wrap={false}>
+            <Text style={{ ...bodyStyle, width: "0.5cm" }}>{i + 1}.</Text>
+            <Text style={{ ...bodyStyle, flex: 1 }} debug={false}>
+              {(li.content as HTMLTag[]).map((e) => tag2PDF(e, tag, section))}
+            </Text>
+          </View>
+        ))}
+      </View>
     );
   }
 
@@ -221,7 +284,7 @@ export default function html2PDF(
   if (html === null) return [null];
 
   const parsed = parseTag(`<div>${html}</div>`);
-
+  // console.log(html, parsed);
   // console.log(parsed, (parsed.content as HTMLTag[]).map(e => tag2PDF(e)).filter(e=>e!==null))
 
   return (parsed.content as HTMLTag[])

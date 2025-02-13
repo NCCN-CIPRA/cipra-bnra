@@ -1,6 +1,6 @@
 import { Image, Page, Text, View } from "@react-pdf/renderer";
 import Footer from "./Footer";
-import { BLACK } from "./styles";
+import { BLACK, PAGE_SIZE } from "./styles";
 import html2PDF, { h3Style, h4Style } from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
@@ -53,13 +53,13 @@ export default function SummarySection({
 
   return (
     <Page
-      size="B5"
+      size={PAGE_SIZE}
       style={{
         backgroundColor: "white",
         padding: "1.5cm",
         color: BLACK,
       }}
-      wrap={false}
+      // wrap={false}
     >
       <Footer />
       <View>

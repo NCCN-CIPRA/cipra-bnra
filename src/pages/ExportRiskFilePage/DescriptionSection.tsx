@@ -1,6 +1,6 @@
 import { Image, Page, Text, View } from "@react-pdf/renderer";
 import Footer from "./Footer";
-import { BLACK } from "./styles";
+import { BLACK, PAGE_SIZE } from "./styles";
 import html2PDF, {
   bodyStyle,
   boldStyle,
@@ -22,6 +22,7 @@ import {
   SCENARIOS,
   unwrap as unwrapScenarios,
 } from "../../functions/scenarios";
+import LeftBorderSection from "./LeftBorderSection";
 
 export default function DescriptionSection({
   riskFile,
@@ -64,9 +65,11 @@ export default function DescriptionSection({
 
   const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
 
+  const mrs_description = html2PDF(riskFile.cr4de_mrs_scenario, "description");
+
   return (
     <Page
-      size="B5"
+      size={PAGE_SIZE}
       style={{
         backgroundColor: "white",
         padding: "1.5cm",
@@ -99,32 +102,13 @@ export default function DescriptionSection({
         <Text style={h5Style}>
           <Trans i18nKey="riskFile.definition.title">Definition</Trans>
         </Text>
-        <View
-          style={{
-            flexDirection: "row",
-            marginTop: "5pt",
-            marginBottom: "0.5cm",
-          }}
+        <LeftBorderSection
+          color="#eee"
+          style={{ paddingTop: "5pt", marginBottom: "10pt" }}
         >
-          <View
-            style={{
-              width: "5pt",
-              marginRight: "5pt",
-              height: "100%",
-              backgroundColor: "#eee",
-            }}
-          />
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "column",
-              marginTop: "5pt",
-              marginBottom: "0cm",
-            }}
-          >
-            {html2PDF(riskFile.cr4de_definition, "description")}
-          </View>
-        </View>
+          {html2PDF(riskFile.cr4de_definition, "description")}
+          <View style={{ marginTop: "-5pt", width: "100%", height: "1pt" }} />
+        </LeftBorderSection>
       </View>
 
       <View
@@ -142,105 +126,81 @@ export default function DescriptionSection({
 
         {events.map((e, i) => {
           return (
-            <View
-              key={e.id}
-              style={{
-                flexDirection: "row",
-                marginTop: "5pt",
-                marginBottom: "0.5cm",
-              }}
-            >
-              <View
-                style={{
-                  width: "5pt",
-                  marginRight: "5pt",
-                  height: "100%",
-                  backgroundColor: colorList[i],
-                }}
-              />
-              <View
-                style={{
-                  flexDirection: "column",
-                  marginTop: "5pt",
-                  marginBottom: "0pt",
-                  width: "3cm",
-                  flexShrink: 0,
-                  borderRadius: 2,
-                  rowGap: 1,
-                }}
-              >
-                <Text style={{ ...bodyStyle, ...boldStyle, fontSize: "8pt" }}>
-                  {e.time}
-                </Text>
-                <Text style={{ ...bodyStyle, ...boldStyle, fontSize: "8pt" }}>
-                  {e.location}
-                </Text>
-              </View>
+            <LeftBorderSection key={e.id} color={colorList[i]} wrap={false}>
+              <View style={{ flexDirection: "row" }}>
+                <View
+                  style={{
+                    flexDirection: "column",
+                    marginTop: "5pt",
+                    marginBottom: "0pt",
+                    width: "3cm",
+                    flexShrink: 0,
+                    borderRadius: 2,
+                    rowGap: 1,
+                  }}
+                >
+                  <Text style={{ ...bodyStyle, ...boldStyle, fontSize: "8pt" }}>
+                    {e.time}
+                  </Text>
+                  <Text style={{ ...bodyStyle, ...boldStyle, fontSize: "8pt" }}>
+                    {e.location}
+                  </Text>
+                </View>
 
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: "column",
-                  marginTop: "5pt",
-                  marginLeft: "5pt",
-                  ...bodyStyle,
-                }}
-              >
-                {html2PDF(e.description, "description")}
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: "column",
+                    marginTop: "5pt",
+                    marginLeft: "5pt",
+                    ...bodyStyle,
+                    marginBottom: "0pt",
+                  }}
+                >
+                  {html2PDF(e.description, "description")}
+                </View>
               </View>
-            </View>
+            </LeftBorderSection>
           );
         })}
       </View>
 
       <View
-        style={
-          {
-            // backgroundColor: "green"
-          }
-        }
+        style={{
+          marginTop: "10pt",
+        }}
       >
-        <Text style={h5Style}>
+        <Text style={h5Style} wrap={false}>
           <Trans i18nKey="hazardCatalogue.mrs">Most Relevant Scenario</Trans>
         </Text>
-        <View
-          style={{
-            flexDirection: "row",
-            marginTop: "5pt",
-            marginBottom: "0.5cm",
-          }}
-        >
+
+        <LeftBorderSection color={SCENARIO_PARAMS[scenario].color}>
           <View
             style={{
-              width: "5pt",
-              marginRight: "5pt",
-              height: "100%",
-              backgroundColor: SCENARIO_PARAMS[scenario].color,
-            }}
-          />
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "column",
+              flexDirection: "row",
               marginTop: "5pt",
-              marginBottom: "0cm",
+              marginBottom: "0.5cm",
             }}
+            wrap={false}
           >
-            {html2PDF(riskFile.cr4de_mrs_scenario, "description")}
+            <View style={{ flex: 1 }}>{mrs_description[0]}</View>
+            <View style={{ width: "4cm", height: "3.6cm" }}>
+              {scenarioChart && (
+                <Image
+                  src={scenarioChart}
+                  style={{
+                    marginTop: 0,
+                    // marginLeft: "0.25cm",
+                    width: "4cm",
+                    height: "3.6cm",
+                  }}
+                  // debug={true}
+                />
+              )}
+            </View>
           </View>
-          {scenarioChart && (
-            <Image
-              src={scenarioChart}
-              style={{
-                marginTop: "0.25cm",
-                // marginLeft: "0.25cm",
-                width: "4cm",
-                height: "3.6cm",
-              }}
-              // debug={true}
-            />
-          )}
-        </View>
+          {mrs_description.slice(1)}
+        </LeftBorderSection>
       </View>
 
       {/* <View

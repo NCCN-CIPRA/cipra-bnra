@@ -93,6 +93,8 @@ import DescriptionSection from "./DescriptionSection";
 import AnalysisSection from "./AnalysisSection";
 import EvolutionSection from "./EvolutionSection";
 import ScenarioMatrix from "../../components/charts/ScenarioMatrix";
+import BibliographySection from "./BibliographySection";
+import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
 
 // Font.register({
 //   family: "Arial",
@@ -191,6 +193,24 @@ export default function ExportRiskFilePage({}) {
     }
   );
 
+  const { data: attachments } = useRecords<DVAttachment<unknown, DVAttachment>>(
+    {
+      table: DataTable.ATTACHMENT,
+      query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_referencedSource`,
+      transformResult: (results: DVAttachment<unknown, DVAttachment>[]) =>
+        results.map((a) =>
+          a.cr4de_referencedSource
+            ? {
+                ...a.cr4de_referencedSource,
+                cr4de_bnraattachmentid: a.cr4de_bnraattachmentid,
+                cr4de_field: a.cr4de_field,
+                cr4de_referencedSource: a.cr4de_referencedSource,
+              }
+            : a
+        ),
+    }
+  );
+
   const cascades = useMemo(() => {
     if (!riskFile || !hazardCatalogue || !rawCascades) return null;
 
@@ -218,7 +238,7 @@ export default function ExportRiskFilePage({}) {
     };
   }, [hazardCatalogue, riskFile, rawCascades]);
 
-  if (!riskFile) return null;
+  if (!riskFile || !cascades || attachments == null) return null;
 
   const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
 
@@ -310,13 +330,33 @@ export default function ExportRiskFilePage({}) {
       <div id="scenarioChart" style={{ position: "absolute", top: -100000 }}>
         <ScenarioMatrix riskFile={riskFile} mrs={scenario} />
       </div>
+      <div id="climateChart" style={{ position: "absolute", top: -100000 }}>
+        <ClimateChangeChart
+          riskFile={riskFile}
+          causes={cascades.causes}
+          scenario={scenario}
+          width={1000}
+          height={600}
+          fontSize="20pt"
+          xLabelDy={50}
+        />
+      </div>
       <PDFViewer
         style={{ overflow: "hidden", height: "100%", width: "100%" }}
         height="100%"
         width="100%"
       >
         <Document>
-          <ExportRiskFile riskFile={riskFile} tp={tp} H={H} S={S} E={E} F={F} />
+          <ExportRiskFile
+            riskFile={riskFile}
+            cascades={cascades}
+            attachments={attachments}
+            tp={tp}
+            H={H}
+            S={S}
+            E={E}
+            F={F}
+          />
         </Document>
       </PDFViewer>
     </Box>
@@ -325,6 +365,8 @@ export default function ExportRiskFilePage({}) {
 
 export function ExportRiskFile({
   riskFile,
+  cascades,
+  attachments,
   tp,
   H,
   S,
@@ -335,6 +377,8 @@ export function ExportRiskFile({
 // attachments,
 {
   riskFile: DVRiskFile;
+  cascades: Cascades;
+  attachments: DVAttachment[];
   tp: number;
   H: number;
   S: number;
@@ -351,38 +395,8 @@ export function ExportRiskFile({
       <SummarySection riskFile={riskFile} tp={tp} H={H} S={S} E={E} F={F} />
       <DescriptionSection riskFile={riskFile} />
       <AnalysisSection riskFile={riskFile} />
-      {/* <EvolutionSection riskFile={riskFile} /> */}
-
-      {/* <Page
-        size="B5"
-        style={{
-          backgroundColor: "white",
-          padding: "1.5cm",
-          color: BLACK,
-        }}
-      >
-        <Header riskFile={riskFile} />
-        <Footer />
-        <View
-          style={
-            {
-              // backgroundColor: "green"
-            }
-          }
-        >
-          <Text
-            style={{
-              marginTop: "15pt",
-              fontFamily: "NH",
-              fontWeight: 700,
-              color: NCCN_GREEN,
-              fontSize: "16pt",
-            }}
-          >
-            <Trans i18nKey="Bibliography">Bibliography</Trans>
-          </Text>
-        </View>
-      </Page> */}
+      <EvolutionSection riskFile={riskFile} cascades={cascades} />
+      <BibliographySection riskFile={riskFile} allAttachments={attachments} />
     </>
   );
 }

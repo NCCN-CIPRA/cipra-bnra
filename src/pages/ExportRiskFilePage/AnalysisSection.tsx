@@ -1,6 +1,6 @@
 import { Image, Page, Text, View } from "@react-pdf/renderer";
 import Footer from "./Footer";
-import { BLACK } from "./styles";
+import { BLACK, PAGE_SIZE } from "./styles";
 import html2PDF, {
   h3Style,
   h4Style,
@@ -14,6 +14,10 @@ import svg2PDF from "../../functions/svg2PDF";
 import getScaleString from "../../functions/getScaleString";
 import getImpactColor from "../../functions/getImpactColor";
 import Header from "./Header";
+import LeftBorderSection from "./LeftBorderSection";
+import { getScenarioSuffix, SCENARIOS } from "../../functions/scenarios";
+
+const bottomDebug = true;
 
 export default function AnalysisSection({
   riskFile,
@@ -44,11 +48,13 @@ export default function AnalysisSection({
 
   return (
     <Page
-      size="B5"
+      size={PAGE_SIZE}
       style={{
         backgroundColor: "white",
         padding: "1.5cm",
         color: BLACK,
+        position: "relative",
+        minHeight: "10cm",
       }}
     >
       <Header riskFile={riskFile} />
@@ -135,21 +141,12 @@ export default function AnalysisSection({
         }
       >
         <Text style={h5Style}>{t("Probability Assessment")}</Text>
-        <View style={{ flexDirection: "row", marginTop: "10pt" }}>
-          <View
-            style={{
-              width: "5pt",
-              marginRight: "5pt",
-              height: "100%",
-              backgroundColor: "#eee",
-            }}
-          />
-          <View
-            style={{ flex: 1, flexDirection: "column", marginBottom: "5pt" }}
-          >
-            {html2PDF(riskFile.cr4de_mrs_probability, "analysis")}
-          </View>
-        </View>
+        <LeftBorderSection
+          color="#eee"
+          style={{ paddingTop: "5pt", marginBottom: "10pt" }}
+        >
+          {html2PDF(riskFile.cr4de_mrs_probability, "analysis")}
+        </LeftBorderSection>
       </View>
 
       <View
@@ -160,83 +157,83 @@ export default function AnalysisSection({
         }
       >
         <Text style={h5Style}>{t("Impact Assessment")}</Text>
-        <View style={{ flexDirection: "row", marginTop: "10pt" }}>
-          <View
+        <LeftBorderSection color={getImpactColor("H")}>
+          <Text
             style={{
-              width: "5pt",
-              marginRight: "5pt",
-              height: "100%",
-              backgroundColor: getImpactColor("H"),
+              ...h5Style,
+              color: getImpactColor("H"),
+              marginTop: "0pt",
+              marginBottom: "5pt",
             }}
-          />
-          <View
-            style={{ flex: 1, flexDirection: "column", marginBottom: "5pt" }}
           >
-            <Text
-              style={{
-                marginTop: "5pt",
-                fontFamily: "NH",
-                fontWeight: 300,
-                color: BLACK,
-                fontSize: "12pt",
-              }}
-            >
-              {t("learning.impact.h.title")}
-            </Text>
-            {html2PDF(riskFile.cr4de_mrs_impact_h, "analysis")}
-          </View>
-        </View>
+            {t("learning.impact.h.title")}
+          </Text>
+          {html2PDF(riskFile.cr4de_mrs_impact_h, "analysis")}
+        </LeftBorderSection>
 
-        <View style={{ flexDirection: "row", marginTop: "10pt" }}>
-          <View
+        <LeftBorderSection color={getImpactColor("S")}>
+          <Text
             style={{
-              width: "5pt",
-              marginRight: "5pt",
-              height: "100%",
-              backgroundColor: getImpactColor("S"),
+              ...h5Style,
+              color: getImpactColor("S"),
+              marginTop: "0pt",
+              marginBottom: "5pt",
             }}
-          />
-          <View
-            style={{ flex: 1, flexDirection: "column", marginBottom: "5pt" }}
           >
-            <Text style={h6Style}>{t("learning.impact.s.title")}</Text>
-            {html2PDF(riskFile.cr4de_mrs_impact_s, "analysis")}
-          </View>
-        </View>
+            {t("learning.impact.s.title")}
+          </Text>
+          {html2PDF(riskFile.cr4de_mrs_impact_s, "analysis")}
+        </LeftBorderSection>
 
-        <View style={{ flexDirection: "row", marginTop: "10pt" }}>
-          <View
+        <LeftBorderSection color={getImpactColor("E")}>
+          <Text
             style={{
-              width: "5pt",
-              marginRight: "5pt",
-              height: "100%",
-              backgroundColor: getImpactColor("E"),
+              ...h5Style,
+              color: getImpactColor("E"),
+              marginTop: "0pt",
+              marginBottom: "5pt",
             }}
-          />
-          <View
-            style={{ flex: 1, flexDirection: "column", marginBottom: "5pt" }}
           >
-            <Text style={h6Style}>{t("learning.impact.e.title")}</Text>
-            {html2PDF(riskFile.cr4de_mrs_impact_e, "analysis")}
-          </View>
-        </View>
+            {t("learning.impact.e.title")}
+          </Text>
+          {html2PDF(riskFile.cr4de_mrs_impact_e, "analysis")}
+        </LeftBorderSection>
 
-        <View style={{ flexDirection: "row", marginTop: "10pt" }}>
-          <View
+        <LeftBorderSection color={getImpactColor("F")}>
+          <Text
             style={{
-              width: "5pt",
-              marginRight: "5pt",
-              height: "100%",
-              backgroundColor: getImpactColor("F"),
+              ...h5Style,
+              color: getImpactColor("F"),
+              marginTop: "0pt",
+              marginBottom: "5pt",
             }}
-          />
-          <View
-            style={{ flex: 1, flexDirection: "column", marginBottom: "5pt" }}
           >
-            <Text style={h6Style}>{t("learning.impact.f.title")}</Text>
-            {html2PDF(riskFile.cr4de_mrs_impact_f, "analysis")}
-          </View>
-        </View>
+            {t("learning.impact.f.title")}
+          </Text>
+          {html2PDF(riskFile.cr4de_mrs_impact_f, "analysis")}
+        </LeftBorderSection>
+
+        <LeftBorderSection color="#eee" style={{ marginBottom: "-5pt" }}>
+          <Text
+            style={{
+              ...h5Style,
+              color: BLACK,
+              marginTop: "0pt",
+              marginBottom: "5pt",
+            }}
+          >
+            {t("Cross-border Impact")}
+          </Text>
+          {html2PDF(
+            riskFile[
+              `cr4de_cross_border_impact_quali${getScenarioSuffix(
+                riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE
+              )}`
+            ],
+            "analysis"
+          )}
+          <View style={{ marginTop: "-5pt", width: "100%", height: "1pt" }} />
+        </LeftBorderSection>
       </View>
     </Page>
   );
