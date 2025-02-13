@@ -50,7 +50,7 @@ export default function RiskEvolutionPage({}) {
         />
 
         <Box className="climate-change" sx={{ mt: 2 }}>
-          <Typography variant="h5">Climate Change</Typography>
+          <Typography variant="h5">{t("Climate Change", "Climate Change")}</Typography>
 
           <CCSection
             cc={climateChange}
@@ -69,7 +69,7 @@ export default function RiskEvolutionPage({}) {
 
         {catalyzingEffects.length > 0 && (
           <Box className="catalyzing-effects" sx={{ mt: 8 }}>
-            <Typography variant="h5">Other Catalysing Effects</Typography>
+            <Typography variant="h5">{t("Other Catalysing Effects", "Other Catalysing Effects")}</Typography>
 
             <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, backgroundColor: "white" }}>
               <Box sx={{ px: 2, pt: 2 }}>

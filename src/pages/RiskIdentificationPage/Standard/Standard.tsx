@@ -1,7 +1,7 @@
 import { Box, IconButton, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { Cascades } from "../../BaseRisksPage";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import DefinitionSection from "../DefinitionSection";
@@ -89,7 +89,7 @@ export default function Standard({
       </Box>
 
       <Box id="mrs" sx={{ mt: 8 }}>
-        <Typography variant="h5">Most Relevant Scenario</Typography>
+        <Typography variant="h5"><Trans i18nKey="hazardCatalogue.mrs">Most Relevant Scenario</Trans></Typography>
 
         <ScenarioMatrix riskFile={riskFile} mrs={riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE} />
 

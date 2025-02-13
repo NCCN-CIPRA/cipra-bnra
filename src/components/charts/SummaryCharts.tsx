@@ -47,7 +47,8 @@ const needle = (
   iR: number,
   oR: number,
   color: string,
-  padding: number
+  padding: number,
+  needleWidth: number = 3
 ) => {
   let total = 0;
   data.forEach((v) => {
@@ -70,7 +71,7 @@ const needle = (
   return (
     <>
       <circle cx={x0} cy={y0} r={r} fill={color} stroke="none" />,
-      <path d={`M${x0} ${y0} L${xp} ${yp} L${x0} ${y0}`} stroke={color} strokeWidth={3} fill={color} />,
+      <path d={`M${x0} ${y0} L${xp} ${yp} L${x0} ${y0}`} stroke={color} strokeWidth={needleWidth} fill={color} />,
     </>
   );
 };
@@ -80,11 +81,13 @@ export const SvgChart = ({
   height = pieHeight,
   category,
   value,
+  needleWidth = 3
 }: {
   category: IMPACT_CATEGORY;
   value: number;
   width?: number;
   height?: number;
+  needleWidth?: number;
 }) => {
   const piePadding = width / 40;
   const cx = width / 2 - piePadding;
@@ -108,10 +111,10 @@ export const SvgChart = ({
         paddingAngle={1}
       >
         {getBars(category).map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={entry.color} />
+          <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
         ))}
       </Pie>
-      {needle(value, data, cx, cy, iR, oR, "#555", piePadding)}
+      {needle(value, data, cx, cy, iR, oR, "#555", piePadding, needleWidth)}
     </PieChart>
   );
 };

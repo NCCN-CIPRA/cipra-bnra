@@ -3,7 +3,7 @@ import { Bar, BarChart, YAxis } from "recharts";
 import getScaleString from "../../functions/getScaleString";
 import { useTranslation } from "react-i18next";
 
-const arrow = (value: number, cy: number, arrowWidth: number, graphWidth: number, color: string) => {
+export const arrow = (value: number, cy: number, arrowWidth: number, graphWidth: number, color: string) => {
   const ratio = graphWidth - 20;
   const x0 = 10 + ratio * value * 0.2;
   const y0 = cy + arrowWidth;
@@ -44,16 +44,34 @@ export default function ProbabilityBars({
           ? t("learning.motivation.text.title", "Motivation")
           : t("learning.probability.2.text.title", "Probability")}
       </Typography>
-      <BarChart width={chartWidth} height={100} data={getProbabilityBars(tp)} style={{}}>
-        {/* <CartesianGrid strokeDasharray="3 3" /> */}
-        <YAxis domain={[0, 5]} hide />
-        <Bar dataKey="uv" fill="#000000b0" stackId="a" />
-        <Bar dataKey="pv" fill="#00000040" stackId="a" />
-        {arrow(tp, 100, 10, chartWidth, "#000000b0")}
-      </BarChart>
+      <ProbabilityBarsChart tp={tp} chartWidth={chartWidth} manmade={manmade} />
       <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
         {t(getScaleString(tp))}
       </Typography>
     </Box>
+  );
+}
+
+export function ProbabilityBarsChart({
+  tp,
+  chartWidth,
+  manmade = false,
+  height = 100
+}: {
+  tp: number;
+  chartWidth: number;
+  manmade?: boolean;
+  height?: number;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <BarChart width={chartWidth} height={height} data={getProbabilityBars(tp)} style={{}}>
+        {/* <CartesianGrid strokeDasharray="3 3" /> */}
+        <YAxis domain={[0, 5]} hide />
+        <Bar dataKey="uv" fill="#000000b0" stackId="a" />
+        <Bar dataKey="pv" fill="#00000040" stackId="a" />
+        {arrow(tp, height, 10, chartWidth, "#000000b0")}
+      </BarChart>
   );
 }

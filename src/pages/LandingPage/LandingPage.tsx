@@ -27,6 +27,7 @@ import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
 import { CategoryIcon } from "../../functions/getCategoryColor";
 import { useState } from "react";
 import { BasePageContext } from "../BasePage";
+import { getLanguage } from "../../functions/translations";
 
 const getCleanLanguage = (language: string) => {
   if (language.indexOf("en") >= 0) return "en";
@@ -136,7 +137,7 @@ export default function LandingPage() {
             </Trans>
           </Typography>
           <Box sx={{ my: 8, height: 0, pb: "56.25%", position: "relative" }}>
-            {i18n.language === "nl" && (
+            {getLanguage(i18n.language) === "nl" && (
               <iframe
                 style={{
                   position: "absolute",
@@ -152,7 +153,7 @@ export default function LandingPage() {
                 allowFullScreen
               ></iframe>
             )}
-            {(i18n.language === "en" || i18n.language === "de") && (
+            {(getLanguage(i18n.language) === "en" || getLanguage(i18n.language) === "de") && (
               <iframe
                 style={{
                   position: "absolute",
@@ -168,7 +169,7 @@ export default function LandingPage() {
                 allowFullScreen
               ></iframe>
             )}
-            {i18n.language === "fr" && (
+            {getLanguage(i18n.language) === "fr" && (
               <iframe
                 style={{
                   position: "absolute",

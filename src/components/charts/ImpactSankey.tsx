@@ -3,7 +3,12 @@ import { Box, Typography, Tooltip } from "@mui/material";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { useNavigate } from "react-router-dom";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { SCENARIOS, getCascadeParameter, getScenarioParameter, getScenarioSuffix } from "../../functions/scenarios";
+import {
+  SCENARIOS,
+  getCascadeParameter,
+  getScenarioParameter,
+  getScenarioSuffix,
+} from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
 import { Cascades } from "../../pages/BaseRisksPage";
 import { useTranslation } from "react-i18next";
@@ -22,6 +27,7 @@ const ISankeyNode = ({
   totalNodes,
   showComponents,
   scenarioSuffix,
+  fontSize,
   onClick,
 }: any) => {
   const { t } = useTranslation();
@@ -43,7 +49,7 @@ const ISankeyNode = ({
           textAnchor="middle"
           x={-y - height / 2 - 18}
           y={x + 30}
-          fontSize="16"
+          fontSize={fontSize || "16"}
           stroke="#333"
           transform="rotate(270)"
         >
@@ -188,7 +194,7 @@ const ISankeyNode = ({
             textAnchor="end"
             x={x - 6}
             y={y + height / 2 + 4}
-            fontSize="14"
+            fontSize={fontSize - 2 || "14"}
             stroke="#333"
             cursor="pointer"
             onClick={() => {
@@ -222,7 +228,10 @@ const ISankeyLink = (props: any) => {
     totalNodes,
   } = props;
 
-  const shiftedSourceY = totalNodes <= 2 ? targetY : sourceRelativeY + sourceY + (baseY - (sourceY - linkWidth / 2));
+  const shiftedSourceY =
+    totalNodes <= 2
+      ? targetY
+      : sourceRelativeY + sourceY + (baseY - (sourceY - linkWidth / 2));
 
   return (
     <path
@@ -230,7 +239,7 @@ const ISankeyLink = (props: any) => {
         M${sourceX},${shiftedSourceY}
         C${sourceControlX},${shiftedSourceY} ${targetControlX},${targetY} ${targetX},${targetY}
       `}
-      stroke="rgb(0, 164, 154, 0.6)"
+      stroke="rgb(102,200,194)"
       fill="none"
       strokeWidth={totalNodes <= 2 ? 600 - 2 * baseY : linkWidth}
       strokeOpacity="0.2"
@@ -258,6 +267,50 @@ export default function ImpactSankey({
   debug?: boolean;
   onClick?: ((id: string) => void) | null;
 }) {
+  return (
+    <>
+      <Box sx={{ width: "100%", height: 30, mb: 2, textAlign: "right" }}>
+        {/* <Typography variant="h6">
+          {riskFile?.cr4de_risk_type === RISK_TYPE.MANMADE ? "Most Impactful Actions" : "Impact Breakdown"}
+        </Typography> */}
+      </Box>
+      <SvgChart
+        riskFile={riskFile}
+        cascades={cascades}
+        maxEffects={maxEffects}
+        shownEffectPortion={shownEffectPortion}
+        minEffectPortion={minEffectPortion}
+        scenario={scenario}
+        onClick={onClick}
+        debug={debug}
+      />
+    </>
+  );
+}
+
+export const SvgChart = ({
+  riskFile = null,
+  cascades = null,
+  maxEffects = null,
+  minEffectPortion = null,
+  shownEffectPortion = null,
+  scenario,
+  debug = false,
+  width = "100%",
+  height = "100%",
+  onClick = null,
+}: {
+  riskFile?: DVRiskFile | null;
+  cascades?: Cascades | null;
+  maxEffects?: number | null;
+  minEffectPortion?: number | null;
+  shownEffectPortion?: number | null;
+  scenario: SCENARIOS;
+  debug?: boolean;
+  width?: number | string;
+  height?: number | string;
+  onClick?: ((id: string) => void) | null;
+}) => {
   const { t } = useTranslation();
   if (!riskFile || !cascades) return null;
 
@@ -270,7 +323,10 @@ export default function ImpactSankey({
     },
     ...cascades.effects.map((e) => ({
       id: e.cr4de_effect_hazard.cr4de_riskfilesid,
-      name: t(`risk.${e.cr4de_effect_hazard.cr4de_hazard_id}.name`, e.cr4de_effect_hazard.cr4de_title),
+      name: t(
+        `risk.${e.cr4de_effect_hazard.cr4de_hazard_id}.name`,
+        e.cr4de_effect_hazard.cr4de_title
+      ),
       i: getCascadeParameter(e, scenario, "II") || 0,
       cascade: e,
     })),
@@ -283,7 +339,9 @@ export default function ImpactSankey({
     minI =
       maxEffects === null || effects.length < maxEffects
         ? -1
-        : effects.sort((a, b) => b.i - a.i)[Math.min(maxEffects - 1, effects.length - 1)].i;
+        : effects.sort((a, b) => b.i - a.i)[
+            Math.min(maxEffects - 1, effects.length - 1)
+          ].i;
   } else if (minEffectPortion !== null) {
     const Itot = effects.reduce((tot, e) => tot + e.i, 0.000000001);
     minI = minEffectPortion * Itot;
@@ -322,7 +380,9 @@ export default function ImpactSankey({
     links.push({
       source: 0,
       target: nodes.length - 1,
-      value: effects.filter((e: any, i: number) => e.i < minI).reduce((tot, e) => tot + e.i, 0.000000001),
+      value: effects
+        .filter((e: any, i: number) => e.i < minI)
+        .reduce((tot, e) => tot + e.i, 0.000000001),
       hidden: effects.filter((e: any, i: number) => e.i < minI),
     });
 
@@ -331,13 +391,8 @@ export default function ImpactSankey({
     links,
   };
 
-  return (
-    <>
-      <Box sx={{ width: "100%", height: 30, mb: 2, textAlign: "right" }}>
-        {/* <Typography variant="h6">
-          {riskFile?.cr4de_risk_type === RISK_TYPE.MANMADE ? "Most Impactful Actions" : "Impact Breakdown"}
-        </Typography> */}
-      </Box>
+  if (typeof width === "string" || typeof height === "string") {
+    return (
       <ResponsiveContainer width="100%" height="100%">
         <Sankey
           data={data}
@@ -351,10 +406,33 @@ export default function ImpactSankey({
             />
           }
           link={<ISankeyLink totalNodes={data.nodes.length} />}
-          nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
+          nodePadding={
+            data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0
+          }
           iterations={0}
         ></Sankey>
       </ResponsiveContainer>
-    </>
+    );
+  }
+
+  return (
+    <Sankey
+      width={width as number}
+      height={height as number}
+      data={data}
+      node={
+        <ISankeyNode
+          onClick={onClick}
+          totalImpact={getScenarioParameter(riskFile, "TI", scenario) || 0}
+          totalNodes={data.nodes.length}
+          showComponents={debug}
+          scenarioSuffix={scenarioSuffix}
+          fontSize={22}
+        />
+      }
+      link={<ISankeyLink totalNodes={data.nodes.length} />}
+      nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
+      iterations={0}
+    ></Sankey>
   );
-}
+};

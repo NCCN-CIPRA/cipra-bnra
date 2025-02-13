@@ -3,7 +3,12 @@ import { Box, Typography, Tooltip } from "@mui/material";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { useNavigate } from "react-router-dom";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { SCENARIOS, getCascadeParameter, getScenarioParameter, getScenarioSuffix } from "../../functions/scenarios";
+import {
+  SCENARIOS,
+  getCascadeParameter,
+  getScenarioParameter,
+  getScenarioSuffix,
+} from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
 import { Cascades } from "../../pages/BaseRisksPage";
 import { useTranslation } from "react-i18next";
@@ -22,6 +27,7 @@ const PSankeyNode = ({
   totalNodes,
   scenario,
   showComponents,
+  fontSize,
   onClick,
 }: any) => {
   const { t } = useTranslation();
@@ -29,7 +35,11 @@ const PSankeyNode = ({
 
   if (payload.depth > 0) {
     return (
-      <Layer className="total-probability" key={`CustomNode${index}`} height="50px">
+      <Layer
+        className="total-probability"
+        key={`CustomNode${index}`}
+        height="50px"
+      >
         <Rectangle
           x={x}
           y={baseY}
@@ -42,7 +52,7 @@ const PSankeyNode = ({
           textAnchor="middle"
           x={-y - height / 2 - 18}
           y={x - 15}
-          fontSize="16"
+          fontSize={fontSize || "16"}
           stroke="#333"
           transform="rotate(270)"
         >
@@ -81,7 +91,10 @@ const PSankeyNode = ({
 
                   <Typography variant="body1" sx={{ mt: 1 }}>
                     {t("analysis.cause.explained", {
-                      percentage: round((100 * payload.p) / totalProbability, 2),
+                      percentage: round(
+                        (100 * payload.p) / totalProbability,
+                        2
+                      ),
                     })}
                   </Typography>
 
@@ -163,7 +176,10 @@ const PSankeyNode = ({
                     <b>{t("2A.dp.title", "Direct Probability")}</b>
                     {": "}
                     {t("analysis.dp.explained", {
-                      percentage: round((100 * payload.p) / totalProbability, 2),
+                      percentage: round(
+                        (100 * payload.p) / totalProbability,
+                        2
+                      ),
                     })}
                   </Typography>
                 </>
@@ -175,7 +191,7 @@ const PSankeyNode = ({
             textAnchor="start"
             x={x + 15}
             y={y + height / 2}
-            fontSize="14"
+            fontSize={fontSize - 2 || "14"}
             stroke="#333"
             cursor="pointer"
             onClick={() => {
@@ -209,7 +225,10 @@ const PSankeyLink = (props: any) => {
     totalNodes,
   } = props;
 
-  const shiftedTargetY = totalNodes <= 2 ? sourceY : targetRelativeY + targetY + (baseY - (targetY - linkWidth / 2));
+  const shiftedTargetY =
+    totalNodes <= 2
+      ? sourceY
+      : targetRelativeY + targetY + (baseY - (targetY - linkWidth / 2));
 
   return (
     <path
@@ -217,7 +236,7 @@ const PSankeyLink = (props: any) => {
         M${sourceX},${sourceY}
         C${sourceControlX},${sourceY} ${targetControlX},${shiftedTargetY} ${targetX},${shiftedTargetY}
       `}
-      stroke="rgb(0, 164, 154, 0.6)"
+      stroke="rgb(102,200,194)"
       fill="none"
       strokeWidth={totalNodes <= 2 ? 600 - 2 * baseY : linkWidth}
       strokeOpacity="0.2"
@@ -247,21 +266,72 @@ export default function ProbabilitySankey({
   manmade?: boolean;
   onClick?: ((id: string) => void) | null;
 }) {
+  return (
+    <>
+      <Box sx={{ width: "100%", height: 30, mb: 2 }}>
+        {/* <Typography variant="h6">Probability Breakdown</Typography> */}
+      </Box>
+      <SvgChart
+        riskFile={riskFile}
+        cascades={cascades}
+        maxCauses={maxCauses}
+        shownCausePortion={shownCausePortion}
+        minCausePortion={minCausePortion}
+        scenario={scenario}
+        onClick={onClick}
+        debug={debug}
+        manmade={manmade}
+      />
+    </>
+  );
+}
+
+export const SvgChart = ({
+  riskFile = null,
+  cascades = null,
+  maxCauses = null,
+  minCausePortion = null,
+  shownCausePortion = null,
+  scenario,
+  debug = false,
+  manmade = false,
+  width = "100%",
+  height = "100%",
+  onClick = null,
+}: {
+  riskFile?: DVRiskFile | null;
+  cascades?: Cascades | null;
+  maxCauses?: number | null;
+  minCausePortion?: number | null;
+  shownCausePortion?: number | null;
+  scenario: SCENARIOS;
+  debug?: boolean;
+  manmade?: boolean;
+  width?: number | string;
+  height?: number | string;
+  onClick?: ((id: string) => void) | null;
+}) => {
   const { t } = useTranslation();
+
   if (!riskFile || !cascades) return null;
 
   const scenarioSuffix: string = getScenarioSuffix(scenario);
 
   const causes = [
     {
-      name: manmade ? t("learning.motivation.text.title", "Motivation") : t("2A.dp.title", "Direct Probability"),
+      name: manmade
+        ? t("learning.motivation.text.title", "Motivation")
+        : t("2A.dp.title", "Direct Probability"),
       p: getScenarioParameter(riskFile, "DP", scenario) || 0,
     },
     ...(manmade
       ? []
       : cascades.causes.map((c) => ({
           id: c.cr4de_cause_hazard.cr4de_riskfilesid,
-          name: t(`risk.${c.cr4de_cause_hazard.cr4de_hazard_id}.name`, c.cr4de_cause_hazard.cr4de_title),
+          name: t(
+            `risk.${c.cr4de_cause_hazard.cr4de_hazard_id}.name`,
+            c.cr4de_cause_hazard.cr4de_title
+          ),
           p: getCascadeParameter(c, scenario, "IP") || 0,
           cascade: c,
         }))),
@@ -275,7 +345,9 @@ export default function ProbabilitySankey({
     minP =
       maxCauses === null || causes.length <= maxCauses
         ? -1
-        : causes.sort((a, b) => b.p - a.p)[Math.min(maxCauses - 1, causes.length - 1)].p;
+        : causes.sort((a, b) => b.p - a.p)[
+            Math.min(maxCauses - 1, causes.length - 1)
+          ].p;
   } else if (minCausePortion !== null) {
     const Ptot = causes.reduce((tot, c) => tot + c.p, 0.000000001);
     minP = minCausePortion * Ptot;
@@ -317,7 +389,9 @@ export default function ProbabilitySankey({
     links.push({
       source: nodes.length - 1,
       target: 0,
-      value: causes.filter((e: any, i: number) => e.p < minP).reduce((tot, e) => tot + e.p, 0.000000001),
+      value: causes
+        .filter((e: any, i: number) => e.p < minP)
+        .reduce((tot, e) => tot + e.p, 0.000000001),
       hidden: causes.filter((e: any, i: number) => e.p < minP),
     });
 
@@ -326,12 +400,9 @@ export default function ProbabilitySankey({
     links,
   };
 
-  return (
-    <>
-      <Box sx={{ width: "100%", height: 30, mb: 2 }}>
-        {/* <Typography variant="h6">Probability Breakdown</Typography> */}
-      </Box>
-      <ResponsiveContainer width="100%" height="100%">
+  if (typeof width === "string" || typeof height === "string") {
+    return (
+      <ResponsiveContainer width={width} height={height}>
         <Sankey
           data={data}
           node={
@@ -344,10 +415,33 @@ export default function ProbabilitySankey({
             />
           }
           link={<PSankeyLink totalNodes={data.nodes.length} />}
-          nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
+          nodePadding={
+            data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0
+          }
           iterations={0}
         ></Sankey>
       </ResponsiveContainer>
-    </>
+    );
+  }
+
+  return (
+    <Sankey
+      width={width as number}
+      height={height as number}
+      data={data}
+      node={
+        <PSankeyNode
+          onClick={onClick}
+          totalProbability={getScenarioParameter(riskFile, "TP", scenario)}
+          totalNodes={data.nodes.length}
+          showComponents={debug}
+          scenarioSuffix={scenario}
+          fontSize={22}
+        />
+      }
+      link={<PSankeyLink totalNodes={data.nodes.length} />}
+      nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
+      iterations={0}
+    ></Sankey>
   );
-}
+};

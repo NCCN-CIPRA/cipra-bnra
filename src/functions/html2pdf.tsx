@@ -4,11 +4,84 @@ import { NCCN_GREEN } from "./colors";
 
 const BLACK = "#231F20";
 
-type HTMLTag = { tagName: string; tagOptions: string | null; content: string | HTMLTag[]; size: number };
+type HTMLTag = {
+  tagName: string;
+  tagOptions: string | null;
+  content: string | HTMLTag[];
+  size: number;
+};
+
+export type Section =
+  | "summary"
+  | "description"
+  | "analysis"
+  | "evolution"
+  | "bibliography";
+
+// Global Title
+export const h1Style = {};
+
+// Chapter Title
+export const h2Style = {};
+
+// Risk File Title
+export const h3Style = {
+  fontFamily: "NH",
+  fontWeight: 700,
+  fontSize: "20pt",
+  marginBottom: "0.5cm",
+};
+
+// Section Title (i.e. Summary, Risk Description)
+export const h4Style = {
+  fontFamily: "NH",
+  fontWeight: 700,
+  color: NCCN_GREEN,
+  fontSize: "16pt",
+  marginBottom: "0.5cm",
+};
+
+// Subsection Title (i.e description, definition, probability analysis)
+export const h5Style = {
+  fontFamily: "NH",
+  fontSize: "11pt",
+  fontWeight: 500,
+  // lineHeight: "1.5pt",
+  color: BLACK,
+  marginTop: "5pt",
+  marginBottom: "5pt",
+};
+
+// Subsubsection Title (i.e. Human impact)
+export const h6Style = {
+  marginTop: "5pt",
+  fontFamily: "NH",
+  fontWeight: 300,
+  color: BLACK,
+  fontSize: "11pt",
+};
+
+export const bodyStyle = {
+  fontFamily: "NH",
+  fontSize: "10pt",
+  fontWeight: 300,
+  lineHeight: "1.5pt",
+  color: BLACK,
+  marginBottom: "5pt",
+};
+
+export const boldStyle = {
+  fontWeight: 500,
+};
+
+const fixText = (txt: string) => {
+  return txt.replaceAll("&#39;", "'");
+};
 
 // html string should start with opening tag <...>
 const parseTag = (html: string): HTMLTag => {
   let currentHtml = html.replace(/<br>/g, "").replace(/<br\/>/g, "");
+  let currentTagEnd = currentHtml.slice(1).indexOf(">") + 1;
   let nextTagStart = currentHtml.slice(1).indexOf("<") + 1;
 
   if (nextTagStart < 0) throw new Error("No closing tag found");
@@ -16,65 +89,142 @@ const parseTag = (html: string): HTMLTag => {
   const nestedTags = [];
 
   while (currentHtml[nextTagStart + 1] !== "/") {
-    // console.log(nextTagStart, currentHtml);
+    // Check if there is plain text before next nested tag
+    if (currentTagEnd + 1 !== nextTagStart) {
+      nestedTags.push({
+        tagName: "span",
+        tagOptions: null,
+        content: currentHtml.slice(currentTagEnd + 1, nextTagStart),
+        size: nextTagStart - currentTagEnd - 1,
+      });
+
+      currentHtml =
+        currentHtml.slice(0, currentTagEnd + 1) +
+        currentHtml.slice(nextTagStart);
+      nextTagStart = currentTagEnd + 1;
+    }
+
     // This tag contains nested tags, process these first
     const nestedTag = parseTag(currentHtml.slice(nextTagStart));
     nestedTags.push(nestedTag);
 
-    currentHtml = currentHtml.slice(0, nextTagStart) + currentHtml.slice(nextTagStart + nestedTag.size);
+    currentHtml =
+      currentHtml.slice(0, nextTagStart) +
+      currentHtml.slice(nextTagStart + nestedTag.size);
     nextTagStart = currentHtml.slice(1).indexOf("<") + 1;
+
     if (nextTagStart < 0) throw new Error("No closing tag found");
   }
 
-  const closingTagIndex = currentHtml.indexOf("</");
+  let closingTagIndex = currentHtml.indexOf("</");
 
-  const tagNameEnd = currentHtml.indexOf(" ") >= 0 ? currentHtml.indexOf(" ") : currentHtml.indexOf(">");
+  const tagNameEnd = Math.min(
+    currentHtml.indexOf(" "),
+    currentHtml.indexOf(">")
+  );
   const tagName = currentHtml.slice(1, tagNameEnd);
 
   const contentIndex = currentHtml.indexOf(">") + 1;
   const content = currentHtml.slice(contentIndex, closingTagIndex);
 
-  const tagOptions = currentHtml[tagNameEnd] === ">" ? null : currentHtml.slice(tagNameEnd + 1, contentIndex - 1);
+  if (nestedTags.length > 0) {
+    if (content.trim() !== "") {
+      nestedTags.push({
+        tagName: "span",
+        tagOptions: null,
+        content: content,
+        size: content.length,
+      });
+
+      currentHtml =
+        currentHtml.slice(0, currentTagEnd + 1) +
+        currentHtml.slice(currentTagEnd + 1 + content.length);
+      closingTagIndex = currentHtml.indexOf("</");
+    }
+  }
+
+  const tagOptions =
+    currentHtml[tagNameEnd] === ">"
+      ? null
+      : currentHtml.slice(tagNameEnd + 1, contentIndex - 1);
 
   const size =
-    nestedTags.reduce((t, i) => t + i.size, 0) + closingTagIndex + currentHtml.slice(closingTagIndex).indexOf(">") + 1;
+    nestedTags.reduce((t, i) => t + i.size, 0) +
+    closingTagIndex +
+    currentHtml.slice(closingTagIndex).indexOf(">") +
+    1;
 
   //   console.log("Parsed tag:", tagName, " with size", size);
 
-  return { tagName, tagOptions, content: nestedTags.length > 0 ? nestedTags : content, size };
+  return {
+    tagName,
+    tagOptions,
+    content: nestedTags.length > 0 ? nestedTags : content,
+    size,
+  };
 };
 
-const tag2PDF = (tag: HTMLTag): ReactElement | null => {
+const tag2PDF = (
+  tag: HTMLTag,
+  parent: HTMLTag | null,
+  section: Section
+): ReactElement | null => {
   if (tag.content === "") return null;
 
-  if (typeof tag.content === "string")
-    return <Text style={{ fontFamily: "Arial", fontWeight: 400, color: BLACK, fontSize: "16pt" }}>{tag.content}</Text>;
+  let styles = {} as any;
 
-  if (tag.tagName === "p" && tag.content[0] && tag.content[0].tagName === "strong")
+  if (typeof tag.content === "string") {
+    if (tag.tagName === "strong") {
+      if (tag.content.indexOf("margin of error") < 0) {
+        styles = { ...styles, ...boldStyle };
+      }
+    } else if (tag.tagName === "span") {
+      // styles = bodyStyle;
+    } else if (tag.tagName === "a") {
+      // styles = bodyStyle;
+    }
+
     return (
-      <View style={{ marginTop: "15pt", width: "8cm" }}>
-        <Text style={{ fontFamily: "NH", fontWeight: 700, color: NCCN_GREEN, fontSize: "16pt" }}>
-          {tag.content[0].content as string}
-        </Text>
-      </View>
+      <Text style={styles} debug={true}>
+        {fixText(tag.content as string)}
+      </Text>
     );
+  }
 
-  if (tag.tagName === "p" && tag.content[0] && tag.content[0].tagName === "span")
+  if (tag.tagName === "p") {
+    let styles = { ...bodyStyle } as any;
+
+    if (
+      tag.content.length <= 1 &&
+      tag.content[0].tagName === "strong" &&
+      section === "summary"
+    ) {
+      styles = { ...h5Style };
+    }
+
     return (
-      <View style={{ marginTop: "15pt", width: "8cm" }}>
-        <Text style={{ fontFamily: "NH", fontWeight: 300, lineHeight: "1.5pt", color: BLACK, fontSize: "11pt" }}>
-          {tag.content[0].content as string}
-        </Text>
-      </View>
+      <Text style={styles} debug={false}>
+        {tag.content.map((e) => tag2PDF(e, tag, section))}
+      </Text>
     );
+  }
 
-  return null;
+  return (
+    <Text style={{}}>{tag.content.map((e) => tag2PDF(e, tag, section))}</Text>
+  );
 };
 
-export default function html2PDF(html: string | null): (ReactElement | null)[] {
+export default function html2PDF(
+  html: string | null,
+  section: Section
+): (ReactElement | null)[] {
   if (html === null) return [null];
 
   const parsed = parseTag(`<div>${html}</div>`);
 
-  return (parsed.content as HTMLTag[]).map(tag2PDF);
+  // console.log(parsed, (parsed.content as HTMLTag[]).map(e => tag2PDF(e)).filter(e=>e!==null))
+
+  return (parsed.content as HTMLTag[])
+    .map((e) => tag2PDF(e, null, section))
+    .filter((e) => e !== null);
 }

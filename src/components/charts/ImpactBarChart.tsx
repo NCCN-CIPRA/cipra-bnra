@@ -13,17 +13,41 @@ import {
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { Box, Stack, Typography } from "@mui/material";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { getScenarioParameter, SCENARIO_SUFFIX, SCENARIOS } from "../../functions/scenarios";
-import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import {
+  getScenarioParameter,
+  SCENARIO_SUFFIX,
+  SCENARIOS,
+} from "../../functions/scenarios";
+import {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 import round from "../../functions/roundNumberString";
 import { useTranslation } from "react-i18next";
-import { getCategoryImpactRescaled, getDamageIndicatorToCategoryImpactRatio } from "../../functions/CategoryImpact";
+import {
+  getCategoryImpactRescaled,
+  getDamageIndicatorToCategoryImpactRatio,
+} from "../../functions/CategoryImpact";
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
     return (
-      <Box sx={{ border: "1px solid #ccc", padding: 1, bgcolor: "rgba(255,255,255,0.8)", mb: 1 }}>
-        <Typography variant="subtitle2" sx={{ textDecoration: "underline", mb: 1 }}>
+      <Box
+        sx={{
+          border: "1px solid #ccc",
+          padding: 1,
+          bgcolor: "rgba(255,255,255,0.8)",
+          mb: 1,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{ textDecoration: "underline", mb: 1 }}
+        >
           {label} Impact
         </Typography>
         {payload.map((p) => (
@@ -50,7 +74,17 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
   return null;
 };
 
-export default function ImpactBarChart({ riskFile, scenario }: { riskFile: DVRiskFile | null; scenario: SCENARIOS }) {
+export default function ImpactBarChart({
+  riskFile,
+  scenario,
+  width,
+  height,
+}: {
+  riskFile: DVRiskFile | null;
+  scenario: SCENARIOS;
+  width?: number;
+  height?: number;
+}) {
   const { t } = useTranslation();
   if (!riskFile) return null;
 
@@ -98,6 +132,52 @@ export default function ImpactBarChart({ riskFile, scenario }: { riskFile: DVRis
     },
   ];
 
+  if (width && height) {
+    return (
+      <BarChart
+        width={width}
+        height={height}
+        data={data}
+        margin={{
+          top: 20,
+          bottom: 125,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          dataKey="name"
+          angle={-90}
+          dx={-5}
+          dy={5}
+          interval={0}
+          textAnchor="end"
+          fontSize={22}
+        />
+        <YAxis
+          domain={[0, 5.5]}
+          ticks={[1, 2, 3, 4, 5]}
+          width={10}
+          fontSize={22}
+        />
+        <Tooltip content={<CustomTooltip />} />
+        <Bar dataKey="Ha" stackId="a" fill="#de6148" />
+        <Bar dataKey="Hb" stackId="a" fill="#f39d87" />
+        <Bar dataKey="Hc" stackId="a" fill="#ffd7cc" />
+        {/* <Bar dataKey="H" stackId="b" style={{ display: "none" }} /> */}
+        <Bar dataKey="Sa" stackId="a" fill="#bca632" />
+        <Bar dataKey="Sb" stackId="a" fill="#d2ba37" />
+        <Bar dataKey="Sc" stackId="a" fill="#e8ce3d" />
+        <Bar dataKey="Sd" stackId="a" fill="#ffe342" />
+        {/* <Bar dataKey="S" stackId="a" style={{ display: "none" }} label /> */}
+        <Bar dataKey="Ea" stackId="a" fill="#83af70" />
+        {/* <Bar dataKey="E" stackId="a" style={{ display: "none" }} label /> */}
+        <Bar dataKey="Fa" stackId="a" fill="#6996b3" />
+        <Bar dataKey="Fb" stackId="a" fill="#c1e7ff" />
+        {/* <Bar dataKey="F" stackId="a" style={{ display: "none" }} label /> */}
+      </BarChart>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart
@@ -108,7 +188,14 @@ export default function ImpactBarChart({ riskFile, scenario }: { riskFile: DVRis
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" angle={-90} dx={-5} dy={5} interval={0} textAnchor="end" />
+        <XAxis
+          dataKey="name"
+          angle={-90}
+          dx={-5}
+          dy={5}
+          interval={0}
+          textAnchor="end"
+        />
         <YAxis domain={[0, 5.5]} ticks={[1, 2, 3, 4, 5]} width={10} />
         <Tooltip content={<CustomTooltip />} />
         <Bar dataKey="Ha" stackId="a" fill="#de6148" />

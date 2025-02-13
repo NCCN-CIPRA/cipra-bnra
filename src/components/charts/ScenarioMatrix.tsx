@@ -17,17 +17,36 @@ import { NameType } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Stack, Typography } from "@mui/material";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { DVAnalysisRun, RiskAnalysisResults, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, SCENARIO_PARAMS, getScenarioParameter } from "../../functions/scenarios";
+import {
+  DVAnalysisRun,
+  RiskAnalysisResults,
+  RiskCalculation,
+} from "../../types/dataverse/DVAnalysisRun";
+import {
+  SCENARIOS,
+  SCENARIO_PARAMS,
+  getScenarioParameter,
+} from "../../functions/scenarios";
 import { hexToRGB } from "../../functions/colors";
-import { getProbabilityScaleNumber, getTotalProbabilityRelativeScale } from "../../functions/Probability";
+import {
+  getProbabilityScaleNumber,
+  getTotalProbabilityRelativeScale,
+} from "../../functions/Probability";
 import round from "../../functions/roundNumberString";
 import { capFirst } from "../../functions/capFirst";
+import { useTranslation } from "react-i18next";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   if (active && payload && payload.length) {
     return (
-      <Box sx={{ border: "1px solid #ccc", padding: 1, bgcolor: "rgba(255,255,255,0.8)", mb: 1 }}>
+      <Box
+        sx={{
+          border: "1px solid #ccc",
+          padding: 1,
+          bgcolor: "rgba(255,255,255,0.8)",
+          mb: 1,
+        }}
+      >
         <Typography variant="subtitle2" sx={{ textDecoration: "underline" }}>
           {capFirst(payload[0].payload.name)} scenario
         </Typography>
@@ -52,7 +71,10 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
           <Typography variant="body2" sx={{ width: 100, fontWeight: "bold" }}>
             Total Risk :
           </Typography>
-          <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>
+          <Typography
+            variant="body2"
+            sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}
+          >
             {round((payload[0].value || 0) * (payload[1].value || 0))}
           </Typography>
         </Stack>
@@ -63,17 +85,26 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   return null;
 };
 
-export default function ScenarioMatrix({ riskFile, mrs }: { riskFile: DVRiskFile; mrs: SCENARIOS }) {
+export default function ScenarioMatrix({
+  riskFile,
+  mrs,
+}: {
+  riskFile: DVRiskFile;
+  mrs: SCENARIOS;
+}) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
-  const data = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].map((s) => ({
-    id: s,
-    name: s,
-    color: SCENARIO_PARAMS[s].color,
-    x: getScenarioParameter(riskFile, "TP", s),
-    y: getScenarioParameter(riskFile, "TI", s),
-    z: 1,
-  }));
+  const data = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].map(
+    (s) => ({
+      id: s,
+      name: s,
+      color: SCENARIO_PARAMS[s].color,
+      x: getScenarioParameter(riskFile, "TP", s),
+      y: getScenarioParameter(riskFile, "TI", s),
+      z: 1,
+    })
+  );
 
   return (
     <ScatterChart
@@ -104,6 +135,12 @@ export default function ScenarioMatrix({ riskFile, mrs }: { riskFile: DVRiskFile
         // tickFormatter={(v: number) => `${v * 100}%`}
         name="probability"
         unit=""
+        label={{
+          value: t("impact"),
+          angle: -90,
+          position: "insideLeft",
+          offset: 20,
+        }}
       />
       <XAxis
         type="number"
@@ -114,6 +151,11 @@ export default function ScenarioMatrix({ riskFile, mrs }: { riskFile: DVRiskFile
         // tickFormatter={(v: number) => String(Math.round(Math.log10(v)) - 7)}
         name="impact"
         unit=""
+        label={{
+          value: t("probability"),
+          position: "insideBottom",
+          offset: -10,
+        }}
       />
       <ZAxis type="number" range={[150]} />
       <Tooltip cursor={{ strokeDasharray: "3 3" }} content={CustomTooltip} />

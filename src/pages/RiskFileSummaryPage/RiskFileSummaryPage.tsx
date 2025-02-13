@@ -27,6 +27,7 @@ import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import RiskFileTitle from "../../components/RiskFileTitle";
 import BNRASpeedDial from "../../components/BNRASpeedDial";
 import RiskFileSummaryTutorial from "./RiskFileSummaryTutorial";
+import { getLanguage } from "../../functions/translations";
 
 export default function RiskFileSummaryPage({}) {
   const api = useAPI();
@@ -74,34 +75,34 @@ export default function RiskFileSummaryPage({}) {
     setEditing(false);
     setSaving(false);
   };
-
+ 
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
       <RiskFileTitle riskFile={riskFile} />
       <Stack direction="row" sx={{ mb: 8 }} columnGap={4}>
         <Box id="summary-text" sx={{ flex: 1 }}>
-          {!editing && i18n.language === "en" && (
+          {!editing && getLanguage(i18n.language) === "en" && (
             <Box
               className="htmleditor"
               sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
               dangerouslySetInnerHTML={{ __html: summary }}
             />
           )}
-          {!editing && i18n.language === "nl" && (
+          {!editing && getLanguage(i18n.language) === "nl" && (
             <Box
               className="htmleditor"
               sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
               dangerouslySetInnerHTML={{ __html: summaryNL }}
             />
           )}
-          {!editing && i18n.language === "fr" && (
+          {!editing && getLanguage(i18n.language) === "fr" && (
             <Box
               className="htmleditor"
               sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
               dangerouslySetInnerHTML={{ __html: summaryFR }}
             />
           )}
-          {!editing && i18n.language === "de" && (
+          {!editing && getLanguage(i18n.language) === "de" && (
             <Box
               className="htmleditor"
               sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
