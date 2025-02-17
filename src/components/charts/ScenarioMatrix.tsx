@@ -35,6 +35,7 @@ import {
 import round from "../../functions/roundNumberString";
 import { capFirst } from "../../functions/capFirst";
 import { useTranslation } from "react-i18next";
+import { ticks } from "d3";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   if (active && payload && payload.length) {
@@ -88,9 +89,17 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
 export default function ScenarioMatrix({
   riskFile,
   mrs,
+  fontSize = 12,
+  radius = 150,
+  width = 300,
+  height = 270,
 }: {
   riskFile: DVRiskFile;
   mrs: SCENARIOS;
+  fontSize?: number;
+  radius?: number;
+  width?: number;
+  height?: number;
 }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -109,15 +118,19 @@ export default function ScenarioMatrix({
   return (
     <ScatterChart
       id="scenario-matrix"
-      width={300}
-      height={270}
+      width={width}
+      height={height}
       margin={{
         top: 30,
         right: 15,
-        bottom: 20,
-        left: 40,
+        bottom: 2 * fontSize,
+        left: 2 * (fontSize - 12),
       }}
-      style={{ float: "right" }}
+      style={{
+        float: "right",
+        overflow: "hidden",
+        // backgroundColor: "rgba(0, 0, 0, 0.2",
+      }}
     >
       <defs>
         <linearGradient id="colorUv" x1="0" y1="1" x2="1" y2="0">
@@ -132,6 +145,7 @@ export default function ScenarioMatrix({
         dataKey="x"
         domain={[0, 5.5]}
         ticks={[1, 2, 3, 4, 5]}
+        fontSize={fontSize}
         // tickFormatter={(v: number) => `${v * 100}%`}
         name="probability"
         unit=""
@@ -139,7 +153,8 @@ export default function ScenarioMatrix({
           value: t("impact"),
           angle: -90,
           position: "insideLeft",
-          offset: 20,
+          offset: (30 * (20 - fontSize)) / 8,
+          fontSize,
         }}
       />
       <XAxis
@@ -148,16 +163,18 @@ export default function ScenarioMatrix({
         scale="linear"
         domain={[0, 5.5]}
         ticks={[1, 2, 3, 4, 5]}
+        fontSize={fontSize}
         // tickFormatter={(v: number) => String(Math.round(Math.log10(v)) - 7)}
         name="impact"
         unit=""
         label={{
           value: t("probability"),
           position: "insideBottom",
-          offset: -10,
+          offset: -width / 30,
+          fontSize,
         }}
       />
-      <ZAxis type="number" range={[150]} />
+      <ZAxis dataKey="z" type="number" range={[0, radius]} />
       <Tooltip cursor={{ strokeDasharray: "3 3" }} content={CustomTooltip} />
       <Scatter name="BNRA Risk Matrix" data={data}>
         {data.map((d) => (
@@ -166,7 +183,6 @@ export default function ScenarioMatrix({
             fill={d.name === mrs ? d.color : hexToRGB(d.color, 0.3)}
             stroke={d.name === mrs ? "#888" : "#aaa"}
             strokeWidth={2}
-            radius={20}
             style={{ cursor: "pointer" }}
             // onClick={(e) => navigate(`/reporting/${d.id}`)}
           />

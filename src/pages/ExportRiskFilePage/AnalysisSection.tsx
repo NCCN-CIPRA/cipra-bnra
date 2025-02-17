@@ -1,12 +1,15 @@
 import { Image, Page, Text, View } from "@react-pdf/renderer";
 import Footer from "./Footer";
-import { BLACK, PAGE_SIZE } from "./styles";
-import html2PDF, {
-  h3Style,
+import {
   h4Style,
   h5Style,
-  h6Style,
-} from "../../functions/html2pdf";
+  PAGE_DPI,
+  PAGE_SIZE,
+  PAGE_STYLES,
+  POINTS_PER_CM,
+  SCALE,
+} from "./styles";
+import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { useEffect, useState } from "react";
@@ -16,13 +19,17 @@ import getImpactColor from "../../functions/getImpactColor";
 import Header from "./Header";
 import LeftBorderSection from "./LeftBorderSection";
 import { getScenarioSuffix, SCENARIOS } from "../../functions/scenarios";
+import { BLACK } from "../../functions/colors";
+import { LoggedInUser } from "../../hooks/useLoggedInUser";
 
 const bottomDebug = true;
 
 export default function AnalysisSection({
   riskFile,
+  user,
 }: {
   riskFile: DVRiskFile;
+  user: LoggedInUser | null | undefined;
 }) {
   const { t } = useTranslation();
 
@@ -49,12 +56,13 @@ export default function AnalysisSection({
   return (
     <Page
       size={PAGE_SIZE}
+      dpi={PAGE_DPI}
       style={{
+        ...PAGE_STYLES,
         backgroundColor: "white",
-        padding: "1.5cm",
         color: BLACK,
         position: "relative",
-        minHeight: "10cm",
+        minHeight: 10 * POINTS_PER_CM,
       }}
     >
       <Header riskFile={riskFile} />
@@ -75,8 +83,9 @@ export default function AnalysisSection({
       <View
         style={{
           // backgroundColor: "green"
-          marginLeft: "-0.25cm",
-          marginRight: "-0.25cm",
+          marginLeft: -0.25 * POINTS_PER_CM,
+          marginRight: -0.25 * POINTS_PER_CM,
+          height: 12.5 * POINTS_PER_CM,
         }}
       >
         {probChart && impactChart && (
@@ -84,7 +93,7 @@ export default function AnalysisSection({
             style={{
               display: "flex",
               width: "100%",
-              height: "12cm",
+              height: 12.5 * POINTS_PER_CM,
               flexDirection: "row",
             }}
           >
@@ -92,17 +101,17 @@ export default function AnalysisSection({
               src={probChart}
               style={{
                 display: "flex",
-                marginTop: "0.25cm",
-                marginLeft: "0.25cm",
-                width: "5cm",
-                height: "10cm",
+                marginTop: 0.25 * POINTS_PER_CM,
+                marginLeft: 0.25 * POINTS_PER_CM,
+                width: 6 * POINTS_PER_CM,
+                height: 12 * POINTS_PER_CM,
               }}
             />
             <View
               style={{
                 flex: 1,
                 flexDirection: "column",
-                marginLeft: "4pt",
+                marginLeft: 4 * SCALE,
                 justifyContent: "center",
               }}
               debug={false}
@@ -123,10 +132,10 @@ export default function AnalysisSection({
               src={impactChart}
               style={{
                 display: "flex",
-                marginTop: "0.25cm",
-                marginLeft: "0.25cm",
-                width: "5cm",
-                height: "10cm",
+                marginTop: 0.25 * POINTS_PER_CM,
+                marginLeft: 0.25 * POINTS_PER_CM,
+                width: 6 * POINTS_PER_CM,
+                height: 12 * POINTS_PER_CM,
               }}
             />
           </View>
@@ -134,16 +143,16 @@ export default function AnalysisSection({
       </View>
 
       <View
-        style={
-          {
-            // backgroundColor: "green"
-          }
-        }
+        style={{
+          // backgroundColor: "green"
+          marginTop: POINTS_PER_CM,
+          marginBottom: POINTS_PER_CM,
+        }}
       >
         <Text style={h5Style}>{t("Probability Assessment")}</Text>
         <LeftBorderSection
           color="#eee"
-          style={{ paddingTop: "5pt", marginBottom: "10pt" }}
+          style={{ paddingTop: 5 * SCALE, marginBottom: 10 * SCALE }}
         >
           {html2PDF(riskFile.cr4de_mrs_probability, "analysis")}
         </LeftBorderSection>
@@ -163,7 +172,7 @@ export default function AnalysisSection({
               ...h5Style,
               color: getImpactColor("H"),
               marginTop: "0pt",
-              marginBottom: "5pt",
+              marginBottom: 5 * SCALE,
             }}
           >
             {t("learning.impact.h.title")}
@@ -177,7 +186,7 @@ export default function AnalysisSection({
               ...h5Style,
               color: getImpactColor("S"),
               marginTop: "0pt",
-              marginBottom: "5pt",
+              marginBottom: 5 * SCALE,
             }}
           >
             {t("learning.impact.s.title")}
@@ -191,7 +200,7 @@ export default function AnalysisSection({
               ...h5Style,
               color: getImpactColor("E"),
               marginTop: "0pt",
-              marginBottom: "5pt",
+              marginBottom: 5 * SCALE,
             }}
           >
             {t("learning.impact.e.title")}
@@ -205,7 +214,7 @@ export default function AnalysisSection({
               ...h5Style,
               color: getImpactColor("F"),
               marginTop: "0pt",
-              marginBottom: "5pt",
+              marginBottom: 5 * SCALE,
             }}
           >
             {t("learning.impact.f.title")}
@@ -213,13 +222,13 @@ export default function AnalysisSection({
           {html2PDF(riskFile.cr4de_mrs_impact_f, "analysis")}
         </LeftBorderSection>
 
-        <LeftBorderSection color="#eee" style={{ marginBottom: "-5pt" }}>
+        <LeftBorderSection color="#eee" style={{ marginBottom: -5 * SCALE }}>
           <Text
             style={{
               ...h5Style,
               color: BLACK,
               marginTop: "0pt",
-              marginBottom: "5pt",
+              marginBottom: 5 * SCALE,
             }}
           >
             {t("Cross-border Impact")}
@@ -232,7 +241,9 @@ export default function AnalysisSection({
             ],
             "analysis"
           )}
-          <View style={{ marginTop: "-5pt", width: "100%", height: "1pt" }} />
+          <View
+            style={{ marginTop: -5 * SCALE, width: "100%", height: "1pt" }}
+          />
         </LeftBorderSection>
       </View>
     </Page>

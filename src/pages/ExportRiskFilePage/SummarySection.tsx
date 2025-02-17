@@ -1,12 +1,28 @@
 import { Image, Page, Text, View } from "@react-pdf/renderer";
 import Footer from "./Footer";
-import { BLACK, PAGE_SIZE } from "./styles";
-import html2PDF, { h3Style, h4Style } from "../../functions/html2pdf";
+import {
+  bodyStyle,
+  boldStyle,
+  h3Style,
+  h4Style,
+  PAGE_DPI,
+  PAGE_SIZE,
+  PAGE_STYLES,
+  POINTS_PER_CM,
+  SCALE,
+  smallStyle,
+} from "./styles";
+import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { useEffect, useState } from "react";
 import svg2PDF from "../../functions/svg2PDF";
 import getScaleString from "../../functions/getScaleString";
+import { getLanguage, getSummary } from "../../functions/translations";
+import i18next from "i18next";
+import { BLACK } from "../../functions/colors";
+import Watermark from "./Watermark";
+import { LoggedInUser } from "../../hooks/useLoggedInUser";
 
 export default function SummarySection({
   riskFile,
@@ -15,6 +31,7 @@ export default function SummarySection({
   S,
   E,
   F,
+  user,
 }: {
   riskFile: DVRiskFile;
   tp: number;
@@ -22,6 +39,7 @@ export default function SummarySection({
   S: number;
   E: number;
   F: number;
+  user: LoggedInUser | null | undefined;
 }) {
   const { t } = useTranslation();
 
@@ -51,12 +69,31 @@ export default function SummarySection({
     }, 5000);
   }, []);
 
+  const wrapperStyle = {
+    width: 3 * POINTS_PER_CM,
+    // height: 4.5 * POINTS_PER_CM,
+    textAlign: "center" as "center",
+  };
+  const titleStyle = { ...bodyStyle, ...smallStyle, ...boldStyle };
+  const imageStyle = {
+    marginTop: 0.25 * POINTS_PER_CM,
+    marginLeft: 0.25 * POINTS_PER_CM,
+    width: 2.5 * POINTS_PER_CM,
+    height: 1.3 * POINTS_PER_CM,
+  };
+  const scaleStyle = {
+    ...bodyStyle,
+    marginTop: 0.25 * POINTS_PER_CM,
+    marginBottom: 0,
+  };
+
   return (
     <Page
       size={PAGE_SIZE}
+      dpi={PAGE_DPI}
       style={{
+        ...PAGE_STYLES,
         backgroundColor: "white",
-        padding: "1.5cm",
         color: BLACK,
       }}
       // wrap={false}
@@ -79,173 +116,57 @@ export default function SummarySection({
           // right: "1.5cm",
           // backgroundColor: "rgba(0,0,0,0.1)",
           border: "1pt solid black",
+          borderWidth: SCALE,
           borderColor: "rgb(232, 232, 232)",
-          paddingTop: "0.25cm",
-          paddingBottom: "0.25cm",
-          height: "3cm",
+          paddingTop: 0.25 * POINTS_PER_CM,
+          paddingBottom: 0.25 * POINTS_PER_CM,
+          // height: 3 * POINTS_PER_CM,
           // width: "3.8cm",
           display: "flex",
           flexDirection: "row",
-          marginBottom: "0.5cm",
+          marginBottom: 0.5 * POINTS_PER_CM,
+          justifyContent: "space-between",
         }}
-        // debug={true}
       >
-        <View style={{ width: "3cm", height: "4.5cm", textAlign: "center" }}>
-          <Text
-            style={{ fontFamily: "NH", fontWeight: 500, fontSize: "8pt" }}
-            debug={false}
-          >
+        <View
+          style={wrapperStyle}
+          // debug={true}
+        >
+          <Text style={titleStyle} debug={false}>
             {riskFile.cr4de_risk_type === RISK_TYPE.MANMADE
               ? t("learning.motivation.text.title", "Motivation")
               : t("learning.probability.2.text.title", "Probability")}
           </Text>
-          {pBarChart && (
-            <Image
-              src={pBarChart}
-              style={{
-                marginTop: "0.25cm",
-                marginLeft: "0.25cm",
-                width: "2.5cm",
-                height: "1.375cm",
-              }}
-            />
-          )}
-          <Text
-            style={{
-              marginTop: "0.25cm",
-              fontFamily: "NH",
-              fontWeight: 300,
-              lineHeight: "1.5pt",
-              color: BLACK,
-              fontSize: "9pt",
-            }}
-          >
-            {t(getScaleString(tp))}
-          </Text>
+          {pBarChart && <Image src={pBarChart} style={imageStyle} />}
+          <Text style={scaleStyle}>{t(getScaleString(tp))}</Text>
         </View>
-        <View style={{ width: "3cm", height: "4.5cm", textAlign: "center" }}>
-          <Text
-            style={{ fontFamily: "NH", fontWeight: 500, fontSize: "8pt" }}
-            debug={false}
-          >
+        <View style={wrapperStyle}>
+          <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Human">Human</Trans>
           </Text>
-          {hChart && (
-            <Image
-              src={hChart}
-              style={{
-                marginTop: "0.25cm",
-                marginLeft: "0.25cm",
-                width: "2.5cm",
-                height: "1.375cm",
-              }}
-            />
-          )}
-          <Text
-            style={{
-              marginTop: "0.25cm",
-              fontFamily: "NH",
-              fontWeight: 300,
-              lineHeight: "1.5pt",
-              color: BLACK,
-              fontSize: "9pt",
-            }}
-          >
-            {t(getScaleString(H))}
-          </Text>
+          {hChart && <Image src={hChart} style={imageStyle} />}
+          <Text style={scaleStyle}>{t(getScaleString(H))}</Text>
         </View>
-        <View style={{ width: "3cm", height: "4.5cm", textAlign: "center" }}>
-          <Text
-            style={{ fontFamily: "NH", fontWeight: 500, fontSize: "8pt" }}
-            debug={false}
-          >
+        <View style={wrapperStyle}>
+          <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Societal">Societal</Trans>
           </Text>
-          {sChart && (
-            <Image
-              src={sChart}
-              style={{
-                marginTop: "0.25cm",
-                marginLeft: "0.25cm",
-                width: "2.5cm",
-                height: "1.375cm",
-              }}
-            />
-          )}
-          <Text
-            style={{
-              marginTop: "0.25cm",
-              fontFamily: "NH",
-              fontWeight: 300,
-              lineHeight: "1.5pt",
-              color: BLACK,
-              fontSize: "9pt",
-            }}
-          >
-            {t(getScaleString(S))}
-          </Text>
+          {sChart && <Image src={sChart} style={imageStyle} />}
+          <Text style={scaleStyle}>{t(getScaleString(S))}</Text>
         </View>
-        <View style={{ width: "3cm", height: "4.5cm", textAlign: "center" }}>
-          <Text
-            style={{ fontFamily: "NH", fontWeight: 500, fontSize: "8pt" }}
-            debug={false}
-          >
+        <View style={wrapperStyle}>
+          <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Environmental">Environmental</Trans>
           </Text>
-          {eChart && (
-            <Image
-              src={eChart}
-              style={{
-                marginTop: "0.25cm",
-                marginLeft: "0.25cm",
-                width: "2.5cm",
-                height: "1.375cm",
-              }}
-            />
-          )}
-          <Text
-            style={{
-              marginTop: "0.25cm",
-              fontFamily: "NH",
-              fontWeight: 300,
-              lineHeight: "1.5pt",
-              color: BLACK,
-              fontSize: "9pt",
-            }}
-          >
-            {t(getScaleString(E))}
-          </Text>
+          {eChart && <Image src={eChart} style={imageStyle} />}
+          <Text style={scaleStyle}>{t(getScaleString(E))}</Text>
         </View>
-        <View style={{ width: "3cm", height: "4.5cm", textAlign: "center" }}>
-          <Text
-            style={{ fontFamily: "NH", fontWeight: 500, fontSize: "8pt" }}
-            debug={false}
-          >
+        <View style={wrapperStyle}>
+          <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Financial">Financial</Trans>
           </Text>
-          {fChart && (
-            <Image
-              src={fChart}
-              style={{
-                marginTop: "0.25cm",
-                marginLeft: "0.25cm",
-                width: "2.5cm",
-                height: "1.375cm",
-              }}
-            />
-          )}
-          <Text
-            style={{
-              marginTop: "0.25cm",
-              fontFamily: "NH",
-              fontWeight: 300,
-              lineHeight: "1.5pt",
-              color: BLACK,
-              fontSize: "9pt",
-            }}
-          >
-            {t(getScaleString(F))}
-          </Text>
+          {fChart && <Image src={fChart} style={imageStyle} />}
+          <Text style={scaleStyle}>{t(getScaleString(F))}</Text>
         </View>
       </View>
 
@@ -257,8 +178,9 @@ export default function SummarySection({
         }
         // debug={true}
       >
-        {html2PDF(riskFile.cr4de_mrs_summary, "summary")}
+        {html2PDF(getSummary(riskFile, i18next.language), "summary")}
       </View>
+      {!user?.roles.admin && <Watermark user={user} />}
     </Page>
   );
 }

@@ -45,11 +45,17 @@ import ExportBNRAPage from "./pages/ExportBNRAPage/ExportBNRAPage";
 function App() {
   useEffect(() => {
     const getAntiForgeryToken = async () => {
-      const response = await fetch(`https://bnra.powerappsportals.com/_layout/tokenhtml?_=${Date.now()}`, {
-        method: "GET",
-      });
+      const response = await fetch(
+        `https://bnra.powerappsportals.com/_layout/tokenhtml?_=${Date.now()}`,
+        {
+          method: "GET",
+        }
+      );
 
-      localStorage.setItem("antiforgerytoken", await (await response.text()).split("value")[1].split('"')[1]);
+      localStorage.setItem(
+        "antiforgerytoken",
+        await (await response.text()).split("value")[1].split('"')[1]
+      );
     };
 
     getAntiForgeryToken();

@@ -1,13 +1,18 @@
 import { Image, Page, Text, View } from "@react-pdf/renderer";
 import Footer from "./Footer";
-import { BLACK, PAGE_SIZE } from "./styles";
-import html2PDF, {
+import {
   bodyStyle,
   boldStyle,
-  h3Style,
   h4Style,
   h5Style,
-} from "../../functions/html2pdf";
+  PAGE_DPI,
+  PAGE_SIZE,
+  PAGE_STYLES,
+  POINTS_PER_CM,
+  SCALE,
+  smallStyle,
+} from "./styles";
+import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { useEffect, useMemo, useState } from "react";
@@ -23,11 +28,15 @@ import {
   unwrap as unwrapScenarios,
 } from "../../functions/scenarios";
 import LeftBorderSection from "./LeftBorderSection";
+import { BLACK } from "../../functions/colors";
+import { LoggedInUser } from "../../hooks/useLoggedInUser";
 
 export default function DescriptionSection({
   riskFile,
+  user,
 }: {
   riskFile: DVRiskFile;
+  user: LoggedInUser | null | undefined;
 }) {
   const { t } = useTranslation();
 
@@ -55,8 +64,8 @@ export default function DescriptionSection({
     setTimeout(() => {
       svg2PDF(
         document.querySelector("#scenarioChart")?.outerHTML || "",
-        300,
-        270
+        600,
+        540
       ).then((uri) => setScenarioChart(uri || ""));
     }, 5000);
   }, []);
@@ -70,9 +79,10 @@ export default function DescriptionSection({
   return (
     <Page
       size={PAGE_SIZE}
+      dpi={PAGE_DPI}
       style={{
+        ...PAGE_STYLES,
         backgroundColor: "white",
-        padding: "1.5cm",
         color: BLACK,
       }}
     >
@@ -104,10 +114,12 @@ export default function DescriptionSection({
         </Text>
         <LeftBorderSection
           color="#eee"
-          style={{ paddingTop: "5pt", marginBottom: "10pt" }}
+          style={{ paddingTop: 5 * SCALE, marginBottom: 10 * SCALE }}
         >
           {html2PDF(riskFile.cr4de_definition, "description")}
-          <View style={{ marginTop: "-5pt", width: "100%", height: "1pt" }} />
+          <View
+            style={{ marginTop: -5 * SCALE, width: "100%", height: "1pt" }}
+          />
         </LeftBorderSection>
       </View>
 
@@ -118,56 +130,59 @@ export default function DescriptionSection({
           }
         }
       >
-        <Text style={h5Style}>
-          <Trans i18nKey="riskFile.historicalEvents.title">
-            Historical Events
-          </Trans>
-        </Text>
-
         {events.map((e, i) => {
           return (
-            <LeftBorderSection key={e.id} color={colorList[i]} wrap={false}>
-              <View style={{ flexDirection: "row" }}>
-                <View
-                  style={{
-                    flexDirection: "column",
-                    marginTop: "5pt",
-                    marginBottom: "0pt",
-                    width: "3cm",
-                    flexShrink: 0,
-                    borderRadius: 2,
-                    rowGap: 1,
-                  }}
-                >
-                  <Text style={{ ...bodyStyle, ...boldStyle, fontSize: "8pt" }}>
-                    {e.time}
-                  </Text>
-                  <Text style={{ ...bodyStyle, ...boldStyle, fontSize: "8pt" }}>
-                    {e.location}
-                  </Text>
-                </View>
+            <View wrap={false}>
+              {i === 0 && (
+                <Text style={h5Style}>
+                  <Trans i18nKey="riskFile.historicalEvents.title">
+                    Historical Events
+                  </Trans>
+                </Text>
+              )}
+              <LeftBorderSection key={e.id} color={colorList[i]} wrap={false}>
+                <View style={{ flexDirection: "row" }}>
+                  <View
+                    style={{
+                      flexDirection: "column",
+                      marginTop: 10 * SCALE,
+                      marginBottom: "0pt",
+                      width: 3 * POINTS_PER_CM,
+                      flexShrink: 0,
+                      borderRadius: 2,
+                      rowGap: 1,
+                    }}
+                  >
+                    <Text style={{ ...bodyStyle, ...boldStyle, ...smallStyle }}>
+                      {e.time}
+                    </Text>
+                    <Text style={{ ...bodyStyle, ...boldStyle, ...smallStyle }}>
+                      {e.location}
+                    </Text>
+                  </View>
 
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "column",
-                    marginTop: "5pt",
-                    marginLeft: "5pt",
-                    ...bodyStyle,
-                    marginBottom: "0pt",
-                  }}
-                >
-                  {html2PDF(e.description, "description")}
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: "column",
+                      marginTop: 5 * SCALE,
+                      marginLeft: 5 * SCALE,
+                      ...bodyStyle,
+                      marginBottom: "0pt",
+                    }}
+                  >
+                    {html2PDF(e.description, "description")}
+                  </View>
                 </View>
-              </View>
-            </LeftBorderSection>
+              </LeftBorderSection>
+            </View>
           );
         })}
       </View>
 
       <View
         style={{
-          marginTop: "10pt",
+          marginTop: 10 * SCALE,
         }}
       >
         <Text style={h5Style} wrap={false}>
@@ -178,21 +193,27 @@ export default function DescriptionSection({
           <View
             style={{
               flexDirection: "row",
-              marginTop: "5pt",
-              marginBottom: "0.5cm",
+              marginTop: 5 * SCALE,
+              marginBottom: 0.5 * POINTS_PER_CM,
             }}
             wrap={false}
           >
             <View style={{ flex: 1 }}>{mrs_description[0]}</View>
-            <View style={{ width: "4cm", height: "3.6cm" }}>
+            <View
+              style={{
+                width: 6 * POINTS_PER_CM,
+                height: 5.4 * POINTS_PER_CM,
+                marginLeft: 0.5 * POINTS_PER_CM,
+              }}
+            >
               {scenarioChart && (
                 <Image
                   src={scenarioChart}
                   style={{
                     marginTop: 0,
                     // marginLeft: "0.25cm",
-                    width: "4cm",
-                    height: "3.6cm",
+                    width: 6 * POINTS_PER_CM,
+                    height: 5.4 * POINTS_PER_CM,
                   }}
                   // debug={true}
                 />

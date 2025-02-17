@@ -1,36 +1,25 @@
-import { Text } from "@react-pdf/renderer";
+import { Text, View } from "@react-pdf/renderer";
+import { PAGE_STYLES, POINTS_PER_CM, smallStyle } from "./styles";
 
 export default function Footer({}) {
   return (
-    <>
+    <View
+      fixed
+      style={{
+        position: "absolute",
+        bottom: PAGE_STYLES.paddingBottom / 2,
+        left: PAGE_STYLES.padding,
+        right: PAGE_STYLES.padding,
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+      }}
+    >
+      <Text style={smallStyle}>NCCN - CIPRA</Text>
       <Text
-        style={{
-          position: "absolute",
-          bottom: "0.75cm",
-          left: "1.5cm",
-          right: "1.5cm",
-          textAlign: "left",
-          fontFamily: "NH",
-          fontWeight: 300,
-          fontSize: "8pt",
-        }}
-      >
-        NCCN - CIPRA
-      </Text>
-      <Text
-        style={{
-          position: "absolute",
-          bottom: "0.75cm",
-          left: "1.5cm",
-          right: "1.5cm",
-          textAlign: "right",
-          fontFamily: "NH",
-          fontWeight: 300,
-          fontSize: "8pt",
-        }}
+        style={smallStyle}
         render={({ pageNumber, totalPages }) => `${pageNumber}`}
-        fixed
       />
-    </>
+    </View>
   );
 }

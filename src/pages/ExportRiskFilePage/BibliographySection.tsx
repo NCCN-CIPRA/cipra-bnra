@@ -1,14 +1,7 @@
 import { Image, Page, Text, View } from "@react-pdf/renderer";
 import Footer from "./Footer";
-import { BLACK, PAGE_SIZE } from "./styles";
-import html2PDF, {
-  bodyStyle,
-  boldStyle,
-  h3Style,
-  h4Style,
-  h5Style,
-  h6Style,
-} from "../../functions/html2pdf";
+import { bodyStyle, h4Style, PAGE_DPI, PAGE_SIZE, PAGE_STYLES } from "./styles";
+import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { useEffect, useMemo, useState } from "react";
@@ -24,13 +17,17 @@ import {
   unwrap as unwrapScenarios,
 } from "../../functions/scenarios";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
+import { BLACK } from "../../functions/colors";
+import { LoggedInUser } from "../../hooks/useLoggedInUser";
 
 export default function BibliographySection({
   riskFile,
   allAttachments,
+  user,
 }: {
   riskFile: DVRiskFile;
   allAttachments: DVAttachment[] | null;
+  user: LoggedInUser | null | undefined;
 }) {
   const { t } = useTranslation();
 
@@ -48,9 +45,10 @@ export default function BibliographySection({
   return (
     <Page
       size={PAGE_SIZE}
+      dpi={PAGE_DPI}
       style={{
+        ...PAGE_STYLES,
         backgroundColor: "white",
-        padding: "1.5cm",
         color: BLACK,
       }}
     >

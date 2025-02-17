@@ -1,5 +1,6 @@
 import { View } from "@react-pdf/renderer";
 import { ReactNode } from "react";
+import { POINTS_PER_CM, SCALE } from "./styles";
 
 export default function LeftBorderSection({
   children,
@@ -18,7 +19,7 @@ export default function LeftBorderSection({
     <View
       style={{
         flexDirection: "row",
-        marginTop: "10pt",
+        marginTop: 10 * SCALE,
         position: "relative",
         ...style,
       }}
@@ -30,7 +31,7 @@ export default function LeftBorderSection({
           backgroundColor: color,
           position: "absolute",
           left: 0,
-          width: "5pt",
+          width: 5 * SCALE,
           top: 0,
           bottom: 0,
         }}
@@ -41,7 +42,7 @@ export default function LeftBorderSection({
           flex: 1,
           flexDirection: "column",
           marginBottom: "0pt",
-          marginLeft: "10pt",
+          marginLeft: 10 * SCALE,
         }}
       >
         {children}

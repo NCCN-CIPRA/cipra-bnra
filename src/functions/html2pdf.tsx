@@ -1,8 +1,14 @@
 import { Text, View } from "@react-pdf/renderer";
 import { ReactElement } from "react";
-import { NCCN_GREEN } from "./colors";
-
-const BLACK = "#231F20";
+import {
+  bodyStyle,
+  boldStyle,
+  h5Style,
+  POINTS_PER_CM,
+  SCALE,
+  smallStyle,
+} from "../pages/ExportRiskFilePage/styles";
+import { BLACK } from "./colors";
 
 type HTMLTag = {
   tagName: string;
@@ -17,62 +23,6 @@ export type Section =
   | "analysis"
   | "evolution"
   | "bibliography";
-
-// Global Title
-export const h1Style = {};
-
-// Chapter Title
-export const h2Style = {};
-
-// Risk File Title
-export const h3Style = {
-  fontFamily: "NH",
-  fontWeight: 700,
-  fontSize: "20pt",
-  marginBottom: "0.5cm",
-};
-
-// Section Title (i.e. Summary, Risk Description)
-export const h4Style = {
-  fontFamily: "NH",
-  fontWeight: 700,
-  color: NCCN_GREEN,
-  fontSize: "16pt",
-  marginBottom: "0.5cm",
-};
-
-// Subsection Title (i.e description, definition, probability analysis)
-export const h5Style = {
-  fontFamily: "NH",
-  fontSize: "11pt",
-  fontWeight: 500,
-  // lineHeight: "1.5pt",
-  color: BLACK,
-  marginTop: "5pt",
-  marginBottom: "5pt",
-};
-
-// Subsubsection Title (i.e. Human impact)
-export const h6Style = {
-  marginTop: "5pt",
-  fontFamily: "NH",
-  fontWeight: 300,
-  color: BLACK,
-  fontSize: "11pt",
-};
-
-export const bodyStyle = {
-  fontFamily: "NH",
-  fontSize: "10pt",
-  fontWeight: 300,
-  lineHeight: "1.5pt",
-  color: BLACK,
-  marginBottom: "5pt",
-};
-
-export const boldStyle = {
-  fontWeight: 500,
-};
 
 const fixText = (txt: string) => {
   return txt.replaceAll("&#39;", "'");
@@ -212,11 +162,12 @@ const tag2PDF = (
         tag.content.some(
           (s) =>
             typeof s.content === "string" &&
-            s.content.indexOf("of total impact") >= 0
+            (s.content.indexOf("of total impact") >= 0 ||
+              s.content.indexOf("of total probability") >= 0)
         ) ||
         (tag.content.length === 1 && tag.content[0].content === " ")
       ) {
-        styles = { ...styles, marginTop: "-8pt", fontSize: "8pt" };
+        styles = { ...styles, marginTop: -8 * SCALE, ...smallStyle };
       }
 
       // Empty line (for spacing?)
@@ -231,7 +182,7 @@ const tag2PDF = (
         styles = {
           ...styles,
           ...h5Style,
-          fontSize: "8pt",
+          fontSize: 8 * SCALE,
           marginBottom: "0pt",
         };
       }
@@ -246,8 +197,78 @@ const tag2PDF = (
       }
     }
 
-    if (tag.content.length <= 0) {
+    if (
+      tag.content.length <= 0 ||
+      (tag.content.length === 1 &&
+        typeof tag.content[0].content === "string" &&
+        tag.content[0].content.trim() === "")
+    ) {
       return null;
+    }
+
+    // Risk file titles in probability section
+    if (
+      tag.content[0].tagName === "strong" &&
+      typeof tag.content[0].content !== "string" &&
+      tag.content[0].content.some(
+        (s) =>
+          typeof s.content === "string" &&
+          s.content.indexOf("of total probability)") >= 0
+      )
+    ) {
+      if (typeof tag.content[0].content[2].content !== "string")
+        return <Text>Error</Text>;
+
+      const percIndex = tag.content[0].content[2].content.indexOf("%");
+      const percPart = tag.content[0].content[2].content.slice(
+        0,
+        percIndex + 1
+      );
+      const otherPart = tag.content[0].content[2].content.slice(percIndex + 1);
+
+      return (
+        <>
+          {tag2PDF(
+            {
+              ...tag,
+              content: [
+                {
+                  ...tag.content[0],
+                  content: tag.content[0].content.slice(0, 2),
+                },
+              ],
+            },
+            parent,
+            section
+          )}
+          {tag2PDF(
+            {
+              tagName: "p",
+              size: 1,
+              tagOptions: "",
+              content: [
+                {
+                  ...tag.content[0].content[2],
+                  tagName: "strong",
+                  content: percPart
+                    .replaceAll("(", "")
+                    .replaceAll(")", "")
+                    .trim(),
+                },
+                {
+                  ...tag.content[0].content[2],
+                  content: otherPart
+                    .replaceAll("(", "")
+                    .replaceAll(")", "")
+                    .trim(),
+                },
+              ],
+            },
+            parent,
+            section
+          )}
+        </>
+      );
     }
 
     return (
@@ -259,13 +280,51 @@ const tag2PDF = (
 
   if (tag.tagName === "ol") {
     return (
-      <View style={{ marginLeft: "10pt" }}>
+      <View style={{ marginLeft: 10 * SCALE }}>
         {tag.content.map((li, i) => (
           <View style={{ flexDirection: "row" }} wrap={false}>
-            <Text style={{ ...bodyStyle, width: "0.5cm" }}>{i + 1}.</Text>
-            <Text style={{ ...bodyStyle, flex: 1 }} debug={false}>
-              {(li.content as HTMLTag[]).map((e) => tag2PDF(e, tag, section))}
+            <Text style={{ ...bodyStyle, width: 0.5 * POINTS_PER_CM }}>
+              {i + 1}.
             </Text>
+            {typeof li.content === "string" ? (
+              <Text style={{ ...bodyStyle, flex: 1 }} debug={false}>
+                {li.content}
+              </Text>
+            ) : (
+              <Text style={{ ...bodyStyle, flex: 1 }} debug={false}>
+                {(li.content as HTMLTag[]).map((e) => tag2PDF(e, tag, section))}
+              </Text>
+            )}
+          </View>
+        ))}
+      </View>
+    );
+  }
+
+  if (tag.tagName === "ul") {
+    return (
+      <View style={{ marginLeft: 10 * SCALE }}>
+        {tag.content.map((li, i) => (
+          <View style={{ flexDirection: "row" }} wrap={false}>
+            <View
+              style={{
+                backgroundColor: BLACK,
+                borderRadius: "100%",
+                marginTop: 3 * SCALE,
+                marginRight: 6 * SCALE,
+                width: 3 * SCALE,
+                height: 3 * SCALE,
+              }}
+            />
+            {typeof li.content === "string" ? (
+              <Text style={{ ...bodyStyle, flex: 1 }} debug={false}>
+                {li.content}
+              </Text>
+            ) : (
+              <Text style={{ ...bodyStyle, flex: 1 }} debug={false}>
+                {(li.content as HTMLTag[]).map((e) => tag2PDF(e, tag, section))}
+              </Text>
+            )}
           </View>
         ))}
       </View>

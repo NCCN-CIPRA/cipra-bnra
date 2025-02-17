@@ -45,20 +45,7 @@ import { NCCN_GREEN } from "../../functions/colors";
 import useRecord from "../../hooks/useRecord";
 import { DataTable } from "../../hooks/useAPI";
 import Arial from "../../assets/fonts/ArialMT.ttf";
-import NH15 from "../../assets/fonts/NHaasGroteskDSPro-15UltTh.ttf";
-import NH25 from "../../assets/fonts/NHaasGroteskDSPro-25Th.ttf";
-import NH45 from "../../assets/fonts/NHaasGroteskDSPro-45Lt.ttf";
-import NH46 from "../../assets/fonts/NHaasGroteskDSPro-46LtIt.ttf";
-import NH55 from "../../assets/fonts/NHaasGroteskDSPro-55Rg.ttf";
-import NH65 from "../../assets/fonts/NHaasGroteskDSPro-65Md.ttf";
-import NH66 from "../../assets/fonts/NHaasGroteskDSPro-66MdIt.ttf";
-import NH75 from "../../assets/fonts/NHaasGroteskDSPro-75Bd.ttf";
-import html2PDF, {
-  h3Style,
-  h4Style,
-  h5Style,
-  h6Style,
-} from "../../functions/html2pdf";
+import html2PDF from "../../functions/html2pdf";
 import { Bar, BarChart, YAxis } from "recharts";
 import svg2PDF from "../../functions/svg2PDF";
 import { pbkdf2 } from "crypto";
@@ -86,7 +73,6 @@ import { SvgChart as ImpactSankey } from "../../components/charts/ImpactSankey";
 import ImpactBarChart from "../../components/charts/ImpactBarChart";
 import { cpSync } from "fs";
 import SummarySection from "./SummarySection";
-import { BLACK } from "./styles";
 import Header from "./Header";
 import Footer from "./Footer";
 import DescriptionSection from "./DescriptionSection";
@@ -95,63 +81,15 @@ import EvolutionSection from "./EvolutionSection";
 import ScenarioMatrix from "../../components/charts/ScenarioMatrix";
 import BibliographySection from "./BibliographySection";
 import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
-
-// Font.register({
-//   family: "Arial",
-//   fonts: [
-//     {
-//       src: Arial,
-//       fontWeight: 400,
-//     },
-//   ],
-// });
-
-Font.register({
-  family: "NH",
-  fonts: [
-    {
-      src: NH15,
-      fontWeight: 100,
-    },
-    {
-      src: NH25,
-      fontWeight: 200,
-    },
-    {
-      src: NH45,
-      fontWeight: 300,
-    },
-    {
-      src: NH46,
-      fontWeight: 300,
-      fontStyle: "italic",
-    },
-    {
-      src: NH55,
-      fontWeight: 400,
-    },
-    {
-      src: NH65,
-      fontWeight: 500,
-    },
-    {
-      src: NH66,
-      fontWeight: 500,
-      fontStyle: "italic",
-    },
-    {
-      src: NH75,
-      fontWeight: 700,
-    },
-  ],
-});
-Font.registerHyphenationCallback((word) => [word]);
+import "./fonts";
+import useLoggedInUser, { LoggedInUser } from "../../hooks/useLoggedInUser";
 
 const barWidth = 300;
 const barHeight = 500;
 
 export default function ExportRiskFilePage({}) {
   const params = useParams();
+  const { user } = useLoggedInUser();
 
   const { data: hazardCatalogue } = useRecords<SmallRisk>({
     table: DataTable.RISK_FILE,
@@ -328,7 +266,14 @@ export default function ExportRiskFilePage({}) {
         />
       </div>
       <div id="scenarioChart" style={{ position: "absolute", top: -100000 }}>
-        <ScenarioMatrix riskFile={riskFile} mrs={scenario} />
+        <ScenarioMatrix
+          riskFile={riskFile}
+          mrs={scenario}
+          fontSize={20}
+          width={600}
+          height={540}
+          radius={600}
+        />
       </div>
       <div id="climateChart" style={{ position: "absolute", top: -100000 }}>
         <ClimateChangeChart
@@ -356,6 +301,7 @@ export default function ExportRiskFilePage({}) {
             S={S}
             E={E}
             F={F}
+            user={user}
           />
         </Document>
       </PDFViewer>
@@ -372,6 +318,7 @@ export function ExportRiskFile({
   S,
   E,
   F,
+  user,
 }: // hazardCatalogue,
 // cascades,
 // attachments,
@@ -384,6 +331,7 @@ export function ExportRiskFile({
   S: number;
   E: number;
   F: number;
+  user: LoggedInUser | null | undefined;
   // hazardCatalogue: SmallRisk[] | null;
   // cascades: Cascades;
   // attachments: DVAttachment<unknown, DVAttachment<unknown, unknown>>[] | null;
@@ -392,11 +340,23 @@ export function ExportRiskFile({
 
   return (
     <>
-      <SummarySection riskFile={riskFile} tp={tp} H={H} S={S} E={E} F={F} />
-      <DescriptionSection riskFile={riskFile} />
-      <AnalysisSection riskFile={riskFile} />
-      <EvolutionSection riskFile={riskFile} cascades={cascades} />
-      <BibliographySection riskFile={riskFile} allAttachments={attachments} />
+      <SummarySection
+        riskFile={riskFile}
+        tp={tp}
+        H={H}
+        S={S}
+        E={E}
+        F={F}
+        user={user}
+      />
+      <DescriptionSection riskFile={riskFile} user={user} />
+      <AnalysisSection riskFile={riskFile} user={user} />
+      <EvolutionSection riskFile={riskFile} cascades={cascades} user={user} />
+      <BibliographySection
+        riskFile={riskFile}
+        allAttachments={attachments}
+        user={user}
+      />
     </>
   );
 }

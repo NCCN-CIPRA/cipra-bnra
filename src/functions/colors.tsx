@@ -7,3 +7,5 @@ export function hexToRGB(hex: string, alpha: number) {
 }
 
 export const NCCN_GREEN = "rgb(0, 164, 154)";
+
+export const BLACK = "#231F20";
