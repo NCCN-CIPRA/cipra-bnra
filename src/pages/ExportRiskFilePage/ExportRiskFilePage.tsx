@@ -189,103 +189,18 @@ export default function ExportRiskFilePage({}) {
 
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
-      <div id="pBars" style={{ position: "absolute", top: -100000 }}>
-        <ProbabilityBarsChart chartWidth={200} height={100} tp={tp} />
-      </div>
-      <div id="hChart" style={{ position: "absolute", top: -100000 }}>
-        <SvgChart
-          category="H"
-          value={H}
-          width={500}
-          height={275}
-          needleWidth={7}
-        />
-      </div>
-      <div id="sChart" style={{ position: "absolute", top: -100000 }}>
-        <SvgChart
-          category="S"
-          value={S}
-          width={500}
-          height={275}
-          needleWidth={7}
-        />
-      </div>
-      <div id="eChart" style={{ position: "absolute", top: -100000 }}>
-        <SvgChart
-          category="E"
-          value={E}
-          width={500}
-          height={275}
-          needleWidth={7}
-        />
-      </div>
-      <div id="fChart" style={{ position: "absolute", top: -100000 }}>
-        <SvgChart
-          category="F"
-          value={F}
-          width={500}
-          height={275}
-          needleWidth={7}
-        />
-      </div>
-      <div id="probChart" style={{ position: "absolute", top: -100000 }}>
-        <ProbabilitySankey
-          riskFile={riskFile}
-          cascades={cascades}
-          maxCauses={null}
-          shownCausePortion={0.8}
-          minCausePortion={null}
-          scenario={scenario}
-          onClick={() => {}}
-          debug={false}
-          manmade={riskFile.cr4de_risk_type === RISK_TYPE.MANMADE}
-          width={400}
-          height={800}
-        />
-      </div>
-      <div id="impactChart" style={{ position: "absolute", top: -100000 }}>
-        <ImpactSankey
-          riskFile={riskFile}
-          cascades={cascades}
-          maxEffects={null}
-          shownEffectPortion={0.8}
-          minEffectPortion={null}
-          scenario={scenario}
-          onClick={() => {}}
-          debug={false}
-          width={400}
-          height={800}
-        />
-      </div>
-      <div id="impactBarChart" style={{ position: "absolute", top: -100000 }}>
-        <ImpactBarChart
-          riskFile={riskFile}
-          scenario={scenario}
-          width={barWidth}
-          height={barHeight}
-        />
-      </div>
-      <div id="scenarioChart" style={{ position: "absolute", top: -100000 }}>
-        <ScenarioMatrix
-          riskFile={riskFile}
-          mrs={scenario}
-          fontSize={20}
-          width={600}
-          height={540}
-          radius={600}
-        />
-      </div>
-      <div id="climateChart" style={{ position: "absolute", top: -100000 }}>
-        <ClimateChangeChart
-          riskFile={riskFile}
-          causes={cascades.causes}
-          scenario={scenario}
-          width={1000}
-          height={600}
-          fontSize="20pt"
-          xLabelDy={50}
-        />
-      </div>
+      <ExportRiskFileCharts
+        riskFile={riskFile}
+        cascades={cascades}
+        attachments={attachments}
+        tp={tp}
+        H={H}
+        S={S}
+        E={E}
+        F={F}
+        user={user}
+        scenario={scenario}
+      />
       <PDFViewer
         style={{ overflow: "hidden", height: "100%", width: "100%" }}
         height="100%"
@@ -306,6 +221,168 @@ export default function ExportRiskFilePage({}) {
         </Document>
       </PDFViewer>
     </Box>
+  );
+}
+
+export function ExportRiskFileCharts({
+  riskFile,
+  cascades,
+  attachments,
+  tp,
+  H,
+  S,
+  E,
+  F,
+  user,
+  scenario,
+}: // hazardCatalogue,
+// cascades,
+// attachments,
+{
+  riskFile: DVRiskFile;
+  cascades: Cascades;
+  attachments: DVAttachment[];
+  tp: number;
+  H: number;
+  S: number;
+  E: number;
+  F: number;
+  user: LoggedInUser | null | undefined;
+  scenario: SCENARIOS;
+  // hazardCatalogue: SmallRisk[] | null;
+  // cascades: Cascades;
+  // attachments: DVAttachment<unknown, DVAttachment<unknown, unknown>>[] | null;
+}) {
+  return (
+    <>
+      <div
+        id={`pBars-${riskFile.cr4de_riskfilesid}`}
+        style={{ position: "absolute", top: -100000 }}
+      >
+        <ProbabilityBarsChart chartWidth={200} height={100} tp={tp} />
+      </div>
+      <div
+        id={`hChart-${riskFile.cr4de_riskfilesid}`}
+        style={{ position: "absolute", top: -100000 }}
+      >
+        <SvgChart
+          category="H"
+          value={H}
+          width={500}
+          height={275}
+          needleWidth={7}
+        />
+      </div>
+      <div
+        id={`sChart-${riskFile.cr4de_riskfilesid}`}
+        style={{ position: "absolute", top: -100000 }}
+      >
+        <SvgChart
+          category="S"
+          value={S}
+          width={500}
+          height={275}
+          needleWidth={7}
+        />
+      </div>
+      <div
+        id={`eChart-${riskFile.cr4de_riskfilesid}`}
+        style={{ position: "absolute", top: -100000 }}
+      >
+        <SvgChart
+          category="E"
+          value={E}
+          width={500}
+          height={275}
+          needleWidth={7}
+        />
+      </div>
+      <div
+        id={`fChart-${riskFile.cr4de_riskfilesid}`}
+        style={{ position: "absolute", top: -100000 }}
+      >
+        <SvgChart
+          category="F"
+          value={F}
+          width={500}
+          height={275}
+          needleWidth={7}
+        />
+      </div>
+      <div
+        id={`probChart-${riskFile.cr4de_riskfilesid}`}
+        style={{ position: "absolute", top: -100000 }}
+      >
+        <ProbabilitySankey
+          riskFile={riskFile}
+          cascades={cascades}
+          maxCauses={null}
+          shownCausePortion={0.8}
+          minCausePortion={null}
+          scenario={scenario}
+          onClick={() => {}}
+          debug={false}
+          manmade={riskFile.cr4de_risk_type === RISK_TYPE.MANMADE}
+          width={400}
+          height={800}
+        />
+      </div>
+      <div
+        id={`impactChart-${riskFile.cr4de_riskfilesid}`}
+        style={{ position: "absolute", top: -100000 }}
+      >
+        <ImpactSankey
+          riskFile={riskFile}
+          cascades={cascades}
+          maxEffects={null}
+          shownEffectPortion={0.8}
+          minEffectPortion={null}
+          scenario={scenario}
+          onClick={() => {}}
+          debug={false}
+          width={400}
+          height={800}
+        />
+      </div>
+      <div
+        id={`impactBarChart-${riskFile.cr4de_riskfilesid}`}
+        style={{ position: "absolute", top: -100000 }}
+      >
+        <ImpactBarChart
+          riskFile={riskFile}
+          scenario={scenario}
+          width={barWidth}
+          height={barHeight}
+        />
+      </div>
+      <div
+        id={`scenarioChart-${riskFile.cr4de_riskfilesid}`}
+        style={{ position: "absolute", top: -100000 }}
+      >
+        <ScenarioMatrix
+          riskFile={riskFile}
+          mrs={scenario}
+          fontSize={20}
+          width={600}
+          height={540}
+          radius={600}
+        />
+      </div>
+      <div
+        id={`climateChart-${riskFile.cr4de_riskfilesid}`}
+        style={{ position: "absolute", top: -100000 }}
+      >
+        <ClimateChangeChart
+          riskFile={riskFile}
+          causes={cascades.causes}
+          scenario={scenario}
+          width={1000}
+          height={600}
+          fontSize="20pt"
+          xLabelDy={50}
+        />
+      </div>
+    </>
   );
 }
 

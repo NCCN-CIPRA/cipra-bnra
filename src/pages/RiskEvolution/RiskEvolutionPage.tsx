@@ -1,6 +1,12 @@
-import { Box, Container, List, ListItemButton, Typography } from "@mui/material";
+import {
+  Box,
+  Container,
+  List,
+  ListItemButton,
+  Typography,
+} from "@mui/material";
 import CCSection from "./CCSection";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { SCENARIOS } from "../../functions/scenarios";
 import Bibliography from "../RiskAnalysisPage/Bibliography";
@@ -14,6 +20,7 @@ import RiskEvolutionTutorial from "./RiskEvolutionTutorial";
 
 export default function RiskEvolutionPage({}) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const {
     user,
     hazardCatalogue,
@@ -45,12 +52,16 @@ export default function RiskEvolutionPage({}) {
           updateAttachments={loadAttachments}
           isEditingOther={isEditing}
           setIsEditing={setIsEditing}
-          reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+          reloadRiskFile={() =>
+            reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+          }
           allRisks={hazardCatalogue}
         />
 
         <Box className="climate-change" sx={{ mt: 2 }}>
-          <Typography variant="h5">{t("Climate Change", "Climate Change")}</Typography>
+          <Typography variant="h5">
+            {t("Climate Change", "Climate Change")}
+          </Typography>
 
           <CCSection
             cc={climateChange}
@@ -62,21 +73,32 @@ export default function RiskEvolutionPage({}) {
             updateAttachments={loadAttachments}
             isEditingOther={isEditing}
             setIsEditing={setIsEditing}
-            reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+            reloadRiskFile={() =>
+              reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+            }
             allRisks={hazardCatalogue}
           />
         </Box>
 
         {catalyzingEffects.length > 0 && (
           <Box className="catalyzing-effects" sx={{ mt: 8 }}>
-            <Typography variant="h5">{t("Other Catalysing Effects", "Other Catalysing Effects")}</Typography>
+            <Typography variant="h5">
+              {t("Other Catalysing Effects", "Other Catalysing Effects")}
+            </Typography>
 
-            <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, backgroundColor: "white" }}>
+            <Box
+              sx={{
+                borderLeft: "solid 8px #eee",
+                mt: 2,
+                backgroundColor: "white",
+              }}
+            >
               <Box sx={{ px: 2, pt: 2 }}>
                 <Typography variant="body2" paragraph>
-                  The following emerging risks were identified as having a potential catalysing effect on the
-                  probability and/or impact of this risk. Please refer to the corresponding risk files for the
-                  qualitative assessment of this effect:
+                  The following emerging risks were identified as having a
+                  potential catalysing effect on the probability and/or impact
+                  of this risk. Please refer to the corresponding risk files for
+                  the qualitative assessment of this effect:
                 </Typography>
               </Box>
               <List>
@@ -104,7 +126,13 @@ export default function RiskEvolutionPage({}) {
           reloadAttachments={loadAttachments}
         />
 
-        <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={RiskEvolutionTutorial} />
+        <BNRASpeedDial
+          offset={{ x: 0, y: 56 }}
+          exportAction={() =>
+            navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
+          }
+          HelpComponent={RiskEvolutionTutorial}
+        />
       </Box>
     </Container>
   );

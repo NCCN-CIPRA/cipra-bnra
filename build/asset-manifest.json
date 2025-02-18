@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/css/main.216a5e1e.css",
-    "main.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.0060caa0.js",
+    "main.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.b0055240.js",
     "static/js/83.77bd3973.chunk.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/83.77bd3973.chunk.js",
     "static/js/787.3fe0f5ae.chunk.js": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/787.3fe0f5ae.chunk.js",
     "static/media/Roboto-BlackItalic.ttf": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/Roboto-BlackItalic.1cb8e1132609209853de.ttf",
@@ -78,12 +78,12 @@
     "static/media/emerging_risk_icon.svg": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/media/emerging_risk_icon.b8eb4450eee331aea123412a957a5625.svg",
     "index.html": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/index.html",
     "main.216a5e1e.css.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/css/main.216a5e1e.css.map",
-    "main.0060caa0.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.0060caa0.js.map",
+    "main.b0055240.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/main.b0055240.js.map",
     "83.77bd3973.chunk.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/83.77bd3973.chunk.js.map",
     "787.3fe0f5ae.chunk.js.map": "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/build/static/js/787.3fe0f5ae.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.216a5e1e.css",
-    "static/js/main.0060caa0.js"
+    "static/js/main.b0055240.js"
   ]
 }

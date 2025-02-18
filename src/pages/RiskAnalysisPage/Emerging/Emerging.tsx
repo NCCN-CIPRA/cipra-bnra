@@ -3,7 +3,7 @@ import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import Bibliography from "../Bibliography";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import { useEffect } from "react";
 import CatalyzingSection from "./CatalyzingSection";
@@ -37,6 +37,7 @@ export default function Emerging({
   reloadCascades: (riskFile: DVRiskFile<unknown>) => Promise<unknown>;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const rf = riskFile;
 
@@ -67,7 +68,13 @@ export default function Emerging({
           attachments={attachments}
           reloadAttachments={loadAttachments}
         />
-        <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={EmergingAnalysisTutorial} />
+        <BNRASpeedDial
+          offset={{ x: 0, y: 56 }}
+          exportAction={() =>
+            navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
+          }
+          HelpComponent={EmergingAnalysisTutorial}
+        />
       </Box>
     </>
   );

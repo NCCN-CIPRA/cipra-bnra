@@ -63,7 +63,8 @@ export default function DescriptionSection({
   useEffect(() => {
     setTimeout(() => {
       svg2PDF(
-        document.querySelector("#scenarioChart")?.outerHTML || "",
+        document.querySelector(`#scenarioChart-${riskFile.cr4de_riskfilesid}`)
+          ?.outerHTML || "",
         600,
         540
       ).then((uri) => setScenarioChart(uri || ""));

@@ -4,7 +4,7 @@ import * as IP from "../../../functions/intensityParameters";
 import { SCENARIOS } from "../../../functions/scenarios";
 import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import CapacitiesSection from "./CapacitiesSection";
 import Bibliography from "../Bibliography";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
@@ -43,6 +43,7 @@ export default function ManMade({
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const MRS = riskFile.cr4de_mrs || SCENARIOS.EXTREME;
   const [scenario, setScenario] = useState(MRS);
@@ -51,7 +52,9 @@ export default function ManMade({
 
   const intensityParameters = IP.unwrap(rf.cr4de_intensity_parameters);
 
-  const effects = cascades.effects.map((c) => getIndirectImpact(c, riskFile, MRS));
+  const effects = cascades.effects.map((c) =>
+    getIndirectImpact(c, riskFile, MRS)
+  );
 
   return (
     <>
@@ -59,7 +62,9 @@ export default function ManMade({
         <RiskFileTitle riskFile={riskFile} />
 
         <Box sx={{ mt: 8 }}>
-          <Typography variant="h5">{t("risks.ananylis.quantiResults", "Quantitative Analysis Results")}</Typography>
+          <Typography variant="h5">
+            {t("risks.ananylis.quantiResults", "Quantitative Analysis Results")}
+          </Typography>
 
           <MMSankeyDiagram
             riskFile={riskFile}
@@ -84,7 +89,9 @@ export default function ManMade({
 
         {rf.cr4de_intensity_parameters && (
           <Box className="mrag" sx={{ mt: 8 }}>
-            <Typography variant="h5">{t("Most Relevant Actor Group")}</Typography>
+            <Typography variant="h5">
+              {t("Most Relevant Actor Group")}
+            </Typography>
 
             <ScenarioMatrix riskFile={riskFile} mrs={MRS} />
 
@@ -104,7 +111,9 @@ export default function ManMade({
         )}
 
         <Box className="actions-assess" sx={{ mt: 8 }}>
-          <Typography variant="h5">{t("Preferred Malicious Actions")}</Typography>
+          <Typography variant="h5">
+            {t("Preferred Malicious Actions")}
+          </Typography>
 
           <ActionsSection
             riskFile={rf}
@@ -143,7 +152,13 @@ export default function ManMade({
           attachments={attachments}
           reloadAttachments={loadAttachments}
         />
-        <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={MMAnalysisTutorial} />
+        <BNRASpeedDial
+          offset={{ x: 0, y: 56 }}
+          exportAction={() =>
+            navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
+          }
+          HelpComponent={MMAnalysisTutorial}
+        />
       </Box>
     </>
   );

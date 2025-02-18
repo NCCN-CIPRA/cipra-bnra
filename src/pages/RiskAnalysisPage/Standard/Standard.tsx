@@ -1,6 +1,10 @@
 import { Alert, Box, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { getCascadeParameter, getScenarioParameter, SCENARIOS } from "../../../functions/scenarios";
+import {
+  getCascadeParameter,
+  getScenarioParameter,
+  SCENARIOS,
+} from "../../../functions/scenarios";
 import { getDirectImpact, getIndirectImpact } from "../../../functions/Impact";
 import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import Scenario from "./Scenario";
@@ -8,7 +12,7 @@ import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { useEffect, useMemo, useState } from "react";
 import ProbabilitySection from "./ProbabilitySection";
 import ImpactSection from "./ImpactSection";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import CBSection from "./CBSection";
 import { Cause } from "../../../functions/Probability";
 import Bibliography from "../Bibliography";
@@ -57,6 +61,7 @@ export default function Standard({
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const MRS = riskFile.cr4de_mrs || SCENARIOS.EXTREME;
   const [scenario, setScenario] = useState(MRS);
@@ -83,7 +88,10 @@ export default function Standard({
       }) || []),
   ].sort((a, b) => b.p - a.p);
 
-  const effects = [getDirectImpact(riskFile, MRS), ...cascades.effects.map((c) => getIndirectImpact(c, riskFile, MRS))];
+  const effects = [
+    getDirectImpact(riskFile, MRS),
+    ...cascades.effects.map((c) => getIndirectImpact(c, riskFile, MRS)),
+  ];
   // effects.map((e, i) => console.log(e, i === 0 ? riskFile : cascades.effects[i - 1]));
   // console.log(riskFile, cascades.effects);
   return (
@@ -91,7 +99,9 @@ export default function Standard({
       <RiskFileTitle riskFile={riskFile} />
 
       <Box sx={{ mt: 8 }}>
-        <Typography variant="h5">{t("risks.ananylis.quantiResults", "Quantitative Analysis Results")}</Typography>
+        <Typography variant="h5">
+          {t("risks.ananylis.quantiResults", "Quantitative Analysis Results")}
+        </Typography>
 
         <SankeyDiagram
           riskFile={riskFile}
@@ -148,7 +158,15 @@ export default function Standard({
 
       <Box className="probability-assess" sx={{ mt: 8, clear: "both" }}>
         <Typography variant="h5">{t("Probability Assessment")}</Typography>
-        <Box sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
+        <Box
+          sx={{
+            borderLeft: "solid 8px #eee",
+            px: 2,
+            py: 1,
+            mt: 2,
+            backgroundColor: "white",
+          }}
+        >
           <ProbabilitySection
             riskFile={rf}
             causes={causes}
@@ -223,7 +241,16 @@ export default function Standard({
           allRisks={hazardCatalogue}
         />
 
-        <Box className="cb-impact" sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
+        <Box
+          className="cb-impact"
+          sx={{
+            borderLeft: "solid 8px #eee",
+            px: 2,
+            py: 1,
+            mt: 2,
+            backgroundColor: "white",
+          }}
+        >
           <Typography variant="h6">Cross-border Impact</Typography>
           <CBSection
             riskFile={riskFile}
@@ -246,7 +273,13 @@ export default function Standard({
         reloadAttachments={loadAttachments}
       />
 
-      <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={StandardAnalysisTutorial} />
+      <BNRASpeedDial
+        offset={{ x: 0, y: 56 }}
+        exportAction={() =>
+          navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
+        }
+        HelpComponent={StandardAnalysisTutorial}
+      />
     </Box>
   );
 }

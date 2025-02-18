@@ -37,7 +37,9 @@ export default function EvolutionSection({
   useEffect(() => {
     setTimeout(() => {
       svg2PDF(
-        document.querySelector("#climateChart svg")?.outerHTML || "",
+        document.querySelector(
+          `#climateChart-${riskFile.cr4de_riskfilesid} svg`
+        )?.outerHTML || "",
         750,
         450
       ).then((uri) => setCCChart(uri || ""));

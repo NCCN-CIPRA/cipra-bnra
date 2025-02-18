@@ -2,7 +2,7 @@ import { Box, IconButton, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { Cascades } from "../../BaseRisksPage";
 import { useTranslation } from "react-i18next";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import DefinitionSection from "../DefinitionSection";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
@@ -47,6 +47,7 @@ export default function Manmade({
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const intensityParameters = IP.unwrap(riskFile.cr4de_intensity_parameters);
   const MRS = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
@@ -57,8 +58,19 @@ export default function Manmade({
       <RiskFileTitle riskFile={riskFile} />
 
       <Box>
-        <Typography variant="h5">{t("riskFile.definition.title", "Definition")}</Typography>{" "}
-        <Box id="definition" sx={{ borderLeft: "solid 8px #eee", px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
+        <Typography variant="h5">
+          {t("riskFile.definition.title", "Definition")}
+        </Typography>{" "}
+        <Box
+          id="definition"
+          sx={{
+            borderLeft: "solid 8px #eee",
+            px: 2,
+            py: 1,
+            mt: 2,
+            backgroundColor: "white",
+          }}
+        >
           <DefinitionSection
             riskFile={riskFile}
             mode={mode}
@@ -116,7 +128,13 @@ export default function Manmade({
         />
       </Box>
 
-      <BNRASpeedDial offset={{ x: 0, y: 56 }} HelpComponent={ManmadeIdentificationTutorial} />
+      <BNRASpeedDial
+        offset={{ x: 0, y: 56 }}
+        exportAction={() =>
+          navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
+        }
+        HelpComponent={ManmadeIdentificationTutorial}
+      />
     </Box>
   );
 }

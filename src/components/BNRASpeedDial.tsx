@@ -26,17 +26,27 @@ export default function BNRASpeedDial({
 
   const [runTutorial, setRunTutorial] = useState(false);
 
-  if (HelpComponent && !(user && user.roles.internal && exportAction) && !(user && user.roles.analist && editAction)) {
+  if (
+    HelpComponent &&
+    !exportAction &&
+    !(user && user.roles.analist && editAction)
+  ) {
     return (
       <>
         <Fab
-          sx={{ position: "fixed", bottom: 16 + offset.y, right: 16 + offset.x }}
+          sx={{
+            position: "fixed",
+            bottom: 16 + offset.y,
+            right: 16 + offset.x,
+          }}
           color="primary"
           onClick={() => setRunTutorial(true)}
         >
           <QuestionMarkIcon />
         </Fab>
-        {HelpComponent && <HelpComponent run={runTutorial} setRun={setRunTutorial} />}
+        {HelpComponent && (
+          <HelpComponent run={runTutorial} setRun={setRunTutorial} />
+        )}
       </>
     );
   }
@@ -49,16 +59,30 @@ export default function BNRASpeedDial({
         icon={<SpeedDialIcon />}
       >
         {HelpComponent && (
-          <SpeedDialAction icon={<QuestionMarkIcon />} tooltipTitle={"Help"} onClick={() => setRunTutorial(true)} />
+          <SpeedDialAction
+            icon={<QuestionMarkIcon />}
+            tooltipTitle={"Help"}
+            onClick={() => setRunTutorial(true)}
+          />
         )}
-        {user && user.roles.internal && exportAction && (
-          <SpeedDialAction icon={<PrintIcon />} tooltipTitle={"Export PDF"} onClick={exportAction} />
+        {user && exportAction && (
+          <SpeedDialAction
+            icon={<PrintIcon />}
+            tooltipTitle={"Export PDF"}
+            onClick={exportAction}
+          />
         )}
         {user && user.roles.analist && editAction && (
-          <SpeedDialAction icon={<EditIcon />} tooltipTitle={"Edit Page"} onClick={editAction} />
+          <SpeedDialAction
+            icon={<EditIcon />}
+            tooltipTitle={"Edit Page"}
+            onClick={editAction}
+          />
         )}
       </SpeedDial>
-      {HelpComponent && <HelpComponent run={runTutorial} setRun={setRunTutorial} />}
+      {HelpComponent && (
+        <HelpComponent run={runTutorial} setRun={setRunTutorial} />
+      )}
     </>
   );
 }

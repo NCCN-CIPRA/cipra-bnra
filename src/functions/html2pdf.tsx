@@ -25,7 +25,10 @@ export type Section =
   | "bibliography";
 
 const fixText = (txt: string) => {
-  return txt.replaceAll("&#39;", "'");
+  return txt
+    .replaceAll("&#39;", "'")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&amp;", "&");
 };
 
 // html string should start with opening tag <...>
@@ -189,10 +192,19 @@ const tag2PDF = (
 
       // Risk file title
       if (
-        tag.content.length === 1 &&
-        tag.content[0].tagName === "strong" &&
-        tag.content[0].content.length === 2
+        (tag.content.length === 1 &&
+          tag.content[0].tagName === "strong" &&
+          tag.content[0].content.length === 2 &&
+          typeof tag.content[0].content[1] !== "string" &&
+          tag.content[0].content[1].tagName === "a") ||
+        (tag.content.length === 2 &&
+          tag.content[0].tagName === "strong" &&
+          tag.content[1].tagName === "strong" &&
+          tag.content[1].content.length === 1 &&
+          typeof tag.content[1].content[0] !== "string" &&
+          tag.content[1].content[0].tagName === "a")
       ) {
+        tag.content[0].tagName = "span";
         styles = { ...styles, textDecoration: "underline" };
       }
     }
@@ -257,10 +269,9 @@ const tag2PDF = (
                 },
                 {
                   ...tag.content[0].content[2],
-                  content: otherPart
-                    .replaceAll("(", "")
-                    .replaceAll(")", "")
-                    .trim(),
+                  content:
+                    " " +
+                    otherPart.replaceAll("(", "").replaceAll(")", "").trim(),
                 },
               ],
             },

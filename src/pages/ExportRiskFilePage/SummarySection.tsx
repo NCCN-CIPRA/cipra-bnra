@@ -51,21 +51,26 @@ export default function SummarySection({
 
   useEffect(() => {
     setTimeout(() => {
-      svg2PDF(document.querySelector("#pBars")?.outerHTML || "").then((uri) =>
-        setpBarChart(uri || "")
-      );
-      svg2PDF(document.querySelector("#hChart svg")?.outerHTML || "").then(
-        (uri) => setHChart(uri || "")
-      );
-      svg2PDF(document.querySelector("#sChart svg")?.outerHTML || "").then(
-        (uri) => setSChart(uri || "")
-      );
-      svg2PDF(document.querySelector("#eChart svg")?.outerHTML || "").then(
-        (uri) => setEChart(uri || "")
-      );
-      svg2PDF(document.querySelector("#fChart svg")?.outerHTML || "").then(
-        (uri) => setFChart(uri || "")
-      );
+      svg2PDF(
+        document.querySelector(`#pBars-${riskFile.cr4de_riskfilesid}`)
+          ?.outerHTML || ""
+      ).then((uri) => setpBarChart(uri || ""));
+      svg2PDF(
+        document.querySelector(`#hChart-${riskFile.cr4de_riskfilesid} svg`)
+          ?.outerHTML || ""
+      ).then((uri) => setHChart(uri || ""));
+      svg2PDF(
+        document.querySelector(`#sChart-${riskFile.cr4de_riskfilesid} svg`)
+          ?.outerHTML || ""
+      ).then((uri) => setSChart(uri || ""));
+      svg2PDF(
+        document.querySelector(`#eChart-${riskFile.cr4de_riskfilesid} svg`)
+          ?.outerHTML || ""
+      ).then((uri) => setEChart(uri || ""));
+      svg2PDF(
+        document.querySelector(`#fChart-${riskFile.cr4de_riskfilesid} svg`)
+          ?.outerHTML || ""
+      ).then((uri) => setFChart(uri || ""));
     }, 5000);
   }, []);
 
@@ -180,7 +185,7 @@ export default function SummarySection({
       >
         {html2PDF(getSummary(riskFile, i18next.language), "summary")}
       </View>
-      {!user?.roles.admin && <Watermark user={user} />}
+      {!user?.roles.analist && <Watermark user={user} />}
     </Page>
   );
 }

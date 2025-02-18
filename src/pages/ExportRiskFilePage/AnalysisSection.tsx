@@ -39,14 +39,18 @@ export default function AnalysisSection({
 
   useEffect(() => {
     setTimeout(() => {
-      svg2PDF(document.querySelector("#probChart svg")?.outerHTML || "").then(
-        (uri) => setProbChart(uri || "")
-      );
-      svg2PDF(document.querySelector("#impactChart svg")?.outerHTML || "").then(
-        (uri) => setImpactChart(uri || "")
-      );
       svg2PDF(
-        document.querySelector("#impactBarChart svg")?.outerHTML || "",
+        document.querySelector(`#probChart-${riskFile.cr4de_riskfilesid} svg`)
+          ?.outerHTML || ""
+      ).then((uri) => setProbChart(uri || ""));
+      svg2PDF(
+        document.querySelector(`#impactChart-${riskFile.cr4de_riskfilesid} svg`)
+          ?.outerHTML || ""
+      ).then((uri) => setImpactChart(uri || ""));
+      svg2PDF(
+        document.querySelector(
+          `#impactBarChart-${riskFile.cr4de_riskfilesid} svg`
+        )?.outerHTML || "",
         400,
         600
       ).then((uri) => setImpactBarChart(uri || ""));
