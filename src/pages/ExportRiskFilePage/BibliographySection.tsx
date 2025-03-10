@@ -23,11 +23,9 @@ import { LoggedInUser } from "../../hooks/useLoggedInUser";
 export default function BibliographySection({
   riskFile,
   allAttachments,
-  user,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskFile | null;
   allAttachments: DVAttachment[] | null;
-  user: LoggedInUser | null | undefined;
 }) {
   const { t } = useTranslation();
 
@@ -52,7 +50,7 @@ export default function BibliographySection({
         color: BLACK,
       }}
     >
-      <Header riskFile={riskFile} />
+      {riskFile && <Header riskFile={riskFile} />}
       <Footer />
       <View
         style={
@@ -124,7 +122,7 @@ export default function BibliographySection({
                 return -1;
               })
               .map((a) => (
-                <View wrap={false}>
+                <View wrap={false} style={{ width: "100%" }}>
                   <View
                     key={a.cr4de_bnraattachmentid}
                     style={{
@@ -137,10 +135,12 @@ export default function BibliographySection({
                       style={{
                         ...bodyStyle,
                         position: "relative",
-                        width: "0.5cm",
+                        width: "1.5cm",
                       }}
                     >
-                      {a.cr4de_reference}.
+                      {riskFile
+                        ? `${riskFile.cr4de_hazard_id}-${a.cr4de_reference}`
+                        : a.cr4de_reference}
                     </Text>
                     <Text
                       style={{
@@ -158,11 +158,13 @@ export default function BibliographySection({
                         width: "100%",
                         textDecoration: "underline",
                         marginTop: "-5pt",
-                        paddingLeft: "0.5cm",
+                        paddingLeft: "1.5cm",
                       }}
-                      hyphenationCallback={(url) => [...url.split("")]}
+                      hyphenationCallback={(word) => ["", word, ""]}
                     >
-                      {a.cr4de_url}
+                      {a.cr4de_url.split("").map((s, idx) => (
+                        <Text key={idx}>{s}</Text>
+                      ))}
                     </Text>
                   )}
                 </View>

@@ -20,7 +20,6 @@ import EmergingIdentification from "../RiskIdentificationPage/Emerging/Emerging"
 import Bibliography from "../RiskAnalysisPage/Bibliography";
 import { BasePageContext } from "../BasePage";
 import { useEffect, useMemo, useState } from "react";
-import { Cascades } from "../BaseRisksPage";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import {
   getResultSnapshot,
@@ -64,6 +63,8 @@ import {
   getCascadeResultSnapshot,
 } from "../../types/dataverse/DVRiskCascade";
 import {
+  Cascades,
+  getCascades,
   getCatalyzingEffects,
   getCauses,
   getClimateChange,
@@ -157,23 +158,17 @@ export default function ExportRiskFilePage({}) {
       {}
     );
 
-    const causes = getCauses(riskFile, rawCascades, hc);
-    const effects = getEffects(riskFile, rawCascades, hc);
-    const catalyzingEffects = getCatalyzingEffects(
-      riskFile,
-      rawCascades,
-      hc,
-      false
-    );
-    const climateChange = getClimateChange(riskFile, rawCascades, hc);
+    // const causes = getCauses(riskFile, rawCascades, hc);
+    // const effects = getEffects(riskFile, rawCascades, hc);
+    // const catalyzingEffects = getCatalyzingEffects(
+    //   riskFile,
+    //   rawCascades,
+    //   hc,
+    //   false
+    // );
+    // const climateChange = getClimateChange(riskFile, rawCascades, hc);
 
-    return {
-      all: [...causes, ...effects, ...catalyzingEffects],
-      causes,
-      effects,
-      catalyzingEffects,
-      climateChange,
-    };
+    return getCascades([riskFile], rawCascades, hc)[riskFile.cr4de_riskfilesid];
   }, [hazardCatalogue, riskFile, rawCascades]);
 
   if (!riskFile || !cascades || attachments == null) return null;
@@ -192,7 +187,6 @@ export default function ExportRiskFilePage({}) {
       <ExportRiskFileCharts
         riskFile={riskFile}
         cascades={cascades}
-        attachments={attachments}
         tp={tp}
         H={H}
         S={S}
@@ -227,7 +221,6 @@ export default function ExportRiskFilePage({}) {
 export function ExportRiskFileCharts({
   riskFile,
   cascades,
-  attachments,
   tp,
   H,
   S,
@@ -241,7 +234,6 @@ export function ExportRiskFileCharts({
 {
   riskFile: DVRiskFile;
   cascades: Cascades;
-  attachments: DVAttachment[];
   tp: number;
   H: number;
   S: number;
@@ -402,7 +394,7 @@ export function ExportRiskFile({
 {
   riskFile: DVRiskFile;
   cascades: Cascades;
-  attachments: DVAttachment[];
+  attachments: DVAttachment[] | null;
   tp: number;
   H: number;
   S: number;
@@ -429,11 +421,9 @@ export function ExportRiskFile({
       <DescriptionSection riskFile={riskFile} user={user} />
       <AnalysisSection riskFile={riskFile} user={user} />
       <EvolutionSection riskFile={riskFile} cascades={cascades} user={user} />
-      <BibliographySection
-        riskFile={riskFile}
-        allAttachments={attachments}
-        user={user}
-      />
+      {attachments && (
+        <BibliographySection riskFile={riskFile} allAttachments={attachments} />
+      )}
     </>
   );
 }

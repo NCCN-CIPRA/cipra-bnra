@@ -183,7 +183,7 @@ export default function SummarySection({
         }
         // debug={true}
       >
-        {html2PDF(getSummary(riskFile, i18next.language), "summary")}
+        {html2PDF(getSummary(riskFile, i18next.language), "summary", riskFile)}
       </View>
       {!user?.roles.analist && <Watermark user={user} />}
     </Page>

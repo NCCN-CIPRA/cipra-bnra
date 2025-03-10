@@ -15,8 +15,8 @@ import ImpactSankey from "../../../components/charts/ImpactSankey";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import { useEffect, useState } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { Cascades } from "../../BaseRisksPage";
 import { useTranslation } from "react-i18next";
+import { Cascades } from "../../../functions/cascades";
 
 export default function SankeyDiagram({
   riskFile,

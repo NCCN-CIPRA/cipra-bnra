@@ -10,8 +10,8 @@ import {
   getScenarioSuffix,
 } from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
-import { Cascades } from "../../pages/BaseRisksPage";
 import { useTranslation } from "react-i18next";
+import { Cascades } from "../../functions/cascades";
 
 const baseY = 50;
 

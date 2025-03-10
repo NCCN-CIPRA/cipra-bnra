@@ -21,11 +21,15 @@ import {
 } from "@mui/material";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, getScenarioSuffix, getWorstCaseScenario } from "../../functions/scenarios";
+import {
+  SCENARIOS,
+  getScenarioSuffix,
+  getWorstCaseScenario,
+} from "../../functions/scenarios";
 import ImpactBarChart from "./ImpactBarChart";
 import ProbabilityBars from "./ProbabilityBars";
 import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
-import { Cascades } from "../../pages/BaseRisksPage";
+import { Cascades } from "../../functions/cascades";
 
 export default function SankeyDiagram({
   riskFile,

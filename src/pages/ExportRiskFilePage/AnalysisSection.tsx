@@ -158,7 +158,7 @@ export default function AnalysisSection({
           color="#eee"
           style={{ paddingTop: 5 * SCALE, marginBottom: 10 * SCALE }}
         >
-          {html2PDF(riskFile.cr4de_mrs_probability, "analysis")}
+          {html2PDF(riskFile.cr4de_mrs_probability, "analysis", riskFile)}
         </LeftBorderSection>
       </View>
 
@@ -181,7 +181,7 @@ export default function AnalysisSection({
           >
             {t("learning.impact.h.title")}
           </Text>
-          {html2PDF(riskFile.cr4de_mrs_impact_h, "analysis")}
+          {html2PDF(riskFile.cr4de_mrs_impact_h, "analysis", riskFile)}
         </LeftBorderSection>
 
         <LeftBorderSection color={getImpactColor("S")}>
@@ -195,7 +195,7 @@ export default function AnalysisSection({
           >
             {t("learning.impact.s.title")}
           </Text>
-          {html2PDF(riskFile.cr4de_mrs_impact_s, "analysis")}
+          {html2PDF(riskFile.cr4de_mrs_impact_s, "analysis", riskFile)}
         </LeftBorderSection>
 
         <LeftBorderSection color={getImpactColor("E")}>
@@ -209,7 +209,7 @@ export default function AnalysisSection({
           >
             {t("learning.impact.e.title")}
           </Text>
-          {html2PDF(riskFile.cr4de_mrs_impact_e, "analysis")}
+          {html2PDF(riskFile.cr4de_mrs_impact_e, "analysis", riskFile)}
         </LeftBorderSection>
 
         <LeftBorderSection color={getImpactColor("F")}>
@@ -223,7 +223,7 @@ export default function AnalysisSection({
           >
             {t("learning.impact.f.title")}
           </Text>
-          {html2PDF(riskFile.cr4de_mrs_impact_f, "analysis")}
+          {html2PDF(riskFile.cr4de_mrs_impact_f, "analysis", riskFile)}
         </LeftBorderSection>
 
         <LeftBorderSection color="#eee" style={{ marginBottom: -5 * SCALE }}>
@@ -243,7 +243,8 @@ export default function AnalysisSection({
                 riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE
               )}`
             ],
-            "analysis"
+            "analysis",
+            riskFile
           )}
           <View
             style={{ marginTop: -5 * SCALE, width: "100%", height: "1pt" }}

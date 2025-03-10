@@ -9,7 +9,6 @@ import CapacitiesSection from "./CapacitiesSection";
 import Bibliography from "../Bibliography";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import ActionsSection from "./PreferredActionsSection";
-import { Cascades } from "../../BaseRisksPage";
 import MMSankeyDiagram from "./MMSankeyDiagram";
 import MMImpactSection from "./MMImpactSection";
 import { useTranslation } from "react-i18next";
@@ -19,6 +18,7 @@ import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import MMAnalysisTutorial from "./MMAnalysisTutorial";
+import { Cascades } from "../../../functions/cascades";
 
 export default function ManMade({
   riskFile,

@@ -75,7 +75,11 @@ export default function DescriptionSection({
 
   const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
 
-  const mrs_description = html2PDF(riskFile.cr4de_mrs_scenario, "description");
+  const mrs_description = html2PDF(
+    riskFile.cr4de_mrs_scenario,
+    "description",
+    riskFile
+  );
 
   return (
     <Page
@@ -117,7 +121,7 @@ export default function DescriptionSection({
           color="#eee"
           style={{ paddingTop: 5 * SCALE, marginBottom: 10 * SCALE }}
         >
-          {html2PDF(riskFile.cr4de_definition, "description")}
+          {html2PDF(riskFile.cr4de_definition, "description", riskFile)}
           <View
             style={{ marginTop: -5 * SCALE, width: "100%", height: "1pt" }}
           />
@@ -172,7 +176,7 @@ export default function DescriptionSection({
                       marginBottom: "0pt",
                     }}
                   >
-                    {html2PDF(e.description, "description")}
+                    {html2PDF(e.description, "description", riskFile)}
                   </View>
                 </View>
               </LeftBorderSection>

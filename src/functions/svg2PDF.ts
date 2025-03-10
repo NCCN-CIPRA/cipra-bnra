@@ -2,7 +2,7 @@ import { Canvg } from "canvg";
 
 // const scale= 1;
 
-export default async function (svgString: string, width?: number, height?: number) {
+export default async function (svgString: string, width?: number, height?: number, type: string = "image/jpeg") {
   try {
     const canvas = document.createElement("canvas");
     if (width) {
@@ -27,6 +27,7 @@ export default async function (svgString: string, width?: number, height?: numbe
       //store the current globalCompositeOperation
       var compositeOperation = context.globalCompositeOperation;
 
+      if (type.indexOf("jpeg") >= 0) {
       //set to draw behind current content
       context.globalCompositeOperation = "destination-over";
 
@@ -35,8 +36,8 @@ export default async function (svgString: string, width?: number, height?: numbe
 
       //draw background / rect on entire canvas
       context.fillRect(0, 0, canvas.width, canvas.height);
-
-      const dataUri = canvas.toDataURL("image/jpeg", 1);
+      }
+      const dataUri = canvas.toDataURL(type, 1);
       return dataUri;
     }
   } catch (error) {

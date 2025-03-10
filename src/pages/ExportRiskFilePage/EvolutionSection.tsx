@@ -18,8 +18,8 @@ import svg2PDF from "../../functions/svg2PDF";
 import getScaleString from "../../functions/getScaleString";
 import { BLACK, NCCN_GREEN } from "../../functions/colors";
 import Header from "./Header";
-import { Cascades } from "../BaseRisksPage";
 import { LoggedInUser } from "../../hooks/useLoggedInUser";
+import { Cascades } from "../../functions/cascades";
 
 export default function EvolutionSection({
   riskFile,
@@ -91,7 +91,7 @@ export default function EvolutionSection({
             // debug={true}
           />
         )}
-        {html2PDF(riskFile.cr4de_mrs_cc, "evolution")}
+        {html2PDF(riskFile.cr4de_mrs_cc, "evolution", riskFile)}
       </View>
 
       <View
@@ -115,7 +115,7 @@ export default function EvolutionSection({
             >
               {c.cr4de_cause_hazard.cr4de_title}
             </Text>
-            {html2PDF(c.cr4de_description, "evolution")}
+            {html2PDF(c.cr4de_description, "evolution", c.cr4de_cause_hazard)}
           </View>
         ))}
       </View>

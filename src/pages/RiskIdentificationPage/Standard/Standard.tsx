@@ -1,6 +1,5 @@
 import { Box, IconButton, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { Cascades } from "../../BaseRisksPage";
 import { Trans, useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
@@ -19,6 +18,7 @@ import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import StandardIdentificationTutorial from "./StandardIdentificationTutorial";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import { Cascades } from "../../../functions/cascades";
 
 const ibsx = {
   transition: "opacity .3s ease",

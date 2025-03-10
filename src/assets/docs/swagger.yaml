@@ -1,0 +1,139 @@
+openapi: 3.0.3
+info:
+  title: NCCN BNRA - Portals Web API
+  description: |-
+    Documentation for API endpoints with anonymous access to the BNRA application
+    
+    Some useful links:
+    - [The BNRA Application](https://bnra.powerappsportals.com/)
+    - [Portals Web API overview](https://learn.microsoft.com/en-us/power-pages/configure/web-api-overview)
+  contact:
+    email: cipra.bnra@nccn.fgov.be
+  version: 1.0.0
+servers:
+  - url: https://bnra.powerappsportals.com/_api
+tags:
+  - name: risk file summary
+paths:
+  /cr4de_bnrariskfilesummaries:
+    get:
+      tags:
+        - risk file summary
+      summary: Get all risk file summaries
+      operationId: getAllRiskfileSummaries
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/riskfile_summary'
+  /cr4de_bnrariskfilesummaries/{riskfileid}:
+    get:
+      tags:
+        - risk file summary
+      summary: Find risk file summary by ID
+      operationId: getRiskfileSummaryById
+      parameters:
+        - name: riskfileid
+          in: path
+          description: ID of risk file to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/riskfile_summary'
+        '404':
+          description: Risk file not found
+components:
+  schemas:
+    riskfile_summary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 6296cd55-aa6c-ed11-9561-000d3adf7089
+        cr4de_title:
+          type: string
+          example: "Software / Hardware vulnerability"
+        cr4de_hazard_id:
+          type: string
+          example: "C03"
+        cr4de_category:
+          type: string
+          description: The category of the risk file
+          example: Cyber
+          enum:
+            - Cyber
+            - EcoTech
+            - Health
+            - Man-made
+            - Nature
+            - Transversal
+            - Emerging Risk
+        cr4de_risk_type:
+          type: string
+          description: The type of the risk file
+          example: Standard
+          enum:
+            - Standard Risk
+            - Malicious Man-made Risk
+            - Emerging Risk
+        cr4de_summary_nl:
+          type: string
+          description: The Dutch translation of the risk file summary in HTML formatted text
+          format: html
+        cr4de_summary_fr:
+          type: string
+          description: The French translation of the risk file summary in HTML formatted text
+          format: html
+        cr4de_summary_en:
+          type: string
+          description: The English translation of the risk file summary in HTML formatted text
+          format: html
+        cr4de_summary_de:
+          type: string
+          description: The German translation of the risk file summary in HTML formatted text (often missing)
+          format: html
+        cr4de_mrs_p:
+          type: number
+          description: The total estimated probability of the most relevant scenario of this risk file on a scale of 0 - 5
+          format: float
+          example: 2.3
+        cr4de_mrs_h:
+          type: number
+          description: The total estimated human impact of the most relevant scenario of this risk file on a scale of 0 - 5
+          format: float
+          example: 1.5
+        cr4de_mrs_s:
+          type: number
+          description: The total estimated societal impact of the most relevant scenario of this risk file on a scale of 0 - 5
+          format: float
+          example: 4
+        cr4de_mrs_e:
+          type: number
+          description: The total estimated environmental impact of the most relevant scenario of this risk file on a scale of 0 - 5
+          format: float
+          example: 1.8
+        cr4de_mrs_f:
+          type: number
+          description: The total estimated financial impact of the most relevant scenario of this risk file on a scale of 0 - 5
+          format: float
+          example: 0
+        cr4de_causing_risks:
+          type: string
+          description: "A string containing a JSON array of causing risk files and their relative probabilities of being the cause."
+          example: '[{\"cause_risk_id\": \"6296cd55-aa6c-ed11-9561-000d3adf7089\", \"cause_risk_title\": \"Software / Hardware vulnerability\", \"cause_risk_p\": 0.4}]'
+        cr4de_effect_risks:
+          type: string
+          description: "A string containing a JSON array of potential effect risk files and their relative expected impact."
+          example: '[{\"effect_risk_id\": \"6296cd55-aa6c-ed11-9561-000d3adf7089\", \"effect_risk_title\": \"Software / Hardware vulnerability\", \"effect_risk_i\": 0.4}]'

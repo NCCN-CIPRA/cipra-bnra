@@ -83,6 +83,54 @@ export function getClimateChange<T extends DVRiskCascade>(
   );
 }
 
+export type Cascades = {
+  all: DVRiskCascade<SmallRisk, SmallRisk>[];
+  causes: DVRiskCascade<SmallRisk, SmallRisk>[];
+  effects: DVRiskCascade<SmallRisk, SmallRisk>[];
+  catalyzingEffects: DVRiskCascade<SmallRisk, SmallRisk>[];
+  climateChange: DVRiskCascade<SmallRisk, SmallRisk> | null;
+};
+
+export const updateCascades =
+        (
+          riskFile: DVRiskFile,
+          cs: { [riskId: string]: Cascades },
+          hc: { [id: string]: SmallRisk }
+        ) =>
+        (rcResult: DVRiskCascade<SmallRisk, SmallRisk>[]) => {
+          const causes = getCauses(riskFile, rcResult, hc);
+          const effects = getEffects(riskFile, rcResult, hc);
+          const catalyzingEffects = getCatalyzingEffects(
+            riskFile,
+            rcResult,
+            hc,
+            false
+          );
+          const climateChange = getClimateChange(riskFile, rcResult, hc);
+    
+          return {
+            ...cs,
+            [riskFile.cr4de_riskfilesid]: {
+              all: [...causes, ...effects, ...catalyzingEffects],
+              causes,
+              effects,
+              catalyzingEffects,
+              climateChange,
+            },
+          };
+        };
+
+export const getCascades =
+    (
+      riskFiles: DVRiskFile[],
+      cascades: DVRiskCascade<SmallRisk, SmallRisk>[],
+      riskCatalogue: { [id: string]: SmallRisk}
+    ): { [riskId: string]: Cascades } => {
+    
+    
+    return riskFiles.reduce((acc, rf) => updateCascades(rf, acc, riskCatalogue)(cascades), {})
+  }
+
 export function getCascadeField(causeScenario: SCENARIOS, effectScenario: SCENARIOS): keyof CascadeAnalysisInput {
   if (causeScenario === SCENARIOS.CONSIDERABLE) {
     if (effectScenario === SCENARIOS.CONSIDERABLE) {

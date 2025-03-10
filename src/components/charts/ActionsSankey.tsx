@@ -1,15 +1,29 @@
-import { Layer, Rectangle, ResponsiveContainer, Sankey, TooltipProps } from "recharts";
+import {
+  Layer,
+  Rectangle,
+  ResponsiveContainer,
+  Sankey,
+  TooltipProps,
+} from "recharts";
 import { Box, Typography, Card, CardContent, Tooltip } from "@mui/material";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { useNavigate } from "react-router-dom";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { CascadeCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
-import { SCENARIOS, getScenarioLetter, getScenarioParameter, getScenarioSuffix } from "../../functions/scenarios";
+import {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
+import {
+  SCENARIOS,
+  getScenarioLetter,
+  getScenarioParameter,
+  getScenarioSuffix,
+} from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
-import { Cascades } from "../../pages/BaseRisksPage";
 import { useTranslation } from "react-i18next";
 import { getIndirectImpact } from "../../functions/Impact";
+import { Cascades } from "../../functions/cascades";
 
 const baseY = 50;
 
@@ -33,7 +47,11 @@ const PSankeyNode = ({
 
   if (payload.depth > 0) {
     return (
-      <Layer className="total-probability" key={`CustomNode${index}`} height="50px">
+      <Layer
+        className="total-probability"
+        key={`CustomNode${index}`}
+        height="50px"
+      >
         <Rectangle
           x={x}
           y={baseY}
@@ -50,7 +68,10 @@ const PSankeyNode = ({
           stroke="#333"
           transform="rotate(270)"
         >
-          {`${t("Preferred Malicious Actions")}:  ${round(totalProbability, 2)} / 5`}
+          {`${t("Preferred Malicious Actions")}:  ${round(
+            totalProbability,
+            2
+          )} / 5`}
         </text>
         {/* <text
           textAnchor="middle"
@@ -99,7 +120,10 @@ const PSankeyNode = ({
 
                   <Typography variant="body1" sx={{ mt: 1 }}>
                     {t("analysis.action.explained", {
-                      percentage: round((100 * payload.cp) / totalProbability, 2),
+                      percentage: round(
+                        (100 * payload.cp) / totalProbability,
+                        2
+                      ),
                     })}
                   </Typography>
 
@@ -289,7 +313,10 @@ const PSankeyLink = (props: any) => {
     totalNodes,
   } = props;
 
-  const shiftedTargetY = totalNodes <= 2 ? sourceY : targetRelativeY + targetY + (baseY - (targetY - linkWidth / 2));
+  const shiftedTargetY =
+    totalNodes <= 2
+      ? sourceY
+      : targetRelativeY + targetY + (baseY - (targetY - linkWidth / 2));
 
   return (
     <path
@@ -361,7 +388,10 @@ export default function ActionsSankey({
     }
   }
 
-  const nodes: any[] = [{ name: riskFile.cr4de_title }, ...actions.filter((c) => c.cp >= minP)];
+  const nodes: any[] = [
+    { name: riskFile.cr4de_title },
+    ...actions.filter((c) => c.cp >= minP),
+  ];
   const otherActions = actions.filter((e) => e.cp < minP);
 
   if (minP >= 0 && otherActions.length > 0) {
@@ -382,7 +412,9 @@ export default function ActionsSankey({
     links.push({
       source: nodes.length - 1,
       target: 0,
-      value: actions.filter((e) => e.cp < minP).reduce((tot, e) => tot + e.cp, 0.000000001),
+      value: actions
+        .filter((e) => e.cp < minP)
+        .reduce((tot, e) => tot + e.cp, 0.000000001),
       hidden: actions.filter((e) => e.cp < minP),
     });
 
@@ -391,7 +423,11 @@ export default function ActionsSankey({
     links,
   };
 
-  const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: TooltipProps<ValueType, NameType>) => {
     if (active && payload) {
       if (payload[0].payload?.payload?.hidden) {
         return (
@@ -400,8 +436,12 @@ export default function ActionsSankey({
               {payload[0].payload?.payload?.hidden
                 .sort(
                   (a: CascadeCalculation, b: CascadeCalculation) =>
-                    (b[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number) -
-                    (a[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number)
+                    (b[
+                      `ip${scenarioSuffix}` as keyof CascadeCalculation
+                    ] as number) -
+                    (a[
+                      `ip${scenarioSuffix}` as keyof CascadeCalculation
+                    ] as number)
                 )
                 .slice(0, 10)
                 .map((c: CascadeCalculation) => (
@@ -409,7 +449,10 @@ export default function ActionsSankey({
                     {`${c.cause.riskTitle}:`}{" "}
                     <b>{`${
                       Math.round(
-                        (10000 * (c[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number)) /
+                        (10000 *
+                          (c[
+                            `ip${scenarioSuffix}` as keyof CascadeCalculation
+                          ] as number)) /
                           (getScenarioParameter(riskFile, "TP", scenario) || 0)
                       ) / 100
                     }%`}</b>
@@ -442,7 +485,9 @@ export default function ActionsSankey({
             />
           }
           link={<PSankeyLink totalNodes={data.nodes.length} />}
-          nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
+          nodePadding={
+            data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0
+          }
           iterations={0}
         ></Sankey>
       </ResponsiveContainer>

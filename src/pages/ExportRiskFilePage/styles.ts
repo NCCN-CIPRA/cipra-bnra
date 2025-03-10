@@ -6,6 +6,8 @@ export const POINTS_PER_CM = 28.3465 * SCALE;
 
 
 export const PAGE_SIZE = "A4"
+export const PAGE_WIDTH = 21;
+export const PAGE_HEIGHT = 29.7;
 export const PAGE_DPI = DPI;
 export const PAGE_STYLES = {
     padding: 2.5 *  POINTS_PER_CM,
@@ -21,7 +23,12 @@ export const PAGE_STYLES = {
 export const h1Style = {};
 
 // Chapter Title
-export const h2Style = {};
+export const h2Style =  {
+  fontFamily: "NH",
+  fontWeight: 700,
+  color: "white",
+  fontSize: 30 * SCALE,
+};
 
 // Risk File Title
 export const h3Style = {
