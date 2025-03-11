@@ -64,6 +64,7 @@ export default function PreferredActionsSection({
         },
         [[], 0] as [Effect[], number]
       )[0];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile, effects]);
 
   const getDefaultText = () => {
@@ -116,10 +117,15 @@ export default function PreferredActionsSection({
 
   useEffect(
     () => setIQuali(riskFile.cr4de_mrs_actions || getDefaultText()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [riskFile]
   );
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const saveRiskFile = async (reset = false) => {
     setSaving(true);
@@ -228,6 +234,4 @@ export default function PreferredActionsSection({
       )}
     </Box>
   );
-
-  return null;
 }

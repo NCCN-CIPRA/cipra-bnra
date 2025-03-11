@@ -230,6 +230,7 @@ export default function ProcessManagementPage() {
 
   useEffect(() => {
     if ((!contacts || !riskFiles) && !isLoading) reloadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   usePageTitle("BNRA 2023 - 2026 Process Management");

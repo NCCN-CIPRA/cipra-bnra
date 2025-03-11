@@ -280,6 +280,7 @@ export default function RiskFilesDataGrid({
         }
       }, [] as GridRowsProp)
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, worstCase]);
 
   return (

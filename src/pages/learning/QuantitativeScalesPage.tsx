@@ -1745,6 +1745,7 @@ export default function QuantitativeScalesPage() {
 
                         <Box sx={{ textAlign: "center", sb: 2 }}>
                           <img
+                            alt="Societal impact"
                             src="https://bnra.powerappsportals.com/sd.png"
                             style={{ width: 600 }}
                           />
@@ -1921,6 +1922,7 @@ export default function QuantitativeScalesPage() {
 
                         <Box sx={{ textAlign: "center", sb: 2 }}>
                           <img
+                            alt="Societal impact"
                             src="https://bnra.powerappsportals.com/sd.png"
                             style={{ width: 600 }}
                           />

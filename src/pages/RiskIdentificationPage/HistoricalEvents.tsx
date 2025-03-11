@@ -42,7 +42,12 @@ export default function HistoricalEvents({
   const [time, setTime] = useState<string>("");
   const [description, setDescription] = useState<string>("");
 
-  useEffect(() => setIsEditing(editing >= 0), [editing]);
+  useEffect(
+    () => setIsEditing(editing >= 0),
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   useEffect(
     () => setEvents(unwrap(riskFile.cr4de_historical_events)),

@@ -151,6 +151,7 @@ export default function BaseRiskFilePage() {
 
   useEffect(() => {
     riskContext.loadRiskFile({ id: params.risk_file_id });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.risk_file_id]);
 
   usePageTitle(

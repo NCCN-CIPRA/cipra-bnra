@@ -42,10 +42,15 @@ export default function IntelligenceSection({
 
   useEffect(
     () => setProbQuali(riskFile.cr4de_mrs_probability || getDefaultText()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [riskFile]
   );
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const saveRiskFile = async (reset = false) => {
     setSaving(true);

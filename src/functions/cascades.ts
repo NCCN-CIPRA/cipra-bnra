@@ -1,7 +1,7 @@
 import { CascadeCalculation } from "../types/dataverse/DVAnalysisRun";
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
-import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
+import {  RISK_TYPE } from "../types/dataverse/DVRiskFile";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { SCENARIOS, SCENARIO_LETTER } from "./scenarios";
 

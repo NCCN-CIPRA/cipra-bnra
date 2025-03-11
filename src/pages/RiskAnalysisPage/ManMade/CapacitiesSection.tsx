@@ -1,7 +1,11 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { IntensityParameter } from "../../../functions/intensityParameters";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { SCENARIOS, SCENARIO_PARAMS, unwrap } from "../../../functions/scenarios";
+import {
+  SCENARIOS,
+  SCENARIO_PARAMS,
+  unwrap,
+} from "../../../functions/scenarios";
 import { useEffect, useState } from "react";
 import TextInputBox from "../../../components/TextInputBox";
 import useAPI from "../../../hooks/useAPI";
@@ -54,11 +58,21 @@ export default function CapacitiesSection({
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [mrsScenario, setMrsScenario] = useState<string | null>(riskFile.cr4de_mrs_scenario || getDefaultText());
+  const [mrsScenario, setMrsScenario] = useState<string | null>(
+    riskFile.cr4de_mrs_scenario || getDefaultText()
+  );
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
-  useEffect(() => setMrsScenario(riskFile.cr4de_mrs_scenario || getDefaultText()), [riskFile]);
+  useEffect(
+    () => setMrsScenario(riskFile.cr4de_mrs_scenario || getDefaultText()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [riskFile]
+  );
 
   const saveScenario = async (reset = false) => {
     setSaving(true);
@@ -78,16 +92,28 @@ export default function CapacitiesSection({
 
   const startEdit = () => {
     if (isEditingOther) {
-      window.alert("You are already editing another section. Please close this section before editing another.");
+      window.alert(
+        "You are already editing another section. Please close this section before editing another."
+      );
     } else {
       setEditing(true);
     }
   };
 
   return (
-    <Box sx={{ borderLeft: "solid 8px " + SCENARIO_PARAMS[scenario].color, pl: 2, py: 1, mt: 2, background: "white" }}>
+    <Box
+      sx={{
+        borderLeft: "solid 8px " + SCENARIO_PARAMS[scenario].color,
+        pl: 2,
+        py: 1,
+        mt: 2,
+        background: "white",
+      }}
+    >
       {editing && (
-        <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+        <Box
+          sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+        >
           <TextInputBox
             limitedOptions
             initialValue={mrsScenario || getDefaultText()}
@@ -98,20 +124,32 @@ export default function CapacitiesSection({
           />
         </Box>
       )}
-      {!editing && mrsScenario && <Box className="htmleditor" dangerouslySetInnerHTML={{ __html: mrsScenario }} />}
+      {!editing && mrsScenario && (
+        <Box
+          className="htmleditor"
+          dangerouslySetInnerHTML={{ __html: mrsScenario }}
+        />
+      )}
       {!editing && !mrsScenario && (
         <>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            Actors of this type with <i>{scenario}</i> capabilities were identified as the{" "}
-            <i>most relevant actor group</i>. This means that they represent the highest amount of risk (motivation x
-            impact). They can be described as follows:
+            Actors of this type with <i>{scenario}</i> capabilities were
+            identified as the <i>most relevant actor group</i>. This means that
+            they represent the highest amount of risk (motivation x impact).
+            They can be described as follows:
           </Typography>
-          <Box sx={{ mb: 2 }} dangerouslySetInnerHTML={{ __html: scenarios[scenario][0].value }} />
+          <Box
+            sx={{ mb: 2 }}
+            dangerouslySetInnerHTML={{ __html: scenarios[scenario][0].value }}
+          />
         </>
       )}
       <div style={{ clear: "both" }} />
       {mode === "edit" && (
-        <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
+        <Stack
+          direction="row"
+          sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}
+        >
           {!editing && (
             <>
               <Button onClick={startEdit}>Edit</Button>
@@ -141,7 +179,12 @@ export default function CapacitiesSection({
               <Button
                 color="warning"
                 onClick={() => {
-                  if (window.confirm("Are you sure you wish to discard your changes?")) setEditing(false);
+                  if (
+                    window.confirm(
+                      "Are you sure you wish to discard your changes?"
+                    )
+                  )
+                    setEditing(false);
                 }}
               >
                 Discard Changes

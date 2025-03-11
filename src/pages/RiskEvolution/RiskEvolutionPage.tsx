@@ -37,6 +37,7 @@ export default function RiskEvolutionPage() {
 
   useEffect(() => {
     if (!attachments) loadAttachments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

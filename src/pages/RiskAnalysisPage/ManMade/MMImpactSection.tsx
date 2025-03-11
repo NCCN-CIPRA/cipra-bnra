@@ -52,6 +52,7 @@ export default function MMImpactSection({
         },
         [[], 0] as [Effect[], number]
       )[0];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile, effects]);
 
   const IParetoEffects = useMemo(() => {
@@ -66,6 +67,7 @@ export default function MMImpactSection({
         },
         [[], 0] as [Effect[], number]
       )[0];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile, effects]);
 
   const impactEffects = IParetoEffects.filter(
@@ -123,10 +125,15 @@ export default function MMImpactSection({
 
   useEffect(
     () => setIQuali(riskFile.cr4de_mrs_mm_impact || getDefaultText()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [riskFile]
   );
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const saveRiskFile = async (reset = false) => {
     setSaving(true);
@@ -235,6 +242,4 @@ export default function MMImpactSection({
       )}
     </Box>
   );
-
-  return null;
 }

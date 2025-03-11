@@ -50,6 +50,7 @@ export default function ProbabilitySection({
         },
         [[], 0] as [Cause[], number]
       )[0];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile, causes]);
 
   const getDefaultText = () => {
@@ -94,10 +95,15 @@ export default function ProbabilitySection({
 
   useEffect(
     () => setProbQuali(riskFile.cr4de_mrs_probability || getDefaultText()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [riskFile]
   );
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const saveRiskFile = async (reset = false) => {
     setSaving(true);
@@ -198,6 +204,4 @@ export default function ProbabilitySection({
       )}
     </>
   );
-
-  return null;
 }

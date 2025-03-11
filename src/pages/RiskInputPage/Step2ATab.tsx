@@ -231,6 +231,7 @@ function ScenarioSection({
       ...d,
       std: avg(Object.values(d).map((dist) => dist.std)),
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quantiNames, directAnalyses]);
 
   return (
@@ -552,6 +553,7 @@ function ExpertInput({
           null
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parameter]);
 
   return (

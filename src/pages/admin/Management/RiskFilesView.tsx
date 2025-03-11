@@ -215,6 +215,7 @@ export default function RiskFilesView({
 
   useEffect(() => {
     applyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, specialFilters, riskFiles]);
 
   const toggleSpecialFilter = (filterName: keyof typeof SPECIAL_FILTERS) => {

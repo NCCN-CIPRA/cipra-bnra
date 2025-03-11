@@ -1,19 +1,21 @@
 import {
-  CascadeCalculation,
   Quality,
   RiskCalculation,
   RiskCalculationKnownFields,
 } from "../../types/dataverse/DVAnalysisRun";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import { DVContact } from "../../types/dataverse/DVContact";
-import { DVDirectAnalysis, FieldQuality } from "../../types/dataverse/DVDirectAnalysis";
+import {
+  DVDirectAnalysis,
+  FieldQuality,
+} from "../../types/dataverse/DVDirectAnalysis";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { getAbsoluteImpact } from "../Impact";
-import { getAbsoluteProbability, getDPDailyProbability } from "../Probability";
-import { getAverage, getConsensusRiskFile as getConsensusRiskFileAverage } from "../inputProcessing";
+import { getAbsoluteProbability } from "../Probability";
+import { getAverage } from "../inputProcessing";
 
 const SC_FACTOR = 1 / 10;
 const SD_FACTOR = 1 / 10;
@@ -50,13 +52,6 @@ const IGNORE_RISKS = [
   "H10", // Processes of a social psychological nature
 ];
 
-interface Metrics {
-  consensus: number;
-  average: number;
-  missing: number;
-  total: number;
-}
-
 const getAveragesForScenarios = (
   name: string,
   parameter: string,
@@ -64,7 +59,8 @@ const getAveragesForScenarios = (
   directAnalyses: DVDirectAnalysis[],
   absoluteValueGetter: (strValue: string | null) => number
 ) => {
-  const daField = field.indexOf("climate_change") >= 0 ? "cr4de_dp50_quanti" : field;
+  const daField =
+    field.indexOf("climate_change") >= 0 ? "cr4de_dp50_quanti" : field;
 
   const factor = daField === "di_Sc" ? SC_FACTOR : 1;
 
@@ -72,27 +68,42 @@ const getAveragesForScenarios = (
     [`${name}_c`]:
       absoluteValueGetter(
         getAverage(
-          directAnalyses.map((da) => da[`${daField}_c` as keyof DVDirectAnalysis]) as string[],
           directAnalyses.map(
-            (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_c` as keyof FieldQuality]) || 2.5
+            (da) => da[`${daField}_c` as keyof DVDirectAnalysis]
+          ) as string[],
+          directAnalyses.map(
+            (da) =>
+              (da.cr4de_quality &&
+                da.cr4de_quality[`${parameter}_c` as keyof FieldQuality]) ||
+              2.5
           )
         )
       ) * factor,
     [`${name}_m`]:
       absoluteValueGetter(
         getAverage(
-          directAnalyses.map((da) => da[`${daField}_m` as keyof DVDirectAnalysis]) as string[],
           directAnalyses.map(
-            (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_m` as keyof FieldQuality]) || 2.5
+            (da) => da[`${daField}_m` as keyof DVDirectAnalysis]
+          ) as string[],
+          directAnalyses.map(
+            (da) =>
+              (da.cr4de_quality &&
+                da.cr4de_quality[`${parameter}_m` as keyof FieldQuality]) ||
+              2.5
           )
         )
       ) * factor,
     [`${name}_e`]:
       absoluteValueGetter(
         getAverage(
-          directAnalyses.map((da) => da[`${daField}_e` as keyof DVDirectAnalysis]) as string[],
           directAnalyses.map(
-            (da) => (da.cr4de_quality && da.cr4de_quality[`${parameter}_e` as keyof FieldQuality]) || 2.5
+            (da) => da[`${daField}_e` as keyof DVDirectAnalysis]
+          ) as string[],
+          directAnalyses.map(
+            (da) =>
+              (da.cr4de_quality &&
+                da.cr4de_quality[`${parameter}_e` as keyof FieldQuality]) ||
+              2.5
           )
         )
       ) * factor,
@@ -115,17 +126,21 @@ const getConsensusRiskFile = (
       )
     : [];
 
-  const scaleFactor = riskFile.cr4de_title.indexOf("International Armed") >= 0 ? IAC_FACTOR : 1;
-  let DPScaleFactor = riskFile.cr4de_title.indexOf("Meteorite") >= 0 ? METEORITE_DP_FACTOR : 1;
+  const scaleFactor =
+    riskFile.cr4de_title.indexOf("International Armed") >= 0 ? IAC_FACTOR : 1;
+  let DPScaleFactor =
+    riskFile.cr4de_title.indexOf("Meteorite") >= 0 ? METEORITE_DP_FACTOR : 1;
   const EaScaleFactor = EA_FACTOR;
-  const ExtremeFactor = riskFile.cr4de_title.indexOf("food supply") >= 0 ? FOOD_SUPPLY_FACTOR : 1;
+  const ExtremeFactor =
+    riskFile.cr4de_title.indexOf("food supply") >= 0 ? FOOD_SUPPLY_FACTOR : 1;
 
   if (ATTACK_RISKS.indexOf(riskFile.cr4de_hazard_id) >= 0) {
     DPScaleFactor *= ATTACK_FACTOR;
   }
 
   if (
-    (riskFile.cr4de_consensus_date && new Date(riskFile.cr4de_consensus_date) <= new Date()) ||
+    (riskFile.cr4de_consensus_date &&
+      new Date(riskFile.cr4de_consensus_date) <= new Date()) ||
     riskFile.cr4de_risk_type === RISK_TYPE.EMERGING
   )
     return {
@@ -140,9 +155,18 @@ const getConsensusRiskFile = (
       di_Hc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_c) * scaleFactor,
       di_Sa_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_c) * scaleFactor,
       di_Sb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_c) * scaleFactor,
-      di_Sc_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_c) * scaleFactor * SC_FACTOR,
-      di_Sd_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_c) * scaleFactor * SD_FACTOR,
-      di_Ea_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_c) * scaleFactor * EaScaleFactor,
+      di_Sc_c:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_c) *
+        scaleFactor *
+        SC_FACTOR,
+      di_Sd_c:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_c) *
+        scaleFactor *
+        SD_FACTOR,
+      di_Ea_c:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_c) *
+        scaleFactor *
+        EaScaleFactor,
       di_Fa_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_c) * scaleFactor,
       di_Fb_c: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_c) * scaleFactor,
 
@@ -151,22 +175,64 @@ const getConsensusRiskFile = (
       di_Hc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_m) * scaleFactor,
       di_Sa_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_m) * scaleFactor,
       di_Sb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_m) * scaleFactor,
-      di_Sc_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_m) * scaleFactor * SC_FACTOR,
-      di_Sd_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_m) * scaleFactor * SD_FACTOR,
-      di_Ea_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_m) * scaleFactor * EaScaleFactor,
+      di_Sc_m:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_m) *
+        scaleFactor *
+        SC_FACTOR,
+      di_Sd_m:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_m) *
+        scaleFactor *
+        SD_FACTOR,
+      di_Ea_m:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_m) *
+        scaleFactor *
+        EaScaleFactor,
       di_Fa_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_m) * scaleFactor,
       di_Fb_m: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_m) * scaleFactor,
 
-      di_Ha_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_e) * scaleFactor * ExtremeFactor,
-      di_Hb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_e) * scaleFactor * ExtremeFactor,
-      di_Hc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_e) * scaleFactor * ExtremeFactor,
-      di_Sa_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_e) * scaleFactor * ExtremeFactor,
-      di_Sb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_e) * scaleFactor * ExtremeFactor,
-      di_Sc_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_e) * scaleFactor * SC_FACTOR * ExtremeFactor,
-      di_Sd_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_e) * scaleFactor * SD_FACTOR * ExtremeFactor,
-      di_Ea_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_e) * scaleFactor * EaScaleFactor * ExtremeFactor,
-      di_Fa_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_e) * scaleFactor * ExtremeFactor,
-      di_Fb_e: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_e) * scaleFactor * ExtremeFactor,
+      di_Ha_e:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_e) *
+        scaleFactor *
+        ExtremeFactor,
+      di_Hb_e:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_e) *
+        scaleFactor *
+        ExtremeFactor,
+      di_Hc_e:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_e) *
+        scaleFactor *
+        ExtremeFactor,
+      di_Sa_e:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_e) *
+        scaleFactor *
+        ExtremeFactor,
+      di_Sb_e:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_e) *
+        scaleFactor *
+        ExtremeFactor,
+      di_Sc_e:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_e) *
+        scaleFactor *
+        SC_FACTOR *
+        ExtremeFactor,
+      di_Sd_e:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_e) *
+        scaleFactor *
+        SD_FACTOR *
+        ExtremeFactor,
+      di_Ea_e:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_e) *
+        scaleFactor *
+        EaScaleFactor *
+        ExtremeFactor,
+      di_Fa_e:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_e) *
+        scaleFactor *
+        ExtremeFactor,
+      di_Fb_e:
+        getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_e) *
+        scaleFactor *
+        ExtremeFactor,
 
       dp50_c: riskFile.cr4de_climate_change_quanti_c
         ? getAbsoluteProbability(riskFile.cr4de_climate_change_quanti_c)
@@ -183,18 +249,90 @@ const getConsensusRiskFile = (
     return {
       quality: Quality.AVERAGE,
       reliability: goodDAs.length,
-      ...getAveragesForScenarios("dp", "dp", "cr4de_dp_quanti", goodDAs, getAbsoluteProbability),
-      ...getAveragesForScenarios("di_Ha", "h", "cr4de_di_quanti_ha", goodDAs, getAbsoluteImpact),
-      ...getAveragesForScenarios("di_Hb", "h", "cr4de_di_quanti_hb", goodDAs, getAbsoluteImpact),
-      ...getAveragesForScenarios("di_Hc", "h", "cr4de_di_quanti_hc", goodDAs, getAbsoluteImpact),
-      ...getAveragesForScenarios("di_Sa", "s", "cr4de_di_quanti_sa", goodDAs, getAbsoluteImpact),
-      ...getAveragesForScenarios("di_Sb", "s", "cr4de_di_quanti_sb", goodDAs, getAbsoluteImpact),
-      ...getAveragesForScenarios("di_Sc", "s", "cr4de_di_quanti_sc", goodDAs, getAbsoluteImpact),
-      ...getAveragesForScenarios("di_Sd", "s", "cr4de_di_quanti_sd", goodDAs, getAbsoluteImpact),
-      ...getAveragesForScenarios("di_Ea", "e", "cr4de_di_quanti_ea", goodDAs, getAbsoluteImpact),
-      ...getAveragesForScenarios("di_Fa", "f", "cr4de_di_quanti_fa", goodDAs, getAbsoluteImpact),
-      ...getAveragesForScenarios("di_Fb", "f", "cr4de_di_quanti_fb", goodDAs, getAbsoluteImpact),
-      ...getAveragesForScenarios("dp50", "cc", "cr4de_climate_change_quanti", goodDAs, getAbsoluteProbability),
+      ...getAveragesForScenarios(
+        "dp",
+        "dp",
+        "cr4de_dp_quanti",
+        goodDAs,
+        getAbsoluteProbability
+      ),
+      ...getAveragesForScenarios(
+        "di_Ha",
+        "h",
+        "cr4de_di_quanti_ha",
+        goodDAs,
+        getAbsoluteImpact
+      ),
+      ...getAveragesForScenarios(
+        "di_Hb",
+        "h",
+        "cr4de_di_quanti_hb",
+        goodDAs,
+        getAbsoluteImpact
+      ),
+      ...getAveragesForScenarios(
+        "di_Hc",
+        "h",
+        "cr4de_di_quanti_hc",
+        goodDAs,
+        getAbsoluteImpact
+      ),
+      ...getAveragesForScenarios(
+        "di_Sa",
+        "s",
+        "cr4de_di_quanti_sa",
+        goodDAs,
+        getAbsoluteImpact
+      ),
+      ...getAveragesForScenarios(
+        "di_Sb",
+        "s",
+        "cr4de_di_quanti_sb",
+        goodDAs,
+        getAbsoluteImpact
+      ),
+      ...getAveragesForScenarios(
+        "di_Sc",
+        "s",
+        "cr4de_di_quanti_sc",
+        goodDAs,
+        getAbsoluteImpact
+      ),
+      ...getAveragesForScenarios(
+        "di_Sd",
+        "s",
+        "cr4de_di_quanti_sd",
+        goodDAs,
+        getAbsoluteImpact
+      ),
+      ...getAveragesForScenarios(
+        "di_Ea",
+        "e",
+        "cr4de_di_quanti_ea",
+        goodDAs,
+        getAbsoluteImpact
+      ),
+      ...getAveragesForScenarios(
+        "di_Fa",
+        "f",
+        "cr4de_di_quanti_fa",
+        goodDAs,
+        getAbsoluteImpact
+      ),
+      ...getAveragesForScenarios(
+        "di_Fb",
+        "f",
+        "cr4de_di_quanti_fb",
+        goodDAs,
+        getAbsoluteImpact
+      ),
+      ...getAveragesForScenarios(
+        "dp50",
+        "cc",
+        "cr4de_climate_change_quanti",
+        goodDAs,
+        getAbsoluteProbability
+      ),
     } as RiskCalculationKnownFields;
 
   return {
@@ -282,19 +420,25 @@ const getConsensusCascade = (
   let cpScaleFactor = 1;
   if (
     cause.cr4de_riskfilesid === "9458db5b-aa6c-ed11-9561-000d3adf7089" ||
-    (effect.cr4de_riskfilesid === "9458db5b-aa6c-ed11-9561-000d3adf7089" && cause.cr4de_risk_type !== RISK_TYPE.MANMADE)
+    (effect.cr4de_riskfilesid === "9458db5b-aa6c-ed11-9561-000d3adf7089" &&
+      cause.cr4de_risk_type !== RISK_TYPE.MANMADE)
   ) {
     cpScaleFactor *= INFO_OPS_CP_FACTOR;
   }
 
-  if (ACTOR_RISKS.indexOf(cause.cr4de_hazard_id) >= 0 && ATTACK_RISKS.indexOf(effect.cr4de_hazard_id) >= 0) {
+  if (
+    ACTOR_RISKS.indexOf(cause.cr4de_hazard_id) >= 0 &&
+    ATTACK_RISKS.indexOf(effect.cr4de_hazard_id) >= 0
+  ) {
     cpScaleFactor *= ATTACK_FACTOR;
   }
 
-  const extremeScaleFactor = effect.cr4de_title.indexOf("International Armed") >= 0 ? IAC_FACTOR : 1;
+  const extremeScaleFactor =
+    effect.cr4de_title.indexOf("International Armed") >= 0 ? IAC_FACTOR : 1;
 
   if (
-    ((effect.cr4de_consensus_date && new Date(effect.cr4de_consensus_date) <= new Date()) ||
+    ((effect.cr4de_consensus_date &&
+      new Date(effect.cr4de_consensus_date) <= new Date()) ||
       effect.cr4de_risk_type === RISK_TYPE.EMERGING) &&
     (effect.cr4de_title.indexOf("food supply") < 0 ||
       [
@@ -309,33 +453,51 @@ const getConsensusCascade = (
         quality: Quality.CONSENSUS,
         reliabilty: goodCAs.length,
         c2c:
-          ((getAbsoluteProbability(cascade.cr4de_c2c) + getAbsoluteProbability(cascade.cr4de_c2c_cause)) / 2) *
+          ((getAbsoluteProbability(cascade.cr4de_c2c) +
+            getAbsoluteProbability(cascade.cr4de_c2c_cause)) /
+            2) *
           cpScaleFactor,
         c2m:
-          ((getAbsoluteProbability(cascade.cr4de_c2m) + getAbsoluteProbability(cascade.cr4de_c2m_cause)) / 2) *
+          ((getAbsoluteProbability(cascade.cr4de_c2m) +
+            getAbsoluteProbability(cascade.cr4de_c2m_cause)) /
+            2) *
           cpScaleFactor,
         c2e:
-          ((getAbsoluteProbability(cascade.cr4de_c2e) + getAbsoluteProbability(cascade.cr4de_c2e_cause)) / 2) *
+          ((getAbsoluteProbability(cascade.cr4de_c2e) +
+            getAbsoluteProbability(cascade.cr4de_c2e_cause)) /
+            2) *
           cpScaleFactor *
           extremeScaleFactor,
         m2c:
-          ((getAbsoluteProbability(cascade.cr4de_m2c) + getAbsoluteProbability(cascade.cr4de_m2c_cause)) / 2) *
+          ((getAbsoluteProbability(cascade.cr4de_m2c) +
+            getAbsoluteProbability(cascade.cr4de_m2c_cause)) /
+            2) *
           cpScaleFactor,
         m2m:
-          ((getAbsoluteProbability(cascade.cr4de_m2m) + getAbsoluteProbability(cascade.cr4de_m2m_cause)) / 2) *
+          ((getAbsoluteProbability(cascade.cr4de_m2m) +
+            getAbsoluteProbability(cascade.cr4de_m2m_cause)) /
+            2) *
           cpScaleFactor,
         m2e:
-          ((getAbsoluteProbability(cascade.cr4de_m2e) + getAbsoluteProbability(cascade.cr4de_m2e_cause)) / 2) *
+          ((getAbsoluteProbability(cascade.cr4de_m2e) +
+            getAbsoluteProbability(cascade.cr4de_m2e_cause)) /
+            2) *
           cpScaleFactor *
           extremeScaleFactor,
         e2c:
-          ((getAbsoluteProbability(cascade.cr4de_e2c) + getAbsoluteProbability(cascade.cr4de_e2c_cause)) / 2) *
+          ((getAbsoluteProbability(cascade.cr4de_e2c) +
+            getAbsoluteProbability(cascade.cr4de_e2c_cause)) /
+            2) *
           cpScaleFactor,
         e2m:
-          ((getAbsoluteProbability(cascade.cr4de_e2m) + getAbsoluteProbability(cascade.cr4de_e2m_cause)) / 2) *
+          ((getAbsoluteProbability(cascade.cr4de_e2m) +
+            getAbsoluteProbability(cascade.cr4de_e2m_cause)) /
+            2) *
           cpScaleFactor,
         e2e:
-          ((getAbsoluteProbability(cascade.cr4de_e2e) + getAbsoluteProbability(cascade.cr4de_e2e_cause)) / 2) *
+          ((getAbsoluteProbability(cascade.cr4de_e2e) +
+            getAbsoluteProbability(cascade.cr4de_e2e_cause)) /
+            2) *
           cpScaleFactor *
           extremeScaleFactor,
       };
@@ -346,13 +508,22 @@ const getConsensusCascade = (
       reliabilty: goodCAs.length,
       c2c: getAbsoluteProbability(cascade.cr4de_c2c) * cpScaleFactor,
       c2m: getAbsoluteProbability(cascade.cr4de_c2m) * cpScaleFactor,
-      c2e: getAbsoluteProbability(cascade.cr4de_c2e) * cpScaleFactor * extremeScaleFactor,
+      c2e:
+        getAbsoluteProbability(cascade.cr4de_c2e) *
+        cpScaleFactor *
+        extremeScaleFactor,
       m2c: getAbsoluteProbability(cascade.cr4de_m2c) * cpScaleFactor,
       m2m: getAbsoluteProbability(cascade.cr4de_m2m) * cpScaleFactor,
-      m2e: getAbsoluteProbability(cascade.cr4de_m2e) * cpScaleFactor * extremeScaleFactor,
+      m2e:
+        getAbsoluteProbability(cascade.cr4de_m2e) *
+        cpScaleFactor *
+        extremeScaleFactor,
       e2c: getAbsoluteProbability(cascade.cr4de_e2c) * cpScaleFactor,
       e2m: getAbsoluteProbability(cascade.cr4de_e2m) * cpScaleFactor,
-      e2e: getAbsoluteProbability(cascade.cr4de_e2e) * cpScaleFactor * extremeScaleFactor,
+      e2e:
+        getAbsoluteProbability(cascade.cr4de_e2e) *
+        cpScaleFactor *
+        extremeScaleFactor,
     };
   }
 
@@ -479,43 +650,47 @@ export default function prepareRiskFiles(
   );
 
   const cascadeIds = cascades.map((c) => c.cr4de_bnrariskcascadeid);
-  const cascadeAnalyses = allCascadeAnalyses.filter((c) => cascadeIds.indexOf(c._cr4de_cascade_value) >= 0);
+  const cascadeAnalyses = allCascadeAnalyses.filter(
+    (c) => cascadeIds.indexOf(c._cr4de_cascade_value) >= 0
+  );
 
-  const daDict: { [key: string]: DVDirectAnalysis<unknown, DVContact>[] } = directAnalyses.reduce((acc, da) => {
-    if (!acc[da._cr4de_risk_file_value]) {
-      return {
-        ...acc,
-        [da._cr4de_risk_file_value]: [da],
-      };
-    }
-    return {
-      ...acc,
-      [da._cr4de_risk_file_value]: [...acc[da._cr4de_risk_file_value], da],
-    };
-  }, {} as { [key: string]: DVDirectAnalysis<unknown, DVContact>[] });
-
-  const caDict: { [key: string]: DVCascadeAnalysis<unknown, unknown, DVContact>[] } = cascadeAnalyses.reduce(
-    (acc, ca) => {
-      if (!acc[ca._cr4de_cascade_value]) {
+  const daDict: { [key: string]: DVDirectAnalysis<unknown, DVContact>[] } =
+    directAnalyses.reduce((acc, da) => {
+      if (!acc[da._cr4de_risk_file_value]) {
         return {
           ...acc,
-          [ca._cr4de_cascade_value]: [ca],
+          [da._cr4de_risk_file_value]: [da],
         };
       }
       return {
         ...acc,
-        [ca._cr4de_cascade_value]: [...acc[ca._cr4de_cascade_value], ca],
+        [da._cr4de_risk_file_value]: [...acc[da._cr4de_risk_file_value], da],
       };
-    },
-    {} as { [key: string]: DVCascadeAnalysis<unknown, unknown, DVContact>[] }
-  );
+    }, {} as { [key: string]: DVDirectAnalysis<unknown, DVContact>[] });
+
+  const caDict: {
+    [key: string]: DVCascadeAnalysis<unknown, unknown, DVContact>[];
+  } = cascadeAnalyses.reduce((acc, ca) => {
+    if (!acc[ca._cr4de_cascade_value]) {
+      return {
+        ...acc,
+        [ca._cr4de_cascade_value]: [ca],
+      };
+    }
+    return {
+      ...acc,
+      [ca._cr4de_cascade_value]: [...acc[ca._cr4de_cascade_value], ca],
+    };
+  }, {} as { [key: string]: DVCascadeAnalysis<unknown, unknown, DVContact>[] });
 
   const calculations: RiskCalculation[] = riskFiles
     .filter((rf) => rf.cr4de_risk_type !== RISK_TYPE.EMERGING)
     .map((rf) => {
       const crf = getConsensusRiskFile(
         rf,
-        participations.filter((p) => p._cr4de_risk_file_value === rf.cr4de_riskfilesid),
+        participations.filter(
+          (p) => p._cr4de_risk_file_value === rf.cr4de_riskfilesid
+        ),
         daDict[rf.cr4de_riskfilesid]
       );
 
@@ -729,21 +904,14 @@ export default function prepareRiskFiles(
     });
 
   // Create a lookup table so we can easily find a calculation by the id of its risk file
-  const calculationsDict: { [key: string]: RiskCalculation } = calculations.reduce(
-    (dict, calculation) => ({
-      ...dict,
-      [calculation.riskId]: calculation,
-    }),
-    {}
-  );
-
-  const hasTitle = (cascade: DVRiskCascade<SmallRisk, SmallRisk>, titles: string[]) => {
-    return titles.some(
-      (t) =>
-        cascade.cr4de_cause_hazard.cr4de_title.indexOf(t) >= 0 ||
-        cascade.cr4de_effect_hazard.cr4de_title.indexOf(t) >= 0
+  const calculationsDict: { [key: string]: RiskCalculation } =
+    calculations.reduce(
+      (dict, calculation) => ({
+        ...dict,
+        [calculation.riskId]: calculation,
+      }),
+      {}
     );
-  };
 
   // Create links between the risk file calculation objects according to the risk cascades
   cascades.forEach((c) => {

@@ -83,7 +83,7 @@ export default function QualiTextInputBox({
   const handleNoComment = () => {
     if (
       valueRef.current === null ||
-      valueRef.current == undefined ||
+      valueRef.current === undefined ||
       valueRef.current.trim() === ""
     ) {
       setNoCommentConfirmed();

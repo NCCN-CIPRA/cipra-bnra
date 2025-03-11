@@ -33,7 +33,12 @@ export default function DefinitionSection({
     riskFile.cr4de_definition
   );
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const saveRiskFile = async () => {
     setSaving(true);

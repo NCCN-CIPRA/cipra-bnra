@@ -382,6 +382,7 @@ export default function CalculationPage() {
       new URL("../../functions/analysis/calculator.worker.ts", import.meta.url),
       { type: "module" }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFiles]);
 
   const lastCalculations: RiskCalculation[] = useMemo(() => {
@@ -606,6 +607,7 @@ export default function CalculationPage() {
         }
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calculator]);
 
   useEffect(() => {
@@ -1041,6 +1043,7 @@ export default function CalculationPage() {
       //   r(c.ti_Sa_e + c.ti_Sb_e + c.ti_Sc_e + c.ti_Sd_e)
       // );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedNode]);
 
   const riskFile =

@@ -46,6 +46,7 @@ export default function DescriptionSection({
         540
       ).then((uri) => setScenarioChart(uri || ""));
     }, 5000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const colorList = Object.values(colors);

@@ -221,6 +221,7 @@ export default function ContactsView({
 
   useEffect(() => {
     applyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, specialFilters, contacts]);
 
   const toggleSpecialFilter = (filterName: keyof typeof SPECIAL_FILTERS) => {

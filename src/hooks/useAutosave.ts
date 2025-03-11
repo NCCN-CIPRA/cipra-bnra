@@ -2,6 +2,7 @@ import { useCallback, useRef, useEffect, useState } from "react";
 
 const DEBOUNCE_SAVE_DELAY_MS = 10000;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function useAutosave<T extends { [key: string]: any }>({
   getFields,
   compareTo,
@@ -20,7 +21,9 @@ export default function useAutosave<T extends { [key: string]: any }>({
   const getUpdatedFields = useCallback(() => {
     const fields = getFields();
 
-    const newFieldsToUpdate = Object.keys(fields).filter((f) => compareTo[f] && fields[f] !== compareTo[f]);
+    const newFieldsToUpdate = Object.keys(fields).filter(
+      (f) => compareTo[f] && fields[f] !== compareTo[f]
+    );
 
     if (newFieldsToUpdate.length > 0) {
       const updatedFields = newFieldsToUpdate.reduce(
@@ -32,7 +35,8 @@ export default function useAutosave<T extends { [key: string]: any }>({
       );
 
       // Check if we already found these fields in a previous update
-      if (JSON.stringify(updatedFields) === JSON.stringify(fieldsToUpdate)) return;
+      if (JSON.stringify(updatedFields) === JSON.stringify(fieldsToUpdate))
+        return;
 
       return updatedFields;
     } else if (fieldsToUpdate !== null) {

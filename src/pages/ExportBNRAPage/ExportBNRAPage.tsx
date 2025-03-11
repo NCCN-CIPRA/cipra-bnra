@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import NCCNLoader from "../../components/NCCNLoader";
 import { NCCN_GREEN } from "../../functions/colors";
-import { ReactComponent as BNRA_Logo } from "../../assets/icons/BNRA_Logo.svg";
-import { ReactComponent as NCCN_Logo } from "../../assets/icons/NCCN_Logo.svg";
-import { ReactComponent as NCCN_Detail } from "../../assets/icons/Triangles_detail.svg";
+import { ReactComponent as BNRALogo } from "../../assets/icons/BNRA_Logo.svg";
+import { ReactComponent as NCCNLogo } from "../../assets/icons/NCCN_Logo.svg";
+import { ReactComponent as NCCNDetail } from "../../assets/icons/Triangles_detail.svg";
 import RiskMatrix from "../../components/charts/RiskMatrix";
 import {
   CATEGORY_NAMES,
@@ -101,17 +101,17 @@ export default function ExportBNRAPage() {
   useEffect(() => {
     svg2PDF(
       renderToStaticMarkup(
-        <NCCN_Detail style={{ position: "absolute", bottom: 0, left: 0 }} />
+        <NCCNDetail style={{ position: "absolute", bottom: 0, left: 0 }} />
       )
     ).then((uri) => setDetailSVG(uri || ""));
     svg2PDF(
       renderToStaticMarkup(
-        <NCCN_Logo style={{ position: "absolute", bottom: 0, left: 0 }} />
+        <NCCNLogo style={{ position: "absolute", bottom: 0, left: 0 }} />
       )
     ).then((uri) => setNccnLogoSVG(uri || ""));
     svg2PDF(
       renderToStaticMarkup(
-        <BNRA_Logo style={{ position: "absolute", bottom: 0, left: 0 }} />
+        <BNRALogo style={{ position: "absolute", bottom: 0, left: 0 }} />
       )
     ).then((uri) => setBnraLogoSVG(uri || ""));
   }, []);
@@ -263,6 +263,7 @@ export function ExportBNRAPage2() {
   useEffect(() => {
     if (!allRiskFilesLoading && !allRiskFilesLoaded) loadAllRiskFiles();
     if (!allAttachmentsLoading && !allAttachmentsLoaded) loadAllAttachments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadAllRiskFiles, loadAllAttachments]);
 
   if (!allRiskFilesLoaded || !allAttachmentsLoaded)
@@ -313,6 +314,7 @@ export function ExportBNRAPage2() {
           2023 - 2026
         </Typography>
         <img
+          alt="Report front page"
           src="https://bnra.powerappsportals.com/report-front.png"
           style={{ width: "100%" }}
         />
@@ -321,8 +323,8 @@ export function ExportBNRAPage2() {
           justifyContent="space-between"
           sx={{ position: "absolute", bottom: 20, px: 5, width: "100%" }}
         >
-          <NCCN_Logo style={{ width: "7cm", height: "50px" }} />
-          <BNRA_Logo style={{ width: "4cm", height: "50px" }} />
+          <NCCNLogo style={{ width: "7cm", height: "50px" }} />
+          <BNRALogo style={{ width: "4cm", height: "50px" }} />
         </Stack>
       </Box>
 
@@ -349,7 +351,7 @@ export function ExportBNRAPage2() {
         >
           Better prepared. Better response.
         </Typography>
-        <NCCN_Detail style={{ position: "absolute", bottom: 0, left: 0 }} />
+        <NCCNDetail style={{ position: "absolute", bottom: 0, left: 0 }} />
       </Box>
 
       <Box

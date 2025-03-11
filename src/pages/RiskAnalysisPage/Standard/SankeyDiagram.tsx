@@ -36,6 +36,7 @@ export default function SankeyDiagram({
 
   useEffect(() => {
     setScenario(scenario);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile, cascades]);
 
   const goToRiskFile = (id: string) => {

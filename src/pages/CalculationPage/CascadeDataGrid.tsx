@@ -129,6 +129,7 @@ export default function CascadeDataGrid({
       "rowSelectionCheckboxChange",
       handleRowCheck
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rows]);
 
   return (

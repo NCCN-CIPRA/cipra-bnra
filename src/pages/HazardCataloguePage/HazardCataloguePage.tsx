@@ -46,11 +46,14 @@ function SearchBar({ onSearch }: { onSearch: (v: string) => void }) {
 
       return () => clearTimeout(t);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   return (
     <FormControl sx={{ m: 0 }} variant="standard" fullWidth id="search-bar">
-      <InputLabel htmlFor="outlined-adornment">Search Risk Catalogue</InputLabel>
+      <InputLabel htmlFor="outlined-adornment">
+        Search Risk Catalogue
+      </InputLabel>
       <Input
         id="outlined-adornment"
         type="text"
@@ -91,7 +94,10 @@ export default function HazardCataloguePage() {
             </Box>
           </CardContent>
         </Card>
-        <TableContainer component={Paper} sx={{ width: "100%", maxHeight: "calc(100vh - 260px)" }}>
+        <TableContainer
+          component={Paper}
+          sx={{ width: "100%", maxHeight: "calc(100vh - 260px)" }}
+        >
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -129,19 +135,21 @@ export default function HazardCataloguePage() {
                     }
                   }}
                 />
-                {user && user.participations && user.participations.length > 0 && (
-                  <TableHeader
-                    name={t("hazardCatalogue.participated", "Participated")}
-                    sort={sortField === "participated" ? sortDir : null}
-                    onSort={(v) => {
-                      if (v === null) setSortField(null);
-                      else {
-                        setSortField("participated");
-                        setSortDir(v);
-                      }
-                    }}
-                  />
-                )}
+                {user &&
+                  user.participations &&
+                  user.participations.length > 0 && (
+                    <TableHeader
+                      name={t("hazardCatalogue.participated", "Participated")}
+                      sort={sortField === "participated" ? sortDir : null}
+                      onSort={(v) => {
+                        if (v === null) setSortField(null);
+                        else {
+                          setSortField("participated");
+                          setSortDir(v);
+                        }
+                      }}
+                    />
+                  )}
                 <TableHeader
                   name={t("hazardCatalogue.mrs", "Most Relevant Scenario")}
                   sort={sortField === "cr4de_mrs" ? sortDir : null}
@@ -182,7 +190,10 @@ export default function HazardCataloguePage() {
             <TableBody>
               {hazardCatalogue === null && (
                 <TableRow>
-                  <TableCell colSpan={100} sx={{ textAlign: "center", border: "none", pt: 10 }}>
+                  <TableCell
+                    colSpan={100}
+                    sx={{ textAlign: "center", border: "none", pt: 10 }}
+                  >
                     <NCCNLoader />
                   </TableCell>
                 </TableRow>
@@ -192,19 +203,32 @@ export default function HazardCataloguePage() {
                   .filter(
                     (h) =>
                       search === "" ||
-                      t(`risk.${h.cr4de_hazard_id}.name`, h.cr4de_title).toLowerCase().indexOf(search.toLowerCase()) >=
-                        0 ||
-                      t(h.cr4de_risk_category).toLowerCase().indexOf(search.toLowerCase()) >= 0 ||
-                      (h.cr4de_mrs ? t(h.cr4de_mrs) : "").toLowerCase().indexOf(search.toLowerCase()) >= 0
+                      t(`risk.${h.cr4de_hazard_id}.name`, h.cr4de_title)
+                        .toLowerCase()
+                        .indexOf(search.toLowerCase()) >= 0 ||
+                      t(h.cr4de_risk_category)
+                        .toLowerCase()
+                        .indexOf(search.toLowerCase()) >= 0 ||
+                      (h.cr4de_mrs ? t(h.cr4de_mrs) : "")
+                        .toLowerCase()
+                        .indexOf(search.toLowerCase()) >= 0
                   )
                   .map((h) => ({
                     ...h,
-                    tp: h.results && h.cr4de_mrs ? h.results[h.cr4de_mrs].TP : null,
-                    ti: h.results && h.cr4de_mrs ? h.results[h.cr4de_mrs].TI : null,
+                    tp:
+                      h.results && h.cr4de_mrs
+                        ? h.results[h.cr4de_mrs].TP
+                        : null,
+                    ti:
+                      h.results && h.cr4de_mrs
+                        ? h.results[h.cr4de_mrs].TI
+                        : null,
                     participated:
                       user &&
                       user.participations &&
-                      user.participations.find((p) => p._cr4de_risk_file_value === h.cr4de_riskfilesid)
+                      user.participations.find(
+                        (p) => p._cr4de_risk_file_value === h.cr4de_riskfilesid
+                      )
                         ? -1
                         : 0,
                   }))
@@ -222,13 +246,16 @@ export default function HazardCataloguePage() {
                     }
 
                     // Determine if the array contains numbers or strings
-                    const isNumeric = typeof a[sortField as keyof SmallRisk] === "number";
+                    const isNumeric =
+                      typeof a[sortField as keyof SmallRisk] === "number";
 
                     // Sort the array using appropriate comparison
                     if (isNumeric) {
                       if (sortDir === "ASC")
                         return (
-                          (a[sortField as keyof SmallRisk] as unknown as number) -
+                          (a[
+                            sortField as keyof SmallRisk
+                          ] as unknown as number) -
                           (b[sortField as keyof SmallRisk] as unknown as number)
                         );
                       return (
@@ -237,10 +264,14 @@ export default function HazardCataloguePage() {
                       );
                     } else {
                       if (sortDir === "ASC")
-                        return (a[sortField as keyof SmallRisk] as string).localeCompare(
+                        return (
+                          a[sortField as keyof SmallRisk] as string
+                        ).localeCompare(
                           b[sortField as keyof SmallRisk] as string
                         );
-                      return (b[sortField as keyof SmallRisk] as string).localeCompare(
+                      return (
+                        b[sortField as keyof SmallRisk] as string
+                      ).localeCompare(
                         a[sortField as keyof SmallRisk] as string
                       );
                     }
@@ -262,17 +293,21 @@ export default function HazardCataloguePage() {
                         </Box>
                       </TableCell>
 
-                      {user && user.participations && user.participations.length > 0 && (
-                        <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}>
-                          {h.participated !== 0 && (
-                            <Box sx={{ width: 30, height: 30, ml: 2.5 }}>
-                              <TaskAltIcon color="primary" />
-                            </Box>
-                          )}
-                        </TableCell>
-                      )}
+                      {user &&
+                        user.participations &&
+                        user.participations.length > 0 && (
+                          <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}>
+                            {h.participated !== 0 && (
+                              <Box sx={{ width: 30, height: 30, ml: 2.5 }}>
+                                <TaskAltIcon color="primary" />
+                              </Box>
+                            )}
+                          </TableCell>
+                        )}
                       {/* <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}></TableCell> */}
-                      <TableCell sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}>
+                      <TableCell
+                        sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}
+                      >
                         {h.cr4de_mrs ? (
                           <Button
                             variant="outlined"
@@ -280,7 +315,9 @@ export default function HazardCataloguePage() {
                               color: SCENARIO_PARAMS[h.cr4de_mrs].color,
                               borderColor: SCENARIO_PARAMS[h.cr4de_mrs].color,
                               borderRadius: "50%",
-                              backgroundColor: `${SCENARIO_PARAMS[h.cr4de_mrs].color}20`,
+                              backgroundColor: `${
+                                SCENARIO_PARAMS[h.cr4de_mrs].color
+                              }20`,
                               width: 30,
                               minWidth: 30,
                               height: 30,
@@ -305,16 +342,26 @@ export default function HazardCataloguePage() {
                           </Typography>
                         )}
                       </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}>
+                      <TableCell
+                        sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}
+                      >
                         {h.results && h.cr4de_mrs ? (
-                          <LinearProgress variant="determinate" value={h.results[h.cr4de_mrs].TP * 20} />
+                          <LinearProgress
+                            variant="determinate"
+                            value={h.results[h.cr4de_mrs].TP * 20}
+                          />
                         ) : (
                           "-"
                         )}
                       </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}>
+                      <TableCell
+                        sx={{ whiteSpace: "nowrap", px: 2, textAlign: "left" }}
+                      >
                         {h.results && h.cr4de_mrs ? (
-                          <LinearProgress variant="determinate" value={h.results[h.cr4de_mrs].TI * 20} />
+                          <LinearProgress
+                            variant="determinate"
+                            value={h.results[h.cr4de_mrs].TI * 20}
+                          />
                         ) : (
                           "-"
                         )}

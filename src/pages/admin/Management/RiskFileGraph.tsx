@@ -236,6 +236,7 @@ export default function RiskFileGraph({
     }
 
     setRiskFileBuckets(dates);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [participations]);
 
   return (

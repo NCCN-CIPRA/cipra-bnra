@@ -32,7 +32,12 @@ export default function HASection({
 
   useEffect(() => setHA(riskFile.cr4de_horizon_analysis), [riskFile]);
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const saveRiskFile = async () => {
     setSaving(true);

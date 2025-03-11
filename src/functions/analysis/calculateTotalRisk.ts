@@ -1,8 +1,18 @@
-import { M } from "../../pages/learning/QuantitativeScales/M";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { getScenarioSuffix, getWorstCaseScenario } from "../scenarios";
 
-const DAMAGE_INDICATORS = ["Ha", "Hb", "Hc", "Sa", "Sb", "Sc", "Sd", "Ea", "Fa", "Fb"];
+const DAMAGE_INDICATORS = [
+  "Ha",
+  "Hb",
+  "Hc",
+  "Sa",
+  "Sb",
+  "Sc",
+  "Sd",
+  "Ea",
+  "Fa",
+  "Fb",
+];
 
 export const getYearlyRisk = (dailyP: number, ti: number) => {
   const yearlyP = 1 - Math.pow(1 - dailyP, 365);
@@ -62,7 +72,7 @@ export default function calculateTotalRisk(r: RiskCalculation) {
   r.ti = r[`ti${wcsSuffix}`];
 
   DAMAGE_INDICATORS.forEach((d) => {
-    //@ts-expect-error
+    //@ts-expect-error never
     r[`ti_${d}`] = r[`ti_${d}${wcsSuffix}`];
   });
 

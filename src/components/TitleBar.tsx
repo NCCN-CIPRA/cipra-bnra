@@ -47,6 +47,7 @@ export default function TitleBar({
 
   useEffect(() => {
     if (role === "") setRole(user?.realRoles?.admin ? "Beheerders" : "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (

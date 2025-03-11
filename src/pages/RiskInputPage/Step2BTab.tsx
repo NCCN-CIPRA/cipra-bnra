@@ -923,6 +923,7 @@ function ExpertInput({
       setLastCascadeAnalysis(cascadeAnalysis);
       setRating(cascadeAnalysis.cr4de_quality);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cascadeAnalysis]);
 
   return (

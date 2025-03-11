@@ -34,6 +34,7 @@ export default function RiskInputPage() {
     if (!participants) loadParticipants();
     if (!directAnalyses) loadDirectAnalyses();
     if (!cascadeAnalyses) loadCascadeAnalyses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!directAnalyses || !cascadeAnalyses)

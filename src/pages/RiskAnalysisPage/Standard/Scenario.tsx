@@ -38,7 +38,12 @@ export default function Scenario({
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const intensityParameters = IP.unwrap(riskFile.cr4de_intensity_parameters);
   const scenarios = unwrap(
@@ -80,6 +85,7 @@ export default function Scenario({
 
   useEffect(
     () => setMrsScenario(riskFile.cr4de_mrs_scenario || getDefaultText()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [riskFile]
   );
 

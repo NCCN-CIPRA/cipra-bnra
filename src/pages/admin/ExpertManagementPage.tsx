@@ -168,6 +168,7 @@ const ExpertFilter = ({
 
   useEffect(() => {
     setFilter(debouncedFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedFilter]);
 
   return (
@@ -700,6 +701,7 @@ export default function ExpertManagementPage() {
 
   useEffect(() => {
     reloadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Get all participation records from O365 dataverse
@@ -870,6 +872,7 @@ export default function ExpertManagementPage() {
     applyFilters();
 
     setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contacts, filter, specialFilter]);
 
   const handleRemove = async (participationId: string) => {

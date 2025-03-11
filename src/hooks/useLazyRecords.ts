@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import useAPI, { DataTable } from "./useAPI";
-import { DVAnalysisRun } from "../types/dataverse/DVAnalysisRun";
 
 export interface GetRecordsParams<T> {
   table: DataTable;
@@ -51,7 +51,9 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
         const parsedResult = result.map((r) => ({
           ...r,
           cr4de_discussion_required:
-            r.cr4de_discussion_required != null ? JSON.parse(r.cr4de_discussion_required) : null,
+            r.cr4de_discussion_required != null
+              ? JSON.parse(r.cr4de_discussion_required)
+              : null,
         }));
 
         if (customTransformResult) {
@@ -74,7 +76,8 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
       o.transformResult = (result: any[]) => {
         const parsedResult = result.map((r) => ({
           ...r,
-          cr4de_quality: r.cr4de_quality != null ? JSON.parse(r.cr4de_quality) : null,
+          cr4de_quality:
+            r.cr4de_quality != null ? JSON.parse(r.cr4de_quality) : null,
         }));
 
         if (customTransformResult) {
@@ -97,9 +100,14 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
       o.transformResult = (result: any[]) => {
         const parsedResult = result.map((r) => ({
           ...r,
-          cr4de_metrics: r.cr4de_metrics != null ? JSON.parse(r.cr4de_metrics) : null,
-          cr4de_risk_file_metrics: r.cr4de_risk_file_metrics != null ? JSON.parse(r.cr4de_risk_file_metrics) : null,
-          cr4de_results: r.cr4de_results != null ? JSON.parse(r.cr4de_results) : null,
+          cr4de_metrics:
+            r.cr4de_metrics != null ? JSON.parse(r.cr4de_metrics) : null,
+          cr4de_risk_file_metrics:
+            r.cr4de_risk_file_metrics != null
+              ? JSON.parse(r.cr4de_risk_file_metrics)
+              : null,
+          cr4de_results:
+            r.cr4de_results != null ? JSON.parse(r.cr4de_results) : null,
         }));
 
         if (customTransformResult) {

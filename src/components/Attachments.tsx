@@ -207,6 +207,7 @@ export default function Attachments({
           <Grid container>
             <Grid item xs>
               <TextField
+                // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
                 margin="dense"
                 id="name"
@@ -429,6 +430,7 @@ export default function Attachments({
                     <TableCell
                       sx={{ position: "relative", textAlign: "center" }}
                     >
+                      {/* eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid */}
                       <a
                         style={{ position: "absolute", top: -100 }}
                         id={`ref-${a.cr4de_reference}`}

@@ -26,6 +26,7 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     api.getContactRoles().then(console.log);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   usePageTitle("User Management");

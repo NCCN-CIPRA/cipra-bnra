@@ -51,6 +51,7 @@ export default function AnalysisSection({
         600
       ).then((uri) => setImpactBarChart(uri || ""));
     }, 5000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

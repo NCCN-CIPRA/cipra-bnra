@@ -12,6 +12,7 @@ export function unwrap(historicalEvents: string | null): HistoricalEvent[] {
   if (!historicalEvents) return [];
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return JSON.parse(historicalEvents).map((e: any) => {
       if (!e.id) {
         return {
@@ -21,7 +22,7 @@ export function unwrap(historicalEvents: string | null): HistoricalEvent[] {
       }
       return e;
     });
-  } catch (e) {
+  } catch {
     // Old HTML format
     const json = tableToJson(historicalEvents);
 
@@ -40,7 +41,7 @@ export function wrap(historicalEvents: HistoricalEvent[]): string {
   return JSON.stringify(historicalEvents);
 }
 
-export function equals(a?: HistoricalEvent[], b?: HistoricalEvent[]) {
-  // TODO
-  return false;
-}
+// export function equals(a?: HistoricalEvent[], b?: HistoricalEvent[]) {
+//   // TODO
+//   return false;
+// }

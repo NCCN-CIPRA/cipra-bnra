@@ -95,6 +95,7 @@ function TextInputBox({
 
       if (onReset) onReset(oldValue);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset]);
 
   const getSourcesButtonOptions = useMemo(

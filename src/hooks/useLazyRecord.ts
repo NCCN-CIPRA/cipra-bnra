@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import useAPI, { DataTable } from "./useAPI";
 
@@ -46,7 +47,9 @@ export default function useLazyRecord<T>(options: GetRecordParams<T>) {
           const parsedResult = {
             ...result,
             cr4de_discussion_required:
-              result.cr4de_discussion_required != null ? JSON.parse(result.cr4de_discussion_required) : null,
+              result.cr4de_discussion_required != null
+                ? JSON.parse(result.cr4de_discussion_required)
+                : null,
           };
 
           if (customTransformResult) {
@@ -71,9 +74,14 @@ export default function useLazyRecord<T>(options: GetRecordParams<T>) {
         o.transformResult = (r: any) => {
           const parsedResult = {
             ...r,
-            cr4de_metrics: r.cr4de_metrics != null ? JSON.parse(r.cr4de_metrics) : null,
-            cr4de_risk_file_metrics: r.cr4de_risk_file_metrics != null ? JSON.parse(r.cr4de_risk_file_metrics) : null,
-            cr4de_results: r.cr4de_results != null ? JSON.parse(r.cr4de_results) : null,
+            cr4de_metrics:
+              r.cr4de_metrics != null ? JSON.parse(r.cr4de_metrics) : null,
+            cr4de_risk_file_metrics:
+              r.cr4de_risk_file_metrics != null
+                ? JSON.parse(r.cr4de_risk_file_metrics)
+                : null,
+            cr4de_results:
+              r.cr4de_results != null ? JSON.parse(r.cr4de_results) : null,
           };
 
           if (customTransformResult) {

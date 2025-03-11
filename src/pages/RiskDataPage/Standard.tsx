@@ -239,6 +239,7 @@ function ParameterSection({
     )
       return DiscussionRequired.RESOLVED;
     return DiscussionRequired.NOT_NECESSARY;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile, parameter]);
 
   const [open, setOpen] = useState(
@@ -330,6 +331,7 @@ function ScenarioSection({
     return riskFile.cr4de_discussion_required[
       `${section.name}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
     ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile, parameter]);
 
   const [open, setOpen] = useState(
@@ -340,10 +342,12 @@ function ScenarioSection({
 
   const qualiName = useMemo(
     () => getQualiFieldName(scenario, section),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [scenario, parameter]
   );
   const quantiNames = useMemo(
     () => getQuantiFieldNames(scenario, section) as (keyof DVRiskFile)[],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [scenario, parameter]
   );
 

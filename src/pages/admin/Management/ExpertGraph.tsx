@@ -278,6 +278,7 @@ export default function ExpertGraph({
     }
 
     setExpertBuckets(dates);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [participations]);
 
   return (

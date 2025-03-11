@@ -30,7 +30,7 @@ export default function useRecords<T>(options: GetRecordsParams<T>) {
     if (_fired) return;
 
     getData().then((value) => {
-      resolveFn.current && resolveFn.current(value);
+      if (resolveFn.current) resolveFn.current(value);
     });
     setFired(true);
   }, [_fired, getData]);

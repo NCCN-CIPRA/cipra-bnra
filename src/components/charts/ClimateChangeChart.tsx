@@ -518,6 +518,7 @@ export default function ClimateChangeChart({
             cause.p2050_e >= cause.p_e ? 0 : cause.p_e - cause.p2050_e,
         })),
     ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile, causes, scenario]);
 
   return (

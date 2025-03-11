@@ -30,6 +30,7 @@ export default function RiskDataPage() {
   useEffect(() => {
     if (!directAnalyses) loadDirectAnalyses();
     if (!cascadeAnalyses) loadCascadeAnalyses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!directAnalyses || !cascadeAnalyses)

@@ -2,7 +2,11 @@ import { Canvg } from "canvg";
 
 // const scale= 1;
 
-export default async function (svgString: string, width?: number, height?: number) {
+export default async function svg2PDF(
+  svgString: string,
+  width?: number,
+  height?: number
+) {
   try {
     const canvas = document.createElement("canvas");
     if (width) {
@@ -13,19 +17,15 @@ export default async function (svgString: string, width?: number, height?: numbe
     }
     // canvas.width = scale*1000; // Default width if not specified
     // canvas.height = scale*550; // Default height if not specified
-    
+
     const context = canvas.getContext("2d");
 
     if (context) {
       // context.imageSmoothingEnabled = true;
       // context.imageSmoothingQuality = 'low';
 
-
       const v = Canvg.fromString(context, svgString.trim());
       await v.render();
-
-      //store the current globalCompositeOperation
-      var compositeOperation = context.globalCompositeOperation;
 
       //set to draw behind current content
       context.globalCompositeOperation = "destination-over";

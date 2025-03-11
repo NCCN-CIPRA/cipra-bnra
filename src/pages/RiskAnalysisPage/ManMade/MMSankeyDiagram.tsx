@@ -36,6 +36,7 @@ export default function MMSankeyDiagram({
 
   useEffect(() => {
     setScenario(scenario);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile]);
 
   const goToRiskFile = (id: string) => {

@@ -156,6 +156,7 @@ export default function SummaryCharts({
       // Download with FileSaver
       FileSaver.saveAs(png, `${riskFile.cr4de_hazard_id}-summary.png`);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getDivJpeg]);
 
   const tp = getScenarioParameter(riskFile, "TP", scenario) || 0;

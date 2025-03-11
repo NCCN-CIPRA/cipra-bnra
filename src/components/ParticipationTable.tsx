@@ -187,6 +187,7 @@ export default function ParticipationTable({
         <DialogContent>
           <Stack direction="column" spacing={4} sx={{ width: 300 }}>
             <TextField
+              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
               margin="dense"
               id="name"

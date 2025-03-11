@@ -390,6 +390,7 @@ export default function RiskNetworkGraph({
       return (
         linkedByIndex[a.index + "," + b.index] ||
         linkedByIndex[b.index + "," + a.index] ||
+        // eslint-disable-next-line eqeqeq
         a.index == b.index
       );
     }
@@ -426,6 +427,7 @@ export default function RiskNetworkGraph({
       link.style("stroke-opacity", 1);
       link.style("stroke", "#ddd");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [graphWidth, graph, selectedNodeId, filter]);
 
   return (

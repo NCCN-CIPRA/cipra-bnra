@@ -38,6 +38,7 @@ export default function ErrorPage() {
           <a href="mailto:cipra.bnra@nccn.fgov.be">cipra.bnra@nccn.fgov.be</a>
         </Alert>
         <img
+          alt="logo"
           src="https://bnra.powerappsportals.com/BNRALogo.png"
           style={{ width: 400 }}
         />

@@ -42,6 +42,7 @@ export default function EvolutionSection({
         450
       ).then((uri) => setCCChart(uri || ""));
     }, 5000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

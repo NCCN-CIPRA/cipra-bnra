@@ -367,6 +367,7 @@ export default function RiskMatrix({
           return true;
         })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calculations, worstCase, scales, nonKeyRisks, es]);
 
   return (

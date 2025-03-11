@@ -58,6 +58,7 @@ export default function ImpactSection({
         },
         [[], 0] as [Effect[], number]
       )[0];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile, effects]);
 
   const getDefaultText = () => {
@@ -136,10 +137,15 @@ export default function ImpactSection({
       setIQuali(
         riskFile[`cr4de_mrs_impact_${impactLetter}`] || getDefaultText()
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [riskFile]
   );
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const saveRiskFile = async (reset = false) => {
     setSaving(true);

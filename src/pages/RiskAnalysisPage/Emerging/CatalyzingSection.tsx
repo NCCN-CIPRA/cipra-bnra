@@ -8,14 +8,6 @@ import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 
-export type CatalyzingEffect = {
-  id: string | null;
-  name: string;
-
-  quali: string | null;
-  quali_cause: string | null;
-};
-
 function CatalyzingEffect({
   riskFile,
   cascade,
@@ -60,10 +52,15 @@ function CatalyzingEffect({
 
   useEffect(
     () => setIQuali(cascade.cr4de_description || getDefaultText()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [riskFile]
   );
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const saveRiskFile = async (reset = false) => {
     setSaving(true);

@@ -25,6 +25,7 @@ export default function PermissionDeniedPage() {
       </Alert>
       <Box sx={{ textAlign: "center" }}>
         <img
+          alt="Logo"
           src="https://bnra.powerappsportals.com/BNRALogo.png"
           style={{ width: 400 }}
         />

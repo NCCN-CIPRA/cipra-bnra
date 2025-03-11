@@ -14,6 +14,7 @@ class DataverseBackend implements Module {
   translations: Promise<Translations>;
 
   constructor() {
+    // eslint-disable-next-line no-async-promise-executor
     this.translations = new Promise<Translations>(async (resolve) => {
       const response = await fetch(
         `https://bnra.powerappsportals.com/_api/cr4de_bnratranslations?$select=cr4de_en,cr4de_nl,cr4de_fr,cr4de_de,cr4de_name`
@@ -43,17 +44,24 @@ class DataverseBackend implements Module {
     // console.log("INIT");
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async read(language: string, namespace: string, callback: any) {
     callback(null, (await this.translations)[language as keyof Translations]);
   }
 
-  async create(languages: string[], namespace: string, key: string, fallbackValue: string) {
+  async create(
+    languages: string[],
+    namespace: string,
+    key: string,
+    fallbackValue: string
+  ) {
     if (languages[0] !== "en") return;
 
     fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnratranslations`, {
       method: "POST",
       headers: {
-        __RequestVerificationToken: localStorage.getItem("antiforgerytoken") || "",
+        __RequestVerificationToken:
+          localStorage.getItem("antiforgerytoken") || "",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

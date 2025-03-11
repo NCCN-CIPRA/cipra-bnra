@@ -219,6 +219,7 @@ export default function RiskProfileGraph({
           .x((d) => x(d[0]))
           .y((d) => y(d[1]))
       );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calculations, selectedNodeId]);
 
   if (!selectedNodeId) return null;

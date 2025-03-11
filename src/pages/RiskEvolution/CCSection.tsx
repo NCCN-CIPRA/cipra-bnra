@@ -55,7 +55,12 @@ export default function CCSection({
 
   useEffect(() => setCCQuali(riskFile.cr4de_mrs_cc || null), [riskFile]);
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const scenarioSuffix = getScenarioSuffix(scenario);
   useEffect(() => {
@@ -165,6 +170,7 @@ export default function CCSection({
           .join("<br />")
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile, causes, scenarioSuffix]);
 
   const saveRiskFile = async () => {
@@ -287,6 +293,4 @@ export default function CCSection({
       <Box sx={{ clear: "both" }} />
     </Box>
   );
-
-  return null;
 }
