@@ -50,7 +50,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts --max_old_space_size=2536 build && npm run build:clean",
+    "build": "react-scripts --max_old_space_size=2536 build",
     "build:clean": "cd build && move static\\js\\main.*.js static\\js\\main.js && move static\\css\\main.*.css static\\css\\main.css",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
