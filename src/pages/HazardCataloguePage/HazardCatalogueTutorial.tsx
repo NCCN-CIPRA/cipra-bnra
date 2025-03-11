@@ -1,8 +1,13 @@
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
-import Joyride, { Step, ACTIONS, EVENTS, STATUS, CallBackProps, LIFECYCLE } from "react-joyride";
+import Joyride, {
+  Step,
+  ACTIONS,
+  EVENTS,
+  STATUS,
+  CallBackProps,
+} from "react-joyride";
 import { useState } from "react";
-import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 import TourTooltip from "../../components/TourTooltip";
 
 export default function HazardCatalogueTutorial({
@@ -29,7 +34,8 @@ export default function HazardCatalogueTutorial({
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="hazardCatalogue.tutorial.1.1">
-              This page is shows the full "Risk Catalogue" of the BNRA.
+              This page is shows the full &#quot;Risk Catalogue&#quot; of the
+              BNRA.
             </Trans>
           </Typography>
         </Box>
@@ -42,38 +48,46 @@ export default function HazardCatalogueTutorial({
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="hazardCatalogue.tutorial.2.1">
-              Each line contains some high-level information about a risk of the BNRA.
+              Each line contains some high-level information about a risk of the
+              BNRA.
             </Trans>
           </Typography>
           <ul>
             <li>
               <Typography variant="body1">
-                <Trans i18nKey="hazardCatalogue.tutorial.2.2">An identification code</Trans>
+                <Trans i18nKey="hazardCatalogue.tutorial.2.2">
+                  An identification code
+                </Trans>
               </Typography>
             </li>
             <li>
               <Typography variant="body1">
-                <Trans i18nKey="hazardCatalogue.tutorial.2.3">The name of the risk</Trans>
+                <Trans i18nKey="hazardCatalogue.tutorial.2.3">
+                  The name of the risk
+                </Trans>
               </Typography>
             </li>
             <li>
               <Typography variant="body1">
                 <Trans i18nKey="hazardCatalogue.tutorial.2.4">
-                  The category to which the risk belongs (cyber, emerging, health, man-made, natural, societal or
-                  ecotech)
+                  The category to which the risk belongs (cyber, emerging,
+                  health, man-made, natural, societal or ecotech)
                 </Trans>
               </Typography>
             </li>
             <li>
               <Typography variant="body1">
                 <Trans i18nKey="hazardCatalogue.tutorial.2.5">
-                  The most relevant scenario of the risk (considerable, major or extreme)
+                  The most relevant scenario of the risk (considerable, major or
+                  extreme)
                 </Trans>
               </Typography>
             </li>
             <li>
               <Typography variant="body1">
-                <Trans i18nKey="hazardCatalogue.tutorial.2.6">The total probability and impact of the risk</Trans>
+                <Trans i18nKey="hazardCatalogue.tutorial.2.6">
+                  The total probability and impact of the risk
+                </Trans>
               </Typography>
             </li>
           </ul>
@@ -101,10 +115,11 @@ export default function HazardCatalogueTutorial({
   ];
 
   const handleTutorialCallback = (data: CallBackProps) => {
-    const { action, index, status, type, lifecycle } = data;
+    const { action, index, status, type } = data;
 
-    // @ts-ignore-next-line
-    if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
+    if (
+      ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND] as string[]).includes(type)
+    ) {
       // Update state to advance the tour
       setStepIndex(index + (action === ACTIONS.PREV ? -1 : 1));
     } else if (status === STATUS.SKIPPED) {

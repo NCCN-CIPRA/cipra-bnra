@@ -1,10 +1,17 @@
 import { useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
-import { Tabs, Container, Paper, TextField, Stack, CssBaseline, Alert, AlertTitle } from "@mui/material";
+import { useSearchParams } from "react-router-dom";
+import {
+  Tabs,
+  Container,
+  Paper,
+  TextField,
+  Stack,
+  Alert,
+  AlertTitle,
+} from "@mui/material";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import useAPI from "../../hooks/useAPI";
-import TitleBar from "../../components/TitleBar";
 import { Trans, useTranslation } from "react-i18next";
 import Typography from "@mui/material/Typography";
 import { LoadingButton } from "@mui/lab";
@@ -14,11 +21,6 @@ interface TabPanelProps {
   index: number;
   value: number;
 }
-
-type RouteParams = {
-  user_id: string;
-  code: string;
-};
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -45,7 +47,7 @@ function a11yProps(index: number) {
 
 export default function ResetPasswordPage() {
   const { t } = useTranslation();
-  let [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const api = useAPI();
 
   const [password, setPassword] = useState("");
@@ -100,7 +102,10 @@ export default function ResetPasswordPage() {
         <Box sx={{ width: "100%", mb: 12 }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs value={0} aria-label="basic tabs example">
-              <Tab label={t("auth.resetPassword.tabName", "Reset Password")} {...a11yProps(0)} />
+              <Tab
+                label={t("auth.resetPassword.tabName", "Reset Password")}
+                {...a11yProps(0)}
+              />
             </Tabs>
           </Box>
           <TabPanel value={0} index={0}>
@@ -113,29 +118,35 @@ export default function ResetPasswordPage() {
               {error && (
                 <Alert severity="error" sx={{ mb: 4 }}>
                   <AlertTitle>
-                    <Trans i18nKey="auth.resetPassword.error2.title">Password Error</Trans>
+                    <Trans i18nKey="auth.resetPassword.error2.title">
+                      Password Error
+                    </Trans>
                   </AlertTitle>
                   {error === "password" && (
                     <Trans i18nKey="auth.registration.error2.password">
-                      Your password is not complex enough. Please consult the password requirements below.
+                      Your password is not complex enough. Please consult the
+                      password requirements below.
                     </Trans>
                   )}
                   {error === "passwordMatch" && (
-                    <Trans i18nKey="auth.registration.error2.passwordMatch">Your passwords did not match.</Trans>
+                    <Trans i18nKey="auth.registration.error2.passwordMatch">
+                      Your passwords did not match.
+                    </Trans>
                   )}
                 </Alert>
               )}
               <Typography variant="body2" paragraph>
                 <Trans i18nKey="auth.registration.introduction2">
-                  Please choose a password below. You will need these credentials to log in to the BNRA Risk Analysis
-                  Platform.
+                  Please choose a password below. You will need these
+                  credentials to log in to the BNRA Risk Analysis Platform.
                 </Trans>
               </Typography>
               <Typography variant="body2" paragraph>
                 <Trans i18nKey="auth.registration.introduction3">
-                  Wachtwoorden moet ten minste 8 tekens bevatten. Wachtwoorden moeten tekens bevatten van ten minste
-                  drie van de volgende vier klassen: hoofdletters, kleine letters, cijfers en niet-alfanumeriek
-                  (speciaal).
+                  Wachtwoorden moet ten minste 8 tekens bevatten. Wachtwoorden
+                  moeten tekens bevatten van ten minste drie van de volgende
+                  vier klassen: hoofdletters, kleine letters, cijfers en
+                  niet-alfanumeriek (speciaal).
                 </Trans>
               </Typography>
               <TextField
@@ -159,7 +170,12 @@ export default function ResetPasswordPage() {
               />
             </Box>
             <Stack spacing={2} direction="row" mt={4}>
-              <LoadingButton variant="contained" sx={{ mr: 1 }} loading={loading} onClick={handleResetPassword}>
+              <LoadingButton
+                variant="contained"
+                sx={{ mr: 1 }}
+                loading={loading}
+                onClick={handleResetPassword}
+              >
                 Reset Password
               </LoadingButton>
             </Stack>

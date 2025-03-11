@@ -1,4 +1,4 @@
-import React, { MutableRefObject, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Stack, Box, Typography, Paper, Divider } from "@mui/material";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
@@ -6,9 +6,7 @@ import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import TransferList from "../../components/TransferList";
 import Attachments from "../../components/Attachments";
 import useAPI from "../../hooks/useAPI";
-import { DVValidation } from "../../types/dataverse/DVValidation";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
-import { DVContact } from "../../types/dataverse/DVContact";
 import { GetRecordsParams } from "../../hooks/useLazyRecords";
 
 function CascadeSections({
@@ -35,7 +33,9 @@ function CascadeSections({
   setIsSaving: (isSaving: boolean) => void;
   onUpdateCascades: () => Promise<unknown>;
   getAttachments: (
-    lazyOptions?: Partial<GetRecordsParams<DVAttachment<unknown, unknown>>> | undefined
+    lazyOptions?:
+      | Partial<GetRecordsParams<DVAttachment<unknown, unknown>>>
+      | undefined
   ) => Promise<unknown>;
 }) {
   const api = useAPI();
@@ -48,7 +48,9 @@ function CascadeSections({
             .filter(
               (rf) =>
                 rf.cr4de_risk_type !== "Emerging Risk" &&
-                !causes.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
+                !causes.find(
+                  (c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid
+                )
             )
             .sort((a, b) => {
               return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
@@ -77,7 +79,9 @@ function CascadeSections({
             .filter(
               (rf) =>
                 rf.cr4de_risk_type === "Standard Risk" &&
-                !effects.find((c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid)
+                !effects.find(
+                  (c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid
+                )
             )
             .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
@@ -104,7 +108,9 @@ function CascadeSections({
             .filter(
               (rf) =>
                 rf.cr4de_risk_type === "Emerging Risk" &&
-                !catalysing.find((c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid)
+                !catalysing.find(
+                  (c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid
+                )
             )
             .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
@@ -138,13 +144,16 @@ function CascadeSections({
 
             <Box mt={1}>
               <Typography variant="caption" paragraph>
-                This section identifies other hazards in the BNRA hazard catalogue that may cause the current hazard. A
-                short reason should be provided for each non-trivial causal relation.
+                This section identifies other hazards in the BNRA hazard
+                catalogue that may cause the current hazard. A short reason
+                should be provided for each non-trivial causal relation.
               </Typography>
               <Typography variant="caption" paragraph>
-                On the left are the hazards that were identified by NCCN analist as being a potential cause. On the
-                right are all the other hazards in the hazard catalogue. The definition of a hazard selected in the
-                windows below can be found beneath the comment box.
+                On the left are the hazards that were identified by NCCN analist
+                as being a potential cause. On the right are all the other
+                hazards in the hazard catalogue. The definition of a hazard
+                selected in the windows below can be found beneath the comment
+                box.
               </Typography>
             </Box>
 
@@ -186,7 +195,9 @@ function CascadeSections({
               riskFile={riskFile}
               field="causes"
               onUpdate={() =>
-                getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                getAttachments({
+                  query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}`,
+                })
               }
             ></Attachments>
           </Box>
@@ -203,14 +214,17 @@ function CascadeSections({
 
             <Box mt={1}>
               <Typography variant="caption" paragraph>
-                This section tries to identify potential malicious actions in the BNRA hazard catalogue that may be
-                taken by the actors described by this hazard. A short reason should be provided for each non-evident
-                action.
+                This section tries to identify potential malicious actions in
+                the BNRA hazard catalogue that may be taken by the actors
+                described by this hazard. A short reason should be provided for
+                each non-evident action.
               </Typography>
               <Typography variant="caption" paragraph>
-                On the left are the hazards that were identified by NCCN analist as being a potential malicious actions.
-                On the right are all the other malicious actions in the hazard catalogue. The definition of a hazard
-                selected in the windows below can be found beneath the comment box.
+                On the left are the hazards that were identified by NCCN analist
+                as being a potential malicious actions. On the right are all the
+                other malicious actions in the hazard catalogue. The definition
+                of a hazard selected in the windows below can be found beneath
+                the comment box.
               </Typography>
             </Box>
 
@@ -252,7 +266,9 @@ function CascadeSections({
               riskFile={riskFile}
               field="effects"
               onUpdate={() =>
-                getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                getAttachments({
+                  query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}`,
+                })
               }
             ></Attachments>
           </Box>
@@ -269,13 +285,17 @@ function CascadeSections({
 
             <Box mt={1}>
               <Typography variant="caption" paragraph>
-                This section identifies other hazards in the BNRA hazard catalogue that may be a direct consequence of
-                the current hazard. A short reason should be provided for each non-trivial causal relation.
+                This section identifies other hazards in the BNRA hazard
+                catalogue that may be a direct consequence of the current
+                hazard. A short reason should be provided for each non-trivial
+                causal relation.
               </Typography>
               <Typography variant="caption" paragraph>
-                On the left are the hazards that were identified by NCCN analist as being a potential effect. On the
-                right are all the other hazards in the hazard catalogue. The definition of a hazard selected in the
-                windows below can be found beneath the comment box.
+                On the left are the hazards that were identified by NCCN analist
+                as being a potential effect. On the right are all the other
+                hazards in the hazard catalogue. The definition of a hazard
+                selected in the windows below can be found beneath the comment
+                box.
               </Typography>
             </Box>
 
@@ -317,7 +337,9 @@ function CascadeSections({
               riskFile={riskFile}
               field="effects"
               onUpdate={() =>
-                getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                getAttachments({
+                  query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}`,
+                })
               }
             ></Attachments>
           </Box>
@@ -334,14 +356,17 @@ function CascadeSections({
 
             <Box mt={1}>
               <Typography variant="caption" paragraph>
-                This section tries to identify other hazards in the BNRA hazard catalogue that may be catalysed by the
-                current emerging risk (this means in the future it may affect the probability and/or impact of the other
-                hazard). A short reason may be provided for each non-trivial causal relation.
+                This section tries to identify other hazards in the BNRA hazard
+                catalogue that may be catalysed by the current emerging risk
+                (this means in the future it may affect the probability and/or
+                impact of the other hazard). A short reason may be provided for
+                each non-trivial causal relation.
               </Typography>
               <Typography variant="caption" paragraph>
-                On the left are the hazards that may experience a catalysing effect. On the right are all the other
-                risks in the hazard catalogue. The definition of a hazard selected in the windows below can be found
-                beneath the comment box.
+                On the left are the hazards that may experience a catalysing
+                effect. On the right are all the other risks in the hazard
+                catalogue. The definition of a hazard selected in the windows
+                below can be found beneath the comment box.
               </Typography>
             </Box>
 
@@ -383,7 +408,9 @@ function CascadeSections({
               riskFile={riskFile}
               field="effects"
               onUpdate={() =>
-                getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                getAttachments({
+                  query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}`,
+                })
               }
             ></Attachments>
           </Box>
@@ -407,14 +434,18 @@ function CascadeSections({
 
             <Box mt={1}>
               <Typography variant="caption" paragraph>
-                This section tries to identifies the emerging risks in the BNRA hazard catalogue that may catalyse the
-                current hazard (this means in the future it may have an effect on the probability and/or impact of this
-                hazard). A short reason may be provided for each non-trivial causal relation.
+                This section tries to identifies the emerging risks in the BNRA
+                hazard catalogue that may catalyse the current hazard (this
+                means in the future it may have an effect on the probability
+                and/or impact of this hazard). A short reason may be provided
+                for each non-trivial causal relation.
               </Typography>
               <Typography variant="caption" paragraph>
-                On the left are the hazards that were identified by NCCN analists as having a potential catalysing
-                effect. On the right are all the other emerging risks in the hazard catalogue. The definition of a
-                hazard selected in the windows below can be found beneath the comment box.
+                On the left are the hazards that were identified by NCCN
+                analists as having a potential catalysing effect. On the right
+                are all the other emerging risks in the hazard catalogue. The
+                definition of a hazard selected in the windows below can be
+                found beneath the comment box.
               </Typography>
             </Box>
 
@@ -456,7 +487,9 @@ function CascadeSections({
               riskFile={riskFile}
               field="catalysing_effects"
               onUpdate={() =>
-                getAttachments({ query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}` })
+                getAttachments({
+                  query: `$filter=_cr4de_risk_file_value eq ${riskFile.cr4de_riskfilesid}`,
+                })
               }
             ></Attachments>
           </Box>

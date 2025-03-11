@@ -1,12 +1,14 @@
 import { Box, Button, Stack } from "@mui/material";
-import { RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
 import TextInputBox from "../../../components/TextInputBox";
 import { useEffect, useMemo, useState } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
-import { Cause, getYearlyProbability, getYearlyProbabilityFromRelative } from "../../../functions/Probability";
-import { SCENARIOS, SCENARIO_SUFFIX, getScenarioParameter, getScenarioSuffix } from "../../../functions/scenarios";
+import {
+  Cause,
+  getYearlyProbabilityFromRelative,
+} from "../../../functions/Probability";
+import { SCENARIOS, getScenarioParameter } from "../../../functions/scenarios";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import round from "../../../functions/roundNumberString";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
@@ -34,7 +36,6 @@ export default function ProbabilitySection({
   reloadRiskFile: () => Promise<unknown>;
   allRisks: SmallRisk[] | null;
 }) {
-  const scenarioSuffix = getScenarioSuffix(scenario);
   const tp = getScenarioParameter(riskFile, "TP", scenario) || 0.00001;
 
   const paretoCauses = useMemo(() => {
@@ -42,7 +43,8 @@ export default function ProbabilitySection({
       .sort((a, b) => b.p - a.p)
       .reduce(
         ([cumulCauses, pCumul], c) => {
-          if (pCumul / tp > 0.8) return [cumulCauses, pCumul] as [Cause[], number];
+          if (pCumul / tp > 0.8)
+            return [cumulCauses, pCumul] as [Cause[], number];
 
           return [[...cumulCauses, c], pCumul + c.p] as [Cause[], number];
         },
@@ -53,7 +55,9 @@ export default function ProbabilitySection({
   const getDefaultText = () => {
     const text = `
           <p style="font-size:10pt;">
-          There is an estimated <b>${round(100 * getYearlyProbabilityFromRelative(tp))}%</b> chance
+          There is an estimated <b>${round(
+            100 * getYearlyProbabilityFromRelative(tp)
+          )}%</b> chance
           for a ${scenario} ${riskFile.cr4de_title.toLocaleLowerCase()} to occur in the next 12 months. The following possible underlying causes for
           such an incident were identified:
           </p>
@@ -62,10 +66,14 @@ export default function ProbabilitySection({
 
     const descriptions = paretoCauses
       .map((c, i) => {
-        const riskName = c.id ? `<a href="/risks/${c.id}" target="_blank">${c.name}</a>` : `<a href="">${c.name}</a>`;
+        const riskName = c.id
+          ? `<a href="/risks/${c.id}" target="_blank">${c.name}</a>`
+          : `<a href="">${c.name}</a>`;
 
         return `<p style="font-weight:bold;font-size:10pt;">
-                    ${i + 1}. ${riskName} (${round((100 * c.p) / tp)}% of total probability)
+                    ${i + 1}. ${riskName} (${round(
+          (100 * c.p) / tp
+        )}% of total probability)
                     </p>
                     <p><br></p>
                     ${c.quali}
@@ -80,9 +88,14 @@ export default function ProbabilitySection({
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [probQuali, setProbQuali] = useState<string>(riskFile.cr4de_mrs_probability || getDefaultText());
+  const [probQuali, setProbQuali] = useState<string>(
+    riskFile.cr4de_mrs_probability || getDefaultText()
+  );
 
-  useEffect(() => setProbQuali(riskFile.cr4de_mrs_probability || getDefaultText()), [riskFile]);
+  useEffect(
+    () => setProbQuali(riskFile.cr4de_mrs_probability || getDefaultText()),
+    [riskFile]
+  );
 
   useEffect(() => setIsEditing(editing), [editing]);
 
@@ -104,7 +117,9 @@ export default function ProbabilitySection({
 
   const startEdit = () => {
     if (isEditingOther) {
-      window.alert("You are already editing another section. Please close this section before editing another.");
+      window.alert(
+        "You are already editing another section. Please close this section before editing another."
+      );
     } else {
       setEditing(true);
     }
@@ -120,7 +135,9 @@ export default function ProbabilitySection({
         />
       )}
       {editing && (
-        <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+        <Box
+          sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+        >
           <TextInputBox
             limitedOptions
             initialValue={probQuali}
@@ -132,7 +149,10 @@ export default function ProbabilitySection({
         </Box>
       )}
       {mode === "edit" && (
-        <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
+        <Stack
+          direction="row"
+          sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}
+        >
           {!editing && (
             <>
               <Button onClick={startEdit}>Edit</Button>
@@ -162,7 +182,12 @@ export default function ProbabilitySection({
               <Button
                 color="warning"
                 onClick={() => {
-                  if (window.confirm("Are you sure you wish to discard your changes?")) setEditing(false);
+                  if (
+                    window.confirm(
+                      "Are you sure you wish to discard your changes?"
+                    )
+                  )
+                    setEditing(false);
                 }}
               >
                 Discard Changes

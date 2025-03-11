@@ -1,29 +1,19 @@
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { Cascades } from "../../BaseRisksPage";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useOutletContext } from "react-router-dom";
-import { RiskFilePageContext } from "../../BaseRiskFilePage";
+import { useNavigate } from "react-router-dom";
 import DefinitionSection from "../DefinitionSection";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import { Section } from "../HelpSiderBar";
-import { getScenarioSuffix, SCENARIOS } from "../../../functions/scenarios";
-import { useEffect } from "react";
+import { SCENARIOS } from "../../../functions/scenarios";
 import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import Bibliography from "../../RiskAnalysisPage/Bibliography";
 import RiskFileTitle from "../../../components/RiskFileTitle";
-import IntelligenceSection from "./IntelligenceSection";
 import CapacitiesSection from "../../RiskAnalysisPage/ManMade/CapacitiesSection";
 import * as IP from "../../../functions/intensityParameters";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import ManmadeIdentificationTutorial from "./ManmadeIdentificationTutorial";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
-
-const ibsx = {
-  transition: "opacity .3s ease",
-  ml: 1,
-};
 
 export default function Manmade({
   riskFile,
@@ -51,7 +41,6 @@ export default function Manmade({
 
   const intensityParameters = IP.unwrap(riskFile.cr4de_intensity_parameters);
   const MRS = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
-  const MRSSuffix = getScenarioSuffix(MRS);
 
   return (
     <Box sx={{ mb: 10 }}>

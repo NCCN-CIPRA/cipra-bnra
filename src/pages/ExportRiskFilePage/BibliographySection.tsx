@@ -1,21 +1,10 @@
-import { Image, Page, Text, View } from "@react-pdf/renderer";
+import { Page, Text, View } from "@react-pdf/renderer";
 import Footer from "./Footer";
 import { bodyStyle, h4Style, PAGE_DPI, PAGE_SIZE, PAGE_STYLES } from "./styles";
-import html2PDF from "../../functions/html2pdf";
-import { Trans, useTranslation } from "react-i18next";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import { useEffect, useMemo, useState } from "react";
-import svg2PDF from "../../functions/svg2PDF";
-import getScaleString from "../../functions/getScaleString";
+import { Trans } from "react-i18next";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { useMemo } from "react";
 import Header from "./Header";
-import { unwrap as unwrapHE } from "../../functions/historicalEvents";
-import { colors } from "../../functions/getCategoryColor";
-import { unwrap as unwrapParams } from "../../functions/intensityParameters";
-import {
-  SCENARIO_PARAMS,
-  SCENARIOS,
-  unwrap as unwrapScenarios,
-} from "../../functions/scenarios";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { BLACK } from "../../functions/colors";
 import { LoggedInUser } from "../../hooks/useLoggedInUser";
@@ -23,14 +12,11 @@ import { LoggedInUser } from "../../hooks/useLoggedInUser";
 export default function BibliographySection({
   riskFile,
   allAttachments,
-  user,
 }: {
   riskFile: DVRiskFile;
   allAttachments: DVAttachment[] | null;
   user: LoggedInUser | null | undefined;
 }) {
-  const { t } = useTranslation();
-
   const attachments = useMemo(() => {
     if (!allAttachments) return [];
 
@@ -123,8 +109,8 @@ export default function BibliographySection({
                 }
                 return -1;
               })
-              .map((a) => (
-                <View wrap={false}>
+              .map((a, i) => (
+                <View key={i} wrap={false}>
                   <View
                     key={a.cr4de_bnraattachmentid}
                     style={{

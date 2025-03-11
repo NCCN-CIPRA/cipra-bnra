@@ -1,16 +1,20 @@
 import { Alert, AlertTitle } from "@mui/lab";
 import { Box, CssBaseline, Button } from "@mui/material";
-import { useNavigate, useRouteError } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import TitleBar from "../components/TitleBar";
 
 export default function ErrorPage() {
-  const error = useRouteError();
   const navigate = useNavigate();
 
   return (
     <>
       <CssBaseline />
-      <TitleBar user={null} setFakeRole={() => {}} title={"BNRA 2023 - 2026"} showUser={false} />
+      <TitleBar
+        user={null}
+        setFakeRole={() => {}}
+        title={"BNRA 2023 - 2026"}
+        showUser={false}
+      />
       <Box
         sx={{
           display: "flex",
@@ -29,10 +33,14 @@ export default function ErrorPage() {
             </Button>
           }
         >
-          <AlertTitle>Error</AlertTitle>A problem has occured. Please try again or contact us as{" "}
+          <AlertTitle>Error</AlertTitle>A problem has occured. Please try again
+          or contact us as{" "}
           <a href="mailto:cipra.bnra@nccn.fgov.be">cipra.bnra@nccn.fgov.be</a>
         </Alert>
-        <img src="https://bnra.powerappsportals.com/BNRALogo.png" style={{ width: 400 }} />
+        <img
+          src="https://bnra.powerappsportals.com/BNRALogo.png"
+          style={{ width: 400 }}
+        />
       </Box>
     </>
   );

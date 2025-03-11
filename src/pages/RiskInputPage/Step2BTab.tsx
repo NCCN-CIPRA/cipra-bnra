@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
+import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import {
   Grid,
@@ -8,7 +8,6 @@ import {
   Stack,
   CardContent,
   Typography,
-  useTheme,
   Container,
   Chip,
   MenuItem,
@@ -27,34 +26,47 @@ import {
 } from "@mui/material";
 import { DVContact } from "../../types/dataverse/DVContact";
 import TextInputBox from "../../components/TextInputBox";
-import { NO_COMMENT } from "../step2A/sections/QualiTextInputBox";
+import { NO_COMMENT } from "./QualiTextInputBox";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import useAPI from "../../hooks/useAPI";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import CascadeMatrix from "../step2B/information/CascadeMatrix";
+import CascadeMatrix from "./CascadeMatrix";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { LoadingButton } from "@mui/lab";
-import ScenarioTable from "../step2A/information/ScenarioTable";
-import { ScenarioInput, ScenarioInputs } from "../step2A/fields";
-import { STATS, avg, getConsensusCascade, getStats } from "../../functions/inputProcessing";
+import ScenarioTable from "./ScenarioTable";
+import { ScenarioInput, ScenarioInputs } from "./fields";
+import {
+  STATS,
+  avg,
+  getConsensusCascade,
+  getStats,
+} from "../../functions/inputProcessing";
 import { DiscussionRequired } from "../../types/DiscussionRequired";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import Attachments from "./Attachments";
-import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-const scenarioLetter = {
-  [SCENARIOS.CONSIDERABLE]: "c",
-  [SCENARIOS.MAJOR]: "m",
-  [SCENARIOS.EXTREME]: "e",
-};
-
-const getQuantiLabel = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDirectAnalysis[]) => {
+const getQuantiLabel = (
+  fieldName: keyof DVDirectAnalysis,
+  directAnalyses: DVDirectAnalysis[]
+) => {
   const good = directAnalyses.filter((da) => da[fieldName] !== null);
 
   if (good.length <= 0) return 0;
 
-  const prefix = fieldName.startsWith("cr4de_dp50") ? fieldName : (good[0][fieldName] as string).slice(0, -1);
+  const prefix = fieldName.startsWith("cr4de_dp50")
+    ? fieldName
+    : (good[0][fieldName] as string).slice(0, -1);
 
   return {
     M: "Motivation",
@@ -101,10 +113,15 @@ export default function Step2BTab({
   const [cascadeIndex, setCascadeIndex] = useState<number>(0);
   const [lastCascadeIndex, setLastCascadeIndex] = useState(0);
   const [consensus, setConsensus] = useState<DVCascadeAnalysis | null>(
-    getConsensusCascade(cascadeAnalyses.filter((ca) => ca._cr4de_cascade_value === cascades[0].cr4de_bnrariskcascadeid))
+    getConsensusCascade(
+      cascadeAnalyses.filter(
+        (ca) => ca._cr4de_cascade_value === cascades[0].cr4de_bnrariskcascadeid
+      )
+    )
   );
   const [isSaving, setIsSaving] = useState(false);
-  const [discussionRequired, setDiscussionRequired] = useState<DiscussionRequired | null>(null);
+  const [discussionRequired, setDiscussionRequired] =
+    useState<DiscussionRequired | null>(null);
 
   const qualiInput = useRef<null | string>(null);
   const [reloadAttachments, setReloadAttachments] = useState(false);
@@ -155,19 +172,33 @@ export default function Step2BTab({
         );
       }
     } else if (cascades !== null && cascadeIndex !== null) {
-      if (riskFile?.cr4de_riskfilesid !== cascades[cascadeIndex]._cr4de_cause_hazard_value) {
-        setDiscussionRequired(cascades[cascadeIndex].cr4de_discussion_required as DiscussionRequired | null);
+      if (
+        riskFile?.cr4de_riskfilesid !==
+        cascades[cascadeIndex]._cr4de_cause_hazard_value
+      ) {
+        setDiscussionRequired(
+          cascades[cascadeIndex]
+            .cr4de_discussion_required as DiscussionRequired | null
+        );
       } else {
-        setDiscussionRequired(cascades[cascadeIndex].cr4de_discussion_required_cause as DiscussionRequired | null);
+        setDiscussionRequired(
+          cascades[cascadeIndex]
+            .cr4de_discussion_required_cause as DiscussionRequired | null
+        );
       }
     }
   }, [cascades, riskFile, cascadeIndex]);
 
   useEffect(() => {
-    if (cascades === null || cascadeAnalyses === null || cascadeIndex === null) return;
+    if (cascades === null || cascadeAnalyses === null || cascadeIndex === null)
+      return;
 
-    const c: any = getConsensusCascade(
-      cascadeAnalyses.filter((ca) => ca._cr4de_cascade_value === cascades[cascadeIndex].cr4de_bnrariskcascadeid)
+    const c = getConsensusCascade(
+      cascadeAnalyses.filter(
+        (ca) =>
+          ca._cr4de_cascade_value ===
+          cascades[cascadeIndex].cr4de_bnrariskcascadeid
+      )
     );
 
     setConsensus(c);
@@ -180,45 +211,68 @@ export default function Step2BTab({
       riskFile !== null &&
       directAnalyses !== null &&
       cascadeAnalyses !== null &&
-      cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 &&
-      riskFile?.cr4de_riskfilesid !== cascades[cascadeIndex]._cr4de_cause_hazard_value
+      cascades[cascadeIndex].cr4de_cause_hazard.cr4de_title.indexOf(
+        "Climate"
+      ) >= 0 &&
+      riskFile?.cr4de_riskfilesid !==
+        cascades[cascadeIndex]._cr4de_cause_hazard_value
     ) {
-      const goodDas = directAnalyses.filter((da) => da.cr4de_dp50_quanti_c !== null);
+      const goodDas = directAnalyses.filter(
+        (da) => da.cr4de_dp50_quanti_c !== null
+      );
       return {
         [SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].titleDefault]: {
           ...(getStats(
             goodDas.map((da) => da["cr4de_dp50_quanti_c"]),
             goodDas
-              .map((da) => cascadeAnalyses.find((ca) => ca._cr4de_expert_value === da._cr4de_expert_value))
+              .map((da) =>
+                cascadeAnalyses.find(
+                  (ca) => ca._cr4de_expert_value === da._cr4de_expert_value
+                )
+              )
               .map((ca) => (ca?.cr4de_quality ? ca?.cr4de_quality : 2.5))
           ) as STATS),
           dp: getStats(
             directAnalyses.map((da) => da.cr4de_dp_quanti_c) as string[],
-            directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality.dp_c) || 2.5)
+            directAnalyses.map(
+              (da) => (da.cr4de_quality && da.cr4de_quality.dp_c) || 2.5
+            )
           )?.avg,
         },
         [SCENARIO_PARAMS[SCENARIOS.MAJOR].titleDefault]: {
           ...(getStats(
             goodDas.map((da) => da["cr4de_dp50_quanti_m"]),
             goodDas
-              .map((da) => cascadeAnalyses.find((ca) => ca._cr4de_expert_value === da._cr4de_expert_value))
+              .map((da) =>
+                cascadeAnalyses.find(
+                  (ca) => ca._cr4de_expert_value === da._cr4de_expert_value
+                )
+              )
               .map((ca) => (ca?.cr4de_quality ? ca?.cr4de_quality : 2.5))
           ) as STATS),
           dp: getStats(
             directAnalyses.map((da) => da.cr4de_dp_quanti_m) as string[],
-            directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality.dp_m) || 2.5)
+            directAnalyses.map(
+              (da) => (da.cr4de_quality && da.cr4de_quality.dp_m) || 2.5
+            )
           )?.avg,
         },
         [SCENARIO_PARAMS[SCENARIOS.EXTREME].titleDefault]: {
           ...(getStats(
             goodDas.map((da) => da["cr4de_dp50_quanti_e"]),
             goodDas
-              .map((da) => cascadeAnalyses.find((ca) => ca._cr4de_expert_value === da._cr4de_expert_value))
+              .map((da) =>
+                cascadeAnalyses.find(
+                  (ca) => ca._cr4de_expert_value === da._cr4de_expert_value
+                )
+              )
               .map((ca) => (ca?.cr4de_quality ? ca?.cr4de_quality : 2.5))
           ) as STATS),
           dp: getStats(
             directAnalyses.map((da) => da.cr4de_dp_quanti_e) as string[],
-            directAnalyses.map((da) => (da.cr4de_quality && da.cr4de_quality.dp_e) || 2.5)
+            directAnalyses.map(
+              (da) => (da.cr4de_quality && da.cr4de_quality.dp_e) || 2.5
+            )
           )?.avg,
         },
       };
@@ -227,10 +281,13 @@ export default function Step2BTab({
     return null;
   }, [cascades, cascadeIndex, riskFile, directAnalyses, cascadeAnalyses]);
 
-  const dp50Divergence = dp50Distribution ? avg(Object.values(dp50Distribution).map((d) => d.std)) / 6 : 0;
+  const dp50Divergence = dp50Distribution
+    ? avg(Object.values(dp50Distribution).map((d) => d.std)) / 6
+    : 0;
 
   const cas = cascadeAnalyses.filter(
-    (ca) => ca._cr4de_cascade_value === cascades[cascadeIndex].cr4de_bnrariskcascadeid
+    (ca) =>
+      ca._cr4de_cascade_value === cascades[cascadeIndex].cr4de_bnrariskcascadeid
   );
 
   const causes = cascades.filter(
@@ -239,7 +296,9 @@ export default function Step2BTab({
       c.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING
   );
   const attacks = cascades.filter(
-    (c) => riskFile.cr4de_risk_type === RISK_TYPE.MANMADE && c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid
+    (c) =>
+      riskFile.cr4de_risk_type === RISK_TYPE.MANMADE &&
+      c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid
   );
   const catalyzingEffects = cascades.filter(
     (c) =>
@@ -258,14 +317,23 @@ export default function Step2BTab({
   const handleSave = async (innerCascadeIndex: number) => {
     setIsSaving(true);
 
-    if (riskFile.cr4de_riskfilesid !== cascades[innerCascadeIndex]._cr4de_cause_hazard_value) {
-      await api.updateCascade(cascades[innerCascadeIndex].cr4de_bnrariskcascadeid, {
-        cr4de_quali: qualiInput.current,
-      });
+    if (
+      riskFile.cr4de_riskfilesid !==
+      cascades[innerCascadeIndex]._cr4de_cause_hazard_value
+    ) {
+      await api.updateCascade(
+        cascades[innerCascadeIndex].cr4de_bnrariskcascadeid,
+        {
+          cr4de_quali: qualiInput.current,
+        }
+      );
     } else {
-      await api.updateCascade(cascades[innerCascadeIndex].cr4de_bnrariskcascadeid, {
-        cr4de_quali_cause: qualiInput.current,
-      });
+      await api.updateCascade(
+        cascades[innerCascadeIndex].cr4de_bnrariskcascadeid,
+        {
+          cr4de_quali_cause: qualiInput.current,
+        }
+      );
     }
 
     await reloadCascades();
@@ -299,12 +367,18 @@ export default function Step2BTab({
                   <Typography variant="subtitle2">Causes</Typography>
                 </ListItem>
                 {causes.map((c) => (
-                  <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
+                  <ListItem
+                    key={c.cr4de_bnrariskcascadeid}
+                    disablePadding
+                    sx={{ paddingLeft: 2 }}
+                  >
                     <ListItemButton
                       onClick={() => {
                         setCascadeIndex(
                           cascades.findIndex(
-                            (ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean
+                            (ca) =>
+                              (ca.cr4de_bnrariskcascadeid ===
+                                c.cr4de_bnrariskcascadeid) as boolean
                           )
                         );
                       }}
@@ -313,14 +387,19 @@ export default function Step2BTab({
                         primary={c.cr4de_cause_hazard.cr4de_title}
                         sx={{
                           fontWeight:
-                            c.cr4de_bnrariskcascadeid === cascade.cr4de_bnrariskcascadeid ? "bold" : "regular",
+                            c.cr4de_bnrariskcascadeid ===
+                            cascade.cr4de_bnrariskcascadeid
+                              ? "bold"
+                              : "regular",
                         }}
                       />
                     </ListItemButton>
                   </ListItem>
                 ))}
               </List>
-              {(attacks.length > 0 || catalyzingEffects.length > 0 || catalyzedRisks.length > 0) && <Divider />}
+              {(attacks.length > 0 ||
+                catalyzingEffects.length > 0 ||
+                catalyzedRisks.length > 0) && <Divider />}
             </>
           )}
           {attacks.length > 0 && (
@@ -330,12 +409,18 @@ export default function Step2BTab({
                   <Typography variant="subtitle2">Potential Attacks</Typography>
                 </ListItem>
                 {attacks.map((c) => (
-                  <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
+                  <ListItem
+                    key={c.cr4de_bnrariskcascadeid}
+                    disablePadding
+                    sx={{ paddingLeft: 2 }}
+                  >
                     <ListItemButton
                       onClick={() => {
                         setCascadeIndex(
                           cascades.findIndex(
-                            (ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean
+                            (ca) =>
+                              (ca.cr4de_bnrariskcascadeid ===
+                                c.cr4de_bnrariskcascadeid) as boolean
                           )
                         );
                       }}
@@ -344,34 +429,49 @@ export default function Step2BTab({
                         primary={c.cr4de_effect_hazard.cr4de_title}
                         sx={{
                           fontWeight:
-                            c.cr4de_bnrariskcascadeid === cascade.cr4de_bnrariskcascadeid ? "bold" : "regular",
+                            c.cr4de_bnrariskcascadeid ===
+                            cascade.cr4de_bnrariskcascadeid
+                              ? "bold"
+                              : "regular",
                         }}
                       />
                     </ListItemButton>
                   </ListItem>
                 ))}
               </List>
-              {(catalyzingEffects.length > 0 || catalyzedRisks.length > 0) && <Divider />}
+              {(catalyzingEffects.length > 0 || catalyzedRisks.length > 0) && (
+                <Divider />
+              )}
             </>
           )}
           {catalyzingEffects.length > 0 && (
             <>
               <List>
                 <ListItem>
-                  <Typography variant="subtitle2">Catalyzing Effects</Typography>
+                  <Typography variant="subtitle2">
+                    Catalyzing Effects
+                  </Typography>
                 </ListItem>
                 {catalyzingEffects.map((c) => (
-                  <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
+                  <ListItem
+                    key={c.cr4de_bnrariskcascadeid}
+                    disablePadding
+                    sx={{ paddingLeft: 2 }}
+                  >
                     <ListItemButton
                       onClick={() => {
                         setCascadeIndex(
                           cascades.findIndex(
-                            (ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean
+                            (ca) =>
+                              (ca.cr4de_bnrariskcascadeid ===
+                                c.cr4de_bnrariskcascadeid) as boolean
                           )
                         );
                       }}
                     >
-                      <ListItemText primary={c.cr4de_cause_hazard.cr4de_title} />
+                      <ListItemText
+                        primary={c.cr4de_cause_hazard.cr4de_title}
+                      />
                     </ListItemButton>
                   </ListItem>
                 ))}
@@ -384,20 +484,30 @@ export default function Step2BTab({
             <>
               <List>
                 <ListItem>
-                  <Typography variant="subtitle2">Catalyzing Effects</Typography>
+                  <Typography variant="subtitle2">
+                    Catalyzing Effects
+                  </Typography>
                 </ListItem>
                 {catalyzedRisks.map((c) => (
-                  <ListItem key={c.cr4de_bnrariskcascadeid} disablePadding sx={{ paddingLeft: 2 }}>
+                  <ListItem
+                    key={c.cr4de_bnrariskcascadeid}
+                    disablePadding
+                    sx={{ paddingLeft: 2 }}
+                  >
                     <ListItemButton
                       onClick={() => {
                         setCascadeIndex(
                           cascades.findIndex(
-                            (ca) => (ca.cr4de_bnrariskcascadeid === c.cr4de_bnrariskcascadeid) as boolean
+                            (ca) =>
+                              (ca.cr4de_bnrariskcascadeid ===
+                                c.cr4de_bnrariskcascadeid) as boolean
                           )
                         );
                       }}
                     >
-                      <ListItemText primary={c.cr4de_effect_hazard.cr4de_title} />
+                      <ListItemText
+                        primary={c.cr4de_effect_hazard.cr4de_title}
+                      />
                     </ListItemButton>
                   </ListItem>
                 ))}
@@ -408,11 +518,17 @@ export default function Step2BTab({
       </Drawer>
       <Container sx={{ ml: "240px" }}>
         <Typography variant="h6" sx={{ mb: 4 }}>
-          <Link href={`/learning/risk/${cascade.cr4de_cause_hazard.cr4de_riskfilesid}`} target="_blank">
+          <Link
+            href={`/learning/risk/${cascade.cr4de_cause_hazard.cr4de_riskfilesid}`}
+            target="_blank"
+          >
             {cascade.cr4de_cause_hazard.cr4de_title}
           </Link>{" "}
           causes{" "}
-          <Link href={`/learning/risk/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}`} target="_blank">
+          <Link
+            href={`/learning/risk/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}`}
+            target="_blank"
+          >
             {cascade.cr4de_effect_hazard.cr4de_title}
           </Link>
         </Typography>
@@ -423,24 +539,38 @@ export default function Step2BTab({
                 <>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body1">
-                      Below is a summary of the quantitative results for this cascade:
+                      Below is a summary of the quantitative results for this
+                      cascade:
                     </Typography>
                   </Box>
-                  {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING && (
+                  {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_risk_type !==
+                    RISK_TYPE.EMERGING && (
                     <Box sx={{ mb: 8 }}>
                       <CascadeMatrix
                         cascadeAnalysis={consensus as DVCascadeAnalysis}
-                        cause={cascades[cascadeIndex].cr4de_cause_hazard as DVRiskFile}
+                        cause={
+                          cascades[cascadeIndex]
+                            .cr4de_cause_hazard as DVRiskFile
+                        }
                         effect={riskFile}
                         onChangeScenario={() => {}}
                       />
                     </Box>
                   )}
 
-                  {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 &&
-                    riskFile.cr4de_riskfilesid !== cascade._cr4de_cause_hazard_value &&
+                  {cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >=
+                    0 &&
+                    riskFile.cr4de_riskfilesid !==
+                      cascade._cr4de_cause_hazard_value &&
                     dp50Distribution && (
-                      <Box sx={{ width: "100%", height: 300, mt: 4, position: "relative" }}>
+                      <Box
+                        sx={{
+                          width: "100%",
+                          height: 300,
+                          mt: 4,
+                          position: "relative",
+                        }}
+                      >
                         <Box
                           sx={{
                             position: "absolute",
@@ -452,15 +582,19 @@ export default function Step2BTab({
                         >
                           <ResponsiveContainer>
                             <BarChart
-                              data={Object.entries(dp50Distribution).map(([label, distribution]) => {
-                                return {
-                                  name: `${label} Input Distribution`,
-                                  distFloat: distribution.min - 0.05,
-                                  distBot: distribution.avg - distribution.min,
-                                  distAvg: 0.1,
-                                  distTop: distribution.max - distribution.avg,
-                                };
-                              })}
+                              data={Object.entries(dp50Distribution).map(
+                                ([label, distribution]) => {
+                                  return {
+                                    name: `${label} Input Distribution`,
+                                    distFloat: distribution.min - 0.05,
+                                    distBot:
+                                      distribution.avg - distribution.min,
+                                    distAvg: 0.1,
+                                    distTop:
+                                      distribution.max - distribution.avg,
+                                  };
+                                }
+                              )}
                               margin={{
                                 top: 5,
                                 right: 30,
@@ -470,33 +604,74 @@ export default function Step2BTab({
                             >
                               <CartesianGrid strokeDasharray="3 3" />
                               <XAxis dataKey="name" />
-                              <YAxis domain={[-1, 6]} ticks={[0, 1, 2, 3, 4, 5]} />
+                              <YAxis
+                                domain={[-1, 6]}
+                                ticks={[0, 1, 2, 3, 4, 5]}
+                              />
                               <Tooltip
                                 formatter={(value, name, props) => {
-                                  if (name === "Minimum") return props.payload.distFloat + 0.05;
-                                  if (name === "Average") return props.payload.distFloat + 0.05 + props.payload.distBot;
+                                  if (name === "Minimum")
+                                    // eslint-disable-next-line react/prop-types
+                                    return props.payload.distFloat + 0.05;
+                                  if (name === "Average")
+                                    return (
+                                      // eslint-disable-next-line react/prop-types
+                                      props.payload.distFloat +
+                                      0.05 +
+                                      // eslint-disable-next-line react/prop-types
+                                      props.payload.distBot
+                                    );
                                   if (name === "Maximum")
                                     return (
-                                      props.payload.distFloat + 0.05 + props.payload.distBot + props.payload.distTop
+                                      // eslint-disable-next-line react/prop-types
+                                      props.payload.distFloat +
+                                      0.05 +
+                                      // eslint-disable-next-line react/prop-types
+                                      props.payload.distBot +
+                                      // eslint-disable-next-line react/prop-types
+                                      props.payload.distTop
                                     );
 
                                   return value;
                                 }}
                               />
-                              <Bar dataKey="distFloat" stackId="a" fill="transparent" />
-                              <Bar dataKey="distBot" stackId="a" fill="#82ca9d" name="Minimum" />
-                              <Bar dataKey="distAvg" stackId="a" fill="#5a9671" name="Average" />
-                              <Bar dataKey="distTop" stackId="a" fill="#82ca9d" name="Maximum" />
+                              <Bar
+                                dataKey="distFloat"
+                                stackId="a"
+                                fill="transparent"
+                              />
+                              <Bar
+                                dataKey="distBot"
+                                stackId="a"
+                                fill="#82ca9d"
+                                name="Minimum"
+                              />
+                              <Bar
+                                dataKey="distAvg"
+                                stackId="a"
+                                fill="#5a9671"
+                                name="Average"
+                              />
+                              <Bar
+                                dataKey="distTop"
+                                stackId="a"
+                                fill="#82ca9d"
+                                name="Maximum"
+                              />
 
                               <ReferenceLine
                                 segment={[
                                   {
                                     x: "Considerable Input Distribution",
-                                    y: (dp50Distribution.Considerable.dp || 0) - 0.1,
+                                    y:
+                                      (dp50Distribution.Considerable.dp || 0) -
+                                      0.1,
                                   },
                                   {
                                     x: "Considerable Input Distribution",
-                                    y: (dp50Distribution.Considerable.dp || 0) + 0.1,
+                                    y:
+                                      (dp50Distribution.Considerable.dp || 0) +
+                                      0.1,
                                   },
                                 ]}
                                 strokeWidth="25%"
@@ -556,9 +731,15 @@ export default function Step2BTab({
                     </Typography>
                     <MUITooltip title={`Divergence: ${100 * dp50Divergence}%`}>
                       <Box>
-                        {dp50Divergence < 0.2 && <Chip label="LOW" color="success" />}
-                        {dp50Divergence >= 0.2 && dp50Divergence < 0.4 && <Chip label="MEDIUM" color="warning" />}
-                        {dp50Divergence >= 0.4 && <Chip label="HIGH" color="error" />}
+                        {dp50Divergence < 0.2 && (
+                          <Chip label="LOW" color="success" />
+                        )}
+                        {dp50Divergence >= 0.2 && dp50Divergence < 0.4 && (
+                          <Chip label="MEDIUM" color="warning" />
+                        )}
+                        {dp50Divergence >= 0.4 && (
+                          <Chip label="HIGH" color="error" />
+                        )}
                       </Box>
                     </MUITooltip>
                   </Stack>
@@ -574,7 +755,10 @@ export default function Step2BTab({
                   sx={{ width: 200 }}
                   onChange={async (e) => {
                     setDiscussionRequired(e.target.value as DiscussionRequired);
-                    if (riskFile.cr4de_riskfilesid !== cascade._cr4de_cause_hazard_value) {
+                    if (
+                      riskFile.cr4de_riskfilesid !==
+                      cascade._cr4de_cause_hazard_value
+                    ) {
                       await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
                         cr4de_discussion_required: e.target.value,
                       });
@@ -587,9 +771,15 @@ export default function Step2BTab({
                   }}
                 >
                   <MenuItem value="unknown">Unknown</MenuItem>
-                  <MenuItem value={DiscussionRequired.REQUIRED}>Required</MenuItem>
-                  <MenuItem value={DiscussionRequired.PREFERRED}>Preferred</MenuItem>
-                  <MenuItem value={DiscussionRequired.NOT_NECESSARY}>Unnecessary</MenuItem>
+                  <MenuItem value={DiscussionRequired.REQUIRED}>
+                    Required
+                  </MenuItem>
+                  <MenuItem value={DiscussionRequired.PREFERRED}>
+                    Preferred
+                  </MenuItem>
+                  <MenuItem value={DiscussionRequired.NOT_NECESSARY}>
+                    Unnecessary
+                  </MenuItem>
                 </Select>
               </Stack>
             </CardContent>
@@ -599,8 +789,9 @@ export default function Step2BTab({
             <CardContent>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body1">
-                  The field below can be used to summarize the qualitative responses of the experts or to prepare for
-                  the consensus meeting:
+                  The field below can be used to summarize the qualitative
+                  responses of the experts or to prepare for the consensus
+                  meeting:
                 </Typography>
               </Box>
               {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD ? (
@@ -620,7 +811,9 @@ export default function Step2BTab({
                 />
               ) : (
                 <TextInputBox
-                  initialValue={(cascade.cr4de_quali_cause as string | null) || ""}
+                  initialValue={
+                    (cascade.cr4de_quali_cause as string | null) || ""
+                  }
                   setUpdatedValue={(v) => {
                     qualiInput.current = v || null;
                   }}
@@ -636,7 +829,10 @@ export default function Step2BTab({
               )}
             </CardContent>
             <CardActions>
-              <LoadingButton loading={isSaving} onClick={() => handleSave(cascadeIndex)}>
+              <LoadingButton
+                loading={isSaving}
+                onClick={() => handleSave(cascadeIndex)}
+              >
                 Save
               </LoadingButton>
             </CardActions>
@@ -669,7 +865,9 @@ export default function Step2BTab({
                         reloadDirectAnalyses={reloadDirectAnalyses}
                         setReloadAttachments={() => setReloadAttachments(true)}
                       />
-                      {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
+                      {i < a.length - 1 && (
+                        <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />
+                      )}
                     </>
                   ))
               : cas.map((ca, i, a) => (
@@ -679,14 +877,18 @@ export default function Step2BTab({
                       cascade={cascade}
                       directAnalysis={
                         directAnalyses.find(
-                          (da) => (da._cr4de_expert_value === ca._cr4de_expert_value) as boolean
+                          (da) =>
+                            (da._cr4de_expert_value ===
+                              ca._cr4de_expert_value) as boolean
                         ) as DVDirectAnalysis
                       }
                       cascadeAnalysis={ca}
                       reloadCascadeAnalyses={reloadCascadeAnalyses}
                       setReloadAttachments={() => setReloadAttachments(true)}
                     />
-                    {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
+                    {i < a.length - 1 && (
+                      <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />
+                    )}
                   </>
                 ))}
           </Paper>
@@ -713,7 +915,8 @@ function ExpertInput({
 }) {
   const api = useAPI();
   const [rating, setRating] = useState(cascadeAnalysis.cr4de_quality);
-  const [lastCascadeAnalysis, setLastCascadeAnalysis] = useState(cascadeAnalysis);
+  const [lastCascadeAnalysis, setLastCascadeAnalysis] =
+    useState(cascadeAnalysis);
 
   useEffect(() => {
     if (cascadeAnalysis !== lastCascadeAnalysis) {
@@ -734,9 +937,12 @@ function ExpertInput({
             value={rating}
             onChange={async (e, newValue) => {
               setRating(newValue);
-              await api.updateCascadeAnalysis(cascadeAnalysis.cr4de_bnracascadeanalysisid, {
-                cr4de_quality: newValue,
-              });
+              await api.updateCascadeAnalysis(
+                cascadeAnalysis.cr4de_bnracascadeanalysisid,
+                {
+                  cr4de_quality: newValue,
+                }
+              );
               reloadCascadeAnalyses();
             }}
             size="small"
@@ -768,9 +974,12 @@ function ExpertInput({
           )}
         {(cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") < 0 ||
           (cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0 &&
-            riskFile.cr4de_riskfilesid === cascade._cr4de_cause_hazard_value)) && (
+            riskFile.cr4de_riskfilesid ===
+              cascade._cr4de_cause_hazard_value)) && (
           <Box
-            dangerouslySetInnerHTML={{ __html: (cascadeAnalysis.cr4de_quali_cascade || "") as string }}
+            dangerouslySetInnerHTML={{
+              __html: (cascadeAnalysis.cr4de_quali_cascade || "") as string,
+            }}
             sx={{ mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
           />
         )}
@@ -824,7 +1033,9 @@ function ExpertInputCC({
 }) {
   const api = useAPI();
 
-  const [rating, setRating] = useState((directAnalysis.cr4de_quality && directAnalysis.cr4de_quality.cc) ?? null);
+  const [rating, setRating] = useState(
+    (directAnalysis.cr4de_quality && directAnalysis.cr4de_quality.cc) ?? null
+  );
 
   return (
     <Grid container wrap="nowrap" spacing={2}>
@@ -838,31 +1049,50 @@ function ExpertInputCC({
             value={rating}
             onChange={async (e, newValue) => {
               setRating(newValue);
-              await api.updateDirectAnalysis(directAnalysis.cr4de_bnradirectanalysisid, {
-                cr4de_quality: JSON.stringify({
-                  ...directAnalysis.cr4de_quality,
-                  cc: newValue,
-                }),
-              });
+              await api.updateDirectAnalysis(
+                directAnalysis.cr4de_bnradirectanalysisid,
+                {
+                  cr4de_quality: JSON.stringify({
+                    ...directAnalysis.cr4de_quality,
+                    cc: newValue,
+                  }),
+                }
+              );
               reloadDirectAnalyses();
             }}
             size="small"
           />
         </Stack>
-        {directAnalysis.cr4de_dp50_quali && directAnalysis.cr4de_dp50_quali !== NO_COMMENT ? (
+        {directAnalysis.cr4de_dp50_quali &&
+        directAnalysis.cr4de_dp50_quali !== NO_COMMENT ? (
           <Box
-            dangerouslySetInnerHTML={{ __html: (directAnalysis.cr4de_dp50_quali || "") as string }}
+            dangerouslySetInnerHTML={{
+              __html: (directAnalysis.cr4de_dp50_quali || "") as string,
+            }}
             sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
           />
         ) : (
-          <Box sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}>- No comment -</Box>
+          <Box
+            sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+          >
+            - No comment -
+          </Box>
         )}
 
         <Stack direction="column" sx={{ mt: 2 }}>
-          {["cr4de_dp50_quanti_c", "cr4de_dp50_quanti_m", "cr4de_dp50_quanti_e"].map((n) => (
-            <Stack direction="row">
+          {[
+            "cr4de_dp50_quanti_c",
+            "cr4de_dp50_quanti_m",
+            "cr4de_dp50_quanti_e",
+          ].map((n) => (
+            <Stack key={n} direction="row">
               <Typography variant="caption" sx={{ flex: 1 }}>
-                <i>{getQuantiLabel(n as keyof DVDirectAnalysis, [directAnalysis])}</i> Estimate:
+                <i>
+                  {getQuantiLabel(n as keyof DVDirectAnalysis, [
+                    directAnalysis,
+                  ])}
+                </i>{" "}
+                Estimate:
               </Typography>
               <Typography variant="caption">
                 <b>{directAnalysis[n as keyof DVDirectAnalysis] as string}</b>
@@ -874,7 +1104,9 @@ function ExpertInputCC({
         <Attachments
           reset={false}
           getAttachments={() =>
-            api.getAttachments(`$filter=_cr4de_directanalysis_value eq ${directAnalysis?.cr4de_bnradirectanalysisid}`)
+            api.getAttachments(
+              `$filter=_cr4de_directanalysis_value eq ${directAnalysis?.cr4de_bnradirectanalysisid}`
+            )
           }
           consolidateAttachment={async (attachment: DVAttachment) => {
             await api.createAttachment(

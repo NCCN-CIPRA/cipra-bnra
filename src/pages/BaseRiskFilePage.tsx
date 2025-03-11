@@ -1,27 +1,23 @@
 import { useEffect, useState } from "react";
-import { Outlet, useLocation, useNavigate, useOutletContext, useParams } from "react-router-dom";
-import useRecords from "../hooks/useRecords";
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from "react-router-dom";
 import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
-import { DVAnalysisRun, RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { DataTable } from "../hooks/useAPI";
-import useLazyRecord from "../hooks/useLazyRecord";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import useLazyRecords from "../hooks/useLazyRecords";
 import {
   BottomNavigation,
   BottomNavigationAction,
-  CircularProgress,
   Paper,
   Box,
-  IconButton,
   Drawer,
-  Fab,
   Toolbar,
-  Typography,
-  Stack,
-  Divider,
-  Button,
 } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
 import AodIcon from "@mui/icons-material/Aod";
@@ -29,12 +25,9 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import { RiskPageContext } from "./BaseRisksPage";
-import { Breadcrumb } from "../components/BreadcrumbNavigation";
 import usePageTitle from "../hooks/usePageTitle";
 import useBreadcrumbs from "../hooks/useBreadcrumbs";
 import { useTranslation } from "react-i18next";
-import useBottomBarHeight from "../hooks/useBottomBarHeight";
-import { getCauses } from "../functions/cascades";
 import satisfies from "../types/satisfies";
 import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
@@ -42,12 +35,8 @@ import { DVContact } from "../types/dataverse/DVContact";
 import { DVParticipation } from "../types/dataverse/DVParticipation";
 import NCCNLoader from "../components/NCCNLoader";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
-import { styled, useTheme } from "@mui/material/styles";
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import CloseIcon from "@mui/icons-material/Close";
-import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
-import HelpSideBar, { Section } from "./RiskAnalysisPage/HelpSiderBar";
+import { styled } from "@mui/material/styles";
+import HelpSideBar from "./RiskAnalysisPage/HelpSiderBar";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
 
 type RouteParams = {
@@ -82,36 +71,6 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
   position: "relative",
 }));
 
-interface AppBarProps extends MuiAppBarProps {
-  open?: boolean;
-}
-
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open",
-})<AppBarProps>(({ theme, open }) => ({
-  transition: theme.transitions.create(["margin", "width"], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    width: `calc(100% - ${helpDrawerWidth}px)`,
-    marginLeft: `${helpDrawerWidth}px`,
-    transition: theme.transitions.create(["margin", "width"], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
-  justifyContent: "flex-start",
-}));
-
 export interface RiskFilePageContext extends RiskPageContext {
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
@@ -138,7 +97,6 @@ export default function BaseRiskFilePage() {
   const { t } = useTranslation();
   const riskContext = useOutletContext<RiskPageContext>();
   const navigate = useNavigate();
-  const theme = useTheme();
 
   const params = useParams() as RouteParams;
   const { pathname } = useLocation();
@@ -151,24 +109,29 @@ export default function BaseRiskFilePage() {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  const { data: participants, getData: loadParticipants } = useLazyRecords<DVParticipation<DVContact>>({
+  const { data: participants, getData: loadParticipants } = useLazyRecords<
+    DVParticipation<DVContact>
+  >({
     table: DataTable.PARTICIPATION,
     query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_contact`,
   });
 
-  const { data: directAnalyses, getData: loadDirectAnalyses } = useLazyRecords<DVDirectAnalysis<unknown, DVContact>>({
+  const { data: directAnalyses, getData: loadDirectAnalyses } = useLazyRecords<
+    DVDirectAnalysis<unknown, DVContact>
+  >({
     table: DataTable.DIRECT_ANALYSIS,
     query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_expert($select=emailaddress1)`,
   });
 
-  const { data: cascadeAnalyses, getData: loadCascadeAnalyses } = useLazyRecords<
-    DVCascadeAnalysis<unknown, unknown, DVContact>
-  >({
-    table: DataTable.CASCADE_ANALYSIS,
-    query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_expert($select=emailaddress1)`,
-  });
+  const { data: cascadeAnalyses, getData: loadCascadeAnalyses } =
+    useLazyRecords<DVCascadeAnalysis<unknown, unknown, DVContact>>({
+      table: DataTable.CASCADE_ANALYSIS,
+      query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_expert($select=emailaddress1)`,
+    });
 
-  const { data: attachments, getData: loadAttachments } = useLazyRecords<DVAttachment<unknown, DVAttachment>>({
+  const { data: attachments, getData: loadAttachments } = useLazyRecords<
+    DVAttachment<unknown, DVAttachment>
+  >({
     table: DataTable.ATTACHMENT,
     query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_referencedSource`,
   });
@@ -176,7 +139,8 @@ export default function BaseRiskFilePage() {
   let tab = 0;
   const extraTab =
     riskContext.riskFiles[params.risk_file_id] &&
-    riskContext.riskFiles[params.risk_file_id].cr4de_risk_type !== RISK_TYPE.EMERGING
+    riskContext.riskFiles[params.risk_file_id].cr4de_risk_type !==
+      RISK_TYPE.EMERGING
       ? 1
       : 0;
   if (pathname.indexOf("identification") >= 0) tab = 1;
@@ -190,23 +154,28 @@ export default function BaseRiskFilePage() {
   }, [params.risk_file_id]);
 
   usePageTitle(
-    riskContext.riskFiles[params.risk_file_id] ? riskContext.riskFiles[params.risk_file_id].cr4de_title : "..."
+    riskContext.riskFiles[params.risk_file_id]
+      ? riskContext.riskFiles[params.risk_file_id].cr4de_title
+      : "..."
   );
   useBreadcrumbs([
     { name: t("bnra.shortName"), url: "/" },
-    { name: t("sideDrawer.hazardCatalogue", "Hazard Catalogue"), url: "/risks" },
+    {
+      name: t("sideDrawer.hazardCatalogue", "Hazard Catalogue"),
+      url: "/risks",
+    },
     {
       name: riskContext.riskFiles[params.risk_file_id]
         ? t(
-            `risk.${riskContext.riskFiles[params.risk_file_id].cr4de_hazard_id}.name`,
+            `risk.${
+              riskContext.riskFiles[params.risk_file_id].cr4de_hazard_id
+            }.name`,
             riskContext.riskFiles[params.risk_file_id].cr4de_title
           )
         : "...",
       url: "",
     },
   ]);
-
-  useBottomBarHeight(riskContext.user ? 56 : 0);
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -222,8 +191,10 @@ export default function BaseRiskFilePage() {
               // calculation: riskContext.riskFiles[params.risk_file_id].cr4de_latest_calculation?.cr4de_results!,
               causes: riskContext.cascades[params.risk_file_id].causes,
               effects: riskContext.cascades[params.risk_file_id].effects,
-              catalyzingEffects: riskContext.cascades[params.risk_file_id].catalyzingEffects,
-              climateChange: riskContext.cascades[params.risk_file_id].climateChange,
+              catalyzingEffects:
+                riskContext.cascades[params.risk_file_id].catalyzingEffects,
+              climateChange:
+                riskContext.cascades[params.risk_file_id].climateChange,
 
               participants,
               loadParticipants,
@@ -241,7 +212,16 @@ export default function BaseRiskFilePage() {
           </Box>
         )}
         {riskContext.user && (
-          <Paper sx={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1201 }} elevation={3}>
+          <Paper
+            sx={{
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1201,
+            }}
+            elevation={3}
+          >
             <BottomNavigation showLabels value={tab}>
               <BottomNavigationAction
                 label={t("risk.bottombar.summary", "Summary")}
@@ -250,44 +230,60 @@ export default function BaseRiskFilePage() {
               />
               {user && user.roles.beReader && (
                 <BottomNavigationAction
-                  label={t("risk.bottombar.riskIdentification", "Risk Identification")}
+                  label={t(
+                    "risk.bottombar.riskIdentification",
+                    "Risk Identification"
+                  )}
                   icon={<FingerprintIcon />}
-                  onClick={() => navigate(`/risks/${params.risk_file_id}/identification`)}
+                  onClick={() =>
+                    navigate(`/risks/${params.risk_file_id}/identification`)
+                  }
                 />
               )}
               {user && user.roles.beReader && (
                 <BottomNavigationAction
                   label={t("risk.bottombar.riskAnalysis", "Risk Analysis")}
                   icon={<AssessmentIcon />}
-                  onClick={() => navigate(`/risks/${params.risk_file_id}/analysis`)}
+                  onClick={() =>
+                    navigate(`/risks/${params.risk_file_id}/analysis`)
+                  }
                 />
               )}
               {user &&
                 user.roles.beReader &&
                 riskContext.riskFiles[params.risk_file_id] &&
-                riskContext.riskFiles[params.risk_file_id].cr4de_risk_type === RISK_TYPE.STANDARD && (
+                riskContext.riskFiles[params.risk_file_id].cr4de_risk_type ===
+                  RISK_TYPE.STANDARD && (
                   <BottomNavigationAction
                     label={t("risk.bottombar.riskEvolution", "Risk Evolution")}
                     icon={<QueryStatsIcon />}
-                    onClick={() => navigate(`/risks/${params.risk_file_id}/evolution`)}
+                    onClick={() =>
+                      navigate(`/risks/${params.risk_file_id}/evolution`)
+                    }
                   />
                 )}
               {user &&
                 (user.roles.analist ||
                   (user.roles.expert &&
                     user.participations &&
-                    user.participations.find((p) => p._cr4de_risk_file_value === params.risk_file_id))) && (
+                    user.participations.find(
+                      (p) => p._cr4de_risk_file_value === params.risk_file_id
+                    ))) && (
                   <BottomNavigationAction
                     label={t("risk.bottombar.rawData", "Raw Data")}
                     icon={<PsychologyIcon />}
-                    onClick={() => navigate(`/risks/${params.risk_file_id}/data`)}
+                    onClick={() =>
+                      navigate(`/risks/${params.risk_file_id}/data`)
+                    }
                   />
                 )}
               {user && user.roles.analist && (
                 <BottomNavigationAction
                   label={t("risk.bottombar.expertInput", "Expert Input")}
                   icon={<GroupsIcon />}
-                  onClick={() => navigate(`/risks/${params.risk_file_id}/input`)}
+                  onClick={() =>
+                    navigate(`/risks/${params.risk_file_id}/input`)
+                  }
                 />
               )}
             </BottomNavigation>

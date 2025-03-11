@@ -1,62 +1,21 @@
-import { Trans, useTranslation } from "react-i18next";
-import { useOutletContext, useParams } from "react-router-dom";
-import { RiskFilePageContext } from "../BaseRiskFilePage";
-import RiskFileTitle from "../../components/RiskFileTitle";
+import { useParams } from "react-router-dom";
 import "./ExportRiskFilePage.css";
-import { Box, Stack } from "@mui/material";
+import { Box } from "@mui/material";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import SummaryCharts, { SvgChart } from "../../components/charts/SummaryCharts";
-import {
-  getScenarioParameter,
-  SCENARIO_PARAMS,
-  SCENARIOS,
-} from "../../functions/scenarios";
-import StandardAnalysis from "../RiskAnalysisPage/Standard/Standard";
-import ManMadeAnalysis from "../RiskAnalysisPage/ManMade/ManMade";
-import EmergingAnalysis from "../RiskAnalysisPage/Emerging/Emerging";
-import StandardIdentification from "../RiskIdentificationPage/Standard/Standard";
-import ManmadeIdentification from "../RiskIdentificationPage/Manmade/Manmade";
-import EmergingIdentification from "../RiskIdentificationPage/Emerging/Emerging";
-import Bibliography from "../RiskAnalysisPage/Bibliography";
-import { BasePageContext } from "../BasePage";
-import { useEffect, useMemo, useState } from "react";
+import { SvgChart } from "../../components/charts/SummaryCharts";
+import { getScenarioParameter, SCENARIOS } from "../../functions/scenarios";
+import { useMemo } from "react";
 import { Cascades } from "../BaseRisksPage";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import {
   getResultSnapshot,
   SmallRisk,
 } from "../../types/dataverse/DVSmallRisk";
-import {
-  Circle,
-  Document,
-  Font,
-  Image,
-  Page,
-  PDFViewer,
-  StyleSheet,
-  Svg,
-  Text,
-  View,
-} from "@react-pdf/renderer";
-import { Canvg } from "canvg";
-import { CategoryIcon, RiskTypeIcon } from "../../functions/getCategoryColor";
-import { renderToStaticMarkup } from "react-dom/server";
-import { NCCN_GREEN } from "../../functions/colors";
+import { Document, PDFViewer } from "@react-pdf/renderer";
 import useRecord from "../../hooks/useRecord";
 import { DataTable } from "../../hooks/useAPI";
-import Arial from "../../assets/fonts/ArialMT.ttf";
-import html2PDF from "../../functions/html2pdf";
-import { Bar, BarChart, YAxis } from "recharts";
-import svg2PDF from "../../functions/svg2PDF";
-import { pbkdf2 } from "crypto";
-import ProbabilityBars, {
-  getProbabilityBars,
-  ProbabilityBarsChart,
-} from "../../components/charts/ProbabilityBars";
+import { ProbabilityBarsChart } from "../../components/charts/ProbabilityBars";
 import { getCategoryImpactRescaled } from "../../functions/CategoryImpact";
-import { getSummary } from "../../functions/translations";
-import getScaleString from "../../functions/getScaleString";
-import getImpactColor from "../../functions/getImpactColor";
 import { SvgChart as ProbabilitySankey } from "../../components/charts/ProbabilitySankey";
 import useRecords from "../../hooks/useRecords";
 import {
@@ -71,10 +30,7 @@ import {
 } from "../../functions/cascades";
 import { SvgChart as ImpactSankey } from "../../components/charts/ImpactSankey";
 import ImpactBarChart from "../../components/charts/ImpactBarChart";
-import { cpSync } from "fs";
 import SummarySection from "./SummarySection";
-import Header from "./Header";
-import Footer from "./Footer";
 import DescriptionSection from "./DescriptionSection";
 import AnalysisSection from "./AnalysisSection";
 import EvolutionSection from "./EvolutionSection";
@@ -87,7 +43,7 @@ import useLoggedInUser, { LoggedInUser } from "../../hooks/useLoggedInUser";
 const barWidth = 300;
 const barHeight = 500;
 
-export default function ExportRiskFilePage({}) {
+export default function ExportRiskFilePage() {
   const params = useParams();
   const { user } = useLoggedInUser();
 
@@ -104,16 +60,14 @@ export default function ExportRiskFilePage({}) {
         })),
   });
 
-  const { data: riskFile, isFetching: loadingRiskFile } = useRecord<DVRiskFile>(
-    {
-      table: DataTable.RISK_FILE,
-      id: params.risk_file_id || "",
-      transformResult: (rf) => ({
-        ...rf,
-        results: getResultSnapshot(rf),
-      }),
-    }
-  );
+  const { data: riskFile } = useRecord<DVRiskFile>({
+    table: DataTable.RISK_FILE,
+    id: params.risk_file_id || "",
+    transformResult: (rf) => ({
+      ...rf,
+      results: getResultSnapshot(rf),
+    }),
+  });
 
   const { data: rawCascades } = useRecords<DVRiskCascade<SmallRisk, SmallRisk>>(
     {
@@ -227,13 +181,11 @@ export default function ExportRiskFilePage({}) {
 export function ExportRiskFileCharts({
   riskFile,
   cascades,
-  attachments,
   tp,
   H,
   S,
   E,
   F,
-  user,
   scenario,
 }: // hazardCatalogue,
 // cascades,
@@ -413,8 +365,6 @@ export function ExportRiskFile({
   // cascades: Cascades;
   // attachments: DVAttachment<unknown, DVAttachment<unknown, unknown>>[] | null;
 }) {
-  const { t } = useTranslation();
-
   return (
     <>
       <SummarySection

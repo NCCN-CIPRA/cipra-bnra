@@ -1,19 +1,16 @@
 import { Stack, Typography, Box, Button } from "@mui/material";
-import { RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
 import {
   SCENARIOS,
   SCENARIO_PARAMS,
   getScenarioParameter,
-  getScenarioSuffix,
 } from "../../../functions/scenarios";
-import { getTotalProbabilityRelativeScale } from "../../../functions/Probability";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBarChart";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import ProbabilitySankey from "../../../components/charts/ProbabilitySankey";
 import ImpactSankey from "../../../components/charts/ImpactSankey";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { Cascades } from "../../BaseRisksPage";
 import { useTranslation } from "react-i18next";

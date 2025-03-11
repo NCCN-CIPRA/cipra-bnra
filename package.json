@@ -53,12 +53,17 @@
     "build": "react-scripts --max_old_space_size=2536 build && npm run build:clean",
     "build:clean": "cd build && move static\\js\\main.*.js static\\js\\main.js && move static\\css\\main.*.css static\\css\\main.css",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "eslint": "eslint --config ./eslint.config.mjs ./src/**/*.tsx",
+    "fix": "eslint --config ./eslint.config.mjs --fix --debug ./src/**/*.tsx"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
+    ],
+    "ignorePatterns": [
+      "src/pages/_deprecated"
     ]
   },
   "browserslist": {
@@ -74,10 +79,16 @@
     ]
   },
   "devDependencies": {
+    "@eslint/js": "^9.22.0",
     "@types/d3": "^7.4.3",
     "@types/file-saver": "^2.0.5",
     "@types/uuid": "^8.3.4",
     "cypress": "^10.10.0",
-    "eslint-plugin-cypress": "^2.12.1"
+    "eslint": "^8.57.1",
+    "eslint-plugin-cypress": "^2.12.1",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "globals": "^16.0.0",
+    "typescript-eslint": "^8.26.0"
   }
 }

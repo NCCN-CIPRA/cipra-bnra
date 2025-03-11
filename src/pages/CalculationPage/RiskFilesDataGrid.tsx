@@ -4,12 +4,9 @@ import {
   GridRowsProp,
   GridColDef,
   GridValueFormatterParams,
-  GridValueGetterParams,
   GridToolbar,
   gridFilteredSortedRowIdsSelector,
   GridRenderCellParams,
-  gridDataRowIdsSelector,
-  useGridApiContext,
   GridCsvGetRowsToExportParams,
   GridRowId,
 } from "@mui/x-data-grid";
@@ -83,7 +80,8 @@ const columns: GridColDef[] = [
     headerName: "ΔTR 2050",
     width: 100,
     valueFormatter: (params: GridValueFormatterParams) => params.value,
-    renderCell: (params: GridRenderCellParams) => "X " + Math.round(100 * params.value) / 100,
+    renderCell: (params: GridRenderCellParams) =>
+      "X " + Math.round(100 * params.value) / 100,
   },
   {
     field: "consensus",
@@ -99,7 +97,9 @@ const columns: GridColDef[] = [
   },
 ];
 
-const getRowsToExport = ({ apiRef }: GridCsvGetRowsToExportParams): GridRowId[] => {
+const getRowsToExport = ({
+  apiRef,
+}: GridCsvGetRowsToExportParams): GridRowId[] => {
   return gridFilteredSortedRowIdsSelector(apiRef);
 };
 
@@ -120,7 +120,11 @@ export default function RiskFilesDataGrid({
     setRows(
       data.reduce((split, c) => {
         const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
-        const rs2050 = [c.tp50_c * c.ti_c, c.tp50_m * c.ti_m, c.tp50_e * c.ti_e];
+        const rs2050 = [
+          c.tp50_c * c.ti_c,
+          c.tp50_m * c.ti_m,
+          c.tp50_e * c.ti_e,
+        ];
 
         if (worstCase) {
           return [
@@ -305,13 +309,23 @@ export default function RiskFilesDataGrid({
         </Box>
         <FormGroup sx={{}}>
           <FormControlLabel
-            control={<Checkbox checked={worstCase} onChange={(e) => setWorstCase(e.target.checked)} />}
+            control={
+              <Checkbox
+                checked={worstCase}
+                onChange={(e) => setWorstCase(e.target.checked)}
+              />
+            }
             label="Show only worst case scenario"
           />
         </FormGroup>
         <FormGroup sx={{}}>
           <FormControlLabel
-            control={<Checkbox checked={worstCase2050} onChange={(e) => setWorstCase2050(e.target.checked)} />}
+            control={
+              <Checkbox
+                checked={worstCase2050}
+                onChange={(e) => setWorstCase2050(e.target.checked)}
+              />
+            }
             label="Show only worst case scenario in 2050"
           />
         </FormGroup>

@@ -9,6 +9,7 @@ import {
   smallStyle,
 } from "../pages/ExportRiskFilePage/styles";
 import { BLACK } from "./colors";
+import { Style } from "@react-pdf/types";
 
 type HTMLTag = {
   tagName: string;
@@ -34,7 +35,7 @@ const fixText = (txt: string) => {
 // html string should start with opening tag <...>
 const parseTag = (html: string): HTMLTag => {
   let currentHtml = html.replace(/<br>/g, "").replace(/<br\/>/g, "");
-  let currentTagEnd = currentHtml.slice(1).indexOf(">") + 1;
+  const currentTagEnd = currentHtml.slice(1).indexOf(">") + 1;
   let nextTagStart = currentHtml.slice(1).indexOf("<") + 1;
 
   if (nextTagStart < 0) throw new Error("No closing tag found");
@@ -124,7 +125,7 @@ const tag2PDF = (
 ): ReactElement | null => {
   if (tag.content === "") return null;
 
-  let styles = {} as any;
+  let styles = {} as Style | Style[];
 
   if (parent === null) {
     styles = { ...styles, ...bodyStyle };
@@ -149,7 +150,7 @@ const tag2PDF = (
   }
 
   if (tag.tagName === "p") {
-    let styles = { ...bodyStyle } as any;
+    let styles = { ...bodyStyle } as Style | Style[];
 
     if (
       tag.content.length <= 1 &&
@@ -293,7 +294,7 @@ const tag2PDF = (
     return (
       <View style={{ marginLeft: 10 * SCALE }}>
         {tag.content.map((li, i) => (
-          <View style={{ flexDirection: "row" }} wrap={false}>
+          <View key={i} style={{ flexDirection: "row" }} wrap={false}>
             <Text style={{ ...bodyStyle, width: 0.5 * POINTS_PER_CM }}>
               {i + 1}.
             </Text>
@@ -316,7 +317,7 @@ const tag2PDF = (
     return (
       <View style={{ marginLeft: 10 * SCALE }}>
         {tag.content.map((li, i) => (
-          <View style={{ flexDirection: "row" }} wrap={false}>
+          <View key={i} style={{ flexDirection: "row" }} wrap={false}>
             <View
               style={{
                 backgroundColor: BLACK,

@@ -1,14 +1,15 @@
 import { Stack, Typography, Box, Button } from "@mui/material";
-import { RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, SCENARIO_PARAMS, getScenarioParameter, getScenarioSuffix } from "../../../functions/scenarios";
-import { getTotalProbabilityRelativeScale } from "../../../functions/Probability";
+import {
+  SCENARIOS,
+  SCENARIO_PARAMS,
+  getScenarioParameter,
+} from "../../../functions/scenarios";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBarChart";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import ProbabilitySankey from "../../../components/charts/ProbabilitySankey";
 import ImpactSankey from "../../../components/charts/ImpactSankey";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import ActionsSankey from "../../../components/charts/ActionsSankey";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { Cascades } from "../../BaseRisksPage";
@@ -50,7 +51,10 @@ export default function MMSankeyDiagram({
 
   return (
     <Stack className="bnra-sankey" direction="row" sx={{ mb: 8 }}>
-      <Box className="sankey-actions" sx={{ width: "calc(50% - 150px)", height: 600 }}>
+      <Box
+        className="sankey-actions"
+        sx={{ width: "calc(50% - 150px)", height: 600 }}
+      >
         <ActionsSankey
           riskFile={riskFile}
           cascades={cascades}
@@ -63,7 +67,12 @@ export default function MMSankeyDiagram({
           manmade={manmade}
         />
       </Box>
-      <Stack className="sankey-charts" direction="column" justifyContent="center" sx={{ width: 300, p: "50px" }}>
+      <Stack
+        className="sankey-charts"
+        direction="column"
+        justifyContent="center"
+        sx={{ width: 300, p: "50px" }}
+      >
         {/* <Box
         sx={{
           width: 200,
@@ -89,7 +98,11 @@ export default function MMSankeyDiagram({
             width: "100%",
           }}
         >
-          <ProbabilityBars tp={getScenarioParameter(riskFile, "TP", scenario) || 0} chartWidth={200} manmade={true} />
+          <ProbabilityBars
+            tp={getScenarioParameter(riskFile, "TP", scenario) || 0}
+            chartWidth={200}
+            manmade={true}
+          />
         </Box>
         <Box
           className="sankey-scenarios"
@@ -105,17 +118,22 @@ export default function MMSankeyDiagram({
               variant="outlined"
               sx={{
                 color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
-                fontWeight: scenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
+                fontWeight:
+                  scenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
                 opacity: scenario === SCENARIOS.CONSIDERABLE ? 1 : 0.15,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
                 borderRadius: "50%",
-                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
+                backgroundColor: `${
+                  SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color
+                }20`,
                 width: 48,
                 minWidth: 48,
                 height: 48,
                 "&:hover": {
                   opacity: 1,
-                  backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
+                  backgroundColor: `${
+                    SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color
+                  }20`,
                   borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
                 },
               }}
@@ -137,7 +155,9 @@ export default function MMSankeyDiagram({
                 height: 48,
                 "&:hover": {
                   opacity: 1,
-                  backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
+                  backgroundColor: `${
+                    SCENARIO_PARAMS[SCENARIOS.MAJOR].color
+                  }20`,
                   borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
                 },
               }}
@@ -153,13 +173,17 @@ export default function MMSankeyDiagram({
                 opacity: scenario === SCENARIOS.EXTREME ? 1 : 0.15,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
                 borderRadius: "50%",
-                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
+                backgroundColor: `${
+                  SCENARIO_PARAMS[SCENARIOS.EXTREME].color
+                }20`,
                 width: 48,
                 minWidth: 48,
                 height: 48,
                 "&:hover": {
                   opacity: 1,
-                  backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
+                  backgroundColor: `${
+                    SCENARIO_PARAMS[SCENARIOS.EXTREME].color
+                  }20`,
                   borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
                 },
               }}
@@ -177,12 +201,17 @@ export default function MMSankeyDiagram({
           }}
         >
           <Box sx={{ width: "100%", textAlign: "center", mt: 3 }}>
-            <Typography variant="subtitle2">{t("Damage Indicators")}</Typography>
+            <Typography variant="subtitle2">
+              {t("Damage Indicators")}
+            </Typography>
           </Box>
           <ImpactBarChart riskFile={riskFile} scenario={scenario} />
         </Box>
       </Stack>
-      <Box className="sankey-impact" sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}>
+      <Box
+        className="sankey-impact"
+        sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}
+      >
         <ImpactSankey
           riskFile={riskFile}
           cascades={cascades}

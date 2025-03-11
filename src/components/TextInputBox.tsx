@@ -1,7 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import HtmlEditor, { Toolbar, Item } from "devextreme-react/html-editor";
 import useDebounce from "../hooks/useDebounce";
-import { Button, Stack, TextField } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
 import { Popup, ScrollView } from "devextreme-react";
 import useAPI from "../hooks/useAPI";
@@ -52,7 +58,7 @@ function TextInputBox({
   reset?: boolean;
   allRisks?: SmallRisk[] | null;
   sources?: DVAttachment[] | null;
-  editorStyle?: any;
+  editorStyle?: unknown;
   updateSources?: null | (() => Promise<unknown>);
 
   onSave?: (newValue: string | null) => void;
@@ -65,7 +71,10 @@ function TextInputBox({
   const cursor = useRef(0);
   const [savedValue, setSavedValue] = useState(initialValue);
   const [innerValue, setInnerValue] = useState(initialValue);
-  const [debouncedValue, setDebouncedValue] = useDebounce(innerValue, debounceInterval);
+  const [debouncedValue, setDebouncedValue] = useDebounce(
+    innerValue,
+    debounceInterval
+  );
   const [sourcePopupVisible, setSourcesPopupVisible] = useState(false);
   const [riskFilesPopupVisible, setRiskFilesPopupVisible] = useState(false);
 
@@ -84,7 +93,7 @@ function TextInputBox({
       setInnerValue(initialValue);
       setDebouncedValue(initialValue);
 
-      onReset && onReset(oldValue);
+      if (onReset) onReset(oldValue);
     }
   }, [reset]);
 
@@ -96,7 +105,8 @@ function TextInputBox({
       onClick: () => {
         setSourcesPopupVisible(true);
         if (htmlEditor.current) {
-          cursor.current = htmlEditor.current.instance.getSelection()?.index || 0;
+          cursor.current =
+            htmlEditor.current.instance.getSelection()?.index || 0;
         }
       },
     }),
@@ -111,7 +121,8 @@ function TextInputBox({
       onClick: () => {
         setRiskFilesPopupVisible(true);
         if (htmlEditor.current) {
-          cursor.current = htmlEditor.current.instance.getSelection()?.index || 0;
+          cursor.current =
+            htmlEditor.current.instance.getSelection()?.index || 0;
         }
       },
     }),
@@ -130,7 +141,8 @@ function TextInputBox({
     if (ref === null) {
       ref =
         sources.reduce((max, s) => {
-          if (s.cr4de_reference !== null && s.cr4de_reference > max) return s.cr4de_reference;
+          if (s.cr4de_reference !== null && s.cr4de_reference > max)
+            return s.cr4de_reference;
 
           return max;
         }, 0) + 1;
@@ -171,23 +183,6 @@ function TextInputBox({
     popupHiding();
   };
 
-  // @ts-ignore-next-line
-  if (window.Cypress) {
-    return (
-      <TextField
-        id={id}
-        multiline
-        fullWidth
-        minRows={6}
-        value={innerValue || ""}
-        onChange={(e) => {
-          setInnerValue(e.target.value);
-          if (setUpdatedValue) setUpdatedValue(e.target.value);
-        }}
-      />
-    );
-  }
-
   return (
     <>
       <HtmlEditor
@@ -224,7 +219,9 @@ function TextInputBox({
           <Item name="orderedList" />
           <Item name="bulletList" />
           <Item name="separator" />
-          {!limitedOptions && <Item name="header" acceptedValues={headerValues} />}
+          {!limitedOptions && (
+            <Item name="header" acceptedValues={headerValues} />
+          )}
           {!limitedOptions && <Item name="separator" />}
           {!limitedOptions && <Item name="color" />}
           {!limitedOptions && <Item name="background" />}
@@ -244,8 +241,12 @@ function TextInputBox({
           {!limitedOptions && <Item name="insertColumnRight" />}
           {!limitedOptions && <Item name="deleteColumn" />}
           {sources !== null || (allRisks !== null && <Item name="separator" />)}
-          {sources !== null && <Item widget="dxButton" options={getSourcesButtonOptions} />}
-          {allRisks !== null && <Item widget="dxButton" options={getRiskButtonOptions} />}
+          {sources !== null && (
+            <Item widget="dxButton" options={getSourcesButtonOptions} />
+          )}
+          {allRisks !== null && (
+            <Item widget="dxButton" options={getRiskButtonOptions} />
+          )}
         </Toolbar>
       </HtmlEditor>
       {sources && (
@@ -282,7 +283,9 @@ function TextInputBox({
           <ScrollView>
             <Stack direction="column">
               {allRisks
-                .sort((a, b) => (a.cr4de_hazard_id < b.cr4de_hazard_id ? -1 : 1))
+                .sort((a, b) =>
+                  a.cr4de_hazard_id < b.cr4de_hazard_id ? -1 : 1
+                )
                 .map((a) => (
                   <Button
                     key={a.cr4de_riskfilesid}

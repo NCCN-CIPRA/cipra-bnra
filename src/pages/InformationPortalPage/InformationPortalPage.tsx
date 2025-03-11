@@ -26,7 +26,7 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export default function InformationPortalPage({}) {
+export default function InformationPortalPage() {
   const { t } = useTranslation();
 
   usePageTitle(t("learning.title", "BNRA 2023 - 2026 Informatieportaal"));
@@ -45,7 +45,8 @@ export default function InformationPortalPage({}) {
           left: 0,
           right: 0,
           backgroundColor: "rgba(128, 180, 180, 0.33)",
-          backgroundImage: "url('https://bnra.powerappsportals.com/banner.png')",
+          backgroundImage:
+            "url('https://bnra.powerappsportals.com/banner.png')",
           backgroundSize: "auto 800px",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
@@ -61,7 +62,14 @@ export default function InformationPortalPage({}) {
           backgroundColor: "transparent",
         }}
       >
-        <Container sx={{ display: "flex", alignItems: "flex-end", height: "100%", pb: 4 }}>
+        <Container
+          sx={{
+            display: "flex",
+            alignItems: "flex-end",
+            height: "100%",
+            pb: 4,
+          }}
+        >
           <Stack direction="column">
             <img
               alt="bnra"
@@ -69,7 +77,9 @@ export default function InformationPortalPage({}) {
               style={{ width: 300, marginBottom: 20 }}
             />
             <Typography variant="subtitle1" paragraph>
-              <Trans i18nKey="learning.title">Belgian National Risk Assessment 2023 - 2026</Trans>
+              <Trans i18nKey="learning.title">
+                Belgian National Risk Assessment 2023 - 2026
+              </Trans>
             </Typography>
           </Stack>
         </Container>
@@ -78,14 +88,19 @@ export default function InformationPortalPage({}) {
         <Container>
           <Box sx={{ py: 4, textAlign: "justify" }}>
             <Typography variant="subtitle2" paragraph>
-              <Trans i18nKey="learning.welcome">Welkom op het BNRA informatieportaal</Trans>
+              <Trans i18nKey="learning.welcome">
+                Welkom op het BNRA informatieportaal
+              </Trans>
             </Typography>
             <Typography variant="body1" paragraph>
               <Trans i18nKey="learning.welcome.text">
-                Hier vindt je alle achtergrondinformatie en gebruikshandleidingen voor je deelname aan de
-                <b>Belgische Nationale Risico Beoordeling 2023 - 2026 (BNRA)</b>. Deze website wordt aangeboden door het
-                Nationaal Crisiscentrum (NCCN) van de FOD Binnenlandse Zaken. Vragen, suggesties of opmerkingen kunt u
-                sturen naar het mailadres onder de contactgegevens.
+                Hier vindt je alle achtergrondinformatie en
+                gebruikshandleidingen voor je deelname aan de
+                <b>Belgische Nationale Risico Beoordeling 2023 - 2026 (BNRA)</b>
+                . Deze website wordt aangeboden door het Nationaal Crisiscentrum
+                (NCCN) van de FOD Binnenlandse Zaken. Vragen, suggesties of
+                opmerkingen kunt u sturen naar het mailadres onder de
+                contactgegevens.
               </Trans>
             </Typography>
           </Box>
@@ -97,18 +112,36 @@ export default function InformationPortalPage({}) {
                 <List
                   aria-labelledby="nested-list-subheader"
                   subheader={
-                    <ListSubheader component="div" id="nested-list-subheader" sx={{ borderBottom: "1px solid #eee" }}>
-                      <Typography variant="h6" sx={{ pt: 1, pb: 1 }} color="primary">
-                        <Trans i18nKey="learning.general.title">General Information</Trans>
+                    <ListSubheader
+                      component="div"
+                      id="nested-list-subheader"
+                      sx={{ borderBottom: "1px solid #eee" }}
+                    >
+                      <Typography
+                        variant="h6"
+                        sx={{ pt: 1, pb: 1 }}
+                        color="primary"
+                      >
+                        <Trans i18nKey="learning.general.title">
+                          General Information
+                        </Trans>
                       </Typography>
                     </ListSubheader>
                   }
                 >
-                  <ListItemButton component={RouterLink} to="/learning/general-introduction">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/general-introduction"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.general.introduction", "General Introduction")} />
+                    <ListItemText
+                      primary={t(
+                        "learning.general.introduction",
+                        "General Introduction"
+                      )}
+                    />
                   </ListItemButton>
                   {/* <ListItemButton component={RouterLink} to="/learning/risk-catalogue">
                     <ListItemIcon sx={{ minWidth: "32px" }}>
@@ -116,11 +149,19 @@ export default function InformationPortalPage({}) {
                     </ListItemIcon>
                     <ListItemText primary={t("learning.general.riskCatalogue", "Risk Catalogue")} />
                   </ListItemButton> */}
-                  <ListItemButton component={RouterLink} to="/learning/quantitative-categories">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/quantitative-categories"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.general.impact", "Kwantitatieve Schalen")} />
+                    <ListItemText
+                      primary={t(
+                        "learning.general.impact",
+                        "Kwantitatieve Schalen"
+                      )}
+                    />
                   </ListItemButton>
                 </List>
               </Item>
@@ -131,66 +172,145 @@ export default function InformationPortalPage({}) {
                 <List
                   aria-labelledby="nested-list-subheader"
                   subheader={
-                    <ListSubheader component="div" id="nested-list-subheader" sx={{ borderBottom: "1px solid #eee" }}>
-                      <Typography variant="h6" sx={{ pt: 1, pb: 1 }} color="primary">
-                        <Trans i18nKey="learning.methodology.title">Methodology</Trans>
+                    <ListSubheader
+                      component="div"
+                      id="nested-list-subheader"
+                      sx={{ borderBottom: "1px solid #eee" }}
+                    >
+                      <Typography
+                        variant="h6"
+                        sx={{ pt: 1, pb: 1 }}
+                        color="primary"
+                      >
+                        <Trans i18nKey="learning.methodology.title">
+                          Methodology
+                        </Trans>
                       </Typography>
                     </ListSubheader>
                   }
                 >
-                  <ListItemButton component={RouterLink} to="/learning/methodology-introduction">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-introduction"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.methodology.introduction", "Introduction")} />
+                    <ListItemText
+                      primary={t(
+                        "learning.methodology.introduction",
+                        "Introduction"
+                      )}
+                    />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/methodology-risk-catalogue">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-risk-catalogue"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.methodology.riskCatalogue", "Risk Catalogue")} />
+                    <ListItemText
+                      primary={t(
+                        "learning.methodology.riskCatalogue",
+                        "Risk Catalogue"
+                      )}
+                    />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/methodology-scenarios">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-scenarios"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.methodology.scenarios", "Intensity Scenarios and Parameters")} />
+                    <ListItemText
+                      primary={t(
+                        "learning.methodology.scenarios",
+                        "Intensity Scenarios and Parameters"
+                      )}
+                    />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/methodology-risk-cascades">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-risk-cascades"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.methodology.riskCascades", "Risk Cascades")} />
+                    <ListItemText
+                      primary={t(
+                        "learning.methodology.riskCascades",
+                        "Risk Cascades"
+                      )}
+                    />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/methodology-impact-probability">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-impact-probability"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.methodology.impactProbability", "Probability and Impact")} />
+                    <ListItemText
+                      primary={t(
+                        "learning.methodology.impactProbability",
+                        "Probability and Impact"
+                      )}
+                    />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/methodology-additional-elements">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-additional-elements"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.methodology.additionalElements", "Additional Elements")} />
+                    <ListItemText
+                      primary={t(
+                        "learning.methodology.additionalElements",
+                        "Additional Elements"
+                      )}
+                    />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/methodology-use-cases">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-use-cases"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.methodology.useCases", "Use Cases")} />
+                    <ListItemText
+                      primary={t("learning.methodology.useCases", "Use Cases")}
+                    />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/methodology-actors">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-actors"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.methodology.actors", "Malicious Actors (optional)")} />
+                    <ListItemText
+                      primary={t(
+                        "learning.methodology.actors",
+                        "Malicious Actors (optional)"
+                      )}
+                    />
                   </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/methodology-emerging">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-emerging"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.methodology.emerging", "Emerging Risks (optional)")} />
+                    <ListItemText
+                      primary={t(
+                        "learning.methodology.emerging",
+                        "Emerging Risks (optional)"
+                      )}
+                    />
                   </ListItemButton>
                 </List>
               </Item>

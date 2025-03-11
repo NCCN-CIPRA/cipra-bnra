@@ -1,25 +1,15 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
-import { CascadeCalculation, RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
+import { Box, Button, Stack } from "@mui/material";
 import TextInputBox from "../../../components/TextInputBox";
 import { useEffect, useMemo, useState } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
 import getImpactColor from "../../../functions/getImpactColor";
-import { Effect, IMPACT_CATEGORY, getIndirectImpact } from "../../../functions/Impact";
-import {
-  SCENARIOS,
-  SCENARIO_LETTER,
-  SCENARIO_SUFFIX,
-  getScenarioLetter,
-  getScenarioParameter,
-  getScenarioSuffix,
-} from "../../../functions/scenarios";
+import { Effect } from "../../../functions/Impact";
+import { SCENARIOS, getScenarioParameter } from "../../../functions/scenarios";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import round from "../../../functions/roundNumberString";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
-import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { getAverageCP } from "../../../functions/cascades";
 
 export default function MMImpactSection({
   riskFile,
@@ -52,9 +42,13 @@ export default function MMImpactSection({
       .sort((a, b) => b.cp - a.cp)
       .reduce(
         ([cumulEffects, cpCumul], e) => {
-          if (cpCumul > 0.8 && cumulEffects.length >= 3) return [cumulEffects, cpCumul] as [Effect[], number];
+          if (cpCumul > 0.8 && cumulEffects.length >= 3)
+            return [cumulEffects, cpCumul] as [Effect[], number];
 
-          return [[...cumulEffects, e], cpCumul + e.cp / totP] as [Effect[], number];
+          return [[...cumulEffects, e], cpCumul + e.cp / totP] as [
+            Effect[],
+            number
+          ];
         },
         [[], 0] as [Effect[], number]
       )[0];
@@ -65,7 +59,8 @@ export default function MMImpactSection({
       .sort((a, b) => b.i - a.i)
       .reduce(
         ([cumulEffects, iCumul], e) => {
-          if (iCumul > 0.8 && cumulEffects.length >= 3) return [cumulEffects, iCumul] as [Effect[], number];
+          if (iCumul > 0.8 && cumulEffects.length >= 3)
+            return [cumulEffects, iCumul] as [Effect[], number];
 
           return [[...cumulEffects, e], iCumul + e.i] as [Effect[], number];
         },
@@ -73,7 +68,9 @@ export default function MMImpactSection({
       )[0];
   }, [riskFile, effects]);
 
-  const impactEffects = IParetoEffects.filter((e) => CPParetoEffects.indexOf(e) < 0);
+  const impactEffects = IParetoEffects.filter(
+    (e) => CPParetoEffects.indexOf(e) < 0
+  );
 
   const getDefaultText = () => {
     const text = `
@@ -86,13 +83,17 @@ export default function MMImpactSection({
 
     const descriptions = impactEffects
       .map((e, i) => {
-        const riskName = e.id ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>` : `<a href="">${e.name}</a>`;
+        const riskName = e.id
+          ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>`
+          : `<a href="">${e.name}</a>`;
 
         return `<p style="font-weight:bold;font-size:10pt;font-family: Arial"">
                     ${i + 1}. ${riskName}
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
-                      <b>${round((100 * e.cp) / totP)}%</b> relative preference for this type of action -
+                      <b>${round(
+                        (100 * e.cp) / totP
+                      )}%</b> relative preference for this type of action -
                       <b>${round((100 * e.i) / TI)}%</b> of total impact
                     </p>
                     <p><br></p>
@@ -116,9 +117,14 @@ export default function MMImpactSection({
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [iQuali, setIQuali] = useState<string>(riskFile.cr4de_mrs_mm_impact || getDefaultText());
+  const [iQuali, setIQuali] = useState<string>(
+    riskFile.cr4de_mrs_mm_impact || getDefaultText()
+  );
 
-  useEffect(() => setIQuali(riskFile.cr4de_mrs_mm_impact || getDefaultText()), [riskFile]);
+  useEffect(
+    () => setIQuali(riskFile.cr4de_mrs_mm_impact || getDefaultText()),
+    [riskFile]
+  );
 
   useEffect(() => setIsEditing(editing), [editing]);
 
@@ -140,14 +146,24 @@ export default function MMImpactSection({
 
   const startEdit = () => {
     if (isEditingOther) {
-      window.alert("You are already editing another section. Please close this section before editing another.");
+      window.alert(
+        "You are already editing another section. Please close this section before editing another."
+      );
     } else {
       setEditing(true);
     }
   };
 
   return (
-    <Box sx={{ borderLeft: "solid 8px " + getImpactColor("S"), px: 2, py: 1, mt: 2, backgroundColor: "white" }}>
+    <Box
+      sx={{
+        borderLeft: "solid 8px " + getImpactColor("S"),
+        px: 2,
+        py: 1,
+        mt: 2,
+        backgroundColor: "white",
+      }}
+    >
       {!editing && (
         <Box
           className="htmleditor"
@@ -156,7 +172,9 @@ export default function MMImpactSection({
         />
       )}
       {editing && (
-        <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+        <Box
+          sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+        >
           <TextInputBox
             limitedOptions
             initialValue={iQuali}
@@ -168,7 +186,10 @@ export default function MMImpactSection({
         </Box>
       )}
       {mode === "edit" && (
-        <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
+        <Stack
+          direction="row"
+          sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}
+        >
           {!editing && (
             <>
               <Button onClick={startEdit}>Edit</Button>
@@ -198,7 +219,12 @@ export default function MMImpactSection({
               <Button
                 color="warning"
                 onClick={() => {
-                  if (window.confirm("Are you sure you wish to discard your changes?")) setEditing(false);
+                  if (
+                    window.confirm(
+                      "Are you sure you wish to discard your changes?"
+                    )
+                  )
+                    setEditing(false);
                 }}
               >
                 Discard Changes

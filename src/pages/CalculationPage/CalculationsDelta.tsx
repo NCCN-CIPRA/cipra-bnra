@@ -1,32 +1,18 @@
 import { useState, useMemo } from "react";
 import {
   DataGrid,
-  GridRowsProp,
   GridColDef,
   GridValueFormatterParams,
-  GridValueGetterParams,
-  GridToolbar,
-  gridFilteredSortedRowIdsSelector,
-  GridRenderCellParams,
-  gridDataRowIdsSelector,
-  useGridApiContext,
-  GridCsvGetRowsToExportParams,
-  GridRowId,
 } from "@mui/x-data-grid";
-import { Quality, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { getMoneyString } from "../../functions/Impact";
+import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import {
-  Box,
   Accordion,
   AccordionActions,
   AccordionDetails,
   AccordionSummary,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
   Typography,
 } from "@mui/material";
-import { SCENARIOS, getWorstCaseScenario } from "../../functions/scenarios";
+import { getWorstCaseScenario } from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
 
 const filteredAttributes = ["timestamp", "reliability"];
@@ -55,7 +41,8 @@ const columns: GridColDef[] = [
     field: "tp",
     headerName: "Δ TP",
     width: 150,
-    valueFormatter: (params: GridValueFormatterParams) => round(100 * params.value, 2) + "%",
+    valueFormatter: (params: GridValueFormatterParams) =>
+      round(100 * params.value, 2) + "%",
     // renderCell: (params: GridRenderCellParams) => {
     //   return `${(100 * params.value).toLocaleString()} %`;
     // },
@@ -64,7 +51,8 @@ const columns: GridColDef[] = [
     field: "ti",
     headerName: "Δ TI",
     width: 150,
-    valueFormatter: (params: GridValueFormatterParams) => round(100 * params.value, 2) + "%",
+    valueFormatter: (params: GridValueFormatterParams) =>
+      round(100 * params.value, 2) + "%",
     // renderCell: (params: GridRenderCellParams) => getMoneyString(params.value),
   },
   // {
@@ -89,15 +77,15 @@ export default function CalculationsDelta({
   previousCalculations: RiskCalculation[] | null;
   setSelectedNodeId: (id: string) => void;
 }) {
-  const [sortedNew, setSortedNew] = useState<RiskCalculation[] | null>(null);
-  const [sortedOld, setSortedOld] = useState<RiskCalculation[] | null>(null);
   const [expand, setExpand] = useState(false);
 
   const delta: DiffRiskCalculation[] = useMemo(() => {
     if (!calculations || !previousCalculations) return [];
 
     const SN = calculations.sort((a, b) => (a.riskId > b.riskId ? 1 : -1));
-    const SO = previousCalculations.sort((a, b) => (a.riskId > b.riskId ? 1 : -1));
+    const SO = previousCalculations.sort((a, b) =>
+      a.riskId > b.riskId ? 1 : -1
+    );
 
     return SN.map((n, i) => {
       const o = SO[i];
@@ -105,16 +93,19 @@ export default function CalculationsDelta({
       const oldMRS = getWorstCaseScenario(o);
       const newMRS = getWorstCaseScenario(n);
 
-      let diff: DiffRiskCalculation = {
+      const diff: DiffRiskCalculation = {
         ...o,
         scenario: oldMRS === newMRS ? null : `${oldMRS} -> ${newMRS}`,
       };
 
-      for (let attr of Object.keys(n).filter((a) => filteredAttributes.indexOf(a) < 0)) {
+      for (const attr of Object.keys(n).filter(
+        (a) => filteredAttributes.indexOf(a) < 0
+      )) {
         if (typeof n[attr as keyof RiskCalculation] === "number") {
-          // @ts-expect-error
+          // @ts-expect-error yes
           diff[attr as keyof RiskCalculation] =
-            ((n[attr as keyof RiskCalculation] as number) - (o[attr as keyof RiskCalculation] as number)) /
+            ((n[attr as keyof RiskCalculation] as number) -
+              (o[attr as keyof RiskCalculation] as number)) /
             (o[attr as keyof RiskCalculation] as number);
         }
       }
@@ -130,9 +121,15 @@ export default function CalculationsDelta({
   }, [calculations, previousCalculations]);
 
   return (
-    <Accordion expanded={expand} onChange={(e, ex) => setExpand(ex)} disabled={!calculations || !previousCalculations}>
+    <Accordion
+      expanded={expand}
+      onChange={(e, ex) => setExpand(ex)}
+      disabled={!calculations || !previousCalculations}
+    >
       <AccordionSummary>
-        <Typography variant="subtitle2">Difference with last calculations</Typography>
+        <Typography variant="subtitle2">
+          Difference with last calculations
+        </Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ height: 1000 }}>
         {expand && (

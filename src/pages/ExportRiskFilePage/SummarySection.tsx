@@ -18,7 +18,7 @@ import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { useEffect, useState } from "react";
 import svg2PDF from "../../functions/svg2PDF";
 import getScaleString from "../../functions/getScaleString";
-import { getLanguage, getSummary } from "../../functions/translations";
+import { getSummary } from "../../functions/translations";
 import i18next from "i18next";
 import { BLACK } from "../../functions/colors";
 import Watermark from "./Watermark";
@@ -77,7 +77,7 @@ export default function SummarySection({
   const wrapperStyle = {
     width: 3 * POINTS_PER_CM,
     // height: 4.5 * POINTS_PER_CM,
-    textAlign: "center" as "center",
+    textAlign: "center" as const,
   };
   const titleStyle = { ...bodyStyle, ...smallStyle, ...boldStyle };
   const imageStyle = {

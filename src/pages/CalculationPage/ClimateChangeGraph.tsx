@@ -11,8 +11,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, getScenarioSuffix } from "../../functions/scenarios";
+import { SCENARIOS } from "../../functions/scenarios";
 import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
@@ -25,12 +24,8 @@ export default function ClimateChangeGraph({
   riskFile: DVRiskFile | null;
   cascades: DVRiskCascade<SmallRisk, unknown>[] | null;
 }) {
-  const [calculation, setCalculation] = useState<RiskCalculation | null>(null);
   const [scenario, setScenario] = useState<"wcs" | SCENARIOS>("wcs");
   const [causes, setCauses] = useState<DVRiskCascade<SmallRisk>[] | null>(null);
-  const [causesCount, setCausesCount] = useState(5);
-  const [effects, setEffects] = useState(5);
-
   useEffect(() => {
     if (!riskFile || !cascades) return;
 
@@ -54,7 +49,11 @@ export default function ClimateChangeGraph({
             <ClimateChangeChart
               riskFile={riskFile}
               causes={causes}
-              scenario={scenario === "wcs" ? riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE : scenario}
+              scenario={
+                scenario === "wcs"
+                  ? riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE
+                  : scenario
+              }
             />
           )}
         </Stack>
@@ -63,7 +62,11 @@ export default function ClimateChangeGraph({
         <Stack direction="row" spacing={5} sx={{ flex: 1 }}>
           <FormControl sx={{ flex: 1 }} fullWidth>
             <InputLabel>Show Scenario</InputLabel>
-            <Select value={scenario} label="Show Scenario" onChange={(e) => setScenario(e.target.value as any)}>
+            <Select
+              value={scenario}
+              label="Show Scenario"
+              onChange={(e) => setScenario(e.target.value as SCENARIOS | "wcs")}
+            >
               <MenuItem value={"wcs"}>Worst Case</MenuItem>
               <MenuItem value={"considerable"}>Considerable</MenuItem>
               <MenuItem value={"major"}>Major</MenuItem>

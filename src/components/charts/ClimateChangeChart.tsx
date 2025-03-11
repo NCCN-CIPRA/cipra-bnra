@@ -20,10 +20,7 @@ import round from "../../functions/roundNumberString";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { Cause as Cause2023 } from "../../functions/Probability";
-import {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
+import { NameType } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Stack, Typography } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -42,11 +39,7 @@ const getPercentage = (orig: number, n: number) => {
   return round((100 * Math.round(100 * n)) / Math.round(100 * orig));
 };
 
-const CustomTooltip = ({
-  active,
-  payload,
-  label,
-}: TooltipProps<number, NameType>) => {
+const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   if (active && payload && payload.length) {
     console.log(
       payload[3].value,
@@ -68,6 +61,7 @@ const CustomTooltip = ({
           Effects of Climate Change
         </Typography>
         <Stack direction="column" rowGap={0.5}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <Stack direction="row" sx={{ color: (payload[0] as any).fill }}>
             <Typography
               variant="body2"
@@ -90,6 +84,7 @@ const CustomTooltip = ({
           {Math.round(100 * (payload[3].value as number)) / 100 > 0 && (
             <Stack
               direction="row"
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               sx={{ ml: 2, mb: 1, color: (payload[3] as any).fill }}
             >
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
@@ -120,6 +115,7 @@ const CustomTooltip = ({
           {Math.round(100 * (payload[6].value as number)) / 100 > 0 && (
             <Stack
               direction="row"
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               sx={{ ml: 2, mb: 1, color: (payload[6] as any).fill }}
             >
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
@@ -151,6 +147,7 @@ const CustomTooltip = ({
             Math.round(100 * (payload[6].value as number)) / 100 <= 0 && (
               <Stack
                 direction="row"
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 sx={{ ml: 2, mb: 1, color: (payload[0] as any).fill }}
               >
                 <Typography
@@ -161,6 +158,8 @@ const CustomTooltip = ({
                 </Typography>
               </Stack>
             )}
+
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <Stack direction="row" sx={{ color: (payload[1] as any).fill }}>
             <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
               Major Scenario
@@ -180,6 +179,7 @@ const CustomTooltip = ({
           {Math.round(100 * (payload[4].value as number)) / 100 > 0 && (
             <Stack
               direction="row"
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               sx={{ ml: 2, mb: 1, color: (payload[4] as any).fill }}
             >
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
@@ -210,6 +210,7 @@ const CustomTooltip = ({
           {Math.round(100 * (payload[7].value as number)) / 100 > 0 && (
             <Stack
               direction="row"
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               sx={{ ml: 2, mb: 1, color: (payload[7] as any).fill }}
             >
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
@@ -241,6 +242,7 @@ const CustomTooltip = ({
             Math.round(100 * (payload[7].value as number)) / 100 <= 0 && (
               <Stack
                 direction="row"
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 sx={{ ml: 2, mb: 1, color: (payload[0] as any).fill }}
               >
                 <Typography
@@ -251,6 +253,8 @@ const CustomTooltip = ({
                 </Typography>
               </Stack>
             )}
+
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <Stack direction="row" sx={{ color: (payload[2] as any).fill }}>
             <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
               Extreme Scenario
@@ -270,6 +274,7 @@ const CustomTooltip = ({
           {Math.round(100 * (payload[5].value as number)) / 100 > 0 && (
             <Stack
               direction="row"
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               sx={{ ml: 2, mb: 1, color: (payload[5] as any).fill }}
             >
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
@@ -300,6 +305,7 @@ const CustomTooltip = ({
           {Math.round(100 * (payload[8].value as number)) / 100 > 0 && (
             <Stack
               direction="row"
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               sx={{ ml: 2, mb: 1, color: (payload[8] as any).fill }}
             >
               <Typography variant="body2" sx={{ flex: 1, fontWeight: "bold" }}>
@@ -331,6 +337,7 @@ const CustomTooltip = ({
             Math.round(100 * (payload[8].value as number)) / 100 <= 0 && (
               <Stack
                 direction="row"
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 sx={{ ml: 2, mb: 1, color: (payload[0] as any).fill }}
               >
                 <Typography

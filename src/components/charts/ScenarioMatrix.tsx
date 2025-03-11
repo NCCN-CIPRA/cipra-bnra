@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import {
   ScatterChart,
   Scatter,
@@ -8,34 +7,20 @@ import {
   ZAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
   TooltipProps,
 } from "recharts";
-import { scaleLog } from "d3-scale";
-import { getImpactScale } from "../../functions/Impact";
 import { NameType } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Stack, Typography } from "@mui/material";
-import getCategoryColor from "../../functions/getCategoryColor";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import {
-  DVAnalysisRun,
-  RiskAnalysisResults,
-  RiskCalculation,
-} from "../../types/dataverse/DVAnalysisRun";
 import {
   SCENARIOS,
   SCENARIO_PARAMS,
   getScenarioParameter,
 } from "../../functions/scenarios";
 import { hexToRGB } from "../../functions/colors";
-import {
-  getProbabilityScaleNumber,
-  getTotalProbabilityRelativeScale,
-} from "../../functions/Probability";
 import round from "../../functions/roundNumberString";
 import { capFirst } from "../../functions/capFirst";
 import { useTranslation } from "react-i18next";
-import { ticks } from "d3";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   if (active && payload && payload.length) {
@@ -101,7 +86,6 @@ export default function ScenarioMatrix({
   width?: number;
   height?: number;
 }) {
-  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const data = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].map(

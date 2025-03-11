@@ -7,7 +7,6 @@ import {
   SCENARIOS,
   getCascadeParameter,
   getScenarioParameter,
-  getScenarioSuffix,
 } from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
 import { Cascades } from "../../pages/BaseRisksPage";
@@ -22,14 +21,12 @@ const PSankeyNode = ({
   height,
   index,
   payload,
-  containerWidth,
   totalProbability,
   totalNodes,
-  scenario,
-  showComponents,
   fontSize,
   onClick,
-}: any) => {
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+any) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -146,6 +143,7 @@ const PSankeyNode = ({
                     {t("Other causes")}:
                   </Typography>
 
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {payload.hidden.map((h: any) =>
                     h.cascade ? (
                       <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
@@ -210,11 +208,10 @@ const PSankeyNode = ({
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const PSankeyLink = (props: any) => {
   const {
-    index,
     targetRelativeY,
-    sourceRelativeY,
     sourceX,
     sourceY,
     sourceControlX,
@@ -315,8 +312,6 @@ export const SvgChart = ({
 
   if (!riskFile || !cascades) return null;
 
-  const scenarioSuffix: string = getScenarioSuffix(scenario);
-
   const causes = [
     {
       name: manmade
@@ -355,7 +350,7 @@ export const SvgChart = ({
     const Ptot = causes.reduce((tot, c) => tot + c.p, 0.000000001);
 
     let cumulP = 0;
-    for (let c of causes.sort((a, b) => b.p - a.p)) {
+    for (const c of causes.sort((a, b) => b.p - a.p)) {
       cumulP += c.p / Ptot;
 
       if (cumulP >= shownCausePortion) {
@@ -365,11 +360,13 @@ export const SvgChart = ({
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nodes: any[] = [
     { name: t(`risk.${riskFile.cr4de_hazard_id}.name`, riskFile.cr4de_title) },
     ...causes.filter((c) => c.p >= minP),
   ];
-  const otherCauses = causes.filter((c: any, i: number) => c.p < minP);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const otherCauses = causes.filter((c: any) => c.p < minP);
 
   if (minP >= 0 && !manmade && otherCauses.length > 0) {
     nodes.push({
@@ -378,6 +375,7 @@ export const SvgChart = ({
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const links: any[] = causes
     .filter((e) => e.p >= minP)
     .map((e, i: number) => ({
@@ -390,9 +388,11 @@ export const SvgChart = ({
       source: nodes.length - 1,
       target: 0,
       value: causes
-        .filter((e: any, i: number) => e.p < minP)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((e: any) => e.p < minP)
         .reduce((tot, e) => tot + e.p, 0.000000001),
-      hidden: causes.filter((e: any, i: number) => e.p < minP),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      hidden: causes.filter((e: any) => e.p < minP),
     });
 
   const data = {

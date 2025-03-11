@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Stack } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
 import TextInputBox from "../../../components/TextInputBox";
 import { useEffect, useState } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
@@ -32,13 +32,18 @@ export default function CBSection({
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [cb, setCB] = useState<string | null>(riskFile[`cr4de_cross_border_impact_quali${scenarioSuffix}`]);
+  const [cb, setCB] = useState<string | null>(
+    riskFile[`cr4de_cross_border_impact_quali${scenarioSuffix}`]
+  );
 
-  useEffect(() => setCB(riskFile[`cr4de_cross_border_impact_quali${scenarioSuffix}`]), [riskFile]);
+  useEffect(
+    () => setCB(riskFile[`cr4de_cross_border_impact_quali${scenarioSuffix}`]),
+    [riskFile]
+  );
 
   useEffect(() => setIsEditing(editing), [editing]);
 
-  const saveRiskFile = async (reset = false) => {
+  const saveRiskFile = async () => {
     setSaving(true);
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
       [`cr4de_cross_border_impact_quali${scenarioSuffix}`]: cb,
@@ -53,7 +58,9 @@ export default function CBSection({
 
   const startEdit = () => {
     if (isEditingOther) {
-      window.alert("You are already editing another section. Please close this section before editing another.");
+      window.alert(
+        "You are already editing another section. Please close this section before editing another."
+      );
     } else {
       setEditing(true);
     }
@@ -69,7 +76,9 @@ export default function CBSection({
         />
       )}
       {editing && (
-        <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+        <Box
+          sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+        >
           <TextInputBox
             limitedOptions
             initialValue={cb}
@@ -81,7 +90,10 @@ export default function CBSection({
         </Box>
       )}
       {mode === "edit" && (
-        <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
+        <Stack
+          direction="row"
+          sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}
+        >
           {!editing && (
             <>
               <Button onClick={startEdit}>Edit</Button>
@@ -97,7 +109,12 @@ export default function CBSection({
               <Button
                 color="warning"
                 onClick={() => {
-                  if (window.confirm("Are you sure you wish to discard your changes?")) setEditing(false);
+                  if (
+                    window.confirm(
+                      "Are you sure you wish to discard your changes?"
+                    )
+                  )
+                    setEditing(false);
                 }}
               >
                 Discard Changes

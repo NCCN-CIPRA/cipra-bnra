@@ -1,6 +1,7 @@
 import { View } from "@react-pdf/renderer";
 import { ReactNode } from "react";
-import { POINTS_PER_CM, SCALE } from "./styles";
+import { SCALE } from "./styles";
+import { Style } from "@react-pdf/types";
 
 export default function LeftBorderSection({
   children,
@@ -12,7 +13,7 @@ export default function LeftBorderSection({
   children: ReactNode;
   debug?: boolean;
   color?: string;
-  style?: any;
+  style?: Style | Style[];
   wrap?: boolean;
 }) {
   return (

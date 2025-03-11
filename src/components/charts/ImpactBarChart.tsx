@@ -1,28 +1,20 @@
 import {
   BarChart,
   Bar,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   TooltipProps,
 } from "recharts";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { Box, Stack, Typography } from "@mui/material";
-import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import {
-  getScenarioParameter,
-  SCENARIO_SUFFIX,
-  SCENARIOS,
-} from "../../functions/scenarios";
+import { getScenarioParameter, SCENARIOS } from "../../functions/scenarios";
 import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
-import round from "../../functions/roundNumberString";
 import { useTranslation } from "react-i18next";
 import {
   getCategoryImpactRescaled,

@@ -1,4 +1,10 @@
-import { Box, CircularProgress, Container, IconButton, Stack } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Container,
+  IconButton,
+  Stack,
+} from "@mui/material";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { useParams } from "react-router-dom";
 import useAPI, { DataTable } from "../../hooks/useAPI";
@@ -39,7 +45,7 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
   }),
 }));
 
-export default function LearningPage({}) {
+export default function LearningPage() {
   const { i18n, t } = useTranslation();
   const params = useParams() as RouteParams;
   const api = useAPI();
@@ -88,7 +94,12 @@ export default function LearningPage({}) {
   };
 
   useBreadcrumbs(null);
-  usePageTitle(t("learning.methodology.general.title", "BNRA 2023 - 2026 Informatieplatform: Algemene Inleiding"));
+  usePageTitle(
+    t(
+      "learning.methodology.general.title",
+      "BNRA 2023 - 2026 Informatieplatform: Algemene Inleiding"
+    )
+  );
 
   if (!page)
     return (
@@ -122,9 +133,15 @@ export default function LearningPage({}) {
               disabled={isSaving || dirty}
               sx={{ "&:hover": { backgroundColor: "rgba(185,185,185,0.2)" } }}
             >
-              {!isEditing && !isSaving && <EditIcon style={{ color: "#999" }} />}
-              {isEditing && !isSaving && <VisibilityIcon style={{ color: "#999" }} />}
-              {isSaving && <CircularProgress style={{ color: "#999" }} size={20} />}
+              {!isEditing && !isSaving && (
+                <EditIcon style={{ color: "#999" }} />
+              )}
+              {isEditing && !isSaving && (
+                <VisibilityIcon style={{ color: "#999" }} />
+              )}
+              {isSaving && (
+                <CircularProgress style={{ color: "#999" }} size={20} />
+              )}
             </IconButton>
           </Box>
           <Box
@@ -154,7 +171,9 @@ export default function LearningPage({}) {
                 width="854"
                 height="480"
                 src={`https://www.youtube.com/embed/${
-                  page[`cr4de_video_${i18n.languages[0]}` as keyof DVPage] || page.cr4de_video_nl || ""
+                  page[`cr4de_video_${i18n.languages[0]}` as keyof DVPage] ||
+                  page.cr4de_video_nl ||
+                  ""
                 }`}
                 title={page.cr4de_bnrapageid}
                 frameBorder="0"
@@ -166,7 +185,9 @@ export default function LearningPage({}) {
           <Container sx={{ mt: 4, mb: 8 }}>
             {isEditing ? (
               <TextInputBox
-                initialValue={page[`cr4de_content_${i18n.languages[0]}` as keyof DVPage]}
+                initialValue={
+                  page[`cr4de_content_${i18n.languages[0]}` as keyof DVPage]
+                }
                 height="1000px"
                 onSave={handleAutoSave}
                 setUpdatedValue={handleSetFieldUpdate}
@@ -174,7 +195,10 @@ export default function LearningPage({}) {
             ) : (
               <Box
                 dangerouslySetInnerHTML={{
-                  __html: page[`cr4de_content_${i18n.languages[0]}` as keyof DVPage] || "",
+                  __html:
+                    page[
+                      `cr4de_content_${i18n.languages[0]}` as keyof DVPage
+                    ] || "",
                 }}
               />
             )}

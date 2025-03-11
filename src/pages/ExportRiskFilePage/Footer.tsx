@@ -1,7 +1,7 @@
 import { Text, View } from "@react-pdf/renderer";
-import { PAGE_STYLES, POINTS_PER_CM, smallStyle } from "./styles";
+import { PAGE_STYLES, smallStyle } from "./styles";
 
-export default function Footer({}) {
+export default function Footer() {
   return (
     <View
       fixed
@@ -16,10 +16,7 @@ export default function Footer({}) {
       }}
     >
       <Text style={smallStyle}>NCCN - CIPRA</Text>
-      <Text
-        style={smallStyle}
-        render={({ pageNumber, totalPages }) => `${pageNumber}`}
-      />
+      <Text style={smallStyle} render={({ pageNumber }) => `${pageNumber}`} />
     </View>
   );
 }

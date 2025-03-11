@@ -17,5 +17,10 @@
     "jsx": "react-jsx",
     "downlevelIteration": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "node_modules",
+    "public",
+    "**/_deprecated/**"
+  ]
 }

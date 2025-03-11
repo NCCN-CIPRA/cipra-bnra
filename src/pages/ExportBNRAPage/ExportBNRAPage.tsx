@@ -1,10 +1,6 @@
 import { useOutletContext } from "react-router-dom";
 import { RiskPageContext } from "../BaseRisksPage";
 import { useEffect, useState } from "react";
-import { ExportRiskFile } from "../ExportRiskFilePage/ExportRiskFilePage";
-import { DataTable } from "../../hooks/useAPI";
-import useRecords from "../../hooks/useRecords";
-import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { Box, Stack, Typography } from "@mui/material";
 import NCCNLoader from "../../components/NCCNLoader";
 import { NCCN_GREEN } from "../../functions/colors";
@@ -12,10 +8,20 @@ import { ReactComponent as BNRA_Logo } from "../../assets/icons/BNRA_Logo.svg";
 import { ReactComponent as NCCN_Logo } from "../../assets/icons/NCCN_Logo.svg";
 import { ReactComponent as NCCN_Detail } from "../../assets/icons/Triangles_detail.svg";
 import RiskMatrix from "../../components/charts/RiskMatrix";
-import { CATEGORY_NAMES, RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
-import { Document, Font, Image, Page, PDFViewer, Text, View } from "@react-pdf/renderer";
+import {
+  CATEGORY_NAMES,
+  RISK_CATEGORY,
+} from "../../types/dataverse/DVRiskFile";
+import {
+  Document,
+  Font,
+  Image,
+  Page,
+  PDFViewer,
+  Text,
+  View,
+} from "@react-pdf/renderer";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Canvg } from "canvg";
 import svg2PDF from "../../functions/svg2PDF";
 import NH15 from "../../assets/fonts/NHaasGroteskDSPro-15UltTh.ttf";
 import NH25 from "../../assets/fonts/NHaasGroteskDSPro-25Th.ttf";
@@ -87,26 +93,36 @@ Font.register({
 });
 Font.registerHyphenationCallback((word) => [word]);
 
-export default function ExportBNRAPage({}) {
+export default function ExportBNRAPage() {
   const [detailSVG, setDetailSVG] = useState("");
   const [nccnLogoSVG, setNccnLogoSVG] = useState("");
   const [bnraLogoSVG, setBnraLogoSVG] = useState("");
 
   useEffect(() => {
-    svg2PDF(renderToStaticMarkup(<NCCN_Detail style={{ position: "absolute", bottom: 0, left: 0 }} />)).then((uri) =>
-      setDetailSVG(uri || "")
-    );
-    svg2PDF(renderToStaticMarkup(<NCCN_Logo style={{ position: "absolute", bottom: 0, left: 0 }} />)).then((uri) =>
-      setNccnLogoSVG(uri || "")
-    );
-    svg2PDF(renderToStaticMarkup(<BNRA_Logo style={{ position: "absolute", bottom: 0, left: 0 }} />)).then((uri) =>
-      setBnraLogoSVG(uri || "")
-    );
+    svg2PDF(
+      renderToStaticMarkup(
+        <NCCN_Detail style={{ position: "absolute", bottom: 0, left: 0 }} />
+      )
+    ).then((uri) => setDetailSVG(uri || ""));
+    svg2PDF(
+      renderToStaticMarkup(
+        <NCCN_Logo style={{ position: "absolute", bottom: 0, left: 0 }} />
+      )
+    ).then((uri) => setNccnLogoSVG(uri || ""));
+    svg2PDF(
+      renderToStaticMarkup(
+        <BNRA_Logo style={{ position: "absolute", bottom: 0, left: 0 }} />
+      )
+    ).then((uri) => setBnraLogoSVG(uri || ""));
   }, []);
 
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
-      <PDFViewer style={{ overflow: "hidden", height: "100%", width: "100%" }} height="100%" width="100%">
+      <PDFViewer
+        style={{ overflow: "hidden", height: "100%", width: "100%" }}
+        height="100%"
+        width="100%"
+      >
         <Document>
           <Page
             size="A5"
@@ -123,17 +139,44 @@ export default function ExportBNRAPage({}) {
                 marginBottom: 0,
               }}
             >
-              <Text style={{ fontFamily: "NH", fontSize: "30pt", color: "white", fontWeight: "bold" }}>
+              <Text
+                style={{
+                  fontFamily: "NH",
+                  fontSize: "30pt",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
                 Belgian National Risk Assessment
               </Text>
             </View>
             <View
-              style={{ width: "80%", margin: "auto", textAlign: "center", marginTop: "10pt", marginBottom: "30pt" }}
+              style={{
+                width: "80%",
+                margin: "auto",
+                textAlign: "center",
+                marginTop: "10pt",
+                marginBottom: "30pt",
+              }}
             >
-              <Text style={{ fontFamily: "NH", fontSize: "20pt", color: "white", fontWeight: "normal" }}>
+              <Text
+                style={{
+                  fontFamily: "NH",
+                  fontSize: "20pt",
+                  color: "white",
+                  fontWeight: "normal",
+                }}
+              >
                 Full Report
               </Text>
-              <Text style={{ fontFamily: "NH", fontSize: "20pt", color: "white", fontWeight: "normal" }}>
+              <Text
+                style={{
+                  fontFamily: "NH",
+                  fontSize: "20pt",
+                  color: "white",
+                  fontWeight: "normal",
+                }}
+              >
                 2023 - 2026
               </Text>
             </View>
@@ -173,7 +216,14 @@ export default function ExportBNRAPage({}) {
                 marginBottom: "100px",
               }}
             >
-              <Text style={{ fontFamily: "NH", fontSize: "16pt", color: "white", fontWeight: "semibold" }}>
+              <Text
+                style={{
+                  fontFamily: "NH",
+                  fontSize: "16pt",
+                  color: "white",
+                  fontWeight: "semibold",
+                }}
+              >
                 Better prepared. Better response.
               </Text>
             </View>
@@ -199,12 +249,9 @@ export default function ExportBNRAPage({}) {
   );
 }
 
-export function ExportBNRAPage2({}) {
+export function ExportBNRAPage2() {
   const {
-    hazardCatalogue,
     riskFiles,
-    cascades,
-    allAttachments,
     loadAllRiskFiles,
     allRiskFilesLoaded,
     loadAllAttachments,
@@ -228,7 +275,13 @@ export function ExportBNRAPage2({}) {
   return (
     <Box id="bnra-export">
       <Box
-        style={{ width: "21cm", height: "29.7cm", margin: "auto", backgroundColor: NCCN_GREEN, position: "relative" }}
+        style={{
+          width: "21cm",
+          height: "29.7cm",
+          margin: "auto",
+          backgroundColor: NCCN_GREEN,
+          position: "relative",
+        }}
       >
         <Typography
           variant="h1"
@@ -259,7 +312,10 @@ export function ExportBNRAPage2({}) {
           <br />
           2023 - 2026
         </Typography>
-        <img src="https://bnra.powerappsportals.com/report-front.png" style={{ width: "100%" }} />
+        <img
+          src="https://bnra.powerappsportals.com/report-front.png"
+          style={{ width: "100%" }}
+        />
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -271,7 +327,13 @@ export function ExportBNRAPage2({}) {
       </Box>
 
       <Box
-        style={{ width: "21cm", height: "29.7cm", margin: "auto", backgroundColor: NCCN_GREEN, position: "relative" }}
+        style={{
+          width: "21cm",
+          height: "29.7cm",
+          margin: "auto",
+          backgroundColor: NCCN_GREEN,
+          position: "relative",
+        }}
       >
         <Typography
           variant="h1"
@@ -317,7 +379,11 @@ export function ExportBNRAPage2({}) {
           Risk Matrix
         </Typography>
         <Box sx={{ width: "19cm", height: "19cm", margin: "auto" }}>
-          <RiskMatrix riskFiles={Object.values(riskFiles)} labels={true} labelSize={10} />
+          <RiskMatrix
+            riskFiles={Object.values(riskFiles)}
+            labels={true}
+            labelSize={10}
+          />
         </Box>
       </Box>
 
@@ -329,7 +395,7 @@ export function ExportBNRAPage2({}) {
           {Object.values(riskFiles)
             .filter((rf) => rf.cr4de_risk_category === c)
             .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
-            .map((rf) => (
+            .map(() => (
               <>
                 {/* <ExportRiskFile
                   key={rf.cr4de_riskfilesid}

@@ -1,4 +1,11 @@
-import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip, TooltipProps } from "recharts";
+import {
+  PieChart,
+  Pie,
+  ResponsiveContainer,
+  Cell,
+  Tooltip,
+  TooltipProps,
+} from "recharts";
 import { Box, Typography } from "@mui/material";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
@@ -24,7 +31,10 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
         </p>
         <p style={{ margin: 0 }}>
           <Typography variant="caption">
-            {Math.round((payload[0]!.value! / payload[0]!.payload.total!) * 10000) / 100}% of total impact
+            {Math.round(
+              (payload[0]!.value! / payload[0]!.payload.total!) * 10000
+            ) / 100}
+            % of total impact
           </Typography>
         </p>
       </div>
@@ -34,6 +44,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   return null;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function ImpactOriginPieChart({ riskFile }: { riskFile: any }) {
   if (!riskFile) return null;
 
@@ -59,7 +70,14 @@ export default function ImpactOriginPieChart({ riskFile }: { riskFile: any }) {
       </Box>
       <ResponsiveContainer width="100%" height={160}>
         <PieChart>
-          <Pie data={dataGlobal} dataKey="value" cx="50%" cy="50%" outerRadius={80} fill="#8884d8">
+          <Pie
+            data={dataGlobal}
+            dataKey="value"
+            cx="50%"
+            cy="50%"
+            outerRadius={80}
+            fill="#8884d8"
+          >
             {dataGlobal.map((d) => (
               <Cell key={d.name} fill={d.color} />
             ))}

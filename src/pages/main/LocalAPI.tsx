@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 export default function LocalAPI() {
   useEffect(() => {
-    const listener = async function (e: any) {
+    const listener = async function (e: MessageEvent) {
       try {
         if (e.data === "getUserInfo") {
           // eslint-disable-next-line no-restricted-globals

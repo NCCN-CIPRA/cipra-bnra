@@ -36,9 +36,14 @@ export default function IntelligenceSection({
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [probQuali, setProbQuali] = useState<string>(riskFile.cr4de_mrs_probability || getDefaultText());
+  const [probQuali, setProbQuali] = useState<string>(
+    riskFile.cr4de_mrs_probability || getDefaultText()
+  );
 
-  useEffect(() => setProbQuali(riskFile.cr4de_mrs_probability || getDefaultText()), [riskFile]);
+  useEffect(
+    () => setProbQuali(riskFile.cr4de_mrs_probability || getDefaultText()),
+    [riskFile]
+  );
 
   useEffect(() => setIsEditing(editing), [editing]);
 
@@ -60,7 +65,9 @@ export default function IntelligenceSection({
 
   const startEdit = () => {
     if (isEditingOther) {
-      window.alert("You are already editing another section. Please close this section before editing another.");
+      window.alert(
+        "You are already editing another section. Please close this section before editing another."
+      );
     } else {
       setEditing(true);
     }
@@ -76,11 +83,13 @@ export default function IntelligenceSection({
         />
       )}
       {editing && (
-        <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+        <Box
+          sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+        >
           <TextInputBox
             limitedOptions
             initialValue={probQuali}
-            setUpdatedValue={(str: any) => setProbQuali(str || "")}
+            setUpdatedValue={(str) => setProbQuali(str || "")}
             sources={attachments}
             updateSources={updateAttachments}
             allRisks={allRisks}
@@ -88,7 +97,10 @@ export default function IntelligenceSection({
         </Box>
       )}
       {mode === "edit" && (
-        <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
+        <Stack
+          direction="row"
+          sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}
+        >
           {!editing && (
             <>
               <Button onClick={startEdit}>Edit</Button>
@@ -118,7 +130,12 @@ export default function IntelligenceSection({
               <Button
                 color="warning"
                 onClick={() => {
-                  if (window.confirm("Are you sure you wish to discard your changes?")) setEditing(false);
+                  if (
+                    window.confirm(
+                      "Are you sure you wish to discard your changes?"
+                    )
+                  )
+                    setEditing(false);
                 }}
               >
                 Discard Changes

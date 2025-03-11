@@ -3,7 +3,13 @@ import { Bar, BarChart, YAxis } from "recharts";
 import getScaleString from "../../functions/getScaleString";
 import { useTranslation } from "react-i18next";
 
-export const arrow = (value: number, cy: number, arrowWidth: number, graphWidth: number, color: string) => {
+export const arrow = (
+  value: number,
+  cy: number,
+  arrowWidth: number,
+  graphWidth: number,
+  color: string
+) => {
   const ratio = graphWidth - 20;
   const x0 = 10 + ratio * value * 0.2;
   const y0 = cy + arrowWidth;
@@ -15,7 +21,13 @@ export const arrow = (value: number, cy: number, arrowWidth: number, graphWidth:
   const xc = x0 + arrowWidth / 2;
   const yc = y0;
 
-  return <path d={`M${xa} ${ya} L${xb} ${yb} L${xc} ${yc} L${xa} ${ya}`} stroke="#none" fill={color} />;
+  return (
+    <path
+      d={`M${xa} ${ya} L${xb} ${yb} L${xc} ${yc} L${xa} ${ya}`}
+      stroke="#none"
+      fill={color}
+    />
+  );
 };
 
 export const getProbabilityBars = (value: number) => {
@@ -55,23 +67,25 @@ export default function ProbabilityBars({
 export function ProbabilityBarsChart({
   tp,
   chartWidth,
-  manmade = false,
-  height = 100
+  height = 100,
 }: {
   tp: number;
   chartWidth: number;
   manmade?: boolean;
   height?: number;
 }) {
-  const { t } = useTranslation();
-
   return (
-    <BarChart width={chartWidth} height={height} data={getProbabilityBars(tp)} style={{}}>
-        {/* <CartesianGrid strokeDasharray="3 3" /> */}
-        <YAxis domain={[0, 5]} hide />
-        <Bar dataKey="uv" fill="#000000b0" stackId="a" />
-        <Bar dataKey="pv" fill="#00000040" stackId="a" />
-        {arrow(tp, height, 10, chartWidth, "#000000b0")}
-      </BarChart>
+    <BarChart
+      width={chartWidth}
+      height={height}
+      data={getProbabilityBars(tp)}
+      style={{}}
+    >
+      {/* <CartesianGrid strokeDasharray="3 3" /> */}
+      <YAxis domain={[0, 5]} hide />
+      <Bar dataKey="uv" fill="#000000b0" stackId="a" />
+      <Bar dataKey="pv" fill="#00000040" stackId="a" />
+      {arrow(tp, height, 10, chartWidth, "#000000b0")}
+    </BarChart>
   );
 }

@@ -7,11 +7,7 @@ import {
   Checkbox,
   Grid,
   FormControlLabel,
-  MenuItem,
-  Menu,
   Tooltip,
-  CircularProgress,
-  IconButton,
 } from "@mui/material";
 import { Virtuoso } from "react-virtuoso";
 import RiskFileListItem from "./RiskFileListItem";
@@ -39,8 +35,6 @@ const SPECIAL_FILTERS = {
 export default function RiskFilesView({
   riskFiles,
   allSelected,
-  sendInvitationEmails,
-  reloadData,
   selectRiskFile,
   selectAll,
 }: {
@@ -53,8 +47,8 @@ export default function RiskFilesView({
 }) {
   const { user } = useOutletContext<AuthPageContext>();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [filteredRiskFiles, setFilteredRiskFiles] = useState<SelectableRiskFile[]>(riskFiles);
+  const [filteredRiskFiles, setFilteredRiskFiles] =
+    useState<SelectableRiskFile[]>(riskFiles);
   const [filter, setFilter] = useState<string | null>(null);
   const [specialFilters, setSpecialFilters] = useState({
     ...SPECIAL_FILTERS,
@@ -72,24 +66,37 @@ export default function RiskFilesView({
           r.cr4de_title.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
           r.participants.some(
             (p) =>
-              p.cr4de_contact.emailaddress1.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
+              p.cr4de_contact.emailaddress1
+                .toLowerCase()
+                .indexOf(filter.toLowerCase()) >= 0 ||
               (p.cr4de_contact.firstname &&
-                p.cr4de_contact.firstname.toLowerCase().indexOf(filter.toLowerCase()) >= 0) ||
-              (p.cr4de_contact.lastname && p.cr4de_contact.lastname.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
+                p.cr4de_contact.firstname
+                  .toLowerCase()
+                  .indexOf(filter.toLowerCase()) >= 0) ||
+              (p.cr4de_contact.lastname &&
+                p.cr4de_contact.lastname
+                  .toLowerCase()
+                  .indexOf(filter.toLowerCase()) >= 0)
           )
       );
     }
 
     if (specialFilters.MY_RISK_FILES && !specialFilters.MY_RISK_FILES_BACKUP) {
       runningFilter = runningFilter.filter((rf) =>
-        rf.participants.some((p) => p.cr4de_contact.emailaddress1 === user?.emailaddress1 && p.cr4de_role === "analist")
+        rf.participants.some(
+          (p) =>
+            p.cr4de_contact.emailaddress1 === user?.emailaddress1 &&
+            p.cr4de_role === "analist"
+        )
       );
     }
 
     if (specialFilters.MY_RISK_FILES_BACKUP && !specialFilters.MY_RISK_FILES) {
       runningFilter = runningFilter.filter((rf) =>
         rf.participants.some(
-          (p) => p.cr4de_contact.emailaddress1 === user?.emailaddress1 && p.cr4de_role === "analist_2"
+          (p) =>
+            p.cr4de_contact.emailaddress1 === user?.emailaddress1 &&
+            p.cr4de_role === "analist_2"
         )
       );
     }
@@ -115,68 +122,95 @@ export default function RiskFilesView({
       runningFilter = runningFilter.map((rf) => ({
         ...rf,
         participants: rf.participants.filter(
-          (p) => p.cr4de_contact.msdyn_portaltermsagreementdate !== null || p.cr4de_contact.admin
+          (p) =>
+            p.cr4de_contact.msdyn_portaltermsagreementdate !== null ||
+            p.cr4de_contact.admin
         ),
       }));
     }
 
     if (specialFilters.DONE_1) {
       runningFilter = runningFilter.filter((rf) =>
-        rf.participants.some((p) => p.cr4de_role === "expert" && p.cr4de_validation_finished)
+        rf.participants.some(
+          (p) => p.cr4de_role === "expert" && p.cr4de_validation_finished
+        )
       );
     }
 
     if (specialFilters.NONE_2A) {
       runningFilter = runningFilter.filter(
-        (rf) => !rf.participants.some((p) => p.cr4de_role === "expert" && p.cr4de_direct_analysis_finished)
+        (rf) =>
+          !rf.participants.some(
+            (p) => p.cr4de_role === "expert" && p.cr4de_direct_analysis_finished
+          )
       );
     }
 
     if (specialFilters.ONE_2A) {
       runningFilter = runningFilter.filter((rf) =>
-        rf.participants.some((p) => p.cr4de_role === "expert" && p.cr4de_direct_analysis_finished)
+        rf.participants.some(
+          (p) => p.cr4de_role === "expert" && p.cr4de_direct_analysis_finished
+        )
       );
     }
 
     if (specialFilters.DONE_2A) {
       runningFilter = runningFilter.filter((rf) =>
-        rf.participants.every((p) => p.cr4de_role !== "expert" || p.cr4de_direct_analysis_finished)
+        rf.participants.every(
+          (p) => p.cr4de_role !== "expert" || p.cr4de_direct_analysis_finished
+        )
       );
     }
 
     if (specialFilters.NONE_2B) {
       runningFilter = runningFilter.filter(
-        (rf) => !rf.participants.some((p) => p.cr4de_role === "expert" && p.cr4de_cascade_analysis_finished)
+        (rf) =>
+          !rf.participants.some(
+            (p) =>
+              p.cr4de_role === "expert" && p.cr4de_cascade_analysis_finished
+          )
       );
     }
 
     if (specialFilters.ONE_2B) {
       runningFilter = runningFilter.filter((rf) =>
-        rf.participants.some((p) => p.cr4de_role === "expert" && p.cr4de_cascade_analysis_finished)
+        rf.participants.some(
+          (p) => p.cr4de_role === "expert" && p.cr4de_cascade_analysis_finished
+        )
       );
     }
 
     if (specialFilters.DONE_2B) {
       runningFilter = runningFilter.filter((rf) =>
-        rf.participants.every((p) => p.cr4de_role !== "expert" || p.cr4de_cascade_analysis_finished)
+        rf.participants.every(
+          (p) => p.cr4de_role !== "expert" || p.cr4de_cascade_analysis_finished
+        )
       );
     }
 
     if (specialFilters.PROBLEMATIC) {
       runningFilter = runningFilter.filter(
-        (rf) => rf.participants.filter((p) => p.cr4de_role === "expert" && p.cr4de_validation_finished).length < 2
+        (rf) =>
+          rf.participants.filter(
+            (p) => p.cr4de_role === "expert" && p.cr4de_validation_finished
+          ).length < 2
       );
     }
 
     if (!specialFilters.SHOW_TEST) {
-      runningFilter = runningFilter.filter((rf) => rf.cr4de_title.indexOf("Test") < 0);
+      runningFilter = runningFilter.filter(
+        (rf) => rf.cr4de_title.indexOf("Test") < 0
+      );
     }
 
     setFilteredRiskFiles(runningFilter);
   };
 
   useEffect(() => {
-    localStorage.setItem("BNRA_RiskFile_Filters", JSON.stringify(specialFilters));
+    localStorage.setItem(
+      "BNRA_RiskFile_Filters",
+      JSON.stringify(specialFilters)
+    );
   }, [specialFilters]);
 
   useEffect(() => {
@@ -216,11 +250,21 @@ export default function RiskFilesView({
       >
         <Tooltip title="Select all">
           <ListItemIcon sx={{ alignSelf: "flex-start" }}>
-            <Checkbox edge="start" checked={allSelected} tabIndex={-1} disableRipple onClick={() => selectAll()} />
+            <Checkbox
+              edge="start"
+              checked={allSelected}
+              tabIndex={-1}
+              disableRipple
+              onClick={() => selectAll()}
+            />
           </ListItemIcon>
         </Tooltip>
         <Stack direction="column" sx={{ width: "100%", mr: 4 }}>
-          <ContactFilterField filter={filter || ""} setFilter={setFilter} count={filteredRiskFiles.length} />
+          <ContactFilterField
+            filter={filter || ""}
+            setFilter={setFilter}
+            count={filteredRiskFiles.length}
+          />
           <Grid container sx={{ mt: 1 }} rowGap={2}>
             <Grid item xs={12} sm={6} md={4}>
               <FormControlLabel
@@ -231,7 +275,9 @@ export default function RiskFilesView({
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
               <FormControlLabel
-                control={<Checkbox checked={specialFilters.MY_RISK_FILES_BACKUP} />}
+                control={
+                  <Checkbox checked={specialFilters.MY_RISK_FILES_BACKUP} />
+                }
                 label="Show my risk files only (backup)"
                 onClick={() => toggleSpecialFilter("MY_RISK_FILES_BACKUP")}
               />
@@ -319,7 +365,12 @@ export default function RiskFilesView({
       <Virtuoso
         useWindowScroll
         data={filteredRiskFiles}
-        itemContent={(index, riskFile) => <RiskFileListItem riskFile={riskFile} selectRiskFile={selectRiskFile} />}
+        itemContent={(index, riskFile) => (
+          <RiskFileListItem
+            riskFile={riskFile}
+            selectRiskFile={selectRiskFile}
+          />
+        )}
       />
 
       {/* <Menu

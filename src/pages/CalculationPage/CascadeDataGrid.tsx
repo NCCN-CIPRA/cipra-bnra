@@ -4,27 +4,17 @@ import {
   GridRowsProp,
   GridColDef,
   GridValueFormatterParams,
-  GRID_CHECKBOX_SELECTION_COL_DEF,
-  GridHeaderCheckbox,
   GridCellCheckboxRenderer,
   GridEventListener,
-  GridRowSelectionModel,
-  GridCallbackDetails,
-  GridRowParams,
-  MuiEvent,
-  useGridApiEventHandler,
   useGridApiRef,
 } from "@mui/x-data-grid";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { getMoneyString } from "../../functions/Impact";
 import {
   Box,
   Accordion,
   AccordionActions,
   AccordionDetails,
   AccordionSummary,
-  Checkbox,
-  FormControlLabel,
   FormGroup,
   Typography,
 } from "@mui/material";
@@ -61,7 +51,7 @@ const columns: GridColDef[] = [
     resizable: false,
     sortable: false,
     filterable: false,
-    // @ts-ignore
+    // @ts-expect-error it does
     aggregable: false,
     disableColumnMenu: true,
     disableReorder: true,
@@ -71,7 +61,11 @@ const columns: GridColDef[] = [
   },
 ];
 
-export default function CascadeDataGrid({ data }: { data: RiskCalculation[] | null }) {
+export default function CascadeDataGrid({
+  data,
+}: {
+  data: RiskCalculation[] | null;
+}) {
   const api = useAPI();
   const [rows, setRows] = useState<GridRowsProp | null>(null);
   // const [worstCase, setWorstCase] = useState(false);
@@ -79,9 +73,7 @@ export default function CascadeDataGrid({ data }: { data: RiskCalculation[] | nu
   const apiRef = useGridApiRef();
 
   const handleRowCheck: GridEventListener<"rowSelectionCheckboxChange"> = (
-    params, // GridRowSelectionCheckboxParams
-    event, // MuiEvent<React.ChangeEvent<HTMLElement>>
-    details // GridCallbackDetails
+    params // GridRowSelectionCheckboxParams
   ) => {
     if (!rows) return;
 
@@ -133,7 +125,10 @@ export default function CascadeDataGrid({ data }: { data: RiskCalculation[] | nu
   useEffect(() => {
     if (!rows) return;
 
-    return apiRef.current.subscribeEvent("rowSelectionCheckboxChange", handleRowCheck);
+    return apiRef.current.subscribeEvent(
+      "rowSelectionCheckboxChange",
+      handleRowCheck
+    );
   }, [rows]);
 
   return (

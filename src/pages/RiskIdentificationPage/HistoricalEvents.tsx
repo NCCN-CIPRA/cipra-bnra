@@ -1,8 +1,11 @@
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
-import { HistoricalEvent, unwrap, wrap } from "../../functions/historicalEvents";
+import {
+  HistoricalEvent,
+  unwrap,
+  wrap,
+} from "../../functions/historicalEvents";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { colors } from "../../functions/getCategoryColor";
-import HistoricalEventsTable from "../../components/HistoricalEventsTable";
 import useAPI from "../../hooks/useAPI";
 import { useEffect, useState } from "react";
 import { LoadingButton } from "@mui/lab";
@@ -32,20 +35,27 @@ export default function HistoricalEvents({
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(-1);
-  const [events, setEvents] = useState(unwrap(riskFile.cr4de_historical_events));
+  const [events, setEvents] = useState(
+    unwrap(riskFile.cr4de_historical_events)
+  );
   const [location, setLocation] = useState<string>("");
   const [time, setTime] = useState<string>("");
   const [description, setDescription] = useState<string>("");
 
   useEffect(() => setIsEditing(editing >= 0), [editing]);
 
-  useEffect(() => setEvents(unwrap(riskFile.cr4de_historical_events)), [riskFile]);
+  useEffect(
+    () => setEvents(unwrap(riskFile.cr4de_historical_events)),
+    [riskFile]
+  );
 
   const colorList = Object.values(colors);
 
   const handleEdit = (event: HistoricalEvent, index: number) => {
     if (isEditingOther) {
-      window.alert("You are already editing another section. Please close this section before editing another.");
+      window.alert(
+        "You are already editing another section. Please close this section before editing another."
+      );
     } else {
       setEditing(index);
       setLocation(event.location);
@@ -77,7 +87,10 @@ export default function HistoricalEvents({
   };
 
   return (
-    <Box sx={{ display: "flex", rowGap: 3, flexDirection: "column", mt: 2, ml: 0 }} className="historical">
+    <Box
+      sx={{ display: "flex", rowGap: 3, flexDirection: "column", mt: 2, ml: 0 }}
+      className="historical"
+    >
       {events.map((e, i) => {
         return (
           <Box
@@ -103,7 +116,12 @@ export default function HistoricalEvents({
                 }}
               >
                 {editing === i ? (
-                  <TextField size="small" defaultValue={time} label="Time" onChange={(e) => setTime(e.target.value)} />
+                  <TextField
+                    size="small"
+                    defaultValue={time}
+                    label="Time"
+                    onChange={(e) => setTime(e.target.value)}
+                  />
                 ) : (
                   <Typography variant="subtitle2" sx={{}}>
                     {e.time}
@@ -141,7 +159,10 @@ export default function HistoricalEvents({
               )}
             </Stack>
             {mode === "edit" && (editing < 0 || editing === i) && (
-              <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
+              <Stack
+                direction="row"
+                sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}
+              >
                 {editing !== i && (
                   <>
                     <Button onClick={() => handleEdit(e, i)}>Edit</Button>
@@ -164,14 +185,22 @@ export default function HistoricalEvents({
                 )}
                 {editing === i && (
                   <>
-                    <LoadingButton loading={saving} onClick={() => saveRiskFile(i)}>
+                    <LoadingButton
+                      loading={saving}
+                      onClick={() => saveRiskFile(i)}
+                    >
                       Save
                     </LoadingButton>
                     <Box sx={{ flex: 1 }} />
                     <Button
                       color="warning"
                       onClick={() => {
-                        if (window.confirm("Are you sure you wish to discard your changes?")) setEditing(-1);
+                        if (
+                          window.confirm(
+                            "Are you sure you wish to discard your changes?"
+                          )
+                        )
+                          setEditing(-1);
                       }}
                     >
                       Discard Changes

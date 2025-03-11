@@ -21,7 +21,9 @@ if (window.location.href.match(/localhost:3000/)) {
   patchFetch();
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+const root = ReactDOM.createRoot(
+  document.getElementById("root") as HTMLElement
+);
 
 root.render(
   <React.StrictMode>
@@ -39,10 +41,10 @@ root.render(
             src="https://bnra.powerappsportals.com/__dev/localapi"
             style={{ display: "none" }}
             onLoad={() => {
-              // @ts-expect-error
+              // @ts-expect-error window
               window.fetch.loaded = true;
 
-              // @ts-expect-error
+              // @ts-expect-error window
               window.frames.localApi.postMessage("getUserInfo", "*");
             }}
           />

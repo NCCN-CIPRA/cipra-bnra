@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { CssBaseline, Box, Toolbar, Stack } from "@mui/material";
+import { CssBaseline, Box, Toolbar } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import AppContext from "../functions/AppContext";
 import SideDrawer from "../components/SideDrawer";
 import TitleBar from "../components/TitleBar";
-import BreadcrumbNavigation, { Breadcrumb } from "../components/BreadcrumbNavigation";
+import BreadcrumbNavigation, {
+  Breadcrumb,
+} from "../components/BreadcrumbNavigation";
 import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
 import satisfies from "../types/satisfies";
 
@@ -27,14 +29,12 @@ export default function BasePage() {
       url: "/",
     },
   ]);
-  const [bottomBarHeight, setBottomBarHeight] = useState(0);
 
   return (
     <AppContext.Provider
       value={{
         setPageTitle,
         setBreadcrumbs,
-        setBottomBarHeight,
       }}
     >
       <CssBaseline />
@@ -44,7 +44,12 @@ export default function BasePage() {
         title={pageTitle}
         onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
       />
-      <SideDrawer user={user} open={drawerOpen} width={drawerWidth} onClose={() => setDrawerOpen(false)} />
+      <SideDrawer
+        user={user}
+        open={drawerOpen}
+        width={drawerWidth}
+        onClose={() => setDrawerOpen(false)}
+      />
       {/* <Box sx={{ display: "flex", flexFlow: "column nowrap", minHeight: "100vh", mb: `${bottomBarHeight}px` }}> */}
       <Box sx={{ flexGrow: 1 }}>
         <Toolbar />

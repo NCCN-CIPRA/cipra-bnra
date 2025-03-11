@@ -10,10 +10,17 @@ import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import { DiscussionRequired } from "../../types/DiscussionRequired";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import { DVContact } from "../../types/dataverse/DVContact";
-import { DVDirectAnalysis, FieldQuality } from "../../types/dataverse/DVDirectAnalysis";
+import {
+  DVDirectAnalysis,
+  FieldQuality,
+} from "../../types/dataverse/DVDirectAnalysis";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import { DVRiskFile, DiscussionsRequired, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import {
+  DVRiskFile,
+  DiscussionsRequired,
+  RISK_TYPE,
+} from "../../types/dataverse/DVRiskFile";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import {
   Paper,
@@ -25,7 +32,6 @@ import {
   TableBody,
   Toolbar,
   Typography,
-  CircularProgress,
   Checkbox,
   Rating,
   Chip,
@@ -62,7 +68,9 @@ export default function InputOverviewTab({
     .filter((p) => p.cr4de_role === "expert")
     .map((p) => ({
       participant: p,
-      directAnalysis: directAnalyses.find((da) => da._cr4de_expert_value === p._cr4de_contact_value),
+      directAnalysis: directAnalyses.find(
+        (da) => da._cr4de_expert_value === p._cr4de_contact_value
+      ),
     }));
   const cInput = cascades.map((c) => ({
     cascade: c,
@@ -72,7 +80,8 @@ export default function InputOverviewTab({
         participant: p,
         cascadeAnalysis: cascadeAnalyses.find(
           (ca) =>
-            ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid && ca._cr4de_expert_value === p._cr4de_contact_value
+            ca._cr4de_cascade_value === c.cr4de_bnrariskcascadeid &&
+            ca._cr4de_expert_value === p._cr4de_contact_value
         ),
       })),
   }));
@@ -103,19 +112,32 @@ export default function InputOverviewTab({
     <>
       {riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING && (
         <Paper>
-          <Toolbar disableGutters sx={{ px: 2, borderBottom: "1px solid #eee" }}>
-            <Typography sx={{ flex: "1 1 100%" }} variant="h6" id="tableTitle" component="div">
+          <Toolbar
+            disableGutters
+            sx={{ px: 2, borderBottom: "1px solid #eee" }}
+          >
+            <Typography
+              sx={{ flex: "1 1 100%" }}
+              variant="h6"
+              id="tableTitle"
+              component="div"
+            >
               Direct Analysis
             </Typography>
           </Toolbar>
           <TableContainer>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
+            <Table
+              sx={{ minWidth: 650 }}
+              aria-label="simple table"
+              size="small"
+            >
               <TableHead>
                 <TableRow>
                   <TableCell>Parameter</TableCell>
-                  {input.map((i) => (
-                    <TableCell align="center">
-                      {i.participant.cr4de_contact.firstname} {i.participant.cr4de_contact.lastname}
+                  {input.map((i, index) => (
+                    <TableCell key={index} align="center">
+                      {i.participant.cr4de_contact.firstname}{" "}
+                      {i.participant.cr4de_contact.lastname}
                     </TableCell>
                   ))}
                   <TableCell align="center">Divergence</TableCell>
@@ -124,7 +146,11 @@ export default function InputOverviewTab({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {[SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].map((scenario) => (
+                {[
+                  SCENARIOS.CONSIDERABLE,
+                  SCENARIOS.MAJOR,
+                  SCENARIOS.EXTREME,
+                ].map((scenario) => (
                   <>
                     <TableRow>
                       <TableCell
@@ -142,14 +168,21 @@ export default function InputOverviewTab({
                       const qualiName = getQualiFieldName(scenario, section);
 
                       return (
-                        <TableRow>
+                        <TableRow key={section.label}>
                           <TableCell>{section.label}</TableCell>
-                          {input.map((i) => {
-                            if (i.participant.cr4de_direct_analysis_finished === null)
-                              return <TableCell align="center">/</TableCell>;
+                          {input.map((i, index) => {
+                            if (
+                              i.participant.cr4de_direct_analysis_finished ===
+                              null
+                            )
+                              return (
+                                <TableCell key={index} align="center">
+                                  /
+                                </TableCell>
+                              );
 
                             return (
-                              <TableCell align="center">
+                              <TableCell key={index} align="center">
                                 {(i.directAnalysis?.cr4de_quality ?? {})[
                                   `${section.name}_${SCENARIO_PARAMS[scenario].prefix}` as keyof FieldQuality
                                 ] ? (
@@ -176,7 +209,8 @@ export default function InputOverviewTab({
                                     directAnalyses?.filter((da) =>
                                       participants?.some(
                                         (p) =>
-                                          p._cr4de_contact_value === da._cr4de_expert_value &&
+                                          p._cr4de_contact_value ===
+                                            da._cr4de_expert_value &&
                                           p.cr4de_direct_analysis_finished
                                       )
                                     ),
@@ -188,7 +222,8 @@ export default function InputOverviewTab({
                           <TableCell align="center">
                             <Checkbox
                               checked={
-                                riskFile[qualiName as keyof DVRiskFile] !== null &&
+                                riskFile[qualiName as keyof DVRiskFile] !==
+                                  null &&
                                 riskFile[qualiName as keyof DVRiskFile] !== ""
                               }
                               size="small"
@@ -199,17 +234,26 @@ export default function InputOverviewTab({
                             {riskFile.cr4de_discussion_required?.[
                               `${section.name}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
                             ] === DiscussionRequired.REQUIRED && (
-                              <Chip label={DiscussionRequired.REQUIRED} color="error" />
+                              <Chip
+                                label={DiscussionRequired.REQUIRED}
+                                color="error"
+                              />
                             )}
                             {riskFile.cr4de_discussion_required?.[
                               `${section.name}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
                             ] === DiscussionRequired.PREFERRED && (
-                              <Chip label={DiscussionRequired.PREFERRED} color="warning" />
+                              <Chip
+                                label={DiscussionRequired.PREFERRED}
+                                color="warning"
+                              />
                             )}
                             {riskFile.cr4de_discussion_required?.[
                               `${section.name}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
                             ] === DiscussionRequired.NOT_NECESSARY && (
-                              <Chip label={DiscussionRequired.NOT_NECESSARY} color="success" />
+                              <Chip
+                                label={DiscussionRequired.NOT_NECESSARY}
+                                color="success"
+                              />
                             )}
                             {riskFile.cr4de_discussion_required?.[
                               `${section.name}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
@@ -233,7 +277,12 @@ export default function InputOverviewTab({
 
       <Paper sx={{ mt: 8 }}>
         <Toolbar disableGutters sx={{ px: 2, borderBottom: "1px solid #eee" }}>
-          <Typography sx={{ flex: "1 1 100%" }} variant="h6" id="tableTitle" component="div">
+          <Typography
+            sx={{ flex: "1 1 100%" }}
+            variant="h6"
+            id="tableTitle"
+            component="div"
+          >
             Cascade Analysis
           </Typography>
         </Toolbar>
@@ -242,9 +291,10 @@ export default function InputOverviewTab({
             <TableHead>
               <TableRow>
                 <TableCell>Risk</TableCell>
-                {input.map((i) => (
-                  <TableCell align="center">
-                    {i.participant.cr4de_contact.firstname} {i.participant.cr4de_contact.lastname}
+                {input.map((i, index) => (
+                  <TableCell key={index} align="center">
+                    {i.participant.cr4de_contact.firstname}{" "}
+                    {i.participant.cr4de_contact.lastname}
                   </TableCell>
                 ))}
                 <TableCell align="center">Divergence</TableCell>
@@ -266,17 +316,26 @@ export default function InputOverviewTab({
                   </TableCell>
                 </TableRow>
               )}
-              {causes.map((input) => (
-                <TableRow>
-                  <TableCell>{input.cascade.cr4de_cause_hazard.cr4de_title}</TableCell>
-                  {input.cascadeAnalyses.map((e) => {
+              {causes.map((input, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    {input.cascade.cr4de_cause_hazard.cr4de_title}
+                  </TableCell>
+                  {input.cascadeAnalyses.map((e, eindex) => {
                     if (!e.cascadeAnalysis) {
-                      return <TableCell align="center">-</TableCell>;
+                      return (
+                        <TableCell key={eindex} align="center">
+                          -
+                        </TableCell>
+                      );
                     }
                     return (
-                      <TableCell align="center">
+                      <TableCell key={eindex} align="center">
                         {e.cascadeAnalysis?.cr4de_quality ? (
-                          <Rating size="small" value={e.cascadeAnalysis?.cr4de_quality} />
+                          <Rating
+                            size="small"
+                            value={e.cascadeAnalysis?.cr4de_quality}
+                          />
                         ) : (
                           "?"
                         )}
@@ -287,34 +346,54 @@ export default function InputOverviewTab({
                     {100 *
                       getCADivergence(
                         input.cascadeAnalyses
-                          .filter((i) => i.cascadeAnalysis && i.participant.cr4de_cascade_analysis_finished)
+                          .filter(
+                            (i) =>
+                              i.cascadeAnalysis &&
+                              i.participant.cr4de_cascade_analysis_finished
+                          )
                           .map((p) => p.cascadeAnalysis) as DVCascadeAnalysis[]
                       )}
                     %
                   </TableCell>
                   <TableCell align="center">
                     <Checkbox
-                      checked={input.cascade.cr4de_quali !== null && input.cascade.cr4de_quali !== ""}
+                      checked={
+                        input.cascade.cr4de_quali !== null &&
+                        input.cascade.cr4de_quali !== ""
+                      }
                       size="small"
                       readOnly
                     />
                   </TableCell>
                   <TableCell align="center">
-                    {input.cascade.cr4de_discussion_required === DiscussionRequired.REQUIRED && (
+                    {input.cascade.cr4de_discussion_required ===
+                      DiscussionRequired.REQUIRED && (
                       <Chip label={DiscussionRequired.REQUIRED} color="error" />
                     )}
-                    {input.cascade.cr4de_discussion_required === DiscussionRequired.PREFERRED && (
-                      <Chip label={DiscussionRequired.PREFERRED} color="warning" />
+                    {input.cascade.cr4de_discussion_required ===
+                      DiscussionRequired.PREFERRED && (
+                      <Chip
+                        label={DiscussionRequired.PREFERRED}
+                        color="warning"
+                      />
                     )}
-                    {input.cascade.cr4de_discussion_required === DiscussionRequired.NOT_NECESSARY && (
-                      <Chip label={DiscussionRequired.NOT_NECESSARY} color="success" />
+                    {input.cascade.cr4de_discussion_required ===
+                      DiscussionRequired.NOT_NECESSARY && (
+                      <Chip
+                        label={DiscussionRequired.NOT_NECESSARY}
+                        color="success"
+                      />
                     )}
-                    {input.cascade.cr4de_discussion_required == null && <Chip label="?" color="default" />}
+                    {input.cascade.cr4de_discussion_required == null && (
+                      <Chip label="?" color="default" />
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
               {causes.length > 0 &&
-                (attacks.length > 0 || catalyzedRisks.length > 0 || catalysingEffects.length > 0) && (
+                (attacks.length > 0 ||
+                  catalyzedRisks.length > 0 ||
+                  catalysingEffects.length > 0) && (
                   <TableRow>
                     <TableCell colSpan={1000}>&nbsp;</TableCell>
                   </TableRow>
@@ -328,22 +407,33 @@ export default function InputOverviewTab({
                       backgroundColor: "#eee",
                     }}
                   >
-                    {riskFile.cr4de_risk_type === RISK_TYPE.MANMADE && "Potential Attacks"}
-                    {riskFile.cr4de_risk_type === RISK_TYPE.EMERGING && "Catalyzed Risks"}
+                    {riskFile.cr4de_risk_type === RISK_TYPE.MANMADE &&
+                      "Potential Attacks"}
+                    {riskFile.cr4de_risk_type === RISK_TYPE.EMERGING &&
+                      "Catalyzed Risks"}
                   </TableCell>
                 </TableRow>
               )}
-              {attacks.map((input) => (
-                <TableRow>
-                  <TableCell>{input.cascade.cr4de_effect_hazard.cr4de_title}</TableCell>
-                  {input.cascadeAnalyses.map((e) => {
+              {attacks.map((input, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    {input.cascade.cr4de_effect_hazard.cr4de_title}
+                  </TableCell>
+                  {input.cascadeAnalyses.map((e, eindex) => {
                     if (!e.cascadeAnalysis) {
-                      return <TableCell align="center">-</TableCell>;
+                      return (
+                        <TableCell key={eindex} align="center">
+                          -
+                        </TableCell>
+                      );
                     }
                     return (
-                      <TableCell align="center">
+                      <TableCell key={eindex} align="center">
                         {e.cascadeAnalysis?.cr4de_quality ? (
-                          <Rating size="small" value={e.cascadeAnalysis?.cr4de_quality} />
+                          <Rating
+                            size="small"
+                            value={e.cascadeAnalysis?.cr4de_quality}
+                          />
                         ) : (
                           "?"
                         )}
@@ -361,22 +451,36 @@ export default function InputOverviewTab({
                   </TableCell>
                   <TableCell align="center">
                     <Checkbox
-                      checked={input.cascade.cr4de_quali_cause !== null && input.cascade.cr4de_quali_cause !== ""}
+                      checked={
+                        input.cascade.cr4de_quali_cause !== null &&
+                        input.cascade.cr4de_quali_cause !== ""
+                      }
                       size="small"
                       readOnly
                     />
                   </TableCell>
                   <TableCell align="center">
-                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.REQUIRED && (
+                    {input.cascade.cr4de_discussion_required_cause ===
+                      DiscussionRequired.REQUIRED && (
                       <Chip label={DiscussionRequired.REQUIRED} color="error" />
                     )}
-                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.PREFERRED && (
-                      <Chip label={DiscussionRequired.PREFERRED} color="warning" />
+                    {input.cascade.cr4de_discussion_required_cause ===
+                      DiscussionRequired.PREFERRED && (
+                      <Chip
+                        label={DiscussionRequired.PREFERRED}
+                        color="warning"
+                      />
                     )}
-                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.NOT_NECESSARY && (
-                      <Chip label={DiscussionRequired.NOT_NECESSARY} color="success" />
+                    {input.cascade.cr4de_discussion_required_cause ===
+                      DiscussionRequired.NOT_NECESSARY && (
+                      <Chip
+                        label={DiscussionRequired.NOT_NECESSARY}
+                        color="success"
+                      />
                     )}
-                    {input.cascade.cr4de_discussion_required_cause == null && <Chip label="?" color="default" />}
+                    {input.cascade.cr4de_discussion_required_cause == null && (
+                      <Chip label="?" color="default" />
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -385,17 +489,26 @@ export default function InputOverviewTab({
                   <TableCell colSpan={1000}>&nbsp;</TableCell>
                 </TableRow>
               )}
-              {catalyzedRisks.map((input) => (
-                <TableRow>
-                  <TableCell>{input.cascade.cr4de_effect_hazard.cr4de_title}</TableCell>
-                  {input.cascadeAnalyses.map((e) => {
+              {catalyzedRisks.map((input, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    {input.cascade.cr4de_effect_hazard.cr4de_title}
+                  </TableCell>
+                  {input.cascadeAnalyses.map((e, eindex) => {
                     if (!e.cascadeAnalysis) {
-                      return <TableCell align="center">-</TableCell>;
+                      return (
+                        <TableCell key={eindex} align="center">
+                          -
+                        </TableCell>
+                      );
                     }
                     return (
-                      <TableCell align="center">
+                      <TableCell key={eindex} align="center">
                         {e.cascadeAnalysis?.cr4de_quality ? (
-                          <Rating size="small" value={e.cascadeAnalysis?.cr4de_quality} />
+                          <Rating
+                            size="small"
+                            value={e.cascadeAnalysis?.cr4de_quality}
+                          />
                         ) : (
                           "?"
                         )}
@@ -405,22 +518,36 @@ export default function InputOverviewTab({
                   <TableCell align="center">-</TableCell>
                   <TableCell align="center">
                     <Checkbox
-                      checked={input.cascade.cr4de_quali_cause !== null && input.cascade.cr4de_quali_cause !== ""}
+                      checked={
+                        input.cascade.cr4de_quali_cause !== null &&
+                        input.cascade.cr4de_quali_cause !== ""
+                      }
                       size="small"
                       readOnly
                     />
                   </TableCell>
                   <TableCell align="center">
-                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.REQUIRED && (
+                    {input.cascade.cr4de_discussion_required_cause ===
+                      DiscussionRequired.REQUIRED && (
                       <Chip label={DiscussionRequired.REQUIRED} color="error" />
                     )}
-                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.PREFERRED && (
-                      <Chip label={DiscussionRequired.PREFERRED} color="warning" />
+                    {input.cascade.cr4de_discussion_required_cause ===
+                      DiscussionRequired.PREFERRED && (
+                      <Chip
+                        label={DiscussionRequired.PREFERRED}
+                        color="warning"
+                      />
                     )}
-                    {input.cascade.cr4de_discussion_required_cause === DiscussionRequired.NOT_NECESSARY && (
-                      <Chip label={DiscussionRequired.NOT_NECESSARY} color="success" />
+                    {input.cascade.cr4de_discussion_required_cause ===
+                      DiscussionRequired.NOT_NECESSARY && (
+                      <Chip
+                        label={DiscussionRequired.NOT_NECESSARY}
+                        color="success"
+                      />
                     )}
-                    {input.cascade.cr4de_discussion_required_cause == null && <Chip label="?" color="default" />}
+                    {input.cascade.cr4de_discussion_required_cause == null && (
+                      <Chip label="?" color="default" />
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -442,17 +569,26 @@ export default function InputOverviewTab({
                   </TableCell>
                 </TableRow>
               )}
-              {catalysingEffects.map((input) => (
-                <TableRow>
-                  <TableCell>{input.cascade.cr4de_cause_hazard.cr4de_title}</TableCell>
-                  {input.cascadeAnalyses.map((e) => {
+              {catalysingEffects.map((input, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    {input.cascade.cr4de_cause_hazard.cr4de_title}
+                  </TableCell>
+                  {input.cascadeAnalyses.map((e, eindex) => {
                     if (!e.cascadeAnalysis) {
-                      return <TableCell align="center">-</TableCell>;
+                      return (
+                        <TableCell key={eindex} align="center">
+                          -
+                        </TableCell>
+                      );
                     }
                     return (
-                      <TableCell align="center">
+                      <TableCell key={eindex} align="center">
                         {e.cascadeAnalysis?.cr4de_quality ? (
-                          <Rating size="small" value={e.cascadeAnalysis?.cr4de_quality} />
+                          <Rating
+                            size="small"
+                            value={e.cascadeAnalysis?.cr4de_quality}
+                          />
                         ) : (
                           "?"
                         )}
@@ -460,7 +596,9 @@ export default function InputOverviewTab({
                     );
                   })}
                   <TableCell align="center">
-                    {input.cascade.cr4de_cause_hazard.cr4de_title.indexOf("Climate") >= 0
+                    {input.cascade.cr4de_cause_hazard.cr4de_title.indexOf(
+                      "Climate"
+                    ) >= 0
                       ? `${
                           100 *
                           avg([
@@ -468,7 +606,8 @@ export default function InputOverviewTab({
                               directAnalyses.filter((da) =>
                                 participants.some(
                                   (p) =>
-                                    p._cr4de_contact_value === da._cr4de_expert_value &&
+                                    p._cr4de_contact_value ===
+                                      da._cr4de_expert_value &&
                                     p.cr4de_cascade_analysis_finished
                                 )
                               ),
@@ -479,7 +618,8 @@ export default function InputOverviewTab({
                               directAnalyses.filter((da) =>
                                 participants.some(
                                   (p) =>
-                                    p._cr4de_contact_value === da._cr4de_expert_value &&
+                                    p._cr4de_contact_value ===
+                                      da._cr4de_expert_value &&
                                     p.cr4de_cascade_analysis_finished
                                 )
                               ),
@@ -490,7 +630,8 @@ export default function InputOverviewTab({
                               directAnalyses.filter((da) =>
                                 participants.some(
                                   (p) =>
-                                    p._cr4de_contact_value === da._cr4de_expert_value &&
+                                    p._cr4de_contact_value ===
+                                      da._cr4de_expert_value &&
                                     p.cr4de_cascade_analysis_finished
                                 )
                               ),
@@ -503,22 +644,36 @@ export default function InputOverviewTab({
                   </TableCell>
                   <TableCell align="center">
                     <Checkbox
-                      checked={input.cascade.cr4de_quali !== null && input.cascade.cr4de_quali !== ""}
+                      checked={
+                        input.cascade.cr4de_quali !== null &&
+                        input.cascade.cr4de_quali !== ""
+                      }
                       size="small"
                       readOnly
                     />
                   </TableCell>
                   <TableCell align="center">
-                    {input.cascade.cr4de_discussion_required === DiscussionRequired.REQUIRED && (
+                    {input.cascade.cr4de_discussion_required ===
+                      DiscussionRequired.REQUIRED && (
                       <Chip label={DiscussionRequired.REQUIRED} color="error" />
                     )}
-                    {input.cascade.cr4de_discussion_required === DiscussionRequired.PREFERRED && (
-                      <Chip label={DiscussionRequired.PREFERRED} color="warning" />
+                    {input.cascade.cr4de_discussion_required ===
+                      DiscussionRequired.PREFERRED && (
+                      <Chip
+                        label={DiscussionRequired.PREFERRED}
+                        color="warning"
+                      />
                     )}
-                    {input.cascade.cr4de_discussion_required === DiscussionRequired.NOT_NECESSARY && (
-                      <Chip label={DiscussionRequired.NOT_NECESSARY} color="success" />
+                    {input.cascade.cr4de_discussion_required ===
+                      DiscussionRequired.NOT_NECESSARY && (
+                      <Chip
+                        label={DiscussionRequired.NOT_NECESSARY}
+                        color="success"
+                      />
                     )}
-                    {input.cascade.cr4de_discussion_required == null && <Chip label="?" color="default" />}
+                    {input.cascade.cr4de_discussion_required == null && (
+                      <Chip label="?" color="default" />
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

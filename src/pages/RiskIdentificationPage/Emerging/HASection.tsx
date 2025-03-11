@@ -12,7 +12,6 @@ export default function HASection({
   mode,
   attachments = null,
   updateAttachments = null,
-  isEditingOther,
   setIsEditing,
   reloadRiskFile,
   allRisks,
@@ -35,7 +34,7 @@ export default function HASection({
 
   useEffect(() => setIsEditing(editing), [editing]);
 
-  const saveRiskFile = async (reset = false) => {
+  const saveRiskFile = async () => {
     setSaving(true);
     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
       cr4de_horizon_analysis: ha,
@@ -48,14 +47,6 @@ export default function HASection({
     // setOpen(false);
   };
 
-  const startEdit = () => {
-    if (isEditingOther) {
-      window.alert("You are already editing another section. Please close this section before editing another.");
-    } else {
-      setEditing(true);
-    }
-  };
-
   return (
     <>
       {!editing && (
@@ -66,7 +57,9 @@ export default function HASection({
         />
       )}
       {editing && (
-        <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+        <Box
+          sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+        >
           <TextInputBox
             limitedOptions
             initialValue={ha}
@@ -78,7 +71,10 @@ export default function HASection({
         </Box>
       )}
       {mode === "edit" && (
-        <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
+        <Stack
+          direction="row"
+          sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}
+        >
           {!editing && (
             <>
               <Button onClick={() => setEditing(true)}>Edit</Button>
@@ -94,7 +90,12 @@ export default function HASection({
               <Button
                 color="warning"
                 onClick={() => {
-                  if (window.confirm("Are you sure you wish to discard your changes?")) setEditing(false);
+                  if (
+                    window.confirm(
+                      "Are you sure you wish to discard your changes?"
+                    )
+                  )
+                    setEditing(false);
                 }}
               >
                 Discard Changes

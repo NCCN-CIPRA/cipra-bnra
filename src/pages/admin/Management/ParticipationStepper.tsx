@@ -1,7 +1,7 @@
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { SelectableContact } from "./Selectables";
-import { Step, StepLabel, Stepper, Tooltip, Button } from "@mui/material";
+import { Step, StepLabel, Stepper, Tooltip } from "@mui/material";
 
 export default function ParticipationStepper({
   contact,
@@ -45,14 +45,22 @@ export default function ParticipationStepper({
         <>
           <Step active={activeStep === 2} completed={activeStep > 2}>
             <Tooltip
-              title={activeStep > 2 ? "The expert has finished step 2A" : "The expert has not yet finished step 2A"}
+              title={
+                activeStep > 2
+                  ? "The expert has finished step 2A"
+                  : "The expert has not yet finished step 2A"
+              }
             >
               <StepLabel icon={"2A"}></StepLabel>
             </Tooltip>
           </Step>
           <Step active={activeStep === 3} completed={activeStep > 3}>
             <Tooltip
-              title={activeStep > 3 ? "The expert has finished step 2B" : "The expert has not yet finished step 2B"}
+              title={
+                activeStep > 3
+                  ? "The expert has finished step 2B"
+                  : "The expert has not yet finished step 2B"
+              }
             >
               <StepLabel icon={"2B"}></StepLabel>
             </Tooltip>
@@ -65,7 +73,11 @@ export default function ParticipationStepper({
           </Step>
           <Step active={activeStep === 3} completed={activeStep > 3}>
             <Tooltip
-              title={activeStep > 3 ? "The expert has finished step 2" : "The expert has not yet finished step 2"}
+              title={
+                activeStep > 3
+                  ? "The expert has finished step 2"
+                  : "The expert has not yet finished step 2"
+              }
             >
               <StepLabel icon={"2"}></StepLabel>
             </Tooltip>

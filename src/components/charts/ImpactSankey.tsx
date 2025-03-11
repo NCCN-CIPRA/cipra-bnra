@@ -22,17 +22,14 @@ const ISankeyNode = ({
   height,
   index,
   payload,
-  containerWidth,
   totalImpact,
   totalNodes,
-  showComponents,
-  scenarioSuffix,
   fontSize,
   onClick,
-}: any) => {
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+any) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const scenarioLetter = scenarioSuffix[1];
 
   if (payload.depth <= 0) {
     return (
@@ -152,6 +149,7 @@ const ISankeyNode = ({
                     {t("Other effects")}:
                   </Typography>
 
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {payload.hidden.map((h: any) =>
                     h.cascade ? (
                       <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
@@ -213,10 +211,9 @@ const ISankeyNode = ({
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ISankeyLink = (props: any) => {
   const {
-    index,
-    targetRelativeY,
     sourceRelativeY,
     sourceX,
     sourceY,
@@ -314,7 +311,7 @@ export const SvgChart = ({
   const { t } = useTranslation();
   if (!riskFile || !cascades) return null;
 
-  let scenarioSuffix: string = getScenarioSuffix(scenario);
+  const scenarioSuffix: string = getScenarioSuffix(scenario);
 
   const effects = [
     {
@@ -333,7 +330,6 @@ export const SvgChart = ({
   ];
 
   let minI = 0;
-  const totI = effects.reduce((t, e) => t + e.i, 0);
 
   if (maxEffects !== null) {
     minI =
@@ -349,7 +345,7 @@ export const SvgChart = ({
     const Itot = effects.reduce((tot, e) => tot + e.i, 0.000000001);
 
     let cumulI = 0;
-    for (let e of effects.sort((a, b) => b.i - a.i)) {
+    for (const e of effects.sort((a, b) => b.i - a.i)) {
       cumulI += e.i / Itot;
 
       if (cumulI >= shownEffectPortion) {
@@ -359,6 +355,7 @@ export const SvgChart = ({
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nodes: any[] = [
     { name: t(`risk.${riskFile.cr4de_hazard_id}.name`, riskFile.cr4de_title) },
     ...effects.filter((c) => c.i >= minI),
@@ -366,9 +363,11 @@ export const SvgChart = ({
   if (minI >= 0)
     nodes.push({
       name: t("Other"),
-      hidden: effects.filter((e: any, i: number) => e.i < minI),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      hidden: effects.filter((e: any) => e.i < minI),
     });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const links: any[] = effects
     .filter((e) => e.i >= minI)
     .map((e, i: number) => ({
@@ -381,9 +380,11 @@ export const SvgChart = ({
       source: 0,
       target: nodes.length - 1,
       value: effects
-        .filter((e: any, i: number) => e.i < minI)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((e: any) => e.i < minI)
         .reduce((tot, e) => tot + e.i, 0.000000001),
-      hidden: effects.filter((e: any, i: number) => e.i < minI),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      hidden: effects.filter((e: any) => e.i < minI),
     });
 
   const data = {

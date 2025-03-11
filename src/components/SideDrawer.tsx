@@ -10,8 +10,7 @@ import {
   Box,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { Link, useOutletContext } from "react-router-dom";
-import { AuthPageContext } from "../pages/AuthPage";
+import { Link } from "react-router-dom";
 import { LoggedInUser } from "../hooks/useLoggedInUser";
 
 export default function SideDrawer({
@@ -46,7 +45,9 @@ export default function SideDrawer({
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/" onClick={onClose}>
               <ListItemIcon></ListItemIcon>
-              <ListItemText primary={t("sideDrawer.introduction", "Introduction")} />
+              <ListItemText
+                primary={t("sideDrawer.introduction", "Introduction")}
+              />
             </ListItemButton>
           </ListItem>
           {user?.roles.beReader && (
@@ -54,13 +55,24 @@ export default function SideDrawer({
               <ListItem disablePadding>
                 <ListItemButton component={Link} to="/risks" onClick={onClose}>
                   <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("sideDrawer.hazardCatalogue", "Hazard Catalogue")} />
+                  <ListItemText
+                    primary={t(
+                      "sideDrawer.hazardCatalogue",
+                      "Hazard Catalogue"
+                    )}
+                  />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>
-                <ListItemButton component={Link} to="/risks/matrix" onClick={onClose}>
+                <ListItemButton
+                  component={Link}
+                  to="/risks/matrix"
+                  onClick={onClose}
+                >
                   <ListItemIcon></ListItemIcon>
-                  <ListItemText primary={t("sideDrawer.riskMatrix", "Risk Matrix")} />
+                  <ListItemText
+                    primary={t("sideDrawer.riskMatrix", "Risk Matrix")}
+                  />
                 </ListItemButton>
               </ListItem>
               {/* {user.roles.expert && (
@@ -89,26 +101,51 @@ export default function SideDrawer({
                     </ListItemButton>
                   </ListItem> */}
                   <ListItem disablePadding>
-                    <ListItemButton component={Link} to="/analysis/calculator" onClick={onClose}>
+                    <ListItemButton
+                      component={Link}
+                      to="/analysis/calculator"
+                      onClick={onClose}
+                    >
                       <ListItemIcon></ListItemIcon>
-                      <ListItemText primary={t("sideDrawer.calculator", "Risk Calculator")} />
+                      <ListItemText
+                        primary={t("sideDrawer.calculator", "Risk Calculator")}
+                      />
                     </ListItemButton>
                   </ListItem>
                   <Divider />
                   <ListItem disablePadding>
-                    <ListItemButton component={Link} to="/admin/process" onClick={onClose}>
+                    <ListItemButton
+                      component={Link}
+                      to="/admin/process"
+                      onClick={onClose}
+                    >
                       <ListItemIcon></ListItemIcon>
-                      <ListItemText primary={t("sideDrawer.experts", "Expert Management")} />
+                      <ListItemText
+                        primary={t("sideDrawer.experts", "Expert Management")}
+                      />
                     </ListItemButton>
                   </ListItem>
                   <ListItem disablePadding>
-                    <ListItemButton component={Link} to="/admin/translations" onClick={onClose}>
+                    <ListItemButton
+                      component={Link}
+                      to="/admin/translations"
+                      onClick={onClose}
+                    >
                       <ListItemIcon></ListItemIcon>
-                      <ListItemText primary={t("sideDrawer.translations", "App Translation")} />
+                      <ListItemText
+                        primary={t(
+                          "sideDrawer.translations",
+                          "App Translation"
+                        )}
+                      />
                     </ListItemButton>
                   </ListItem>
                   <ListItem disablePadding>
-                    <ListItemButton component={Link} to="/admin/corrections" onClick={onClose}>
+                    <ListItemButton
+                      component={Link}
+                      to="/admin/corrections"
+                      onClick={onClose}
+                    >
                       <ListItemIcon></ListItemIcon>
                       <ListItemText primary={"Report Corrections"} />
                     </ListItemButton>
@@ -118,9 +155,18 @@ export default function SideDrawer({
               )}
               {user.roles.verified && (
                 <ListItem disablePadding>
-                  <ListItemButton component={Link} to="/learning" onClick={onClose}>
+                  <ListItemButton
+                    component={Link}
+                    to="/learning"
+                    onClick={onClose}
+                  >
                     <ListItemIcon></ListItemIcon>
-                    <ListItemText primary={t("sideDrawer.informationPortal", "Information Portal")} />
+                    <ListItemText
+                      primary={t(
+                        "sideDrawer.informationPortal",
+                        "Information Portal"
+                      )}
+                    />
                   </ListItemButton>
                 </ListItem>
               )}

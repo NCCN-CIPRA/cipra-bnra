@@ -1,7 +1,7 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import TextInputBox from "../../../components/TextInputBox";
 import { useEffect, useMemo, useState } from "react";
-import { DVRiskFile, RISKFILE_RESULT_FIELD } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
 import getImpactColor from "../../../functions/getImpactColor";
@@ -40,16 +40,21 @@ export default function ImpactSection({
   const impactLetterUC = impactLetter.toUpperCase() as IMPACT_CATEGORY;
 
   const ti = getScenarioParameter(riskFile, "TI", scenario) || 0.00001;
-  const impactTI = getScenarioParameter(riskFile, `TI_${impactLetterUC}`, scenario) || 0.00001;
+  const impactTI =
+    getScenarioParameter(riskFile, `TI_${impactLetterUC}`, scenario) || 0.00001;
 
   const paretoEffects = useMemo(() => {
     return effects
       .sort((a, b) => b[impactLetter] - a[impactLetter])
       .reduce(
         ([cumulEffects, iCumul], e) => {
-          if (iCumul > 0.8 * impactTI && cumulEffects.length >= 3) return [cumulEffects, iCumul] as [Effect[], number];
+          if (iCumul > 0.8 * impactTI && cumulEffects.length >= 3)
+            return [cumulEffects, iCumul] as [Effect[], number];
 
-          return [[...cumulEffects, e], iCumul + e[impactLetter]] as [Effect[], number];
+          return [[...cumulEffects, e], iCumul + e[impactLetter]] as [
+            Effect[],
+            number
+          ];
         },
         [[], 0] as [Effect[], number]
       )[0];
@@ -68,15 +73,21 @@ export default function ImpactSection({
 
     const descriptions = paretoEffects
       .map((e, i) => {
-        const riskName = e.id ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>` : `<a href="">${e.name}</a>`;
+        const riskName = e.id
+          ? `<a href="/risks/${e.id}" target="_blank">${e.name}</a>`
+          : `<a href="">${e.name}</a>`;
 
         if (e.quali_cause) {
           return `<p style="font-weight:bold;font-size:10pt;font-family: Arial"">
                     ${i + 1}. ${riskName}
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
-                      <b>${round(100 * e[impactLetter])}%</b> of total ${impactName} impact -
-                      <b>${round((100 * e[impactLetter] * impactTI) / ti)}%</b> of total impact
+                      <b>${round(
+                        100 * e[impactLetter]
+                      )}%</b> of total ${impactName} impact -
+                      <b>${round(
+                        (100 * e[impactLetter] * impactTI) / ti
+                      )}%</b> of total impact
                     </p>
                     <p><br></p>
                     <p style="font-size: 8pt;margin-bottom:0px;text-decoration:underline">Input from the ${
@@ -95,8 +106,12 @@ export default function ImpactSection({
                     ${i + 1}. ${riskName}
                     </p>
                     <p style="font-size:10pt;font-family: Arial">
-                      <b>${round(100 * e[impactLetter])}%</b> of total ${impactName} impact -
-                      <b>${round((100 * e[impactLetter] * impactTI) / ti)}%</b> of total impact
+                      <b>${round(
+                        100 * e[impactLetter]
+                      )}%</b> of total ${impactName} impact -
+                      <b>${round(
+                        (100 * e[impactLetter] * impactTI) / ti
+                      )}%</b> of total impact
                     </p>
                     <p><br></p>
                     ${e.quali || e[`quali_${impactLetter}`]}
@@ -112,9 +127,17 @@ export default function ImpactSection({
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [iQuali, setIQuali] = useState<string>(riskFile[`cr4de_mrs_impact_${impactLetter}`] || getDefaultText());
+  const [iQuali, setIQuali] = useState<string>(
+    riskFile[`cr4de_mrs_impact_${impactLetter}`] || getDefaultText()
+  );
 
-  useEffect(() => setIQuali(riskFile[`cr4de_mrs_impact_${impactLetter}`] || getDefaultText()), [riskFile]);
+  useEffect(
+    () =>
+      setIQuali(
+        riskFile[`cr4de_mrs_impact_${impactLetter}`] || getDefaultText()
+      ),
+    [riskFile]
+  );
 
   useEffect(() => setIsEditing(editing), [editing]);
 
@@ -136,7 +159,9 @@ export default function ImpactSection({
 
   const startEdit = () => {
     if (isEditingOther) {
-      window.alert("You are already editing another section. Please close this section before editing another.");
+      window.alert(
+        "You are already editing another section. Please close this section before editing another."
+      );
     } else {
       setEditing(true);
     }
@@ -144,7 +169,13 @@ export default function ImpactSection({
 
   return (
     <Box
-      sx={{ borderLeft: "solid 8px " + getImpactColor(impactLetterUC), px: 2, py: 1, mt: 2, backgroundColor: "white" }}
+      sx={{
+        borderLeft: "solid 8px " + getImpactColor(impactLetterUC),
+        px: 2,
+        py: 1,
+        mt: 2,
+        backgroundColor: "white",
+      }}
     >
       <Typography variant="h6">
         {impactLetter.toUpperCase()}
@@ -158,7 +189,9 @@ export default function ImpactSection({
         />
       )}
       {editing && (
-        <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+        <Box
+          sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+        >
           <TextInputBox
             limitedOptions
             initialValue={iQuali}
@@ -170,7 +203,10 @@ export default function ImpactSection({
         </Box>
       )}
       {mode === "edit" && (
-        <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
+        <Stack
+          direction="row"
+          sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}
+        >
           {!editing && (
             <>
               <Button onClick={startEdit}>Edit</Button>
@@ -200,7 +236,12 @@ export default function ImpactSection({
               <Button
                 color="warning"
                 onClick={() => {
-                  if (window.confirm("Are you sure you wish to discard your changes?")) setEditing(false);
+                  if (
+                    window.confirm(
+                      "Are you sure you wish to discard your changes?"
+                    )
+                  )
+                    setEditing(false);
                 }}
               >
                 Discard Changes

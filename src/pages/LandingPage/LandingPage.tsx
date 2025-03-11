@@ -9,17 +9,7 @@ import {
   Fade,
   Paper,
 } from "@mui/material";
-import {
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
-  TimelineOppositeContent,
-} from "@mui/lab";
-import { Link as RouterLink, useNavigate, useOutletContext } from "react-router-dom";
-import { timelineOppositeContentClasses } from "@mui/lab/TimelineOppositeContent";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { Trans, useTranslation } from "react-i18next";
 import usePageTitle from "../../hooks/usePageTitle";
@@ -67,7 +57,8 @@ export default function LandingPage() {
           left: 0,
           right: 0,
           backgroundColor: "rgba(128, 180, 180, 0.33)",
-          backgroundImage: "url('https://bnra.powerappsportals.com/banner.png')",
+          backgroundImage:
+            "url('https://bnra.powerappsportals.com/banner.png')",
           backgroundSize: "auto 1000px",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
@@ -83,7 +74,14 @@ export default function LandingPage() {
           backgroundColor: "transparent",
         }}
       >
-        <Container sx={{ display: "flex", alignItems: "flex-end", height: "100%", pb: 4 }}>
+        <Container
+          sx={{
+            display: "flex",
+            alignItems: "flex-end",
+            height: "100%",
+            pb: 4,
+          }}
+        >
           <Stack direction="column">
             <img
               alt="text logo"
@@ -91,7 +89,9 @@ export default function LandingPage() {
               style={{ width: 300, marginBottom: 20 }}
             />
             <Typography variant="subtitle1" paragraph>
-              <Trans i18nKey="homepage.bnraLong">Belgian National Risk Assessment</Trans>
+              <Trans i18nKey="homepage.bnraLong">
+                Belgian National Risk Assessment
+              </Trans>
             </Typography>
           </Stack>
         </Container>
@@ -102,9 +102,10 @@ export default function LandingPage() {
           <Box sx={{ mt: 4, textAlign: "justify" }}>
             <Typography variant="body1" paragraph>
               <Trans i18nKey="landingpage.introtext1">
-                Avec la Belgian National Risk Assessment (BNRA), le Centre de crise National (NCCN), en collaboration
-                avec plus de 160 experts, a identifié et évalué les risques pertinents auxquels la Belgique pourrait
-                être exposée.
+                Avec la Belgian National Risk Assessment (BNRA), le Centre de
+                crise National (NCCN), en collaboration avec plus de 160
+                experts, a identifié et évalué les risques pertinents auxquels
+                la Belgique pourrait être exposée.
               </Trans>
             </Typography>
             <Stack direction="row" sx={{ mt: 4, alignItems: "center" }}>
@@ -120,12 +121,16 @@ export default function LandingPage() {
               <Box>
                 <Typography variant="body1" paragraph>
                   <Trans i18nKey="landingpage.introtext2">
-                    La BNRA est un élément important de la première étape du cycle du risque, à savoir l'identification
-                    et l'évaluation des risques. Le but ultime de la BNRA est d'identifier la probabilité, l'impact et
-                    les effets en cascade des risques nationaux d'une manière structurée et scientifiquement correcte.
-                    Les résultats de cette évaluation des risques constituent une source d'information importante pour
-                    façonner les étapes suivantes du cycle du risque, y compris la planification d'urgence et la gestion
-                    de crise.
+                    La BNRA est un élément important de la première étape du
+                    cycle du risque, à savoir l&#39;identification et
+                    l&#39;évaluation des risques. Le but ultime de la BNRA est
+                    d&#39;identifier la probabilité, l&#39;impact et les effets
+                    en cascade des risques nationaux d&#39;une manière
+                    structurée et scientifiquement correcte. Les résultats de
+                    cette évaluation des risques constituent une source
+                    d&#39;information importante pour façonner les étapes
+                    suivantes du cycle du risque, y compris la planification
+                    d&#39;urgence et la gestion de crise.
                   </Trans>
                 </Typography>
               </Box>
@@ -133,7 +138,8 @@ export default function LandingPage() {
           </Box>
           <Typography variant="body1" paragraph sx={{ mt: 4 }}>
             <Trans i18nKey="landingpage.introtext3">
-              Vous voulez en savoir plus sur la BNRA, sa méthodologie et ses résultats ? Regardez la vidéo ci-dessous:
+              Vous voulez en savoir plus sur la BNRA, sa méthodologie et ses
+              résultats ? Regardez la vidéo ci-dessous:
             </Trans>
           </Typography>
           <Box sx={{ my: 8, height: 0, pb: "56.25%", position: "relative" }}>
@@ -153,7 +159,8 @@ export default function LandingPage() {
                 allowFullScreen
               ></iframe>
             )}
-            {(getLanguage(i18n.language) === "en" || getLanguage(i18n.language) === "de") && (
+            {(getLanguage(i18n.language) === "en" ||
+              getLanguage(i18n.language) === "de") && (
               <iframe
                 style={{
                   position: "absolute",
@@ -217,7 +224,11 @@ export default function LandingPage() {
               }}
               onClick={() => navigate("/risks")}
             >
-              <CategoryIcon category={RISK_CATEGORY.MANMADE} size={80} tooltip={false} />
+              <CategoryIcon
+                category={RISK_CATEGORY.MANMADE}
+                size={80}
+                tooltip={false}
+              />
               <Typography
                 variant="subtitle2"
                 sx={{
@@ -229,7 +240,10 @@ export default function LandingPage() {
                   textAlign: "center",
                 }}
               >
-                {t(`landingpage.risks.${RISK_CATEGORY.MANMADE}`, `23 Risques Man-made`)}
+                {t(
+                  `landingpage.risks.${RISK_CATEGORY.MANMADE}`,
+                  `23 Risques Man-made`
+                )}
               </Typography>
             </Box>
             <Box
@@ -252,7 +266,11 @@ export default function LandingPage() {
               }}
               onClick={() => navigate("/risks")}
             >
-              <CategoryIcon category={RISK_CATEGORY.TRANSVERSAL} size={80} tooltip={false} />
+              <CategoryIcon
+                category={RISK_CATEGORY.TRANSVERSAL}
+                size={80}
+                tooltip={false}
+              />
               <Typography
                 variant="subtitle2"
                 sx={{
@@ -264,7 +282,10 @@ export default function LandingPage() {
                   textAlign: "center",
                 }}
               >
-                {t(`landingpage.risks.${RISK_CATEGORY.TRANSVERSAL}`, `22 Risques Sociétaux`)}
+                {t(
+                  `landingpage.risks.${RISK_CATEGORY.TRANSVERSAL}`,
+                  `22 Risques Sociétaux`
+                )}
               </Typography>
             </Box>
             <Box
@@ -287,7 +308,11 @@ export default function LandingPage() {
               }}
               onClick={() => navigate("/risks")}
             >
-              <CategoryIcon category={RISK_CATEGORY.ECOTECH} size={80} tooltip={false} />
+              <CategoryIcon
+                category={RISK_CATEGORY.ECOTECH}
+                size={80}
+                tooltip={false}
+              />
               <Typography
                 variant="subtitle2"
                 sx={{
@@ -299,7 +324,10 @@ export default function LandingPage() {
                   textAlign: "center",
                 }}
               >
-                {t(`landingpage.risks.${RISK_CATEGORY.ECOTECH}`, `23 Risques Économiques et Technologiques`)}
+                {t(
+                  `landingpage.risks.${RISK_CATEGORY.ECOTECH}`,
+                  `23 Risques Économiques et Technologiques`
+                )}
               </Typography>
             </Box>
             <Box
@@ -322,7 +350,11 @@ export default function LandingPage() {
               }}
               onClick={() => navigate("/risks")}
             >
-              <CategoryIcon category={RISK_CATEGORY.CYBER} size={80} tooltip={false} />
+              <CategoryIcon
+                category={RISK_CATEGORY.CYBER}
+                size={80}
+                tooltip={false}
+              />
               <Typography
                 variant="subtitle2"
                 sx={{
@@ -334,7 +366,10 @@ export default function LandingPage() {
                   textAlign: "center",
                 }}
               >
-                {t(`landingpage.risks.${RISK_CATEGORY.CYBER}`, `5 Risques Cyber`)}
+                {t(
+                  `landingpage.risks.${RISK_CATEGORY.CYBER}`,
+                  `5 Risques Cyber`
+                )}
               </Typography>
             </Box>
             <Box
@@ -357,7 +392,11 @@ export default function LandingPage() {
               }}
               onClick={() => navigate("/risks")}
             >
-              <CategoryIcon category={RISK_CATEGORY.HEALTH} size={80} tooltip={false} />
+              <CategoryIcon
+                category={RISK_CATEGORY.HEALTH}
+                size={80}
+                tooltip={false}
+              />
               <Typography
                 variant="subtitle2"
                 sx={{
@@ -369,7 +408,10 @@ export default function LandingPage() {
                   textAlign: "center",
                 }}
               >
-                {t(`landingpage.risks.${RISK_CATEGORY.HEALTH}`, `10 Risques liés à la Santé`)}
+                {t(
+                  `landingpage.risks.${RISK_CATEGORY.HEALTH}`,
+                  `10 Risques liés à la Santé`
+                )}
               </Typography>
             </Box>
             <Box
@@ -392,7 +434,11 @@ export default function LandingPage() {
               }}
               onClick={() => navigate("/risks")}
             >
-              <CategoryIcon category={RISK_CATEGORY.NATURE} size={80} tooltip={false} />
+              <CategoryIcon
+                category={RISK_CATEGORY.NATURE}
+                size={80}
+                tooltip={false}
+              />
               <Typography
                 variant="subtitle2"
                 sx={{
@@ -404,7 +450,10 @@ export default function LandingPage() {
                   textAlign: "center",
                 }}
               >
-                {t(`landingpage.risks.${RISK_CATEGORY.NATURE}`, `23 Risques Naturels`)}
+                {t(
+                  `landingpage.risks.${RISK_CATEGORY.NATURE}`,
+                  `23 Risques Naturels`
+                )}
               </Typography>
             </Box>
             <Box
@@ -427,7 +476,11 @@ export default function LandingPage() {
               }}
               onClick={() => navigate("/risks")}
             >
-              <CategoryIcon category={RISK_CATEGORY.EMERGING} size={80} tooltip={false} />
+              <CategoryIcon
+                category={RISK_CATEGORY.EMERGING}
+                size={80}
+                tooltip={false}
+              />
               <Typography
                 variant="subtitle2"
                 sx={{
@@ -439,7 +492,10 @@ export default function LandingPage() {
                   textAlign: "center",
                 }}
               >
-                {t(`landingpage.risks.${RISK_CATEGORY.EMERGING}`, `12 Risques Émergents`)}
+                {t(
+                  `landingpage.risks.${RISK_CATEGORY.EMERGING}`,
+                  `12 Risques Émergents`
+                )}
               </Typography>
             </Box>
           </Box>
@@ -451,24 +507,43 @@ export default function LandingPage() {
           <Box sx={{ mt: 4, display: "flex", flexDirection: "column" }}>
             <Typography variant="body1" paragraph sx={{ textAlign: "justify" }}>
               <Trans i18nKey="landingpage.infotext1">
-                Vous trouverez ci-dessous le Guide des Risques et le Fact Sheet. Ce Guide reprend les principaux risques
-                par catégorie (valeurs de probabilité et/ou d'impact élevées), complétés par certains risques qui ont
-                été récemment portés à l'attention du public.
+                Vous trouverez ci-dessous le Guide des Risques et le Fact Sheet.
+                Ce Guide reprend les principaux risques par catégorie (valeurs
+                de probabilité et/ou dcimpact élevées), complétés par certains
+                risques qui ont été récemment portés à l&#quot;attention du
+                public.
               </Trans>
             </Typography>
-            <Typography variant="body1" color="error" paragraph sx={{ textAlign: "justify" }}>
+            <Typography
+              variant="body1"
+              color="error"
+              paragraph
+              sx={{ textAlign: "justify" }}
+            >
               <Trans i18nKey="landingpage.restricted">
-                Please consider the reports below as "Limited Distribution" until 25/10/2024.
+                Please consider the reports below as &#quot;Limited
+                Distribution&#quot; until 25/10/2024.
               </Trans>
             </Typography>
 
-            <Stack direction="row" justifyContent="center" gap={10} sx={{ my: 6 }}>
+            <Stack
+              direction="row"
+              justifyContent="center"
+              gap={10}
+              sx={{ my: 6 }}
+            >
               <Button
                 variant="contained"
                 sx={{ mt: 4 }}
-                onClick={() => onDownload(`BNRA-risk-guide-${getCleanLanguage(i18n.language)}.pdf`)}
+                onClick={() =>
+                  onDownload(
+                    `BNRA-risk-guide-${getCleanLanguage(i18n.language)}.pdf`
+                  )
+                }
               >
-                <Trans i18nKey="landingpage.button.riskguide">Télécharge le Guide des Risques</Trans>
+                <Trans i18nKey="landingpage.button.riskguide">
+                  Télécharge le Guide des Risques
+                </Trans>
               </Button>
 
               {/* <Button
@@ -482,9 +557,18 @@ export default function LandingPage() {
           </Box>
           <Box sx={{ mt: 12, display: "flex", flexDirection: "column" }}>
             <Typography variant="body1" paragraph sx={{ textAlign: "justify" }}>
-              <Trans i18nKey="landingpage.infotext2">Des informations sur les 118 risques sont disponibles sur </Trans>
-              <Link href={`https://crisiscenter.be/${getCleanLanguage(i18n.language)}/risks-belgium`} target="_blank">
-                <Trans i18nKey="landingpage.infotext3">le site web du NCCN</Trans>
+              <Trans i18nKey="landingpage.infotext2">
+                Des informations sur les 118 risques sont disponibles sur{" "}
+              </Trans>
+              <Link
+                href={`https://crisiscenter.be/${getCleanLanguage(
+                  i18n.language
+                )}/risks-belgium`}
+                target="_blank"
+              >
+                <Trans i18nKey="landingpage.infotext3">
+                  le site web du NCCN
+                </Trans>
               </Link>
             </Typography>
           </Box>
@@ -507,11 +591,14 @@ export default function LandingPage() {
           >
             <Typography variant="body1" paragraph sx={{ textAlign: "center" }}>
               <Trans i18nKey="landingpage.questions1">
-                Questions, suggestions or other? Please don't hesitate to contact us!
+                Questions, suggestions or other? Please don&#quot;t hesitate to
+                contact us!
               </Trans>
             </Typography>
             <Typography variant="body1" paragraph sx={{ textAlign: "center" }}>
-              <Link href={`mailto:dist.nccn.cipra@nccn.fgov.be`}>dist.nccn.cipra@nccn.fgov.be</Link>
+              <Link href={`mailto:dist.nccn.cipra@nccn.fgov.be`}>
+                dist.nccn.cipra@nccn.fgov.be
+              </Link>
             </Typography>
           </Box>
         </Container>
@@ -538,63 +625,80 @@ export default function LandingPage() {
                 borderTopWidth: 1,
               }}
             >
-              <Stack direction={{ xs: "column", sm: "column" }} sx={{ justifyContent: "space-between", gap: 2 }}>
-                <Box sx={{ flexShrink: 1, alignSelf: { xs: "flex-start", sm: "center" } }}>
+              <Stack
+                direction={{ xs: "column", sm: "column" }}
+                sx={{ justifyContent: "space-between", gap: 2 }}
+              >
+                <Box
+                  sx={{
+                    flexShrink: 1,
+                    alignSelf: { xs: "flex-start", sm: "center" },
+                  }}
+                >
                   <Typography variant="h6" paragraph>
                     <Trans i18nKey="disclaimer.title">Disclaimer</Trans>
                   </Typography>
                   <Typography variant="body1" paragraph>
                     <Trans i18nKey="disclaimer.1">
-                      De methodologie en resultaten van de BNRA zijn het intellectuele eigendom van het NCCN. De BNRA
-                      als geheel wordt ondersteund door de geïnformeerde input van de experten die voor elk van de
-                      risico’s werden ingeschakeld. Noch CIPRA, noch het NCCN kan bijgevolg rechtstreeks
+                      De methodologie en resultaten van de BNRA zijn het
+                      intellectuele eigendom van het NCCN. De BNRA als geheel
+                      wordt ondersteund door de geïnformeerde input van de
+                      experten die voor elk van de risico’s werden ingeschakeld.
+                      Noch CIPRA, noch het NCCN kan bijgevolg rechtstreeks
                       verantwoordelijk gehouden voor de eindresultaten.
                     </Trans>
                   </Typography>
                   <Typography variant="body1" paragraph>
                     <Trans i18nKey="disclaimer.2">
-                      Gebruikers van BNRA-gegevens moeten zich ervan bewust zijn dat de resultaten in principe slechts 3
-                      jaar geldig zijn, in overeenstemming met de regelgeving van de Europese Commissie. Bovendien
-                      moeten alle risico’s en resultaten in hun volledige context en met voldoende nuance
+                      Gebruikers van BNRA-gegevens moeten zich ervan bewust zijn
+                      dat de resultaten in principe slechts 3 jaar geldig zijn,
+                      in overeenstemming met de regelgeving van de Europese
+                      Commissie. Bovendien moeten alle risico’s en resultaten in
+                      hun volledige context en met voldoende nuance
                       geïnterpreteerd en gebruikt worden.
                     </Trans>
                   </Typography>
                   <Typography variant="body1" paragraph>
                     <Trans i18nKey="disclaimer.3">
-                      Tot slot is het essentieel om erop te wijzen wat de BNRA niet doet:
+                      Tot slot is het essentieel om erop te wijzen wat de BNRA
+                      niet doet:
                     </Trans>
                   </Typography>
                   <ul>
                     <li>
                       <Typography variant="body1">
                         <Trans i18nKey="disclaimer.4">
-                          Er wordt niet getracht toekomstige gebeurtenissen of zogenaamde <i>Black Swan Events</i> te
-                          voorspellen
+                          Er wordt niet getracht toekomstige gebeurtenissen of
+                          zogenaamde <i>Black Swan Events</i> te voorspellen
                         </Trans>
                       </Typography>
                     </li>
                     <li>
                       <Typography variant="body1">
                         <Trans i18nKey="disclaimer.5">
-                          Er wordt geen absolute ranking gemaakt van risico’s (de cijfers moeten als grootteordes
-                          geïnterpreteerd worden en niet als exact vergelijkbaar)
+                          Er wordt geen absolute ranking gemaakt van risico’s
+                          (de cijfers moeten als grootteordes geïnterpreteerd
+                          worden en niet als exact vergelijkbaar)
                         </Trans>
                       </Typography>
                     </li>
                     <li>
                       <Typography variant="body1">
                         <Trans i18nKey="disclaimer.6">
-                          Er wordt volledige abstractie gemaakt van alle geospatiale element van risico’s (bv. we kijken
-                          niet specifiek naar de kernreactoren van Doel, maar naar een abstracte gemiddelde kernreactor
-                          in België)
+                          Er wordt volledige abstractie gemaakt van alle
+                          geospatiale element van risico’s (bv. we kijken niet
+                          specifiek naar de kernreactoren van Doel, maar naar
+                          een abstracte gemiddelde kernreactor in België)
                         </Trans>
                       </Typography>
                     </li>
                   </ul>
                   <Typography variant="body1" paragraph color="error">
                     <Trans i18nKey="disclaimer.7">
-                      Indien u een deel van de BNRA wilt delen met externe partners, wordt het ten zeerste op prijs
-                      gesteld indien CIPRA hiervan op de hoogte wordt gebracht en de BNRA als bron vermeld wordt.
+                      Indien u een deel van de BNRA wilt delen met externe
+                      partners, wordt het ten zeerste op prijs gesteld indien
+                      CIPRA hiervan op de hoogte wordt gebracht en de BNRA als
+                      bron vermeld wordt.
                     </Trans>
                   </Typography>
                 </Box>
@@ -609,7 +713,11 @@ export default function LandingPage() {
                     alignSelf: "flex-end",
                   }}
                 >
-                  <Button size="small" onClick={closeBanner} variant="contained">
+                  <Button
+                    size="small"
+                    onClick={closeBanner}
+                    variant="contained"
+                  >
                     OK
                   </Button>
                 </Stack>
@@ -880,7 +988,11 @@ export default function LandingPage() {
           src="https://bnra.powerappsportals.com/logo_nccn.svg"
           style={{ height: 40 }}
         />
-        <img alt="BNRA" src="https://bnra.powerappsportals.com/logo_text.png" style={{ height: 40 }} />
+        <img
+          alt="BNRA"
+          src="https://bnra.powerappsportals.com/logo_text.png"
+          style={{ height: 40 }}
+        />
       </Stack>
     </>
   );

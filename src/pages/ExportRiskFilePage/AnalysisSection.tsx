@@ -11,10 +11,9 @@ import {
 } from "./styles";
 import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { useEffect, useState } from "react";
 import svg2PDF from "../../functions/svg2PDF";
-import getScaleString from "../../functions/getScaleString";
 import getImpactColor from "../../functions/getImpactColor";
 import Header from "./Header";
 import LeftBorderSection from "./LeftBorderSection";
@@ -22,11 +21,8 @@ import { getScenarioSuffix, SCENARIOS } from "../../functions/scenarios";
 import { BLACK } from "../../functions/colors";
 import { LoggedInUser } from "../../hooks/useLoggedInUser";
 
-const bottomDebug = true;
-
 export default function AnalysisSection({
   riskFile,
-  user,
 }: {
   riskFile: DVRiskFile;
   user: LoggedInUser | null | undefined;

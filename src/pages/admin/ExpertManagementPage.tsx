@@ -18,8 +18,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import useAPI, { DataTable } from "../../hooks/useAPI";
-import useRecords from "../../hooks/useRecords";
+import useAPI from "../../hooks/useAPI";
 import { LoadingButton } from "@mui/lab";
 import { DVContact } from "../../types/dataverse/DVContact";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
@@ -42,7 +41,8 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useOutletContext } from "react-router-dom";
 import { AuthPageContext } from "../AuthPage";
 
-interface SelectableContact extends DVContact<DVParticipation<undefined, DVRiskFile>[], DVInvitation[]> {
+interface SelectableContact
+  extends DVContact<DVParticipation<undefined, DVRiskFile>[], DVInvitation[]> {
   selected: boolean;
 }
 
@@ -100,14 +100,22 @@ const ParticipationStepper = ({
         <>
           <Step completed={activeStep > 2}>
             <Tooltip
-              title={activeStep > 2 ? "The expert has finished step 2A" : "The expert has not yet finished step 2A"}
+              title={
+                activeStep > 2
+                  ? "The expert has finished step 2A"
+                  : "The expert has not yet finished step 2A"
+              }
             >
               <StepLabel icon={"2A"}></StepLabel>
             </Tooltip>
           </Step>
           <Step completed={activeStep > 3}>
             <Tooltip
-              title={activeStep > 3 ? "The expert has finished step 2B" : "The expert has not yet finished step 2B"}
+              title={
+                activeStep > 3
+                  ? "The expert has finished step 2B"
+                  : "The expert has not yet finished step 2B"
+              }
             >
               <StepLabel icon={"2B"}></StepLabel>
             </Tooltip>
@@ -117,7 +125,11 @@ const ParticipationStepper = ({
         <>
           <Step completed={activeStep > 2}>
             <Tooltip
-              title={activeStep > 2 ? "The expert has finished step 2" : "The expert has not yet finished step 2"}
+              title={
+                activeStep > 2
+                  ? "The expert has finished step 2"
+                  : "The expert has not yet finished step 2"
+              }
             >
               <StepLabel icon={"2"}></StepLabel>
             </Tooltip>
@@ -142,8 +154,17 @@ const ParticipationStepper = ({
   );
 };
 
-const ExpertFilter = ({ filter, setFilter }: { filter: string; setFilter: (f: string) => void }) => {
-  const [displayFilter, debouncedFilter, setDebouncedFilter] = useDebounce(filter, 1000);
+const ExpertFilter = ({
+  filter,
+  setFilter,
+}: {
+  filter: string;
+  setFilter: (f: string) => void;
+}) => {
+  const [displayFilter, debouncedFilter, setDebouncedFilter] = useDebounce(
+    filter,
+    1000
+  );
 
   useEffect(() => {
     setFilter(debouncedFilter);
@@ -230,7 +251,11 @@ const ExpertsTable = ({
             <TableCell width="100%">
               <Tooltip title="Show only experts for your risk files">
                 <IconButton
-                  color={specialFilter === SPECIAL_FILTERS.MY_RISK_FILES ? "primary" : "secondary"}
+                  color={
+                    specialFilter === SPECIAL_FILTERS.MY_RISK_FILES
+                      ? "primary"
+                      : "secondary"
+                  }
                   onClick={() =>
                     specialFilter === SPECIAL_FILTERS.MY_RISK_FILES
                       ? setSpecialFilter(null)
@@ -242,7 +267,11 @@ const ExpertsTable = ({
               </Tooltip>
               <Tooltip title="Show only experts">
                 <IconButton
-                  color={specialFilter === SPECIAL_FILTERS.EXPERTS_ONLY ? "primary" : "secondary"}
+                  color={
+                    specialFilter === SPECIAL_FILTERS.EXPERTS_ONLY
+                      ? "primary"
+                      : "secondary"
+                  }
                   onClick={() =>
                     specialFilter === SPECIAL_FILTERS.EXPERTS_ONLY
                       ? setSpecialFilter(null)
@@ -254,7 +283,11 @@ const ExpertsTable = ({
               </Tooltip>
               <Tooltip title="Show only registered experts">
                 <IconButton
-                  color={specialFilter === SPECIAL_FILTERS.REGISTERED_ONLY ? "primary" : "secondary"}
+                  color={
+                    specialFilter === SPECIAL_FILTERS.REGISTERED_ONLY
+                      ? "primary"
+                      : "secondary"
+                  }
                   onClick={() =>
                     specialFilter === SPECIAL_FILTERS.REGISTERED_ONLY
                       ? setSpecialFilter(null)
@@ -266,7 +299,11 @@ const ExpertsTable = ({
               </Tooltip>
               <Tooltip title="Show only NOT registered experts">
                 <IconButton
-                  color={specialFilter === SPECIAL_FILTERS.UNREGISTERED_ONLY ? "primary" : "secondary"}
+                  color={
+                    specialFilter === SPECIAL_FILTERS.UNREGISTERED_ONLY
+                      ? "primary"
+                      : "secondary"
+                  }
                   onClick={() =>
                     specialFilter === SPECIAL_FILTERS.UNREGISTERED_ONLY
                       ? setSpecialFilter(null)
@@ -278,7 +315,11 @@ const ExpertsTable = ({
               </Tooltip>
               <Tooltip title="Show experts in need of a reminder">
                 <IconButton
-                  color={specialFilter === SPECIAL_FILTERS.REMINDER ? "primary" : "secondary"}
+                  color={
+                    specialFilter === SPECIAL_FILTERS.REMINDER
+                      ? "primary"
+                      : "secondary"
+                  }
                   onClick={() =>
                     specialFilter === SPECIAL_FILTERS.REMINDER
                       ? setSpecialFilter(null)
@@ -291,7 +332,9 @@ const ExpertsTable = ({
             </TableCell>
             <TableCell sx={{ textAlign: "right" }}>
               <Tooltip title="Send an invitation email to all selected expert so they can register on the BNRA application">
-                <IconButton onClick={() => onInvite(experts.filter((e) => e.selected))}>
+                <IconButton
+                  onClick={() => onInvite(experts.filter((e) => e.selected))}
+                >
                   <ContactMailIcon />
                 </IconButton>
               </Tooltip>
@@ -300,16 +343,29 @@ const ExpertsTable = ({
         </TableHead>
         <TableBody>
           <TableRow>
-            <TableCell colSpan={100} component="td" scope="row" sx={{ p: 1, backgroundColor: "#eee" }}></TableCell>
+            <TableCell
+              colSpan={100}
+              component="td"
+              scope="row"
+              sx={{ p: 1, backgroundColor: "#eee" }}
+            ></TableCell>
           </TableRow>
           {experts &&
             experts.map((e) => (
               <React.Fragment key={e.emailaddress1}>
                 <TableRow>
                   <TableCell>
-                    <Checkbox checked={e.selected} onChange={() => selectExpert(e)} />
+                    <Checkbox
+                      checked={e.selected}
+                      onChange={() => selectExpert(e)}
+                    />
                   </TableCell>
-                  <TableCell component="th" scope="row" sx={{ fontWeight: "bold" }} colSpan={2}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{ fontWeight: "bold" }}
+                    colSpan={2}
+                  >
                     {e.firstname} {e.lastname} ({e.emailaddress1})
                   </TableCell>
                   <TableCell sx={{ textAlign: "right" }}>
@@ -321,20 +377,38 @@ const ExpertsTable = ({
                   </TableCell>
                 </TableRow>
                 {e.participations
-                  .sort((a, b) => a.cr4de_risk_file.cr4de_hazard_id.localeCompare(b.cr4de_risk_file.cr4de_hazard_id))
+                  .sort((a, b) =>
+                    a.cr4de_risk_file.cr4de_hazard_id.localeCompare(
+                      b.cr4de_risk_file.cr4de_hazard_id
+                    )
+                  )
                   .map((p) => {
                     if (p.cr4de_role === "expert") {
                       return (
-                        <TableRow key={`${e.emailaddress1}_${p.cr4de_risk_file.cr4de_riskfilesid}_${p.cr4de_role}`}>
+                        <TableRow
+                          key={`${e.emailaddress1}_${p.cr4de_risk_file.cr4de_riskfilesid}_${p.cr4de_role}`}
+                        >
                           <TableCell></TableCell>
-                          <TableCell component="td" scope="row" sx={{ p: 1, pl: 4 }}>
-                            {p.cr4de_risk_file.cr4de_hazard_id} {p.cr4de_risk_file.cr4de_title}
+                          <TableCell
+                            component="td"
+                            scope="row"
+                            sx={{ p: 1, pl: 4 }}
+                          >
+                            {p.cr4de_risk_file.cr4de_hazard_id}{" "}
+                            {p.cr4de_risk_file.cr4de_title}
                           </TableCell>
                           <TableCell sx={{ textAlign: "right" }}>
-                            <ParticipationStepper contact={e} participation={p} />
+                            <ParticipationStepper
+                              contact={e}
+                              participation={p}
+                            />
                           </TableCell>
                           <TableCell sx={{ width: 30 }}>
-                            <IconButton onClick={() => onRemove(p.cr4de_bnraparticipationid)}>
+                            <IconButton
+                              onClick={() =>
+                                onRemove(p.cr4de_bnraparticipationid)
+                              }
+                            >
                               <Delete />
                             </IconButton>
                           </TableCell>
@@ -342,18 +416,31 @@ const ExpertsTable = ({
                       );
                     } else {
                       return (
-                        <TableRow key={`${e.emailaddress1}_${p.cr4de_risk_file.cr4de_riskfilesid}_${p.cr4de_role}`}>
+                        <TableRow
+                          key={`${e.emailaddress1}_${p.cr4de_risk_file.cr4de_riskfilesid}_${p.cr4de_role}`}
+                        >
                           <TableCell></TableCell>
-                          <TableCell component="td" scope="row" sx={{ p: 1, pl: 4 }}>
-                            {p.cr4de_risk_file.cr4de_hazard_id} {p.cr4de_risk_file.cr4de_title}
+                          <TableCell
+                            component="td"
+                            scope="row"
+                            sx={{ p: 1, pl: 4 }}
+                          >
+                            {p.cr4de_risk_file.cr4de_hazard_id}{" "}
+                            {p.cr4de_risk_file.cr4de_title}
                           </TableCell>
                           <TableCell sx={{ textAlign: "center" }}>
                             <Typography variant="body1">
-                              {p.cr4de_role === "analist" ? "Author" : "Co-Author"}
+                              {p.cr4de_role === "analist"
+                                ? "Author"
+                                : "Co-Author"}
                             </Typography>
                           </TableCell>
                           <TableCell sx={{ width: 30 }}>
-                            <IconButton onClick={() => onRemove(p.cr4de_bnraparticipationid)}>
+                            <IconButton
+                              onClick={() =>
+                                onRemove(p.cr4de_bnraparticipationid)
+                              }
+                            >
                               <Delete />
                             </IconButton>
                           </TableCell>
@@ -388,6 +475,7 @@ const ParticipantInput = ({
 
   const [isLoading, setIsLoading] = useState(false);
   const [expertsCSV, setExpertsCSV] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [errors, setErrors] = useState<any[] | null>(null);
 
   const handleUploadExperts = async () => {
@@ -396,8 +484,10 @@ const ParticipantInput = ({
     const delimiter = expertsCSV.indexOf(";") >= 0 ? ";" : ",";
 
     const contacts = await api.getContacts("$select=emailaddress1");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const missingContacts: any[] = [];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const expertData: { [email: string]: any } = expertsCSV
       .split("\n")
       .map((l) => {
@@ -405,6 +495,7 @@ const ParticipantInput = ({
 
         return { email, hazardId, role };
       })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .reduce((acc: any, e) => {
         if (!acc[e.email]) {
           acc[e.email] = {};
@@ -414,8 +505,12 @@ const ParticipantInput = ({
           acc[e.email].participations = [];
         }
 
-        const existingContact = contacts?.find((c) => c.emailaddress1 === e.email.toLowerCase());
-        const existingParticipation = experts?.find((expert) => expert.emailaddress1 === e.email.toLowerCase());
+        const existingContact = contacts?.find(
+          (c) => c.emailaddress1 === e.email.toLowerCase()
+        );
+        const existingParticipation = experts?.find(
+          (expert) => expert.emailaddress1 === e.email.toLowerCase()
+        );
 
         if (!existingContact) {
           missingContacts.push(e);
@@ -425,7 +520,11 @@ const ParticipantInput = ({
           acc[e.email].contact = existingContact;
         }
 
-        if (existingParticipation?.participations.some((p) => p.cr4de_risk_file.cr4de_hazard_id === e.hazardId)) {
+        if (
+          existingParticipation?.participations.some(
+            (p) => p.cr4de_risk_file.cr4de_hazard_id === e.hazardId
+          )
+        ) {
           return acc;
         }
 
@@ -437,9 +536,11 @@ const ParticipantInput = ({
         return acc;
       }, {});
 
-    for (let expert of Object.values(expertData)) {
-      for (let p of expert.participations) {
-        const riskFile = await api.getRiskFiles(`$filter=cr4de_hazard_id eq '${p.hazardId}'`);
+    for (const expert of Object.values(expertData)) {
+      for (const p of expert.participations) {
+        const riskFile = await api.getRiskFiles(
+          `$filter=cr4de_hazard_id eq '${p.hazardId}'`
+        );
 
         if (riskFile?.length > 0) {
           await api.createParticipant({
@@ -482,7 +583,11 @@ const ParticipantInput = ({
 
   return (
     <Accordion sx={{ mb: 4 }}>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls="panel1a-content"
+        id="panel1a-header"
+      >
         <Typography>Load Participation Data</Typography>
       </AccordionSummary>
       <AccordionDetails>
@@ -505,7 +610,13 @@ const ParticipantInput = ({
             </Typography>
 
             {errors.map((c) => (
-              <Typography key={c.email} variant="caption" color="error" paragraph sx={{ m: 0 }}>
+              <Typography
+                key={c.email}
+                variant="caption"
+                color="error"
+                paragraph
+                sx={{ m: 0 }}
+              >
                 {c.email}
               </Typography>
             ))}
@@ -540,7 +651,9 @@ export default function ExpertManagementPage() {
   const [filter, setFilter] = useState<string | null>(null);
   const [specialFilter, setSpecialFilter] = useState<string | null>(null);
   const [contacts, setContacts] = useState<SelectableContact[] | null>(null);
-  const [filteredContacts, setFilteredContacts] = useState<SelectableContact[] | null>(null);
+  const [filteredContacts, setFilteredContacts] = useState<
+    SelectableContact[] | null
+  >(null);
 
   const reloadData = async () => {
     setIsLoading(true);
@@ -553,13 +666,17 @@ export default function ExpertManagementPage() {
       ),
     ]);
 
-    const invitationsDict = invitations.reduce((acc: { [key: string]: DVInvitation[] }, i) => {
-      if (!acc[i._adx_invitecontact_value]) acc[i._adx_invitecontact_value] = [];
+    const invitationsDict = invitations.reduce(
+      (acc: { [key: string]: DVInvitation[] }, i) => {
+        if (!acc[i._adx_invitecontact_value])
+          acc[i._adx_invitecontact_value] = [];
 
-      acc[i._adx_invitecontact_value].push(i);
+        acc[i._adx_invitecontact_value].push(i);
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {}
+    );
     const participationsDict = participations.reduce(
       (acc: { [key: string]: DVParticipation<undefined, DVRiskFile>[] }, p) => {
         if (!acc[p._cr4de_contact_value]) acc[p._cr4de_contact_value] = [];
@@ -615,7 +732,9 @@ export default function ExpertManagementPage() {
   const handleInvites = async (experts: SelectableContact[]) => {
     if (
       window.confirm(
-        `Are you sure you wish to send an invitation email to ${experts.length} expert${experts.length > 1 ? "s" : ""}?`
+        `Are you sure you wish to send an invitation email to ${
+          experts.length
+        } expert${experts.length > 1 ? "s" : ""}?`
       )
     ) {
       await api.sendInvitationEmail(experts.map((e) => e.contactid));
@@ -631,26 +750,38 @@ export default function ExpertManagementPage() {
       const normalFilteredContacts = filter
         ? contacts.filter(
             (e) =>
-              e.emailaddress1.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
-              (e.firstname && e.firstname.toLowerCase().indexOf(filter.toLowerCase()) >= 0) ||
-              (e.lastname && e.lastname.toLowerCase().indexOf(filter.toLowerCase()) >= 0) ||
+              e.emailaddress1.toLowerCase().indexOf(filter.toLowerCase()) >=
+                0 ||
+              (e.firstname &&
+                e.firstname.toLowerCase().indexOf(filter.toLowerCase()) >= 0) ||
+              (e.lastname &&
+                e.lastname.toLowerCase().indexOf(filter.toLowerCase()) >= 0) ||
               e.participations.some(
-                (p) => p.cr4de_risk_file.cr4de_title.toLowerCase().indexOf(filter.toLowerCase()) >= 0
+                (p) =>
+                  p.cr4de_risk_file.cr4de_title
+                    .toLowerCase()
+                    .indexOf(filter.toLowerCase()) >= 0
               )
           )
         : contacts;
 
       switch (specialFilter) {
-        case SPECIAL_FILTERS.MY_RISK_FILES:
-          const me = contacts.find((c) => c.emailaddress1 === user?.emailaddress1);
-          const myRiskFiles = me?.participations.filter((p) => p.cr4de_role !== "expert");
+        case SPECIAL_FILTERS.MY_RISK_FILES: {
+          const me = contacts.find(
+            (c) => c.emailaddress1 === user?.emailaddress1
+          );
+          const myRiskFiles = me?.participations.filter(
+            (p) => p.cr4de_role !== "expert"
+          );
 
           setFilteredContacts(
             normalFilteredContacts
               .filter((c) =>
                 c.participations.some((p) =>
                   myRiskFiles?.some(
-                    (rf) => p.cr4de_role === "expert" && rf._cr4de_risk_file_value === p._cr4de_risk_file_value
+                    (rf) =>
+                      p.cr4de_role === "expert" &&
+                      rf._cr4de_risk_file_value === p._cr4de_risk_file_value
                   )
                 )
               )
@@ -658,20 +789,27 @@ export default function ExpertManagementPage() {
                 ...c,
                 participations: c.participations.filter((p) =>
                   myRiskFiles?.some(
-                    (rf) => p.cr4de_role === "expert" && rf._cr4de_risk_file_value === p._cr4de_risk_file_value
+                    (rf) =>
+                      p.cr4de_role === "expert" &&
+                      rf._cr4de_risk_file_value === p._cr4de_risk_file_value
                   )
                 ),
               }))
           );
 
           break;
+        }
         case SPECIAL_FILTERS.EXPERTS_ONLY:
           setFilteredContacts(
             normalFilteredContacts
-              .filter((c) => c.participations.some((p) => p.cr4de_role === "expert"))
+              .filter((c) =>
+                c.participations.some((p) => p.cr4de_role === "expert")
+              )
               .map((c) => ({
                 ...c,
-                participations: c.participations.filter((p) => p.cr4de_role === "expert"),
+                participations: c.participations.filter(
+                  (p) => p.cr4de_role === "expert"
+                ),
               }))
           );
           break;
@@ -680,11 +818,14 @@ export default function ExpertManagementPage() {
             normalFilteredContacts
               .filter(
                 (c) =>
-                  c.msdyn_portaltermsagreementdate !== null && c.participations.some((p) => p.cr4de_role === "expert")
+                  c.msdyn_portaltermsagreementdate !== null &&
+                  c.participations.some((p) => p.cr4de_role === "expert")
               )
               .map((c) => ({
                 ...c,
-                participations: c.participations.filter((p) => p.cr4de_role === "expert"),
+                participations: c.participations.filter(
+                  (p) => p.cr4de_role === "expert"
+                ),
               }))
           );
           break;
@@ -693,26 +834,32 @@ export default function ExpertManagementPage() {
             normalFilteredContacts
               .filter(
                 (c) =>
-                  c.msdyn_portaltermsagreementdate === null && c.participations.some((p) => p.cr4de_role === "expert")
+                  c.msdyn_portaltermsagreementdate === null &&
+                  c.participations.some((p) => p.cr4de_role === "expert")
               )
               .map((c) => ({
                 ...c,
-                participations: c.participations.filter((p) => p.cr4de_role === "expert"),
+                participations: c.participations.filter(
+                  (p) => p.cr4de_role === "expert"
+                ),
               }))
           );
           break;
-        case SPECIAL_FILTERS.REMINDER:
+        case SPECIAL_FILTERS.REMINDER: {
           const today = new Date();
 
           setFilteredContacts(
             normalFilteredContacts.filter((c) =>
               // c.msdyn_portaltermsagreementdate === null &&
               c.invitations?.some(
-                (i) => i.cr4de_laatstverzonden !== null && dayDifference(new Date(i.cr4de_laatstverzonden), today) > 2
+                (i) =>
+                  i.cr4de_laatstverzonden !== null &&
+                  dayDifference(new Date(i.cr4de_laatstverzonden), today) > 2
               )
             )
           );
           break;
+        }
         default:
           setFilteredContacts(normalFilteredContacts);
       }
@@ -741,12 +888,20 @@ export default function ExpertManagementPage() {
         </Box>
 
         {isLoading && (
-          <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={isLoading}>
+          <Backdrop
+            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={isLoading}
+          >
             <CircularProgress color="primary" />
           </Backdrop>
         )}
 
-        {contacts && <ParticipantInput experts={contacts} onFinishUpload={() => reloadData()} />}
+        {contacts && (
+          <ParticipantInput
+            experts={contacts}
+            onFinishUpload={() => reloadData()}
+          />
+        )}
 
         {filteredContacts && (
           <ExpertsTable

@@ -1,23 +1,16 @@
-import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import ProbabilityBars from "./ProbabilityBars";
 import { Cell, Pie, PieChart } from "recharts";
 import getScaleString from "../../functions/getScaleString";
-import { DVAnalysisRun, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, getScenarioParameter, getScenarioSuffix } from "../../functions/scenarios";
-import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
+import { SCENARIOS, getScenarioParameter } from "../../functions/scenarios";
 import { IMPACT_CATEGORY } from "../../functions/Impact";
 import { IMPACT_COLOR_SCALES } from "../../functions/getImpactColor";
 import { useCallback } from "react";
 import FileSaver from "file-saver";
-import { useCurrentPng, useGenerateImage } from "recharts-to-png";
-import { useOutletContext } from "react-router-dom";
-import { AuthPageContext } from "../../pages/AuthPage";
+import { useGenerateImage } from "recharts-to-png";
 import SaveIcon from "@mui/icons-material/Download";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { Trans, useTranslation } from "react-i18next";
-import useRecord from "../../hooks/useRecord";
-import { DataTable } from "../../hooks/useAPI";
-import useRecords from "../../hooks/useRecords";
 import { getCategoryImpactRescaled } from "../../functions/CategoryImpact";
 
 const RADIAN = Math.PI / 180;
@@ -41,6 +34,7 @@ const getBars = (impact: IMPACT_CATEGORY) => [
 
 const needle = (
   value: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[],
   cx: number,
   cy: number,
@@ -61,17 +55,19 @@ const needle = (
   const r = 5;
   const x0 = cx + padding;
   const y0 = cy + r;
-  const xba = x0 + r * sin;
-  const yba = y0 - r * cos;
-  const xbb = x0 - r * sin;
-  const ybb = y0 + r * cos;
   const xp = x0 + length * cos;
   const yp = y0 + length * sin;
 
   return (
     <>
       <circle cx={x0} cy={y0} r={r} fill={color} stroke="none" />,
-      <path d={`M${x0} ${y0} L${xp} ${yp} L${x0} ${y0}`} stroke={color} strokeWidth={needleWidth} fill={color} />,
+      <path
+        d={`M${x0} ${y0} L${xp} ${yp} L${x0} ${y0}`}
+        stroke={color}
+        strokeWidth={needleWidth}
+        fill={color}
+      />
+      ,
     </>
   );
 };
@@ -81,7 +77,7 @@ export const SvgChart = ({
   height = pieHeight,
   category,
   value,
-  needleWidth = 3
+  needleWidth = 3,
 }: {
   category: IMPACT_CATEGORY;
   value: number;
@@ -142,9 +138,10 @@ export default function SummaryCharts({
   // });
 
   // useCurrentPng usage (isLoading is optional)
-  const [getDivJpeg, { ref, isLoading }] = useGenerateImage({
+  const [getDivJpeg, { ref }] = useGenerateImage({
     type: "image/png",
     quality: 1,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     options: { scale: 4 } as any,
   });
 
@@ -161,8 +158,6 @@ export default function SummaryCharts({
     }
   }, [getDivJpeg]);
 
-  const scenarioSuffix = getScenarioSuffix(scenario);
-
   const tp = getScenarioParameter(riskFile, "TP", scenario) || 0;
 
   const H = getCategoryImpactRescaled(riskFile, "H", scenario);
@@ -172,7 +167,10 @@ export default function SummaryCharts({
 
   return (
     <Box sx={{ position: "relative" }}>
-      <Box ref={ref} sx={{ p: 2, pb: 1, border: "1px solid #ddd", display: "inline-block" }}>
+      <Box
+        ref={ref}
+        sx={{ p: 2, pb: 1, border: "1px solid #ddd", display: "inline-block" }}
+      >
         <ProbabilityBars tp={tp} chartWidth={pieWidth} manmade={manmade} />
         <Stack direction="column" spacing={4} sx={{ mb: 4, width: pieWidth }}>
           <Stack direction="column">
@@ -197,7 +195,9 @@ export default function SummaryCharts({
         <Stack direction="column" spacing={4} sx={{ mb: 1, width: pieWidth }}>
           <Stack direction="column">
             <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "center" }}>
-              <Trans i18nKey="learning.impact.e.title">Environmental Impact</Trans>
+              <Trans i18nKey="learning.impact.e.title">
+                Environmental Impact
+              </Trans>
             </Typography>
             <SvgChart category="E" value={E} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
@@ -216,7 +216,11 @@ export default function SummaryCharts({
         </Stack>
       </Box>
       {canDownload && (
-        <IconButton className="admin-button" sx={{ position: "absolute", top: 5, left: 5 }} onClick={handleDownload}>
+        <IconButton
+          className="admin-button"
+          sx={{ position: "absolute", top: 5, left: 5 }}
+          onClick={handleDownload}
+        >
           <SaveIcon />
         </IconButton>
       )}

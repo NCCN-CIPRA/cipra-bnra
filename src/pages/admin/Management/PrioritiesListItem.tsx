@@ -1,31 +1,18 @@
-import { useEffect, useState } from "react";
-import { SelectableContact } from "./Selectables";
 import {
-  Snackbar,
-  SnackbarContent,
-  CircularProgress,
-  Container,
   ListItem,
   ListItemText,
-  Box,
-  Paper,
-  ListItemIcon,
   ListItemButton,
-  List,
-  IconButton,
   ListItemAvatar,
   Avatar,
-  Checkbox,
-  Menu,
-  MenuItem,
 } from "@mui/material";
-import ParticipationStepper from "./ParticipationStepper";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import useAPI from "../../../hooks/useAPI";
 import { Link } from "react-router-dom";
 import { SelectableRiskFile } from "./Selectables";
 
-export default function PrioritiesListItem({ riskFile }: { riskFile: SelectableRiskFile }) {
+export default function PrioritiesListItem({
+  riskFile,
+}: {
+  riskFile: SelectableRiskFile;
+}) {
   return (
     <>
       <ListItem
@@ -49,11 +36,19 @@ export default function PrioritiesListItem({ riskFile }: { riskFile: SelectableR
         //   )
         // }
       >
-        <ListItemButton role={undefined} component={Link} to={`/hazards/${riskFile.cr4de_riskfilesid}`} target="_blank">
+        <ListItemButton
+          role={undefined}
+          component={Link}
+          to={`/hazards/${riskFile.cr4de_riskfilesid}`}
+          target="_blank"
+        >
           <ListItemAvatar>
             <Avatar sx={{ fontSize: 12 }}>{riskFile.cr4de_hazard_id}</Avatar>
           </ListItemAvatar>
-          <ListItemText primary={riskFile.cr4de_title} secondary={riskFile.cr4de_risk_type} />
+          <ListItemText
+            primary={riskFile.cr4de_title}
+            secondary={riskFile.cr4de_risk_type}
+          />
         </ListItemButton>
       </ListItem>
 

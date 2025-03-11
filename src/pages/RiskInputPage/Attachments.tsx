@@ -38,9 +38,11 @@ export default function Attachments({
   const [expanded, setExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [attachments, setAttachments] = useState<DVAttachment<unknown, DVAttachment>[] | null>(null);
+  const [attachments, setAttachments] = useState<
+    DVAttachment<unknown, DVAttachment>[] | null
+  >(null);
 
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [, setIsDownloading] = useState(false);
   const [isConsolidating, setIsConsolidating] = useState(false);
 
   useEffect(() => {
@@ -52,7 +54,12 @@ export default function Attachments({
   }, [reset]);
 
   return (
-    <Box mt={1} sx={{ backgroundColor: consolidateAttachment !== null ? "#efefef77" : "#fff" }}>
+    <Box
+      mt={1}
+      sx={{
+        backgroundColor: consolidateAttachment !== null ? "#efefef77" : "#fff",
+      }}
+    >
       <Stack direction="row" sx={{ mt: 2, alignItems: "center", pl: 2 }}>
         <Typography variant="subtitle2">Attachments</Typography>
         <Box sx={{ flex: 1 }} />
@@ -80,7 +87,12 @@ export default function Attachments({
         </Tooltip>
       </Stack>
 
-      <Collapse in={expanded && !reset} timeout="auto" unmountOnExit sx={{ px: 2 }}>
+      <Collapse
+        in={expanded && !reset}
+        timeout="auto"
+        unmountOnExit
+        sx={{ px: 2 }}
+      >
         <Table size="small" sx={{ mb: 2 }}>
           <TableHead>
             <TableRow>
@@ -98,10 +110,15 @@ export default function Attachments({
               attachments.length > 0 &&
               attachments
                 .map((a) =>
-                  a.cr4de_referencedSource ? { a: a.cr4de_referencedSource, parent: a } : { a: a, parent: a }
+                  a.cr4de_referencedSource
+                    ? { a: a.cr4de_referencedSource, parent: a }
+                    : { a: a, parent: a }
                 )
                 .map((a) => (
-                  <TableRow key={a.a.cr4de_name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                  <TableRow
+                    key={a.a.cr4de_name}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
                     <TableCell component="th" scope="row">
                       <Link
                         sx={{ "&:hover": { cursor: "pointer" } }}
@@ -117,7 +134,10 @@ export default function Attachments({
                       </Link>
                     </TableCell>
                     <TableCell>{a.a.cr4de_url ? "Link" : "File"}</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap", textAlign: "right" }}>
+                    <TableCell
+                      align="center"
+                      sx={{ whiteSpace: "nowrap", textAlign: "right" }}
+                    >
                       {consolidateAttachment !== null && (
                         <>
                           {isConsolidating ? (
@@ -162,7 +182,9 @@ export default function Attachments({
             {attachments && attachments.length <= 0 && (
               <TableRow>
                 <TableCell sx={{ textAlign: "center" }} colSpan={3}>
-                  <Trans i18nKey="source.list.noSources">No sources attached</Trans>
+                  <Trans i18nKey="source.list.noSources">
+                    No sources attached
+                  </Trans>
                 </TableCell>
               </TableRow>
             )}

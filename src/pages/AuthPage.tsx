@@ -1,8 +1,7 @@
 import { useEffect } from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { Box } from "@mui/material";
 import { Outlet, useNavigate, useOutletContext } from "react-router-dom";
 import { LoggedInUser } from "../hooks/useLoggedInUser";
-import { DVContact } from "../types/dataverse/DVContact";
 import NCCNLoader from "../components/NCCNLoader";
 import satisfies from "../types/satisfies";
 import { BasePageContext } from "./BasePage";
@@ -16,7 +15,7 @@ export default function AuthPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let interval: any;
+    let interval: NodeJS.Timer;
 
     if (basePageContext.user === undefined) {
       interval = setInterval(basePageContext.refreshUser, 1000);
@@ -27,7 +26,15 @@ export default function AuthPage() {
 
   if (basePageContext.user === undefined) {
     return (
-      <Box sx={{ width: "100%", height: 500, alignItems: "center", justifyContent: "center", display: "flex" }}>
+      <Box
+        sx={{
+          width: "100%",
+          height: 500,
+          alignItems: "center",
+          justifyContent: "center",
+          display: "flex",
+        }}
+      >
         <NCCNLoader />
       </Box>
     );
@@ -39,5 +46,12 @@ export default function AuthPage() {
     return null;
   }
 
-  return <Outlet context={satisfies<AuthPageContext>({ ...basePageContext, user: basePageContext.user })} />;
+  return (
+    <Outlet
+      context={satisfies<AuthPageContext>({
+        ...basePageContext,
+        user: basePageContext.user,
+      })}
+    />
+  );
 }

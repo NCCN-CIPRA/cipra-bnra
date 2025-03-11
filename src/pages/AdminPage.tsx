@@ -13,7 +13,7 @@ export default function AdminPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let interval: any;
+    let interval: NodeJS.Timer;
 
     if (user === undefined) {
       interval = setInterval(refreshUser, 1000);
@@ -24,7 +24,15 @@ export default function AdminPage() {
 
   if (user === undefined) {
     return (
-      <Box sx={{ width: "100%", height: 500, alignItems: "center", justifyContent: "center", display: "flex" }}>
+      <Box
+        sx={{
+          width: "100%",
+          height: 500,
+          alignItems: "center",
+          justifyContent: "center",
+          display: "flex",
+        }}
+      >
         <CircularProgress />
       </Box>
     );

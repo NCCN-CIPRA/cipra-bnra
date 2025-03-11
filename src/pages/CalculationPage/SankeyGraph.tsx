@@ -1,7 +1,4 @@
 import { useEffect, useState } from "react";
-import ImpactDistributionPieChart from "../../components/charts/ImpactDistributionPieChart";
-import ImpactSankey from "../../components/charts/ImpactSankey";
-import ProbabilitySankey from "../../components/charts/ProbabilitySankey";
 import {
   Stack,
   Typography,
@@ -9,34 +6,33 @@ import {
   AccordionActions,
   AccordionDetails,
   AccordionSummary,
-  Checkbox,
-  FormGroup,
-  FormControlLabel,
   Box,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   TextField,
-  Tooltip,
 } from "@mui/material";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, SCENARIO_PARAMS, getScenarioSuffix, getWorstCaseScenario } from "../../functions/scenarios";
-import ImpactBarChart from "../../components/charts/ImpactBarChart";
+import {
+  SCENARIOS,
+  SCENARIO_PARAMS,
+  getWorstCaseScenario,
+} from "../../functions/scenarios";
 import { capFirst } from "../../functions/capFirst";
 
 export default function SankeyGraph({
   calculations,
   selectedNodeId,
-  setSelectedNodeId,
 }: {
   calculations: RiskCalculation[] | null;
   selectedNodeId: string | null;
   setSelectedNodeId: (id: string | null) => void;
 }) {
   const [calculation, setCalculation] = useState<RiskCalculation | null>(null);
-  const [selectedScenario, setSelectedScenario] = useState<"wcs" | SCENARIOS>("wcs");
+  const [selectedScenario, setSelectedScenario] = useState<"wcs" | SCENARIOS>(
+    "wcs"
+  );
   const [split, setSplit] = useState<"total" | "scenario" | "impact">("impact");
   const [causes, setCauses] = useState(5);
   const [effects, setEffects] = useState(5);
@@ -44,12 +40,17 @@ export default function SankeyGraph({
   useEffect(() => {
     if (!calculations) return;
 
-    setCalculation(calculations.find((c) => c.riskId === selectedNodeId) || null);
+    setCalculation(
+      calculations.find((c) => c.riskId === selectedNodeId) || null
+    );
   }, [selectedNodeId, calculations]);
 
   if (!calculation) return null;
 
-  const scenario = selectedScenario === "wcs" ? getWorstCaseScenario(calculation) : selectedScenario;
+  const scenario =
+    selectedScenario === "wcs"
+      ? getWorstCaseScenario(calculation)
+      : selectedScenario;
 
   return (
     <Accordion disabled={!calculations || !selectedNodeId}>
@@ -67,7 +68,11 @@ export default function SankeyGraph({
               onClick={(id: string) => setSelectedNodeId(id)}
             /> */}
           </Box>
-          <Stack direction="column" justifyContent="center" sx={{ width: 300, p: "50px" }}>
+          <Stack
+            direction="column"
+            justifyContent="center"
+            sx={{ width: 300, p: "50px" }}
+          >
             {/* <Box
         sx={{
           width: 200,
@@ -86,7 +91,10 @@ export default function SankeyGraph({
       </Box> */}
             <Box sx={{ width: "100%", textAlign: "center", mb: 2 }}>
               <Typography variant="h6">{calculation.riskTitle}</Typography>
-              <Typography variant="subtitle1" color={SCENARIO_PARAMS[scenario].color}>
+              <Typography
+                variant="subtitle1"
+                color={SCENARIO_PARAMS[scenario].color}
+              >
                 {capFirst(scenario)} scenario
               </Typography>
             </Box>
@@ -127,7 +135,9 @@ export default function SankeyGraph({
               value={causes}
               onChange={(e) => {
                 if (e.target.value !== "" && !isNaN(parseInt(e.target.value))) {
-                  setCauses(Math.min(10, Math.max(1, parseInt(e.target.value))));
+                  setCauses(
+                    Math.min(10, Math.max(1, parseInt(e.target.value)))
+                  );
                 }
               }}
             />
@@ -137,7 +147,9 @@ export default function SankeyGraph({
             <Select
               value={selectedScenario}
               label="Show Scenario"
-              onChange={(e) => setSelectedScenario(e.target.value as any)}
+              onChange={(e) =>
+                setSelectedScenario(e.target.value as SCENARIOS | "wcs")
+              }
             >
               <MenuItem value={"wcs"}>Worst Case</MenuItem>
               <MenuItem value={"considerable"}>Considerable</MenuItem>
@@ -147,7 +159,13 @@ export default function SankeyGraph({
           </FormControl>
           <FormControl sx={{ flex: 1 }} fullWidth>
             <InputLabel>Split flows</InputLabel>
-            <Select value={split} label="Node Size" onChange={(e) => setSplit(e.target.value as any)}>
+            <Select
+              value={split}
+              label="Node Size"
+              onChange={(e) =>
+                setSplit(e.target.value as "total" | "scenario" | "impact")
+              }
+            >
               <MenuItem value={"total"}>-</MenuItem>
               <MenuItem value={"scenario"}>Scenario</MenuItem>
               <MenuItem value={"impact"}>Impact</MenuItem>
@@ -160,7 +178,9 @@ export default function SankeyGraph({
               value={effects}
               onChange={(e) => {
                 if (e.target.value !== "" && !isNaN(parseInt(e.target.value))) {
-                  setEffects(Math.min(10, Math.max(1, parseInt(e.target.value))));
+                  setEffects(
+                    Math.min(10, Math.max(1, parseInt(e.target.value)))
+                  );
                 }
               }}
             />

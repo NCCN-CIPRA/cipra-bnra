@@ -2,12 +2,17 @@ import { Box } from "@mui/material";
 import { useEffect, useState, PropsWithChildren, useRef } from "react";
 
 type AutoProps = {
-  toggle: any;
-  toggle2: any;
+  toggle: unknown;
+  toggle2: unknown;
   duration: string;
 };
 
-export default function ({ children, toggle, toggle2, duration }: PropsWithChildren<AutoProps>) {
+export default function AutoHeight({
+  children,
+  toggle,
+  toggle2,
+  duration,
+}: PropsWithChildren<AutoProps>) {
   const [fixedHeight, setFixedHeight] = useState<number | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -19,10 +24,15 @@ export default function ({ children, toggle, toggle2, duration }: PropsWithChild
 
   return (
     <>
-      <Box ref={ref} sx={{ position: "absolute", height: "auto", opacity: 0, zIndex: -1 }}>
+      <Box
+        ref={ref}
+        sx={{ position: "absolute", height: "auto", opacity: 0, zIndex: -1 }}
+      >
         {children}
       </Box>
-      <Box sx={{ height: fixedHeight, transition: `height ${duration} ease` }} />
+      <Box
+        sx={{ height: fixedHeight, transition: `height ${duration} ease` }}
+      />
     </>
   );
 }

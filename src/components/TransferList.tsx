@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import Card from "@mui/material/Card";
@@ -12,7 +12,6 @@ import ArrowForwardIcon from "@mui/icons-material/CompareArrows";
 import { Trans } from "react-i18next";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import TextInputBox from "./TextInputBox";
-import { HtmlEditor } from "devextreme-react";
 
 type SIDE = "LEFT" | "RIGHT";
 
@@ -77,14 +76,21 @@ function TransferList({
     }
   };
 
-  const customList = (title: ReactNode, items: readonly any[], side: SIDE, subheader?: string) => (
+  const customList = (
+    title: ReactNode,
+    items: readonly SmallRisk[],
+    side: SIDE,
+    subheader?: string
+  ) => (
     <Card elevation={0} sx={{ border: "1px solid #eee", flex: 1, mt: 2 }}>
       <CardHeader
         sx={{ ml: -2, py: 1 }}
         title={title}
         avatar={" "}
         subheader={subheader || "-"}
-        subheaderTypographyProps={subheader ? {} : { sx: { color: "rgba(0, 0, 0, 0)" } }}
+        subheaderTypographyProps={
+          subheader ? {} : { sx: { color: "rgba(0, 0, 0, 0)" } }
+        }
       />
       <Divider />
       <List
@@ -98,7 +104,7 @@ function TransferList({
         component="div"
         role="list"
       >
-        {items.map((value: any, i) => {
+        {items.map((value, i) => {
           const labelId = `transfer-list-all-item-${value}-label`;
 
           return (
@@ -106,8 +112,10 @@ function TransferList({
               key={value.cr4de_riskfilesid}
               role="listitem"
               button
-              selected={Boolean(selected && selected.side === side && selected.index === i)}
-              onClick={(event) => handleListItemClick(side, i)}
+              selected={Boolean(
+                selected && selected.side === side && selected.index === i
+              )}
+              onClick={() => handleListItemClick(side, i)}
             >
               <ListItemIcon>{value.cr4de_hazard_id}</ListItemIcon>
               <ListItemText id={labelId} primary={value.cr4de_title} />
@@ -121,9 +129,16 @@ function TransferList({
 
   return (
     <>
-      <Box justifyContent="center" alignItems="center" sx={{ display: "flex", flexDirection: "row" }}>
+      <Box
+        justifyContent="center"
+        alignItems="center"
+        sx={{ display: "flex", flexDirection: "row" }}
+      >
         {customList(choicesLabel, choices, "LEFT", choicesSubheader)}
-        <Box alignItems="center" sx={{ mx: 2, display: "flex", flexDirection: "column" }}>
+        <Box
+          alignItems="center"
+          sx={{ mx: 2, display: "flex", flexDirection: "column" }}
+        >
           {onAddChosen && onRemoveChosen ? (
             <>
               <Button
@@ -148,7 +163,7 @@ function TransferList({
                 onClick={() => {
                   if (selected) {
                     setSelected(null);
-                    selected && onRemoveChosen(chosen[selected.index]);
+                    if (selected) onRemoveChosen(chosen[selected.index]);
                   }
                 }}
                 disabled={chosen.length === 0 || selected?.side !== "RIGHT"}
@@ -172,7 +187,9 @@ function TransferList({
           }}
         >
           <Typography variant="subtitle2" mb={1}>
-            <Trans i18nKey="transferList.reason">Reason for the causal relationship</Trans>
+            <Trans i18nKey="transferList.reason">
+              Reason for the causal relationship
+            </Trans>
           </Typography>
           {onChangeReason ? (
             <>
@@ -196,7 +213,9 @@ function TransferList({
           ) : (
             <Box
               dangerouslySetInnerHTML={{
-                __html: chosen[selected.index].reason || "<p>(No reason provided)</p>",
+                __html:
+                  chosen[selected.index].reason ||
+                  "<p>(No reason provided)</p>",
               }}
             />
           )}
@@ -211,14 +230,18 @@ function TransferList({
           }}
         >
           <Typography variant="subtitle2" mb={1}>
-            <Trans i18nKey="transferList.definition">Definition of</Trans> '
-            {(selected.side === "LEFT" ? choices : chosen)[selected.index].cr4de_title}'
+            <Trans i18nKey="transferList.definition">Definition of</Trans> &#39;
+            {
+              (selected.side === "LEFT" ? choices : chosen)[selected.index]
+                .cr4de_title
+            }
+            &#39;
           </Typography>
           <Box
             dangerouslySetInnerHTML={{
               __html:
-                (selected.side === "LEFT" ? choices : chosen)[selected.index].cr4de_definition ||
-                "<p>(No definition provided)</p>",
+                (selected.side === "LEFT" ? choices : chosen)[selected.index]
+                  .cr4de_definition || "<p>(No definition provided)</p>",
             }}
           />
         </Box>

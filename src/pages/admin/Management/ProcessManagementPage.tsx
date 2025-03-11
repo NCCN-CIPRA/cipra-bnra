@@ -1,18 +1,5 @@
-import {
-  Snackbar,
-  ListItem,
-  ListItemIcon,
-  Checkbox,
-  List,
-  Container,
-  Box,
-  Paper,
-  Tooltip,
-  CircularProgress,
-  IconButton,
-} from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
-import dayDifference from "../../../functions/days";
+import { List, Container, Box, Paper, CircularProgress } from "@mui/material";
+import { useEffect, useState } from "react";
 import useAPI from "../../../hooks/useAPI";
 import { DVInvitation } from "../../../types/dataverse/DVInvitation";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
@@ -27,7 +14,6 @@ import RiskFilesView from "./RiskFilesView";
 import usePageTitle from "../../../hooks/usePageTitle";
 import useBreadcrumbs from "../../../hooks/useBreadcrumbs";
 import GraphView from "./GraphView";
-import { DVContact } from "../../../types/dataverse/DVContact";
 import { DVValidation } from "../../../types/dataverse/DVValidation";
 import PrioritiesView from "./PrioritiesView";
 import { DVDirectAnalysis } from "../../../types/dataverse/DVDirectAnalysis";
@@ -40,7 +26,13 @@ export default function ProcessManagementPage() {
   const [contacts, setContacts] = useState<SelectableContact[] | null>(null);
   const [riskFiles, setRiskFiles] = useState<SelectableRiskFile[] | null>(null);
   const [participations, setParticipations] = useState<
-    DVParticipation<SelectableContact, DVRiskFile, DVValidation, DVDirectAnalysis>[] | null
+    | DVParticipation<
+        SelectableContact,
+        DVRiskFile,
+        DVValidation,
+        DVDirectAnalysis
+      >[]
+    | null
   >(null);
   const [allSelected, setAllSelected] = useState(false);
 
@@ -50,20 +42,34 @@ export default function ProcessManagementPage() {
     const [rawContacts, invitations, participations] = await Promise.all([
       api.getContacts(),
       api.getInvitations(),
-      api.getParticipants<DVParticipation<undefined, DVRiskFile, DVValidation, DVDirectAnalysis>>(
-        "$expand=cr4de_risk_file,cr4de_validation,cr4de_direct_analysis"
-      ),
+      api.getParticipants<
+        DVParticipation<undefined, DVRiskFile, DVValidation, DVDirectAnalysis>
+      >("$expand=cr4de_risk_file,cr4de_validation,cr4de_direct_analysis"),
     ]);
 
-    const invitationsDict = invitations.reduce((acc: { [key: string]: DVInvitation[] }, i) => {
-      if (!acc[i._adx_invitecontact_value]) acc[i._adx_invitecontact_value] = [];
+    const invitationsDict = invitations.reduce(
+      (acc: { [key: string]: DVInvitation[] }, i) => {
+        if (!acc[i._adx_invitecontact_value])
+          acc[i._adx_invitecontact_value] = [];
 
-      acc[i._adx_invitecontact_value].push(i);
+        acc[i._adx_invitecontact_value].push(i);
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {}
+    );
     const participationsDict = participations.reduce(
-      (acc: { [key: string]: DVParticipation<undefined, DVRiskFile, DVValidation, DVDirectAnalysis>[] }, p) => {
+      (
+        acc: {
+          [key: string]: DVParticipation<
+            undefined,
+            DVRiskFile,
+            DVValidation,
+            DVDirectAnalysis
+          >[];
+        },
+        p
+      ) => {
         if (!acc[p._cr4de_contact_value]) acc[p._cr4de_contact_value] = [];
 
         acc[p._cr4de_contact_value].push(p);
@@ -73,7 +79,17 @@ export default function ProcessManagementPage() {
       {}
     );
     const participationsRFDict = participations.reduce(
-      (acc: { [key: string]: DVParticipation<undefined, DVRiskFile, DVValidation, DVDirectAnalysis>[] }, p) => {
+      (
+        acc: {
+          [key: string]: DVParticipation<
+            undefined,
+            DVRiskFile,
+            DVValidation,
+            DVDirectAnalysis
+          >[];
+        },
+        p
+      ) => {
         if (!p._cr4de_risk_file_value) return acc;
 
         if (!acc[p._cr4de_risk_file_value]) acc[p._cr4de_risk_file_value] = [];
@@ -92,11 +108,16 @@ export default function ProcessManagementPage() {
       participations: participationsDict[c.contactid] || [],
     }));
 
-    const selectableContactsDict = selectableContacts.reduce((acc: { [key: string]: SelectableContact }, el) => {
-      return { ...acc, [el.contactid]: el };
-    }, {});
+    const selectableContactsDict = selectableContacts.reduce(
+      (acc: { [key: string]: SelectableContact }, el) => {
+        return { ...acc, [el.contactid]: el };
+      },
+      {}
+    );
 
-    const selectableRiskFiles: SelectableRiskFile[] = Object.keys(participationsRFDict).map((rfId) => ({
+    const selectableRiskFiles: SelectableRiskFile[] = Object.keys(
+      participationsRFDict
+    ).map((rfId) => ({
       ...participationsRFDict[rfId][0].cr4de_risk_file,
       selected: false,
       participants: participationsRFDict[rfId].map((p) => ({
@@ -118,7 +139,9 @@ export default function ProcessManagementPage() {
   const sendInvitationEmails = async (contact: SelectableContact[]) => {
     if (
       window.confirm(
-        `Are you sure you wish to send an invitation email to ${contact.length} expert${contact.length > 1 ? "s" : ""}?`
+        `Are you sure you wish to send an invitation email to ${
+          contact.length
+        } expert${contact.length > 1 ? "s" : ""}?`
       )
     ) {
       await api.sendInvitationEmail(contact.map((c) => c.contactid));
@@ -188,7 +211,8 @@ export default function ProcessManagementPage() {
 
     setRiskFiles(
       riskFiles.map((rf) => {
-        if (rf.cr4de_riskfilesid !== selectedRiskFile.cr4de_riskfilesid) return rf;
+        if (rf.cr4de_riskfilesid !== selectedRiskFile.cr4de_riskfilesid)
+          return rf;
 
         return {
           ...rf,
@@ -302,7 +326,7 @@ export default function ProcessManagementPage() {
           <TabPanel value="priorities">
             <List dense>
               {riskFiles ? (
-                <PrioritiesView baseRiskFiles={riskFiles} />
+                <PrioritiesView />
               ) : (
                 <Box sx={{ m: 4, textAlign: "center" }}>
                   <CircularProgress />

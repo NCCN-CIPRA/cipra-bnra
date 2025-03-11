@@ -1,8 +1,13 @@
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
-import Joyride, { Step, ACTIONS, EVENTS, STATUS, CallBackProps, LIFECYCLE } from "react-joyride";
+import Joyride, {
+  Step,
+  ACTIONS,
+  EVENTS,
+  STATUS,
+  CallBackProps,
+} from "react-joyride";
 import { useState } from "react";
-import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 import TourTooltip from "../../components/TourTooltip";
 
 export default function RiskFileSummaryTutorial({
@@ -33,7 +38,9 @@ export default function RiskFileSummaryTutorial({
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfSummary.tutorial.1.2">It contains a very high-level overview of the risk file.</Trans>
+            <Trans i18nKey="rfSummary.tutorial.1.2">
+              It contains a very high-level overview of the risk file.
+            </Trans>
           </Typography>
         </Box>
       ),
@@ -45,7 +52,8 @@ export default function RiskFileSummaryTutorial({
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="rfSummary.tutorial.2.1">
-              From here, you may use the bottom navigation bar to explore the more in-depth sections of the risk file.
+              From here, you may use the bottom navigation bar to explore the
+              more in-depth sections of the risk file.
             </Trans>
           </Typography>
         </Box>
@@ -58,15 +66,17 @@ export default function RiskFileSummaryTutorial({
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="rfSummary.tutorial.3.1">
-              These sections contain a highly processed and summarized version of the respective pages of the risk file,
-              which are accessible using the bottom navigation bar.
+              These sections contain a highly processed and summarized version
+              of the respective pages of the risk file, which are accessible
+              using the bottom navigation bar.
             </Trans>
           </Typography>
           <ul>
             <li>
               <Typography variant="body1">
                 <Trans i18nKey="hazardCatalogue.tutorial.3.2">
-                  The Risk Description (i.e. definition, scenario parameters, ...)
+                  The Risk Description (i.e. definition, scenario parameters,
+                  ...)
                 </Trans>
               </Typography>
             </li>
@@ -88,14 +98,15 @@ export default function RiskFileSummaryTutorial({
         <Box sx={{ textAlign: "left", maxWidth: 600 }}>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="hazardCatalogue.tutorial.4.1">
-              On the right is a summary of the quantitative results, i.e. the probability and impact of the most
-              relevant scenario of the risk.
+              On the right is a summary of the quantitative results, i.e. the
+              probability and impact of the most relevant scenario of the risk.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="hazardCatalogue.tutorial.4.2">
-              These parameters are all logarithmically scaled between 1 and 5, where each number corresponds to a
-              qualitative value (Very Low, Low, Medium, High and Very High).
+              These parameters are all logarithmically scaled between 1 and 5,
+              where each number corresponds to a qualitative value (Very Low,
+              Low, Medium, High and Very High).
             </Trans>
           </Typography>
         </Box>
@@ -104,10 +115,11 @@ export default function RiskFileSummaryTutorial({
   ];
 
   const handleTutorialCallback = (data: CallBackProps) => {
-    const { action, index, status, type, lifecycle } = data;
+    const { action, index, status, type } = data;
 
-    // @ts-ignore-next-line
-    if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
+    if (
+      ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND] as string[]).includes(type)
+    ) {
       // Update state to advance the tour
       setStepIndex(index + (action === ACTIONS.PREV ? -1 : 1));
     } else if (status === STATUS.SKIPPED) {

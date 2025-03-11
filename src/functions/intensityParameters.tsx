@@ -11,7 +11,7 @@ export function unwrap(parameters: string | null): IntensityParameter[] {
 
   try {
     return JSON.parse(parameters);
-  } catch (e) {
+  } catch {
     // Old HTML format
     const json = tableToJson(parameters);
 
@@ -29,7 +29,7 @@ export function wrap(parameters: IntensityParameter[]): string {
   return JSON.stringify(parameters);
 }
 
-export function equals(a?: IntensityParameter[], b?: IntensityParameter[]) {
-  // TODO
-  return false;
-}
+// export function equals(a?: IntensityParameter[], b?: IntensityParameter[]) {
+//   // TODO
+//   return false;
+// }

@@ -12,47 +12,30 @@ import {
   LabelList,
   Legend,
 } from "recharts";
-import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
-import SaveIcon from "@mui/icons-material/Download";
 import {
-  Typography,
-  Accordion,
-  AccordionActions,
-  AccordionDetails,
-  AccordionSummary,
-  Checkbox,
-  FormGroup,
-  FormControlLabel,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Stack,
-  Box,
-  Input,
-  Button,
-  IconButton,
-} from "@mui/material";
-import { getMoneyString, IMPACT_CATEGORY } from "../../functions/Impact";
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
+import SaveIcon from "@mui/icons-material/Download";
+import { Typography, Stack, Box, IconButton } from "@mui/material";
+import { IMPACT_CATEGORY } from "../../functions/Impact";
 import {
   SCENARIOS,
   SCENARIO_PARAMS,
-  SCENARIO_SUFFIX,
   getScenarioParameter,
   getScenarioSuffix,
 } from "../../functions/scenarios";
-import { CATEGORY_NAMES, DVRiskFile, RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
-import { scaleLog, select } from "d3";
+import {
+  CATEGORY_NAMES,
+  RISK_CATEGORY,
+} from "../../types/dataverse/DVRiskFile";
 import getCategoryColor from "../../functions/getCategoryColor";
-import { getTotalProbabilityRelativeScale, getYearlyProbability } from "../../functions/Probability";
 import { hexToRGB } from "../../functions/colors";
 import { capFirst } from "../../functions/capFirst";
 import { useGenerateImage } from "recharts-to-png";
 import FileSaver from "file-saver";
 import { useTranslation } from "react-i18next";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import { getTotalImpactRelative } from "../../functions/TotalImpact";
 import { BasePageContext } from "../../pages/BasePage";
 import { useOutletContext } from "react-router-dom";
 
@@ -73,7 +56,14 @@ interface MatrixRisk {
 const CATEGORIES: Partial<{
   [key in RISK_CATEGORY]: {
     color: string;
-    shape: "circle" | "cross" | "diamond" | "square" | "star" | "triangle" | "wye";
+    shape:
+      | "circle"
+      | "cross"
+      | "diamond"
+      | "square"
+      | "star"
+      | "triangle"
+      | "wye";
   };
 }> = {
   Cyber: {
@@ -151,8 +141,6 @@ const defaultFields = (c: SmallRisk) =>
     category: c.cr4de_risk_category,
   } as Partial<MatrixRisk>);
 
-const pScale = scaleLog().base(100);
-
 export default function RiskMatrix({
   riskFiles,
   selectedNodeId = null,
@@ -172,9 +160,9 @@ export default function RiskMatrix({
   setSelectedNodeId?: (id: string | null) => void;
 
   scenario?: "All" | "MRS" | SCENARIOS;
-  labels?: Boolean;
+  labels?: boolean;
   labelSize?: number | null;
-  onlyES?: Boolean;
+  onlyES?: boolean;
   category?: "All" | RISK_CATEGORY;
   impact?: "All" | IMPACT_CATEGORY;
   categoryDisplay?: "shapes" | "colors" | "both" | "none";
@@ -185,9 +173,10 @@ export default function RiskMatrix({
   const [dots, setDots] = useState<MatrixRisk[] | null>(null);
 
   // useCurrentPng usage (isLoading is optional)
-  const [getDivJpeg, { ref, isLoading }] = useGenerateImage({
+  const [getDivJpeg, { ref }] = useGenerateImage({
     type: "image/png",
     quality: 1,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     options: { scale: 4 } as any,
   });
 
@@ -204,16 +193,33 @@ export default function RiskMatrix({
     }
   }, [getDivJpeg]);
 
-  const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+  }: TooltipProps<ValueType, NameType>) => {
     if (active) {
       return (
-        <Stack sx={{ backgroundColor: "rgba(255,255,255,0.8)", border: "1px solid #eee", p: 1 }}>
-          <Typography variant="subtitle1">{payload?.[0].payload.title}</Typography>
-          <Typography variant="subtitle2">
-            {`Total Probability: ${Math.round((payload?.[1].value as number) * 10) / 10}`} / 5
+        <Stack
+          sx={{
+            backgroundColor: "rgba(255,255,255,0.8)",
+            border: "1px solid #eee",
+            p: 1,
+          }}
+        >
+          <Typography variant="subtitle1">
+            {payload?.[0].payload.title}
           </Typography>
           <Typography variant="subtitle2">
-            {`Total Impact: ${Math.round((payload?.[0].value as number) * 10) / 10}`} / 5
+            {`Total Probability: ${
+              Math.round((payload?.[1].value as number) * 10) / 10
+            }`}{" "}
+            / 5
+          </Typography>
+          <Typography variant="subtitle2">
+            {`Total Impact: ${
+              Math.round((payload?.[0].value as number) * 10) / 10
+            }`}{" "}
+            / 5
           </Typography>
           <Typography variant="subtitle2">{`Total Risk: ${
             Math.round((payload?.[0].payload.tr as number) * 10) / 10
@@ -230,39 +236,13 @@ export default function RiskMatrix({
       return hexToRGB(SCENARIO_PARAMS[entry.scenario].color, opacity);
     }
     if (categoryDisplay === "colors" || categoryDisplay === "both") {
-      return hexToRGB(CATEGORIES[entry.category]?.color || `rgba(150,150,150,${opacity})`, opacity);
+      return hexToRGB(
+        CATEGORIES[entry.category]?.color || `rgba(150,150,150,${opacity})`,
+        opacity
+      );
     }
 
     return `rgba(150,150,150,${opacity})`;
-  };
-
-  const recalcPI = (calculation: RiskCalculation, scenarioSuffix: SCENARIO_SUFFIX, visible = true) => {
-    if (!visible) {
-      return {
-        tp: 0,
-        ti: 0,
-        tr: 0,
-      };
-    }
-    // scales === "classes"
-    //   ? {
-    //       x: 5 * (1 - Math.pow(1 - tp, 365)),
-    //       y: Math.log10(ti / 100000000) / 0.9,
-    //       tr: Math.log10(100) / Math.log10(tp * ti),
-    //     }
-    //   : {
-    //       x: getYearlyProbability(tp),
-    //       y: ti,
-    //       tr: tp * ti,
-    //     };
-    const p = getTotalProbabilityRelativeScale(calculation, scenarioSuffix);
-    const i = getTotalImpactRelative(calculation, scenarioSuffix);
-
-    return {
-      tp: p,
-      ti: i,
-      tr: p * i,
-    };
   };
 
   useMemo(() => {
@@ -273,23 +253,28 @@ export default function RiskMatrix({
       .reduce((d, rf) => {
         const tmp = [...d];
 
-        [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].forEach((s) => {
-          const tp = getScenarioParameter(rf, "TP", s);
-          const ti = impact === "All" ? getScenarioParameter(rf, "TI", s) : getScenarioParameter(rf, `TI_${impact}`, s);
+        [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].forEach(
+          (s) => {
+            const tp = getScenarioParameter(rf, "TP", s);
+            const ti =
+              impact === "All"
+                ? getScenarioParameter(rf, "TI", s)
+                : getScenarioParameter(rf, `TI_${impact}`, s);
 
-          if (tp !== null && ti !== null) {
-            tmp.push({
-              id: `${rf.cr4de_riskfilesid}${getScenarioSuffix(s)}`,
-              fullTitle: `${capFirst(s)} ${rf.cr4de_title}`,
-              scenario: s,
-              tp: tp,
-              ti: ti,
-              tr: tp * ti,
-              ...defaultFields(rf),
-              mrs: rf.cr4de_mrs === s,
-            } as MatrixRisk);
+            if (tp !== null && ti !== null) {
+              tmp.push({
+                id: `${rf.cr4de_riskfilesid}${getScenarioSuffix(s)}`,
+                fullTitle: `${capFirst(s)} ${rf.cr4de_title}`,
+                scenario: s,
+                tp: tp,
+                ti: ti,
+                tr: tp * ti,
+                ...defaultFields(rf),
+                mrs: rf.cr4de_mrs === s,
+              } as MatrixRisk);
+            }
           }
-        });
+        );
 
         return tmp;
       }, [] as MatrixRisk[]);
@@ -302,10 +287,14 @@ export default function RiskMatrix({
   const categoryLegend = categoryDisplay !== "none" && category === "All";
   const scenarioLegend = scenarioDisplay === "colors";
 
-  const legendMargin = 0 + (categoryLegend ? 60 : 0) + (scenarioLegend ? 30 : 0);
+  const legendMargin =
+    0 + (categoryLegend ? 60 : 0) + (scenarioLegend ? 30 : 0);
 
   return (
-    <Stack direction="row" sx={{ width: "100%", height: "100%", position: "relative" }}>
+    <Stack
+      direction="row"
+      sx={{ width: "100%", height: "100%", position: "relative" }}
+    >
       <Box ref={ref} sx={{ flex: 1, height: "100%", p: 2 }}>
         <ResponsiveContainer width="100%">
           <ScatterChart
@@ -334,7 +323,7 @@ export default function RiskMatrix({
               scale="linear"
               domain={[0, 5.5]}
               // tickCount={5}
-              tickFormatter={(s, n) => t(getScaleString(s))}
+              tickFormatter={(s) => t(getScaleString(s))}
               ticks={[1, 2, 3, 4, 5]}
               label={{
                 offset: -45,
@@ -352,7 +341,7 @@ export default function RiskMatrix({
               // tickCount={6}
               // tickFormatter={(s, n) => `TI${n}`}
               // ticks={[160000000, 800000000, 4000000000, 20000000000, 100000000000, 500000000000]}
-              tickFormatter={(s, n) => t(getScaleString(s))}
+              tickFormatter={(s) => t(getScaleString(s))}
               ticks={[1, 2, 3, 4, 5]}
               label={{
                 // value: scales === "classes" ? "Impact" : "Impact of an event",
@@ -363,9 +352,13 @@ export default function RiskMatrix({
                 props: { fontWeight: "bold" },
               }}
             />
-            <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
+            <Tooltip
+              cursor={{ strokeDasharray: "3 3" }}
+              content={<CustomTooltip />}
+            />
             {Object.entries(CATEGORIES).map(([CATEGORY, shape]) => {
-              const catData = dots?.filter((d) => d.category === CATEGORY) || [];
+              const catData =
+                dots?.filter((d) => d.category === CATEGORY) || [];
 
               return (
                 <Scatter
@@ -373,16 +366,26 @@ export default function RiskMatrix({
                   name={`${CATEGORY} Risks`}
                   data={catData}
                   fill="#8884d8"
-                  shape={categoryDisplay === "shapes" || categoryDisplay === "both" ? shape.shape : "circle"}
+                  shape={
+                    categoryDisplay === "shapes" || categoryDisplay === "both"
+                      ? shape.shape
+                      : "circle"
+                  }
                 >
                   {labels && (category === "All" || category === CATEGORY) && (
-                    <LabelList dataKey="code" position="insideTop" offset={15} fontSize={labelSize || 20} />
+                    <LabelList
+                      dataKey="code"
+                      position="insideTop"
+                      offset={15}
+                      fontSize={labelSize || 20}
+                    />
                   )}
-                  {catData.map((entry, index) => {
+                  {catData.map((entry) => {
                     let opacity = 1;
                     let strokeOpacity = 0.4;
                     if (selectedNodeId !== null) {
-                      if (selectedNodeId !== entry.riskId) opacity = opacity * 0.2;
+                      if (selectedNodeId !== entry.riskId)
+                        opacity = opacity * 0.2;
                     }
 
                     if (onlyES && ES_RISKS.indexOf(entry.code) < 0) {
@@ -395,7 +398,10 @@ export default function RiskMatrix({
                         opacity = 0;
                         strokeOpacity = 0;
                       }
-                    } else if (scenario !== "All" && scenario !== entry.scenario) {
+                    } else if (
+                      scenario !== "All" &&
+                      scenario !== entry.scenario
+                    ) {
                       opacity = 0;
                       strokeOpacity = 0;
                     }
@@ -456,18 +462,30 @@ export default function RiskMatrix({
               payload={
                 categoryLegend
                   ? Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
-                      value: t(CATEGORY, CATEGORY_NAMES[CATEGORY as RISK_CATEGORY]),
-                      type: categoryDisplay === "both" || categoryDisplay === "shapes" ? shape.shape : "circle",
+                      value: t(
+                        CATEGORY,
+                        CATEGORY_NAMES[CATEGORY as RISK_CATEGORY]
+                      ),
+                      type:
+                        categoryDisplay === "both" ||
+                        categoryDisplay === "shapes"
+                          ? shape.shape
+                          : "circle",
                       color:
-                        categoryDisplay === "both" || categoryDisplay === "colors"
-                          ? CATEGORIES[CATEGORY as RISK_CATEGORY]?.color || "rgba(150,150,150,1)"
+                        categoryDisplay === "both" ||
+                        categoryDisplay === "colors"
+                          ? CATEGORIES[CATEGORY as RISK_CATEGORY]?.color ||
+                            "rgba(150,150,150,1)"
                           : "rgba(150,150,150,1)",
                     }))
                   : []
               }
             />
           </Box>
-          <Box className="custom-legend-wrapper" sx={{ flex: 1, height: 30, textAlign: "center" }}>
+          <Box
+            className="custom-legend-wrapper"
+            sx={{ flex: 1, height: 30, textAlign: "center" }}
+          >
             <Legend
               chartHeight={30}
               height={30}
@@ -475,11 +493,18 @@ export default function RiskMatrix({
               align="center"
               payload={
                 scenarioLegend
-                  ? Object.entries(SCENARIO_PARAMS).map(([scenario, params]) => ({
-                      value: t(`2A.${scenario}.title`, `${scenario[0].toUpperCase()}${scenario.slice(1)} Scenario`),
-                      type: "circle",
-                      color: params.color,
-                    }))
+                  ? Object.entries(SCENARIO_PARAMS).map(
+                      ([scenario, params]) => ({
+                        value: t(
+                          `2A.${scenario}.title`,
+                          `${scenario[0].toUpperCase()}${scenario.slice(
+                            1
+                          )} Scenario`
+                        ),
+                        type: "circle",
+                        color: params.color,
+                      })
+                    )
                   : []
               }
             />
@@ -487,7 +512,11 @@ export default function RiskMatrix({
         </Box>
       </Box>
       {user?.roles.internal && (
-        <IconButton className="admin-button" sx={{ position: "absolute", top: 45, right: 45 }} onClick={handleDownload}>
+        <IconButton
+          className="admin-button"
+          sx={{ position: "absolute", top: 45, right: 45 }}
+          onClick={handleDownload}
+        >
           <SaveIcon />
         </IconButton>
       )}

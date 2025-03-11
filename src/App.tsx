@@ -4,8 +4,6 @@ import AuthenticationPage from "./pages/auth/AuthenticationPage";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import LocalAPI from "./pages/main/LocalAPI";
 import CalculationPage from "./pages/CalculationPage/CalculationPage";
-import ValidationIntroPage from "./pages/validation/ValidationIntroPage";
-import ValidationPage from "./pages/validation/ValidationPage";
 import RiskPage from "./pages/learning/RiskPage";
 
 import "./App.css";
@@ -20,11 +18,8 @@ import QuantitativeScalesPage from "./pages/learning/QuantitativeScalesPage";
 import RegistrationPage from "./pages/auth/RegistrationPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ErrorPage from "./pages/ErrorPage";
-import Step2APage from "./pages/step2A/Step2APage";
 import ProcessManagementPage from "./pages/admin/Management/ProcessManagementPage";
 import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
-import Step2BPage from "./pages/step2B/Step2BPage";
-import ConsensusExpertPage from "./pages/consensus/ConsensusExpertPage";
 import AdminPage from "./pages/AdminPage";
 import HazardCataloguePage from "./pages/HazardCataloguePage/HazardCataloguePage";
 import BaseRisksPage from "./pages/BaseRisksPage";
@@ -41,6 +36,12 @@ import RiskMatrixPage from "./pages/RiskMatrixPage/RiskMatrixPage";
 import RiskEvolutionPage from "./pages/RiskEvolution/RiskEvolutionPage";
 import ExportRiskFilePage from "./pages/ExportRiskFilePage/ExportRiskFilePage";
 import ExportBNRAPage from "./pages/ExportBNRAPage/ExportBNRAPage";
+
+// DEPRECATED
+// import ValidationPage from "./pages/validation/ValidationPage";
+// import Step2APage from "./pages/step2A/Step2APage";
+// import Step2BPage from "./pages/step2B/Step2BPage";
+// import ConsensusExpertPage from "./pages/consensus/ConsensusExpertPage";
 
 function App() {
   useEffect(() => {
@@ -169,22 +170,23 @@ function App() {
                   element: <OverviewPage />,
                 },
 
-                {
-                  path: "/validation/:validation_id",
-                  element: <ValidationPage />,
-                },
-                {
-                  path: "/step2A/:step2A_id",
-                  element: <Step2APage />,
-                },
-                {
-                  path: "/step2B/:step2A_id",
-                  element: <Step2BPage />,
-                },
-                {
-                  path: "/consensus/:riskFile_id",
-                  element: <ConsensusExpertPage />,
-                },
+                // DEPRECATED
+                // {
+                //   path: "/validation/:validation_id",
+                //   element: <ValidationPage />,
+                // },
+                // {
+                //   path: "/step2A/:step2A_id",
+                //   element: <Step2APage />,
+                // },
+                // {
+                //   path: "/step2B/:step2A_id",
+                //   element: <Step2BPage />,
+                // },
+                // {
+                //   path: "/consensus/:riskFile_id",
+                //   element: <ConsensusExpertPage />,
+                // },
 
                 {
                   path: "/analysis/calculator",

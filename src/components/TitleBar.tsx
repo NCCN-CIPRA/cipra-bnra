@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { FormControl, IconButton, InputLabel, Menu, MenuItem, Select, Stack } from "@mui/material";
+import {
+  FormControl,
+  IconButton,
+  InputLabel,
+  Menu,
+  MenuItem,
+  Select,
+  Stack,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Trans, useTranslation } from "react-i18next";
@@ -44,7 +52,10 @@ export default function TitleBar({
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <AppBar
+          position="fixed"
+          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        >
           <Toolbar>
             {onDrawerToggle && (
               <IconButton
@@ -62,7 +73,11 @@ export default function TitleBar({
               {title}
             </Typography>
             {user?.realRoles?.admin && (
-              <FormControl variant="filled" sx={{ width: 200, mr: 4 }} size="small">
+              <FormControl
+                variant="filled"
+                sx={{ width: 200, mr: 4 }}
+                size="small"
+              >
                 <InputLabel id="demo-simple-select-label">Role</InputLabel>
                 <Select
                   labelId="demo-simple-select-label"
@@ -79,7 +94,9 @@ export default function TitleBar({
                   <MenuItem value={"Analisten"}>Analist</MenuItem>
                   <MenuItem value={"Intern NCCN"}>Intern NCCN</MenuItem>
                   <MenuItem value={"Experten"}>Expert</MenuItem>
-                  <MenuItem value={"Geverifieerde gebruikers"}>Rapport Lezer</MenuItem>
+                  <MenuItem value={"Geverifieerde gebruikers"}>
+                    Rapport Lezer
+                  </MenuItem>
                   <MenuItem value={"Anonymous"}>Anoniem</MenuItem>
                 </Select>
               </FormControl>
@@ -129,7 +146,12 @@ export default function TitleBar({
             )}
             {showUser && user != null && (
               <>
-                <Button variant="text" color="inherit" startIcon={<AccountCircleIcon />} onClick={handleMenu}>
+                <Button
+                  variant="text"
+                  color="inherit"
+                  startIcon={<AccountCircleIcon />}
+                  onClick={handleMenu}
+                >
                   {user?.firstname} {user?.lastname}
                 </Button>
                 <Menu
@@ -150,7 +172,8 @@ export default function TitleBar({
                   <MenuItem
                     onClick={() => {
                       handleClose();
-                      window.location.href = "https://bnra.powerappsportals.com/Account/Login/LogOff?returnUrl=/auth";
+                      window.location.href =
+                        "https://bnra.powerappsportals.com/Account/Login/LogOff?returnUrl=/auth";
                     }}
                   >
                     <Trans i18nKey="button.logout">Log out</Trans>
