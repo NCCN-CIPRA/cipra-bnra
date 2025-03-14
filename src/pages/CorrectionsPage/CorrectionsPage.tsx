@@ -73,6 +73,7 @@ import {
 } from "../../functions/Impact";
 import { getCategoryImpactRelative } from "../../functions/TotalImpact";
 import { getCategoryImpactRescaled } from "../../functions/CategoryImpact";
+import { DVTranslation } from "../../types/dataverse/DVTranslation";
 
 const replacements: string[][] = [
   ["Animal diseases \\(not zoonoses\\)", "Animal diseases excluding zoonoses"],
@@ -248,6 +249,10 @@ export default function CorrectionsPage() {
     },
   });
 
+  const { data: trans } = useRecords<DVTranslation>({
+    table: DataTable.TRANSLATIONS,
+  });
+
   usePageTitle("BNRA 2023 - 2026 Report Corrector");
   useBreadcrumbs([
     { name: "BNRA 2023 - 2026", url: "/" },
@@ -262,7 +267,48 @@ export default function CorrectionsPage() {
   };
 
   const handleSaveSummaries = async () => {
-    if (!riskFiles || !cascades) return;
+    if (!riskFiles || !cascades || !trans) return;
+
+    const resp = await fetch(
+      `https://bnra.powerappsportals.com/_api/cr4de_bnrariskfilesummaries`,
+      {
+        method: "GET",
+        headers: {
+          __RequestVerificationToken:
+            localStorage.getItem("antiforgerytoken") || "",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const sums = (await resp.json()).value;
+
+    for (const sum of sums) {
+      const t = trans.find(
+        (t) => t.cr4de_name === `risk.${sum.cr4de_hazard_id}.name`
+      );
+
+      if (!t) throw Error("No translation found");
+
+      await fetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskfilesummaries(${sum.cr4de_bnrariskfilesummaryid})`,
+        {
+          method: "PATCH",
+          headers: {
+            __RequestVerificationToken:
+              localStorage.getItem("antiforgerytoken") || "",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            cr4de_title_nl: t.cr4de_nl,
+            cr4de_title_fr: t.cr4de_fr,
+            cr4de_title_de: t.cr4de_de,
+          }),
+        }
+      );
+    }
+
+    return;
 
     for (let rf of riskFiles.filter(
       (rf) => rf.cr4de_hazard_id.indexOf("X") < 0
