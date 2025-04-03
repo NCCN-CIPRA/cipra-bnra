@@ -11,23 +11,10 @@ import {
 } from "../types/dataverse/DVRiskCascade";
 import useLazyRecords, { GetRecordsParams } from "../hooks/useLazyRecords";
 import { LoggedInUser } from "../hooks/useLoggedInUser";
-import {
-  getCatalyzingEffects,
-  getCauses,
-  getClimateChange,
-  getEffects,
-} from "../functions/cascades";
+import { Cascades, getCascades } from "../functions/cascades";
 import satisfies from "../types/satisfies";
 import { AuthPageContext } from "./AuthPage";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
-
-export type Cascades = {
-  all: DVRiskCascade<SmallRisk, SmallRisk>[];
-  causes: DVRiskCascade<SmallRisk, SmallRisk>[];
-  effects: DVRiskCascade<SmallRisk, SmallRisk>[];
-  catalyzingEffects: DVRiskCascade<SmallRisk, SmallRisk>[];
-  climateChange: DVRiskCascade<SmallRisk, SmallRisk> | null;
-};
 
 export interface RiskPageContext {
   user: LoggedInUser | null | undefined;
@@ -111,35 +98,6 @@ export default function BaseRisksPage() {
   ) => {
     return { ...rfs, [rfResult.cr4de_riskfilesid]: rfResult };
   };
-
-  const getCascades =
-    (
-      riskFile: DVRiskFile,
-      cs: { [riskId: string]: Cascades },
-      hc: { [id: string]: SmallRisk }
-    ) =>
-    (rcResult: DVRiskCascade<SmallRisk, SmallRisk>[]) => {
-      const causes = getCauses(riskFile, rcResult, hc);
-      const effects = getEffects(riskFile, rcResult, hc);
-      const catalyzingEffects = getCatalyzingEffects(
-        riskFile,
-        rcResult,
-        hc,
-        false
-      );
-      const climateChange = getClimateChange(riskFile, rcResult, hc);
-
-      return {
-        ...cs,
-        [riskFile.cr4de_riskfilesid]: {
-          all: [...causes, ...effects, ...catalyzingEffects],
-          causes,
-          effects,
-          catalyzingEffects,
-          climateChange,
-        },
-      };
-    };
 
   // const transformRiskFile = (rf: DVRiskFile): DVRiskFile => ({
   //   ...rf,

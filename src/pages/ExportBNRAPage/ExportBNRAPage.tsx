@@ -1,463 +1,400 @@
-import { useOutletContext } from "react-router-dom";
-import { RiskPageContext } from "../BaseRisksPage";
-import { useEffect, useState } from "react";
-import { Box, Stack, Typography } from "@mui/material";
-import NCCNLoader from "../../components/NCCNLoader";
-import { NCCN_GREEN } from "../../functions/colors";
-import { ReactComponent as BNRALogo } from "../../assets/icons/BNRA_Logo.svg";
-import { ReactComponent as NCCNLogo } from "../../assets/icons/NCCN_Logo.svg";
-import { ReactComponent as NCCNDetail } from "../../assets/icons/Triangles_detail.svg";
-import RiskMatrix from "../../components/charts/RiskMatrix";
+import { useState, useRef, useMemo, useEffect } from "react";
 import {
-  CATEGORY_NAMES,
-  RISK_CATEGORY,
-} from "../../types/dataverse/DVRiskFile";
+  Container,
+  Typography,
+  Card,
+  CardActions,
+  CardContent,
+  Button,
+  Box,
+  Stack,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControl,
+  SelectChangeEvent,
+  OutlinedInput,
+  Chip,
+} from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
+import usePageTitle from "../../hooks/usePageTitle";
+import useBreadcrumbs from "../../hooks/useBreadcrumbs";
+import useRecords from "../../hooks/useRecords";
+import { DataTable } from "../../hooks/useAPI";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import {
-  Document,
-  Font,
-  Image,
-  Page,
-  PDFViewer,
-  Text,
-  View,
-} from "@react-pdf/renderer";
-import { renderToStaticMarkup } from "react-dom/server";
-import svg2PDF from "../../functions/svg2PDF";
-import NH15 from "../../assets/fonts/NHaasGroteskDSPro-15UltTh.ttf";
-import NH25 from "../../assets/fonts/NHaasGroteskDSPro-25Th.ttf";
-import NH45 from "../../assets/fonts/NHaasGroteskDSPro-45Lt.ttf";
-import NH46 from "../../assets/fonts/NHaasGroteskDSPro-46LtIt.ttf";
-import NH55 from "../../assets/fonts/NHaasGroteskDSPro-55Rg.ttf";
-import NH65 from "../../assets/fonts/NHaasGroteskDSPro-65Md.ttf";
-import NH66 from "../../assets/fonts/NHaasGroteskDSPro-66MdIt.ttf";
-import NH75 from "../../assets/fonts/NHaasGroteskDSPro-75Bd.ttf";
+  DVRiskCascade,
+  getCascadeResultSnapshot,
+} from "../../types/dataverse/DVRiskCascade";
+import {
+  getResultSnapshot,
+  SmallRisk,
+} from "../../types/dataverse/DVSmallRisk";
+import { DVAttachment } from "../../types/dataverse/DVAttachment";
+import { saveAs } from "file-saver";
 
-const categories = [
-  RISK_CATEGORY.MANMADE,
-  RISK_CATEGORY.CYBER,
-  RISK_CATEGORY.TRANSVERSAL,
-  RISK_CATEGORY.ECOTECH,
-  RISK_CATEGORY.HEALTH,
-  RISK_CATEGORY.NATURE,
-  RISK_CATEGORY.EMERGING,
-];
+enum EXPORT_TYPE {
+  ALL = "ALL",
+  SINGLE = "SINGLE",
+  DATA = "DATA",
+}
 
-const SPLASH: Partial<{ [key in RISK_CATEGORY]: string }> = {
-  Cyber: "splash1.png",
-  "Emerging Risk": "splash7.png",
-  Health: "splash5.png",
-  "Man-made": "splash2.png",
-  Nature: "splash6.png",
-  Transversal: "spalsh3.png",
-  EcoTech: "splash4.png",
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
 };
-
-Font.register({
-  family: "NH",
-  fonts: [
-    {
-      src: NH15,
-      fontWeight: 100,
-    },
-    {
-      src: NH25,
-      fontWeight: 200,
-    },
-    {
-      src: NH45,
-      fontWeight: 300,
-    },
-    {
-      src: NH46,
-      fontWeight: 300,
-      fontStyle: "italic",
-    },
-    {
-      src: NH55,
-      fontWeight: 400,
-    },
-    {
-      src: NH65,
-      fontWeight: 500,
-    },
-    {
-      src: NH66,
-      fontWeight: 500,
-      fontStyle: "italic",
-    },
-    {
-      src: NH75,
-      fontWeight: 700,
-    },
-  ],
-});
-Font.registerHyphenationCallback((word) => [word]);
 
 export default function ExportBNRAPage() {
-  const [detailSVG, setDetailSVG] = useState("");
-  const [nccnLogoSVG, setNccnLogoSVG] = useState("");
-  const [bnraLogoSVG, setBnraLogoSVG] = useState("");
+  const logLines = useRef<string[]>(["Loading data..."]);
+  const [, setUpdateLog] = useState(Date.now());
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [type, setType] = useState(EXPORT_TYPE.ALL);
+  const [selectedRiskFiles, setSelectedRiskFiles] = useState<DVRiskFile[]>([]);
 
-  useEffect(() => {
-    svg2PDF(
-      renderToStaticMarkup(
-        <NCCNDetail style={{ position: "absolute", bottom: 0, left: 0 }} />
-      )
-    ).then((uri) => setDetailSVG(uri || ""));
-    svg2PDF(
-      renderToStaticMarkup(
-        <NCCNLogo style={{ position: "absolute", bottom: 0, left: 0 }} />
-      )
-    ).then((uri) => setNccnLogoSVG(uri || ""));
-    svg2PDF(
-      renderToStaticMarkup(
-        <BNRALogo style={{ position: "absolute", bottom: 0, left: 0 }} />
-      )
-    ).then((uri) => setBnraLogoSVG(uri || ""));
-  }, []);
+  const handleChangeType = (event: SelectChangeEvent) => {
+    setType(event.target.value as EXPORT_TYPE);
+  };
 
-  return (
-    <Box sx={{ width: "100vw", height: "100vh" }}>
-      <PDFViewer
-        style={{ overflow: "hidden", height: "100%", width: "100%" }}
-        height="100%"
-        width="100%"
-      >
-        <Document>
-          <Page
-            size="A5"
-            style={{
-              backgroundColor: NCCN_GREEN,
-            }}
-          >
-            <View
-              style={{
-                width: "70%",
-                margin: "auto",
-                textAlign: "center",
-                marginTop: "60pt",
-                marginBottom: 0,
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: "NH",
-                  fontSize: "30pt",
-                  color: "white",
-                  fontWeight: "bold",
-                }}
-              >
-                Belgian National Risk Assessment
-              </Text>
-            </View>
-            <View
-              style={{
-                width: "80%",
-                margin: "auto",
-                textAlign: "center",
-                marginTop: "10pt",
-                marginBottom: "30pt",
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: "NH",
-                  fontSize: "20pt",
-                  color: "white",
-                  fontWeight: "normal",
-                }}
-              >
-                Full Report
-              </Text>
-              <Text
-                style={{
-                  fontFamily: "NH",
-                  fontSize: "20pt",
-                  color: "white",
-                  fontWeight: "normal",
-                }}
-              >
-                2023 - 2026
-              </Text>
-            </View>
-            <Image src="https://bnra.powerappsportals.com/report-front.png" />
-            <View
-              style={{
-                position: "absolute",
-                width: "100%",
-                bottom: "-0.5cm",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                paddingLeft: "0.5cm",
-                paddingRight: "0cm",
-              }}
-            >
-              <Image src={nccnLogoSVG} style={{ height: "3cm" }} />
-              <Image src={bnraLogoSVG} style={{ height: "2cm" }} />
-            </View>
-          </Page>
-          <Page
-            size="A5"
-            style={{
-              backgroundColor: NCCN_GREEN,
-            }}
-          >
-            <View
-              style={{
-                width: "80%",
-                height: "80%",
-                margin: "auto",
-                textAlign: "center",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                marginBottom: "100px",
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: "NH",
-                  fontSize: "16pt",
-                  color: "white",
-                  fontWeight: "semibold",
-                }}
-              >
-                Better prepared. Better response.
-              </Text>
-            </View>
-            <View
-              style={{
-                position: "absolute",
-                width: "100%",
-                bottom: "0",
-              }}
-            >
-              <Image src={detailSVG} />
-            </View>
-          </Page>
-          <Page
-            size="A5"
-            style={{
-              backgroundColor: NCCN_GREEN,
-            }}
-          ></Page>
-        </Document>
-      </PDFViewer>
-    </Box>
-  );
-}
+  const handleChangeRFs = (
+    event: SelectChangeEvent<typeof selectedRiskFiles>
+  ) => {
+    const {
+      target: { value },
+    } = event;
+    if (typeof value === "string") return;
 
-export function ExportBNRAPage2() {
+    setSelectedRiskFiles(
+      value
+        .map((rf) => {
+          if (typeof rf === "string") {
+            if (
+              value.find(
+                (r) => typeof r !== "string" && r.cr4de_riskfilesid === rf
+              )
+            )
+              return undefined;
+            return riskFiles?.find((r) => r.cr4de_riskfilesid === rf);
+          } else if (
+            value.find(
+              (r) => typeof r === "string" && r === rf.cr4de_riskfilesid
+            )
+          ) {
+            return undefined;
+          }
+          return rf;
+        })
+        .filter((rf) => rf !== undefined) as DVRiskFile[]
+    );
+  };
+
+  const logger = (line: string, slice: number = 0) => {
+    logLines.current = [...logLines.current.slice(slice), line];
+    setUpdateLog(Date.now());
+  };
+
   const {
-    riskFiles,
-    loadAllRiskFiles,
-    allRiskFilesLoaded,
-    loadAllAttachments,
-    allRiskFilesLoading,
-    allAttachmentsLoaded,
-    allAttachmentsLoading,
-  } = useOutletContext<RiskPageContext>();
+    data: riskFiles,
+    isFetching: loadingRiskFiles,
+    reloadData: reloadRiskFiles,
+  } = useRecords<DVRiskFile>({
+    table: DataTable.RISK_FILE,
+    query: `$orderby=cr4de_hazard_id&$filter=cr4de_risk_category ne 'test'`,
+    onComplete: async (data) =>
+      logger(`    Finished loading ${data.length} risk files`),
+    transformResult: (rfs) =>
+      rfs.map((rf: DVRiskFile) => ({
+        ...rf,
+        results: getResultSnapshot(rf),
+      })),
+  });
+  const {
+    data: cascades,
+    isFetching: loadingCascades,
+    reloadData: reloadCascades,
+  } = useRecords<DVRiskCascade<SmallRisk, SmallRisk>>({
+    table: DataTable.RISK_CASCADE,
+    onComplete: async (data) =>
+      logger(`    Finished loading ${data.length} cascades`),
+    transformResult: (results: DVRiskCascade[]) =>
+      results.map((r) => {
+        return {
+          ...r,
+          results: getCascadeResultSnapshot(r),
+        } as DVRiskCascade<SmallRisk, SmallRisk>;
+      }),
+  });
 
-  useEffect(() => {
-    if (!allRiskFilesLoading && !allRiskFilesLoaded) loadAllRiskFiles();
-    if (!allAttachmentsLoading && !allAttachmentsLoaded) loadAllAttachments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadAllRiskFiles, loadAllAttachments]);
+  const {
+    data: attachments,
+    isFetching: loadingAttachments,
+    reloadData: reloadAttachments,
+  } = useRecords<DVAttachment>({
+    table: DataTable.ATTACHMENT,
+    query: `$orderby=cr4de_reference&$filter=cr4de_reference ne null&$expand=cr4de_referencedSource`,
+    transformResult: (results: DVAttachment<unknown, DVAttachment>[]) =>
+      results.map((a) =>
+        a.cr4de_referencedSource
+          ? {
+              ...a.cr4de_referencedSource,
+              cr4de_bnraattachmentid: a.cr4de_bnraattachmentid,
+              cr4de_field: a.cr4de_field,
+              cr4de_referencedSource: a.cr4de_referencedSource,
+            }
+          : a
+      ),
+    // .reduce((acc, att) => {
+    //   if (!acc.find((a) => a.cr4de_reference === att.cr4de_reference))
+    //     return [...acc, att];
+    //   return acc;
+    // }, [] as DVAttachment[]),
+    onComplete: async (data) =>
+      logger(`    Finished loading ${data.length} attachments`),
+  });
 
-  if (!allRiskFilesLoaded || !allAttachmentsLoaded)
-    return (
-      <Box sx={{ width: "100%", mt: 20, textAlign: "center" }}>
-        <NCCNLoader />
-      </Box>
+  usePageTitle("BNRA 2023 - 2026 Export to PDF");
+  useBreadcrumbs([
+    { name: "BNRA 2023 - 2026", url: "/" },
+    { name: "Export", url: "/export" },
+  ]);
+
+  const isLoading = loadingRiskFiles || loadingCascades;
+
+  const exporter: Worker = useMemo(() => {
+    const testUrl = new URL(
+      "../../functions/export/export.worker.ts",
+      import.meta.url
     );
 
+    if (testUrl.href.indexOf("githack") >= 0) {
+      return new Worker(
+        new URL("https://bnra.powerappsportals.com/export.worker.js")
+      );
+    }
+
+    return new Worker(
+      new URL("../../functions/export/export.worker.ts", import.meta.url),
+      { type: "module" }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [riskFiles]);
+
+  useEffect(() => {
+    if (window.Worker) {
+      // calculator.onmessage = (e: MessageEvent<MessageParams>) => {
+      exporter.onmessage = (e: MessageEvent) => {
+        if (e.data.type === "progress") {
+          logger(e.data.message);
+        }
+        if (e.data.type === "result") {
+          if (e.data.fileType === "pdf") {
+            setPdfUrl(URL.createObjectURL(e.data.value));
+          } else {
+            setPdfUrl(null);
+            saveAs(e.data.value, "BNRA-export.xlsx");
+          }
+          logger("Done.");
+        }
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exporter]);
+
+  const reloadData = () => {
+    logger("Loading data...");
+    reloadCascades();
+    reloadRiskFiles();
+    reloadAttachments();
+  };
+
+  const exportToPDF = async () => {
+    if (!riskFiles || !cascades || !attachments) return;
+
+    if (type !== EXPORT_TYPE.ALL && selectedRiskFiles.length <= 0) {
+      logger("Please select at least 1 risk file");
+
+      return;
+    }
+
+    exporter.postMessage({
+      exportType: type,
+      exportedRiskFiles: selectedRiskFiles,
+      riskFiles,
+      cascades,
+      attachments,
+    });
+  };
+
   return (
-    <Box id="bnra-export">
-      <Box
-        style={{
-          width: "21cm",
-          height: "29.7cm",
-          margin: "auto",
-          backgroundColor: NCCN_GREEN,
-          position: "relative",
-        }}
-      >
-        <Typography
-          variant="h1"
-          sx={{
-            textAlign: "center",
-            color: "white",
-            fontWeight: "600",
-            width: "60%",
-            margin: "auto",
-            paddingTop: "130px",
-            fontSize: "53px",
-          }}
-        >
-          Belgian National Risk Assessment
-        </Typography>
-        <Typography
-          sx={{
-            textAlign: "center",
-            color: "white",
-            width: "60%",
-            margin: "auto",
-            fontSize: "30px",
-            paddingTop: "20px",
-            paddingBottom: "40px",
-          }}
-        >
-          Full Report
-          <br />
-          2023 - 2026
-        </Typography>
-        <img
-          alt="Report front page"
-          src="https://bnra.powerappsportals.com/report-front.png"
-          style={{ width: "100%" }}
-        />
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          sx={{ position: "absolute", bottom: 20, px: 5, width: "100%" }}
-        >
-          <NCCNLogo style={{ width: "7cm", height: "50px" }} />
-          <BNRALogo style={{ width: "4cm", height: "50px" }} />
-        </Stack>
-      </Box>
-
-      <Box
-        style={{
-          width: "21cm",
-          height: "29.7cm",
-          margin: "auto",
-          backgroundColor: NCCN_GREEN,
-          position: "relative",
-        }}
-      >
-        <Typography
-          variant="h1"
-          sx={{
-            textAlign: "center",
-            color: "white",
-            fontWeight: "600",
-            width: "90%",
-            margin: "auto",
-            paddingTop: "370px",
-            fontSize: "24px",
-          }}
-        >
-          Better prepared. Better response.
-        </Typography>
-        <NCCNDetail style={{ position: "absolute", bottom: 0, left: 0 }} />
-      </Box>
-
-      <Box
-        style={{
-          width: "21cm",
-          height: "29.7cm",
-          margin: "auto",
-          position: "relative",
-          backgroundColor: "white",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
-      >
-        <Typography
-          variant="h1"
-          sx={{
-            textAlign: "left",
-            color: "#231F20",
-            fontWeight: "600",
-            width: "90%",
-            margin: "auto",
-            fontSize: "36px",
-            marginBottom: 5,
-          }}
-        >
-          Risk Matrix
-        </Typography>
-        <Box sx={{ width: "19cm", height: "19cm", margin: "auto" }}>
-          <RiskMatrix
-            riskFiles={Object.values(riskFiles)}
-            labels={true}
-            labelSize={10}
-          />
-        </Box>
-      </Box>
-
-      <Box className="break" />
-
-      {categories.map((c) => (
-        <>
-          <CategoryFrontPage category={c} />
-          {Object.values(riskFiles)
-            .filter((rf) => rf.cr4de_risk_category === c)
-            .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
-            .map(() => (
-              <>
-                {/* <ExportRiskFile
-                  key={rf.cr4de_riskfilesid}
-                  hazardCatalogue={hazardCatalogue}
-                  riskFile={rf}
-                  cascades={cascades[rf.cr4de_riskfilesid]}
-                  attachments={allAttachments.filter((a) => a._cr4de_risk_file_value === rf.cr4de_riskfilesid)}
-                /> */}
-                <Box className="break" />
-              </>
-            ))}
-        </>
-      ))}
-    </Box>
-  );
-}
-
-const SPLASH_POS: Partial<{ [key in RISK_CATEGORY]: string }> = {
-  "Man-made": "65% 50%",
-};
-
-function CategoryFrontPage({ category }: { category: RISK_CATEGORY }) {
-  return (
-    <Box
-      style={{
-        width: "21cm",
-        height: "29.7cm",
-        margin: "auto",
-        backgroundColor: NCCN_GREEN,
-        position: "relative",
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
-      <Box
-        sx={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          opacity: 0.2,
-          backgroundImage: `url('https://bnra.powerappsportals.com/${SPLASH[category]}')`,
-          backgroundSize: "cover",
-          backgroundPosition: SPLASH_POS[category] || "center",
-          zIndex: 1,
-        }}
-      />
-      <Typography
-        variant="h1"
-        sx={{
-          textAlign: "center",
-          color: "white",
-          fontWeight: "600",
-          width: "60%",
-          margin: "auto",
-          fontSize: "40px",
-          zIndex: 2,
-        }}
-      >
-        {CATEGORY_NAMES[category]}
-      </Typography>
-    </Box>
+    <>
+      <Container sx={{ mt: 4, pb: 8 }}>
+        <Card sx={{ mb: 4 }}>
+          <CardContent sx={{}}>
+            <Typography variant="subtitle2">Export log:</Typography>
+            <Box
+              sx={{
+                mt: 1,
+              }}
+            >
+              <Stack direction="row">
+                <Stack direction="column" sx={{ flex: 1 }}>
+                  <Stack direction="row">
+                    <Box sx={{ width: 24, height: 32, mx: 1 }}>
+                      {riskFiles && !loadingRiskFiles && (
+                        <CheckIcon color="success" />
+                      )}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle2" sx={{ mt: "2px" }}>
+                        Risk Files
+                      </Typography>
+                    </Box>
+                  </Stack>
+                  <Stack direction="row">
+                    <Box sx={{ width: 24, height: 32, mx: 1 }}>
+                      {cascades && !loadingCascades && (
+                        <CheckIcon color="success" />
+                      )}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle2" sx={{ mt: "2px" }}>
+                        Risk Cascades
+                      </Typography>
+                    </Box>
+                  </Stack>
+                  <Stack direction="row">
+                    <Box sx={{ width: 24, height: 32, mx: 1 }}>
+                      {attachments && !loadingAttachments && (
+                        <CheckIcon color="success" />
+                      )}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle2" sx={{ mt: "2px" }}>
+                        Attachments
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Stack>
+                <Stack direction="column" sx={{ flex: 1 }}>
+                  <FormControl fullWidth sx={{ my: 1 }}>
+                    <InputLabel id="export-type-label">Export Type</InputLabel>
+                    <Select
+                      labelId="export-type-label"
+                      id="export-type"
+                      value={type}
+                      label="Export Type"
+                      onChange={handleChangeType}
+                    >
+                      <MenuItem value={EXPORT_TYPE.ALL}>
+                        BNRA Full Report
+                      </MenuItem>
+                      <MenuItem value={EXPORT_TYPE.SINGLE}>Risk File</MenuItem>
+                      <MenuItem value={EXPORT_TYPE.DATA}>Raw Data</MenuItem>
+                    </Select>
+                  </FormControl>
+                  {type !== EXPORT_TYPE.ALL && (
+                    <FormControl fullWidth sx={{ my: 1 }}>
+                      <InputLabel id="rf-label">Risk Files</InputLabel>
+                      <Select
+                        labelId="rf-label"
+                        id="rf-chip"
+                        multiple
+                        value={selectedRiskFiles}
+                        onChange={handleChangeRFs}
+                        input={
+                          <OutlinedInput
+                            id="select-multiple-chip"
+                            label="Risk Files"
+                          />
+                        }
+                        renderValue={(selected) => (
+                          <Box
+                            sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
+                          >
+                            {selected.map((rf) => (
+                              <Chip
+                                key={rf.cr4de_riskfilesid}
+                                label={rf.cr4de_title}
+                              />
+                            ))}
+                          </Box>
+                        )}
+                        MenuProps={MenuProps}
+                      >
+                        {riskFiles &&
+                          riskFiles.map((rf) => (
+                            <MenuItem
+                              key={rf.cr4de_riskfilesid}
+                              value={rf.cr4de_riskfilesid}
+                              style={{
+                                fontWeight: selectedRiskFiles.includes(rf)
+                                  ? 600
+                                  : 400,
+                              }}
+                            >
+                              {rf.cr4de_title}
+                            </MenuItem>
+                          ))}
+                      </Select>
+                    </FormControl>
+                  )}
+                </Stack>
+              </Stack>
+              <Box
+                sx={{
+                  mt: 2,
+                  mx: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  border: "1px solid #ddd",
+                  padding: 1,
+                  height: 200,
+                  overflowY: "auto",
+                }}
+              >
+                {logLines.current.reverse().map((l, i) => (
+                  <Typography key={i} variant="caption">
+                    {l}
+                  </Typography>
+                ))}
+              </Box>
+            </Box>
+          </CardContent>
+          <CardActions>
+            <Button disabled={isLoading} onClick={reloadData}>
+              Reload data
+            </Button>
+            <Button disabled={isLoading} onClick={exportToPDF}>
+              Export
+            </Button>
+            {/* <Box sx={{ flex: 1 }} />
+            <Button
+              color="warning"
+              disabled={calculations === null || isCalculating}
+              onClick={saveResults}
+            >
+              Save results
+            </Button> */}
+            {/* <Button
+              color="warning"
+              disabled={
+                calculations === null || isCalculating || !latestAnalysisId
+              }
+              onClick={saveSnapshot}
+            >
+              Save snapshot
+            </Button> */}
+          </CardActions>
+        </Card>
+        {pdfUrl && (
+          <iframe title="export" width="100%" height={500} src={pdfUrl} />
+        )}
+      </Container>
+    </>
   );
 }

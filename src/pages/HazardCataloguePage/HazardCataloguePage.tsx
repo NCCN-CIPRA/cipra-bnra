@@ -28,7 +28,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
 import TableHeader from "./TableHeader";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import { CategoryIcon } from "../../functions/getCategoryColor";
+import { CategoryIcon } from "../../functions/getIcons";
 import BNRASpeedDial from "../../components/BNRASpeedDial";
 import HazardCatalogueTutorial from "./HazardCatalogueTutorial";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";

@@ -1,6 +1,5 @@
 import { Box, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { Cascades } from "../../BaseRisksPage";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import DefinitionSection from "../DefinitionSection";
@@ -11,6 +10,7 @@ import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import EmergingIdentificationTutorial from "./EmergingIdentificationTutorial";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
+import { Cascades } from "../../../functions/cascades";
 
 export default function Emerging({
   riskFile,

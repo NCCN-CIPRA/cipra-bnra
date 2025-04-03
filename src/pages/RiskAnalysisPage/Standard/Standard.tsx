@@ -18,12 +18,12 @@ import Bibliography from "../Bibliography";
 import SankeyDiagram from "./SankeyDiagram";
 import DisclaimerSection from "../DisclaimerSection";
 import { useTranslation } from "react-i18next";
-import { Cascades } from "../../BaseRisksPage";
 import RiskFileTitle from "../../../components/RiskFileTitle";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import StandardAnalysisTutorial from "./StandardAnalysisTutorial";
+import { Cascades } from "../../../functions/cascades";
 
 const getScenarioSuffix = (scenario: SCENARIOS) => {
   if (scenario === SCENARIOS.CONSIDERABLE) return "_c";

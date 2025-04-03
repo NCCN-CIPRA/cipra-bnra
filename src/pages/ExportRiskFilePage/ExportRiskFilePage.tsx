@@ -2,10 +2,9 @@ import { useParams } from "react-router-dom";
 import "./ExportRiskFilePage.css";
 import { Box } from "@mui/material";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import { SvgChart } from "../../components/charts/SummaryCharts";
+import SummaryImpactChart from "../../components/charts/svg/SummaryImpactChart";
 import { getScenarioParameter, SCENARIOS } from "../../functions/scenarios";
 import { useMemo } from "react";
-import { Cascades } from "../BaseRisksPage";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import {
   getResultSnapshot,
@@ -14,22 +13,22 @@ import {
 import { Document, PDFViewer } from "@react-pdf/renderer";
 import useRecord from "../../hooks/useRecord";
 import { DataTable } from "../../hooks/useAPI";
-import { ProbabilityBarsChart } from "../../components/charts/ProbabilityBars";
 import { getCategoryImpactRescaled } from "../../functions/CategoryImpact";
-import { SvgChart as ProbabilitySankey } from "../../components/charts/ProbabilitySankey";
+import ProbabilitySankeyChart from "../../components/charts/svg/ProbabilitySankeyChart";
 import useRecords from "../../hooks/useRecords";
 import {
   DVRiskCascade,
   getCascadeResultSnapshot,
 } from "../../types/dataverse/DVRiskCascade";
 import {
+  Cascades,
   getCatalyzingEffects,
   getCauses,
   getClimateChange,
   getEffects,
 } from "../../functions/cascades";
-import { SvgChart as ImpactSankey } from "../../components/charts/ImpactSankey";
-import ImpactBarChart from "../../components/charts/ImpactBarChart";
+import ImpactSankey from "../../components/charts/svg/ImpactSankeyChart";
+import ImpactBarChart from "../../components/charts/svg/ImpactBarChart";
 import SummarySection from "./SummarySection";
 import DescriptionSection from "./DescriptionSection";
 import AnalysisSection from "./AnalysisSection";
@@ -39,6 +38,7 @@ import BibliographySection from "./BibliographySection";
 import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
 import "./fonts";
 import useLoggedInUser, { LoggedInUser } from "../../hooks/useLoggedInUser";
+import { ProbabilityBarsChart } from "../../components/charts/svg/ProbabilityBarsChart";
 
 const barWidth = 300;
 const barHeight = 500;
@@ -217,7 +217,7 @@ export function ExportRiskFileCharts({
         id={`hChart-${riskFile.cr4de_riskfilesid}`}
         style={{ position: "absolute", top: -100000 }}
       >
-        <SvgChart
+        <SummaryImpactChart
           category="H"
           value={H}
           width={500}
@@ -229,7 +229,7 @@ export function ExportRiskFileCharts({
         id={`sChart-${riskFile.cr4de_riskfilesid}`}
         style={{ position: "absolute", top: -100000 }}
       >
-        <SvgChart
+        <SummaryImpactChart
           category="S"
           value={S}
           width={500}
@@ -241,7 +241,7 @@ export function ExportRiskFileCharts({
         id={`eChart-${riskFile.cr4de_riskfilesid}`}
         style={{ position: "absolute", top: -100000 }}
       >
-        <SvgChart
+        <SummaryImpactChart
           category="E"
           value={E}
           width={500}
@@ -253,7 +253,7 @@ export function ExportRiskFileCharts({
         id={`fChart-${riskFile.cr4de_riskfilesid}`}
         style={{ position: "absolute", top: -100000 }}
       >
-        <SvgChart
+        <SummaryImpactChart
           category="F"
           value={F}
           width={500}
@@ -265,7 +265,7 @@ export function ExportRiskFileCharts({
         id={`probChart-${riskFile.cr4de_riskfilesid}`}
         style={{ position: "absolute", top: -100000 }}
       >
-        <ProbabilitySankey
+        <ProbabilitySankeyChart
           riskFile={riskFile}
           cascades={cascades}
           maxCauses={null}

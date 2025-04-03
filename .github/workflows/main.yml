@@ -21,3 +21,22 @@ jobs:
         run: npm ci
       - name: Build application
         run: npm run build
+
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Upload `.png`s to Azure Blob Storage
+      - name: Upload all PNGs to Azure Blob Storage
+        id: upload
+        uses: github-developer/upload-azure-blob@v1
+        with:
+          account: octodex
+          destination: octocats
+          source: "**/*.png"
+
+      # Print out the urls to uploaded files
+      - name: Print URLs
+        run: echo $URLS # { ["filename":"hulatocat.png","url":"https://octodex.blob.core.windows.net/octocats/hulatocat.png"] }
+        env:
+          URLS: ${{ steps.upload.outputs.urls }}

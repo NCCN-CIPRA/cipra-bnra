@@ -5,15 +5,15 @@ import {
   getScenarioParameter,
 } from "../../../functions/scenarios";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
-import ImpactBarChart from "../../../components/charts/ImpactBarChart";
+import ImpactBarChart from "../../../components/charts/ImpactBars";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import ImpactSankey from "../../../components/charts/ImpactSankey";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import { useEffect } from "react";
 import ActionsSankey from "../../../components/charts/ActionsSankey";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { Cascades } from "../../BaseRisksPage";
 import { useTranslation } from "react-i18next";
+import { Cascades } from "../../../functions/cascades";
 
 export default function MMSankeyDiagram({
   riskFile,

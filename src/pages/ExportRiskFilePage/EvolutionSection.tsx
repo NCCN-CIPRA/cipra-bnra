@@ -17,8 +17,8 @@ import { useEffect, useState } from "react";
 import svg2PDF from "../../functions/svg2PDF";
 import { BLACK } from "../../functions/colors";
 import Header from "./Header";
-import { Cascades } from "../BaseRisksPage";
 import { LoggedInUser } from "../../hooks/useLoggedInUser";
+import { Cascades } from "../../functions/cascades";
 
 export default function EvolutionSection({
   riskFile,
@@ -90,7 +90,7 @@ export default function EvolutionSection({
             // debug={true}
           />
         )}
-        {html2PDF(riskFile.cr4de_mrs_cc, "evolution")}
+        {html2PDF(riskFile.cr4de_mrs_cc, "evolution", riskFile)}
       </View>
 
       <View
@@ -117,7 +117,7 @@ export default function EvolutionSection({
             >
               {c.cr4de_cause_hazard.cr4de_title}
             </Text>
-            {html2PDF(c.cr4de_description, "evolution")}
+            {html2PDF(c.cr4de_description, "evolution", riskFile)}
           </View>
         ))}
       </View>

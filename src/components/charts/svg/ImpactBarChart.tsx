@@ -6,11 +6,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  TooltipProps,
 } from "recharts";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { Box, Stack, Typography } from "@mui/material";
-import { getScenarioParameter, SCENARIOS } from "../../functions/scenarios";
+import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { getScenarioParameter, SCENARIOS } from "../../../functions/scenarios";
 import {
   NameType,
   ValueType,
@@ -19,63 +17,21 @@ import { useTranslation } from "react-i18next";
 import {
   getCategoryImpactRescaled,
   getDamageIndicatorToCategoryImpactRatio,
-} from "../../functions/CategoryImpact";
-
-const CustomTooltip = ({
-  active,
-  payload,
-  label,
-}: TooltipProps<ValueType, NameType>) => {
-  if (active && payload && payload.length) {
-    return (
-      <Box
-        sx={{
-          border: "1px solid #ccc",
-          padding: 1,
-          bgcolor: "rgba(255,255,255,0.8)",
-          mb: 1,
-        }}
-      >
-        <Typography
-          variant="subtitle2"
-          sx={{ textDecoration: "underline", mb: 1 }}
-        >
-          {label} Impact
-        </Typography>
-        {payload.map((p) => (
-          <Stack key={p.name} direction="row" rowGap={0.5}>
-            <Typography variant="body2" sx={{ width: 50, fontWeight: "bold" }}>
-              {p.name}
-              {p.payload[`${p.name}_abs`]}
-            </Typography>
-          </Stack>
-        ))}
-        {/* <Stack direction="row" sx={{ mt: 1 }}>
-          <Typography variant="body2" sx={{ width: 50, fontWeight: "bold" }}>
-            Total :
-          </Typography>
-          <Typography variant="body2" sx={{ width: 50, fontWeight: "bold", textAlign: "right" }}>{`${round(
-            payload.reduce((sum, p) => sum + (p.value as number), 0),
-            1
-          )} / 5`}</Typography>
-        </Stack> */}
-      </Box>
-    );
-  }
-
-  return null;
-};
+} from "../../../functions/CategoryImpact";
+import { ContentType } from "recharts/types/component/Tooltip";
 
 export default function ImpactBarChart({
   riskFile,
   scenario,
   width,
   height,
+  CustomTooltip,
 }: {
   riskFile: DVRiskFile | null;
   scenario: SCENARIOS;
   width?: number;
   height?: number;
+  CustomTooltip?: ContentType<ValueType, NameType>;
 }) {
   const { t } = useTranslation();
   if (!riskFile) return null;
@@ -151,7 +107,7 @@ export default function ImpactBarChart({
           width={10}
           fontSize={22}
         />
-        <Tooltip content={<CustomTooltip />} />
+        {CustomTooltip && <Tooltip content={CustomTooltip} />}
         <Bar dataKey="Ha" stackId="a" fill="#de6148" />
         <Bar dataKey="Hb" stackId="a" fill="#f39d87" />
         <Bar dataKey="Hc" stackId="a" fill="#ffd7cc" />
@@ -189,7 +145,7 @@ export default function ImpactBarChart({
           textAnchor="end"
         />
         <YAxis domain={[0, 5.5]} ticks={[1, 2, 3, 4, 5]} width={10} />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip content={CustomTooltip} />
         <Bar dataKey="Ha" stackId="a" fill="#de6148" />
         <Bar dataKey="Hb" stackId="a" fill="#f39d87" />
         <Bar dataKey="Hc" stackId="a" fill="#ffd7cc" />

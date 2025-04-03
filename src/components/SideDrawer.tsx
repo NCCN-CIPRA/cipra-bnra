@@ -112,6 +112,18 @@ export default function SideDrawer({
                       />
                     </ListItemButton>
                   </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      component={Link}
+                      to="/export"
+                      onClick={onClose}
+                    >
+                      <ListItemIcon></ListItemIcon>
+                      <ListItemText
+                        primary={t("sideDrawer.reporting", "Reporting")}
+                      />
+                    </ListItemButton>
+                  </ListItem>
                   <Divider />
                   <ListItem disablePadding>
                     <ListItemButton

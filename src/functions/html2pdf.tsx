@@ -10,6 +10,8 @@ import {
 } from "../pages/ExportRiskFilePage/styles";
 import { BLACK } from "./colors";
 import { Style } from "@react-pdf/types";
+import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import { italicStyle } from "../components/export/styles";
 
 type HTMLTag = {
   tagName: string;
@@ -140,6 +142,10 @@ const tag2PDF = (
       // styles = bodyStyle;
     } else if (tag.tagName === "a") {
       // styles = bodyStyle;
+    } else if (tag.tagName === "ref") {
+      return (
+        <Text style={{ ...bodyStyle, ...italicStyle }}> ({tag.content})</Text>
+      );
     }
 
     return (
@@ -350,11 +356,17 @@ const tag2PDF = (
 
 export default function html2PDF(
   html: string | null,
-  section: Section
+  section: Section,
+  riskFile: DVRiskFile
 ): (ReactElement | null)[] {
   if (html === null) return [null];
 
-  const parsed = parseTag(`<div>${html}</div>`);
+  const parsed = parseTag(
+    `<div>${html.replace(
+      / ?<a href="#ref-\d+" .*?>\((\d+)\)<\/a>/g,
+      `<ref>${riskFile.cr4de_hazard_id}-$1</ref>`
+    )}</div>`
+  );
   // console.log(html, parsed);
   // console.log(parsed, (parsed.content as HTMLTag[]).map(e => tag2PDF(e)).filter(e=>e!==null))
 

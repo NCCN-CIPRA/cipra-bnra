@@ -14,10 +14,10 @@ import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { Trans, useTranslation } from "react-i18next";
 import usePageTitle from "../../hooks/usePageTitle";
 import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
-import { CategoryIcon } from "../../functions/getCategoryColor";
 import { useState } from "react";
 import { BasePageContext } from "../BasePage";
 import { getLanguage } from "../../functions/translations";
+import { CategoryIcon } from "../../functions/getIcons";
 
 const getCleanLanguage = (language: string) => {
   if (language.indexOf("en") >= 0) return "en";

@@ -170,6 +170,11 @@ function App() {
                   element: <OverviewPage />,
                 },
 
+                {
+                  path: "/export",
+                  element: <ExportBNRAPage />,
+                },
+
                 // DEPRECATED
                 // {
                 //   path: "/validation/:validation_id",

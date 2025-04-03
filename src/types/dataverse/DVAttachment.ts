@@ -1,4 +1,8 @@
-export interface DVAttachment<ContactType = unknown, SourceType = unknown> {
+export interface DVAttachment<
+  ContactType = unknown,
+  SourceType = unknown,
+  RiskFileType = unknown
+> {
   cr4de_bnraattachmentid: string;
 
   _cr4de_owner_value: string;
@@ -14,6 +18,7 @@ export interface DVAttachment<ContactType = unknown, SourceType = unknown> {
   _cr4de_referencedSource_value: string | null;
 
   _cr4de_risk_file_value: string | null;
+  cr4de_risk_file: RiskFileType | null;
   _cr4de_validation_value: string | null;
   _cr4de_direct_analysis_value: string | null;
   _cr4de_cascade_analysis_value: string | null;
