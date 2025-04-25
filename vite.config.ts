@@ -12,7 +12,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: "https://raw.githubusercontent.com/NCCN-CIPRA/cipra-bnra/refs/heads/dev/dist",
+  base: "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/dist",
   build: {
     rollupOptions: {
       external: ["**/_deprecated/**"],
