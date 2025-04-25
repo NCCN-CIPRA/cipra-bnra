@@ -35,8 +35,27 @@ import RiskMatrixPage from "./pages/RiskMatrixPage/RiskMatrixPage";
 import RiskEvolutionPage from "./pages/RiskEvolution/RiskEvolutionPage";
 import ExportRiskFilePage from "./pages/ExportRiskFilePage/ExportRiskFilePage";
 import ExportBNRAPage from "./pages/ExportBNRAPage/ExportBNRAPage";
+import { useEffect } from "react";
 
 export default function App() {
+  useEffect(() => {
+    const getAntiForgeryToken = async () => {
+      const response = await fetch(
+        `https://bnra.powerappsportals.com/_layout/tokenhtml?_=${Date.now()}`,
+        {
+          method: "GET",
+        }
+      );
+
+      localStorage.setItem(
+        "antiforgerytoken",
+        await (await response.text()).split("value")[1].split('"')[1]
+      );
+    };
+
+    getAntiForgeryToken();
+  }, []);
+
   const router = createBrowserRouter([
     {
       path: "/",
