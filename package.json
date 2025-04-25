@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && cp dist\\assets\\index-*.js dist\\assets\\index.js && move dist\\assets\\index-*.css dist\\assets\\index.css",
+    "build": "tsc -b && vite build && copy dist\\assets\\index-*.js dist\\assets\\index.js && copy dist\\assets\\index-*.css dist\\assets\\index.css",
     "lint": "eslint .",
     "lint-ts": "tsc -b",
     "preview": "vite preview"
