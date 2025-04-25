@@ -1,5 +1,12 @@
-import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip, TooltipProps } from "recharts";
-import { Box, Typography } from "@mui/material";
+import {
+  PieChart,
+  Pie,
+  ResponsiveContainer,
+  Cell,
+  Tooltip,
+  TooltipProps,
+} from "recharts";
+import { Typography } from "@mui/material";
 import { getImpactScale } from "../../functions/Impact";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
@@ -18,11 +25,16 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
           <Typography variant="subtitle1">{payload[0].name}:</Typography>
         </p>
         <p style={{ margin: 0, marginLeft: 10 }}>
-          <Typography variant="subtitle2">{getImpactScale(payload[0]!.value!, payload[0]!.payload.scale!)}</Typography>
+          <Typography variant="subtitle2">
+            {getImpactScale(payload[0]!.value!, payload[0]!.payload.scale!)}
+          </Typography>
         </p>
         <p style={{ margin: 0, marginLeft: 10 }}>
           <Typography variant="caption">
-            {Math.round((payload[0]!.value! / payload[0]!.payload.total!) * 10000) / 100}% of total impact
+            {Math.round(
+              (payload[0]!.value! / payload[0]!.payload.total!) * 10000
+            ) / 100}
+            % of total impact
           </Typography>
         </p>
       </div>
@@ -33,7 +45,6 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
 };
 
 export default function ImpactDistributionPieChart({
-  riskFile = null,
   calculation,
 }: {
   riskFile?: DVRiskFile | null;
@@ -51,7 +62,11 @@ export default function ImpactDistributionPieChart({
     },
     {
       name: "Societal Impact",
-      value: calculation.ti_Sa + calculation.ti_Sb + calculation.ti_Sc + calculation.ti_Sd,
+      value:
+        calculation.ti_Sa +
+        calculation.ti_Sb +
+        calculation.ti_Sc +
+        calculation.ti_Sd,
       color: "#a6932d",
       total: calculation.ti,
       scale: "S",
@@ -149,12 +164,27 @@ export default function ImpactDistributionPieChart({
     <>
       <ResponsiveContainer width="100%" height={160}>
         <PieChart>
-          <Pie data={dataGlobal} dataKey="value" cx="50%" cy="50%" outerRadius={55} fill="#8884d8">
+          <Pie
+            data={dataGlobal}
+            dataKey="value"
+            cx="50%"
+            cy="50%"
+            outerRadius={55}
+            fill="#8884d8"
+          >
             {dataGlobal.map((d) => (
               <Cell key={d.name} fill={d.color} />
             ))}
           </Pie>
-          <Pie data={dataSpecific} dataKey="value" cx="50%" cy="50%" innerRadius={65} outerRadius={80} fill="#82ca9d">
+          <Pie
+            data={dataSpecific}
+            dataKey="value"
+            cx="50%"
+            cy="50%"
+            innerRadius={65}
+            outerRadius={80}
+            fill="#82ca9d"
+          >
             {dataSpecific.map((d) => (
               <Cell key={d.name} fill={d.color} />
             ))}

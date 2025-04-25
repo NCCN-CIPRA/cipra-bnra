@@ -16,7 +16,7 @@ export default function useRecords<T>(options: GetRecordsParams<T>) {
   const { loading, isFetching, data, getData } = useLazyRecords<T>(options);
 
   const [_fired, setFired] = useState(false);
-  const resolveFn = useRef<(data: T[]) => void>();
+  const resolveFn = useRef<((data: T[]) => void) | null>(null);
 
   const dataPromise = useMemo(
     () =>
@@ -30,7 +30,7 @@ export default function useRecords<T>(options: GetRecordsParams<T>) {
     if (_fired) return;
 
     getData().then((value) => {
-      resolveFn.current && resolveFn.current(value);
+      if (resolveFn.current) resolveFn.current(value);
     });
     setFired(true);
   }, [_fired, getData]);

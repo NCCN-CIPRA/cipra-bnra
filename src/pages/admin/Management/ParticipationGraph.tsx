@@ -4,8 +4,6 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
-  Legend,
-  ResponsiveContainer,
   XAxis,
   YAxis,
   Tooltip,
@@ -19,12 +17,16 @@ import {
   ValidationEditableFields,
   VALIDATION_EDITABLE_FIELDS,
 } from "../../../types/dataverse/DVValidation";
-import { SelectableContact, SelectableRiskFile } from "./Selectables";
+import { SelectableContact } from "./Selectables";
 import {
   DIRECT_ANALYSIS_EDITABLE_FIELDS,
   DVDirectAnalysis,
   DirectAnalysisEditableFields,
 } from "../../../types/dataverse/DVDirectAnalysis";
+import {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 
 interface Bucket {
   date: number;
@@ -40,16 +42,27 @@ const isValidationComplete = (input: ValidationEditableFields) =>
   VALIDATION_EDITABLE_FIELDS.every((fieldName) => input[fieldName] !== null);
 
 const isStep2AEmpty = (input: DirectAnalysisEditableFields) =>
-  DIRECT_ANALYSIS_EDITABLE_FIELDS.every((fieldName) => input[fieldName] === null);
+  DIRECT_ANALYSIS_EDITABLE_FIELDS.every(
+    (fieldName) => input[fieldName] === null
+  );
 const isStep2AComplete = (input: DirectAnalysisEditableFields) =>
-  DIRECT_ANALYSIS_EDITABLE_FIELDS.every((fieldName) => input[fieldName] !== null);
+  DIRECT_ANALYSIS_EDITABLE_FIELDS.every(
+    (fieldName) => input[fieldName] !== null
+  );
 
-const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any[]; label?: any } = {}) => {
+const CustomTooltip = ({
+  payload,
+  label,
+}: TooltipProps<ValueType, NameType>) => {
   if (!payload || payload.length <= 0) return <div></div>;
 
   return (
-    <Box sx={{ borderRadius: 4, backgroundColor: "rgba(255,255,255,.9)", p: 2 }}>
-      <Typography variant="subtitle2">{new Date(label).toISOString().slice(0, 10)}</Typography>
+    <Box
+      sx={{ borderRadius: 4, backgroundColor: "rgba(255,255,255,.9)", p: 2 }}
+    >
+      <Typography variant="subtitle2">
+        {new Date(label).toISOString().slice(0, 10)}
+      </Typography>
       <table>
         <tbody>
           {payload.map((p) => (
@@ -60,7 +73,10 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
                 </Typography>
               </td>
               <td>
-                <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2 }}>
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", textAlign: "right", pl: 2 }}
+                >
                   {p.value}
                 </Typography>
               </td>
@@ -73,7 +89,11 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
               </Typography>
             </td>
             <td>
-              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}
+              >
+                {/* @ts-expect-error value*/}
                 {payload.reduce((tot, p) => tot + p.value, 0)}
               </Typography>
             </td>
@@ -85,9 +105,16 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
               </Typography>
             </td>
             <td>
-              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}
+              >
+                {}
                 {Math.round(
-                  (1000 * (payload[0].value + payload[1].value + payload[2].value)) /
+                  (1000 *
+                    /* @ts-expect-error value*/
+                    (payload[0].value + payload[1].value + payload[2].value)) /
+                    /* @ts-expect-error value*/
                     payload.reduce((tot, p) => tot + p.value, 0)
                 ) / 10}
                 %
@@ -101,9 +128,15 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
               </Typography>
             </td>
             <td>
-              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 0 }}>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 0 }}
+              >
                 {Math.round(
-                  (1000 * (payload[0].value + payload[1].value)) / payload.reduce((tot, p) => tot + p.value, 0)
+                  /* @ts-expect-error value*/
+                  (1000 * (payload[0].value + payload[1].value)) /
+                    /* @ts-expect-error value*/
+                    payload.reduce((tot, p) => tot + p.value, 0)
                 ) / 10}
                 %
               </Typography>
@@ -116,8 +149,17 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
               </Typography>
             </td>
             <td>
-              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 0 }}>
-                {Math.round((1000 * payload[0].value) / payload.reduce((tot, p) => tot + p.value, 0)) / 10}%
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 0 }}
+              >
+                {Math.round(
+                  /* @ts-expect-error value*/
+                  (1000 * payload[0].value) /
+                    /* @ts-expect-error value*/
+                    payload.reduce((tot, p) => tot + p.value, 0)
+                ) / 10}
+                %
               </Typography>
             </td>
           </tr>
@@ -130,9 +172,16 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
 export default function ParticipationGraph({
   participations,
 }: {
-  participations: DVParticipation<SelectableContact, DVRiskFile, DVValidation, DVDirectAnalysis>[];
+  participations: DVParticipation<
+    SelectableContact,
+    DVRiskFile,
+    DVValidation,
+    DVDirectAnalysis
+  >[];
 }) {
-  const [participationBuckets, setParticipationBuckets] = useState<Bucket[]>([]);
+  const [participationBuckets, setParticipationBuckets] = useState<Bucket[]>(
+    []
+  );
   const [firstDate, setFirstDate] = useState<number>(Date.now());
   const [lastDate, setLastDate] = useState<number>(Date.now());
 
@@ -142,7 +191,8 @@ export default function ParticipationGraph({
         ? new Date(p.cr4de_cascade_analysis_finished_on).getTime()
         : null,
       step2BStartedDate:
-        p.cr4de_direct_analysis_finished_on && p.cr4de_risk_file.cr4de_step2b_enabled_on
+        p.cr4de_direct_analysis_finished_on &&
+        p.cr4de_risk_file.cr4de_step2b_enabled_on
           ? new Date(
               Math.max(
                 p.cr4de_direct_analysis_finished_on as unknown as number,
@@ -161,7 +211,9 @@ export default function ParticipationGraph({
         p.cr4de_direct_analysis && !isStep2AEmpty(p.cr4de_direct_analysis)
           ? new Date(p.cr4de_direct_analysis.modifiedon).getTime()
           : null,
-      step2ACreatedDate: p.cr4de_direct_analysis ? new Date(p.cr4de_direct_analysis.createdon).getTime() : null,
+      step2ACreatedDate: p.cr4de_direct_analysis
+        ? new Date(p.cr4de_direct_analysis.createdon).getTime()
+        : null,
       validationFinishedDate: p.cr4de_validation_finished_on
         ? new Date(p.cr4de_validation_finished_on).getTime()
         : null,
@@ -173,7 +225,9 @@ export default function ParticipationGraph({
         p.cr4de_validation && !isValidationEmpty(p.cr4de_validation)
           ? new Date(p.cr4de_validation.modifiedon).getTime()
           : null,
-      validationCreatedDate: p.cr4de_validation ? new Date(p.cr4de_validation.modifiedon).getTime() : null,
+      validationCreatedDate: p.cr4de_validation
+        ? new Date(p.cr4de_validation.modifiedon).getTime()
+        : null,
       registrationDate: p.cr4de_contact.msdyn_portaltermsagreementdate
         ? new Date(p.cr4de_contact.msdyn_portaltermsagreementdate).getTime()
         : null,
@@ -184,8 +238,15 @@ export default function ParticipationGraph({
     let firstDate = new Date().getTime();
     let lastDate = new Date().getTime();
     datedPs.forEach((p) => {
-      if (p.registrationDate && (firstDate === null || p.registrationDate < firstDate)) firstDate = p.registrationDate;
-      if (p.validationFinishedDate && (lastDate === null || p.validationFinishedDate > lastDate))
+      if (
+        p.registrationDate &&
+        (firstDate === null || p.registrationDate < firstDate)
+      )
+        firstDate = p.registrationDate;
+      if (
+        p.validationFinishedDate &&
+        (lastDate === null || p.validationFinishedDate > lastDate)
+      )
         lastDate = p.validationFinishedDate;
     });
 
@@ -206,7 +267,7 @@ export default function ParticipationGraph({
       currentDate = addDays(new Date(currentDate), 1).getTime();
     } while (currentDate <= lastDate);
 
-    for (let p of datedPs) {
+    for (const p of datedPs) {
       for (let i = 0; i < dates.length; i++) {
         const d = dates[i];
 
@@ -214,7 +275,10 @@ export default function ParticipationGraph({
           dates[i].step2BDone++;
         } else if (p.step2AFinishedDate && d.date >= p.step2AFinishedDate) {
           dates[i].step2ADone++;
-        } else if (p.validationFinishedDate && d.date >= p.validationFinishedDate) {
+        } else if (
+          p.validationFinishedDate &&
+          d.date >= p.validationFinishedDate
+        ) {
           dates[i].validated++;
         } else {
           dates[i].notStarted++;
@@ -265,8 +329,22 @@ export default function ParticipationGraph({
           fill="#ff6e54"
           name="Finished step 2A"
         />
-        <Area type="monotone" dataKey="validated" stackId="1" stroke="#955196" fill="#955196" name="Validated" />
-        <Area type="monotone" dataKey="notStarted" stackId="1" stroke="#003f5c" fill="#003f5c" name="Not registered" />
+        <Area
+          type="monotone"
+          dataKey="validated"
+          stackId="1"
+          stroke="#955196"
+          fill="#955196"
+          name="Validated"
+        />
+        <Area
+          type="monotone"
+          dataKey="notStarted"
+          stackId="1"
+          stroke="#003f5c"
+          fill="#003f5c"
+          name="Not registered"
+        />
       </AreaChart>
     </>
   );

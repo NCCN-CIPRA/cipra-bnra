@@ -12,7 +12,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import LoadingButton from "@mui/lab/LoadingButton";
 import { Trans, useTranslation } from "react-i18next";
 import useAPI from "../hooks/useAPI";
 import { useOutletContext } from "react-router-dom";
@@ -72,8 +71,9 @@ export default function SurveyDialog({
         <DialogContentText>
           <Typography variant="body1" paragraph>
             <Trans i18nKey="feedback.dialog.helpText">
-              Would you mind providing some feedback for this step in the process? This will help us streamline our
-              methodology for subsequent experts and iterations.
+              Would you mind providing some feedback for this step in the
+              process? This will help us streamline our methodology for
+              subsequent experts and iterations.
             </Trans>
           </Typography>
           <Stack direction="column" spacing={3}>
@@ -89,7 +89,9 @@ export default function SurveyDialog({
                     display: "inline-block",
                   }}
                 >
-                  <Trans i18nKey="feedback.dialog.dontagree">Do not agree</Trans>
+                  <Trans i18nKey="feedback.dialog.dontagree">
+                    Do not agree
+                  </Trans>
                 </Typography>
                 <Box sx={{ flex: 1 }} />
                 <Typography
@@ -107,13 +109,15 @@ export default function SurveyDialog({
             </Stack>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="subtitle2" sx={{ flex: 1 }}>
-                <Trans i18nKey="feedback.dialog.q1">It was clear what was expected of me</Trans>
+                <Trans i18nKey="feedback.dialog.q1">
+                  It was clear what was expected of me
+                </Trans>
               </Typography>
               <Box sx={{ width: 160, mr: 5, textAlign: "center", pt: "5px" }}>
                 <Rating
                   size="large"
                   value={q1}
-                  onChange={(event, newValue) => {
+                  onChange={(_event, newValue) => {
                     setQ1(newValue);
                   }}
                 />
@@ -122,14 +126,15 @@ export default function SurveyDialog({
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="subtitle2" sx={{ flex: 1 }}>
                 <Trans i18nKey="feedback.dialog.q2">
-                  The subject was in line with my personal expertise and/or interests
+                  The subject was in line with my personal expertise and/or
+                  interests
                 </Trans>
               </Typography>
               <Box sx={{ width: 160, mr: 5, textAlign: "center", pt: "5px" }}>
                 <Rating
                   size="large"
                   value={q2}
-                  onChange={(event, newValue) => {
+                  onChange={(_event, newValue) => {
                     setQ2(newValue);
                   }}
                 />
@@ -137,13 +142,15 @@ export default function SurveyDialog({
             </Stack>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="subtitle2" sx={{ flex: 1 }}>
-                <Trans i18nKey="feedback.dialog.q3">I understand the necessity of this step in the BNRA process</Trans>
+                <Trans i18nKey="feedback.dialog.q3">
+                  I understand the necessity of this step in the BNRA process
+                </Trans>
               </Typography>
               <Box sx={{ width: 160, mr: 5, textAlign: "center", pt: "5px" }}>
                 <Rating
                   size="large"
                   value={q3}
-                  onChange={(event, newValue) => {
+                  onChange={(_event, newValue) => {
                     setQ3(newValue);
                   }}
                 />
@@ -152,14 +159,15 @@ export default function SurveyDialog({
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="subtitle2" sx={{ flex: 1 }}>
                 <Trans i18nKey="feedback.dialog.q4">
-                  The time and/or effort required of me for this step was as expected
+                  The time and/or effort required of me for this step was as
+                  expected
                 </Trans>
               </Typography>
               <Box sx={{ width: 160, mr: 5, textAlign: "center", pt: "5px" }}>
                 <Rating
                   size="large"
                   value={q4}
-                  onChange={(event, newValue) => {
+                  onChange={(_event, newValue) => {
                     setQ4(newValue);
                   }}
                 />
@@ -168,7 +176,10 @@ export default function SurveyDialog({
             <TextField
               multiline
               rows={3}
-              placeholder={t("feedback.dialog.remarks", "Any other remarks or feedback?")}
+              placeholder={t(
+                "feedback.dialog.remarks",
+                "Any other remarks or feedback?"
+              )}
               value={quali}
               onChange={(e) => setQuali(e.target.value)}
             />
@@ -179,9 +190,9 @@ export default function SurveyDialog({
         <Button onClick={onClose}>
           <Trans i18nKey="feedback.dialog.skip">Skip</Trans>
         </Button>
-        <LoadingButton loading={isLoading} onClick={handleSubmitFeedback}>
+        <Button loading={isLoading} onClick={handleSubmitFeedback}>
           <Trans i18nKey="feedback.dialog.submit">Submit Feedback</Trans>
-        </LoadingButton>
+        </Button>
       </DialogActions>
     </Dialog>
   );

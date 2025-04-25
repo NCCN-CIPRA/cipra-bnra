@@ -14,7 +14,6 @@ export default function useLoggedInUser() {
   const api = useAPI();
 
   const [user, setUser] = useState<LoggedInUser | null | undefined>(undefined);
-  const [participations, setParticipations] = useState<DVParticipation[] | null>(null);
 
   const setFakeRole = (role: string) => {
     if (user?.realRoles?.admin || user?.roles.admin) {
@@ -33,7 +32,11 @@ export default function useLoggedInUser() {
       return;
     }
 
-    if (info && info.getAttribute("data-id") && info.getAttribute("data-id") !== "") {
+    if (
+      info &&
+      info.getAttribute("data-id") &&
+      info.getAttribute("data-id") !== ""
+    ) {
       if (info.getAttribute("data-id") !== user?.contactid) {
         setUser({
           contactid: info?.getAttribute("data-id") || "",
@@ -47,19 +50,23 @@ export default function useLoggedInUser() {
           realRoles: getAuthRoles(info?.getAttribute("data-roles") || ""),
         });
 
-        api.getParticipants(`$filter=_cr4de_contact_value eq ${info?.getAttribute("data-id")}`).then((p) => {
-          setUser({
-            contactid: info?.getAttribute("data-id") || "",
-            emailaddress1: info?.getAttribute("data-email") || "",
-            firstname: info?.getAttribute("data-firstname") || "",
-            lastname: info?.getAttribute("data-lastname") || "",
-            admin: info?.hasAttribute("data-admin"),
-            viewer: info?.hasAttribute("data-report-viewer"),
-            roles: getAuthRoles(info?.getAttribute("data-roles") || ""),
-            realRoles: getAuthRoles(info?.getAttribute("data-roles") || ""),
-            participations: p,
+        api
+          .getParticipants(
+            `$filter=_cr4de_contact_value eq ${info?.getAttribute("data-id")}`
+          )
+          .then((p) => {
+            setUser({
+              contactid: info?.getAttribute("data-id") || "",
+              emailaddress1: info?.getAttribute("data-email") || "",
+              firstname: info?.getAttribute("data-firstname") || "",
+              lastname: info?.getAttribute("data-lastname") || "",
+              admin: info?.hasAttribute("data-admin"),
+              viewer: info?.hasAttribute("data-report-viewer"),
+              roles: getAuthRoles(info?.getAttribute("data-roles") || ""),
+              realRoles: getAuthRoles(info?.getAttribute("data-roles") || ""),
+              participations: p,
+            });
           });
-        });
       }
     } else {
       setUser(null);

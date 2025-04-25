@@ -1,11 +1,23 @@
 import { Box, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Area, AreaChart, CartesianGrid, Legend, XAxis, YAxis, Tooltip, TooltipProps } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
 import { addDays } from "../../../functions/days";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { DVValidation } from "../../../types/dataverse/DVValidation";
 import { SelectableContact } from "./Selectables";
+import { TooltipProps } from "recharts/types/component/Tooltip";
+import {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 
 interface RFBucket {
   date: number;
@@ -18,12 +30,19 @@ interface RFBucket {
   finished: number;
 }
 
-const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any[]; label?: any } = {}) => {
+const CustomTooltip = ({
+  payload,
+  label,
+}: TooltipProps<ValueType, NameType>) => {
   if (!payload || payload.length <= 0) return <div></div>;
 
   return (
-    <Box sx={{ borderRadius: 4, backgroundColor: "rgba(255,255,255,.9)", p: 2 }}>
-      <Typography variant="subtitle2">{new Date(label).toISOString().slice(0, 10)}</Typography>
+    <Box
+      sx={{ borderRadius: 4, backgroundColor: "rgba(255,255,255,.9)", p: 2 }}
+    >
+      <Typography variant="subtitle2">
+        {new Date(label).toISOString().slice(0, 10)}
+      </Typography>
       <table>
         <tbody>
           {payload.map((p) => (
@@ -34,7 +53,10 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
                 </Typography>
               </td>
               <td>
-                <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2 }}>
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", textAlign: "right", pl: 2 }}
+                >
                   {p.value}
                 </Typography>
               </td>
@@ -47,7 +69,11 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
               </Typography>
             </td>
             <td>
-              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}
+              >
+                {/* @ts-expect-error value */}
                 {payload.reduce((tot, p) => tot + p.value, 0)}
               </Typography>
             </td>
@@ -59,8 +85,17 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
               </Typography>
             </td>
             <td>
-              <Typography variant="body1" sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}>
-                {Math.round((1000 * payload[0].value) / payload.reduce((tot, p) => tot + p.value, 0)) / 10}%
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}
+              >
+                {Math.round(
+                  // @ts-expect-error value
+                  (1000 * payload[0].value) /
+                    // @ts-expect-error value
+                    payload.reduce((tot, p) => tot + p.value, 0)
+                ) / 10}
+                %
               </Typography>
             </td>
           </tr>
@@ -73,25 +108,39 @@ const CustomTooltip = ({ active, payload, label }: { active?: any; payload?: any
 export default function RiskFileGraph({
   participations,
 }: {
-  participations: DVParticipation<SelectableContact, DVRiskFile, DVValidation>[];
+  participations: DVParticipation<
+    SelectableContact,
+    DVRiskFile,
+    DVValidation
+  >[];
 }) {
   const [riskFileBuckets, setRiskFileBuckets] = useState<RFBucket[]>([]);
   const [firstDate, setFirstDate] = useState<number>(Date.now());
-  const [lastDate, setLastDate] = useState<number>(addDays(new Date(), 1).getTime());
+  const [lastDate] = useState<number>(addDays(new Date(), 1).getTime());
 
   useEffect(() => {
-    const riskFiles: { [key: string]: DVParticipation<SelectableContact, DVRiskFile, DVValidation>[] } = {};
+    const riskFiles: {
+      [key: string]: DVParticipation<
+        SelectableContact,
+        DVRiskFile,
+        DVValidation
+      >[];
+    } = {};
 
     let firstDateCalc = firstDate;
 
     participations.forEach((p) => {
       if (!p._cr4de_risk_file_value) return;
 
-      if (!riskFiles[p._cr4de_risk_file_value]) riskFiles[p._cr4de_risk_file_value] = [];
+      if (!riskFiles[p._cr4de_risk_file_value])
+        riskFiles[p._cr4de_risk_file_value] = [];
 
       riskFiles[p._cr4de_risk_file_value].push(p);
 
-      if (p.cr4de_validation?.createdon && new Date(p.cr4de_validation.createdon).getTime() < firstDateCalc) {
+      if (
+        p.cr4de_validation?.createdon &&
+        new Date(p.cr4de_validation.createdon).getTime() < firstDateCalc
+      ) {
         firstDateCalc = new Date(p.cr4de_validation.createdon).getTime();
       }
     });
@@ -116,7 +165,7 @@ export default function RiskFileGraph({
       currentDate = addDays(new Date(currentDate), 1).getTime();
     } while (currentDate <= lastDate);
 
-    for (let participations of Object.values(riskFiles)) {
+    for (const participations of Object.values(riskFiles)) {
       for (let i = 0; i < dates.length; i++) {
         const d = dates[i];
 
@@ -124,7 +173,8 @@ export default function RiskFileGraph({
           participations.some(
             (p) =>
               p.cr4de_risk_file?.cr4de_consensus_date &&
-              new Date(p.cr4de_risk_file?.cr4de_consensus_date).getTime() < d.date
+              new Date(p.cr4de_risk_file?.cr4de_consensus_date).getTime() <
+                d.date
           )
         ) {
           dates[i].finished++;
@@ -132,29 +182,40 @@ export default function RiskFileGraph({
           participations.some(
             (p) =>
               p.cr4de_risk_file?.cr4de_consensus_date &&
-              addDays(new Date(p.cr4de_risk_file?.cr4de_consensus_date), -14).getTime() <= d.date
+              addDays(
+                new Date(p.cr4de_risk_file?.cr4de_consensus_date),
+                -14
+              ).getTime() <= d.date
           )
         ) {
           dates[i].consensusStarted++;
         } else if (
           participations.filter(
             (p) =>
-              p.cr4de_cascade_analysis_finished_on && new Date(p.cr4de_cascade_analysis_finished_on).getTime() <= d.date
+              p.cr4de_cascade_analysis_finished_on &&
+              new Date(p.cr4de_cascade_analysis_finished_on).getTime() <= d.date
           ).length >= 2
         ) {
           dates[i].step2BStarted++;
         } else if (
           participations.filter(
             (p) =>
-              p.cr4de_direct_analysis_finished_on && new Date(p.cr4de_direct_analysis_finished_on).getTime() <= d.date
+              p.cr4de_direct_analysis_finished_on &&
+              new Date(p.cr4de_direct_analysis_finished_on).getTime() <= d.date
           ).length >= 2
         ) {
           dates[i].step2AStarted++;
         } else if (
           participations.some(
             (p) =>
-              p.cr4de_risk_file?.cr4de_validation_silent_procedure_until != null &&
-              addDays(new Date(p.cr4de_risk_file?.cr4de_validation_silent_procedure_until), -14).getTime() <= d.date
+              p.cr4de_risk_file?.cr4de_validation_silent_procedure_until !=
+                null &&
+              addDays(
+                new Date(
+                  p.cr4de_risk_file?.cr4de_validation_silent_procedure_until
+                ),
+                -14
+              ).getTime() <= d.date
           )
         ) {
           dates[i].silenceProcedureStarted++;
@@ -174,6 +235,7 @@ export default function RiskFileGraph({
     }
 
     setRiskFileBuckets(dates);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [participations]);
 
   return (
@@ -206,7 +268,14 @@ export default function RiskFileGraph({
           fill="#ffa600"
           name="Ready for consensus"
         /> */}
-        <Area type="monotone" dataKey="finished" stackId="1" stroke="#ff7c43" fill="#ff7c43" name="Process finished" />
+        <Area
+          type="monotone"
+          dataKey="finished"
+          stackId="1"
+          stroke="#ff7c43"
+          fill="#ff7c43"
+          name="Process finished"
+        />
         <Area
           type="monotone"
           dataKey="consensusStarted"
@@ -239,7 +308,14 @@ export default function RiskFileGraph({
           fill="#665191"
           name="Validation step finished"
         />
-        <Area type="monotone" dataKey="started" stackId="1" stroke="#2f4b7c" fill="#2f4b7c" name="Process started" />
+        <Area
+          type="monotone"
+          dataKey="started"
+          stackId="1"
+          stroke="#2f4b7c"
+          fill="#2f4b7c"
+          name="Process started"
+        />
       </AreaChart>
     </>
   );

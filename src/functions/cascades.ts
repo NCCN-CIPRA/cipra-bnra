@@ -3,9 +3,23 @@ import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
-import { SCENARIOS, SCENARIO_LETTER } from "./scenarios";
+import {
+  SCENARIOS,
+  SCENARIO_LETTER,
+  getCascadeParameter,
+  getScenarioParameter,
+} from "./scenarios";
 
-export type CASCADE_LETTER = "c2c" | "c2m" | "c2e" | "m2c" | "m2m" | "m2e" | "e2c" | "e2m" | "e2e";
+export type CASCADE_LETTER =
+  | "c2c"
+  | "c2m"
+  | "c2e"
+  | "m2c"
+  | "m2m"
+  | "m2e"
+  | "e2c"
+  | "e2m"
+  | "e2e";
 
 export interface CascadeAnalysisInput {
   cr4de_c2c: number | null;
@@ -21,6 +35,14 @@ export interface CascadeAnalysisInput {
   cr4de_quali_cascade: string | null;
 }
 
+export type Cascades = {
+  all: DVRiskCascade<SmallRisk, SmallRisk>[];
+  causes: DVRiskCascade<SmallRisk, SmallRisk>[];
+  effects: DVRiskCascade<SmallRisk, SmallRisk>[];
+  catalyzingEffects: DVRiskCascade<SmallRisk, SmallRisk>[];
+  climateChange: DVRiskCascade<SmallRisk, SmallRisk> | null;
+};
+
 export function getCauses(
   riskFile: SmallRisk,
   cascades: DVRiskCascade[],
@@ -30,14 +52,35 @@ export function getCauses(
     .filter(
       (c) =>
         c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
-        (hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.STANDARD ||
-          hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.MANMADE)
+        (hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type ===
+          RISK_TYPE.STANDARD ||
+          hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type ===
+            RISK_TYPE.MANMADE)
     )
     .map((c) => ({
       ...c,
       cr4de_cause_hazard: hazardCatalogue[c._cr4de_cause_hazard_value],
       cr4de_effect_hazard: hazardCatalogue[c._cr4de_effect_hazard_value],
     }));
+}
+
+export function getCausesWithDP(
+  riskFile: DVRiskFile,
+  cascades: Cascades,
+  scenario: SCENARIOS
+) {
+  return [
+    {
+      name: "2A.dp.title",
+      p: getScenarioParameter(riskFile, "DP", scenario) || 0,
+    },
+    ...cascades.causes.map((c) => ({
+      id: c.cr4de_cause_hazard.cr4de_riskfilesid,
+      name: `risk.${c.cr4de_cause_hazard.cr4de_hazard_id}.name`,
+      p: getCascadeParameter(c, scenario, "IP") || 0,
+      cascade: c,
+    })),
+  ];
 }
 
 export function getEffects(
@@ -54,6 +97,51 @@ export function getEffects(
     }));
 }
 
+export function getEffectsWithDI(
+  riskFile: DVRiskFile,
+  cascades: Cascades,
+  scenario: SCENARIOS
+) {
+  return [
+    {
+      name: "Direct Impact",
+      i: getScenarioParameter(riskFile, "DI", scenario) || 0,
+      iH:
+        (getScenarioParameter(riskFile, "DI_Ha", scenario) || 0) +
+        (getScenarioParameter(riskFile, "DI_Hb", scenario) || 0) +
+        (getScenarioParameter(riskFile, "DI_Hc", scenario) || 0),
+      iS:
+        (getScenarioParameter(riskFile, "DI_Sa", scenario) || 0) +
+        (getScenarioParameter(riskFile, "DI_Sb", scenario) || 0) +
+        (getScenarioParameter(riskFile, "DI_Sc", scenario) || 0) +
+        (getScenarioParameter(riskFile, "DI_Sd", scenario) || 0),
+      iE: getScenarioParameter(riskFile, "DI_Ea", scenario) || 0,
+      iF:
+        (getScenarioParameter(riskFile, "DI_Fa", scenario) || 0) +
+        (getScenarioParameter(riskFile, "DI_Fb", scenario) || 0),
+    },
+    ...cascades.effects.map((e) => ({
+      id: e.cr4de_effect_hazard.cr4de_riskfilesid,
+      name: `risk.${e.cr4de_effect_hazard.cr4de_hazard_id}.name`,
+      i: getCascadeParameter(e, scenario, "II") || 0,
+      iH:
+        (getCascadeParameter(e, scenario, "II_Ha") || 0) +
+        (getCascadeParameter(e, scenario, "II_Hb") || 0) +
+        (getCascadeParameter(e, scenario, "II_Hc") || 0),
+      iS:
+        (getCascadeParameter(e, scenario, "II_Sa") || 0) +
+        (getCascadeParameter(e, scenario, "II_Sb") || 0) +
+        (getCascadeParameter(e, scenario, "II_Sc") || 0) +
+        (getCascadeParameter(e, scenario, "II_Sd") || 0),
+      iE: getCascadeParameter(e, scenario, "II_Ea") || 0,
+      iF:
+        (getCascadeParameter(e, scenario, "II_Fa") || 0) +
+        (getCascadeParameter(e, scenario, "II_Fb") || 0),
+      cascade: e,
+    })),
+  ];
+}
+
 export function getCatalyzingEffects<T extends DVRiskCascade>(
   riskFile: SmallRisk,
   cascades: T[],
@@ -63,8 +151,12 @@ export function getCatalyzingEffects<T extends DVRiskCascade>(
   return cascades.filter(
     (c) =>
       c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
-      hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.EMERGING &&
-      (includeClimateChange || hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_title.indexOf("Climate") < 0)
+      hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type ===
+        RISK_TYPE.EMERGING &&
+      (includeClimateChange ||
+        hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_title.indexOf(
+          "Climate"
+        ) < 0)
   );
 }
 
@@ -77,61 +169,19 @@ export function getClimateChange<T extends DVRiskCascade>(
     cascades.find(
       (c) =>
         c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
-        hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type === RISK_TYPE.EMERGING &&
-        hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_title.indexOf("Climate") >= 0
+        hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type ===
+          RISK_TYPE.EMERGING &&
+        hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_title.indexOf(
+          "Climate"
+        ) >= 0
     ) || null
   );
 }
 
-export type Cascades = {
-  all: DVRiskCascade<SmallRisk, SmallRisk>[];
-  causes: DVRiskCascade<SmallRisk, SmallRisk>[];
-  effects: DVRiskCascade<SmallRisk, SmallRisk>[];
-  catalyzingEffects: DVRiskCascade<SmallRisk, SmallRisk>[];
-  climateChange: DVRiskCascade<SmallRisk, SmallRisk> | null;
-};
-
-export const updateCascades =
-        (
-          riskFile: DVRiskFile,
-          cs: { [riskId: string]: Cascades },
-          hc: { [id: string]: SmallRisk }
-        ) =>
-        (rcResult: DVRiskCascade<SmallRisk, SmallRisk>[]) => {
-          const causes = getCauses(riskFile, rcResult, hc);
-          const effects = getEffects(riskFile, rcResult, hc);
-          const catalyzingEffects = getCatalyzingEffects(
-            riskFile,
-            rcResult,
-            hc,
-            false
-          );
-          const climateChange = getClimateChange(riskFile, rcResult, hc);
-    
-          return {
-            ...cs,
-            [riskFile.cr4de_riskfilesid]: {
-              all: [...causes, ...effects, ...catalyzingEffects],
-              causes,
-              effects,
-              catalyzingEffects,
-              climateChange,
-            },
-          };
-        };
-
-export const getCascades =
-    (
-      riskFiles: DVRiskFile[],
-      cascades: DVRiskCascade<SmallRisk, SmallRisk>[],
-      riskCatalogue: { [id: string]: SmallRisk}
-    ): { [riskId: string]: Cascades } => {
-    
-    
-    return riskFiles.reduce((acc, rf) => updateCascades(rf, acc, riskCatalogue)(cascades), {})
-  }
-
-export function getCascadeField(causeScenario: SCENARIOS, effectScenario: SCENARIOS): keyof CascadeAnalysisInput {
+export function getCascadeField(
+  causeScenario: SCENARIOS,
+  effectScenario: SCENARIOS
+): keyof CascadeAnalysisInput {
   if (causeScenario === SCENARIOS.CONSIDERABLE) {
     if (effectScenario === SCENARIOS.CONSIDERABLE) {
       return "cr4de_c2c";
@@ -175,7 +225,10 @@ export function getCascadeInput(ca: DVCascadeAnalysis): CascadeAnalysisInput {
   };
 }
 
-export const getAverageCP = (causeScenario: SCENARIO_LETTER, effect: CascadeCalculation): number => {
+export const getAverageCP = (
+  causeScenario: SCENARIO_LETTER,
+  effect: CascadeCalculation
+): number => {
   const ii_s2c = effect[`${causeScenario}2c`] * effect.effect.ti_c;
   const ii_s2m = effect[`${causeScenario}2m`] * effect.effect.ti_m;
   const ii_s2e = effect[`${causeScenario}2e`] * effect.effect.ti_e;
@@ -189,3 +242,32 @@ export const getAverageCP = (causeScenario: SCENARIO_LETTER, effect: CascadeCalc
     ii_tot
   );
 };
+
+export const getCascades =
+  (
+    riskFile: DVRiskFile,
+    cs: { [riskId: string]: Cascades },
+    hc: { [id: string]: SmallRisk }
+  ) =>
+  (rcResult: DVRiskCascade<SmallRisk, SmallRisk>[]) => {
+    const causes = getCauses(riskFile, rcResult, hc);
+    const effects = getEffects(riskFile, rcResult, hc);
+    const catalyzingEffects = getCatalyzingEffects(
+      riskFile,
+      rcResult,
+      hc,
+      false
+    );
+    const climateChange = getClimateChange(riskFile, rcResult, hc);
+
+    return {
+      ...cs,
+      [riskFile.cr4de_riskfilesid]: {
+        all: [...causes, ...effects, ...catalyzingEffects],
+        causes,
+        effects,
+        catalyzingEffects,
+        climateChange,
+      },
+    };
+  };

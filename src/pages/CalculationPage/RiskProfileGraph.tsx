@@ -1,5 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import { Accordion, AccordionDetails, AccordionSummary, Typography, Box } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Typography,
+  Box,
+} from "@mui/material";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 import * as d3 from "d3";
 
@@ -12,12 +18,12 @@ const margin = {
 };
 
 const gaussianPDF = (m: number, s: number) => (x: number) =>
-  (1 / (s * Math.sqrt(2 * Math.PI))) * Math.exp((-1 / 2) * Math.pow((x - m) / s, 2));
+  (1 / (s * Math.sqrt(2 * Math.PI))) *
+  Math.exp((-1 / 2) * Math.pow((x - m) / s, 2));
 
 export default function RiskProfileGraph({
   calculations,
   selectedNodeId,
-  setSelectedNodeId,
 }: {
   calculations: RiskCalculation[] | null;
   selectedNodeId: string | null;
@@ -45,29 +51,34 @@ export default function RiskProfileGraph({
     };
 
     const TP0 = 1 - risk.tp_c - risk.tp_m - risk.tp_e;
-    const minP = 0.00001;
     const maxTI = Math.max(risk.ti_c, risk.ti_m, risk.ti_e);
     const minTI = Math.min(risk.ti_c, risk.ti_m, risk.ti_e);
 
     const width = graphWidth - margin.left - margin.right;
     const height = graphHeight - margin.top - margin.bottom;
 
-    const gauss_0 = gaussianPDF(0, 1);
     const gauss_c = gaussianPDF(risk.ti_c, 0.5);
     const gauss_m = gaussianPDF(risk.ti_m, 0.5);
     const gauss_e = gaussianPDF(risk.ti_e, 0.5);
-    const gaussLineX = new Array(150).fill(null).map((v, i) => (i * maxTI * 1.5) / 150);
-    const gaussLineY_0 = gaussLineX.map((x) => gauss_0(x));
+    const gaussLineX = new Array(150)
+      .fill(null)
+      .map((_v, i) => (i * maxTI * 1.5) / 150);
     const gaussLineY_c = gaussLineX.map((x) => gauss_c(x));
     const gaussLineY_m = gaussLineX.map((x) => gauss_m(x));
     const gaussLineY_e = gaussLineX.map((x) => gauss_e(x));
     const gaussLineTot = gaussLineX.map(
-      (x, i) => risk.tp_c * gaussLineY_c[i] + risk.tp_m * gaussLineY_m[i] + risk.tp_e * gaussLineY_e[i]
+      (_x, i) =>
+        risk.tp_c * gaussLineY_c[i] +
+        risk.tp_m * gaussLineY_m[i] +
+        risk.tp_e * gaussLineY_e[i]
     );
 
     const WCS_i = gaussLineX.reduce(
       (maxR_i, x, i) =>
-        gaussLineTot[i] * Math.pow(10, x) > gaussLineTot[maxR_i] * Math.pow(10, gaussLineX[maxR_i]) ? i : maxR_i,
+        gaussLineTot[i] * Math.pow(10, x) >
+        gaussLineTot[maxR_i] * Math.pow(10, gaussLineX[maxR_i])
+          ? i
+          : maxR_i,
       0
     );
     const maxTP = Math.max(risk.tp_c, risk.tp_m, risk.tp_e, ...gaussLineTot);
@@ -77,7 +88,10 @@ export default function RiskProfileGraph({
       .domain([minTI / 1.5, maxTI * 1.5])
       .range([margin.left, width]);
 
-    const y = d3.scaleLinear().domain([0, maxTP]).range([height, margin.bottom]);
+    const y = d3
+      .scaleLinear()
+      .domain([0, maxTP])
+      .range([height, margin.bottom]);
 
     const xAxis = d3.axisBottom(x);
 
@@ -85,7 +99,7 @@ export default function RiskProfileGraph({
 
     d3.selectAll("#profile-graph > *").remove();
 
-    var svg = d3.select("#profile-graph").append("g");
+    const svg = d3.select("#profile-graph").append("g");
 
     svg
       .append("g")
@@ -176,7 +190,9 @@ export default function RiskProfileGraph({
     //   );
     svg
       .append("path")
-      .datum(gaussLineX.map((x, i) => [x, gaussLineTot[i]]) as [number, number][])
+      .datum(
+        gaussLineX.map((x, i) => [x, gaussLineTot[i]]) as [number, number][]
+      )
       .attr("fill", "none")
       .attr("stroke", "green")
       .attr("stroke-width", 4)
@@ -203,6 +219,7 @@ export default function RiskProfileGraph({
           .x((d) => x(d[0]))
           .y((d) => y(d[1]))
       );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calculations, selectedNodeId]);
 
   if (!selectedNodeId) return null;

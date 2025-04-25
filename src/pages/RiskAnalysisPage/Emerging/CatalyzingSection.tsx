@@ -1,25 +1,11 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
 import TextInputBox from "../../../components/TextInputBox";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { LoadingButton } from "@mui/lab";
 import useAPI from "../../../hooks/useAPI";
-import getImpactColor from "../../../functions/getImpactColor";
-import { Effect, IMPACT_CATEGORY } from "../../../functions/Impact";
-import { SCENARIO_SUFFIX } from "../../../functions/scenarios";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
-import round from "../../../functions/roundNumberString";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-
-export type CatalyzingEffect = {
-  id: string | null;
-  name: string;
-
-  quali: string | null;
-  quali_cause: string | null;
-};
 
 function CatalyzingEffect({
   riskFile,
@@ -59,11 +45,21 @@ function CatalyzingEffect({
   const api = useAPI();
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [iQuali, setIQuali] = useState<string>(cascade.cr4de_description || getDefaultText());
+  const [iQuali, setIQuali] = useState<string>(
+    cascade.cr4de_description || getDefaultText()
+  );
 
-  useEffect(() => setIQuali(cascade.cr4de_description || getDefaultText()), [riskFile]);
+  useEffect(
+    () => setIQuali(cascade.cr4de_description || getDefaultText()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [riskFile]
+  );
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const saveRiskFile = async (reset = false) => {
     setSaving(true);
@@ -83,15 +79,27 @@ function CatalyzingEffect({
 
   const startEdit = () => {
     if (isEditingOther) {
-      window.alert("You are already editing another section. Please close this section before editing another.");
+      window.alert(
+        "You are already editing another section. Please close this section before editing another."
+      );
     } else {
       setEditing(true);
     }
   };
 
   return (
-    <Box sx={{ borderLeft: "solid 8px #eee", mt: 2, px: 2, py: 1, backgroundColor: "white" }}>
-      <a href={`/risks/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}/evolution`}>
+    <Box
+      sx={{
+        borderLeft: "solid 8px #eee",
+        mt: 2,
+        px: 2,
+        py: 1,
+        backgroundColor: "white",
+      }}
+    >
+      <a
+        href={`/risks/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}/evolution`}
+      >
         <Typography variant="h6" sx={{ mb: 2 }}>
           {cascade.cr4de_effect_hazard.cr4de_title}
         </Typography>
@@ -104,7 +112,9 @@ function CatalyzingEffect({
         />
       )}
       {editing && (
-        <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+        <Box
+          sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+        >
           <TextInputBox
             limitedOptions
             initialValue={iQuali}
@@ -116,12 +126,15 @@ function CatalyzingEffect({
         </Box>
       )}
       {mode === "edit" && (
-        <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
+        <Stack
+          direction="row"
+          sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}
+        >
           {!editing && (
             <>
               <Button onClick={startEdit}>Edit</Button>
               <Box sx={{ flex: 1 }} />
-              <LoadingButton
+              <Button
                 color="error"
                 loading={saving}
                 onClick={() => {
@@ -134,19 +147,24 @@ function CatalyzingEffect({
                 }}
               >
                 Reset to default
-              </LoadingButton>
+              </Button>
             </>
           )}
           {editing && (
             <>
-              <LoadingButton loading={saving} onClick={() => saveRiskFile()}>
+              <Button loading={saving} onClick={() => saveRiskFile()}>
                 Save
-              </LoadingButton>
+              </Button>
               <Box sx={{ flex: 1 }} />
               <Button
                 color="warning"
                 onClick={() => {
-                  if (window.confirm("Are you sure you wish to discard your changes?")) setEditing(false);
+                  if (
+                    window.confirm(
+                      "Are you sure you wish to discard your changes?"
+                    )
+                  )
+                    setEditing(false);
                 }}
               >
                 Discard Changes

@@ -1,11 +1,23 @@
 import { IconButton, useTheme } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import Joyride, { Step, STATUS, EVENTS, CallBackProps, ACTIONS } from "react-joyride";
+import Joyride, {
+  Step,
+  STATUS,
+  EVENTS,
+  CallBackProps,
+  ACTIONS,
+} from "react-joyride";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import TourTooltip from "./TourTooltip";
 
-export default function HelpButton({ id, steps }: { id?: string; steps: Step[] }) {
+export default function HelpButton({
+  id,
+  steps,
+}: {
+  id?: string;
+  steps: Step[];
+}) {
   const { t } = useTranslation();
   const theme = useTheme();
   const [run, setRun] = useState(false);
@@ -14,8 +26,9 @@ export default function HelpButton({ id, steps }: { id?: string; steps: Step[] }
   const handleCallback = (data: CallBackProps) => {
     const { action, index, status, type } = data;
 
-    // @ts-ignore-next-line
-    if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
+    if (
+      ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND] as string[]).includes(type)
+    ) {
       // Update state to advance the tour
       setStepIndex(index + (action === ACTIONS.PREV ? -1 : 1));
     } else if (status === STATUS.FINISHED) {
@@ -26,7 +39,11 @@ export default function HelpButton({ id, steps }: { id?: string; steps: Step[] }
 
   return (
     <>
-      <IconButton id={id} sx={{ float: "right", mt: "-8px" }} onClick={() => setRun(true)}>
+      <IconButton
+        id={id}
+        sx={{ float: "right", mt: "-8px" }}
+        onClick={() => setRun(true)}
+      >
         <InfoOutlinedIcon color="primary" />
       </IconButton>
       <Joyride

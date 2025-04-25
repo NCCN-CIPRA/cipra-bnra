@@ -2,9 +2,10 @@ import { createContext } from "react";
 import { Breadcrumb } from "../components/BreadcrumbNavigation";
 
 const AppContext = createContext({
-  setPageTitle: (pageTitle: string): void => undefined,
-  setBreadcrumbs: (breadcrumbs: (Breadcrumb | null)[]): void => undefined,
-  setBottomBarHeight: (bottomBarHeigh: number): void => undefined,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  setPageTitle: (_pageTitle: string): void => undefined,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  setBreadcrumbs: (_breadcrumbs: (Breadcrumb | null)[]): void => undefined,
 });
 
 export default AppContext;

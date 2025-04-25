@@ -1,7 +1,7 @@
 import { createTheme } from "@mui/material";
 import { blueGrey } from "@mui/material/colors";
 
-export default createTheme({
+const theme = createTheme({
   palette: {
     background: {
       default: "#fafafa",
@@ -13,3 +13,5 @@ export default createTheme({
     secondary: blueGrey,
   },
 });
+
+export default theme;

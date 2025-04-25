@@ -8,23 +8,20 @@ import {
 import { getDirectImpact, getIndirectImpact } from "../../../functions/Impact";
 import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import Scenario from "./Scenario";
-import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import ProbabilitySection from "./ProbabilitySection";
 import ImpactSection from "./ImpactSection";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CBSection from "./CBSection";
 import { Cause } from "../../../functions/Probability";
 import Bibliography from "../Bibliography";
 import SankeyDiagram from "./SankeyDiagram";
-import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import DisclaimerSection from "../DisclaimerSection";
 import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../../components/RiskFileTitle";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
-import StandardIdentificationTutorial from "../../RiskIdentificationPage/Standard/StandardIdentificationTutorial";
 import StandardAnalysisTutorial from "./StandardAnalysisTutorial";
 import { Cascades } from "../../../functions/cascades";
 
@@ -32,11 +29,6 @@ const getScenarioSuffix = (scenario: SCENARIOS) => {
   if (scenario === SCENARIOS.CONSIDERABLE) return "_c";
   else if (scenario === SCENARIOS.MAJOR) return "_m";
   return "_e";
-};
-
-const ibsx = {
-  transition: "opacity .3s ease",
-  ml: 1,
 };
 
 export default function Standard({

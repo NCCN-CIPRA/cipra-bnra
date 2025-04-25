@@ -1,19 +1,15 @@
 import { Stack, Typography, Box, Button } from "@mui/material";
-import { RiskCalculation } from "../../../types/dataverse/DVAnalysisRun";
 import {
   SCENARIOS,
   SCENARIO_PARAMS,
   getScenarioParameter,
-  getScenarioSuffix,
 } from "../../../functions/scenarios";
-import { getTotalProbabilityRelativeScale } from "../../../functions/Probability";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
-import ImpactBarChart from "../../../components/charts/ImpactBarChart";
+import ImpactBarChart from "../../../components/charts/ImpactBars";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import ProbabilitySankey from "../../../components/charts/ProbabilitySankey";
 import ImpactSankey from "../../../components/charts/ImpactSankey";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import ActionsSankey from "../../../components/charts/ActionsSankey";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { useTranslation } from "react-i18next";
@@ -40,6 +36,7 @@ export default function MMSankeyDiagram({
 
   useEffect(() => {
     setScenario(scenario);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile]);
 
   const goToRiskFile = (id: string) => {

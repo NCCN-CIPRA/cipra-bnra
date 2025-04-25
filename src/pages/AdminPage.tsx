@@ -13,18 +13,28 @@ export default function AdminPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let interval: any;
+    let interval: ReturnType<typeof setInterval>;
 
     if (user === undefined) {
       interval = setInterval(refreshUser, 1000);
     }
 
-    return () => interval && clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [user, refreshUser]);
 
   if (user === undefined) {
     return (
-      <Box sx={{ width: "100%", height: 500, alignItems: "center", justifyContent: "center", display: "flex" }}>
+      <Box
+        sx={{
+          width: "100%",
+          height: 500,
+          alignItems: "center",
+          justifyContent: "center",
+          display: "flex",
+        }}
+      >
         <CircularProgress />
       </Box>
     );

@@ -1,14 +1,6 @@
 import { useNavigate, useOutletContext } from "react-router-dom";
 import {
   Box,
-  Paper,
-  TableContainer,
-  TableHead,
-  Table,
-  TableCell,
-  TableBody,
-  CircularProgress,
-  TableRow,
   Card,
   CardContent,
   Stack,
@@ -23,13 +15,14 @@ import {
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { RiskPageContext } from "../BaseRisksPage";
-import NCCNLoader from "../../components/NCCNLoader";
-import { AuthPageContext } from "../AuthPage";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import RiskMatrix from "../../components/charts/RiskMatrix";
 import { SCENARIOS } from "../../functions/scenarios";
-import { CATEGORY_NAMES, RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
+import {
+  CATEGORY_NAMES,
+  RISK_CATEGORY,
+} from "../../types/dataverse/DVRiskFile";
 import { IMPACT_CATEGORY } from "../../functions/Impact";
 
 export default function RiskMatrixPage() {
@@ -45,8 +38,12 @@ export default function RiskMatrixPage() {
   const [es, setES] = useState(false);
   // const [scales, setScales] = useState<"absolute" | "classes">("classes");
   // const [nonKeyRisks, setNonKeyRisks] = useState<"show" | "fade" | "hide">("show");
-  const [categoryDisplay, setCategoryDisplay] = useState<"shapes" | "colors" | "both" | "none">("shapes");
-  const [scenarioDisplay, setScenarioDisplay] = useState<"colors" | "shapes" | "none">("colors");
+  const [categoryDisplay, setCategoryDisplay] = useState<
+    "shapes" | "colors" | "both" | "none"
+  >("shapes");
+  const [scenarioDisplay, setScenarioDisplay] = useState<
+    "colors" | "shapes" | "none"
+  >("colors");
 
   usePageTitle(t("sideDrawer.riskMatrix", "Risk Matrix"));
   useBreadcrumbs([
@@ -56,8 +53,20 @@ export default function RiskMatrixPage() {
 
   return (
     <Card sx={{ my: 4, mx: 9 }}>
-      <CardContent sx={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-        <Box sx={{ flex: 1, aspectRatio: "1", maxHeight: "calc(100vh - 220px)", my: 4, pl: 2, mt: -4, pr: 2 }}>
+      <CardContent
+        sx={{ display: "flex", flexDirection: "row", justifyContent: "center" }}
+      >
+        <Box
+          sx={{
+            flex: 1,
+            aspectRatio: "1",
+            maxHeight: "calc(100vh - 220px)",
+            my: 4,
+            pl: 2,
+            mt: -4,
+            pr: 2,
+          }}
+        >
           <RiskMatrix
             riskFiles={hazardCatalogue}
             setSelectedNodeId={(id) => {
@@ -73,93 +82,170 @@ export default function RiskMatrixPage() {
           />
         </Box>
         <Box sx={{ width: 350, height: "100%" }}>
-          <Stack direction="column" sx={{ pb: 4, mt: 2, height: "100%" }} spacing={4}>
+          <Stack
+            direction="column"
+            sx={{ pb: 4, mt: 2, height: "100%" }}
+            spacing={4}
+          >
             <FormGroup sx={{}}>
               <FormControl sx={{ flex: 1 }} fullWidth>
-                <InputLabel>{t("riskMatrix.show_scenarios", "Show Scenarios")}</InputLabel>
+                <InputLabel>
+                  {t("riskMatrix.show_scenarios", "Show Scenarios")}
+                </InputLabel>
                 <Select
                   value={scenario}
                   label={t("riskMatrix.show_scenarios", "Show Scenarios")}
-                  onChange={(e) => setScenario(e.target.value as any)}
+                  onChange={(e) => setScenario(e.target.value as SCENARIOS)}
                 >
                   <MenuItem value={"All"}>{t("All", "All")}</MenuItem>
-                  <MenuItem value={"MRS"}>{t("Most Relevant Scenario")}</MenuItem>
-                  <MenuItem value={SCENARIOS.CONSIDERABLE}>{t("considerable", "Considerable")}</MenuItem>
-                  <MenuItem value={SCENARIOS.MAJOR}>{t("major", "Major")}</MenuItem>
-                  <MenuItem value={SCENARIOS.EXTREME}>{t("extreme", "Extreme")}</MenuItem>
+                  <MenuItem value={"MRS"}>
+                    {t("Most Relevant Scenario")}
+                  </MenuItem>
+                  <MenuItem value={SCENARIOS.CONSIDERABLE}>
+                    {t("considerable", "Considerable")}
+                  </MenuItem>
+                  <MenuItem value={SCENARIOS.MAJOR}>
+                    {t("major", "Major")}
+                  </MenuItem>
+                  <MenuItem value={SCENARIOS.EXTREME}>
+                    {t("extreme", "Extreme")}
+                  </MenuItem>
                 </Select>
               </FormControl>
               <FormControl sx={{ flex: 1, mt: 2 }} fullWidth>
-                <InputLabel>{t("riskMatrix.show_category", "Show Category")}</InputLabel>
+                <InputLabel>
+                  {t("riskMatrix.show_category", "Show Category")}
+                </InputLabel>
                 <Select
                   value={category}
                   label={t("riskMatrix.show_category", "Show Category")}
-                  onChange={(e) => setCategory(e.target.value as any)}
+                  onChange={(e) => setCategory(e.target.value as RISK_CATEGORY)}
                 >
                   <MenuItem value="All">{t("All", "All")}</MenuItem>
                   <MenuItem value={RISK_CATEGORY.CYBER}>
-                    {t(RISK_CATEGORY.CYBER, CATEGORY_NAMES[RISK_CATEGORY.CYBER])}
+                    {t(
+                      RISK_CATEGORY.CYBER,
+                      CATEGORY_NAMES[RISK_CATEGORY.CYBER] as string
+                    )}
                   </MenuItem>
                   <MenuItem value={RISK_CATEGORY.ECOTECH}>
-                    {t(RISK_CATEGORY.ECOTECH, CATEGORY_NAMES[RISK_CATEGORY.ECOTECH])}
+                    {t(
+                      RISK_CATEGORY.ECOTECH,
+                      CATEGORY_NAMES[RISK_CATEGORY.ECOTECH] as string
+                    )}
                   </MenuItem>
                   <MenuItem value={RISK_CATEGORY.HEALTH}>
-                    {t(RISK_CATEGORY.HEALTH, CATEGORY_NAMES[RISK_CATEGORY.HEALTH])}
+                    {t(
+                      RISK_CATEGORY.HEALTH,
+                      CATEGORY_NAMES[RISK_CATEGORY.HEALTH] as string
+                    )}
                   </MenuItem>
                   <MenuItem value={RISK_CATEGORY.MANMADE}>
-                    {t(RISK_CATEGORY.MANMADE, CATEGORY_NAMES[RISK_CATEGORY.MANMADE])}
+                    {t(
+                      RISK_CATEGORY.MANMADE,
+                      CATEGORY_NAMES[RISK_CATEGORY.MANMADE] as string
+                    )}
                   </MenuItem>
                   <MenuItem value={RISK_CATEGORY.NATURE}>
-                    {t(RISK_CATEGORY.NATURE, CATEGORY_NAMES[RISK_CATEGORY.NATURE])}
+                    {t(
+                      RISK_CATEGORY.NATURE,
+                      CATEGORY_NAMES[RISK_CATEGORY.NATURE] as string
+                    )}
                   </MenuItem>
                   <MenuItem value={RISK_CATEGORY.TRANSVERSAL}>
-                    {t(RISK_CATEGORY.TRANSVERSAL, CATEGORY_NAMES[RISK_CATEGORY.TRANSVERSAL])}
+                    {t(
+                      RISK_CATEGORY.TRANSVERSAL,
+                      CATEGORY_NAMES[RISK_CATEGORY.TRANSVERSAL] as string
+                    )}
                   </MenuItem>
                 </Select>
               </FormControl>
               <FormControl sx={{ flex: 1, mt: 2 }} fullWidth>
-                <InputLabel>{t("riskMatrix.show_impact", "Show Impact")}</InputLabel>
+                <InputLabel>
+                  {t("riskMatrix.show_impact", "Show Impact")}
+                </InputLabel>
                 <Select
                   value={impact}
                   label={t("riskMatrix.show_impact", "Show Impact")}
-                  onChange={(e) => setImpact(e.target.value as any)}
+                  onChange={(e) =>
+                    setImpact(e.target.value as "All" | IMPACT_CATEGORY)
+                  }
                 >
                   <MenuItem value="All">{t("All", "All")}</MenuItem>
                   {["h", "s", "e", "f"].map((i) => (
-                    <MenuItem value={i.toUpperCase()}>{t(`learning.impact.${i}.title`)}</MenuItem>
+                    <MenuItem key={i} value={i.toUpperCase()}>
+                      {t(`learning.impact.${i}.title`)}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
               <FormControlLabel
-                control={<Checkbox checked={es} onChange={(e) => setES(e.target.checked)} />}
-                label={t("riskMatrix.executive_summary", "Show only executive summary")}
+                control={
+                  <Checkbox
+                    checked={es}
+                    onChange={(e) => setES(e.target.checked)}
+                  />
+                }
+                label={t(
+                  "riskMatrix.executive_summary",
+                  "Show only executive summary"
+                )}
               />
               <FormControlLabel
-                control={<Checkbox checked={labels} onChange={(e) => setLabels(e.target.checked)} />}
+                control={
+                  <Checkbox
+                    checked={labels}
+                    onChange={(e) => setLabels(e.target.checked)}
+                  />
+                }
                 label={t("riskMatrix.show_labels", "Show labels")}
               />
               <FormControl sx={{ flex: 1, mt: 2 }} fullWidth>
-                <InputLabel>{t("riskMatrix.categories", "Categories display")}</InputLabel>
+                <InputLabel>
+                  {t("riskMatrix.categories", "Categories display")}
+                </InputLabel>
                 <Select
                   value={categoryDisplay}
                   label={t("riskMatrix.categories", "Categories display")}
-                  onChange={(e) => setCategoryDisplay(e.target.value as any)}
+                  onChange={(e) =>
+                    setCategoryDisplay(
+                      e.target.value as "shapes" | "colors" | "both" | "none"
+                    )
+                  }
                 >
-                  <MenuItem value={"shapes"}>{t("riskMatrix.shapes", "Shapes")}</MenuItem>
-                  <MenuItem value={"colors"}>{t("riskMatrix.colors", "Colors")}</MenuItem>
-                  <MenuItem value={"both"}>{t("riskMatrix.shapesandcolors", "Shapes & Colors")}</MenuItem>
-                  <MenuItem value={"none"}>{t("riskMatrix.none", "None")}</MenuItem>
+                  <MenuItem value={"shapes"}>
+                    {t("riskMatrix.shapes", "Shapes")}
+                  </MenuItem>
+                  <MenuItem value={"colors"}>
+                    {t("riskMatrix.colors", "Colors")}
+                  </MenuItem>
+                  <MenuItem value={"both"}>
+                    {t("riskMatrix.shapesandcolors", "Shapes & Colors")}
+                  </MenuItem>
+                  <MenuItem value={"none"}>
+                    {t("riskMatrix.none", "None")}
+                  </MenuItem>
                 </Select>
               </FormControl>
               <FormControl sx={{ flex: 1, mt: 2 }} fullWidth>
-                <InputLabel>{t("riskMatrix.scenarios", "Scenarios display")}</InputLabel>
+                <InputLabel>
+                  {t("riskMatrix.scenarios", "Scenarios display")}
+                </InputLabel>
                 <Select
                   value={scenarioDisplay}
                   label={t("riskMatrix.scenarios", "Scenarios display")}
-                  onChange={(e) => setScenarioDisplay(e.target.value as any)}
+                  onChange={(e) =>
+                    setScenarioDisplay(
+                      e.target.value as "none" | "shapes" | "colors"
+                    )
+                  }
                 >
-                  <MenuItem value={"colors"}>{t("riskMatrix.colors", "Colors")}</MenuItem>
-                  <MenuItem value={"none"}>{t("riskMatrix.none", "None")}</MenuItem>
+                  <MenuItem value={"colors"}>
+                    {t("riskMatrix.colors", "Colors")}
+                  </MenuItem>
+                  <MenuItem value={"none"}>
+                    {t("riskMatrix.none", "None")}
+                  </MenuItem>
                 </Select>
               </FormControl>
             </FormGroup>

@@ -1,14 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SelectableContact } from "./Selectables";
 import {
-  Snackbar,
-  SnackbarContent,
   CircularProgress,
-  Container,
   ListItem,
   ListItemText,
-  Box,
-  Paper,
   ListItemIcon,
   ListItemButton,
   List,
@@ -18,7 +13,6 @@ import {
   Checkbox,
   Menu,
   MenuItem,
-  ListItemSecondaryAction,
 } from "@mui/material";
 import ParticipationStepper from "./ParticipationStepper";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -28,7 +22,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 
 export default function ContactListItem({
-  index,
   contact,
   sendInvitation,
   reloadData,
@@ -52,7 +45,9 @@ export default function ContactListItem({
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleDeleteParticipation = async (p: DVParticipation<unknown, unknown>) => {
+  const handleDeleteParticipation = async (
+    p: DVParticipation<unknown, unknown>
+  ) => {
     if (window.confirm("Are you sure you wish to delete this participation?")) {
       setIsLoading(true);
 
@@ -72,10 +67,13 @@ export default function ContactListItem({
       setIsLoading(true);
       handleClose();
 
-      await Promise.all([
-        ...c.participations?.map((p) => api.deleteParticipant(p.cr4de_bnraparticipationid)),
-        api.deleteContact(c.contactid),
-      ]);
+      if (c.participations)
+        await Promise.all([
+          ...c.participations.map((p) =>
+            api.deleteParticipant(p.cr4de_bnraparticipationid)
+          ),
+          api.deleteContact(c.contactid),
+        ]);
 
       await reloadData();
 
@@ -108,20 +106,35 @@ export default function ContactListItem({
       >
         <ListItemButton role={undefined} onClick={() => selectContact(contact)}>
           <ListItemIcon>
-            <Checkbox edge="start" checked={contact.selected} tabIndex={-1} disableRipple />
+            <Checkbox
+              edge="start"
+              checked={contact.selected}
+              tabIndex={-1}
+              disableRipple
+            />
           </ListItemIcon>
-          <ListItemText primary={`${contact.firstname} ${contact.lastname}`} secondary={`${contact.emailaddress1}`} />
+          <ListItemText
+            primary={`${contact.firstname} ${contact.lastname}`}
+            secondary={`${contact.emailaddress1}`}
+          />
         </ListItemButton>
       </ListItem>
       {contact.participations && contact.participations.length > 0 && (
         <List component="div" disablePadding>
           {contact.participations
-            .sort((a, b) => a.cr4de_risk_file.cr4de_hazard_id.localeCompare(b.cr4de_risk_file.cr4de_hazard_id))
+            .sort((a, b) =>
+              a.cr4de_risk_file.cr4de_hazard_id.localeCompare(
+                b.cr4de_risk_file.cr4de_hazard_id
+              )
+            )
             .map((p) => (
               <ListItem
                 key={p.cr4de_bnraparticipationid}
                 secondaryAction={
-                  <IconButton disabled={isLoading} onClick={() => handleDeleteParticipation(p)}>
+                  <IconButton
+                    disabled={isLoading}
+                    onClick={() => handleDeleteParticipation(p)}
+                  >
                     <DeleteIcon />
                   </IconButton>
                 }
@@ -135,9 +148,14 @@ export default function ContactListItem({
                   target="_blank"
                 >
                   <ListItemAvatar>
-                    <Avatar sx={{ fontSize: 12 }}>{p.cr4de_risk_file.cr4de_hazard_id}</Avatar>
+                    <Avatar sx={{ fontSize: 12 }}>
+                      {p.cr4de_risk_file.cr4de_hazard_id}
+                    </Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary={p.cr4de_risk_file.cr4de_title} secondary={p.cr4de_role} />
+                  <ListItemText
+                    primary={p.cr4de_risk_file.cr4de_title}
+                    secondary={p.cr4de_role}
+                  />
                   <ParticipationStepper contact={contact} participation={p} />
                 </ListItemButton>
               </ListItem>
@@ -174,7 +192,8 @@ export default function ContactListItem({
         <MenuItem
           onClick={async () => {
             await api.updateContact(contact.contactid, {
-              "ownerid@odata.bind": "/systemusers(412a1781-de11-ea11-a816-000d3aba9502)",
+              "ownerid@odata.bind":
+                "/systemusers(412a1781-de11-ea11-a816-000d3aba9502)",
               // "owninguser@odata.value": "/systemusers(412a1781-de11-ea11-a816-000d3aba9502)",
             });
           }}

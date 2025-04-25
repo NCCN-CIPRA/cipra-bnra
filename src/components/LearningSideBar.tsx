@@ -32,7 +32,12 @@ export default function LearningSideBar({
       inset: 1,
       letter: "G",
     },
-    { title: t("learning.general.riskCatalogue", "Risk Catalogue"), id: "risk-catalogue", inset: 1, letter: "C" },
+    {
+      title: t("learning.general.riskCatalogue", "Risk Catalogue"),
+      id: "risk-catalogue",
+      inset: 1,
+      letter: "C",
+    },
     {
       title: t("learning.general.impact", "Kwantitatieve Schalen"),
       id: "quantitative-categories",
@@ -41,10 +46,21 @@ export default function LearningSideBar({
     },
   ];
   const methoPages = [
-    { title: t("learning.methodology.introduction", "Introduction"), id: "methodology-introduction", inset: 1 },
-    { title: t("learning.methodology.riskCatalogue", "Risk Catalogue"), id: "methodology-risk-catalogue", inset: 1 },
     {
-      title: t("learning.methodology.scenarios", "Intensity Scenarios and Parameters"),
+      title: t("learning.methodology.introduction", "Introduction"),
+      id: "methodology-introduction",
+      inset: 1,
+    },
+    {
+      title: t("learning.methodology.riskCatalogue", "Risk Catalogue"),
+      id: "methodology-risk-catalogue",
+      inset: 1,
+    },
+    {
+      title: t(
+        "learning.methodology.scenarios",
+        "Intensity Scenarios and Parameters"
+      ),
       id: "methodology-scenarios",
       inset: 1,
       letter: "M",
@@ -56,20 +72,42 @@ export default function LearningSideBar({
       letter: "C",
     },
     {
-      title: t("learning.methodology.impactProbability", "Probability and Impact"),
+      title: t(
+        "learning.methodology.impactProbability",
+        "Probability and Impact"
+      ),
       id: "methodology-impact-probability",
     },
     {
-      title: t("learning.methodology.additionalElements", "Additional Elements"),
+      title: t(
+        "learning.methodology.additionalElements",
+        "Additional Elements"
+      ),
       id: "methodology-additional-elements",
     },
-    { title: t("learning.methodology.useCases", "Use Cases"), id: "methodology-use-cases" },
-    { title: t("learning.methodology.actors", "Malicious Actors"), id: "methodology-actors" },
-    { title: t("learning.methodology.emerging", "Emerging Risks"), id: "methodology-emerging" },
+    {
+      title: t("learning.methodology.useCases", "Use Cases"),
+      id: "methodology-use-cases",
+    },
+    {
+      title: t("learning.methodology.actors", "Malicious Actors"),
+      id: "methodology-actors",
+    },
+    {
+      title: t("learning.methodology.emerging", "Emerging Risks"),
+      id: "methodology-emerging",
+    },
   ];
   const toolPages = [
-    { title: t("learning.tools.validation", "Risk File Validation"), id: "tools-validation" },
-    { title: t("learning.tools.analysis", "Risk Analysis"), id: "tools-analysisA", letter: "A" },
+    {
+      title: t("learning.tools.validation", "Risk File Validation"),
+      id: "tools-validation",
+    },
+    {
+      title: t("learning.tools.analysis", "Risk Analysis"),
+      id: "tools-analysisA",
+      letter: "A",
+    },
     {
       title: t("learning.tools.analysisAStandard", "2A - Standard Risks"),
       id: "tools-analysisA-standard",
@@ -125,7 +163,9 @@ export default function LearningSideBar({
     },
   });
 
-  const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" })(({ theme, open }) => ({
+  const Drawer = styled(MuiDrawer, {
+    shouldForwardProp: (prop) => prop !== "open",
+  })(({ theme, open }) => ({
     width,
     flexShrink: 0,
     whiteSpace: "nowrap",
@@ -172,14 +212,22 @@ export default function LearningSideBar({
             />
           </ListItem>
         )}
-        {generalPages.map(({ title, id, letter, inset }, index) => (
-          <ListItem key={id} disablePadding sx={{ display: "block", whiteSpace: "normal" }}>
+        {generalPages.map(({ title, id, letter, inset }) => (
+          <ListItem
+            key={id}
+            disablePadding
+            sx={{ display: "block", whiteSpace: "normal" }}
+          >
             {open ? (
               <ListItemButton component={Link} to={`/learning/${id}`}>
                 <ListItemText
                   secondary={title}
                   sx={{ opacity: open ? 1 : 0, ml: inset ? 4 : 2 }}
-                  secondaryTypographyProps={pageName === id ? { fontWeight: "bold", color: "primary" } : {}}
+                  secondaryTypographyProps={
+                    pageName === id
+                      ? { fontWeight: "bold", color: "primary" }
+                      : {}
+                  }
                 />
               </ListItemButton>
             ) : (
@@ -218,14 +266,22 @@ export default function LearningSideBar({
             />
           </ListItem>
         )}
-        {methoPages.map(({ title, id, letter, inset }, index) => (
-          <ListItem key={id} disablePadding sx={{ display: "block", whiteSpace: "normal" }}>
+        {methoPages.map(({ title, id, letter, inset }) => (
+          <ListItem
+            key={id}
+            disablePadding
+            sx={{ display: "block", whiteSpace: "normal" }}
+          >
             {open ? (
               <ListItemButton component={Link} to={`/learning/${id}`}>
                 <ListItemText
                   secondary={title}
                   sx={{ opacity: open ? 1 : 0, ml: inset ? 4 : 2 }}
-                  secondaryTypographyProps={pageName === id ? { fontWeight: "bold", color: "primary" } : {}}
+                  secondaryTypographyProps={
+                    pageName === id
+                      ? { fontWeight: "bold", color: "primary" }
+                      : {}
+                  }
                 />
               </ListItemButton>
             ) : (
@@ -264,14 +320,26 @@ export default function LearningSideBar({
             />
           </ListItem>
         )}
-        {toolPages.map(({ title, id, letter, disabled, inset }, index) => (
-          <ListItem key={id} disablePadding sx={{ display: "block", whiteSpace: "normal" }}>
+        {toolPages.map(({ title, id, letter, disabled, inset }) => (
+          <ListItem
+            key={id}
+            disablePadding
+            sx={{ display: "block", whiteSpace: "normal" }}
+          >
             {open ? (
-              <ListItemButton component={Link} to={`/learning/${id}`} disabled={disabled}>
+              <ListItemButton
+                component={Link}
+                to={`/learning/${id}`}
+                disabled={disabled}
+              >
                 <ListItemText
                   secondary={title}
                   sx={{ opacity: open ? 1 : 0, ml: inset ? 4 : 2 }}
-                  secondaryTypographyProps={pageName === id ? { fontWeight: "bold", color: "primary" } : {}}
+                  secondaryTypographyProps={
+                    pageName === id
+                      ? { fontWeight: "bold", color: "primary" }
+                      : {}
+                  }
                 />
               </ListItemButton>
             ) : (

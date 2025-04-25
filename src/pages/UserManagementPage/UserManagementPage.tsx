@@ -8,7 +8,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
 } from "@mui/material";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import useRecords from "../../hooks/useRecords";
@@ -18,7 +17,7 @@ import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { DVContact } from "../../types/dataverse/DVContact";
 import { useEffect } from "react";
 
-export default function UserManagementPage({}) {
+export default function UserManagementPage() {
   const api = useAPI();
 
   const { data: users, loading } = useRecords<DVContact>({
@@ -27,6 +26,7 @@ export default function UserManagementPage({}) {
 
   useEffect(() => {
     api.getContactRoles().then(console.log);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   usePageTitle("User Management");
@@ -55,7 +55,7 @@ export default function UserManagementPage({}) {
           </TableHead>
           <TableBody>
             {users.map((u) => (
-              <TableRow>
+              <TableRow key={u.contactid}>
                 <TableCell>
                   {u.firstname} {u.lastname}
                 </TableCell>

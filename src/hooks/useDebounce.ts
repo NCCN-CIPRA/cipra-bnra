@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useRef } from "react";
 
 // Our hook
@@ -38,7 +39,7 @@ export function useDifferentDebounce(value: any, delay: number) {
   // State and setters for debounced value
   const [instantValue, setInstantValue] = useState(value);
   const [debouncedValue, setDebouncedValue] = useState(value);
-  const valueSetter = useRef<ReturnType<typeof setTimeout> | null>();
+  const valueSetter = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setValue = (newValue: any) => {
     setInstantValue(newValue);

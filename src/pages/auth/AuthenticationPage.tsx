@@ -8,7 +8,6 @@ import {
   Checkbox,
   Stack,
   Button,
-  CssBaseline,
   Typography,
   Alert,
   AlertTitle,
@@ -17,8 +16,6 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import useAPI from "../../hooks/useAPI";
 import { Trans, useTranslation } from "react-i18next";
-import TitleBar from "../../components/TitleBar";
-import { LoadingButton } from "@mui/lab";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -62,7 +59,10 @@ export default function AuthenticationPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleChangeTab = async (event: React.SyntheticEvent, newValue: number) => {
+  const handleChangeTab = async (
+    _event: React.SyntheticEvent,
+    newValue: number
+  ) => {
     setResetPassword(false);
     setTab(newValue);
   };
@@ -95,9 +95,19 @@ export default function AuthenticationPage() {
       <Container maxWidth="md" component={Paper} sx={{ mt: 20 }}>
         <Box sx={{ width: "100%" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs value={tab} onChange={handleChangeTab} aria-label="basic tabs example">
-              <Tab label={t("auth.login.tabName1", "Log In (External Expert)")} {...a11yProps(0)} />
-              <Tab label={t("auth.login.tabName2", "Log In (Internal NCCN)")} {...a11yProps(0)} />
+            <Tabs
+              value={tab}
+              onChange={handleChangeTab}
+              aria-label="basic tabs example"
+            >
+              <Tab
+                label={t("auth.login.tabName1", "Log In (External Expert)")}
+                {...a11yProps(0)}
+              />
+              <Tab
+                label={t("auth.login.tabName2", "Log In (Internal NCCN)")}
+                {...a11yProps(0)}
+              />
             </Tabs>
           </Box>
           <TabPanel value={tab} index={0}>
@@ -111,8 +121,9 @@ export default function AuthenticationPage() {
                 >
                   <Typography variant="body2" paragraph>
                     <Trans i18nKey="auth.resetPassword">
-                      Please enter the email you used to register on the platform below. An email will be sent
-                      containing instruction to reset your password.
+                      Please enter the email you used to register on the
+                      platform below. An email will be sent containing
+                      instruction to reset your password.
                     </Trans>
                   </Typography>
                   <TextField
@@ -130,7 +141,10 @@ export default function AuthenticationPage() {
                   <Button variant="contained" onClick={handleForgotPassword}>
                     Request Password Reset
                   </Button>
-                  <Button variant="outlined" onClick={() => setResetPassword(false)}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setResetPassword(false)}
+                  >
                     Log In
                   </Button>
                 </Stack>
@@ -140,7 +154,9 @@ export default function AuthenticationPage() {
                 {passwordResetSent && (
                   <Alert severity="info" sx={{ mb: 4 }}>
                     <AlertTitle>
-                      <Trans i18nKey="auth.resetPassword.sentTitle">Password Reset Requested</Trans>
+                      <Trans i18nKey="auth.resetPassword.sentTitle">
+                        Password Reset Requested
+                      </Trans>
                     </AlertTitle>
                     <Trans i18nKey="auth.resetPassword.sentContent">
                       Please check your email to reset your password.
@@ -155,7 +171,10 @@ export default function AuthenticationPage() {
 
                     <Typography variant="caption">
                       <Trans i18nKey={error}>
-                        Ongeldige Aanmeldpoging. <a href="mailto:cipra.bnra@nccn.fgov.be">cipra.bnra@nccn.fgov.be</a>
+                        Ongeldige Aanmeldpoging.{" "}
+                        <a href="mailto:cipra.bnra@nccn.fgov.be">
+                          cipra.bnra@nccn.fgov.be
+                        </a>
                       </Trans>
                     </Typography>
                   </Alert>
@@ -191,14 +210,21 @@ export default function AuthenticationPage() {
                     label="Remember me"
                     sx={{ ml: 0 }}
                     checked={remember}
-                    onChange={(e) => setRemember(!remember)}
+                    onChange={() => setRemember(!remember)}
                   />
                 </Box>
                 <Stack spacing={2} direction="row" mt={4}>
-                  <LoadingButton loading={loading} variant="contained" onClick={handleLogin}>
+                  <Button
+                    loading={loading}
+                    variant="contained"
+                    onClick={handleLogin}
+                  >
                     Login
-                  </LoadingButton>
-                  <Button variant="outlined" onClick={() => setResetPassword(true)}>
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setResetPassword(true)}
+                  >
                     Forgot Password
                   </Button>
                 </Stack>
@@ -207,7 +233,10 @@ export default function AuthenticationPage() {
           </TabPanel>
           <TabPanel value={tab} index={1}>
             <Stack spacing={2} direction="row" mt={2}>
-              <form action="/Account/Login/ExternalLogin?ReturnUrl=/" method="post">
+              <form
+                action="/Account/Login/ExternalLogin?ReturnUrl=/"
+                method="post"
+              >
                 <input
                   name="__RequestVerificationToken"
                   type="hidden"

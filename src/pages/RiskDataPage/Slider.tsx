@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
-import { Box, Typography, Slider as MuiSlider, Alert } from "@mui/material";
+import { useState } from "react";
+import { Box, Typography, Slider as MuiSlider } from "@mui/material";
 import { getQuantiNumber } from "../../functions/inputProcessing";
 import { DPValueStack } from "../learning/QuantitativeScales/P";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { MValueStack } from "../learning/QuantitativeScales/M";
-import { DIValueStack, DirectImpactField } from "../learning/QuantitativeScales/DI";
+import {
+  DIValueStack,
+  DirectImpactField,
+} from "../learning/QuantitativeScales/DI";
 import { Ha, Hb, Hc } from "../learning/QuantitativeScales/H";
 import { Sa, Sb, Sc, Sd } from "../learning/QuantitativeScales/S";
 import { Ea } from "../learning/QuantitativeScales/E";
@@ -66,11 +69,14 @@ export function Slider({
 
   const [value, setValue] = useState(number);
 
-  const handleChangeValue = (event: Event, newValue: number | number[]) => {
+  const handleChangeValue = (_event: Event, newValue: number | number[]) => {
     setValue(newValue as number);
   };
 
-  const handleChangeCommitted = (event: unknown, newValue: number | number[]) => {
+  const handleChangeCommitted = (
+    _event: unknown,
+    newValue: number | number[]
+  ) => {
     if (onChange) onChange(`${prefix}${newValue}`);
   };
 
@@ -94,7 +100,9 @@ export function Slider({
       <MuiSlider
         value={value}
         onChange={onChange !== null ? handleChangeValue : undefined}
-        onChangeCommitted={onChange !== null ? handleChangeCommitted : undefined}
+        onChangeCommitted={
+          onChange !== null ? handleChangeCommitted : undefined
+        }
         valueLabelDisplay="auto"
         step={0.5}
         min={0}

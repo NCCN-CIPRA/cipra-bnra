@@ -1,8 +1,17 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { DIRECT_ANALYSIS_QUANTI_FIELDS, DVDirectAnalysis, FieldQuality } from "../../types/dataverse/DVDirectAnalysis";
-import { DVRiskFile, DiscussionsRequired, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import {
+  DIRECT_ANALYSIS_QUANTI_FIELDS,
+  DVDirectAnalysis,
+  FieldQuality,
+} from "../../types/dataverse/DVDirectAnalysis";
+import {
+  DVRiskFile,
+  DiscussionsRequired,
+  RISK_TYPE,
+} from "../../types/dataverse/DVRiskFile";
 import {
   Grid,
+  Button,
   Box,
   Card,
   Stack,
@@ -19,11 +28,18 @@ import {
 } from "@mui/material";
 import { DVContact } from "../../types/dataverse/DVContact";
 import TextInputBox from "../../components/TextInputBox";
-import { NO_COMMENT } from "../step2A/sections/QualiTextInputBox";
+import { NO_COMMENT } from "./QualiTextInputBox";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import useAPI from "../../hooks/useAPI";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { LoadingButton } from "@mui/lab";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { DiscussionRequired } from "../../types/DiscussionRequired";
 import Attachments from "./Attachments";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
@@ -35,7 +51,10 @@ const scenarioLetter = {
   [SCENARIOS.EXTREME]: "e",
 };
 
-const getQualiFieldName = (scenario: SCENARIOS, parameter: string): keyof DVDirectAnalysis => {
+const getQualiFieldName = (
+  scenario: SCENARIOS,
+  parameter: string
+): keyof DVDirectAnalysis => {
   if (parameter === "dp") {
     return `cr4de_dp_quali_${scenarioLetter[scenario]}` as keyof DVDirectAnalysis;
   }
@@ -47,9 +66,14 @@ const getQualiFieldName = (scenario: SCENARIOS, parameter: string): keyof DVDire
   return `cr4de_di_quali_${parameter}_${scenarioLetter[scenario]}` as keyof DVDirectAnalysis;
 };
 
-const getQuantiFieldNames = (scenario: SCENARIOS, parameter: string): (keyof DVDirectAnalysis)[] => {
+const getQuantiFieldNames = (
+  scenario: SCENARIOS,
+  parameter: string
+): (keyof DVDirectAnalysis)[] => {
   if (parameter === "dp") {
-    return [`cr4de_dp_quanti_${scenarioLetter[scenario]}` as keyof DVDirectAnalysis];
+    return [
+      `cr4de_dp_quanti_${scenarioLetter[scenario]}` as keyof DVDirectAnalysis,
+    ];
   }
 
   if (parameter === "cb") {
@@ -57,11 +81,20 @@ const getQuantiFieldNames = (scenario: SCENARIOS, parameter: string): (keyof DVD
   }
 
   return DIRECT_ANALYSIS_QUANTI_FIELDS.filter((f) =>
-    f.match(new RegExp(`cr4de_di_quanti_${parameter}.{1}_${scenarioLetter[scenario]}`, "g"))
+    f.match(
+      new RegExp(
+        `cr4de_di_quanti_${parameter}.{1}_${scenarioLetter[scenario]}`,
+        "g"
+      )
+    )
   );
 };
 
-const getPrefix = (parameter: string, fieldName: string, riskType: RISK_TYPE) => {
+const getPrefix = (
+  parameter: string,
+  fieldName: string,
+  riskType: RISK_TYPE
+) => {
   if (parameter === "dp") {
     if (riskType === RISK_TYPE.MANMADE) return "Motivation";
     return "DP";
@@ -70,7 +103,10 @@ const getPrefix = (parameter: string, fieldName: string, riskType: RISK_TYPE) =>
   return capFirst(fieldName.slice(0, -2).slice(-2));
 };
 
-const getQuantiLabel = (fieldName: keyof DVDirectAnalysis, directAnalyses: DVDirectAnalysis[]) => {
+const getQuantiLabel = (
+  fieldName: keyof DVDirectAnalysis,
+  directAnalyses: DVDirectAnalysis[]
+) => {
   const good = directAnalyses.filter((da) => da[fieldName] !== null);
 
   if (good.length <= 0) return 0;
@@ -118,7 +154,7 @@ function ScenarioSection({
   scenario: SCENARIOS;
   parameter: string;
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
-  initialOpen?: Boolean;
+  initialOpen?: boolean;
 
   reloadRiskFile: () => void;
   reloadDirectAnalyses: () => void;
@@ -150,8 +186,14 @@ function ScenarioSection({
     );
   }, [riskFile, scenario, parameter]);
 
-  const qualiName = useMemo(() => getQualiFieldName(scenario, parameter), [scenario, parameter]);
-  const quantiNames = useMemo(() => getQuantiFieldNames(scenario, parameter), [scenario, parameter]);
+  const qualiName = useMemo(
+    () => getQualiFieldName(scenario, parameter),
+    [scenario, parameter]
+  );
+  const quantiNames = useMemo(
+    () => getQuantiFieldNames(scenario, parameter),
+    [scenario, parameter]
+  );
 
   const qualiInput = useRef<null | string>(null);
 
@@ -176,7 +218,9 @@ function ScenarioSection({
           directAnalyses.map(
             (da) =>
               (da.cr4de_quality &&
-                da.cr4de_quality[`${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof FieldQuality]) ||
+                da.cr4de_quality[
+                  `${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof FieldQuality
+                ]) ||
               2.5
           )
         ),
@@ -187,10 +231,15 @@ function ScenarioSection({
       ...d,
       std: avg(Object.values(d).map((dist) => dist.std)),
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quantiNames, directAnalyses]);
 
   return (
-    <Stack direction="column" spacing={2} sx={{ flex: open ? 1 : 0, transition: "all .3s ease" }}>
+    <Stack
+      direction="column"
+      spacing={2}
+      sx={{ flex: open ? 1 : 0, transition: "all .3s ease" }}
+    >
       <Paper
         sx={{
           p: 2,
@@ -212,11 +261,19 @@ function ScenarioSection({
             <CardContent>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body1">
-                  Below is a summary of the quantitative results for this parameter:
+                  Below is a summary of the quantitative results for this
+                  parameter:
                 </Typography>
               </Box>
               {quantiNames.length > 0 && (
-                <Box sx={{ width: "100%", height: 300, mt: 4, position: "relative" }}>
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: 300,
+                    mt: 4,
+                    position: "relative",
+                  }}
+                >
                   <Box
                     sx={{
                       position: "absolute",
@@ -230,7 +287,11 @@ function ScenarioSection({
                       <BarChart
                         data={quantiNames.map((n) => {
                           return {
-                            name: `${getPrefix(parameter, n, riskFile.cr4de_risk_type)} Input Distribution`,
+                            name: `${getPrefix(
+                              parameter,
+                              n,
+                              riskFile.cr4de_risk_type
+                            )} Input Distribution`,
                             distFloat: distribution[n].min - 0.05,
                             distBot: distribution[n].avg - distribution[n].min,
                             distAvg: 0.1,
@@ -249,18 +310,48 @@ function ScenarioSection({
                         <YAxis domain={[-1, 6]} ticks={[0, 1, 2, 3, 4, 5]} />
                         <Tooltip
                           formatter={(value, name, props) => {
-                            if (name === "Minimum") return props.payload.distFloat + 0.05;
-                            if (name === "Average") return props.payload.distFloat + 0.05 + props.payload.distBot;
+                            if (name === "Minimum")
+                              return props.payload.distFloat + 0.05;
+                            if (name === "Average")
+                              return (
+                                props.payload.distFloat +
+                                0.05 +
+                                props.payload.distBot
+                              );
                             if (name === "Maximum")
-                              return props.payload.distFloat + 0.05 + props.payload.distBot + props.payload.distTop;
+                              return (
+                                props.payload.distFloat +
+                                0.05 +
+                                props.payload.distBot +
+                                props.payload.distTop
+                              );
 
                             return value;
                           }}
                         />
-                        <Bar dataKey="distFloat" stackId="a" fill="transparent" />
-                        <Bar dataKey="distBot" stackId="a" fill="#82ca9d" name="Minimum" />
-                        <Bar dataKey="distAvg" stackId="a" fill="#5a9671" name="Average" />
-                        <Bar dataKey="distTop" stackId="a" fill="#82ca9d" name="Maximum" />
+                        <Bar
+                          dataKey="distFloat"
+                          stackId="a"
+                          fill="transparent"
+                        />
+                        <Bar
+                          dataKey="distBot"
+                          stackId="a"
+                          fill="#82ca9d"
+                          name="Minimum"
+                        />
+                        <Bar
+                          dataKey="distAvg"
+                          stackId="a"
+                          fill="#5a9671"
+                          name="Average"
+                        />
+                        <Bar
+                          dataKey="distTop"
+                          stackId="a"
+                          fill="#82ca9d"
+                          name="Maximum"
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </Box>
@@ -271,11 +362,15 @@ function ScenarioSection({
                 {quantiNames.length > 0 && (
                   <Stack direction="column" sx={{ mt: 2, flex: 1 }} spacing={1}>
                     {quantiNames.map((n) => (
-                      <Stack direction="row">
+                      <Stack key={n} direction="row">
                         <Typography variant="body1" sx={{ flex: 1 }}>
-                          Average <i>{getQuantiLabel(n, directAnalyses)}</i> Estimate:
+                          Average <i>{getQuantiLabel(n, directAnalyses)}</i>{" "}
+                          Estimate:
                         </Typography>
-                        <Chip label={distribution[n].avgLabel} sx={{ fontWeight: "bold" }}></Chip>
+                        <Chip
+                          label={distribution[n].avgLabel}
+                          sx={{ fontWeight: "bold" }}
+                        ></Chip>
                       </Stack>
                     ))}
                   </Stack>
@@ -287,7 +382,9 @@ function ScenarioSection({
                   Divergence:
                 </Typography>
                 {distribution.std < 1 && <Chip label="LOW" color="success" />}
-                {distribution.std >= 1 && distribution.std < 2 && <Chip label="MEDIUM" color="warning" />}
+                {distribution.std >= 1 && distribution.std < 2 && (
+                  <Chip label="MEDIUM" color="warning" />
+                )}
                 {distribution.std >= 2 && <Chip label="HIGH" color="error" />}
               </Stack>
 
@@ -303,16 +400,23 @@ function ScenarioSection({
                     await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
                       cr4de_discussion_required: JSON.stringify({
                         ...riskFile.cr4de_discussion_required,
-                        [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]: e.target.value,
+                        [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]:
+                          e.target.value,
                       }),
                     });
                     reloadRiskFile();
                   }}
                 >
                   <MenuItem value="unknown">Unknown</MenuItem>
-                  <MenuItem value={DiscussionRequired.REQUIRED}>Required</MenuItem>
-                  <MenuItem value={DiscussionRequired.PREFERRED}>Preferred</MenuItem>
-                  <MenuItem value={DiscussionRequired.NOT_NECESSARY}>Unnecessary</MenuItem>
+                  <MenuItem value={DiscussionRequired.REQUIRED}>
+                    Required
+                  </MenuItem>
+                  <MenuItem value={DiscussionRequired.PREFERRED}>
+                    Preferred
+                  </MenuItem>
+                  <MenuItem value={DiscussionRequired.NOT_NECESSARY}>
+                    Unnecessary
+                  </MenuItem>
                 </Select>
               </Stack>
             </CardContent>
@@ -322,12 +426,16 @@ function ScenarioSection({
             <CardContent>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body1">
-                  The field below can be used to summarize the qualitative responses of the experts or to prepare for
-                  the consensus meeting:
+                  The field below can be used to summarize the qualitative
+                  responses of the experts or to prepare for the consensus
+                  meeting:
                 </Typography>
               </Box>
               <TextInputBox
-                initialValue={(riskFile[qualiName as keyof DVRiskFile] as string | null) || ""}
+                initialValue={
+                  (riskFile[qualiName as keyof DVRiskFile] as string | null) ||
+                  ""
+                }
                 // onSave={async (newValue) => handleSave(qualiName, newValue)}
                 disabled={false}
                 setUpdatedValue={(v) => {
@@ -336,17 +444,23 @@ function ScenarioSection({
                 // onSave={async (newValue) => handleSave(qualiName, newValue)}
                 // disabled={false}
                 reset={lastParam !== parameter}
-                onReset={async (value: string | null) => {
+                onReset={async () => {
                   // await handleSave(getQualiFieldName(scenario, lastParam), value);
                   setLastParam(parameter);
-                  qualiInput.current = (riskFile[qualiName as keyof DVRiskFile] as string | null) || "";
+                  qualiInput.current =
+                    (riskFile[qualiName as keyof DVRiskFile] as
+                      | string
+                      | null) || "";
                 }}
               />
             </CardContent>
             <CardActions>
-              <LoadingButton loading={isSaving} onClick={() => handleSave(qualiName, qualiInput.current)}>
+              <Button
+                loading={isSaving}
+                onClick={() => handleSave(qualiName, qualiInput.current)}
+              >
                 Save
-              </LoadingButton>
+              </Button>
             </CardActions>
 
             <Attachments
@@ -355,7 +469,9 @@ function ScenarioSection({
                 api.getAttachments(
                   `$filter=_cr4de_risk_file_value eq ${
                     riskFile.cr4de_riskfilesid
-                  } and _cr4de_directanalysis_value eq null and cr4de_field eq 'cr4de_${getField(parameter)}_${
+                  } and _cr4de_directanalysis_value eq null and cr4de_field eq 'cr4de_${getField(
+                    parameter
+                  )}_${
                     scenarioLetter[scenario]
                   }'&$expand=cr4de_referencedSource`
                 )
@@ -380,7 +496,9 @@ function ScenarioSection({
                   reloadDirectAnalyses={reloadDirectAnalyses}
                   setReloadAttachments={() => setReloadAttachments(true)}
                 />
-                {i < a.length - 1 && <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />}
+                {i < a.length - 1 && (
+                  <Divider variant="fullWidth" sx={{ mt: 2, mb: 4 }} />
+                )}
               </>
             ))}
           </Paper>
@@ -411,7 +529,9 @@ function ExpertInput({
 
   const [rating, setRating] = useState(
     (directAnalysis.cr4de_quality &&
-      directAnalysis.cr4de_quality[`${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof FieldQuality]) ??
+      directAnalysis.cr4de_quality[
+        `${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof FieldQuality
+      ]) ??
       null
   );
   const [lastParameter, setLastParameter] = useState(parameter);
@@ -421,15 +541,18 @@ function ExpertInput({
       setLastParameter(parameter);
       setRating(
         (directAnalysis.cr4de_quality &&
-          directAnalysis.cr4de_quality[`${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof FieldQuality]) ??
+          directAnalysis.cr4de_quality[
+            `${parameter}_${SCENARIO_PARAMS[scenario].prefix}` as keyof FieldQuality
+          ]) ??
           null
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parameter]);
 
   return (
     <Grid container wrap="nowrap" spacing={2}>
-      <Grid justifyContent="left" item xs zeroMinWidth>
+      <Grid justifyContent="left" size="grow">
         <Stack direction="row">
           <Typography variant="subtitle2" sx={{ flex: 1 }}>
             {directAnalysis.cr4de_expert.emailaddress1} says:
@@ -437,32 +560,43 @@ function ExpertInput({
           <Rating
             name="size-small"
             value={rating}
-            onChange={async (e, newValue) => {
+            onChange={async (_e, newValue) => {
               setRating(newValue);
-              await api.updateDirectAnalysis(directAnalysis.cr4de_bnradirectanalysisid, {
-                cr4de_quality: JSON.stringify({
-                  ...directAnalysis.cr4de_quality,
-                  [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]: newValue,
-                }),
-              });
+              await api.updateDirectAnalysis(
+                directAnalysis.cr4de_bnradirectanalysisid,
+                {
+                  cr4de_quality: JSON.stringify({
+                    ...directAnalysis.cr4de_quality,
+                    [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]:
+                      newValue,
+                  }),
+                }
+              );
               reloadDirectAnalyses();
             }}
             size="small"
           />
         </Stack>
-        {directAnalysis[qualiName] && directAnalysis[qualiName] !== NO_COMMENT ? (
+        {directAnalysis[qualiName] &&
+        directAnalysis[qualiName] !== NO_COMMENT ? (
           <Box
-            dangerouslySetInnerHTML={{ __html: (directAnalysis[qualiName] || "") as string }}
+            dangerouslySetInnerHTML={{
+              __html: (directAnalysis[qualiName] || "") as string,
+            }}
             sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
           />
         ) : (
-          <Box sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}>- No comment -</Box>
+          <Box
+            sx={{ mt: 1, mb: 2, ml: 1, pl: 1, borderLeft: "4px solid #eee" }}
+          >
+            - No comment -
+          </Box>
         )}
 
         {quantiNames.length > 0 && (
           <Stack direction="column" sx={{ mt: 2 }}>
             {quantiNames.map((n) => (
-              <Stack direction="row">
+              <Stack key={n} direction="row">
                 <Typography variant="caption" sx={{ flex: 1 }}>
                   <i>{getQuantiLabel(n, [directAnalysis])}</i> Estimate:
                 </Typography>
@@ -480,7 +614,9 @@ function ExpertInput({
             api.getAttachments(
               `$filter=_cr4de_directanalysis_value eq ${
                 directAnalysis?.cr4de_bnradirectanalysisid
-              } and cr4de_field eq 'cr4de_${getField(parameter)}_${scenarioLetter[scenario]}'`
+              } and cr4de_field eq 'cr4de_${getField(parameter)}_${
+                scenarioLetter[scenario]
+              }'`
             )
           }
           consolidateAttachment={async (attachment: DVAttachment) => {
@@ -521,9 +657,17 @@ export default function Step2APage({
 
   return (
     <Stack spacing={4}>
-      <Stack direction="row" spacing={2} sx={{ bgcolor: theme.palette.background.paper }}>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{ bgcolor: theme.palette.background.paper }}
+      >
         {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && (
-          <Select value={parameter} sx={{ flex: 1 }} onChange={(e) => setParameter(e.target.value)}>
+          <Select
+            value={parameter}
+            sx={{ flex: 1 }}
+            onChange={(e) => setParameter(e.target.value)}
+          >
             <MenuItem value={"dp"}>Direct Probability</MenuItem>
             <MenuItem value={"h"}>Direct Human Impact</MenuItem>
             <MenuItem value={"s"}>Direct Societal Impact</MenuItem>
@@ -533,7 +677,11 @@ export default function Step2APage({
           </Select>
         )}
         {riskFile.cr4de_risk_type === RISK_TYPE.MANMADE && (
-          <Select value={parameter} sx={{ flex: 1 }} onChange={(e) => setParameter(e.target.value)}>
+          <Select
+            value={parameter}
+            sx={{ flex: 1 }}
+            onChange={(e) => setParameter(e.target.value)}
+          >
             <MenuItem value={"dp"}>Motivation</MenuItem>
           </Select>
         )}

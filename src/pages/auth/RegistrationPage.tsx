@@ -3,22 +3,20 @@ import { useParams } from "react-router-dom";
 import {
   Tabs,
   Container,
+  Button,
   Paper,
   TextField,
   FormControlLabel,
   Checkbox,
   Stack,
-  CssBaseline,
   Alert,
   AlertTitle,
 } from "@mui/material";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import useAPI from "../../hooks/useAPI";
-import TitleBar from "../../components/TitleBar";
 import { Trans, useTranslation } from "react-i18next";
 import Typography from "@mui/material/Typography";
-import { LoadingButton } from "@mui/lab";
 import FormGroup from "@mui/material/FormGroup";
 
 interface TabPanelProps {
@@ -121,8 +119,12 @@ export default function RegistrationPage() {
       setError(false);
       document.getElementById("EmailTextBox")!.setAttribute("value", email);
       document.getElementById("UserNameTextBox")!.setAttribute("value", email);
-      document.getElementById("PasswordTextBox")!.setAttribute("value", password);
-      document.getElementById("ConfirmPasswordTextBox")!.setAttribute("value", password2);
+      document
+        .getElementById("PasswordTextBox")!
+        .setAttribute("value", password);
+      document
+        .getElementById("ConfirmPasswordTextBox")!
+        .setAttribute("value", password2);
 
       document.getElementById("SubmitButton")!.click();
     }
@@ -134,7 +136,10 @@ export default function RegistrationPage() {
         <Box sx={{ width: "100%", mb: 12 }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs value={0} aria-label="basic tabs example">
-              <Tab label={t("auth.registration.tabName", "Register")} {...a11yProps(0)} />
+              <Tab
+                label={t("auth.registration.tabName", "Register")}
+                {...a11yProps(0)}
+              />
             </Tabs>
           </Box>
           <TabPanel value={0} index={0}>
@@ -149,35 +154,45 @@ export default function RegistrationPage() {
                   {error && (
                     <Alert severity="error" sx={{ mb: 4 }}>
                       <AlertTitle>
-                        <Trans i18nKey="auth.registration.error2.title">Registration Error</Trans>
+                        <Trans i18nKey="auth.registration.error2.title">
+                          Registration Error
+                        </Trans>
                       </AlertTitle>
                       {error === "email" && (
-                        <Trans i18nKey="auth.registration.error2.email">Please enter a valid email</Trans>
+                        <Trans i18nKey="auth.registration.error2.email">
+                          Please enter a valid email
+                        </Trans>
                       )}
                       {error === "password" && (
                         <Trans i18nKey="auth.registration.error2.password">
-                          Your password is not complex enough. Please consult the password requirements below.
+                          Your password is not complex enough. Please consult
+                          the password requirements below.
                         </Trans>
                       )}
                       {error === "passwordMatch" && (
-                        <Trans i18nKey="auth.registration.error2.passwordMatch">Your passwords did not match.</Trans>
+                        <Trans i18nKey="auth.registration.error2.passwordMatch">
+                          Your passwords did not match.
+                        </Trans>
                       )}
                       {error === "accept" && (
-                        <Trans i18nKey="auth.registration.error2.accept">Please accept the privacy policy.</Trans>
+                        <Trans i18nKey="auth.registration.error2.accept">
+                          Please accept the privacy policy.
+                        </Trans>
                       )}
                     </Alert>
                   )}
                   <Typography variant="body2" paragraph>
                     <Trans i18nKey="auth.registration.introduction2">
-                      Please choose a password below. You will need these credentials to log in to the BNRA Risk
-                      Analysis Platform.
+                      Please choose a password below. You will need these
+                      credentials to log in to the BNRA Risk Analysis Platform.
                     </Trans>
                   </Typography>
                   <Typography variant="body2" paragraph>
                     <Trans i18nKey="auth.registration.introduction3">
-                      Wachtwoorden moet ten minste 8 tekens bevatten. Wachtwoorden moeten tekens bevatten van ten minste
-                      drie van de volgende vier klassen: hoofdletters, kleine letters, cijfers en niet-alfanumeriek
-                      (speciaal).
+                      Wachtwoorden moet ten minste 8 tekens bevatten.
+                      Wachtwoorden moeten tekens bevatten van ten minste drie
+                      van de volgende vier klassen: hoofdletters, kleine
+                      letters, cijfers en niet-alfanumeriek (speciaal).
                     </Trans>
                   </Typography>
                   <TextField
@@ -213,9 +228,15 @@ export default function RegistrationPage() {
                   <Box sx={{ ml: 2 }}>
                     <Typography variant="body2" paragraph sx={{ mt: 4 }}>
                       <Trans i18nKey="auth.registration.disclaimer1">
-                        Deze website gebruikt cookies van Microsoft om de functionaliteit te verbeteren. Deze gegevens
-                        worden door Microsoft opgeslagen. Meer informatie over cookies vindt u in ons{" "}
-                        <a target="_blank" href="https://crisiscentrum.be/nl/bnra/cookiebeleid">
+                        Deze website gebruikt cookies van Microsoft om de
+                        functionaliteit te verbeteren. Deze gegevens worden door
+                        Microsoft opgeslagen. Meer informatie over cookies vindt
+                        u in ons{" "}
+                        <a
+                          target="_blank"
+                          href="https://crisiscentrum.be/nl/bnra/cookiebeleid"
+                          rel="noreferrer"
+                        >
                           cookiebeleid
                         </a>
                         .
@@ -223,17 +244,25 @@ export default function RegistrationPage() {
                     </Typography>
                     <Typography variant="body2" paragraph>
                       <Trans i18nKey="auth.registration.disclaimer2">
-                        Bovendien worden de persoonlijke gegevens die u vrijwillig verstrekt in het formulier niet
-                        opgeslagen voor commerciële doeleinden of doorgegeven aan derden. U geeft uitsluitend
-                        toestemming om deze gegevens te verwerken voor het geven van deskundig advies in het kader van
-                        de BNRA.
+                        Bovendien worden de persoonlijke gegevens die u
+                        vrijwillig verstrekt in het formulier niet opgeslagen
+                        voor commerciële doeleinden of doorgegeven aan derden. U
+                        geeft uitsluitend toestemming om deze gegevens te
+                        verwerken voor het geven van deskundig advies in het
+                        kader van de BNRA.
                       </Trans>
                     </Typography>
                     <Typography variant="body2" paragraph>
                       <Trans i18nKey="auth.registration.disclaimer3">
-                        Uw gegevens worden bewaard tot het einde van de studie en nog een jaar langer om de studie voor
-                        de volgende periode te starten, dus maximaal 5 jaar. Voor meer informatie: lees de{" "}
-                        <a target="_blank" href="https://crisiscentrum.be/nl/bnra/privacyverklaring-bnra">
+                        Uw gegevens worden bewaard tot het einde van de studie
+                        en nog een jaar langer om de studie voor de volgende
+                        periode te starten, dus maximaal 5 jaar. Voor meer
+                        informatie: lees de{" "}
+                        <a
+                          target="_blank"
+                          href="https://crisiscentrum.be/nl/bnra/privacyverklaring-bnra"
+                          rel="noreferrer"
+                        >
                           privacyverklaring
                         </a>
                         .
@@ -241,24 +270,38 @@ export default function RegistrationPage() {
                     </Typography>
                     <Typography variant="body2" paragraph>
                       <Trans i18nKey="auth.registration.disclaimer4">
-                        U kunt uw recht van toegang, rechtzetting, verwijdering, beperking of verzet tegen de verwerking
-                        van uw gegevens uitoefenen door te mailen naar{" "}
-                        <a href="mailto:cipra.bnra@nccn.fgov.be">cipra.bnra@nccn.fgov.be</a>.
+                        U kunt uw recht van toegang, rechtzetting, verwijdering,
+                        beperking of verzet tegen de verwerking van uw gegevens
+                        uitoefenen door te mailen naar{" "}
+                        <a href="mailto:cipra.bnra@nccn.fgov.be">
+                          cipra.bnra@nccn.fgov.be
+                        </a>
+                        .
                       </Trans>
                     </Typography>
 
                     <FormGroup sx={{ mt: 2 }}>
                       <FormControlLabel
-                        control={<Checkbox checked={accept} onChange={(e) => setAccept(e.target.checked)} />}
+                        control={
+                          <Checkbox
+                            checked={accept}
+                            onChange={(e) => setAccept(e.target.checked)}
+                          />
+                        }
                         label={t("auth.registration.agree", "Ik ga akkoord")}
                       />
                     </FormGroup>
                   </Box>
                 </Box>
                 <Stack spacing={2} direction="row" mt={4}>
-                  <LoadingButton variant="contained" sx={{ mr: 1 }} loading={loading} onClick={handleRegister}>
+                  <Button
+                    variant="contained"
+                    sx={{ mr: 1 }}
+                    loading={loading}
+                    onClick={handleRegister}
+                  >
                     <Trans i18nKey="auth.button.registration">Register</Trans>
-                  </LoadingButton>
+                  </Button>
                 </Stack>
                 <div
                   id="registration-form"
@@ -277,17 +320,26 @@ export default function RegistrationPage() {
                   {error && (
                     <Alert severity="error" sx={{ mb: 4 }}>
                       <AlertTitle>
-                        <Trans i18nKey="auth.registration.error.title">Unknown Invitation Code</Trans>
+                        <Trans i18nKey="auth.registration.error.title">
+                          Unknown Invitation Code
+                        </Trans>
                       </AlertTitle>
                       <Trans i18nKey="auth.registration.error.content">
-                        Please try again or contact <a href="mailto:cipra.bnra@nccn.fgov.be">cipra.bnra@nccn.fgov.be</a>
+                        Please try again or contact{" "}
+                        <a href="mailto:cipra.bnra@nccn.fgov.be">
+                          cipra.bnra@nccn.fgov.be
+                        </a>
                       </Trans>
                     </Alert>
                   )}
                   <Typography variant="body2" paragraph>
                     <Trans i18nKey="auth.registration.introduction1">
-                      Please enter the invitation code you received from your NCCN contact below. If you did not receive
-                      a code, please contact <a href="mailto:cipra.bnra@nccn.fgov.be">cipra.bnra@nccn.fgov.be</a>
+                      Please enter the invitation code you received from your
+                      NCCN contact below. If you did not receive a code, please
+                      contact{" "}
+                      <a href="mailto:cipra.bnra@nccn.fgov.be">
+                        cipra.bnra@nccn.fgov.be
+                      </a>
                     </Trans>
                   </Typography>
                   <TextField
@@ -301,9 +353,16 @@ export default function RegistrationPage() {
                   />
                 </Box>
                 <Stack spacing={2} direction="row" mt={2}>
-                  <LoadingButton variant="contained" sx={{ mr: 1 }} loading={loading} onClick={handleRegisterStart}>
-                    <Trans i18nKey="auth.button.startRegistration">Start Registration</Trans>
-                  </LoadingButton>
+                  <Button
+                    variant="contained"
+                    sx={{ mr: 1 }}
+                    loading={loading}
+                    onClick={handleRegisterStart}
+                  >
+                    <Trans i18nKey="auth.button.startRegistration">
+                      Start Registration
+                    </Trans>
+                  </Button>
                 </Stack>
               </>
             )}

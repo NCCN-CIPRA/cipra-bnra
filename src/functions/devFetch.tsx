@@ -3,16 +3,19 @@ import { v4 as uuid } from "uuid";
 const responses: { [key: string]: Response } = {};
 
 export default function patchFetch() {
-  // @ts-expect-error
+  // @ts-expect-error oldFetch doesn't exist
   window.oldFetch = window.fetch;
   window.fetch = devFetch;
 
   window.onmessage = function (e) {
     if (e.data && e.data.requestData) {
-      responses[e.data.requestData.id] = new Response(e.data.body || undefined, {
-        status: e.data.status,
-        headers: new Headers(e.data.headers),
-      });
+      responses[e.data.requestData.id] = new Response(
+        e.data.body || undefined,
+        {
+          status: e.data.status,
+          headers: new Headers(e.data.headers),
+        }
+      );
     } else if (e.data && e.data.userInfo) {
       const div = document.createElement("div");
       div.innerHTML = e.data.userInfo;
@@ -29,15 +32,18 @@ export default function patchFetch() {
   };
 }
 
-async function devFetch(input: RequestInfo | URL, init?: RequestInit | undefined) {
-  // @ts-expect-error
+async function devFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit | undefined
+) {
+  // @ts-expect-error is does exist
   if (input.match(/powerappsportal/)) {
-    return new Promise<Response>((resolve, reject) => {
+    return new Promise<Response>((resolve) => {
       const requestId = uuid();
 
       setTimeout(
         () => {
-          // @ts-expect-error
+          // @ts-expect-error it does exist
           window.frames.localApi.postMessage(
             JSON.stringify({
               url: input,
@@ -47,7 +53,7 @@ async function devFetch(input: RequestInfo | URL, init?: RequestInit | undefined
             "*"
           );
         },
-        // @ts-expect-error
+        // @ts-expect-error why
         window.fetch.loaded ? 0 : 5000
       );
 
@@ -85,7 +91,7 @@ async function devFetch(input: RequestInfo | URL, init?: RequestInit | undefined
       }, 500);
     });
   } else {
-    // @ts-expect-error
+    // @ts-expect-error just defined it
     return window.oldFetch(input, init);
   }
 }

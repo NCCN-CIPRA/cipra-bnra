@@ -3,28 +3,18 @@ import {
   DataGrid,
   GridRowsProp,
   GridColDef,
-  GridValueFormatterParams,
-  GRID_CHECKBOX_SELECTION_COL_DEF,
-  GridHeaderCheckbox,
   GridCellCheckboxRenderer,
   GridEventListener,
-  GridRowSelectionModel,
-  GridCallbackDetails,
-  GridRowParams,
-  MuiEvent,
-  useGridApiEventHandler,
   useGridApiRef,
+  GRID_CHECKBOX_SELECTION_COL_DEF,
 } from "@mui/x-data-grid";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { getMoneyString } from "../../functions/Impact";
 import {
   Box,
   Accordion,
   AccordionActions,
   AccordionDetails,
   AccordionSummary,
-  Checkbox,
-  FormControlLabel,
   FormGroup,
   Typography,
 } from "@mui/material";
@@ -41,28 +31,26 @@ const columns: GridColDef[] = [
     field: "cp",
     headerName: "AVG CP",
     width: 100,
-    valueFormatter: (params: GridValueFormatterParams<number>) => {
-      return `${(100 * params.value).toLocaleString()} %`;
+    valueFormatter: (value: number) => {
+      return `${(100 * value).toLocaleString()} %`;
     },
   },
   {
     field: "ip",
     headerName: "AVG IP",
     width: 200,
-    valueFormatter: (params: GridValueFormatterParams<number>) => {
-      return `${(100 * params.value).toLocaleString()} %`;
+    valueFormatter: (value: number) => {
+      return `${(100 * value).toLocaleString()} %`;
     },
   },
   {
+    ...GRID_CHECKBOX_SELECTION_COL_DEF,
     field: "damp",
     headerName: "Damp",
     width: 200,
-    type: "checkboxSelection",
     resizable: false,
     sortable: false,
     filterable: false,
-    // @ts-ignore
-    aggregable: false,
     disableColumnMenu: true,
     disableReorder: true,
     disableExport: true,
@@ -71,7 +59,11 @@ const columns: GridColDef[] = [
   },
 ];
 
-export default function CascadeDataGrid({ data }: { data: RiskCalculation[] | null }) {
+export default function CascadeDataGrid({
+  data,
+}: {
+  data: RiskCalculation[] | null;
+}) {
   const api = useAPI();
   const [rows, setRows] = useState<GridRowsProp | null>(null);
   // const [worstCase, setWorstCase] = useState(false);
@@ -79,9 +71,7 @@ export default function CascadeDataGrid({ data }: { data: RiskCalculation[] | nu
   const apiRef = useGridApiRef();
 
   const handleRowCheck: GridEventListener<"rowSelectionCheckboxChange"> = (
-    params, // GridRowSelectionCheckboxParams
-    event, // MuiEvent<React.ChangeEvent<HTMLElement>>
-    details // GridCallbackDetails
+    params // GridRowSelectionCheckboxParams
   ) => {
     if (!rows) return;
 
@@ -131,9 +121,13 @@ export default function CascadeDataGrid({ data }: { data: RiskCalculation[] | nu
   }, [data]);
 
   useEffect(() => {
-    if (!rows) return;
+    if (!rows || !apiRef.current) return;
 
-    return apiRef.current.subscribeEvent("rowSelectionCheckboxChange", handleRowCheck);
+    return apiRef.current.subscribeEvent(
+      "rowSelectionCheckboxChange",
+      handleRowCheck
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rows]);
 
   return (

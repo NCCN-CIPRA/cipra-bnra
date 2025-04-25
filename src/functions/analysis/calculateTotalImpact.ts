@@ -3,7 +3,6 @@ import { SCENARIOS } from "../scenarios";
 
 const DAMAGE_INDICATORS = ["Ha", "Hb", "Hc", "Sa", "Sb", "Sc", "Sd", "Ea", "Fa", "Fb"];
 
-const INFO_OPS_FACTOR = 10;
 
 const getScenarioSuffix = (scenario: SCENARIOS) => {
   if (scenario === SCENARIOS.CONSIDERABLE) return "_c";
@@ -30,17 +29,17 @@ const setIndirectImpacts = (
   s2m: number,
   s2e: number
 ) => {
-  let suffix = getScenarioSuffix(scenario);
+  const suffix = getScenarioSuffix(scenario);
 
   DAMAGE_INDICATORS.forEach((d) => {
-    //@ts-expect-error
+    //@ts-expect-error never
     cascade[`ii_${d}${suffix}` as keyof CascadeCalculation] =
       s2c * (cascade.effect[`ti_${d}_c` as keyof RiskCalculation] as number) +
       s2m * (cascade.effect[`ti_${d}_m` as keyof RiskCalculation] as number) +
       s2e * (cascade.effect[`ti_${d}_e` as keyof RiskCalculation] as number);
   });
 
-  //@ts-expect-error
+    //@ts-expect-error never
   cascade[`ii${suffix}` as keyof CascadeCalculation] =
     s2c * (cascade.effect[`ti_c` as keyof RiskCalculation] as number) +
     s2m * (cascade.effect[`ti_m` as keyof RiskCalculation] as number) +
@@ -107,9 +106,9 @@ export default function calculateTotalImpact(risk: RiskCalculation): void {
 }
 
 function calculateTotalImpactScenario(risk: RiskCalculation, scenario: SCENARIOS) {
-  let suffix = getScenarioSuffix(scenario);
+  const suffix = getScenarioSuffix(scenario);
 
-  //@ts-expect-error
+    //@ts-expect-error never
   risk[`ti${suffix}` as keyof RiskCalculation] =
     getDI(risk, scenario) +
     risk.effects.reduce((iiTot, cascade) => {
@@ -142,7 +141,7 @@ function calculateTotalImpactScenario(risk: RiskCalculation, scenario: SCENARIOS
     }, 0);
 
   DAMAGE_INDICATORS.forEach((d) => {
-    //@ts-expect-error
+    //@ts-expect-error never
     risk[`ti_${d}${suffix}` as keyof RiskCalculation] =
       (risk[`di_${d}${suffix}` as keyof RiskCalculation] as number) +
       risk.effects.reduce((tot, cascade) => {

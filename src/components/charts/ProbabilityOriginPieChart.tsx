@@ -1,5 +1,5 @@
-import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip, TooltipProps } from "recharts";
-import { Box, Typography } from "@mui/material";
+import { PieChart, Pie, Cell, Tooltip, TooltipProps } from "recharts";
+import { Typography } from "@mui/material";
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
@@ -24,7 +24,10 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
         </p>
         <p style={{ margin: 0 }}>
           <Typography variant="caption">
-            {Math.round((payload[0]!.value! / payload[0]!.payload.total!) * 10000) / 100}% of total probability
+            {Math.round(
+              (payload[0]!.value! / payload[0]!.payload.total!) * 10000
+            ) / 100}
+            % of total probability
           </Typography>
         </p>
       </div>
@@ -34,7 +37,12 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   return null;
 };
 
-export default function ProbabilityOriginPieChart({ causes }: { causes: any[] }) {
+export default function ProbabilityOriginPieChart({
+  causes,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  causes: any[];
+}) {
   const dataGlobal = causes.map((c) => ({
     name: c.name,
     value: c.p,
@@ -43,8 +51,19 @@ export default function ProbabilityOriginPieChart({ causes }: { causes: any[] })
   }));
 
   return (
-    <PieChart width={150} height={150} style={{ float: "right", margin: 10, marginLeft: 80 }}>
-      <Pie data={dataGlobal} dataKey="value" cx="50%" cy="50%" outerRadius={80} fill="#8884d8">
+    <PieChart
+      width={150}
+      height={150}
+      style={{ float: "right", margin: 10, marginLeft: 80 }}
+    >
+      <Pie
+        data={dataGlobal}
+        dataKey="value"
+        cx="50%"
+        cy="50%"
+        outerRadius={80}
+        fill="#8884d8"
+      >
         {dataGlobal.map((d) => (
           <Cell key={d.name} />
         ))}

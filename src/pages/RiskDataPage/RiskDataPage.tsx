@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { DataTable } from "../../hooks/useAPI";
-import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import { Box, CircularProgress, Container, Fade } from "@mui/material";
-import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
-import useRecords from "../../hooks/useRecords";
+import { Box, Container, Fade } from "@mui/material";
 import Standard from "./Standard";
 import ManMade from "./ManMade";
-import { DVContact } from "../../types/dataverse/DVContact";
 import Emerging from "./Emerging";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import NCCNLoader from "../../components/NCCNLoader";
@@ -16,14 +11,13 @@ import RiskFileTitle from "../../components/RiskFileTitle";
 
 const transitionDelay = 500;
 
-export default function RiskDataPage({}) {
+export default function RiskDataPage() {
   const {
     riskFile,
     causes,
     effects,
     catalyzingEffects,
     climateChange,
-    cascades,
     directAnalyses,
     cascadeAnalyses,
     reloadRiskFile,
@@ -31,11 +25,12 @@ export default function RiskDataPage({}) {
     loadCascadeAnalyses,
   } = useOutletContext<RiskFilePageContext>();
 
-  const [fade, setFade] = useState(true);
+  const [fade] = useState(true);
 
   useEffect(() => {
     if (!directAnalyses) loadDirectAnalyses();
     if (!cascadeAnalyses) loadCascadeAnalyses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!directAnalyses || !cascadeAnalyses)
@@ -60,8 +55,12 @@ export default function RiskDataPage({}) {
               climateChange={climateChange}
               directAnalyses={directAnalyses}
               cascadeAnalyses={cascadeAnalyses}
-              reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
-              reloadCascades={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+              reloadRiskFile={() =>
+                reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+              }
+              reloadCascades={() =>
+                reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+              }
             />
           )}
           {riskFile.cr4de_risk_type === RISK_TYPE.MANMADE && (
@@ -72,15 +71,21 @@ export default function RiskDataPage({}) {
               climateChange={climateChange}
               directAnalyses={directAnalyses}
               cascadeAnalyses={cascadeAnalyses}
-              reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
-              reloadCascades={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+              reloadRiskFile={() =>
+                reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+              }
+              reloadCascades={() =>
+                reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+              }
             />
           )}
           {riskFile.cr4de_risk_type === RISK_TYPE.EMERGING && (
             <Emerging
               riskFile={riskFile}
               effects={effects}
-              reloadCascades={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+              reloadCascades={() =>
+                reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+              }
             />
           )}
         </Box>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState } from "react";
 import {
   Container,
   Typography,
@@ -8,12 +8,8 @@ import {
   Button,
   Box,
   TextField,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
   Stack,
   LinearProgress,
-  Accordion,
   CardHeader,
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
@@ -21,44 +17,19 @@ import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import useRecords from "../../hooks/useRecords";
 import useAPI, { DataTable } from "../../hooks/useAPI";
-import {
-  DVRiskFile,
-  RISK_FILE_QUANTI_FIELDS,
-  RISK_TYPE,
-} from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import {
   DVRiskCascade,
   getCascadeResultSnapshot,
-  RISK_CASCADE_QUANTI_FIELDS,
 } from "../../types/dataverse/DVRiskCascade";
-import {
-  DIRECT_ANALYSIS_QUANTI_FIELDS,
-  DVDirectAnalysis,
-} from "../../types/dataverse/DVDirectAnalysis";
-import {
-  CASCADE_ANALYSIS_QUANTI_FIELDS,
-  DVCascadeAnalysis,
-} from "../../types/dataverse/DVCascadeAnalysis";
-import {
-  CascadeCalculation,
-  DVAnalysisRun,
-  RiskCalculation,
-} from "../../types/dataverse/DVAnalysisRun";
-import { v4 as uuid } from "uuid";
-import { DVParticipation } from "../../types/dataverse/DVParticipation";
-import { DVContact } from "../../types/dataverse/DVContact";
-import calculateMetrics from "../../functions/analysis/calculateMetrics";
-import runAnalysis from "../../functions/analysis/runAnalysis";
 import {
   getResultSnapshot,
   SmallRisk,
 } from "../../types/dataverse/DVSmallRisk";
-import { getCascades, getCauses, getEffects } from "../../functions/cascades";
+import { getCauses, getEffects } from "../../functions/cascades";
 import {
   getCascadeParameter,
   getScenarioParameter,
-  getScenarioSuffix,
-  getWorstCaseScenario,
   SCENARIOS,
 } from "../../functions/scenarios";
 import {
@@ -71,9 +42,6 @@ import {
   getDirectImpact,
   getIndirectImpact,
 } from "../../functions/Impact";
-import { getCategoryImpactRelative } from "../../functions/TotalImpact";
-import { getCategoryImpactRescaled } from "../../functions/CategoryImpact";
-import { DVTranslation } from "../../types/dataverse/DVTranslation";
 
 const replacements: string[][] = [
   ["Animal diseases \\(not zoonoses\\)", "Animal diseases excluding zoonoses"],
@@ -211,7 +179,9 @@ interface Correction {
 
 type ReportProblems = { [key: string]: { rf: DVRiskFile; problem: string }[] };
 
-const last = (arr: any[]) => arr.slice(-1)[0];
+function last<T>(arr: T[]) {
+  return arr.slice(-1)[0];
+}
 
 export default function CorrectionsPage() {
   const api = useAPI();
@@ -249,10 +219,6 @@ export default function CorrectionsPage() {
     },
   });
 
-  const { data: trans } = useRecords<DVTranslation>({
-    table: DataTable.TRANSLATIONS,
-  });
-
   usePageTitle("BNRA 2023 - 2026 Report Corrector");
   useBreadcrumbs([
     { name: "BNRA 2023 - 2026", url: "/" },
@@ -264,190 +230,6 @@ export default function CorrectionsPage() {
 
   const reloadData = () => {
     reloadRiskFiles();
-  };
-
-  const handleSaveSummaries = async () => {
-    if (!riskFiles || !cascades || !trans) return;
-
-    const resp = await fetch(
-      `https://bnra.powerappsportals.com/_api/cr4de_bnrariskfilesummaries`,
-      {
-        method: "GET",
-        headers: {
-          __RequestVerificationToken:
-            localStorage.getItem("antiforgerytoken") || "",
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    const sums = (await resp.json()).value;
-
-    for (const sum of sums) {
-      const t = trans.find(
-        (t) => t.cr4de_name === `risk.${sum.cr4de_hazard_id}.name`
-      );
-
-      if (!t) throw Error("No translation found");
-
-      await fetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskfilesummaries(${sum.cr4de_bnrariskfilesummaryid})`,
-        {
-          method: "PATCH",
-          headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            cr4de_title_nl: t.cr4de_nl,
-            cr4de_title_fr: t.cr4de_fr,
-            cr4de_title_de: t.cr4de_de,
-          }),
-        }
-      );
-    }
-
-    return;
-
-    for (let rf of riskFiles.filter(
-      (rf) => rf.cr4de_hazard_id.indexOf("X") < 0
-    )) {
-      const scenario = rf.cr4de_mrs || SCENARIOS.MAJOR;
-      const scenarioSuffix = getScenarioSuffix(scenario);
-
-      const tp =
-        Math.round((getScenarioParameter(rf, "TP", scenario) || 0) * 10) / 10;
-
-      const H =
-        Math.round(getCategoryImpactRescaled(rf, "H", scenario) * 10) / 10;
-      const S =
-        Math.round(getCategoryImpactRescaled(rf, "S", scenario) * 10) / 10;
-      const E =
-        Math.round(getCategoryImpactRescaled(rf, "E", scenario) * 10) / 10;
-      const F =
-        Math.round(getCategoryImpactRescaled(rf, "F", scenario) * 10) / 10;
-
-      const hc = riskFiles.reduce(
-        (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),
-        {}
-      );
-
-      const causes: Cause[] = [
-        {
-          id: null,
-          name: "No underlying cause",
-          p: getScenarioParameter(rf, "DP", scenario) || 0,
-          quali: rf[`cr4de_dp_quali${scenarioSuffix}`],
-        },
-        ...(getCauses(rf, cascades, hc)
-          .filter((c) => getCascadeParameter(c, scenario, "IP"))
-          .map((c) => {
-            return {
-              id: c.cr4de_cause_hazard.cr4de_riskfilesid,
-              name: c.cr4de_cause_hazard.cr4de_title,
-              p: getCascadeParameter(c, scenario, "IP") || 0,
-              quali: c.cr4de_quali,
-            };
-          }) || []),
-      ].sort((a, b) => b.p - a.p);
-
-      const paretoCauses = causes
-        .sort((a, b) => b.p - a.p)
-        .reduce(
-          ([cumulCauses, pCumul], c) => {
-            if (pCumul / tp > 0.8)
-              return [cumulCauses, pCumul] as [Cause[], number];
-
-            return [[...cumulCauses, c], pCumul + c.p] as [Cause[], number];
-          },
-          [[], 0] as [Cause[], number]
-        )[0];
-
-      const effects = [
-        {
-          id: null,
-          name: "Direct Impact",
-          i: getScenarioParameter(rf, "DI", scenario) || 0,
-        },
-        ...getEffects(rf, cascades, hc).map((e) => ({
-          id: e.cr4de_effect_hazard.cr4de_riskfilesid,
-          name: e.cr4de_effect_hazard.cr4de_title,
-          i: getCascadeParameter(e, scenario, "II") || 0,
-          cascade: e,
-        })),
-      ];
-
-      let minI = 0;
-      const totI = effects.reduce((t, e) => t + e.i, 0);
-
-      const Itot = effects.reduce((tot, e) => tot + e.i, 0.000000001);
-
-      let cumulI = 0;
-      for (let e of effects.sort((a, b) => b.i - a.i)) {
-        cumulI += e.i / Itot;
-
-        if (cumulI >= 0.8) {
-          minI = e.i;
-          break;
-        }
-      }
-
-      const paretoEffects = effects.filter((c) => c.i >= minI);
-
-      // console.log(paretoCauses, paretoEffects);
-
-      await fetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskfilesummaries`,
-        {
-          method: "POST",
-          headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            cr4de_bnrariskfilesummaryid: rf.cr4de_riskfilesid,
-            "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${rf.cr4de_riskfilesid})`,
-            cr4de_title: rf.cr4de_title,
-            cr4de_hazard_id: rf.cr4de_hazard_id,
-            cr4de_category: rf.cr4de_risk_category,
-            cr4de_risk_type: rf.cr4de_risk_type,
-            cr4de_summary_nl: rf.cr4de_mrs_summary_nl,
-            cr4de_summary_fr: rf.cr4de_mrs_summary_fr,
-            cr4de_summary_en: rf.cr4de_mrs_summary,
-            cr4de_summary_de: rf.cr4de_mrs_summary_de,
-            cr4de_mrs_p: tp,
-            cr4de_mrs_h: H,
-            cr4de_mrs_s: S,
-            cr4de_mrs_e: E,
-            cr4de_mrs_f: F,
-            cr4de_causing_risks:
-              rf.cr4de_risk_type === RISK_TYPE.STANDARD
-                ? JSON.stringify(
-                    paretoCauses.map((c) => ({
-                      cause_risk_id: c.id,
-                      cause_risk_title: c.name,
-                      cause_risk_p: c.p,
-                    }))
-                  )
-                : null,
-            cr4de_effect_risks:
-              rf.cr4de_risk_type !== RISK_TYPE.EMERGING
-                ? JSON.stringify(
-                    paretoEffects.map((c) => ({
-                      effect_risk_id: c.id,
-                      effect_risk_title: c.name,
-                      effect_risk_i: c.i,
-                    }))
-                  )
-                : null,
-          }),
-        }
-      );
-      // if (rf.cr4de_risk_type === RISK_TYPE.STANDARD && paretoCauses.length > 1)
-      //   break;
-    }
   };
 
   const reloadDataCascades = () => {
@@ -482,17 +264,19 @@ export default function CorrectionsPage() {
       setInputError(null);
     }
 
-    for (let i in es) {
+    for (const i in es) {
       allReplacements.push([es[i], cs[i]]);
     }
 
-    for (let rf of riskFiles) {
-      for (let f of rfFields) {
-        for (let r of allReplacements) {
-          for (let m of (rf[f] || "")
+    for (const rf of riskFiles) {
+      for (const f of rfFields) {
+        for (const r of allReplacements) {
+          for (const m of (rf[f] || "")
             .toString()
             .matchAll(new RegExp(r[0], "g"))) {
             const i = m.index;
+
+            if (i === undefined) continue;
             // console.log(m);
             if (
               cors.length <= 0 ||
@@ -540,12 +324,12 @@ export default function CorrectionsPage() {
 
       const fields: { [k in keyof Partial<DVRiskFile>]: string } = {};
 
-      for (let f of rf.fields) {
+      for (const f of rf.fields) {
         if (!rf.riskFile[f.field]) continue;
 
         let base = rf.riskFile[f.field] as string;
 
-        for (let rep of f.replacements) {
+        for (const rep of f.replacements) {
           base = base.replaceAll(rep.match, rep.replaceWith);
         }
 
@@ -582,7 +366,7 @@ export default function CorrectionsPage() {
       {} as { [id: string]: SmallRisk }
     );
 
-    for (let rf of riskFiles.filter(
+    for (const rf of riskFiles.filter(
       (rf) =>
         rf.cr4de_risk_type === RISK_TYPE.STANDARD &&
         !rf.cr4de_hazard_id.startsWith("X") &&
@@ -594,11 +378,11 @@ export default function CorrectionsPage() {
 
       const TPmatch = find(
         rf.cr4de_mrs_probability,
-        /There is an estimated ([\d\,]*)%/
+        /There is an estimated ([\d,]*)%/
       );
       const DPmatch = find(
         rf.cr4de_mrs_probability,
-        /No underlying cause\ ?\(([\d\,]*)% of total probability\)/
+        /No underlying cause ?\(([\d,]*)% of total probability\)/
       );
       const causeMatches = causes
         .map((c) => {
@@ -616,16 +400,16 @@ export default function CorrectionsPage() {
 
       const TIHMatch = find(
         rf.cr4de_mrs_impact_h,
-        /The human impact represents an estimated ([\d\,]*)% of the total impact/
+        /The human impact represents an estimated ([\d,]*)% of the total impact/
       );
       const DIHMatch =
         find(
           rf.cr4de_mrs_impact_h,
-          /Direct Impact\ ?([\d\,]*)% of total human impact - ([\d\,]*)% of total impact/
+          /Direct Impact ?([\d,]*)% of total human impact - ([\d,]*)% of total impact/
         ) ||
         find(
           rf.cr4de_mrs_impact_h,
-          /Direct Impact\ ?\(([\d\,]*)% of total human impact - ([\d\,]*)% of total impact\)/
+          /Direct Impact ?\(([\d,]*)% of total human impact - ([\d,]*)% of total impact\)/
         );
 
       const hEffectMatches = effects
@@ -652,16 +436,16 @@ export default function CorrectionsPage() {
 
       const TISMatch = find(
         rf.cr4de_mrs_impact_s,
-        /The societal impact represents an estimated ([\d\,]*)% of the total impact/
+        /The societal impact represents an estimated ([\d,]*)% of the total impact/
       );
       const DISMatch =
         find(
           rf.cr4de_mrs_impact_s,
-          /Direct Impact\ ?([\d\,]*)% of total societal impact - ([\d\,]*)% of total impact/
+          /Direct Impact ?([\d,]*)% of total societal impact - ([\d,]*)% of total impact/
         ) ||
         find(
           rf.cr4de_mrs_impact_s,
-          /Direct Impact\ ?\(([\d\,]*)% of total societal impact - ([\d\,]*)% of total impact\)/
+          /Direct Impact ?\(([\d,]*)% of total societal impact - ([\d,]*)% of total impact\)/
         );
       const sEffectMatches = effects
         .map((c) => {
@@ -687,17 +471,17 @@ export default function CorrectionsPage() {
 
       const TIEMatch = find(
         rf.cr4de_mrs_impact_e,
-        /The environmental impact represents an estimated ([\d\,]*)% of the total impact/
+        /The environmental impact represents an estimated ([\d,]*)% of the total impact/
       );
       // if (rf.cr4de_title.indexOf("CBRN") >= 0) console.log(rf.cr4de_title, rf.cr4de_mrs_impact_e, TIEMatch);
       const DIEMatch =
         find(
           rf.cr4de_mrs_impact_e,
-          /Direct Impact\ ?([\d\,]*)% of total environmental impact - ([\d\,]*)% of total impact/
+          /Direct Impact ?([\d,]*)% of total environmental impact - ([\d,]*)% of total impact/
         ) ||
         find(
           rf.cr4de_mrs_impact_e,
-          /Direct Impact\ ?\(([\d\,]*)% of total environmental impact - ([\d\,]*)% of total impact\)/
+          /Direct Impact ?\(([\d,]*)% of total environmental impact - ([\d,]*)% of total impact\)/
         );
       const eEffectMatches = effects
         .map((c) => {
@@ -723,16 +507,16 @@ export default function CorrectionsPage() {
 
       const TIFMatch = find(
         rf.cr4de_mrs_impact_f,
-        /The financial impact represents an estimated ([\d\,]*)% of the total impact/
+        /The financial impact represents an estimated ([\d,]*)% of the total impact/
       );
       const DIFMatch =
         find(
           rf.cr4de_mrs_impact_f,
-          /Direct Impact\ ?([\d\,]*)% of total financial impact - ([\d\,]*)% of total impact/
+          /Direct Impact ?([\d,]*)% of total financial impact - ([\d,]*)% of total impact/
         ) ||
         find(
           rf.cr4de_mrs_impact_f,
-          /Direct Impact\ ?\(([\d\,]*)% of total financial impact - ([\d\,]*)% of total impact\)/
+          /Direct Impact ?\(([\d,]*)% of total financial impact - ([\d,]*)% of total impact\)/
         );
       const fEffectMatches = effects
         .map((c) => {
@@ -831,7 +615,7 @@ export default function CorrectionsPage() {
         );
       }
 
-      for (let pc of paretoCauses) {
+      for (const pc of paretoCauses) {
         if (pc.name === "DP") continue;
 
         const match = causeMatches.find(
@@ -897,7 +681,7 @@ export default function CorrectionsPage() {
         );
       }
 
-      for (let pc of paretoEffectsH) {
+      for (const pc of paretoEffectsH) {
         if (pc.name === "Direct Impact") continue;
 
         const match = hEffectMatches.find(
@@ -920,7 +704,7 @@ export default function CorrectionsPage() {
           );
       }
 
-      for (let m of hEffectMatches) {
+      for (const m of hEffectMatches) {
         if (
           m &&
           !paretoEffectsH.find(
@@ -978,7 +762,7 @@ export default function CorrectionsPage() {
         );
       }
 
-      for (let pc of paretoEffectsS) {
+      for (const pc of paretoEffectsS) {
         if (pc.name === "Direct Impact") continue;
 
         const match = sEffectMatches.find(
@@ -1002,7 +786,7 @@ export default function CorrectionsPage() {
           );
       }
 
-      for (let m of sEffectMatches) {
+      for (const m of sEffectMatches) {
         if (
           m &&
           !paretoEffectsS.find(
@@ -1065,7 +849,7 @@ export default function CorrectionsPage() {
         );
       }
 
-      for (let pc of paretoEffectsE) {
+      for (const pc of paretoEffectsE) {
         if (pc.name === "Direct Impact") continue;
 
         const match = eEffectMatches.find(
@@ -1089,7 +873,7 @@ export default function CorrectionsPage() {
           );
       }
 
-      for (let m of eEffectMatches) {
+      for (const m of eEffectMatches) {
         if (
           m &&
           !paretoEffectsE.find(
@@ -1149,7 +933,7 @@ export default function CorrectionsPage() {
         );
       }
 
-      for (let pc of paretoEffectsF) {
+      for (const pc of paretoEffectsF) {
         if (pc.name === "Direct Impact") continue;
 
         const match = fEffectMatches.find(
@@ -1173,7 +957,7 @@ export default function CorrectionsPage() {
           );
       }
 
-      for (let m of fEffectMatches) {
+      for (const m of fEffectMatches) {
         if (
           m &&
           !paretoEffectsF.find(
@@ -1309,7 +1093,7 @@ export default function CorrectionsPage() {
                               {f.replacements.map((rep) => (
                                 <>
                                   {rep.indices.map((i) => (
-                                    <Typography variant="body2">
+                                    <Typography key={i} variant="body2">
                                       {(c.riskFile[f.field] as string).slice(
                                         i - 30,
                                         i
@@ -1396,8 +1180,10 @@ export default function CorrectionsPage() {
                       {p[0].rf.cr4de_title}
                     </Typography>
                     <Box sx={{ pl: 2, mb: 2 }}>
-                      {p.map((sp) => (
-                        <Typography variant="body2">{sp.problem}</Typography>
+                      {p.map((sp, i) => (
+                        <Typography key={i} variant="body2">
+                          {sp.problem}
+                        </Typography>
                       ))}
                     </Box>
                   </>
@@ -1413,8 +1199,7 @@ export default function CorrectionsPage() {
             </Box>
           </CardContent>
           <CardActions>
-            {/* <Button disabled={isLoading} onClick={reloadDataCascades}> */}
-            <Button disabled={isLoading} onClick={handleSaveSummaries}>
+            <Button disabled={isLoading} onClick={reloadDataCascades}>
               Reload data
             </Button>
             <Button disabled={isLoading} onClick={findBadPercentages}>

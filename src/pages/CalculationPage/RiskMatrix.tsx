@@ -13,7 +13,10 @@ import {
   Legend,
 } from "recharts";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 import {
   Typography,
   Accordion,
@@ -32,11 +35,13 @@ import {
   Input,
 } from "@mui/material";
 import { getMoneyString } from "../../functions/Impact";
-import { SCENARIOS, SCENARIO_PARAMS, SCENARIO_SUFFIX } from "../../functions/scenarios";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { scaleLog, select } from "d3";
+import {
+  SCENARIOS,
+  SCENARIO_PARAMS,
+  SCENARIO_SUFFIX,
+} from "../../functions/scenarios";
 import getCategoryColor from "../../functions/getCategoryColor";
-import { getTotalProbabilityRelativeScale, getYearlyProbability } from "../../functions/Probability";
+import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
 import { getTotalImpactRelative } from "../../functions/TotalImpact";
 
 interface MatrixRisk {
@@ -54,7 +59,17 @@ interface MatrixRisk {
 }
 
 const CATEGORIES: {
-  [key: string]: { color: string; shape: "circle" | "cross" | "diamond" | "square" | "star" | "triangle" | "wye" };
+  [key: string]: {
+    color: string;
+    shape:
+      | "circle"
+      | "cross"
+      | "diamond"
+      | "square"
+      | "star"
+      | "triangle"
+      | "wye";
+  };
 } = {
   Cyber: {
     shape: "square",
@@ -140,8 +155,6 @@ const defaultFields = (c: RiskCalculation) =>
     category: c.category,
   } as Partial<MatrixRisk>);
 
-const pScale = scaleLog().base(100);
-
 export default function RiskMatrix({
   calculations,
   selectedNodeId,
@@ -156,16 +169,33 @@ export default function RiskMatrix({
   const [labels, setLabels] = useState(false);
   const [es, setES] = useState(false);
   const [scales, setScales] = useState<"absolute" | "classes">("classes");
-  const [nonKeyRisks, setNonKeyRisks] = useState<"show" | "fade" | "hide">("show");
-  const [categories, setCategories] = useState<"shapes" | "colors" | "both" | "none">("none");
-  const [scenarios, setScenarios] = useState<"colors" | "shapes" | "none">("colors");
+  const [nonKeyRisks, setNonKeyRisks] = useState<"show" | "fade" | "hide">(
+    "show"
+  );
+  const [categories, setCategories] = useState<
+    "shapes" | "colors" | "both" | "none"
+  >("none");
+  const [scenarios, setScenarios] = useState<"colors" | "shapes" | "none">(
+    "colors"
+  );
 
-  const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+  }: TooltipProps<ValueType, NameType>) => {
     if (active) {
       if (scales === "absolute")
         return (
-          <Stack sx={{ backgroundColor: "rgba(255,255,255,0.8)", border: "1px solid #eee", p: 1 }}>
-            <Typography variant="subtitle1">{payload?.[0].payload.title}</Typography>
+          <Stack
+            sx={{
+              backgroundColor: "rgba(255,255,255,0.8)",
+              border: "1px solid #eee",
+              p: 1,
+            }}
+          >
+            <Typography variant="subtitle1">
+              {payload?.[0].payload.title}
+            </Typography>
             <Typography variant="subtitle2">{`Total Probability: ${
               Math.round((payload?.[1].value as number) * 100000) / 1000
             }%`}</Typography>
@@ -178,13 +208,27 @@ export default function RiskMatrix({
           </Stack>
         );
       return (
-        <Stack sx={{ backgroundColor: "rgba(255,255,255,0.8)", border: "1px solid #eee", p: 1 }}>
-          <Typography variant="subtitle1">{payload?.[0].payload.title}</Typography>
-          <Typography variant="subtitle2">
-            {`Total Probability: ${Math.round((payload?.[1].value as number) * 10) / 10}`} / 5
+        <Stack
+          sx={{
+            backgroundColor: "rgba(255,255,255,0.8)",
+            border: "1px solid #eee",
+            p: 1,
+          }}
+        >
+          <Typography variant="subtitle1">
+            {payload?.[0].payload.title}
           </Typography>
           <Typography variant="subtitle2">
-            {`Total Impact: ${Math.round((payload?.[0].value as number) * 10) / 10}`} / 5
+            {`Total Probability: ${
+              Math.round((payload?.[1].value as number) * 10) / 10
+            }`}{" "}
+            / 5
+          </Typography>
+          <Typography variant="subtitle2">
+            {`Total Impact: ${
+              Math.round((payload?.[0].value as number) * 10) / 10
+            }`}{" "}
+            / 5
           </Typography>
           <Typography variant="subtitle2">{`Total Risk: ${
             Math.round((payload?.[0].payload.tr as number) * 10) / 10
@@ -207,7 +251,10 @@ export default function RiskMatrix({
     return "rgba(150,150,150,1)";
   };
 
-  const recalcPI = (calculation: RiskCalculation, scenarioSuffix: SCENARIO_SUFFIX) => {
+  const recalcPI = (
+    calculation: RiskCalculation,
+    scenarioSuffix: SCENARIO_SUFFIX
+  ) => {
     // scales === "classes"
     //   ? {
     //       x: 5 * (1 - Math.pow(1 - tp, 365)),
@@ -238,7 +285,10 @@ export default function RiskMatrix({
           const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
 
           if (worstCase) {
-            if ((c.tp_c === 0 && c.tp_m === 0 && c.tp_e === 0) || (c.ti_c === 0 && c.ti_m === 0 && c.ti_e === 0))
+            if (
+              (c.tp_c === 0 && c.tp_m === 0 && c.tp_e === 0) ||
+              (c.ti_c === 0 && c.ti_m === 0 && c.ti_e === 0)
+            )
               return split;
 
             return [
@@ -317,6 +367,7 @@ export default function RiskMatrix({
           return true;
         })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calculations, worstCase, scales, nonKeyRisks, es]);
 
   return (
@@ -363,7 +414,9 @@ export default function RiskMatrix({
                   scale="log"
                   domain={[50000000, 5000000000000]}
                   tickFormatter={getMoneyString}
-                  ticks={[50000000, 500000000, 5000000000, 50000000000, 500000000000]}
+                  ticks={[
+                    50000000, 500000000, 5000000000, 50000000000, 500000000000,
+                  ]}
                 />
               </>
             ) : (
@@ -376,11 +429,14 @@ export default function RiskMatrix({
                   scale="linear"
                   domain={[0, 5.5]}
                   // tickCount={5}
-                  tickFormatter={(s, n) => getScaleString(s)}
+                  tickFormatter={(s) => getScaleString(s)}
                   ticks={[1, 2, 3, 4, 5]}
                   label={{
                     offset: -15,
-                    value: scales === "classes" ? "Probability" : "Yearly Probability",
+                    value:
+                      scales === "classes"
+                        ? "Probability"
+                        : "Yearly Probability",
                     angle: -90,
                     position: "insideLeft",
                   }}
@@ -393,10 +449,11 @@ export default function RiskMatrix({
                   // tickCount={6}
                   // tickFormatter={(s, n) => `TI${n}`}
                   // ticks={[160000000, 800000000, 4000000000, 20000000000, 100000000000, 500000000000]}
-                  tickFormatter={(s, n) => getScaleString(s)}
+                  tickFormatter={(s) => getScaleString(s)}
                   ticks={[1, 2, 3, 4, 5]}
                   label={{
-                    value: scales === "classes" ? "Impact" : "Impact of an event",
+                    value:
+                      scales === "classes" ? "Impact" : "Impact of an event",
                     position: "insideBottom",
                     offset: -20,
 
@@ -405,9 +462,13 @@ export default function RiskMatrix({
                 />
               </>
             )}
-            <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
+            <Tooltip
+              cursor={{ strokeDasharray: "3 3" }}
+              content={<CustomTooltip />}
+            />
             {Object.entries(CATEGORIES).map(([CATEGORY, shape]) => {
-              const catData = dots?.filter((d) => d.category === CATEGORY) || [];
+              const catData =
+                dots?.filter((d) => d.category === CATEGORY) || [];
 
               return (
                 <Scatter
@@ -415,13 +476,25 @@ export default function RiskMatrix({
                   name={`${CATEGORY} Risks`}
                   data={catData}
                   fill="#8884d8"
-                  shape={categories === "shapes" || categories === "both" ? shape.shape : "circle"}
+                  shape={
+                    categories === "shapes" || categories === "both"
+                      ? shape.shape
+                      : "circle"
+                  }
                 >
-                  {labels && <LabelList dataKey="code" position="insideTop" offset={15} fontSize={20} />}
-                  {catData.map((entry, index) => {
+                  {labels && (
+                    <LabelList
+                      dataKey="code"
+                      position="insideTop"
+                      offset={15}
+                      fontSize={20}
+                    />
+                  )}
+                  {catData.map((entry) => {
                     let opacity = 1;
                     if (selectedNodeId !== null) {
-                      if (selectedNodeId !== entry.riskId) opacity = opacity * 0.2;
+                      if (selectedNodeId !== entry.riskId)
+                        opacity = opacity * 0.2;
                     }
                     if (nonKeyRisks !== "show" && !entry.keyRisk) {
                       if (nonKeyRisks === "fade") {
@@ -456,11 +529,16 @@ export default function RiskMatrix({
               <Box sx={{ flex: 1 }}>
                 <Legend
                   wrapperStyle={{ position: "relative" }}
-                  payload={Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
-                    value: CATEGORY_NAMES[CATEGORY],
-                    type: shape.shape,
-                    color: categories === "both" ? CATEGORIES[CATEGORY].color : "rgba(150,150,150,1)",
-                  }))}
+                  payload={Object.entries(CATEGORIES).map(
+                    ([CATEGORY, shape]) => ({
+                      value: CATEGORY_NAMES[CATEGORY],
+                      type: shape.shape,
+                      color:
+                        categories === "both"
+                          ? CATEGORIES[CATEGORY].color
+                          : "rgba(150,150,150,1)",
+                    })
+                  )}
                 />
               </Box>
             ))}
@@ -468,11 +546,15 @@ export default function RiskMatrix({
             <Box sx={{ flex: 1 }}>
               <Legend
                 wrapperStyle={{ position: "relative" }}
-                payload={Object.entries(SCENARIO_PARAMS).map(([scenario, params]) => ({
-                  value: `${scenario[0].toUpperCase()}${scenario.slice(1)} Scenario`,
-                  type: "circle",
-                  color: params.color,
-                }))}
+                payload={Object.entries(SCENARIO_PARAMS).map(
+                  ([scenario, params]) => ({
+                    value: `${scenario[0].toUpperCase()}${scenario.slice(
+                      1
+                    )} Scenario`,
+                    type: "circle",
+                    color: params.color,
+                  })
+                )}
               />
             </Box>
           )}
@@ -482,15 +564,30 @@ export default function RiskMatrix({
         <Stack direction="row" spacing={5} sx={{ flex: 1 }}>
           <FormGroup sx={{}}>
             <FormControlLabel
-              control={<Checkbox checked={worstCase} onChange={(e) => setWorstCase(e.target.checked)} />}
+              control={
+                <Checkbox
+                  checked={worstCase}
+                  onChange={(e) => setWorstCase(e.target.checked)}
+                />
+              }
               label="Show only worst case scenario"
             />
             <FormControlLabel
-              control={<Checkbox checked={labels} onChange={(e) => setLabels(e.target.checked)} />}
+              control={
+                <Checkbox
+                  checked={labels}
+                  onChange={(e) => setLabels(e.target.checked)}
+                />
+              }
               label="Show labels"
             />
             <FormControlLabel
-              control={<Checkbox checked={es} onChange={(e) => setES(e.target.checked)} />}
+              control={
+                <Checkbox
+                  checked={es}
+                  onChange={(e) => setES(e.target.checked)}
+                />
+              }
               label="Show only executive summary"
             />
           </FormGroup>
@@ -498,7 +595,13 @@ export default function RiskMatrix({
             <Stack direction="row" spacing={5}>
               <FormControl sx={{ flex: 1 }} fullWidth>
                 <InputLabel>Scale Display</InputLabel>
-                <Select value={scales} label="Scale Display" onChange={(e) => setScales(e.target.value as any)}>
+                <Select
+                  value={scales}
+                  label="Scale Display"
+                  onChange={(e) =>
+                    setScales(e.target.value as "absolute" | "classes")
+                  }
+                >
                   <MenuItem value={"classes"}>Classes</MenuItem>
                   <MenuItem value={"absolute"}>Absolute</MenuItem>
                 </Select>
@@ -508,7 +611,9 @@ export default function RiskMatrix({
                 <Select
                   value={nonKeyRisks}
                   label="Non-key Risks"
-                  onChange={(e) => setNonKeyRisks(e.target.value as any)}
+                  onChange={(e) =>
+                    setNonKeyRisks(e.target.value as "show" | "fade" | "hide")
+                  }
                 >
                   <MenuItem value={"show"}>Show</MenuItem>
                   <MenuItem value={"fade"}>Fade</MenuItem>
@@ -522,7 +627,11 @@ export default function RiskMatrix({
                 <Select
                   value={categories}
                   label="Categories display"
-                  onChange={(e) => setCategories(e.target.value as any)}
+                  onChange={(e) =>
+                    setCategories(
+                      e.target.value as "colors" | "shapes" | "none" | "both"
+                    )
+                  }
                 >
                   <MenuItem value={"shapes"}>Shapes</MenuItem>
                   <MenuItem value={"colors"}>Colors</MenuItem>
@@ -535,7 +644,9 @@ export default function RiskMatrix({
                 <Select
                   value={scenarios}
                   label="Scenarios display"
-                  onChange={(e) => setScenarios(e.target.value as any)}
+                  onChange={(e) =>
+                    setScenarios(e.target.value as "none" | "shapes" | "colors")
+                  }
                 >
                   <MenuItem value={"colors"}>Colors</MenuItem>
                   <MenuItem value={"none"}>None</MenuItem>

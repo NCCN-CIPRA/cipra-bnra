@@ -22,12 +22,10 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
-import LoadingButton from "@mui/lab/LoadingButton";
 import { DVParticipation } from "../types/dataverse/DVParticipation";
 import { DVContact } from "../types/dataverse/DVContact";
-import useAPI, { DataTable } from "../hooks/useAPI";
+import useAPI from "../hooks/useAPI";
 import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
-import useRecords from "../hooks/useRecords";
 import DoneIcon from "@mui/icons-material/Done";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 
@@ -37,7 +35,11 @@ const roles = {
   expert: "Topical Expert",
 };
 
-const showDoneIcon = (doneField: boolean | null, roleField: string, available: boolean = true) => {
+const showDoneIcon = (
+  doneField: boolean | null,
+  roleField: string,
+  available: boolean = true
+) => {
   if (roleField === "analist" || roleField === "analist_2" || !available) {
     return <Typography variant="subtitle1">-</Typography>;
   }
@@ -46,7 +48,9 @@ const showDoneIcon = (doneField: boolean | null, roleField: string, available: b
     return <DoneIcon color="success" sx={{ fontSize: 16 }} />;
   }
 
-  return <HourglassEmptyIcon color="warning" sx={{ opacity: 0.5, fontSize: 16 }} />;
+  return (
+    <HourglassEmptyIcon color="warning" sx={{ opacity: 0.5, fontSize: 16 }} />
+  );
 };
 
 export default function ParticipationTable({
@@ -71,7 +75,9 @@ export default function ParticipationTable({
   const handleAddParticipant = async () => {
     setIsLoading(true);
 
-    const existingContact = await api.getContacts(`$filter=contains(emailaddress1,'${email}')`);
+    const existingContact = await api.getContacts(
+      `$filter=contains(emailaddress1,'${email}')`
+    );
 
     let contactId;
 
@@ -134,8 +140,12 @@ export default function ParticipationTable({
                   <TableCell component="th" scope="row">
                     {p.cr4de_contact.emailaddress1}
                   </TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>{roles[p.cr4de_role as keyof typeof roles]}</TableCell>
-                  <TableCell align="center">{showDoneIcon(p.cr4de_validation_finished, p.cr4de_role)}</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>
+                    {roles[p.cr4de_role as keyof typeof roles]}
+                  </TableCell>
+                  <TableCell align="center">
+                    {showDoneIcon(p.cr4de_validation_finished, p.cr4de_role)}
+                  </TableCell>
                   <TableCell align="center">
                     {showDoneIcon(
                       p.cr4de_direct_analysis_finished,
@@ -143,20 +153,29 @@ export default function ParticipationTable({
                       riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING
                     )}
                   </TableCell>
-                  <TableCell align="center">{showDoneIcon(p.cr4de_cascade_analysis_finished, p.cr4de_role)}</TableCell>
+                  <TableCell align="center">
+                    {showDoneIcon(
+                      p.cr4de_cascade_analysis_finished,
+                      p.cr4de_role
+                    )}
+                  </TableCell>
                   <TableCell align="center"></TableCell>
                 </TableRow>
               ))}
             {participants && participants.length <= 0 && (
               <TableRow>
-                <TableCell colSpan={6}>No participants defined, add some!</TableCell>
+                <TableCell colSpan={6}>
+                  No participants defined, add some!
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
           <TableFooter>
             <TableRow>
               <TableCell colSpan={6} size="small" sx={{ textAlign: "right" }}>
-                <Button onClick={() => setDialogOpen(true)}>Add Participant</Button>
+                <Button onClick={() => setDialogOpen(true)}>
+                  Add Participant
+                </Button>
               </TableCell>
             </TableRow>
           </TableFooter>
@@ -178,7 +197,11 @@ export default function ParticipationTable({
             />
             <FormControl fullWidth>
               <InputLabel>Role</InputLabel>
-              <Select value={role} label="Role" onChange={(e) => setRole(e.target.value)}>
+              <Select
+                value={role}
+                label="Role"
+                onChange={(e) => setRole(e.target.value)}
+              >
                 <MenuItem value="analist">Author</MenuItem>
                 <MenuItem value="analist_2">Co-author (back-up)</MenuItem>
                 <MenuItem value="expert">Topical Expert</MenuItem>
@@ -188,9 +211,9 @@ export default function ParticipationTable({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
-          <LoadingButton loading={isLoading} onClick={handleAddParticipant}>
+          <Button loading={isLoading} onClick={handleAddParticipant}>
             Add participant
-          </LoadingButton>
+          </Button>
         </DialogActions>
       </Dialog>
     </>

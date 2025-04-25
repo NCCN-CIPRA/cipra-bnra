@@ -1,0 +1,33 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.recharts-wrapper svg {
+  overflow: inherit !important;
+}
+
+.dx-htmleditor-content blockquote,
+.dx-htmleditor-content h1,
+.dx-htmleditor-content h2,
+.dx-htmleditor-content h3,
+.dx-htmleditor-content h4,
+.dx-htmleditor-content h5,
+.dx-htmleditor-content h6,
+.dx-htmleditor-content ol,
+.dx-htmleditor-content p,
+.dx-htmleditor-content pre,
+.dx-htmleditor-content ul {
+  margin-block-start: 1em !important;
+  margin-block-end: 1em !important;
+}
+

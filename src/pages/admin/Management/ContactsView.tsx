@@ -49,9 +49,10 @@ export default function ContactsView({
 }) {
   const { user } = useOutletContext<AuthPageContext>();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const [filteredContacts, setFilteredContacts] = useState<SelectableContact[]>(contacts);
+  const [filteredContacts, setFilteredContacts] =
+    useState<SelectableContact[]>(contacts);
   const [filter, setFilter] = useState<string | null>(null);
   const [specialFilters, setSpecialFilters] = useState<typeof SPECIAL_FILTERS>({
     ...SPECIAL_FILTERS,
@@ -77,21 +78,32 @@ export default function ContactsView({
       runningFilter = runningFilter.filter(
         (e) =>
           e.emailaddress1.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
-          (e.firstname && e.firstname.toLowerCase().indexOf(filter.toLowerCase()) >= 0) ||
-          (e.lastname && e.lastname.toLowerCase().indexOf(filter.toLowerCase()) >= 0) ||
-          e.participations.some((p) => p.cr4de_risk_file.cr4de_title.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
+          (e.firstname &&
+            e.firstname.toLowerCase().indexOf(filter.toLowerCase()) >= 0) ||
+          (e.lastname &&
+            e.lastname.toLowerCase().indexOf(filter.toLowerCase()) >= 0) ||
+          e.participations.some(
+            (p) =>
+              p.cr4de_risk_file.cr4de_title
+                .toLowerCase()
+                .indexOf(filter.toLowerCase()) >= 0
+          )
       );
     }
 
     if (specialFilters.MY_RISK_FILES) {
       const me = contacts.find((c) => c.emailaddress1 === user?.emailaddress1);
-      const myRiskFiles = me?.participations.filter((p) => p.cr4de_role === "analist");
+      const myRiskFiles = me?.participations.filter(
+        (p) => p.cr4de_role === "analist"
+      );
 
       runningFilter = runningFilter
         .filter((c) =>
           c.participations.some((p) =>
             myRiskFiles?.some(
-              (rf) => p.cr4de_role === "expert" && rf._cr4de_risk_file_value === p._cr4de_risk_file_value
+              (rf) =>
+                p.cr4de_role === "expert" &&
+                rf._cr4de_risk_file_value === p._cr4de_risk_file_value
             )
           )
         )
@@ -99,7 +111,9 @@ export default function ContactsView({
           ...c,
           participations: c.participations.filter((p) =>
             myRiskFiles?.some(
-              (rf) => p.cr4de_role === "expert" && rf._cr4de_risk_file_value === p._cr4de_risk_file_value
+              (rf) =>
+                p.cr4de_role === "expert" &&
+                rf._cr4de_risk_file_value === p._cr4de_risk_file_value
             )
           ),
         }));
@@ -107,13 +121,17 @@ export default function ContactsView({
 
     if (specialFilters.MY_RISK_FILES_BACKUP) {
       const me = contacts.find((c) => c.emailaddress1 === user?.emailaddress1);
-      const myRiskFiles = me?.participations.filter((p) => p.cr4de_role === "analist_2");
+      const myRiskFiles = me?.participations.filter(
+        (p) => p.cr4de_role === "analist_2"
+      );
 
       runningFilter = runningFilter
         .filter((c) =>
           c.participations.some((p) =>
             myRiskFiles?.some(
-              (rf) => p.cr4de_role === "expert" && rf._cr4de_risk_file_value === p._cr4de_risk_file_value
+              (rf) =>
+                p.cr4de_role === "expert" &&
+                rf._cr4de_risk_file_value === p._cr4de_risk_file_value
             )
           )
         )
@@ -121,7 +139,9 @@ export default function ContactsView({
           ...c,
           participations: c.participations.filter((p) =>
             myRiskFiles?.some(
-              (rf) => p.cr4de_role === "expert" && rf._cr4de_risk_file_value === p._cr4de_risk_file_value
+              (rf) =>
+                p.cr4de_role === "expert" &&
+                rf._cr4de_risk_file_value === p._cr4de_risk_file_value
             )
           ),
         }));
@@ -131,13 +151,21 @@ export default function ContactsView({
       runningFilter = runningFilter
         .map((c) => ({
           ...c,
-          participations: c.participations.filter((p) => p.cr4de_role === "expert"),
+          participations: c.participations.filter(
+            (p) => p.cr4de_role === "expert"
+          ),
         }))
-        .filter((c) => c.participations.length > 0 && c.emailaddress1.indexOf("nccn.fgov.be") < 0);
+        .filter(
+          (c) =>
+            c.participations.length > 0 &&
+            c.emailaddress1.indexOf("nccn.fgov.be") < 0
+        );
     }
 
     if (specialFilters.REGISTERED_ONLY) {
-      runningFilter = runningFilter.filter((c) => c.msdyn_portaltermsagreementdate !== null || c.admin);
+      runningFilter = runningFilter.filter(
+        (c) => c.msdyn_portaltermsagreementdate !== null || c.admin
+      );
     }
 
     if (specialFilters.REMINDER) {
@@ -146,20 +174,26 @@ export default function ContactsView({
       runningFilter = runningFilter.filter((c) =>
         // c.msdyn_portaltermsagreementdate === null &&
         c.invitations?.some(
-          (i) => i.cr4de_laatstverzonden !== null && dayDifference(new Date(i.cr4de_laatstverzonden), today) > 2
+          (i) =>
+            i.cr4de_laatstverzonden !== null &&
+            dayDifference(new Date(i.cr4de_laatstverzonden), today) > 2
         )
       );
     }
 
     if (specialFilters.UNINVITED_ONLY) {
-      runningFilter = runningFilter.filter((c) => !c.invitations || c.invitations.length <= 0);
+      runningFilter = runningFilter.filter(
+        (c) => !c.invitations || c.invitations.length <= 0
+      );
     }
 
     if (specialFilters.DONE_2A) {
       runningFilter = runningFilter
         .map((c) => ({
           ...c,
-          participations: c.participations.filter((p) => p.cr4de_direct_analysis_finished),
+          participations: c.participations.filter(
+            (p) => p.cr4de_direct_analysis_finished
+          ),
         }))
         .filter((c) => c.participations.length > 0);
     }
@@ -168,7 +202,9 @@ export default function ContactsView({
       runningFilter = runningFilter
         .map((c) => ({
           ...c,
-          participations: c.participations.filter((p) => p.cr4de_cascade_analysis_finished),
+          participations: c.participations.filter(
+            (p) => p.cr4de_cascade_analysis_finished
+          ),
         }))
         .filter((c) => c.participations.length > 0);
     }
@@ -177,11 +213,15 @@ export default function ContactsView({
   };
 
   useEffect(() => {
-    localStorage.setItem("BNRA_Contact_Filters", JSON.stringify(specialFilters));
+    localStorage.setItem(
+      "BNRA_Contact_Filters",
+      JSON.stringify(specialFilters)
+    );
   }, [specialFilters]);
 
   useEffect(() => {
     applyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, specialFilters, contacts]);
 
   const toggleSpecialFilter = (filterName: keyof typeof SPECIAL_FILTERS) => {
@@ -217,62 +257,114 @@ export default function ContactsView({
       >
         <Tooltip title="Select all">
           <ListItemIcon sx={{ alignSelf: "flex-start" }}>
-            <Checkbox edge="start" checked={allSelected} tabIndex={-1} disableRipple onClick={() => selectAll()} />
+            <Checkbox
+              edge="start"
+              checked={allSelected}
+              tabIndex={-1}
+              disableRipple
+              onClick={() => selectAll()}
+            />
           </ListItemIcon>
         </Tooltip>
         <Stack direction="column" sx={{ width: "100%", mr: 4 }}>
-          <ContactFilterField filter={filter || ""} setFilter={setFilter} count={filteredContacts.length} />
+          <ContactFilterField
+            filter={filter || ""}
+            setFilter={setFilter}
+            count={filteredContacts.length}
+          />
           <Grid container sx={{ mt: 1 }} rowGap={2}>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6,
+                md: 4
+              }}>
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.MY_RISK_FILES} />}
                 label="Show my risk files only (author)"
                 onClick={() => toggleSpecialFilter("MY_RISK_FILES")}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6,
+                md: 4
+              }}>
               <FormControlLabel
-                control={<Checkbox checked={specialFilters.MY_RISK_FILES_BACKUP} />}
+                control={
+                  <Checkbox checked={specialFilters.MY_RISK_FILES_BACKUP} />
+                }
                 label="Show my risk files only (backup)"
                 onClick={() => toggleSpecialFilter("MY_RISK_FILES_BACKUP")}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6,
+                md: 4
+              }}>
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.EXPERTS_ONLY} />}
                 label="Hide CIPRA analists"
                 onClick={() => toggleSpecialFilter("EXPERTS_ONLY")}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6,
+                md: 4
+              }}>
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.REGISTERED_ONLY} />}
                 label="Hide unregistered contacts"
                 onClick={() => toggleSpecialFilter("REGISTERED_ONLY")}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6,
+                md: 4
+              }}>
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.REMINDER} />}
                 label="Show only problematic risk files"
                 onClick={() => toggleSpecialFilter("REMINDER")}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6,
+                md: 4
+              }}>
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.UNINVITED_ONLY} />}
                 label="Show only uninvited contacts"
                 onClick={() => toggleSpecialFilter("UNINVITED_ONLY")}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6,
+                md: 4
+              }}>
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.DONE_2A} />}
                 label="Show only step2A finished"
                 onClick={() => toggleSpecialFilter("DONE_2A")}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6,
+                md: 4
+              }}>
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.DONE_2B} />}
                 label="Show only step 2B finished"
@@ -295,7 +387,6 @@ export default function ContactsView({
           />
         )}
       />
-
       <Menu
         id="long-menu"
         MenuListProps={{
@@ -310,7 +401,11 @@ export default function ContactsView({
           },
         }}
       >
-        <MenuItem onClick={() => sendInvitationEmails(filteredContacts.filter((c) => c.selected))}>
+        <MenuItem
+          onClick={() =>
+            sendInvitationEmails(filteredContacts.filter((c) => c.selected))
+          }
+        >
           Send Invitations Emails
         </MenuItem>
       </Menu>

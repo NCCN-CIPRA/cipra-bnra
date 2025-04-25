@@ -1,6 +1,9 @@
 import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
-import { CASCADE_RESULT_SNAPSHOT, DVRiskCascade } from "../types/dataverse/DVRiskCascade";
-import { DVRiskFile, RISKFILE_RESULT_FIELD } from "../types/dataverse/DVRiskFile";
+import {
+  CASCADE_RESULT_SNAPSHOT,
+  DVRiskCascade,
+} from "../types/dataverse/DVRiskCascade";
+import { RISKFILE_RESULT_FIELD } from "../types/dataverse/DVRiskFile";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { IntensityParameter } from "./intensityParameters";
 import tableToJson from "./tableToJson";
@@ -28,7 +31,12 @@ export const SCENARIO_PARAMS = {
     color: "#9DC3E6",
     prefix: "c",
   },
-  [SCENARIOS.MAJOR]: { titleI18N: "2A.progress.major.title", titleDefault: "Major", color: "#FFE699", prefix: "m" },
+  [SCENARIOS.MAJOR]: {
+    titleI18N: "2A.progress.major.title",
+    titleDefault: "Major",
+    color: "#FFE699",
+    prefix: "m",
+  },
   [SCENARIOS.EXTREME]: {
     titleI18N: "2A.progress.extreme.title",
     titleDefault: "Extreme",
@@ -61,7 +69,7 @@ export const unwrapScenario = (
 
       return p;
     });
-  } catch (e) {
+  } catch {
     // Old HTML format
     const json = tableToJson(scenarioJSON);
 
@@ -102,10 +110,10 @@ export function wrap(scenario: IntensityParameter<string>[]): string {
   return JSON.stringify(scenario);
 }
 
-export function scenariosEquals(a?: Scenarios, b?: Scenarios) {
-  // TODO
-  return false;
-}
+// export function scenariosEquals(a?: Scenarios, b?: Scenarios) {
+//   // TODO
+//   return false;
+// }
 
 export const getScenarioSuffix = (scenario: SCENARIOS): SCENARIO_SUFFIX => {
   if (scenario === SCENARIOS.CONSIDERABLE) return "_c";
@@ -157,16 +165,24 @@ export const getCascadeParameter = (
   if (!cascade.results) return null;
 
   if (parameter === "IP" || parameter === "IP50")
-    return cascade.results[`${parameter}_All2${cascadeScenarios[mainScenario]}`];
+    return cascade.results[
+      `${parameter}_All2${cascadeScenarios[mainScenario]}`
+    ];
 
-  if (parameter === "CP_AVG") return cascade.results[`${parameter}_${cascadeScenarios[mainScenario]}2All`];
+  if (parameter === "CP_AVG")
+    return cascade.results[
+      `${parameter}_${cascadeScenarios[mainScenario]}2All`
+    ];
 
   if (parameter.indexOf("II_") >= 0)
     return cascade.results[
-      `II_${cascadeScenarios[mainScenario]}2All_${parameter.slice(3)}` as keyof CASCADE_RESULT_SNAPSHOT
+      `II_${cascadeScenarios[mainScenario]}2All_${parameter.slice(
+        3
+      )}` as keyof CASCADE_RESULT_SNAPSHOT
     ];
 
-  if (parameter === "II") return cascade.results[`II_${cascadeScenarios[mainScenario]}2All`];
+  if (parameter === "II")
+    return cascade.results[`II_${cascadeScenarios[mainScenario]}2All`];
 
   return null;
 };
@@ -184,5 +200,7 @@ export const getWorstCaseScenario = (calculation: RiskCalculation) => {
     calculation.tp_e * calculation.ti_e,
   ];
 
-  return [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME][rs.indexOf(Math.max(...rs))];
+  return [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME][
+    rs.indexOf(Math.max(...rs))
+  ];
 };

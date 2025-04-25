@@ -1,12 +1,8 @@
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useOutletContext } from "react-router-dom";
-import { RiskFilePageContext } from "../../BaseRiskFilePage";
+import { useNavigate } from "react-router-dom";
 import DefinitionSection from "../DefinitionSection";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import { Section } from "../HelpSiderBar";
-import { useEffect } from "react";
 import Bibliography from "../../RiskAnalysisPage/Bibliography";
 import RiskFileTitle from "../../../components/RiskFileTitle";
 import HASection from "./HASection";
@@ -15,11 +11,6 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import EmergingIdentificationTutorial from "./EmergingIdentificationTutorial";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import { Cascades } from "../../../functions/cascades";
-
-const ibsx = {
-  transition: "opacity .3s ease",
-  ml: 1,
-};
 
 export default function Emerging({
   riskFile,

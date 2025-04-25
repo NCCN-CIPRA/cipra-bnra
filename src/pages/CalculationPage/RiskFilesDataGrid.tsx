@@ -3,13 +3,8 @@ import {
   DataGrid,
   GridRowsProp,
   GridColDef,
-  GridValueFormatterParams,
-  GridValueGetterParams,
-  GridToolbar,
   gridFilteredSortedRowIdsSelector,
   GridRenderCellParams,
-  gridDataRowIdsSelector,
-  useGridApiContext,
   GridCsvGetRowsToExportParams,
   GridRowId,
 } from "@mui/x-data-grid";
@@ -27,6 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { SCENARIOS } from "../../functions/scenarios";
+import { GridToolbar } from "@mui/x-data-grid/internals";
 
 const columns: GridColDef[] = [
   {
@@ -52,7 +48,7 @@ const columns: GridColDef[] = [
     field: "tp",
     headerName: "TP",
     width: 100,
-    valueFormatter: (params: GridValueFormatterParams) => params.value,
+    valueFormatter: (value: string) => value,
     renderCell: (params: GridRenderCellParams) => {
       return `${(100 * params.value).toLocaleString()} %`;
     },
@@ -61,29 +57,30 @@ const columns: GridColDef[] = [
     field: "ti",
     headerName: "TI",
     width: 100,
-    valueFormatter: (params: GridValueFormatterParams) => params.value,
+    valueFormatter: (value: string) => value,
     renderCell: (params: GridRenderCellParams) => getMoneyString(params.value),
   },
   {
     field: "tr",
     headerName: "TR",
     width: 100,
-    valueFormatter: (params: GridValueFormatterParams) => params.value,
+    valueFormatter: (value: string) => value,
     renderCell: (params: GridRenderCellParams) => getMoneyString(params.value),
   },
   {
     field: "tr50",
     headerName: "TR 2050",
     width: 100,
-    valueFormatter: (params: GridValueFormatterParams) => params.value,
+    valueFormatter: (value: string) => value,
     renderCell: (params: GridRenderCellParams) => getMoneyString(params.value),
   },
   {
     field: "dtr50",
     headerName: "ΔTR 2050",
     width: 100,
-    valueFormatter: (params: GridValueFormatterParams) => params.value,
-    renderCell: (params: GridRenderCellParams) => "X " + Math.round(100 * params.value) / 100,
+    valueFormatter: (value: string) => value,
+    renderCell: (params: GridRenderCellParams) =>
+      "X " + Math.round(100 * params.value) / 100,
   },
   {
     field: "consensus",
@@ -99,7 +96,9 @@ const columns: GridColDef[] = [
   },
 ];
 
-const getRowsToExport = ({ apiRef }: GridCsvGetRowsToExportParams): GridRowId[] => {
+const getRowsToExport = ({
+  apiRef,
+}: GridCsvGetRowsToExportParams): GridRowId[] => {
   return gridFilteredSortedRowIdsSelector(apiRef);
 };
 
@@ -120,7 +119,11 @@ export default function RiskFilesDataGrid({
     setRows(
       data.reduce((split, c) => {
         const rs = [c.tp_c * c.ti_c, c.tp_m * c.ti_m, c.tp_e * c.ti_e];
-        const rs2050 = [c.tp50_c * c.ti_c, c.tp50_m * c.ti_m, c.tp50_e * c.ti_e];
+        const rs2050 = [
+          c.tp50_c * c.ti_c,
+          c.tp50_m * c.ti_m,
+          c.tp50_e * c.ti_e,
+        ];
 
         if (worstCase) {
           return [
@@ -276,6 +279,7 @@ export default function RiskFilesDataGrid({
         }
       }, [] as GridRowsProp)
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, worstCase]);
 
   return (
@@ -305,13 +309,23 @@ export default function RiskFilesDataGrid({
         </Box>
         <FormGroup sx={{}}>
           <FormControlLabel
-            control={<Checkbox checked={worstCase} onChange={(e) => setWorstCase(e.target.checked)} />}
+            control={
+              <Checkbox
+                checked={worstCase}
+                onChange={(e) => setWorstCase(e.target.checked)}
+              />
+            }
             label="Show only worst case scenario"
           />
         </FormGroup>
         <FormGroup sx={{}}>
           <FormControlLabel
-            control={<Checkbox checked={worstCase2050} onChange={(e) => setWorstCase2050(e.target.checked)} />}
+            control={
+              <Checkbox
+                checked={worstCase2050}
+                onChange={(e) => setWorstCase2050(e.target.checked)}
+              />
+            }
             label="Show only worst case scenario in 2050"
           />
         </FormGroup>

@@ -1,8 +1,13 @@
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
-import { Trans, useTranslation } from "react-i18next";
-import Joyride, { Step, ACTIONS, EVENTS, STATUS, CallBackProps, LIFECYCLE } from "react-joyride";
+import { Box, Typography, useTheme } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import Joyride, {
+  Step,
+  ACTIONS,
+  EVENTS,
+  STATUS,
+  CallBackProps,
+} from "react-joyride";
 import { useState } from "react";
-import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 import TourTooltip from "../../../components/TourTooltip";
 
 export default function EmergingAnalysisTutorial({
@@ -69,10 +74,11 @@ export default function EmergingAnalysisTutorial({
   ];
 
   const handleTutorialCallback = (data: CallBackProps) => {
-    const { action, index, status, type, lifecycle } = data;
+    const { action, index, status, type } = data;
 
-    // @ts-ignore-next-line
-    if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
+    if (
+      ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND] as string[]).includes(type)
+    ) {
       // Update state to advance the tour
       setStepIndex(index + (action === ACTIONS.PREV ? -1 : 1));
     } else if (status === STATUS.SKIPPED) {

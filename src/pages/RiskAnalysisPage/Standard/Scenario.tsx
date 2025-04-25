@@ -1,12 +1,14 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
-import { IntensityParameter } from "../../../functions/intensityParameters";
+import { Box, Button, Stack } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { SCENARIOS, SCENARIO_PARAMS, unwrap } from "../../../functions/scenarios";
+import {
+  SCENARIOS,
+  SCENARIO_PARAMS,
+  unwrap,
+} from "../../../functions/scenarios";
 import * as IP from "../../../functions/intensityParameters";
 import { useEffect, useState } from "react";
 import TextInputBox from "../../../components/TextInputBox";
 import useAPI from "../../../hooks/useAPI";
-import { LoadingButton } from "@mui/lab";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
@@ -35,7 +37,12 @@ export default function Scenario({
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
 
-  useEffect(() => setIsEditing(editing), [editing]);
+  useEffect(
+    () => setIsEditing(editing),
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editing]
+  );
 
   const intensityParameters = IP.unwrap(riskFile.cr4de_intensity_parameters);
   const scenarios = unwrap(
@@ -71,9 +78,15 @@ export default function Scenario({
     return text + descriptions;
   };
 
-  const [mrsScenario, setMrsScenario] = useState<string>(riskFile.cr4de_mrs_scenario || getDefaultText());
+  const [mrsScenario, setMrsScenario] = useState<string>(
+    riskFile.cr4de_mrs_scenario || getDefaultText()
+  );
 
-  useEffect(() => setMrsScenario(riskFile.cr4de_mrs_scenario || getDefaultText()), [riskFile]);
+  useEffect(
+    () => setMrsScenario(riskFile.cr4de_mrs_scenario || getDefaultText()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [riskFile]
+  );
 
   const saveScenario = async (reset = false) => {
     setSaving(true);
@@ -93,16 +106,28 @@ export default function Scenario({
 
   const startEdit = () => {
     if (isEditingOther) {
-      window.alert("You are already editing another section. Please close this section before editing another.");
+      window.alert(
+        "You are already editing another section. Please close this section before editing another."
+      );
     } else {
       setEditing(true);
     }
   };
 
   return (
-    <Box sx={{ borderLeft: "solid 8px " + SCENARIO_PARAMS[scenario].color, pl: 2, py: 1, mt: 2, background: "white" }}>
+    <Box
+      sx={{
+        borderLeft: "solid 8px " + SCENARIO_PARAMS[scenario].color,
+        pl: 2,
+        py: 1,
+        mt: 2,
+        background: "white",
+      }}
+    >
       {editing && (
-        <Box sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}>
+        <Box
+          sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
+        >
           <TextInputBox
             limitedOptions
             initialValue={mrsScenario || getDefaultText()}
@@ -113,15 +138,23 @@ export default function Scenario({
           />
         </Box>
       )}
-      {!editing && <Box className="htmleditor" dangerouslySetInnerHTML={{ __html: mrsScenario }} />}
+      {!editing && (
+        <Box
+          className="htmleditor"
+          dangerouslySetInnerHTML={{ __html: mrsScenario }}
+        />
+      )}
       <div style={{ clear: "both" }} />
       {mode === "edit" && (
-        <Stack direction="row" sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}>
+        <Stack
+          direction="row"
+          sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}
+        >
           {!editing && (
             <>
               <Button onClick={startEdit}>Edit</Button>
               <Box sx={{ flex: 1 }} />
-              <LoadingButton
+              <Button
                 color="error"
                 loading={saving}
                 onClick={() => {
@@ -134,19 +167,24 @@ export default function Scenario({
                 }}
               >
                 Reset to default
-              </LoadingButton>
+              </Button>
             </>
           )}
           {editing && (
             <>
-              <LoadingButton loading={saving} onClick={() => saveScenario()}>
+              <Button loading={saving} onClick={() => saveScenario()}>
                 Save
-              </LoadingButton>
+              </Button>
               <Box sx={{ flex: 1 }} />
               <Button
                 color="warning"
                 onClick={() => {
-                  if (window.confirm("Are you sure you wish to discard your changes?")) setEditing(false);
+                  if (
+                    window.confirm(
+                      "Are you sure you wish to discard your changes?"
+                    )
+                  )
+                    setEditing(false);
                 }}
               >
                 Discard Changes

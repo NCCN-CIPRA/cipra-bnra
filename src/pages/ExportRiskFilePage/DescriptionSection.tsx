@@ -13,50 +13,27 @@ import {
   smallStyle,
 } from "./styles";
 import html2PDF from "../../functions/html2pdf";
-import { Trans, useTranslation } from "react-i18next";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import { Trans } from "react-i18next";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { useEffect, useMemo, useState } from "react";
 import svg2PDF from "../../functions/svg2PDF";
-import getScaleString from "../../functions/getScaleString";
 import Header from "./Header";
 import { unwrap as unwrapHE } from "../../functions/historicalEvents";
 import { colors } from "../../functions/getCategoryColor";
-import { unwrap as unwrapParams } from "../../functions/intensityParameters";
-import {
-  SCENARIO_PARAMS,
-  SCENARIOS,
-  unwrap as unwrapScenarios,
-} from "../../functions/scenarios";
+import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import LeftBorderSection from "./LeftBorderSection";
 import { BLACK } from "../../functions/colors";
 import { LoggedInUser } from "../../hooks/useLoggedInUser";
 
 export default function DescriptionSection({
   riskFile,
-  user,
 }: {
   riskFile: DVRiskFile;
   user: LoggedInUser | null | undefined;
 }) {
-  const { t } = useTranslation();
-
   const events = useMemo(() => {
     return unwrapHE(riskFile.cr4de_historical_events);
   }, [riskFile]);
-  const parameters = useMemo(
-    () => unwrapParams(riskFile.cr4de_intensity_parameters),
-    [riskFile]
-  );
-  const scenarios = useMemo(
-    () =>
-      unwrapScenarios(
-        parameters,
-        riskFile.cr4de_scenario_considerable,
-        riskFile.cr4de_scenario_major,
-        riskFile.cr4de_scenario_extreme
-      ),
-    [parameters, riskFile]
-  );
 
   const [scenarioChart, setScenarioChart] = useState("");
 
@@ -69,6 +46,7 @@ export default function DescriptionSection({
         540
       ).then((uri) => setScenarioChart(uri || ""));
     }, 5000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const colorList = Object.values(colors);
@@ -137,7 +115,7 @@ export default function DescriptionSection({
       >
         {events.map((e, i) => {
           return (
-            <View wrap={false}>
+            <View key={i} wrap={false}>
               {i === 0 && (
                 <Text style={h5Style}>
                   <Trans i18nKey="riskFile.historicalEvents.title">

@@ -1,8 +1,13 @@
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
-import Joyride, { Step, ACTIONS, EVENTS, STATUS, CallBackProps, LIFECYCLE } from "react-joyride";
+import Joyride, {
+  Step,
+  ACTIONS,
+  EVENTS,
+  STATUS,
+  CallBackProps,
+} from "react-joyride";
 import { useState } from "react";
-import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 import TourTooltip from "../../../components/TourTooltip";
 
 export default function EmergingIdentificationTutorial({
@@ -34,8 +39,8 @@ export default function EmergingIdentificationTutorial({
           </Typography>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="rfDescription.tutorial.1.2">
-              It contains some general information about the risk that was used as the basis for subsequent analyses by
-              experts.
+              It contains some general information about the risk that was used
+              as the basis for subsequent analyses by experts.
             </Trans>
           </Typography>
         </Box>
@@ -48,14 +53,16 @@ export default function EmergingIdentificationTutorial({
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="rfDescription.s.tutorial.2.1">
-              The base of each risk file is the definition. It determines the scope of the risk under study and in some
-              cases it also specifies which elements fall outside the scope.
+              The base of each risk file is the definition. It determines the
+              scope of the risk under study and in some cases it also specifies
+              which elements fall outside the scope.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="rfDescription.s.tutorial.2.2">
-              This section also specifies, if relevant, the differences between the risk studied and the other risks
-              studied within the framework of this Belgian National Risk Assessment.
+              This section also specifies, if relevant, the differences between
+              the risk studied and the other risks studied within the framework
+              of this Belgian National Risk Assessment.
             </Trans>
           </Typography>
         </Box>
@@ -83,7 +90,8 @@ export default function EmergingIdentificationTutorial({
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
             <Trans i18nKey="rfDescription.s.tutorial.6.1">
-              Every source that is referenced in the sections above can be found here.
+              Every source that is referenced in the sections above can be found
+              here.
             </Trans>
           </Typography>
         </Box>
@@ -92,10 +100,11 @@ export default function EmergingIdentificationTutorial({
   ];
 
   const handleTutorialCallback = (data: CallBackProps) => {
-    const { action, index, status, type, lifecycle } = data;
+    const { action, index, status, type } = data;
 
-    // @ts-ignore-next-line
-    if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
+    if (
+      ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND] as string[]).includes(type)
+    ) {
       // Update state to advance the tour
       setStepIndex(index + (action === ACTIONS.PREV ? -1 : 1));
     } else if (status === STATUS.SKIPPED) {

@@ -1,27 +1,14 @@
-import { useEffect, useState } from "react";
-import { SelectableContact } from "./Selectables";
 import {
-  Snackbar,
-  SnackbarContent,
-  CircularProgress,
-  Container,
   ListItem,
   ListItemText,
-  Box,
-  Paper,
   ListItemIcon,
   ListItemButton,
   List,
-  IconButton,
   ListItemAvatar,
   Avatar,
   Checkbox,
-  Menu,
-  MenuItem,
 } from "@mui/material";
 import ParticipationStepper from "./ParticipationStepper";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import useAPI from "../../../hooks/useAPI";
 import { Link } from "react-router-dom";
 import { SelectableRiskFile } from "./Selectables";
 
@@ -61,7 +48,12 @@ export default function RiskFileListItem({
         //   )
         // }
       >
-        <ListItemButton role={undefined} component={Link} to={`/hazards/${riskFile.cr4de_riskfilesid}`} target="_blank">
+        <ListItemButton
+          role={undefined}
+          component={Link}
+          to={`/hazards/${riskFile.cr4de_riskfilesid}`}
+          target="_blank"
+        >
           <ListItemIcon>
             <Checkbox
               edge="start"
@@ -83,7 +75,12 @@ export default function RiskFileListItem({
       {riskFile.participants && riskFile.participants.length > 0 && (
         <List component="div" disablePadding>
           {riskFile.participants
-            .sort((a, b) => a.cr4de_contact?.firstname?.localeCompare(b.cr4de_contact?.firstname || "") || 0)
+            .sort(
+              (a, b) =>
+                a.cr4de_contact?.firstname?.localeCompare(
+                  b.cr4de_contact?.firstname || ""
+                ) || 0
+            )
             .map((p) => (
               <ListItem key={p.cr4de_bnraparticipationid}>
                 <ListItemButton
@@ -101,7 +98,10 @@ export default function RiskFileListItem({
                     primary={`${p.cr4de_contact?.firstname} ${p.cr4de_contact?.lastname}`}
                     secondary={p.cr4de_contact?.emailaddress1}
                   />
-                  <ParticipationStepper contact={p.cr4de_contact} participation={p} />
+                  <ParticipationStepper
+                    contact={p.cr4de_contact}
+                    participation={p}
+                  />
                 </ListItemButton>
               </ListItem>
             ))}

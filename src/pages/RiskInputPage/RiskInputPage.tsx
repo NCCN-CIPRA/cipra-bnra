@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Box, Tab, CircularProgress } from "@mui/material";
+import { useEffect } from "react";
+import { Box, Tab } from "@mui/material";
 import { TabContext, TabPanel, TabList } from "@mui/lab";
 import Step2APage from "./Step2ATab";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
@@ -9,7 +9,7 @@ import InputOverviewTab from "./InputOverviewTab";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import NCCNLoader from "../../components/NCCNLoader";
 
-export default function RiskInputPage({}) {
+export default function RiskInputPage() {
   const {
     riskFile,
     cascades,
@@ -23,9 +23,7 @@ export default function RiskInputPage({}) {
   } = useOutletContext<RiskFilePageContext>();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [value, setValue] = useState();
-
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
     setSearchParams({
       tab: "input",
       subtab: newValue,
@@ -36,6 +34,7 @@ export default function RiskInputPage({}) {
     if (!participants) loadParticipants();
     if (!directAnalyses) loadDirectAnalyses();
     if (!cascadeAnalyses) loadCascadeAnalyses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!directAnalyses || !cascadeAnalyses)
@@ -51,7 +50,11 @@ export default function RiskInputPage({}) {
         <TabList onChange={handleChange} centered>
           <Tab label="Overview" value="0" />
           <Tab label="Validation" value="1" />
-          <Tab label="Step 2A" value="2" disabled={riskFile?.cr4de_risk_type === RISK_TYPE.EMERGING} />
+          <Tab
+            label="Step 2A"
+            value="2"
+            disabled={riskFile?.cr4de_risk_type === RISK_TYPE.EMERGING}
+          />
           <Tab label="Step 2B" value="3" />
           <Tab label="Feedback" value="4" />
         </TabList>
@@ -70,7 +73,9 @@ export default function RiskInputPage({}) {
         <Step2APage
           riskFile={riskFile}
           directAnalyses={directAnalyses}
-          reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+          reloadRiskFile={() =>
+            reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+          }
           reloadDirectAnalyses={loadDirectAnalyses}
         />
       </TabPanel>
@@ -80,8 +85,12 @@ export default function RiskInputPage({}) {
           cascades={cascades[riskFile.cr4de_riskfilesid].all}
           directAnalyses={directAnalyses}
           cascadeAnalyses={cascadeAnalyses}
-          reloadRiskFile={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
-          reloadCascades={() => reloadRiskFile({ id: riskFile.cr4de_riskfilesid })}
+          reloadRiskFile={() =>
+            reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+          }
+          reloadCascades={() =>
+            reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+          }
           reloadDirectAnalyses={loadDirectAnalyses}
           reloadCascadeAnalyses={loadCascadeAnalyses}
         />

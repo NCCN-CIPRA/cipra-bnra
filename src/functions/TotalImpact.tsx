@@ -1,6 +1,6 @@
 import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 import { DAMAGE_INDICATOR, IMPACT_CATEGORY } from "./Impact";
-import { getScenarioSuffix, SCENARIO_SUFFIX } from "./scenarios";
+import { SCENARIO_SUFFIX } from "./scenarios";
 
 const BASE_TOTAL_IMPACT = 8 * 10 ** 8;
 
@@ -12,12 +12,18 @@ const BASE_TOTAL_IMPACT = 8 * 10 ** 8;
  *      Logarithmic Scale with base 5 from 0 to 5
  */
 
-export const getTotalImpactRelative = (calculation: RiskCalculation, scenarioSuffix: SCENARIO_SUFFIX) => {
+export const getTotalImpactRelative = (
+  calculation: RiskCalculation,
+  scenarioSuffix: SCENARIO_SUFFIX
+) => {
   const totalImpactAbsolute = calculation[`ti${scenarioSuffix}`];
 
-  if (totalImpactAbsolute < BASE_TOTAL_IMPACT) return totalImpactAbsolute / BASE_TOTAL_IMPACT;
+  if (totalImpactAbsolute < BASE_TOTAL_IMPACT)
+    return totalImpactAbsolute / BASE_TOTAL_IMPACT;
 
-  return 1 + Math.log10(totalImpactAbsolute / BASE_TOTAL_IMPACT) / Math.log10(5);
+  return (
+    1 + Math.log10(totalImpactAbsolute / BASE_TOTAL_IMPACT) / Math.log10(5)
+  );
 };
 
 export const getTotalImpactAbsolute = (relativeImpact: number) => {
@@ -35,11 +41,17 @@ export const getDamageIndicatorImpactRelative = (
   scenarioSuffix: SCENARIO_SUFFIX
 ) => {
   const totalImpactAbsolute = calculation[`ti${scenarioSuffix}`];
-  const totalImpactRelative = getTotalImpactRelative(calculation, scenarioSuffix);
+  const totalImpactRelative = getTotalImpactRelative(
+    calculation,
+    scenarioSuffix
+  );
 
-  const damageIndicatorImpactAbsolute = calculation[`ti_${damageIndicator}${scenarioSuffix}`] || 0;
+  const damageIndicatorImpactAbsolute =
+    calculation[`ti_${damageIndicator}${scenarioSuffix}`] || 0;
 
-  return (totalImpactRelative * damageIndicatorImpactAbsolute) / totalImpactAbsolute;
+  return (
+    (totalImpactRelative * damageIndicatorImpactAbsolute) / totalImpactAbsolute
+  );
 };
 
 // export const getDamageIndicatorImpactAbsolute = () => {
@@ -53,9 +65,15 @@ export const getTotalCategoryImpactAbsolute = (
 ) => {
   return (
     (calculation[`ti_${category}a${scenarioSuffix}`] || 0) +
-    ((calculation[`ti_${category}b${scenarioSuffix}` as keyof RiskCalculation] as number) || 0) +
-    ((calculation[`ti_${category}c${scenarioSuffix}` as keyof RiskCalculation] as number) || 0) +
-    ((calculation[`ti_${category}d${scenarioSuffix}` as keyof RiskCalculation] as number) || 0)
+    ((calculation[
+      `ti_${category}b${scenarioSuffix}` as keyof RiskCalculation
+    ] as number) || 0) +
+    ((calculation[
+      `ti_${category}c${scenarioSuffix}` as keyof RiskCalculation
+    ] as number) || 0) +
+    ((calculation[
+      `ti_${category}d${scenarioSuffix}` as keyof RiskCalculation
+    ] as number) || 0)
   );
 };
 
@@ -69,9 +87,16 @@ export const getCategoryImpactRelative = (
   scenarioSuffix: SCENARIO_SUFFIX
 ) => {
   const totalImpactAbsolute = calculation[`ti${scenarioSuffix}`];
-  const totalImpactRelative = getTotalImpactRelative(calculation, scenarioSuffix);
+  const totalImpactRelative = getTotalImpactRelative(
+    calculation,
+    scenarioSuffix
+  );
 
-  const categoryImpactAbsolute = getTotalCategoryImpactAbsolute(calculation, category, scenarioSuffix);
+  const categoryImpactAbsolute = getTotalCategoryImpactAbsolute(
+    calculation,
+    category,
+    scenarioSuffix
+  );
 
   return (totalImpactRelative * categoryImpactAbsolute) / totalImpactAbsolute;
 };

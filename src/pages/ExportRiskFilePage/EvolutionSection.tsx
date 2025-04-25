@@ -12,11 +12,10 @@ import {
 } from "./styles";
 import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { useEffect, useState } from "react";
 import svg2PDF from "../../functions/svg2PDF";
-import getScaleString from "../../functions/getScaleString";
-import { BLACK, NCCN_GREEN } from "../../functions/colors";
+import { BLACK } from "../../functions/colors";
 import Header from "./Header";
 import { LoggedInUser } from "../../hooks/useLoggedInUser";
 import { Cascades } from "../../functions/cascades";
@@ -24,7 +23,6 @@ import { Cascades } from "../../functions/cascades";
 export default function EvolutionSection({
   riskFile,
   cascades,
-  user,
 }: {
   riskFile: DVRiskFile;
   cascades: Cascades;
@@ -44,6 +42,7 @@ export default function EvolutionSection({
         450
       ).then((uri) => setCCChart(uri || ""));
     }, 5000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -105,7 +104,10 @@ export default function EvolutionSection({
           {t("Other Catalysing Effects", "Other Catalysing Effects")}
         </Text>
         {cascades.catalyzingEffects.map((c) => (
-          <View style={{ marginBottom: 10 * SCALE }}>
+          <View
+            key={c.cr4de_bnrariskcascadeid}
+            style={{ marginBottom: 10 * SCALE }}
+          >
             <Text
               style={{
                 ...bodyStyle,
@@ -115,7 +117,7 @@ export default function EvolutionSection({
             >
               {c.cr4de_cause_hazard.cr4de_title}
             </Text>
-            {html2PDF(c.cr4de_description, "evolution", c.cr4de_cause_hazard)}
+            {html2PDF(c.cr4de_description, "evolution", riskFile)}
           </View>
         ))}
       </View>

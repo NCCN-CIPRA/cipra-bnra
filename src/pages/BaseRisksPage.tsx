@@ -2,11 +2,6 @@ import { useEffect, useState } from "react";
 import { Outlet, useOutletContext } from "react-router-dom";
 import useRecords from "../hooks/useRecords";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
-import {
-  DVAnalysisRun,
-  RiskAnalysisResults,
-  RiskCalculation,
-} from "../types/dataverse/DVAnalysisRun";
 import { getResultSnapshot, SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { DataTable } from "../hooks/useAPI";
 import useLazyRecord, { GetRecordParams } from "../hooks/useLazyRecord";
@@ -15,23 +10,8 @@ import {
   getCascadeResultSnapshot,
 } from "../types/dataverse/DVRiskCascade";
 import useLazyRecords, { GetRecordsParams } from "../hooks/useLazyRecords";
-import { PanoramaSharp } from "@mui/icons-material";
-import { Breadcrumb } from "../components/BreadcrumbNavigation";
-import { useTranslation } from "react-i18next";
-import usePageTitle from "../hooks/usePageTitle";
-import useBreadcrumbs from "../hooks/useBreadcrumbs";
-import { DVContact } from "../types/dataverse/DVContact";
 import { LoggedInUser } from "../hooks/useLoggedInUser";
-import {
-  CascadeAnalysisInput,
-  Cascades,
-  getCascades,
-  getCatalyzingEffects,
-  getCauses,
-  getClimateChange,
-  getEffects,
-  updateCascades,
-} from "../functions/cascades";
+import { Cascades, getCascades } from "../functions/cascades";
 import satisfies from "../types/satisfies";
 import { AuthPageContext } from "./AuthPage";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
@@ -53,10 +33,10 @@ export interface RiskPageContext {
     lazyOptions?: Partial<GetRecordsParams<SmallRisk>> | undefined
   ) => Promise<unknown>;
   loadRiskFile: (
-    params: Partial<GetRecordParams<DVRiskFile<any>>>
+    params: Partial<GetRecordParams<DVRiskFile>>
   ) => Promise<unknown>;
   reloadRiskFile: (
-    params: Partial<GetRecordParams<DVRiskFile<any>>>
+    params: Partial<GetRecordParams<DVRiskFile>>
   ) => Promise<unknown>;
   reloadCascades: (riskFile: DVRiskFile) => Promise<unknown>;
   loadAllRiskFiles: (
@@ -71,13 +51,15 @@ export default function BaseRisksPage() {
   const { user, refreshUser } = useOutletContext<AuthPageContext>();
 
   useEffect(() => {
-    let interval: any;
+    let interval: ReturnType<typeof setInterval>;
 
     if (user === undefined) {
       interval = setInterval(refreshUser, 1000);
     }
 
-    return () => interval && clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [user, refreshUser]);
 
   const [riskFiles, setRiskFiles] = useState<{ [id: string]: DVRiskFile }>({});
@@ -188,7 +170,9 @@ export default function BaseRisksPage() {
         onComplete: async (rcResult: DVRiskCascade<SmallRisk, SmallRisk>[]) => {
           setRiskFiles(rfResult.reduce((acc, rf) => getRiskFiles(rf, acc), {}));
 
-          setCascades(getCascades(rfResult, rcResult, hc));
+          setCascades(
+            rfResult.reduce((acc, rf) => getCascades(rf, acc, hc)(rcResult), {})
+          );
         },
       });
     },
@@ -213,9 +197,7 @@ export default function BaseRisksPage() {
         hazardCatalogue,
         srf: srf || {},
         reloadHazardCatalogue,
-        loadRiskFile: async (
-          params: Partial<GetRecordParams<DVRiskFile<any>>>
-        ) => {
+        loadRiskFile: async (params: Partial<GetRecordParams<DVRiskFile>>) => {
           if (!params.id) return;
 
           if (!riskFiles[params.id] && !loadingRiskFile) {
@@ -249,9 +231,7 @@ export default function BaseRisksPage() {
                         {}
                       );
 
-                    setCascades(
-                      updateCascades(rfResult, cascades, hc)(rcResult)
-                    );
+                    setCascades(getCascades(rfResult, cascades, hc)(rcResult));
                     setRiskFiles(getRiskFiles(rfResult, riskFiles));
                   },
                 });
@@ -299,7 +279,7 @@ export default function BaseRisksPage() {
                   {}
                 );
 
-              setCascades(updateCascades(riskFile, cascades, hc)(rcResult));
+              setCascades(getCascades(riskFile, cascades, hc)(rcResult));
             },
           });
         },

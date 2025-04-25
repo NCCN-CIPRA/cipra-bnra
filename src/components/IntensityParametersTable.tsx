@@ -13,10 +13,13 @@ import {
   Skeleton,
   Tooltip,
 } from "@mui/material";
-import { IntensityParameter, unwrap, wrap } from "../functions/intensityParameters";
+import {
+  IntensityParameter,
+  unwrap,
+  wrap,
+} from "../functions/intensityParameters";
 import { Trans } from "react-i18next";
 import DeleteIcon from "@mui/icons-material/Delete";
-import LoadingButton from "@mui/lab/LoadingButton";
 import AddIcon from "@mui/icons-material/Add";
 import TextInputBox from "./TextInputBox";
 import useDebounce from "../hooks/useDebounce";
@@ -112,7 +115,7 @@ function IntensityParameterTable({
     if (onSave && debouncedValue !== savedValue) {
       onSave(debouncedValue);
       setSavedValue(debouncedValue);
-      setUpdatedValue && setUpdatedValue(undefined);
+      if (setUpdatedValue) setUpdatedValue(undefined);
     }
   }, [debouncedValue, savedValue, onSave, setSavedValue, setUpdatedValue]);
 
@@ -136,29 +139,39 @@ function IntensityParameterTable({
     setDebouncedValue(wrapped);
 
     await onSave(wrapped);
-    setUpdatedValue && setUpdatedValue(undefined);
+    if (setUpdatedValue) setUpdatedValue(undefined);
 
     setIsLoading(false);
   };
 
   const handleAddRow = async () => {
-    return handleForceSave([...parameters, { name: "", description: "", value: undefined }]);
+    return handleForceSave([
+      ...parameters,
+      { name: "", description: "", value: undefined },
+    ]);
   };
 
   const handleRemoveRow = (i: number) => {
     return async () => {
       if (window.confirm("Are you sure you wish to delete this parameter?")) {
-        return handleForceSave([...parameters.slice(0, i), ...parameters.slice(i + 1, parameters.length)]);
+        return handleForceSave([
+          ...parameters.slice(0, i),
+          ...parameters.slice(i + 1, parameters.length),
+        ]);
       }
     };
   };
 
   const handleUpdate = (i: number) => {
     return (updatedEvent: IntensityParameter) => {
-      const newValue = wrap([...parameters.slice(0, i), updatedEvent, ...parameters.slice(i + 1, parameters.length)]);
+      const newValue = wrap([
+        ...parameters.slice(0, i),
+        updatedEvent,
+        ...parameters.slice(i + 1, parameters.length),
+      ]);
 
       setInnerValue(newValue);
-      setUpdatedValue && setUpdatedValue(newValue);
+      if (setUpdatedValue) setUpdatedValue(newValue);
     };
   };
 
@@ -172,7 +185,9 @@ function IntensityParameterTable({
                 <Trans i18nKey="intensityParameters.name">Parameter Name</Trans>
               </TableCell>
               <TableCell sx={{ whiteSpace: "nowrap" }}>
-                <Trans i18nKey="intensityParameters.description">Parameter Description</Trans>
+                <Trans i18nKey="intensityParameters.description">
+                  Parameter Description
+                </Trans>
               </TableCell>
             </TableRow>
           </TableHead>
@@ -190,7 +205,9 @@ function IntensityParameterTable({
               <TableRow>
                 <TableCell colSpan={2} sx={{ textAlign: "center" }}>
                   <Typography variant="subtitle1">
-                    <Trans i18nKey="intensityParameters.none">No intensity parameters suggested...</Trans>
+                    <Trans i18nKey="intensityParameters.none">
+                      No intensity parameters suggested...
+                    </Trans>
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -213,7 +230,10 @@ function IntensityParameterTable({
       {onSave && (
         <Box sx={{ position: "relative" }}>
           <Tooltip title="Add new intensity parameter">
-            <IconButton onClick={handleAddRow} sx={{ position: "absolute", mt: 2, ml: 6 }}>
+            <IconButton
+              onClick={handleAddRow}
+              sx={{ position: "absolute", mt: 2, ml: 6 }}
+            >
               {isLoading ? <CircularProgress /> : <AddIcon />}
             </IconButton>
           </Tooltip>

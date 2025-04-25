@@ -38,7 +38,9 @@ function HistoricalEventRow({
 
   return (
     <TableRow>
-      <TableCell sx={{ whiteSpace: "nowrap", verticalAlign: "top", minWidth: 200 }}>
+      <TableCell
+        sx={{ whiteSpace: "nowrap", verticalAlign: "top", minWidth: 200 }}
+      >
         {onChange ? (
           <Stack direction="column" spacing={2}>
             <TextField
@@ -59,13 +61,21 @@ function HistoricalEventRow({
           <Stack direction="column">
             <Typography
               variant="subtitle1"
-              sx={{ "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" }, transition: "0.3s", px: "5px" }}
+              sx={{
+                "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" },
+                transition: "0.3s",
+                px: "5px",
+              }}
             >
               {event.location}
             </Typography>
             <Typography
               variant="subtitle2"
-              sx={{ "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" }, transition: "0.3s", px: "5px" }}
+              sx={{
+                "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" },
+                transition: "0.3s",
+                px: "5px",
+              }}
             >
               {event.time}
             </Typography>
@@ -134,7 +144,7 @@ function HistoricalEventsTable({
     if (onSave && debouncedValue !== savedValue) {
       onSave(debouncedValue);
       setSavedValue(debouncedValue);
-      setUpdatedValue && setUpdatedValue(undefined);
+      if (setUpdatedValue) setUpdatedValue(undefined);
     }
   }, [debouncedValue, savedValue, onSave, setSavedValue, setUpdatedValue]);
 
@@ -158,13 +168,16 @@ function HistoricalEventsTable({
     setDebouncedValue(wrapped);
 
     await onSave(wrapped);
-    setUpdatedValue && setUpdatedValue(undefined);
+    if (setUpdatedValue) setUpdatedValue(undefined);
 
     setIsLoading(false);
   };
 
   const handleAddRow = async () => {
-    return handleForceSave([...historicalEvents, { id: uuidv4(), time: "", location: "", description: "" }]);
+    return handleForceSave([
+      ...historicalEvents,
+      { id: uuidv4(), time: "", location: "", description: "" },
+    ]);
   };
 
   const handleRemoveRow = (i: number) => {
@@ -187,7 +200,7 @@ function HistoricalEventsTable({
       ]);
 
       setInnerValue(newValue);
-      setUpdatedValue && setUpdatedValue(newValue);
+      if (setUpdatedValue) setUpdatedValue(newValue);
     };
   };
 
@@ -209,7 +222,9 @@ function HistoricalEventsTable({
               <TableRow>
                 <TableCell colSpan={2} sx={{ textAlign: "center" }}>
                   <Typography variant="subtitle1">
-                    <Trans i18nKey="historicalEvents.none">No historical events suggested...</Trans>
+                    <Trans i18nKey="historicalEvents.none">
+                      No historical events suggested...
+                    </Trans>
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -232,7 +247,10 @@ function HistoricalEventsTable({
       {onSave && (
         <Box sx={{ position: "relative" }}>
           <Tooltip title="Add new historical event">
-            <IconButton onClick={handleAddRow} sx={{ position: "absolute", mt: 2, ml: 6 }}>
+            <IconButton
+              onClick={handleAddRow}
+              sx={{ position: "absolute", mt: 2, ml: 6 }}
+            >
               {isLoading ? <CircularProgress /> : <AddIcon />}
             </IconButton>
           </Tooltip>

@@ -1,11 +1,8 @@
-import { useEffect } from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import AuthenticationPage from "./pages/auth/AuthenticationPage";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import LocalAPI from "./pages/main/LocalAPI";
 import CalculationPage from "./pages/CalculationPage/CalculationPage";
-import ValidationIntroPage from "./pages/validation/ValidationIntroPage";
-import ValidationPage from "./pages/validation/ValidationPage";
 import RiskPage from "./pages/learning/RiskPage";
 
 import "./App.css";
@@ -20,11 +17,8 @@ import QuantitativeScalesPage from "./pages/learning/QuantitativeScalesPage";
 import RegistrationPage from "./pages/auth/RegistrationPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ErrorPage from "./pages/ErrorPage";
-import Step2APage from "./pages/step2A/Step2APage";
 import ProcessManagementPage from "./pages/admin/Management/ProcessManagementPage";
 import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
-import Step2BPage from "./pages/step2B/Step2BPage";
-import ConsensusExpertPage from "./pages/consensus/ConsensusExpertPage";
 import AdminPage from "./pages/AdminPage";
 import HazardCataloguePage from "./pages/HazardCataloguePage/HazardCataloguePage";
 import BaseRisksPage from "./pages/BaseRisksPage";
@@ -42,25 +36,7 @@ import RiskEvolutionPage from "./pages/RiskEvolution/RiskEvolutionPage";
 import ExportRiskFilePage from "./pages/ExportRiskFilePage/ExportRiskFilePage";
 import ExportBNRAPage from "./pages/ExportBNRAPage/ExportBNRAPage";
 
-function App() {
-  useEffect(() => {
-    const getAntiForgeryToken = async () => {
-      const response = await fetch(
-        `https://bnra.powerappsportals.com/_layout/tokenhtml?_=${Date.now()}`,
-        {
-          method: "GET",
-        }
-      );
-
-      localStorage.setItem(
-        "antiforgerytoken",
-        await (await response.text()).split("value")[1].split('"')[1]
-      );
-    };
-
-    getAntiForgeryToken();
-  }, []);
-
+export default function App() {
   const router = createBrowserRouter([
     {
       path: "/",
@@ -170,21 +146,27 @@ function App() {
                 },
 
                 {
-                  path: "/validation/:validation_id",
-                  element: <ValidationPage />,
+                  path: "/export",
+                  element: <ExportBNRAPage />,
                 },
-                {
-                  path: "/step2A/:step2A_id",
-                  element: <Step2APage />,
-                },
-                {
-                  path: "/step2B/:step2A_id",
-                  element: <Step2BPage />,
-                },
-                {
-                  path: "/consensus/:riskFile_id",
-                  element: <ConsensusExpertPage />,
-                },
+
+                // DEPRECATED
+                // {
+                //   path: "/validation/:validation_id",
+                //   element: <ValidationPage />,
+                // },
+                // {
+                //   path: "/step2A/:step2A_id",
+                //   element: <Step2APage />,
+                // },
+                // {
+                //   path: "/step2B/:step2A_id",
+                //   element: <Step2BPage />,
+                // },
+                // {
+                //   path: "/consensus/:riskFile_id",
+                //   element: <ConsensusExpertPage />,
+                // },
 
                 {
                   path: "/analysis/calculator",
@@ -225,5 +207,3 @@ function App() {
 
   return <RouterProvider router={router}></RouterProvider>;
 }
-
-export default App;

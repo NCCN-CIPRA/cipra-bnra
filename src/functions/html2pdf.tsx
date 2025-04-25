@@ -1,5 +1,8 @@
 import { Text, View } from "@react-pdf/renderer";
 import { ReactElement } from "react";
+import { BLACK } from "./colors";
+import { Style } from "@react-pdf/types";
+import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import {
   bodyStyle,
   boldStyle,
@@ -7,10 +10,8 @@ import {
   POINTS_PER_CM,
   SCALE,
   smallStyle,
-} from "../pages/ExportRiskFilePage/styles";
-import { BLACK } from "./colors";
-import { DVRiskFile } from "../types/dataverse/DVRiskFile";
-import { SmallRisk } from "../types/dataverse/DVSmallRisk";
+  italicStyle,
+} from "../components/export/styles";
 
 type HTMLTag = {
   tagName: string;
@@ -26,18 +27,17 @@ export type Section =
   | "evolution"
   | "bibliography";
 
-const fixText = (txt: string, riskFile: SmallRisk) => {
+const fixText = (txt: string) => {
   return txt
     .replaceAll("&#39;", "'")
     .replaceAll("&quot;", '"')
-    .replaceAll("&amp;", "&")
-    .replace(/\((\d{1,2})\)/g, `(${riskFile.cr4de_hazard_id}-$1)`);
+    .replaceAll("&amp;", "&");
 };
 
 // html string should start with opening tag <...>
 const parseTag = (html: string): HTMLTag => {
   let currentHtml = html.replace(/<br>/g, "").replace(/<br\/>/g, "");
-  let currentTagEnd = currentHtml.slice(1).indexOf(">") + 1;
+  const currentTagEnd = currentHtml.slice(1).indexOf(">") + 1;
   let nextTagStart = currentHtml.slice(1).indexOf("<") + 1;
 
   if (nextTagStart < 0) throw new Error("No closing tag found");
@@ -123,12 +123,11 @@ const parseTag = (html: string): HTMLTag => {
 const tag2PDF = (
   tag: HTMLTag,
   parent: HTMLTag | null,
-  section: Section,
-  riskFile: SmallRisk
+  section: Section
 ): ReactElement | null => {
   if (tag.content === "") return null;
 
-  let styles = {} as any;
+  let styles = {} as Style;
 
   if (parent === null) {
     styles = { ...styles, ...bodyStyle };
@@ -143,17 +142,19 @@ const tag2PDF = (
       // styles = bodyStyle;
     } else if (tag.tagName === "a") {
       // styles = bodyStyle;
+    } else if (tag.tagName === "ref") {
+      return <Text style={[bodyStyle, italicStyle]}> ({tag.content})</Text>;
     }
 
     return (
       <Text style={styles} debug={false}>
-        {fixText(tag.content as string, riskFile)}
+        {fixText(tag.content as string)}
       </Text>
     );
   }
 
   if (tag.tagName === "p") {
-    let styles = { ...bodyStyle } as any;
+    let styles = { ...bodyStyle } as Style;
 
     if (
       tag.content.length <= 1 &&
@@ -255,8 +256,7 @@ const tag2PDF = (
               ],
             },
             parent,
-            section,
-            riskFile
+            section
           )}
           {tag2PDF(
             {
@@ -281,8 +281,7 @@ const tag2PDF = (
               ],
             },
             parent,
-            section,
-            riskFile
+            section
           )}
         </>
       );
@@ -290,7 +289,7 @@ const tag2PDF = (
 
     return (
       <Text style={styles} debug={false}>
-        {tag.content.map((e) => tag2PDF(e, tag, section, riskFile))}
+        {tag.content.map((e) => tag2PDF(e, tag, section))}
       </Text>
     );
   }
@@ -299,7 +298,7 @@ const tag2PDF = (
     return (
       <View style={{ marginLeft: 10 * SCALE }}>
         {tag.content.map((li, i) => (
-          <View style={{ flexDirection: "row" }} wrap={false}>
+          <View key={i} style={{ flexDirection: "row" }} wrap={false}>
             <Text style={{ ...bodyStyle, width: 0.5 * POINTS_PER_CM }}>
               {i + 1}.
             </Text>
@@ -309,9 +308,7 @@ const tag2PDF = (
               </Text>
             ) : (
               <Text style={{ ...bodyStyle, flex: 1 }} debug={false}>
-                {(li.content as HTMLTag[]).map((e) =>
-                  tag2PDF(e, tag, section, riskFile)
-                )}
+                {(li.content as HTMLTag[]).map((e) => tag2PDF(e, tag, section))}
               </Text>
             )}
           </View>
@@ -324,7 +321,7 @@ const tag2PDF = (
     return (
       <View style={{ marginLeft: 10 * SCALE }}>
         {tag.content.map((li, i) => (
-          <View style={{ flexDirection: "row" }} wrap={false}>
+          <View key={i} style={{ flexDirection: "row" }} wrap={false}>
             <View
               style={{
                 backgroundColor: BLACK,
@@ -341,9 +338,7 @@ const tag2PDF = (
               </Text>
             ) : (
               <Text style={{ ...bodyStyle, flex: 1 }} debug={false}>
-                {(li.content as HTMLTag[]).map((e) =>
-                  tag2PDF(e, tag, section, riskFile)
-                )}
+                {(li.content as HTMLTag[]).map((e) => tag2PDF(e, tag, section))}
               </Text>
             )}
           </View>
@@ -353,24 +348,27 @@ const tag2PDF = (
   }
 
   return (
-    <Text style={{}}>
-      {tag.content.map((e) => tag2PDF(e, tag, section, riskFile))}
-    </Text>
+    <Text style={{}}>{tag.content.map((e) => tag2PDF(e, tag, section))}</Text>
   );
 };
 
 export default function html2PDF(
   html: string | null,
   section: Section,
-  riskFile: SmallRisk
+  riskFile: DVRiskFile
 ): (ReactElement | null)[] {
   if (html === null) return [null];
 
-  const parsed = parseTag(`<div>${html}</div>`);
+  const parsed = parseTag(
+    `<div>${html.replace(
+      / ?<a href="#ref-\d+" .*?>\((\d+)\)<\/a>/g,
+      `<ref>${riskFile.cr4de_hazard_id}-$1</ref>`
+    )}</div>`
+  );
   // console.log(html, parsed);
   // console.log(parsed, (parsed.content as HTMLTag[]).map(e => tag2PDF(e)).filter(e=>e!==null))
 
   return (parsed.content as HTMLTag[])
-    .map((e) => tag2PDF(e, null, section, riskFile))
+    .map((e) => tag2PDF(e, null, section))
     .filter((e) => e !== null);
 }

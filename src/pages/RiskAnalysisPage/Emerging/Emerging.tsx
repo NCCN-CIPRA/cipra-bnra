@@ -3,9 +3,7 @@ import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import Bibliography from "../Bibliography";
-import { useNavigate, useOutletContext } from "react-router-dom";
-import { RiskFilePageContext } from "../../BaseRiskFilePage";
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import CatalyzingSection from "./CatalyzingSection";
 import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../../components/RiskFileTitle";
@@ -22,7 +20,6 @@ export default function Emerging({
   loadAttachments,
   hazardCatalogue,
   setIsEditing,
-  reloadRiskFile,
   reloadCascades,
 }: {
   riskFile: DVRiskFile;

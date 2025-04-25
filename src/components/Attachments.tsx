@@ -2,8 +2,6 @@ import { ReactNode, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
-  Chip,
-  ListItem,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -43,16 +41,10 @@ import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { useOutletContext } from "react-router-dom";
 import { AuthPageContext } from "../pages/AuthPage";
 
-const fieldIndex = {
-  definition: 0,
-  historical_events: 1,
-  scenarios: 2,
-};
-
 export interface Action {
   icon: ReactNode;
   tooltip: string;
-  onClick: (e: any) => Promise<void>;
+  onClick: () => Promise<void>;
 }
 
 export default function Attachments({
@@ -61,7 +53,6 @@ export default function Attachments({
   children,
   field,
   riskFile,
-  cascades = null,
   validation,
   isExternal = false,
   alwaysOpen = false,
@@ -136,7 +127,10 @@ export default function Attachments({
     setOpenDialog(false);
 
     if (existingId) {
-      await api.updateAttachmentFields(existingId, { cr4de_name: title || (file && file.name), cr4de_url: url });
+      await api.updateAttachmentFields(existingId, {
+        cr4de_name: title || (file && file.name),
+        cr4de_url: url,
+      });
     } else {
       await api.createAttachment(
         {
@@ -194,18 +188,24 @@ export default function Attachments({
   return (
     <Box mt={1}>
       <Dialog open={openDialog} onClose={handleToggleDialog}>
-        <input ref={inputRef} type="file" style={{ display: "none" }} onInput={handleSaveAttachment} />
+        <input
+          ref={inputRef}
+          type="file"
+          style={{ display: "none" }}
+          onInput={handleSaveAttachment}
+        />
         <DialogTitle>
           <Trans i18nKey="source.dialog.title">Provide source material</Trans>
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
             <Trans i18nKey="source.dialog.helpText">
-              Please provide a title and a web url for the source, or upload a file from your computer.
+              Please provide a title and a web url for the source, or upload a
+              file from your computer.
             </Trans>
           </DialogContentText>
           <Grid container>
-            <Grid item xs>
+            <Grid size="grow">
               <TextField
                 autoFocus
                 margin="dense"
@@ -228,8 +228,19 @@ export default function Attachments({
             </Grid>
             <Divider orientation="vertical" flexItem sx={{ mx: 4 }} />
             {!existingId && (
-              <Grid item xs sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Button variant="outlined" startIcon={<UploadFileIcon />} onClick={handlePickFile}>
+              <Grid
+                size="grow"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  startIcon={<UploadFileIcon />}
+                  onClick={handlePickFile}
+                >
                   <Trans i18nKey="source.dialog.uploadFile">Upload File</Trans>
                 </Button>
               </Grid>
@@ -252,29 +263,53 @@ export default function Attachments({
       <Snackbar open={isUploadingFile}>
         <Alert severity="info" icon={false} sx={{ width: "100%" }}>
           <CircularProgress size={12} sx={{ mr: 1 }} />{" "}
-          <Trans i18nKey="source.alert.savingAttachment">Saving attachment</Trans>
+          <Trans i18nKey="source.alert.savingAttachment">
+            Saving attachment
+          </Trans>
         </Alert>
       </Snackbar>
-      <Snackbar open={isUploadingFinished} autoHideDuration={6000} onClose={() => setIsUploadingFinished(false)}>
-        <Alert severity="success" sx={{ width: "100%" }} onClose={() => setIsUploadingFinished(false)}>
+      <Snackbar
+        open={isUploadingFinished}
+        autoHideDuration={6000}
+        onClose={() => setIsUploadingFinished(false)}
+      >
+        <Alert
+          severity="success"
+          sx={{ width: "100%" }}
+          onClose={() => setIsUploadingFinished(false)}
+        >
           <Trans i18nKey="source.alert.attachmentSaved">Attachment saved</Trans>
         </Alert>
       </Snackbar>
       <Snackbar open={isRemovingFile}>
         <Alert severity="info" icon={false} sx={{ width: "100%" }}>
           <CircularProgress size={12} sx={{ mr: 1 }} />{" "}
-          <Trans i18nKey="source.alert.removingAttachment">Removing attachment</Trans>
+          <Trans i18nKey="source.alert.removingAttachment">
+            Removing attachment
+          </Trans>
         </Alert>
       </Snackbar>
-      <Snackbar open={isRemovingFinished} autoHideDuration={6000} onClose={() => setIsRemovingFinished(false)}>
-        <Alert severity="success" sx={{ width: "100%" }} onClose={() => setIsRemovingFinished(false)}>
-          <Trans i18nKey="source.alert.attachmentRemoved">Attachment removed</Trans>
+      <Snackbar
+        open={isRemovingFinished}
+        autoHideDuration={6000}
+        onClose={() => setIsRemovingFinished(false)}
+      >
+        <Alert
+          severity="success"
+          sx={{ width: "100%" }}
+          onClose={() => setIsRemovingFinished(false)}
+        >
+          <Trans i18nKey="source.alert.attachmentRemoved">
+            Attachment removed
+          </Trans>
         </Alert>
       </Snackbar>
       <Snackbar open={isDownloading}>
         <Alert severity="info" icon={false} sx={{ width: "100%" }}>
           <CircularProgress size={12} sx={{ mr: 1 }} />{" "}
-          <Trans i18nKey="source.alert.downloadingAttachment">Downloading attachment</Trans>
+          <Trans i18nKey="source.alert.downloadingAttachment">
+            Downloading attachment
+          </Trans>
         </Alert>
       </Snackbar>
 
@@ -288,16 +323,25 @@ export default function Attachments({
         )}
         {actions &&
           actions.map((a, i) => (
-            <Tooltip title={a.tooltip}>
-              <IconButton key={i} onClick={a.onClick} className="add-attachment-button">
+            <Tooltip key={i} title={a.tooltip}>
+              <IconButton
+                key={i}
+                onClick={a.onClick}
+                className="add-attachment-button"
+              >
                 {a.icon}
               </IconButton>
             </Tooltip>
           ))}
         <Box sx={{ flex: 1 }} />
         {!alwaysOpen && (
-          <Tooltip title={expanded ? t("source.button.hide") : t("source.button.show")}>
-            <IconButton onClick={() => setExpanded(!expanded)} className="attachment-expand-button">
+          <Tooltip
+            title={expanded ? t("source.button.hide") : t("source.button.show")}
+          >
+            <IconButton
+              onClick={() => setExpanded(!expanded)}
+              className="attachment-expand-button"
+            >
               <ExpandMoreIcon
                 sx={{
                   transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
@@ -323,25 +367,38 @@ export default function Attachments({
                 <Trans i18nKey="source.list.fileName">Source filename</Trans>
               </TableCell>
               {user?.roles.analist && !isExternal && (
-                <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>Section</TableCell>
+                <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
+                  Section
+                </TableCell>
               )}
               <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
                 <Trans i18nKey="source.list.type">Source Type</Trans>
               </TableCell>
-              {user?.roles.analist && !isExternal && <TableCell align="right" sx={{ width: 0 }}></TableCell>}
+              {user?.roles.analist && !isExternal && (
+                <TableCell align="right" sx={{ width: 0 }}></TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
             {fieldAttachments.length > 0 ? (
               fieldAttachments
                 .sort((a, b) => {
-                  if (a.cr4de_reference === null && b.cr4de_reference !== null) {
+                  if (
+                    a.cr4de_reference === null &&
+                    b.cr4de_reference !== null
+                  ) {
                     return 1;
                   }
-                  if (b.cr4de_reference === null && a.cr4de_reference !== null) {
+                  if (
+                    b.cr4de_reference === null &&
+                    a.cr4de_reference !== null
+                  ) {
                     return -1;
                   }
-                  if (a.cr4de_reference !== null && b.cr4de_reference !== null) {
+                  if (
+                    a.cr4de_reference !== null &&
+                    b.cr4de_reference !== null
+                  ) {
                     return a.cr4de_reference - b.cr4de_reference;
                   }
 
@@ -364,9 +421,17 @@ export default function Attachments({
                   return -1;
                 })
                 .map((a) => (
-                  <TableRow key={a.cr4de_bnraattachmentid} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                    <TableCell sx={{ position: "relative", textAlign: "center" }}>
-                      <a style={{ position: "absolute", top: -100 }} id={`ref-${a.cr4de_reference}`}></a>
+                  <TableRow
+                    key={a.cr4de_bnraattachmentid}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell
+                      sx={{ position: "relative", textAlign: "center" }}
+                    >
+                      <a
+                        style={{ position: "absolute", top: -100 }}
+                        id={`ref-${a.cr4de_reference}`}
+                      ></a>
                       {a.cr4de_reference}
                     </TableCell>
                     <TableCell component="th" scope="row">
@@ -383,14 +448,26 @@ export default function Attachments({
                         {a.cr4de_name}
                       </Link>
                     </TableCell>
-                    {user?.roles.analist && !isExternal && <TableCell>{a.cr4de_field ? a.cr4de_field : "-"}</TableCell>}
+                    {user?.roles.analist && !isExternal && (
+                      <TableCell>
+                        {a.cr4de_field ? a.cr4de_field : "-"}
+                      </TableCell>
+                    )}
                     <TableCell>
-                      {a.cr4de_url ? t("source.type.link") : t("source.type.file")}
-                      {user?.roles.analist && a.cr4de_referencedSource ? "*" : ""}
+                      {a.cr4de_url
+                        ? t("source.type.link")
+                        : t("source.type.file")}
+                      {user?.roles.analist && a.cr4de_referencedSource
+                        ? "*"
+                        : ""}
                     </TableCell>
                     {user?.roles.analist && !isExternal && (
-                      <TableCell align="center" sx={{ whiteSpace: "nowrap", textAlign: "right" }}>
-                        {(!isExternal || a._cr4de_owner_value === user?.contactid) && (
+                      <TableCell
+                        align="center"
+                        sx={{ whiteSpace: "nowrap", textAlign: "right" }}
+                      >
+                        {(!isExternal ||
+                          a._cr4de_owner_value === user?.contactid) && (
                           <>
                             {a.cr4de_url && (
                               <IconButton
@@ -403,7 +480,9 @@ export default function Attachments({
                             )}
                             <IconButton
                               onClick={() => {
-                                handleRemoveAttachment(a.cr4de_bnraattachmentid);
+                                handleRemoveAttachment(
+                                  a.cr4de_bnraattachmentid
+                                );
                               }}
                             >
                               <DeleteIcon color="error" />
@@ -417,7 +496,9 @@ export default function Attachments({
             ) : (
               <TableRow>
                 <TableCell sx={{ textAlign: "center" }} colSpan={4}>
-                  <Trans i18nKey="source.list.noSources">No sources attached</Trans>
+                  <Trans i18nKey="source.list.noSources">
+                    No sources attached
+                  </Trans>
                 </TableCell>
               </TableRow>
             )}

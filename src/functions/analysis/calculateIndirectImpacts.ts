@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
 
 export default function calculateIndirectImpacts(risk: RiskCalculation, dampingFactor: number = 1) {

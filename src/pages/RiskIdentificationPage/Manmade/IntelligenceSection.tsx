@@ -1,26 +1,19 @@
-import { Box, Button, Stack, Tooltip, Typography } from "@mui/material";
-import TextInputBox from "../../../components/TextInputBox";
-import { useEffect, useMemo, useState } from "react";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import { useMemo, useState } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { LoadingButton } from "@mui/lab";
-import useAPI from "../../../hooks/useAPI";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
-import { IntensityParameter, unwrap, wrap } from "../../../functions/intensityParameters";
-import { SCENARIO_PARAMS, SCENARIO_SUFFIX, SCENARIOS, unwrap as unwrapScenarios } from "../../../functions/scenarios";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import { unwrap } from "../../../functions/intensityParameters";
+import {
+  SCENARIO_PARAMS,
+  SCENARIO_SUFFIX,
+  SCENARIOS,
+  unwrap as unwrapScenarios,
+} from "../../../functions/scenarios";
 import { useTranslation } from "react-i18next";
 
 export default function IntelligenceSection({
   riskFile,
-  MRSSuffix,
-  mode,
-  attachments = null,
-  updateAttachments = null,
-  isEditingOther,
-  setIsEditing,
-  reloadRiskFile,
-  allRisks,
 }: {
   riskFile: DVRiskFile;
   MRSSuffix: SCENARIO_SUFFIX;
@@ -32,11 +25,15 @@ export default function IntelligenceSection({
   reloadRiskFile: () => Promise<unknown>;
   allRisks: SmallRisk[] | null;
 }) {
-  const api = useAPI();
   const { t } = useTranslation();
-  const [selectedScenario, setSelectedScenario] = useState(riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE);
+  const [selectedScenario, setSelectedScenario] = useState(
+    riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE
+  );
 
-  const parameters = useMemo(() => unwrap(riskFile.cr4de_intensity_parameters), [riskFile]);
+  const parameters = useMemo(
+    () => unwrap(riskFile.cr4de_intensity_parameters),
+    [riskFile]
+  );
   const scenarios = useMemo(
     () =>
       unwrapScenarios(
@@ -50,7 +47,9 @@ export default function IntelligenceSection({
 
   return (
     <>
-      <Typography variant="h5">{t("riskFile.capabilities.title", "Actor Capabilities")}</Typography>
+      <Typography variant="h5">
+        {t("riskFile.capabilities.title", "Actor Capabilities")}
+      </Typography>
 
       <Box
         sx={{
@@ -61,22 +60,33 @@ export default function IntelligenceSection({
           backgroundColor: "white",
         }}
       >
-        <Stack id="scenario-buttons" direction="row" justifyContent="flex-start" spacing={2} sx={{ mt: 1, mb: 4 }}>
+        <Stack
+          id="scenario-buttons"
+          direction="row"
+          justifyContent="flex-start"
+          spacing={2}
+          sx={{ mt: 1, mb: 4 }}
+        >
           <Button
             variant="outlined"
             sx={{
               color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
-              fontWeight: selectedScenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
+              fontWeight:
+                selectedScenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
               opacity: selectedScenario === SCENARIOS.CONSIDERABLE ? 1 : 0.15,
               borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
               borderRadius: "50%",
-              backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
+              backgroundColor: `${
+                SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color
+              }20`,
               width: 48,
               minWidth: 48,
               height: 48,
               "&:hover": {
                 opacity: 1,
-                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color}20`,
+                backgroundColor: `${
+                  SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color
+                }20`,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
               },
             }}
@@ -88,7 +98,8 @@ export default function IntelligenceSection({
             variant="outlined"
             sx={{
               color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
-              fontWeight: selectedScenario === SCENARIOS.MAJOR ? "bold" : "normal",
+              fontWeight:
+                selectedScenario === SCENARIOS.MAJOR ? "bold" : "normal",
               opacity: selectedScenario === SCENARIOS.MAJOR ? 1 : 0.35,
               borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
               borderRadius: "50%",
@@ -110,7 +121,8 @@ export default function IntelligenceSection({
             variant="outlined"
             sx={{
               color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
-              fontWeight: selectedScenario === SCENARIOS.EXTREME ? "bold" : "normal",
+              fontWeight:
+                selectedScenario === SCENARIOS.EXTREME ? "bold" : "normal",
               opacity: selectedScenario === SCENARIOS.EXTREME ? 1 : 0.1,
               borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
               borderRadius: "50%",
@@ -120,7 +132,9 @@ export default function IntelligenceSection({
               height: 48,
               "&:hover": {
                 opacity: 1,
-                backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
+                backgroundColor: `${
+                  SCENARIO_PARAMS[SCENARIOS.EXTREME].color
+                }20`,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
               },
             }}
@@ -132,7 +146,10 @@ export default function IntelligenceSection({
         <Stack>
           {scenarios[selectedScenario].map((p) => {
             return (
-              <Box key={`${riskFile.cr4de_riskfilesid}-${p.name}`} sx={{ mb: 4 }}>
+              <Box
+                key={`${riskFile.cr4de_riskfilesid}-${p.name}`}
+                sx={{ mb: 4 }}
+              >
                 <Box dangerouslySetInnerHTML={{ __html: p.value || "" }} />
               </Box>
             );

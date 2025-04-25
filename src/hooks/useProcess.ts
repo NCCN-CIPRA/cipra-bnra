@@ -1,5 +1,4 @@
 import { addDays } from "../functions/days";
-import { DVContact } from "../types/dataverse/DVContact";
 import { DVParticipation } from "../types/dataverse/DVParticipation";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import useAPI from "./useAPI";
@@ -7,8 +6,14 @@ import useAPI from "./useAPI";
 export interface ProcessManager {
   organiseValidationConsensus: (rf: DVRiskFile) => Promise<void>;
   startSilenceProcedure: (rf: DVRiskFile) => Promise<void>;
-  finishStep2A: (rf: DVRiskFile, participation: DVParticipation) => Promise<void>;
-  finishStep2B: (rf: DVRiskFile, participation: DVParticipation) => Promise<void>;
+  finishStep2A: (
+    rf: DVRiskFile,
+    participation: DVParticipation
+  ) => Promise<void>;
+  finishStep2B: (
+    rf: DVRiskFile,
+    participation: DVParticipation
+  ) => Promise<void>;
   startConsensusMeeting: (rf: DVRiskFile) => Promise<void>;
   startConsensusSilenceProcedure: (rf: DVRiskFile) => Promise<void>;
 }
@@ -43,7 +48,10 @@ export default function useProcess(): ProcessManager {
         cr4de_validation_silent_procedure_until: addDays(new Date(), 14),
       });
     },
-    finishStep2A: async function (rf: DVRiskFile, participation: DVParticipation) {
+    finishStep2A: async function (
+      rf: DVRiskFile,
+      participation: DVParticipation
+    ) {
       await api.updateParticipant(participation.cr4de_bnraparticipationid, {
         cr4de_direct_analysis_finished: true,
         cr4de_direct_analysis_finished_on: new Date(),
@@ -67,7 +75,10 @@ export default function useProcess(): ProcessManager {
 
       return;
     },
-    finishStep2B: async function (rf: DVRiskFile, participation: DVParticipation) {
+    finishStep2B: async function (
+      rf: DVRiskFile,
+      participation: DVParticipation
+    ) {
       await api.updateParticipant(participation.cr4de_bnraparticipationid, {
         cr4de_cascade_analysis_finished: true,
         cr4de_cascade_analysis_finished_on: new Date(),

@@ -1,10 +1,20 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Box, Typography, TextField, Table, TableBody, TableCell, TableRow, TableHead, Skeleton } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  TableHead,
+  Skeleton,
+} from "@mui/material";
 import { Scenarios, unwrap, wrap } from "../functions/scenarios";
 import { IntensityParameter } from "../functions/intensityParameters";
 import { Trans } from "react-i18next";
 import useDebounce from "../hooks/useDebounce";
-import { DVRiskFile, RiskFileEditableFields } from "../types/dataverse/DVRiskFile";
+import { RiskFileEditableFields } from "../types/dataverse/DVRiskFile";
 
 interface RawScenarios {
   considerable: string | null;
@@ -15,7 +25,8 @@ interface RawScenarios {
 const getChangedScenarios = (old: RawScenarios, new_: RawScenarios) => {
   const update: Partial<RawScenarios> = {};
 
-  if (old.considerable !== new_.considerable) update.considerable = new_.considerable;
+  if (old.considerable !== new_.considerable)
+    update.considerable = new_.considerable;
   if (old.major !== new_.major) update.major = new_.major;
   if (old.extreme !== new_.extreme) update.extreme = new_.extreme;
 
@@ -44,7 +55,12 @@ function ScenariosTable({
   //   [parameters, innerValue]
   // );
 
-  const scenarios = unwrap(parameters, innerValue.considerable, innerValue.major, innerValue.extreme);
+  const scenarios = unwrap(
+    parameters,
+    innerValue.considerable,
+    innerValue.major,
+    innerValue.extreme
+  );
 
   useEffect(() => {
     if (onSave) {
@@ -53,13 +69,16 @@ function ScenariosTable({
       if (Object.keys(update).length > 0) {
         const fieldsToUpdate: Partial<RiskFileEditableFields> = {};
 
-        if (update.considerable !== undefined) fieldsToUpdate.cr4de_scenario_considerable = update.considerable;
-        if (update.major !== undefined) fieldsToUpdate.cr4de_scenario_major = update.major;
-        if (update.extreme !== undefined) fieldsToUpdate.cr4de_scenario_extreme = update.extreme;
+        if (update.considerable !== undefined)
+          fieldsToUpdate.cr4de_scenario_considerable = update.considerable;
+        if (update.major !== undefined)
+          fieldsToUpdate.cr4de_scenario_major = update.major;
+        if (update.extreme !== undefined)
+          fieldsToUpdate.cr4de_scenario_extreme = update.extreme;
 
         onSave(fieldsToUpdate);
         setSavedValue(debouncedValue);
-        setUpdatedValue && setUpdatedValue({});
+        if (setUpdatedValue) setUpdatedValue({});
       }
     }
   }, [debouncedValue, savedValue, onSave, setSavedValue, setUpdatedValue]);
@@ -73,7 +92,11 @@ function ScenariosTable({
       </Box>
     );
 
-  const handleUpdate = (scenario: keyof Scenarios, parameter: number, newValue: string) => {
+  const handleUpdate = (
+    scenario: keyof Scenarios,
+    parameter: number,
+    newValue: string
+  ) => {
     const updated = {
       ...innerValue,
       [scenario]: wrap([
@@ -86,7 +109,7 @@ function ScenariosTable({
       ]),
     };
     setInnerValue(updated);
-    setUpdatedValue &&
+    if (setUpdatedValue)
       setUpdatedValue({
         [`cr4de_scenario_${scenario}`]: updated[scenario],
       });
@@ -124,7 +147,9 @@ function ScenariosTable({
                     defaultValue={scenarios.considerable[i]?.value || ""}
                     multiline
                     inputProps={{ style: { width: "250px", height: "134px" } }}
-                    onChange={(e) => handleUpdate("considerable", i, e.target.value)}
+                    onChange={(e) =>
+                      handleUpdate("considerable", i, e.target.value)
+                    }
                   />
                 ) : (
                   <Typography variant="body1" paragraph>
@@ -168,7 +193,9 @@ function ScenariosTable({
           <TableRow>
             <TableCell colSpan={4} sx={{ textAlign: "center" }}>
               <Typography variant="subtitle1">
-                <Trans i18nKey="scenarios.none">No intensity parameters defined...</Trans>
+                <Trans i18nKey="scenarios.none">
+                  No intensity parameters defined...
+                </Trans>
               </Typography>
             </TableCell>
           </TableRow>

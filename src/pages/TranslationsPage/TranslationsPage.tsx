@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   CardActions,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -25,7 +24,6 @@ import useAPI, { DataTable } from "../../hooks/useAPI";
 import useRecords from "../../hooks/useRecords";
 import { DVTranslation } from "../../types/dataverse/DVTranslation";
 import { Stack } from "@mui/system";
-import { LoadingButton } from "@mui/lab";
 import Delete from "@mui/icons-material/Delete";
 
 const TranslationsTable = React.memo(
@@ -56,26 +54,58 @@ const TranslationsTable = React.memo(
             translations.map((t) => (
               <TableRow
                 key={t.cr4de_bnratranslationid}
-                onClick={(event) => {
+                onClick={() => {
                   setEditTranslation(t);
                 }}
               >
-                <TableCell component="th" scope="row" sx={{ whiteSpace: "nowrap" }}>
+                <TableCell
+                  component="th"
+                  scope="row"
+                  sx={{ whiteSpace: "nowrap" }}
+                >
                   {t.createdon.slice(0, 10)}
                 </TableCell>
                 <TableCell component="th" scope="row">
                   {t.cr4de_name}
                 </TableCell>
-                <TableCell sx={{ "&:hover": { bgcolor: "rgba(0, 0, 0, 0.1)", cursor: "pointer" } }}>
+                <TableCell
+                  sx={{
+                    "&:hover": {
+                      bgcolor: "rgba(0, 0, 0, 0.1)",
+                      cursor: "pointer",
+                    },
+                  }}
+                >
                   {t.cr4de_en}
                 </TableCell>
-                <TableCell sx={{ "&:hover": { bgcolor: "rgba(0, 0, 0, 0.1)", cursor: "pointer" } }}>
+                <TableCell
+                  sx={{
+                    "&:hover": {
+                      bgcolor: "rgba(0, 0, 0, 0.1)",
+                      cursor: "pointer",
+                    },
+                  }}
+                >
                   {t.cr4de_nl}
                 </TableCell>
-                <TableCell sx={{ "&:hover": { bgcolor: "rgba(0, 0, 0, 0.1)", cursor: "pointer" } }}>
+                <TableCell
+                  sx={{
+                    "&:hover": {
+                      bgcolor: "rgba(0, 0, 0, 0.1)",
+                      cursor: "pointer",
+                    },
+                  }}
+                >
                   {t.cr4de_fr}
                 </TableCell>
-                <TableCell sx={{ "&:hover": { bgcolor: "rgba(0, 0, 0, 0.1)", cursor: "pointer" } }}>
+                <TableCell
+                  sx={{
+                    "&:hover": {
+                      bgcolor: "rgba(0, 0, 0, 0.1)",
+                      cursor: "pointer",
+                    },
+                  }}
+                >
                   {t.cr4de_de}
                 </TableCell>
                 <TableCell sx={{ width: 30 }}>
@@ -138,7 +168,12 @@ function TranslationDialog({
               multiline
               rows={3}
               value={newTranslation.cr4de_en}
-              onChange={(e) => setNewTranslation({ ...newTranslation, cr4de_en: e.target.value })}
+              onChange={(e) =>
+                setNewTranslation({
+                  ...newTranslation,
+                  cr4de_en: e.target.value,
+                })
+              }
             />
           </Stack>
           <Typography variant="h6">NL: </Typography>
@@ -147,7 +182,12 @@ function TranslationDialog({
               multiline
               rows={3}
               value={newTranslation.cr4de_nl}
-              onChange={(e) => setNewTranslation({ ...newTranslation, cr4de_nl: e.target.value })}
+              onChange={(e) =>
+                setNewTranslation({
+                  ...newTranslation,
+                  cr4de_nl: e.target.value,
+                })
+              }
             />
           </Stack>
           <Typography variant="h6">FR: </Typography>
@@ -156,7 +196,12 @@ function TranslationDialog({
               multiline
               rows={3}
               value={newTranslation.cr4de_fr}
-              onChange={(e) => setNewTranslation({ ...newTranslation, cr4de_fr: e.target.value })}
+              onChange={(e) =>
+                setNewTranslation({
+                  ...newTranslation,
+                  cr4de_fr: e.target.value,
+                })
+              }
             />
           </Stack>
           <Typography variant="h6">DE: </Typography>
@@ -165,16 +210,25 @@ function TranslationDialog({
               multiline
               rows={3}
               value={newTranslation.cr4de_de}
-              onChange={(e) => setNewTranslation({ ...newTranslation, cr4de_de: e.target.value })}
+              onChange={(e) =>
+                setNewTranslation({
+                  ...newTranslation,
+                  cr4de_de: e.target.value,
+                })
+              }
             />
           </Stack>
         </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={() => onClose()}>Cancel</Button>
-        <LoadingButton loading={isLoading} variant="text" onClick={() => handleSaveTranslation()}>
+        <Button
+          loading={isLoading}
+          variant="text"
+          onClick={() => handleSaveTranslation()}
+        >
           Save
-        </LoadingButton>
+        </Button>
       </DialogActions>
     </Dialog>
   );
@@ -183,7 +237,9 @@ function TranslationDialog({
 export default function TranslationsPage() {
   const api = useAPI();
 
-  const [editTranslation, setEditTranslation] = useState<DVTranslation | null>(null);
+  const [editTranslation, setEditTranslation] = useState<DVTranslation | null>(
+    null
+  );
   const [filter, setFilter] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -214,7 +270,7 @@ export default function TranslationsPage() {
     // },
   });
 
-  const handleCloseEditDialog = (newTranslation?: string) => {
+  const handleCloseEditDialog = () => {
     setEditTranslation(null);
   };
 
@@ -239,14 +295,21 @@ export default function TranslationsPage() {
 
         <Card sx={{ my: 4 }}>
           <CardActions>
-            <Button onClick={() => setFilter(!filter)}>{filter ? "Show All" : "Show Incomplete"}</Button>
+            <Button onClick={() => setFilter(!filter)}>
+              {filter ? "Show All" : "Show Incomplete"}
+            </Button>
           </CardActions>
         </Card>
 
         <TranslationsTable
           translations={
             translations && filter
-              ? translations.filter((t) => t.cr4de_nl === null || t.cr4de_fr === null || t.cr4de_en === null)
+              ? translations.filter(
+                  (t) =>
+                    t.cr4de_nl === null ||
+                    t.cr4de_fr === null ||
+                    t.cr4de_en === null
+                )
               : translations
           }
           setEditTranslation={setEditTranslation}

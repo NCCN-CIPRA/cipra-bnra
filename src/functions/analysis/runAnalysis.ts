@@ -5,9 +5,10 @@ import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import { SCENARIOS } from "../scenarios";
 import calculateTotalImpact, { getEffectGraph } from "./calculateTotalImpact";
-import calculateTotalProbability, { getCausalGraph } from "./calculateTotalProbability";
+import calculateTotalProbability, {
+  getCausalGraph,
+} from "./calculateTotalProbability";
 import calculateTotalRisk from "./calculateTotalRisk";
 import prepareRiskFiles from "./prepareRiskFiles";
 
@@ -41,13 +42,6 @@ export default function runAnalysis(
       [c.cr4de_riskfilesid]: c,
     }),
     {} as { [key: string]: DVRiskFile }
-  );
-  const cascadesDict = cascades.reduce(
-    (d, c) => ({
-      ...d,
-      [c.cr4de_bnrariskcascadeid]: c,
-    }),
-    {}
   );
 
   const calculations = prepareRiskFiles(

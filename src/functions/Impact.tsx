@@ -1,18 +1,18 @@
-import { isParameter } from "typescript";
-import { CascadeCalculation, RiskCalculation } from "../types/dataverse/DVAnalysisRun";
+import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
-import { DVRiskFile, RISKFILE_RESULT_FIELD } from "../types/dataverse/DVRiskFile";
+import {
+  DVRiskFile,
+  RISKFILE_RESULT_FIELD,
+} from "../types/dataverse/DVRiskFile";
 import {
   CASCADE_RESULT_FIELD,
   getCascadeParameter,
-  getScenarioLetter,
   getScenarioParameter,
   getScenarioSuffix,
   SCENARIO_SUFFIX,
   SCENARIOS,
 } from "./scenarios";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
-import round from "./roundNumberString";
 
 export type Effect = {
   id: string | null;
@@ -45,7 +45,17 @@ export type Effect = {
 };
 
 export type IMPACT_CATEGORY = "H" | "S" | "E" | "F";
-export type DAMAGE_INDICATOR = "Ha" | "Hb" | "Hc" | "Sa" | "Sb" | "Sc" | "Sd" | "Ea" | "Fa" | "Fb";
+export type DAMAGE_INDICATOR =
+  | "Ha"
+  | "Hb"
+  | "Hc"
+  | "Sa"
+  | "Sb"
+  | "Sc"
+  | "Sd"
+  | "Ea"
+  | "Fa"
+  | "Fb";
 
 // in k€ = € 1 000
 const scales: { [key: string]: number } = {
@@ -78,7 +88,10 @@ export function getImpactScaleNumber(absoluteImpact: number) {
 
   const diffs: [string, number][] = Object.entries(scales)
     .sort((a, b) => b[1] - a[1])
-    .map((v) => [v[0], Math.abs(Math.log(1000 * v[1]) - Math.log(absoluteImpact))]);
+    .map((v) => [
+      v[0],
+      Math.abs(Math.log(1000 * v[1]) - Math.log(absoluteImpact)),
+    ]);
 
   const minDiff = diffs.reduce((min, cur) => (min[1] >= cur[1] ? cur : min));
 
@@ -104,11 +117,16 @@ export function getMoneyString(impactNumber: number) {
     return `€ ${(Math.round(impactNumber / 10000000) / 100).toLocaleString()}B`;
   }
 
-  return `€ ${(Math.round(impactNumber / 10000000000) / 100).toLocaleString()}T`;
+  return `€ ${(
+    Math.round(impactNumber / 10000000000) / 100
+  ).toLocaleString()}T`;
 }
 
-const gsp = (rf: DVRiskFile, parameter: RISKFILE_RESULT_FIELD, scenario: SCENARIOS) =>
-  getScenarioParameter(rf, parameter, scenario) || 0.00000001;
+const gsp = (
+  rf: DVRiskFile,
+  parameter: RISKFILE_RESULT_FIELD,
+  scenario: SCENARIOS
+) => getScenarioParameter(rf, parameter, scenario) || 0.00000001;
 
 export function getDirectImpact(rf: DVRiskFile, scenario: SCENARIOS): Effect {
   const scenarioSuffix = getScenarioSuffix(scenario);
@@ -144,12 +162,17 @@ export function getDirectImpact(rf: DVRiskFile, scenario: SCENARIOS): Effect {
   };
 }
 
-const gcp = (c: DVRiskCascade, parameter: CASCADE_RESULT_FIELD, scenario: SCENARIOS) =>
-  getCascadeParameter(c, scenario, parameter) || 0.00000001;
+const gcp = (
+  c: DVRiskCascade,
+  parameter: CASCADE_RESULT_FIELD,
+  scenario: SCENARIOS
+) => getCascadeParameter(c, scenario, parameter) || 0.00000001;
 
-export function getIndirectImpact(c: DVRiskCascade<SmallRisk, SmallRisk>, rf: DVRiskFile, scenario: SCENARIOS): Effect {
-  const scenarioLetter = getScenarioLetter(scenario);
-
+export function getIndirectImpact(
+  c: DVRiskCascade<SmallRisk, SmallRisk>,
+  rf: DVRiskFile,
+  scenario: SCENARIOS
+): Effect {
   return {
     id: c.cr4de_effect_hazard.cr4de_riskfilesid,
     name: c.cr4de_effect_hazard.cr4de_title,
@@ -197,7 +220,11 @@ export const getDamageIndicatorAbsoluteScale = (
   if (diImpact <= 0) return 0;
 
   if (diImpact < 1000 * scales["0.5"])
-    return Math.round((10 * 0.5 * (1000 * scales["0.5"] - diImpact)) / (1000 * scales["0.5"])) / 10;
+    return (
+      Math.round(
+        (10 * 0.5 * (1000 * scales["0.5"] - diImpact)) / (1000 * scales["0.5"])
+      ) / 10
+    );
 
   return Math.round(10 * getImpactScaleFloat(diImpact)) / 10;
 };

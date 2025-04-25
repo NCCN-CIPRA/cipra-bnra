@@ -41,11 +41,13 @@ const CPScales: { [key: string]: number } = {
   "5": 0.95,
 };
 
-const logMean = (x: number, y: number) => (y - x) / (Math.log10(y) - Math.log10(x));
+const logMean = (x: number, y: number) =>
+  (y - x) / (Math.log10(y) - Math.log10(x));
 const mean = (x: number, y: number) => (x + y) / 2;
 
 export function getReturnPeriod(DPScaleString: string) {
-  if (DPScaleString === "DP0") return logMean(DPScales["0"], DPScales["0"] * 10);
+  if (DPScaleString === "DP0")
+    return logMean(DPScales["0"], DPScales["0"] * 10);
 
   if (DPScaleString.indexOf(".") >= 0) {
     const scaleNumber = Math.floor(parseFloat(DPScaleString.replace("DP", "")));
@@ -85,7 +87,10 @@ export function getMDailyProbability(scaleString: string | null) {
   return (-1 * Math.log(1 - get3YearLikelihood(scaleString))) / (3 * 365);
 }
 
-export function getAbsoluteProbability(scaleString: string | null, scaleFactor: number = 1) {
+export function getAbsoluteProbability(
+  scaleString: string | null,
+  scaleFactor: number = 1
+) {
   if (scaleString === null) return 0;
 
   if (scaleString.startsWith("DP")) {
@@ -99,7 +104,10 @@ export function getAbsoluteProbability(scaleString: string | null, scaleFactor: 
   return -1;
 }
 
-export function getProbabilityScaleNumber(absoluteProbability: number, scalePrefix: string) {
+export function getProbabilityScaleNumber(
+  absoluteProbability: number,
+  scalePrefix: string
+) {
   let scales;
   if (scalePrefix === "DP") scales = DPScales;
   else if (scalePrefix === "DP50-") scales = DPScales;
@@ -111,15 +119,24 @@ export function getProbabilityScaleNumber(absoluteProbability: number, scalePref
 
   const diffs: [string, number][] = Object.entries(scales)
     .sort((a, b) => b[1] - a[1])
-    .map((v) => [v[0], Math.abs(Math.log(v[1]) - Math.log(absoluteProbability))]);
+    .map((v) => [
+      v[0],
+      Math.abs(Math.log(v[1]) - Math.log(absoluteProbability)),
+    ]);
 
   const minDiff = diffs.reduce((min, cur) => (min[1] > cur[1] ? cur : min));
 
   return minDiff[0];
 }
 
-export function getProbabilityScale(absoluteProbability: number, scalePrefix: string) {
-  return `${scalePrefix}${getProbabilityScaleNumber(absoluteProbability, scalePrefix)}`;
+export function getProbabilityScale(
+  absoluteProbability: number,
+  scalePrefix: string
+) {
+  return `${scalePrefix}${getProbabilityScaleNumber(
+    absoluteProbability,
+    scalePrefix
+  )}`;
 }
 
 export const getPercentageProbability = (p: number) => {
@@ -139,19 +156,16 @@ export function getTotalProbabilityRelativeScale(
   scenarioSuffix: SCENARIO_SUFFIX,
   tp50: boolean = false
 ) {
-  return rescaleProbability(getYearlyProbability(calculation[`tp${tp50 ? "50" : ""}${scenarioSuffix}`]));
+  return rescaleProbability(
+    getYearlyProbability(calculation[`tp${tp50 ? "50" : ""}${scenarioSuffix}`])
+  );
 }
 
 export function getYearlyProbabilityFromRelative(p: number) {
   return Math.pow(Math.E, (p - 5) * Math.log(2.5)) - 0.0103;
 }
 
-export function getPartialProbabilityRelativeScale(
-  p_daily: number,
-  calculation: RiskCalculation,
-  scenarioSuffix: SCENARIO_SUFFIX,
-  tp50: boolean = false
-) {
+export function getPartialProbabilityRelativeScale(p_daily: number) {
   // const tp = getYearlyProbability(calculation[`tp${tp50 ? "50" : ""}${scenarioSuffix}`]);
   // const ratio = getYearlyProbability(p_daily) / tp;
 

@@ -11,10 +11,12 @@ export default function ContactFilterField({
   setFilter: (f: string) => void;
   count: number;
 }) {
-  const [displayFilter, debouncedFilter, setDebouncedFilter] = useDifferentDebounce(filter, 200);
+  const [displayFilter, debouncedFilter, setDebouncedFilter] =
+    useDifferentDebounce(filter, 200);
 
   useEffect(() => {
     setFilter(debouncedFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedFilter]);
 
   return (
@@ -28,7 +30,10 @@ export default function ContactFilterField({
         onChange={(e) => setDebouncedFilter(e.target.value)}
         sx={{ mr: 4 }}
       />
-      <Typography variant="subtitle2" sx={{ position: "absolute", right: 0, marginTop: 1 }}>
+      <Typography
+        variant="subtitle2"
+        sx={{ position: "absolute", right: 0, marginTop: 1 }}
+      >
         ({count})
       </Typography>
     </>

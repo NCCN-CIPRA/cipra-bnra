@@ -11,14 +11,13 @@ import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { SCENARIOS } from "../../functions/scenarios";
 import Bibliography from "../RiskAnalysisPage/Bibliography";
 import { useTranslation } from "react-i18next";
-import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import RiskFileTitle from "../../components/RiskFileTitle";
 import DisclaimerSection from "../RiskAnalysisPage/DisclaimerSection";
 import { useEffect } from "react";
 import BNRASpeedDial from "../../components/BNRASpeedDial";
 import RiskEvolutionTutorial from "./RiskEvolutionTutorial";
 
-export default function RiskEvolutionPage({}) {
+export default function RiskEvolutionPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const {
@@ -38,6 +37,7 @@ export default function RiskEvolutionPage({}) {
 
   useEffect(() => {
     if (!attachments) loadAttachments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

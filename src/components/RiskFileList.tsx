@@ -6,7 +6,15 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
-import { Paper, Stack, Skeleton, TextField, Box, Tooltip, IconButton } from "@mui/material";
+import {
+  Paper,
+  Stack,
+  Skeleton,
+  TextField,
+  Box,
+  Tooltip,
+  IconButton,
+} from "@mui/material";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import getCategoryColor from "../functions/getCategoryColor";
 import SearchIcon from "@mui/icons-material/Search";
@@ -32,7 +40,9 @@ function RiskFileList({
   const filteredRiskFiles =
     filter === "" || !riskFiles
       ? riskFiles
-      : riskFiles.filter((r) => r.cr4de_title.toLowerCase().indexOf(filter.toLowerCase()) >= 0);
+      : riskFiles.filter(
+          (r) => r.cr4de_title.toLowerCase().indexOf(filter.toLowerCase()) >= 0
+        );
 
   return (
     <>
@@ -59,29 +69,51 @@ function RiskFileList({
                     rf.finished && (
                       <Tooltip title={finishedTooltip}>
                         <IconButton>
-                          <CheckCircleOutlineIcon color="primary" fontSize="medium" />
+                          <CheckCircleOutlineIcon
+                            color="primary"
+                            fontSize="medium"
+                          />
                         </IconButton>
                       </Tooltip>
                     )
                   }
                 >
-                  <ListItemButton onClick={(e) => onClick(rf)}>
+                  <ListItemButton onClick={() => onClick(rf)}>
                     <ListItemAvatar>
-                      <Avatar sx={{ fontSize: 13, bgcolor: getCategoryColor(rf.cr4de_risk_category) }}>
+                      <Avatar
+                        sx={{
+                          fontSize: 13,
+                          bgcolor: getCategoryColor(rf.cr4de_risk_category),
+                        }}
+                      >
                         {rf.cr4de_hazard_id}
                       </Avatar>
                     </ListItemAvatar>
-                    <ListItemText primary={rf.cr4de_title} secondary={t(rf.cr4de_risk_type)} />
+                    <ListItemText
+                      primary={rf.cr4de_title}
+                      secondary={t(rf.cr4de_risk_type)}
+                    />
                   </ListItemButton>
                 </ListItem>
               ))
             : [1, 2, 3].map((i) => (
                 <ListItem key={i}>
                   <Stack direction="row" sx={{ flex: 1 }}>
-                    <Skeleton variant="circular" width={42} height={42} sx={{ mr: "14px" }}></Skeleton>
+                    <Skeleton
+                      variant="circular"
+                      width={42}
+                      height={42}
+                      sx={{ mr: "14px" }}
+                    ></Skeleton>
                     <Stack direction="column" sx={{ flex: 1, maxWidth: 300 }}>
-                      <Skeleton variant="text" sx={{ fontSize: "1rem" }}></Skeleton>
-                      <Skeleton variant="text" sx={{ fontSize: "0.7rem" }}></Skeleton>
+                      <Skeleton
+                        variant="text"
+                        sx={{ fontSize: "1rem" }}
+                      ></Skeleton>
+                      <Skeleton
+                        variant="text"
+                        sx={{ fontSize: "0.7rem" }}
+                      ></Skeleton>
                     </Stack>
                   </Stack>
                 </ListItem>

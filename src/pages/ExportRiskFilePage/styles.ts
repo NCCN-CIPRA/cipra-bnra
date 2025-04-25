@@ -1,18 +1,16 @@
+import { Style } from "@react-pdf/types";
 import { BLACK, NCCN_GREEN } from "../../functions/colors";
 
-export const DPI = 300
-export const SCALE = 300 / 72
+export const DPI = 300;
+export const SCALE = 300 / 72;
 export const POINTS_PER_CM = 28.3465 * SCALE;
 
-
-export const PAGE_SIZE = "A4"
-export const PAGE_WIDTH = 21;
-export const PAGE_HEIGHT = 29.7;
+export const PAGE_SIZE = "A4";
 export const PAGE_DPI = DPI;
 export const PAGE_STYLES = {
-    padding: 2.5 *  POINTS_PER_CM,
-    paddingBottom: 3 *  POINTS_PER_CM
-}
+  padding: 2.5 * POINTS_PER_CM,
+  paddingBottom: 3 * POINTS_PER_CM,
+};
 // export const PAGE_SIZE = "B5"
 // export const PAGE_STYLES = {
 //     padding: "1.5cm",
@@ -20,18 +18,13 @@ export const PAGE_STYLES = {
 // }
 
 // Global Title
-export const h1Style = {};
+export const h1Style: Style = {};
 
 // Chapter Title
-export const h2Style =  {
-  fontFamily: "NH",
-  fontWeight: 700,
-  color: "white",
-  fontSize: 30 * SCALE,
-};
+export const h2Style: Style = {};
 
 // Risk File Title
-export const h3Style = {
+export const h3Style: Style = {
   fontFamily: "NH",
   fontWeight: 700,
   fontSize: 20 * SCALE,
@@ -39,7 +32,7 @@ export const h3Style = {
 };
 
 // Section Title (i.e. Summary, Risk Description)
-export const h4Style = {
+export const h4Style: Style = {
   fontFamily: "NH",
   fontWeight: 700,
   color: NCCN_GREEN,
@@ -48,7 +41,7 @@ export const h4Style = {
 };
 
 // Subsection Title (i.e description, definition, probability analysis)
-export const h5Style = {
+export const h5Style: Style = {
   fontFamily: "NH",
   fontSize: 11 * SCALE,
   fontWeight: 500,
@@ -59,7 +52,7 @@ export const h5Style = {
 };
 
 // Subsubsection Title (i.e. Human impact)
-export const h6Style = {
+export const h6Style: Style = {
   marginTop: 5 * SCALE,
   fontFamily: "NH",
   fontWeight: 300,
@@ -67,7 +60,7 @@ export const h6Style = {
   fontSize: 11 * SCALE,
 };
 
-export const bodyStyle = {
+export const bodyStyle: Style = {
   fontFamily: "NH",
   fontSize: 10 * SCALE,
   fontWeight: 300,
@@ -76,12 +69,10 @@ export const bodyStyle = {
   marginBottom: 5 * SCALE,
 };
 
-export const boldStyle = {
+export const boldStyle: Style = {
   fontWeight: 500,
 };
 
-export const smallStyle = {
-    fontSize: 8 * SCALE,
+export const smallStyle: Style = {
+  fontSize: 8 * SCALE,
 };
-
-
