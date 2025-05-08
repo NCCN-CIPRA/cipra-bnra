@@ -7,8 +7,8 @@ import { comlink } from "vite-plugin-comlink";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    comlink(),
     react(),
+    comlink(),
     svgr({
       svgrOptions: {
         // svgr options
