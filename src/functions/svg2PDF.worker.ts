@@ -8,7 +8,7 @@ const preset = presets.offscreen({
   DOMParser,
 });
 
-// const scale= 1;
+// const scale = 1;
 
 export default async function svg2PDF(
   jsxChart: ReactElement,

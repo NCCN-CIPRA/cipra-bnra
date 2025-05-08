@@ -325,7 +325,10 @@ const tag2PDF = (
             <View
               style={{
                 backgroundColor: BLACK,
-                borderRadius: "100%",
+                borderTopLeftRadius: "100%",
+                borderTopRightRadius: "100%",
+                borderBottomLeftRadius: "100%",
+                borderBottomRightRadius: "100%",
                 marginTop: 3 * SCALE,
                 marginRight: 6 * SCALE,
                 width: 3 * SCALE,

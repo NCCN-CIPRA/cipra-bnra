@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect } from "react";
+import { useState, useRef } from "react";
 import {
   Container,
   Typography,
@@ -32,6 +32,7 @@ import {
 } from "../../types/dataverse/DVSmallRisk";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { saveAs } from "file-saver";
+import { proxy } from "comlink";
 
 enum EXPORT_TYPE {
   ALL = "ALL",
@@ -53,7 +54,7 @@ const MenuProps = {
 export default function ExportBNRAPage() {
   const logLines = useRef<string[]>(["Loading data..."]);
   const [, setUpdateLog] = useState(Date.now());
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  // const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [type, setType] = useState(EXPORT_TYPE.ALL);
   const [selectedRiskFiles, setSelectedRiskFiles] = useState<DVRiskFile[]>([]);
 
@@ -165,45 +166,11 @@ export default function ExportBNRAPage() {
 
   const isLoading = loadingRiskFiles || loadingCascades;
 
-  const exporter: Worker = useMemo(() => {
-    const testUrl = new URL(
-      "../../functions/export/export.worker.ts",
-      import.meta.url
-    );
-
-    if (testUrl.href.indexOf("githack") >= 0) {
-      return new Worker(
-        new URL("https://bnra.powerappsportals.com/export.worker.js")
-      );
-    }
-
-    return new Worker(
-      new URL("../../functions/export/export.worker.ts", import.meta.url),
-      { type: "module" }
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [riskFiles]);
-
-  useEffect(() => {
-    if (window.Worker) {
-      // calculator.onmessage = (e: MessageEvent<MessageParams>) => {
-      exporter.onmessage = (e: MessageEvent) => {
-        if (e.data.type === "progress") {
-          logger(e.data.message);
-        }
-        if (e.data.type === "result") {
-          if (e.data.fileType === "pdf") {
-            setPdfUrl(URL.createObjectURL(e.data.value));
-          } else {
-            setPdfUrl(null);
-            saveAs(e.data.value, "BNRA-export.xlsx");
-          }
-          logger("Done.");
-        }
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exporter]);
+  const exporter = new ComlinkWorker<
+    typeof import("../../functions/export/export.worker")
+  >(new URL("../../functions/export/export.worker", import.meta.url), {
+    type: "module",
+  });
 
   const reloadData = () => {
     logger("Loading data...");
@@ -212,7 +179,7 @@ export default function ExportBNRAPage() {
     reloadAttachments();
   };
 
-  const exportToPDF = async () => {
+  const handleExport = async () => {
     if (!riskFiles || !cascades || !attachments) return;
 
     if (type !== EXPORT_TYPE.ALL && selectedRiskFiles.length <= 0) {
@@ -221,13 +188,30 @@ export default function ExportBNRAPage() {
       return;
     }
 
-    exporter.postMessage({
-      exportType: type,
-      exportedRiskFiles: selectedRiskFiles,
-      riskFiles,
-      cascades,
-      attachments,
-    });
+    const callback = (message: string) => {
+      return logger(message);
+    };
+
+    const blob = await exporter.exportBNRA(
+      {
+        exportType: type,
+        exportedRiskFiles: selectedRiskFiles,
+        riskFiles,
+        allCascades: cascades,
+        allAttachments: attachments,
+      },
+      proxy(callback)
+    );
+
+    if (blob) {
+      if (type === EXPORT_TYPE.ALL) {
+        saveAs(blob, "BNRA_export.pdf");
+      } else if (type === EXPORT_TYPE.SINGLE) {
+        saveAs(blob, "BNRA_export.pdf");
+      } else {
+        saveAs(blob, "BNRA_export.xlsx");
+      }
+    }
   };
 
   return (
@@ -369,7 +353,7 @@ export default function ExportBNRAPage() {
             <Button disabled={isLoading} onClick={reloadData}>
               Reload data
             </Button>
-            <Button disabled={isLoading} onClick={exportToPDF}>
+            <Button disabled={isLoading} onClick={handleExport}>
               Export
             </Button>
             {/* <Box sx={{ flex: 1 }} />
@@ -391,9 +375,9 @@ export default function ExportBNRAPage() {
             </Button> */}
           </CardActions>
         </Card>
-        {pdfUrl && (
+        {/* pdfUrl && (
           <iframe title="export" width="100%" height={500} src={pdfUrl} />
-        )}
+        )*/}
       </Container>
     </>
   );

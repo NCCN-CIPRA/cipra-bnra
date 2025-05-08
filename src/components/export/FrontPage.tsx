@@ -75,7 +75,9 @@ export default function FrontPage({
             2023 - 2026
           </Text>
         </View>
-        <Image src="https://bnra.powerappsportals.com/report-front.png" />
+        {/* <Image
+          source={{ uri: "https://bnra.powerappsportals.com/report-front.png" }}
+        /> */}
         <View
           style={{
             position: "absolute",

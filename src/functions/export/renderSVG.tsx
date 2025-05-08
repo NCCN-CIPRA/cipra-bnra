@@ -4,9 +4,9 @@ import { ProbabilityBarsChart } from "../../components/charts/svg/ProbabilityBar
 import { getScenarioParameter, SCENARIOS } from "../scenarios";
 import { getCategoryImpactRescaled } from "../CategoryImpact";
 import SummaryImpactChart from "../../components/charts/svg/SummaryImpactChart";
-import BNRALogo from "../../assets/icons/BNRA_Logo.svg?react";
-import NCCNLogo from "../../assets/icons/NCCN_Logo.svg";
-import NCCNDetail from "../../assets/icons/Triangles_detail.svg";
+import BNRALogo from "../../assets/icons/BNRALogo.svg?react";
+import NCCNLogo from "../../assets/icons/NCCNLogo.svg?react";
+import NCCNDetail from "../../assets/icons/TrianglesDetail.svg?react";
 import ScenarioMatrixChart from "../../components/charts/svg/ScenarioMatrixChart";
 import { Cascades } from "../cascades";
 import ProbabilitySankeyChart from "../../components/charts/svg/ProbabilitySankeyChart";

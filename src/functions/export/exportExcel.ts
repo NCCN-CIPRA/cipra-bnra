@@ -61,7 +61,6 @@ export default function exportExcel({
   exportedRiskFiles: DVRiskFile[];
   riskFiles: DVRiskFile[];
   allCascades: DVRiskCascade[];
-  onProgress: (message: string) => void;
 }) {
   const hc: { [key: string]: DVRiskFile } = riskFiles.reduce(
     (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),

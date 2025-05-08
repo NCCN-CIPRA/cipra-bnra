@@ -1,5 +1,4 @@
 import { Document } from "@react-pdf/renderer";
-import FrontPage from "./FrontPage";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { Cascades } from "../../functions/cascades";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
@@ -47,11 +46,6 @@ export default function RiskFileExport({
 
   return (
     <Document>
-      <FrontPage
-        nccnLogo={svgImages.nccnLogo}
-        bnraLogo={svgImages.bnraLogo}
-        triangles={svgImages.triangles}
-      />
       {svgRisks.map((rf) => (
         <RiskFilePDF
           key={rf.cr4de_riskfilesid}

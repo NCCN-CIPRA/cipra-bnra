@@ -26,6 +26,7 @@
   "exclude": [
     "node_modules",
     "public",
-    "**/_deprecated/**"
+    "**/_deprecated/**",
+    "*.new.*"
   ]
 }

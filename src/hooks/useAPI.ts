@@ -12,6 +12,7 @@ import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { DVTranslation } from "../types/dataverse/DVTranslation";
 import { DVValidation } from "../types/dataverse/DVValidation";
 import { DVAnalysisRun } from "../types/dataverse/DVAnalysisRun";
+import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
 
 export enum DataTable {
   CONTACT,
@@ -78,6 +79,11 @@ export interface API {
   deleteContact(id: string): Promise<void>;
 
   getInvitations<T = DVInvitation>(query?: string): Promise<T[]>;
+
+  getRiskSummaries<T = DVRiskSummary>(query?: string): Promise<T[]>;
+  getRiskSummary<T = DVRiskSummary>(id: string, query?: string): Promise<T>;
+  updateRiskSummary(id: string, fields: object): Promise<void>;
+  deleteRiskSummary(id: string): Promise<void>;
 
   getRiskFiles<T = DVRiskFile>(query?: string): Promise<T[]>;
   getRiskFile<T = DVRiskFile>(id: string, query?: string): Promise<T>;
@@ -376,6 +382,60 @@ export default function useAPI(): API {
       );
 
       return (await response.json()).value;
+    },
+
+    getRiskSummaries: async function <T = DVRiskSummary>(
+      query?: string
+    ): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_risksummaries${
+          query ? "?" + query : ""
+        }`
+      );
+
+      return (await response.json()).value.map();
+    },
+    getRiskSummary: async function <T = DVRiskSummary>(
+      id: string,
+      query?: string
+    ): Promise<T> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_risksummaries(${id})${
+          query ? "?" + query : ""
+        }`
+      );
+
+      return (await response.json()) as T;
+    },
+    updateRiskSummary: async function (
+      id: string,
+      fields: object
+    ): Promise<void> {
+      await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_risksummaries(${id})`,
+        {
+          method: "PATCH",
+          headers: {
+            __RequestVerificationToken:
+              localStorage.getItem("antiforgerytoken") || "",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(fields),
+        }
+      );
+    },
+    deleteRiskSummary: async function (id: string): Promise<void> {
+      await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_risksummaries(${id})`,
+        {
+          method: "DELETE",
+          headers: {
+            __RequestVerificationToken:
+              localStorage.getItem("antiforgerytoken") || "",
+            "Content-Type": "application/json",
+          },
+        }
+      );
     },
 
     getRiskFiles: async function <T = DVRiskFile>(

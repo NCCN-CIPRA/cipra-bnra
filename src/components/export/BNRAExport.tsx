@@ -1,5 +1,3 @@
-// import { Cascades } from "../../pages/BaseRisksPage";
-// import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import {
   DVRiskFile,

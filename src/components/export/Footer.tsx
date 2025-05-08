@@ -16,7 +16,12 @@ export default function Footer() {
       }}
     >
       <Text style={smallStyle}>NCCN - CIPRA</Text>
-      <Text style={smallStyle} render={({ pageNumber }) => `${pageNumber}`} />
+      <Text
+        style={smallStyle}
+        render={({ pageNumber }) => {
+          return `${pageNumber}`;
+        }}
+      />
     </View>
   );
 }

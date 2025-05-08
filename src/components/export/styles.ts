@@ -2,7 +2,8 @@ import { Style } from "@react-pdf/types";
 import { BLACK, NCCN_GREEN } from "../../functions/colors";
 
 export const DPI = 300;
-export const SCALE = 300 / 72;
+// export const SCALE = 300 / 72;
+export const SCALE = 1;
 export const POINTS_PER_CM = 28.3465 * SCALE;
 
 export const PAGE_SIZE = "A4";
