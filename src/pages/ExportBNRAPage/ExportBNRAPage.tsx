@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import {
   Container,
   Typography,
@@ -166,11 +166,25 @@ export default function ExportBNRAPage() {
 
   const isLoading = loadingRiskFiles || loadingCascades;
 
-  const exporter = new ComlinkWorker<
-    typeof import("../../functions/export/export.worker")
-  >(new URL("../../functions/export/export.worker", import.meta.url), {
-    type: "module",
-  });
+  const exporter = useMemo(() => {
+    const testUrl = new URL(
+      "../../functions/export/export.worker.ts",
+      import.meta.url
+    );
+
+    if (testUrl.href.indexOf("githack") >= 0) {
+      return new ComlinkWorker<
+        typeof import("../../functions/export/export.worker")
+      >(new URL("https://bnra.powerappsportals.com/export.worker.js"));
+    }
+
+    return new ComlinkWorker<
+      typeof import("../../functions/export/export.worker")
+    >(new URL("../../functions/export/export.worker", import.meta.url), {
+      type: "module",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [riskFiles]);
 
   const reloadData = () => {
     logger("Loading data...");
