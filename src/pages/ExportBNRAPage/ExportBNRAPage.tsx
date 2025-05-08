@@ -167,22 +167,17 @@ export default function ExportBNRAPage() {
   const isLoading = loadingRiskFiles || loadingCascades;
 
   const exporter = useMemo(() => {
-    const testUrl = new URL(
-      "../../functions/export/export.worker.ts",
-      import.meta.url
-    );
-
-    if (testUrl.href.indexOf("githack") >= 0) {
+    if (window.location.href.indexOf("localhost") >= 0) {
       return new ComlinkWorker<
         typeof import("../../functions/export/export.worker")
-      >(new URL("https://bnra.powerappsportals.com/export.worker.js"));
+      >(new URL("../../functions/export/export.worker", import.meta.url), {
+        type: "module",
+      });
     }
 
     return new ComlinkWorker<
       typeof import("../../functions/export/export.worker")
-    >(new URL("../../functions/export/export.worker", import.meta.url), {
-      type: "module",
-    });
+    >(new URL("https://bnra.powerappsportals.com/export.worker.js"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFiles]);
 
