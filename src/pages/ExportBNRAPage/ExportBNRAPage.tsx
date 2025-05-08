@@ -177,10 +177,7 @@ export default function ExportBNRAPage() {
     }
 
     return wrap(
-      new Worker(
-        new URL("https://bnra.powerappsportals.com/export.worker.js"),
-        { type: "module" }
-      )
+      new Worker(new URL("https://bnra.powerappsportals.com/export.worker.js"))
     ) as unknown as typeof import("../../functions/export/export.worker");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFiles]);
