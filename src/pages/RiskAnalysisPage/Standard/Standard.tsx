@@ -11,7 +11,6 @@ import Scenario from "./Scenario";
 import { useState } from "react";
 import ProbabilitySection from "./ProbabilitySection";
 import ImpactSection from "./ImpactSection";
-import { useNavigate } from "react-router-dom";
 import CBSection from "./CBSection";
 import { Cause } from "../../../functions/Probability";
 import Bibliography from "../Bibliography";
@@ -24,6 +23,8 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import StandardAnalysisTutorial from "./StandardAnalysisTutorial";
 import { Cascades } from "../../../functions/cascades";
+import handleExportRiskfile from "../../../functions/export/exportBNRA";
+import useAPI from "../../../hooks/useAPI";
 
 const getScenarioSuffix = (scenario: SCENARIOS) => {
   if (scenario === SCENARIOS.CONSIDERABLE) return "_c";
@@ -53,7 +54,7 @@ export default function Standard({
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const api = useAPI();
 
   const MRS = riskFile.cr4de_mrs || SCENARIOS.EXTREME;
   const [scenario, setScenario] = useState(MRS);
@@ -267,9 +268,7 @@ export default function Standard({
 
       <BNRASpeedDial
         offset={{ x: 0, y: 56 }}
-        exportAction={() =>
-          navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
-        }
+        exportAction={handleExportRiskfile(riskFile, api)}
         HelpComponent={StandardAnalysisTutorial}
       />
     </Box>

@@ -1,7 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import DefinitionSection from "../DefinitionSection";
 import Bibliography from "../../RiskAnalysisPage/Bibliography";
 import RiskFileTitle from "../../../components/RiskFileTitle";
@@ -11,6 +10,8 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import EmergingIdentificationTutorial from "./EmergingIdentificationTutorial";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import { Cascades } from "../../../functions/cascades";
+import handleExportRiskfile from "../../../functions/export/exportBNRA";
+import useAPI from "../../../hooks/useAPI";
 
 export default function Emerging({
   riskFile,
@@ -34,7 +35,7 @@ export default function Emerging({
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const api = useAPI();
 
   return (
     <Box sx={{ mb: 10 }}>
@@ -103,9 +104,7 @@ export default function Emerging({
 
       <BNRASpeedDial
         offset={{ x: 0, y: 56 }}
-        exportAction={() =>
-          navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
-        }
+        exportAction={handleExportRiskfile(riskFile, api)}
         HelpComponent={EmergingIdentificationTutorial}
       />
     </Box>

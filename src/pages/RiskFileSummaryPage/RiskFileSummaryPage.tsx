@@ -1,4 +1,4 @@
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import { useState } from "react";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import {
@@ -22,11 +22,11 @@ import RiskFileTitle from "../../components/RiskFileTitle";
 import BNRASpeedDial from "../../components/BNRASpeedDial";
 import RiskFileSummaryTutorial from "./RiskFileSummaryTutorial";
 import { getLanguage } from "../../functions/translations";
+import handleExportRiskfile from "../../functions/export/exportBNRA";
 
 export default function RiskFileSummaryPage() {
   const api = useAPI();
   const { i18n } = useTranslation();
-  const navigate = useNavigate();
   const { user, riskFile, reloadRiskFile } =
     useOutletContext<RiskFilePageContext>();
 
@@ -232,9 +232,7 @@ export default function RiskFileSummaryPage() {
             <BNRASpeedDial
               offset={{ x: 0, y: 56 }}
               editAction={() => setEditing(true)}
-              exportAction={() =>
-                navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
-              }
+              exportAction={handleExportRiskfile(riskFile, api)}
               HelpComponent={RiskFileSummaryTutorial}
             />
           )}

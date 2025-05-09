@@ -33,7 +33,7 @@ import {
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { saveAs } from "file-saver";
 import { proxy } from "comlink";
-import { wrap } from "vite-plugin-comlink/symbol";
+import { getExporter } from "../../functions/export/exportBNRA";
 
 enum EXPORT_TYPE {
   ALL = "ALL",
@@ -167,20 +167,7 @@ export default function ExportBNRAPage() {
 
   const isLoading = loadingRiskFiles || loadingCascades;
 
-  const exporter = useMemo(() => {
-    if (window.location.href.indexOf("localhost") >= 0) {
-      return new ComlinkWorker<
-        typeof import("../../functions/export/export.worker")
-      >(new URL("../../functions/export/export.worker", import.meta.url), {
-        type: "module",
-      });
-    }
-
-    return wrap(
-      new Worker(new URL("https://bnra.powerappsportals.com/export.worker.js"))
-    ) as unknown as typeof import("../../functions/export/export.worker");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [riskFiles]);
+  const exporter = useMemo(getExporter, [riskFiles]);
 
   const reloadData = () => {
     logger("Loading data...");

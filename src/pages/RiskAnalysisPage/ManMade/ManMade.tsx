@@ -4,7 +4,6 @@ import * as IP from "../../../functions/intensityParameters";
 import { SCENARIOS } from "../../../functions/scenarios";
 import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import CapacitiesSection from "./CapacitiesSection";
 import Bibliography from "../Bibliography";
 import ActionsSection from "./PreferredActionsSection";
@@ -18,6 +17,8 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import MMAnalysisTutorial from "./MMAnalysisTutorial";
 import { Cascades } from "../../../functions/cascades";
+import handleExportRiskfile from "../../../functions/export/exportBNRA";
+import useAPI from "../../../hooks/useAPI";
 
 export default function ManMade({
   riskFile,
@@ -42,7 +43,7 @@ export default function ManMade({
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const api = useAPI();
 
   const MRS = riskFile.cr4de_mrs || SCENARIOS.EXTREME;
   const [scenario, setScenario] = useState(MRS);
@@ -153,9 +154,7 @@ export default function ManMade({
         />
         <BNRASpeedDial
           offset={{ x: 0, y: 56 }}
-          exportAction={() =>
-            navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
-          }
+          exportAction={handleExportRiskfile(riskFile, api)}
           HelpComponent={MMAnalysisTutorial}
         />
       </Box>

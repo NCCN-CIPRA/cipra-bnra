@@ -3,13 +3,14 @@ import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import Bibliography from "../Bibliography";
-import { useNavigate } from "react-router-dom";
 import CatalyzingSection from "./CatalyzingSection";
 import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../../components/RiskFileTitle";
 import { DVAttachment } from "../../../types/dataverse/DVAttachment";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import EmergingAnalysisTutorial from "./EmergingAnalysisTutorial";
+import handleExportRiskfile from "../../../functions/export/exportBNRA";
+import useAPI from "../../../hooks/useAPI";
 
 export default function Emerging({
   riskFile,
@@ -34,7 +35,7 @@ export default function Emerging({
   reloadCascades: (riskFile: DVRiskFile<unknown>) => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const api = useAPI();
 
   const rf = riskFile;
 
@@ -67,9 +68,7 @@ export default function Emerging({
         />
         <BNRASpeedDial
           offset={{ x: 0, y: 56 }}
-          exportAction={() =>
-            navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
-          }
+          exportAction={handleExportRiskfile(riskFile, api)}
           HelpComponent={EmergingAnalysisTutorial}
         />
       </Box>

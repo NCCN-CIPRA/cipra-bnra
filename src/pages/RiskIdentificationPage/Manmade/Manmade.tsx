@@ -1,7 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import DefinitionSection from "../DefinitionSection";
 import { SCENARIOS } from "../../../functions/scenarios";
 import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
@@ -14,6 +13,8 @@ import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import ManmadeIdentificationTutorial from "./ManmadeIdentificationTutorial";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import { Cascades } from "../../../functions/cascades";
+import handleExportRiskfile from "../../../functions/export/exportBNRA";
+import useAPI from "../../../hooks/useAPI";
 
 export default function Manmade({
   riskFile,
@@ -37,7 +38,7 @@ export default function Manmade({
   reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const api = useAPI();
 
   const intensityParameters = IP.unwrap(riskFile.cr4de_intensity_parameters);
   const MRS = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
@@ -119,9 +120,7 @@ export default function Manmade({
 
       <BNRASpeedDial
         offset={{ x: 0, y: 56 }}
-        exportAction={() =>
-          navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
-        }
+        exportAction={handleExportRiskfile(riskFile, api)}
         HelpComponent={ManmadeIdentificationTutorial}
       />
     </Box>

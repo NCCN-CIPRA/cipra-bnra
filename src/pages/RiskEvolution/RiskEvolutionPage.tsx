@@ -6,7 +6,7 @@ import {
   Typography,
 } from "@mui/material";
 import CCSection from "./CCSection";
-import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { SCENARIOS } from "../../functions/scenarios";
 import Bibliography from "../RiskAnalysisPage/Bibliography";
@@ -16,10 +16,12 @@ import DisclaimerSection from "../RiskAnalysisPage/DisclaimerSection";
 import { useEffect } from "react";
 import BNRASpeedDial from "../../components/BNRASpeedDial";
 import RiskEvolutionTutorial from "./RiskEvolutionTutorial";
+import handleExportRiskfile from "../../functions/export/exportBNRA";
+import useAPI from "../../hooks/useAPI";
 
 export default function RiskEvolutionPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const api = useAPI();
   const {
     user,
     hazardCatalogue,
@@ -128,9 +130,7 @@ export default function RiskEvolutionPage() {
 
         <BNRASpeedDial
           offset={{ x: 0, y: 56 }}
-          exportAction={() =>
-            navigate(`/risks/${riskFile.cr4de_riskfilesid}/export`)
-          }
+          exportAction={handleExportRiskfile(riskFile, api)}
           HelpComponent={RiskEvolutionTutorial}
         />
       </Box>

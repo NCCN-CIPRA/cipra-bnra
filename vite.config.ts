@@ -17,10 +17,18 @@ export default defineConfig({
     nodePolyfills(),
   ],
   worker: {
-    plugins: () => [comlink()],
+    plugins: () => [
+      comlink(),
+      svgr({
+        svgrOptions: {
+          // svgr options
+        },
+      }),
+    ],
   },
-  base: "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/dist",
+  // base: "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/dist",
   build: {
+    // minify: false,
     rollupOptions: {
       external: ["**/_deprecated/**"],
     },
