@@ -26,7 +26,7 @@ export default defineConfig({
       }),
     ],
   },
-  // base: "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/dist",
+  base: "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/dist",
   build: {
     // minify: false,
     rollupOptions: {
