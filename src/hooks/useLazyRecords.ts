@@ -116,6 +116,8 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
 
         return parsedResult;
       };
+    } else if (o.table === DataTable.PAGE) {
+      response = await api.getPages<T>(o.query);
     } else {
       // (o.table === DataTable.TRANSLATIONS) {
       response = await api.getTranslations<T>(o.query);

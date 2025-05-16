@@ -12,6 +12,14 @@ import {
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { LoggedInUser } from "../hooks/useLoggedInUser";
+import HomeIcon from "@mui/icons-material/Home";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
+import FunctionsIcon from "@mui/icons-material/Functions";
+import SummarizeIcon from "@mui/icons-material/Summarize";
+import GroupIcon from "@mui/icons-material/Group";
+import TranslateIcon from "@mui/icons-material/Translate";
+import InfoIcon from "@mui/icons-material/Info";
 
 export default function SideDrawer({
   user,
@@ -44,7 +52,9 @@ export default function SideDrawer({
         <List>
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/" onClick={onClose}>
-              <ListItemIcon></ListItemIcon>
+              <ListItemIcon sx={{ pl: "7px" }}>
+                <HomeIcon />
+              </ListItemIcon>
               <ListItemText
                 primary={t("sideDrawer.introduction", "Introduction")}
               />
@@ -54,7 +64,9 @@ export default function SideDrawer({
             <>
               <ListItem disablePadding>
                 <ListItemButton component={Link} to="/risks" onClick={onClose}>
-                  <ListItemIcon></ListItemIcon>
+                  <ListItemIcon sx={{ pl: "7px" }}>
+                    <ListAltIcon />
+                  </ListItemIcon>
                   <ListItemText
                     primary={t(
                       "sideDrawer.hazardCatalogue",
@@ -69,7 +81,9 @@ export default function SideDrawer({
                   to="/risks/matrix"
                   onClick={onClose}
                 >
-                  <ListItemIcon></ListItemIcon>
+                  <ListItemIcon sx={{ pl: "7px" }}>
+                    <ScatterPlotIcon />
+                  </ListItemIcon>
                   <ListItemText
                     primary={t("sideDrawer.riskMatrix", "Risk Matrix")}
                   />
@@ -106,7 +120,9 @@ export default function SideDrawer({
                       to="/analysis/calculator"
                       onClick={onClose}
                     >
-                      <ListItemIcon></ListItemIcon>
+                      <ListItemIcon sx={{ pl: "7px" }}>
+                        <FunctionsIcon />
+                      </ListItemIcon>
                       <ListItemText
                         primary={t("sideDrawer.calculator", "Risk Calculator")}
                       />
@@ -118,7 +134,9 @@ export default function SideDrawer({
                       to="/export"
                       onClick={onClose}
                     >
-                      <ListItemIcon></ListItemIcon>
+                      <ListItemIcon sx={{ pl: "7px" }}>
+                        <SummarizeIcon />
+                      </ListItemIcon>
                       <ListItemText
                         primary={t("sideDrawer.reporting", "Reporting")}
                       />
@@ -131,9 +149,25 @@ export default function SideDrawer({
                       to="/admin/process"
                       onClick={onClose}
                     >
-                      <ListItemIcon></ListItemIcon>
+                      <ListItemIcon sx={{ pl: "7px" }}>
+                        <GroupIcon />
+                      </ListItemIcon>
                       <ListItemText
                         primary={t("sideDrawer.experts", "Expert Management")}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      component={Link}
+                      to="/admin/users"
+                      onClick={onClose}
+                    >
+                      <ListItemIcon sx={{ pl: "7px" }}>
+                        <GroupIcon />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={t("sideDrawer.users", "User Management")}
                       />
                     </ListItemButton>
                   </ListItem>
@@ -143,7 +177,9 @@ export default function SideDrawer({
                       to="/admin/translations"
                       onClick={onClose}
                     >
-                      <ListItemIcon></ListItemIcon>
+                      <ListItemIcon sx={{ pl: "7px" }}>
+                        <TranslateIcon />
+                      </ListItemIcon>
                       <ListItemText
                         primary={t(
                           "sideDrawer.translations",
@@ -152,16 +188,18 @@ export default function SideDrawer({
                       />
                     </ListItemButton>
                   </ListItem>
-                  <ListItem disablePadding>
+                  {/* <ListItem disablePadding>
                     <ListItemButton
                       component={Link}
                       to="/admin/corrections"
                       onClick={onClose}
                     >
-                      <ListItemIcon></ListItemIcon>
+                      <ListItemIcon sx={{ pl: "7px" }}>
+                        <SummarizeIcon />
+                      </ListItemIcon>
                       <ListItemText primary={"Report Corrections"} />
                     </ListItemButton>
-                  </ListItem>
+                  </ListItem> */}
                   <Divider />
                 </>
               )}
@@ -172,7 +210,9 @@ export default function SideDrawer({
                     to="/learning"
                     onClick={onClose}
                   >
-                    <ListItemIcon></ListItemIcon>
+                    <ListItemIcon sx={{ pl: "7px" }}>
+                      <InfoIcon />
+                    </ListItemIcon>
                     <ListItemText
                       primary={t(
                         "sideDrawer.informationPortal",

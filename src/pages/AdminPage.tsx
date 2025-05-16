@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { Outlet, useNavigate, useOutletContext } from "react-router-dom";
-import { DVContact } from "../types/dataverse/DVContact";
 import { BasePageContext } from "./BasePage";
+import { LoggedInUser } from "../hooks/useLoggedInUser";
 
-export interface AuthPageContext {
-  user: DVContact;
+export interface AdminPageContext extends BasePageContext {
+  user: LoggedInUser;
 }
 
 export default function AdminPage() {

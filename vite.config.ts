@@ -5,7 +5,7 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 import { comlink } from "vite-plugin-comlink";
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     comlink(),
@@ -26,11 +26,14 @@ export default defineConfig({
       }),
     ],
   },
-  base: "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/dist",
+  base:
+    command === "build"
+      ? "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/dist"
+      : undefined,
   build: {
     // minify: false,
     rollupOptions: {
       external: ["**/_deprecated/**"],
     },
   },
-});
+}));

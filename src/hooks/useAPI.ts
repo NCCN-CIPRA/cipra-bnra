@@ -141,6 +141,7 @@ export interface API {
   updateTranslation(id: string, fields: object): Promise<void>;
   deleteTranslation(id: string): Promise<void>;
 
+  getPages<T = DVPage>(query?: string): Promise<T[]>;
   getPage<T = DVPage>(name: string, query?: string): Promise<T>;
   updatePage(id: string, fields: object): Promise<void>;
 
@@ -1115,6 +1116,15 @@ export default function useAPI(): API {
       );
     },
 
+    getPages: async function <T = DVPage>(query?: string): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnrapages${
+          query ? "?" + query : ""
+        }`
+      );
+
+      return (await response.json()).value;
+    },
     getPage: async function <T = DVPage>(name: string): Promise<T> {
       const response = await authFetch(
         `https://bnra.powerappsportals.com/_api/cr4de_bnrapages?$filter=cr4de_name eq '${name}'`

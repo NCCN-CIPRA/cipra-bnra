@@ -48,6 +48,8 @@ export default function useLoggedInUser() {
           participations: undefined,
           roles: getAuthRoles(info?.getAttribute("data-roles") || ""),
           realRoles: getAuthRoles(info?.getAttribute("data-roles") || ""),
+          createdon: "",
+          cr4de_permissions: "",
         });
 
         api
@@ -65,6 +67,8 @@ export default function useLoggedInUser() {
               roles: getAuthRoles(info?.getAttribute("data-roles") || ""),
               realRoles: getAuthRoles(info?.getAttribute("data-roles") || ""),
               participations: p,
+              createdon: "",
+              cr4de_permissions: "",
             });
           });
       }
