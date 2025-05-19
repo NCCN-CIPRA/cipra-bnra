@@ -22,7 +22,7 @@ export function getExporter() {
   const objURL = URL.createObjectURL(blob);
 
   return wrap(
-    new Worker(objURL, { type: "module", name: "ExportWorker" })
+    new Worker(objURL)
   ) as unknown as typeof import("./export.worker");
 }
 
