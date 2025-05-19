@@ -44,7 +44,7 @@ jobs:
         run: cat ./package.json
 
   build:
-    needs: increase-version
+    needs: bump-version
     strategy:
       matrix:
         node-version: ["22.x"]
