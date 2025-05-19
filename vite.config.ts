@@ -27,9 +27,7 @@ export default defineConfig(({ command }) => ({
     ],
   },
   base:
-    command === "build"
-      ? "https://raw.githack.com/NCCN-CIPRA/cipra-bnra/main/dist"
-      : undefined,
+    command === "build" ? "https://nccn-cipra.github.io/cipra-bnra" : undefined,
   build: {
     // minify: false,
     rollupOptions: {
