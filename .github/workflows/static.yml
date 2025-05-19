@@ -35,7 +35,7 @@ jobs:
         run: cat ./package.json
       - uses: actions/setup-node@v4
       - name: "Automated Version Bump"
-        uses: "phips28/gh-action-bump-version@master"
+        uses: "phips28/gh-action-bump-version@main"
         with:
           tag-prefix: ""
         env:
