@@ -16,7 +16,7 @@ export function getExporter() {
   }
 
   return wrap(
-    new Worker(new URL("./export.worker.js"))
+    new Worker(new URL("./export.worker.js", import.meta.url))
   ) as unknown as typeof import("./export.worker");
 }
 
