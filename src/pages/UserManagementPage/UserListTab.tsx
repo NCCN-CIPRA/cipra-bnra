@@ -72,6 +72,13 @@ const columns: GridColDef<DVContact<DVParticipation[]>>[] = [
     headerName: "Permissions",
     width: 300,
     valueGetter: (_value, row) => {
+      if (
+        new Date(row.msdyn_portaltermsagreementdate as string) <
+        new Date(2025, 5, 10)
+      ) {
+        return ROLE.READER;
+      }
+
       if (!row.cr4de_permissions) return ROLE.APPROVE;
 
       const role = ROLES_REVERSE[row.cr4de_permissions];
