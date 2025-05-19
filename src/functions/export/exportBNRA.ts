@@ -55,6 +55,8 @@ export default function handleExportRiskfile(riskFile: DVRiskFile, api: API) {
 
     const exporter = getExporter();
 
+    console.log(exporter);
+
     const blob = await exporter.exportBNRA(
       {
         exportType: EXPORT_TYPE.SINGLE,

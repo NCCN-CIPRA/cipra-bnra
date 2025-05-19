@@ -40,6 +40,8 @@ i18n
     },
   });
 
+console.log("Loaded exporter");
+
 export const exportBNRA = async (
   data: {
     exportType: EXPORT_TYPE;
