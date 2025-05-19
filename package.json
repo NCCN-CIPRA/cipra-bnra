@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && copy /b dist\\assets\\index-*.js dist\\assets\\index.js && copy /b dist\\assets\\index-*.css dist\\assets\\index.css",
-    "build-ci": "tsc -b && vite build && cp dist\\assets\\index-*.js dist\\assets\\index.js && cp dist\\assets\\index-*.css dist\\assets\\index.css",
+    "build-ci": "tsc -b && vite build && cp dist/assets/index-*.js dist/assets/index.js && cp dist/assets/index-*.css dist/assets/index.css",
     "lint": "eslint .",
     "lint-ts": "tsc -b",
     "preview": "vite preview"
