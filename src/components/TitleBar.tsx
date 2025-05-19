@@ -74,33 +74,38 @@ export default function TitleBar({
               {title}
             </Typography>
             {user?.realRoles?.admin && (
-              <FormControl
-                variant="filled"
-                sx={{ width: 200, mr: 4 }}
-                size="small"
-              >
-                <InputLabel id="demo-simple-select-label">Role</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={role}
-                  label="Role"
-                  onChange={(e) => {
-                    setRole(e.target.value);
-                    setFakeRole(e.target.value);
-                  }}
-                  sx={{ bgcolor: "white" }}
+              <>
+                <Typography variant="subtitle1" sx={{ mr: 2 }}>
+                  {__APP_VERSION__}
+                </Typography>
+                <FormControl
+                  variant="filled"
+                  sx={{ width: 200, mr: 4 }}
+                  size="small"
                 >
-                  <MenuItem value={"Beheerders"}>Admin</MenuItem>
-                  <MenuItem value={"Analisten"}>Analist</MenuItem>
-                  <MenuItem value={"Intern NCCN"}>Intern NCCN</MenuItem>
-                  <MenuItem value={"Experten"}>Expert</MenuItem>
-                  <MenuItem value={"Geverifieerde gebruikers"}>
-                    Rapport Lezer
-                  </MenuItem>
-                  <MenuItem value={"Anonymous"}>Anoniem</MenuItem>
-                </Select>
-              </FormControl>
+                  <InputLabel id="demo-simple-select-label">Role</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={role}
+                    label="Role"
+                    onChange={(e) => {
+                      setRole(e.target.value);
+                      setFakeRole(e.target.value);
+                    }}
+                    sx={{ bgcolor: "white" }}
+                  >
+                    <MenuItem value={"Beheerders"}>Admin</MenuItem>
+                    <MenuItem value={"Analisten"}>Analist</MenuItem>
+                    <MenuItem value={"Intern NCCN"}>Intern NCCN</MenuItem>
+                    <MenuItem value={"Experten"}>Expert</MenuItem>
+                    <MenuItem value={"Geverifieerde gebruikers"}>
+                      Rapport Lezer
+                    </MenuItem>
+                    <MenuItem value={"Anonymous"}>Anoniem</MenuItem>
+                  </Select>
+                </FormControl>
+              </>
             )}
             <Stack direction="row" sx={{ mr: 4 }}>
               <Button

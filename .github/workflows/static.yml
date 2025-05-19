@@ -22,7 +22,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  bump-version:
+    name: "Bump Version on main"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout source code"
+        uses: "actions/checkout@v2"
+        with:
+          ref: ${{ github.ref }}
+      - name: "cat package.json"
+        run: cat ./package.json
+      - uses: actions/setup-node@v4
+      - name: "Automated Version Bump"
+        uses: "phips28/gh-action-bump-version@master"
+        with:
+          tag-prefix: ""
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "cat package.json"
+        run: cat ./package.json
+
   build:
+    needs: increase-version
     strategy:
       matrix:
         node-version: ["22.x"]
