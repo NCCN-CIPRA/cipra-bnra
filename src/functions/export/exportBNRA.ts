@@ -4,7 +4,6 @@ import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { saveAs } from "file-saver";
 import { API } from "../../hooks/useAPI";
-import workerUrl from "./export.worker?worker&url";
 
 export function getExporter() {
   if (window.location.href.indexOf("localhost") >= 0) {
@@ -16,7 +15,9 @@ export function getExporter() {
     );
   }
 
-  const js = `import ${JSON.stringify(new URL(workerUrl, import.meta.url))}`;
+  const js = `import ${JSON.stringify(
+    new URL("./export.worker", import.meta.url)
+  )}`;
   const blob = new Blob([js], { type: "application/javascript" });
 
   const objURL = URL.createObjectURL(blob);
