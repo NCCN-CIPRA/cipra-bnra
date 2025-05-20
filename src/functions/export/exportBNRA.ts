@@ -4,7 +4,7 @@ import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { saveAs } from "file-saver";
 import { API } from "../../hooks/useAPI";
-import workerCode from "./export.worker?raw";
+import ExportWorker from "./export.worker?worker&inline";
 
 interface ExporterWorker {
   exportBNRA: typeof exportBNRA;
@@ -20,16 +20,7 @@ export function getExporter() {
     );
   }
 
-  const blob = new Blob([workerCode], {
-    type: "application/javascript",
-  });
-  const blobUrl = URL.createObjectURL(blob);
-
-  return wrap<ExporterWorker>(
-    new Worker(blobUrl, {
-      type: "module",
-    })
-  );
+  return wrap<ExporterWorker>(new ExportWorker());
 }
 
 export default function handleExportRiskfile(riskFile: DVRiskFile, api: API) {
