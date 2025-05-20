@@ -15,15 +15,8 @@ export function getExporter() {
     );
   }
 
-  const js = `import ${JSON.stringify(
-    new URL("./export.worker", import.meta.url)
-  )}`;
-  const blob = new Blob([js], { type: "application/javascript" });
-
-  const objURL = URL.createObjectURL(blob);
-
   return wrap(
-    new Worker(objURL, { type: "module" })
+    new Worker(new URL("./export.worker", import.meta.url))
   ) as unknown as typeof import("./export.worker");
 }
 
@@ -55,8 +48,6 @@ export default function handleExportRiskfile(riskFile: DVRiskFile, api: API) {
       );
 
     const exporter = getExporter();
-
-    console.log(exporter);
 
     const blob = await exporter.exportBNRA(
       {
