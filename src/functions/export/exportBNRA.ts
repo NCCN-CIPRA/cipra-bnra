@@ -15,8 +15,13 @@ export function getExporter() {
     );
   }
 
+  const blob = new Blob(["importScripts('./export.worker');"], {
+    type: "application/javascript",
+  });
+  const blobUrl = URL.createObjectURL(blob);
+
   return wrap(
-    new Worker(new URL("./export.worker", import.meta.url))
+    new Worker(blobUrl)
   ) as unknown as typeof import("./export.worker");
 }
 
