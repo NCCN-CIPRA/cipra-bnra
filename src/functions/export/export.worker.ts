@@ -43,7 +43,7 @@ i18n
 
 console.log("Loaded exporter");
 
-const exportBNRA = async (
+export const exportBNRA = async (
   data: {
     exportType: EXPORT_TYPE;
     exportedRiskFiles: DVRiskFile[];
@@ -142,4 +142,4 @@ const exportBNRA = async (
   }
 };
 
-expose(exportBNRA);
+expose({ exportBNRA });
