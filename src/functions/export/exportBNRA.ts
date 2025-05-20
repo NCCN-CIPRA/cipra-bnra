@@ -1,4 +1,4 @@
-import { EXPORT_TYPE } from "../../functions/export/export.worker";
+import { EXPORT_TYPE, exportBNRA } from "../../functions/export/export.worker";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { proxy, wrap } from "vite-plugin-comlink/symbol";
@@ -6,9 +6,13 @@ import { saveAs } from "file-saver";
 import { API } from "../../hooks/useAPI";
 import workerCode from "./export.worker?raw";
 
+interface ExporterWorker {
+  exportBNRA: typeof exportBNRA;
+}
+
 export function getExporter() {
   if (window.location.href.indexOf("localhost") >= 0) {
-    return new ComlinkWorker<typeof import("./export.worker")>(
+    return new ComlinkWorker<ExporterWorker>(
       new URL("./export.worker", import.meta.url),
       {
         type: "module",
@@ -21,11 +25,11 @@ export function getExporter() {
   });
   const blobUrl = URL.createObjectURL(blob);
 
-  return wrap(
+  return wrap<ExporterWorker>(
     new Worker(blobUrl, {
       type: "module",
     })
-  ) as unknown as typeof import("./export.worker");
+  );
 }
 
 export default function handleExportRiskfile(riskFile: DVRiskFile, api: API) {
