@@ -13,6 +13,7 @@ import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { BNRAExport } from "../../components/export/BNRAExport";
 import RiskFileExport from "../../components/export/RiskFilePDF";
 import exportExcel from "./exportExcel";
+import { expose } from "comlink";
 
 export enum EXPORT_TYPE {
   ALL = "ALL",
@@ -42,7 +43,7 @@ i18n
 
 console.log("Loaded exporter");
 
-export const exportBNRA = async (
+const exportBNRA = async (
   data: {
     exportType: EXPORT_TYPE;
     exportedRiskFiles: DVRiskFile[];
@@ -140,3 +141,5 @@ export const exportBNRA = async (
     return null;
   }
 };
+
+expose(exportBNRA);
