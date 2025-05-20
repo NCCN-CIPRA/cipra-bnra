@@ -199,6 +199,7 @@ export default function ExportBNRAPage() {
       },
       proxy(callback)
     );
+    console.log(blob);
 
     if (blob) {
       if (type === EXPORT_TYPE.ALL) {

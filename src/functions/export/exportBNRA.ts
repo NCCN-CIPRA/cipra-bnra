@@ -63,6 +63,8 @@ export default function handleExportRiskfile(riskFile: DVRiskFile, api: API) {
       proxy(onProgress || (() => {}))
     );
 
+    console.log(blob);
+
     if (blob) {
       saveAs(blob, "BNRA_export.pdf");
     }
