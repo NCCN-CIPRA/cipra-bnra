@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { DOMParser } from "xmldom";
+import { DOMParser } from "@xmldom/xmldom";
 import { Canvg, presets } from "canvg";
 import { ReactElement } from "react";
 import { renderToString } from "react-dom/server";
