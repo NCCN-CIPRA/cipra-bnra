@@ -26,6 +26,7 @@
     "@tiptap/extension-table-row": "^2.12.0",
     "@tiptap/extension-underline": "^2.12.0",
     "@tiptap/starter-kit": "^2.12.0",
+    "@xmldom/xmldom": "^0.9.8",
     "canvg": "^4.0.3",
     "comlink": "^4.4.2",
     "d3": "^7.9.0",
@@ -44,8 +45,7 @@
     "recharts": "^2.15.3",
     "recharts-to-png": "^2.4.0",
     "uuid": "^11.1.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
-    "xmldom": "^0.6.0"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
