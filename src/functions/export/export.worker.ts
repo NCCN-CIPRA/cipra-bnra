@@ -13,7 +13,8 @@ import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { BNRAExport } from "../../components/export/BNRAExport";
 import RiskFileExport from "../../components/export/RiskFilePDF";
 import exportExcel from "./exportExcel";
-import { expose } from "comlink";
+import svg2PDF from "../svg2PDF.worker";
+import "../../components/export/fonts";
 
 export enum EXPORT_TYPE {
   ALL = "ALL",
@@ -40,8 +41,6 @@ i18n
       useSuspense: false,
     },
   });
-
-console.log("Loaded exporter");
 
 export const exportBNRA = async (
   data: {
@@ -92,7 +91,8 @@ export const exportBNRA = async (
     } else {
       const svgImages = await renderSVG(
         exportType === EXPORT_TYPE.ALL ? riskFiles : exportedRiskFiles,
-        cascades
+        cascades,
+        svg2PDF
       );
 
       onProgress("Rendering charts complete.");
@@ -141,5 +141,3 @@ export const exportBNRA = async (
     return null;
   }
 };
-
-expose({ exportBNRA });

@@ -5,9 +5,8 @@ import {
   RISK_TYPE,
 } from "../../types/dataverse/DVRiskFile";
 // import BibliographySection from "./BibliographySection";
-import { Document, Page } from "@react-pdf/renderer";
+import { Document, Page, Text } from "@react-pdf/renderer";
 
-import "./fonts";
 import { DPI, PAGE_SIZE } from "./styles";
 import { NCCN_GREEN } from "../../functions/colors";
 import { SVGImages } from "../../functions/export/renderSVG";
@@ -41,54 +40,67 @@ export function BNRAExport({
   allAttachments: DVAttachment<unknown, unknown, DVRiskFile>[];
   svgImages: SVGImages;
 }) {
-  const svgRisks = riskFiles.map((rf, i) => ({
-    ...rf,
-    charts: svgImages.riskFiles[i],
-  }));
+  try {
+    const svgRisks = riskFiles.map((rf, i) => ({
+      ...rf,
+      charts: svgImages.riskFiles[i],
+    }));
 
-  return (
-    <Document>
-      <FrontPage
-        nccnLogo={svgImages.nccnLogo}
-        bnraLogo={svgImages.bnraLogo}
-        triangles={svgImages.triangles}
-      />
-      {categories.map((c) => (
-        <>
-          <CategoryFrontPage category={c} />
-          {svgRisks
-            .filter(
-              (rf) =>
-                rf.cr4de_risk_type === c ||
-                (rf.cr4de_risk_type !== RISK_TYPE.MANMADE &&
-                  rf.cr4de_risk_category === c)
-            )
-            .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
-            .map((riskFile) => {
-              return (
-                <RiskFilePDF
-                  key={riskFile.cr4de_riskfilesid}
-                  riskFile={riskFile}
-                  cascades={allCascades[riskFile.cr4de_riskfilesid]}
-                  attachments={null}
-                  // user={user}
-                  charts={riskFile.charts}
-                />
-              );
-            })}
-        </>
-      ))}
-      <BibliographySection
-        riskFile={null}
-        allAttachments={getSpecificAttachments(allAttachments)}
-      />
-      <Page
-        size={PAGE_SIZE}
-        style={{
-          backgroundColor: NCCN_GREEN,
-        }}
-        dpi={DPI}
-      ></Page>
-    </Document>
-  );
+    return (
+      <Document>
+        <FrontPage
+          nccnLogo={svgImages.nccnLogo}
+          bnraLogo={svgImages.bnraLogo}
+          triangles={svgImages.triangles}
+        />
+        {categories.map((c) => (
+          <>
+            <CategoryFrontPage category={c} />
+            {svgRisks
+              .filter(
+                (rf) =>
+                  rf.cr4de_risk_type === c ||
+                  (rf.cr4de_risk_type !== RISK_TYPE.MANMADE &&
+                    rf.cr4de_risk_category === c)
+              )
+              .sort((a, b) =>
+                a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id)
+              )
+              .map((riskFile) => {
+                return (
+                  <RiskFilePDF
+                    key={riskFile.cr4de_riskfilesid}
+                    riskFile={riskFile}
+                    cascades={allCascades[riskFile.cr4de_riskfilesid]}
+                    attachments={null}
+                    // user={user}
+                    charts={riskFile.charts}
+                  />
+                );
+              })}
+          </>
+        ))}
+        <BibliographySection
+          riskFile={null}
+          allAttachments={getSpecificAttachments(allAttachments)}
+        />
+        <Page
+          size={PAGE_SIZE}
+          style={{
+            backgroundColor: NCCN_GREEN,
+          }}
+          dpi={DPI}
+        ></Page>
+      </Document>
+    );
+  } catch (e) {
+    console.log(e);
+    return (
+      <Document>
+        <Page>
+          <Text>Error</Text>
+        </Page>
+      </Document>
+    );
+  }
 }

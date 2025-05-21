@@ -8,7 +8,7 @@ export default function LeftBorderSection({
   debug = false,
   color,
   style = {},
-  wrap,
+  wrap = true,
 }: {
   children: ReactNode;
   debug?: boolean;

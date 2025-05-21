@@ -51,9 +51,10 @@ export default function SummarySection({
   };
   const titleStyle = { ...bodyStyle, ...smallStyle, ...boldStyle };
   const imageStyle = {
-    marginTop: 0.25 * POINTS_PER_CM,
-    marginLeft: 0.25 * POINTS_PER_CM,
-    width: 2.5 * POINTS_PER_CM,
+    marginTop: 0.125 * POINTS_PER_CM,
+    marginLeft: 0.125 * POINTS_PER_CM,
+    marginRight: 0.125 * POINTS_PER_CM,
+    width: 2.6 * POINTS_PER_CM,
     height: 1.3 * POINTS_PER_CM,
   };
   const scaleStyle = {
@@ -73,7 +74,7 @@ export default function SummarySection({
       }}
       // wrap={false}
     >
-      <Footer />
+      <Footer riskFile={riskFile} />
       <View>
         <Text style={h3Style}>
           {t(`risk.${riskFile.cr4de_hazard_id}.name`, riskFile.cr4de_title)}
@@ -119,7 +120,7 @@ export default function SummarySection({
           <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Human">Human</Trans>
           </Text>
-          <Image src={charts.hChartURI} style={imageStyle} />
+          <Image src={charts.hChartURI} style={imageStyle} debug={false} />
           <Text style={scaleStyle}>{t(getScaleString(H))}</Text>
         </View>
         <View style={wrapperStyle}>

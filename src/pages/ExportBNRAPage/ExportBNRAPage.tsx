@@ -58,6 +58,7 @@ export default function ExportBNRAPage() {
   // const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [type, setType] = useState(EXPORT_TYPE.ALL);
   const [selectedRiskFiles, setSelectedRiskFiles] = useState<DVRiskFile[]>([]);
+  const ref = useRef(false);
 
   const handleChangeType = (event: SelectChangeEvent) => {
     setType(event.target.value as EXPORT_TYPE);
@@ -177,6 +178,10 @@ export default function ExportBNRAPage() {
   };
 
   const handleExport = async () => {
+    if (ref.current) {
+      return false;
+    }
+    ref.current = true;
     if (!riskFiles || !cascades || !attachments) return;
 
     if (type !== EXPORT_TYPE.ALL && selectedRiskFiles.length <= 0) {
@@ -189,6 +194,7 @@ export default function ExportBNRAPage() {
       return logger(message);
     };
 
+    console.log("exporting");
     const blob = await exporter.exportBNRA(
       {
         exportType: type,

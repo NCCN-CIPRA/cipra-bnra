@@ -1,12 +1,8 @@
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import svg2PDF from "../svg2PDF.worker";
 import { ProbabilityBarsChart } from "../../components/charts/svg/ProbabilityBarsChart";
 import { getScenarioParameter, SCENARIOS } from "../scenarios";
 import { getCategoryImpactRescaled } from "../CategoryImpact";
 import SummaryImpactChart from "../../components/charts/svg/SummaryImpactChart";
-import BNRALogo from "../../assets/icons/BNRALogo.svg?react";
-import NCCNLogo from "../../assets/icons/NCCNLogo.svg?react";
-import NCCNDetail from "../../assets/icons/TrianglesDetail.svg?react";
 import ScenarioMatrixChart from "../../components/charts/svg/ScenarioMatrixChart";
 import { Cascades } from "../cascades";
 import ProbabilitySankeyChart from "../../components/charts/svg/ProbabilitySankeyChart";
@@ -14,6 +10,10 @@ import ImpactSankeyChart from "../../components/charts/svg/ImpactSankeyChart";
 import ImpactBarChart from "../../components/charts/svg/ImpactBarChart";
 import ClimateChangeChart from "../../components/charts/svg/ClimateChangeChart";
 import ActionsSankeyChart from "../../components/charts/svg/ActionsSankeyChart";
+import { ReactElement } from "react";
+import NCCNLogo from "../../assets/icons/NCCNLogo";
+import BNRALogo from "../../assets/icons/BNRALogo";
+import NCCNDetail from "../../assets/icons/NCCNDetail";
 
 export type SummaryCharts = {
   pBarChartURI: string;
@@ -48,21 +48,36 @@ const barHeight = 500;
 
 export default async function renderSVG(
   riskFiles: DVRiskFile[],
-  allCascades: { [key: string]: Cascades }
+  allCascades: { [key: string]: Cascades },
+  svg2PDF: (
+    jsxChart: ReactElement,
+    width: number,
+    height: number,
+    type?: string
+  ) => Promise<string>
 ) {
   return {
     nccnLogo: await svg2PDF(<NCCNLogo />, 100, 100, "image/png"),
     bnraLogo: await svg2PDF(<BNRALogo />, 100, 100, "image/png"),
     triangles: await svg2PDF(<NCCNDetail />, 100, 100, "image/png"),
     riskFiles: await Promise.all(
-      riskFiles.map((rf) =>
-        renderRFCharts(rf, allCascades[rf.cr4de_riskfilesid])
-      )
+      riskFiles.map((rf) => {
+        return renderRFCharts(rf, allCascades[rf.cr4de_riskfilesid], svg2PDF);
+      })
     ),
   };
 }
 
-export async function renderRFCharts(riskFile: DVRiskFile, cascades: Cascades) {
+export async function renderRFCharts(
+  riskFile: DVRiskFile,
+  cascades: Cascades,
+  svg2PDF: (
+    jsxChart: ReactElement,
+    width: number,
+    height: number,
+    type?: string
+  ) => Promise<string>
+) {
   if (riskFile.cr4de_risk_type === RISK_TYPE.EMERGING) {
     return null;
   }
@@ -79,7 +94,7 @@ export async function renderRFCharts(riskFile: DVRiskFile, cascades: Cascades) {
   return {
     summary: {
       pBarChartURI: await svg2PDF(
-        <ProbabilityBarsChart chartWidth={200} height={100} tp={tp} />,
+        <ProbabilityBarsChart chartWidth={2000} height={1000} tp={tp} />,
         2000,
         1000
       ),
@@ -87,9 +102,9 @@ export async function renderRFCharts(riskFile: DVRiskFile, cascades: Cascades) {
         <SummaryImpactChart
           category="H"
           value={H}
-          width={500}
-          height={250}
-          needleWidth={7}
+          width={5000}
+          height={2500}
+          needleWidth={70}
         />,
         5000,
         2500
@@ -98,9 +113,9 @@ export async function renderRFCharts(riskFile: DVRiskFile, cascades: Cascades) {
         <SummaryImpactChart
           category="S"
           value={S}
-          width={500}
-          height={250}
-          needleWidth={7}
+          width={5000}
+          height={2500}
+          needleWidth={70}
         />,
         5000,
         2500
@@ -109,9 +124,9 @@ export async function renderRFCharts(riskFile: DVRiskFile, cascades: Cascades) {
         <SummaryImpactChart
           category="E"
           value={E}
-          width={500}
-          height={250}
-          needleWidth={7}
+          width={5000}
+          height={2500}
+          needleWidth={70}
         />,
         5000,
         2500
@@ -120,9 +135,9 @@ export async function renderRFCharts(riskFile: DVRiskFile, cascades: Cascades) {
         <SummaryImpactChart
           category="F"
           value={F}
-          width={500}
-          height={250}
-          needleWidth={7}
+          width={5000}
+          height={2500}
+          needleWidth={70}
         />,
         5000,
         2500

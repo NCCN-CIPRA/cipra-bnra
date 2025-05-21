@@ -3,8 +3,6 @@ import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { Cascades } from "../../functions/cascades";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { RiskFileCharts, SVGImages } from "../../functions/export/renderSVG";
-
-import "./fonts";
 import { getScenarioParameter, SCENARIOS } from "../../functions/scenarios";
 import { getCategoryImpactRescaled } from "../../functions/CategoryImpact";
 import SummarySection from "./SummarySection";

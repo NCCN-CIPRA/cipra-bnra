@@ -36,7 +36,6 @@ import EvolutionSection from "./EvolutionSection";
 import ScenarioMatrix from "../../components/charts/ScenarioMatrix";
 import BibliographySection from "./BibliographySection";
 import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
-import "./fonts";
 import useLoggedInUser, { LoggedInUser } from "../../hooks/useLoggedInUser";
 import { ProbabilityBarsChart } from "../../components/charts/svg/ProbabilityBarsChart";
 

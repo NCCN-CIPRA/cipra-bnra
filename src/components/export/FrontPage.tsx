@@ -2,8 +2,6 @@
 // import { DVAttachment } from "../../types/dataverse/DVAttachment";
 // import BibliographySection from "./BibliographySection";
 import { Image, Page, Text, View } from "@react-pdf/renderer";
-
-import "./fonts";
 import { DPI, PAGE_SIZE, PAGE_STYLES, POINTS_PER_CM, SCALE } from "./styles";
 import { NCCN_GREEN } from "../../functions/colors";
 

@@ -5,6 +5,7 @@ import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { saveAs } from "file-saver";
 import { API } from "../../hooks/useAPI";
 import ExportWorker from "./export.worker?worker&inline";
+import "../../components/export/fonts";
 
 interface ExporterWorker {
   exportBNRA: typeof exportBNRA;

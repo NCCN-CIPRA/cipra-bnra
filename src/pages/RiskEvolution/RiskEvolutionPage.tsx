@@ -108,11 +108,11 @@ export default function RiskEvolutionPage() {
                   <ListItemButton
                     key={c.cr4de_bnrariskcascadeid}
                     LinkComponent={Link}
-                    href={`/risks/${c.cr4de_cause_hazard.cr4de_riskfilesid}?tab=analysis`}
+                    to={`/risks/${c.cr4de_cause_hazard.cr4de_riskfilesid}/analysis`}
                     target="_blank"
                   >
                     <Typography variant="subtitle2" sx={{ pl: 2 }}>
-                      {c.cr4de_cause_hazard.cr4de_title}{" "}
+                      {c.cr4de_cause_hazard.cr4de_title}
                     </Typography>
                   </ListItemButton>
                 ))}

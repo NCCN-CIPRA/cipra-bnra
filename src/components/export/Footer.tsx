@@ -1,7 +1,8 @@
 import { Text, View } from "@react-pdf/renderer";
 import { PAGE_STYLES, smallStyle } from "./styles";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 
-export default function Footer() {
+export default function Footer({ riskFile }: { riskFile?: DVRiskFile }) {
   return (
     <View
       fixed

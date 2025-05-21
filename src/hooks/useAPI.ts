@@ -162,11 +162,20 @@ export interface API {
 export default function useAPI(): API {
   const navigate = useNavigate();
 
-  const authFetch = async (
-    input: RequestInfo | URL,
-    init?: RequestInit | undefined
-  ) => {
-    const response = await fetch(input, init);
+  return getAPI(
+    localStorage.getItem("antiforgerytoken") || "",
+    navigate,
+    fetch
+  );
+}
+
+export const getAPI = (
+  antiForgeryToken: string,
+  navigate: (url: string) => void,
+  customFetch: (input: string, init?: RequestInit) => Promise<Response>
+) => {
+  const authFetch = async (input: string, init?: RequestInit | undefined) => {
+    const response = await customFetch(input, init);
 
     if (response.status === 403) {
       navigate("/auth");
@@ -182,19 +191,21 @@ export default function useAPI(): API {
   return {
     authFetch,
     login: async function (email: string, password: string, remember: boolean) {
-      const response = await fetch("https://bnra.powerappsportals.com/SignIn", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          __RequestVerificationToken:
-            localStorage.getItem("antiforgerytoken") || "",
-          Username: email,
-          PasswordValue: password,
-          RememberMe: String(remember),
-        }),
-      });
+      const response = await customFetch(
+        "https://bnra.powerappsportals.com/SignIn",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            __RequestVerificationToken: antiForgeryToken,
+            Username: email,
+            PasswordValue: password,
+            RememberMe: String(remember),
+          }),
+        }
+      );
 
       const responseHtml = await response.text();
 
@@ -222,7 +233,7 @@ export default function useAPI(): API {
       }
     },
     requestPasswordReset: async function (email: string) {
-      const response = await fetch(
+      const response = await customFetch(
         "https://bnra.powerappsportals.com/Account/Login/ForgotPassword",
         {
           method: "POST",
@@ -230,8 +241,7 @@ export default function useAPI(): API {
             "Content-Type": "application/x-www-form-urlencoded",
           },
           body: new URLSearchParams({
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             Email: email,
           }),
         }
@@ -250,7 +260,7 @@ export default function useAPI(): API {
       code: string,
       password: string
     ) {
-      const response = await fetch(
+      const response = await customFetch(
         "https://bnra.powerappsportals.com/Account/Login/ResetPassword",
         {
           method: "POST",
@@ -258,8 +268,7 @@ export default function useAPI(): API {
             "Content-Type": "application/x-www-form-urlencoded",
           },
           body: new URLSearchParams({
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             UserId: userId,
             Code: code,
             Password: password,
@@ -278,7 +287,7 @@ export default function useAPI(): API {
     },
 
     requestRegistrationLink: async function (invitationCode: string) {
-      const response = await fetch(
+      const response = await customFetch(
         "https://bnra.powerappsportals.com/Register?returnUrl=/",
         {
           method: "POST",
@@ -286,8 +295,7 @@ export default function useAPI(): API {
             "Content-Type": "application/x-www-form-urlencoded",
           },
           body: new URLSearchParams({
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             InvitationCode: invitationCode,
             RedeemByLogin: "false",
           }),
@@ -335,8 +343,7 @@ export default function useAPI(): API {
         {
           method: "POST",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -351,8 +358,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -365,8 +371,7 @@ export default function useAPI(): API {
         {
           method: "DELETE",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
         }
@@ -417,8 +422,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -431,8 +435,7 @@ export default function useAPI(): API {
         {
           method: "DELETE",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
         }
@@ -468,8 +471,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -482,8 +484,7 @@ export default function useAPI(): API {
         {
           method: "DELETE",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
         }
@@ -519,8 +520,7 @@ export default function useAPI(): API {
         {
           method: "POST",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -535,8 +535,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -549,8 +548,7 @@ export default function useAPI(): API {
         {
           method: "DELETE",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
         }
@@ -576,8 +574,7 @@ export default function useAPI(): API {
         {
           method: "POST",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -595,8 +592,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -609,8 +605,7 @@ export default function useAPI(): API {
         {
           method: "DELETE",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
         }
@@ -646,8 +641,7 @@ export default function useAPI(): API {
         {
           method: "POST",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -665,8 +659,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -679,8 +672,7 @@ export default function useAPI(): API {
         {
           method: "DELETE",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
         }
@@ -718,8 +710,7 @@ export default function useAPI(): API {
         {
           method: "POST",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -737,8 +728,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -755,8 +745,7 @@ export default function useAPI(): API {
         {
           method: "DELETE",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
         }
@@ -807,8 +796,7 @@ export default function useAPI(): API {
         {
           method: "POST",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -826,8 +814,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -840,8 +827,7 @@ export default function useAPI(): API {
         {
           method: "DELETE",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
         }
@@ -871,8 +857,7 @@ export default function useAPI(): API {
             {
               method: "GET",
               headers: {
-                __RequestVerificationToken:
-                  localStorage.getItem("antiforgerytoken") || "",
+                __RequestVerificationToken: antiForgeryToken,
                 "Content-Type": "application/json",
               },
             }
@@ -887,8 +872,7 @@ export default function useAPI(): API {
             {
               method: "GET",
               headers: {
-                __RequestVerificationToken:
-                  localStorage.getItem("antiforgerytoken") || "",
+                __RequestVerificationToken: antiForgeryToken,
                 "Content-Type": "application/json",
               },
             }
@@ -917,8 +901,7 @@ export default function useAPI(): API {
         {
           method: "POST",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -940,8 +923,7 @@ export default function useAPI(): API {
             {
               method: "PUT",
               headers: {
-                __RequestVerificationToken:
-                  localStorage.getItem("antiforgerytoken") || "",
+                __RequestVerificationToken: antiForgeryToken,
                 "Content-Type": "application/octet-stream",
                 // "x-ms-file-name": "main.js",
               },
@@ -973,8 +955,7 @@ export default function useAPI(): API {
             {
               method: "PUT",
               headers: {
-                __RequestVerificationToken:
-                  localStorage.getItem("antiforgerytoken") || "",
+                __RequestVerificationToken: antiForgeryToken,
                 "Content-Type": "application/octet-stream",
                 // "x-ms-file-name": "main.js",
               },
@@ -997,8 +978,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -1011,8 +991,7 @@ export default function useAPI(): API {
         {
           method: "DELETE",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
         }
@@ -1036,8 +1015,7 @@ export default function useAPI(): API {
         {
           method: "POST",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -1052,8 +1030,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -1066,8 +1043,7 @@ export default function useAPI(): API {
         {
           method: "DELETE",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
         }
@@ -1094,8 +1070,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -1108,8 +1083,7 @@ export default function useAPI(): API {
         {
           method: "DELETE",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
         }
@@ -1140,8 +1114,7 @@ export default function useAPI(): API {
         {
           method: "PATCH",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -1150,7 +1123,7 @@ export default function useAPI(): API {
     },
 
     sendInvitationEmail: async function (contactIds: string[]): Promise<void> {
-      await fetch(
+      await customFetch(
         "https://prod-03.westeurope.logic.azure.com:443/workflows/987f8d4c173d41ff81d3d3259346d6c6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=0h3uYyRN7UPfaTsc4VqJwezF8ZXqwwHEiFPD1iuv-ts",
         {
           method: "POST",
@@ -1216,8 +1189,7 @@ export default function useAPI(): API {
         {
           method: "POST",
           headers: {
-            __RequestVerificationToken:
-              localStorage.getItem("antiforgerytoken") || "",
+            __RequestVerificationToken: antiForgeryToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(fields),
@@ -1228,11 +1200,11 @@ export default function useAPI(): API {
     },
 
     getContactRoles: async function <T = DVContact>(): Promise<T[]> {
-      const response = await fetch(
+      const response = await customFetch(
         `https://bnra.powerappsportals.com/_api/adx_webroles`
       );
 
       return (await response.json()).value;
     },
   };
-}
+};

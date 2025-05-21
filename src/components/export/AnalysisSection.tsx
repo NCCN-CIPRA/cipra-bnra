@@ -118,16 +118,18 @@ export default function AnalysisSection({
       </View>
 
       <View
-        style={{
-          // backgroundColor: "green"
-          marginTop: POINTS_PER_CM,
-          marginBottom: POINTS_PER_CM,
-        }}
+        style={
+          {
+            // backgroundColor: "green"
+            // marginTop: POINTS_PER_CM,
+            // marginBottom: POINTS_PER_CM,
+          }
+        }
       >
         <Text style={h5Style}>{t("Probability Assessment")}</Text>
         <LeftBorderSection
           color="#eee"
-          style={{ paddingTop: 5 * SCALE, marginBottom: 10 * SCALE }}
+          // style={{ paddingTop: 5 * SCALE, marginBottom: 10 * SCALE }}
         >
           {html2PDF(riskFile.cr4de_mrs_probability, "analysis", riskFile)}
         </LeftBorderSection>
