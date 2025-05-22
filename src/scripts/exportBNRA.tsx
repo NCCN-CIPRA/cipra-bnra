@@ -1,4 +1,4 @@
-import { getAPI } from "../hooks/useAPI";
+import { getAPI } from "../functions/api";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import DataverseBackend from "../functions/i18Backend";

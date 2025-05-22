@@ -118,6 +118,8 @@ export default function useLazyRecords<T>(options: GetRecordsParams<T>) {
       };
     } else if (o.table === DataTable.PAGE) {
       response = await api.getPages<T>(o.query);
+    } else if (o.table === DataTable.RISK_SUMMARY) {
+      response = await api.getRiskSummaries<T>(o.query);
     } else {
       // (o.table === DataTable.TRANSLATIONS) {
       response = await api.getTranslations<T>(o.query);

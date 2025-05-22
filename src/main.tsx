@@ -4,6 +4,7 @@ import "./main.css";
 import App from "./App.tsx";
 import theme from "./theme.tsx";
 import { ThemeProvider } from "@mui/material";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import "./i18n";
 
@@ -11,6 +12,15 @@ import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
+
+// Create a react-query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 500000,
+    },
+  },
+});
 
 import patchFetch from "./functions/devFetch";
 
@@ -21,9 +31,11 @@ if (window.location.href.match(/localhost.*/)) {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider theme={theme}>
-      <App />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
+    </QueryClientProvider>
     {
       // These iframes are used for development purposes only
       window.location.href.indexOf("localhost") >= 0 && (
