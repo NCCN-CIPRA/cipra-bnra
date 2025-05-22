@@ -263,6 +263,8 @@ export default function ActionsSankeyChart({
               totalNodes={data.nodes.length}
               showComponents={debug}
               scenarioSuffix={scenarioSuffix}
+              CustomTooltip={CustomTooltip}
+              onNavigate={onNavigate}
             />
           }
           link={<PSankeyLink totalNodes={data.nodes.length} />}
