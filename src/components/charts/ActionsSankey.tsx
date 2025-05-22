@@ -27,7 +27,7 @@ any) {
           {payload.cascade && (
             <>
               <Typography variant="subtitle1" color="inherit">
-                {payload.name}
+                {t(payload.name)}
               </Typography>
 
               <Typography variant="body1" sx={{ mt: 1 }}>
@@ -46,7 +46,7 @@ any) {
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {payload.hidden.map((h: any) => (
                 <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
-                  <b>{h.name}:</b>{" "}
+                  <b>{t(h.name)}:</b>{" "}
                   {t("analysis.action.other.explained", {
                     percentage: round((100 * h.cp) / totalProbability, 2),
                   })}
