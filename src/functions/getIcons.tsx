@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import SensorOccupiedIcon from "@mui/icons-material/SensorOccupied";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import ArticleIcon from "@mui/icons-material/Article";
+import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
 
 export function CategoryIcon({
   category,
@@ -42,7 +43,11 @@ export function CategoryIcon({
   );
 }
 
-export function RiskTypeIcon({ riskFile }: { riskFile: DVRiskFile }) {
+export function RiskTypeIcon({
+  riskFile,
+}: {
+  riskFile: DVRiskFile | DVRiskSummary;
+}) {
   const { t } = useTranslation();
 
   return (

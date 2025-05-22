@@ -1,6 +1,6 @@
 import { HistoricalEvent } from "../../functions/historicalEvents";
 import { IntensityParameter } from "../../functions/intensityParameters";
-import { Scenarios, SCENARIOS } from "../../functions/scenarios";
+import { Scenarios } from "../../functions/scenarios";
 
 export enum RISK_TYPE {
   STANDARD = "Standard Risk",
@@ -38,10 +38,6 @@ export const CATEGORY_NAMES: Partial<{ [key in RISK_CATEGORY]: string }> = {
 export interface RiskFileEditableFields<T = ParsedRiskFields> extends T {
   cr4de_definition: string | null;
   cr4de_horizon_analysis: string | null;
-  cr4de_legal_bases: string | null;
-  cr4de_roles_responsibilities: string | null;
-  cr4de_existing_measures: string | null;
-  cr4de_online_sources: string | null;
 }
 
 interface ParsedRiskFields {

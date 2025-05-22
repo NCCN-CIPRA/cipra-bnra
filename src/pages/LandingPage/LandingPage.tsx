@@ -18,6 +18,8 @@ import { useState } from "react";
 import { BasePageContext } from "../BasePage";
 import { getLanguage } from "../../functions/translations";
 import { CategoryIcon } from "../../functions/getIcons";
+import { useQuery } from "@tanstack/react-query";
+import useAPI, { DataTable } from "../../hooks/useAPI";
 
 const getCleanLanguage = (language: string) => {
   if (language.indexOf("en") >= 0) return "en";
@@ -36,8 +38,14 @@ const onDownload = (filename: string) => {
 export default function LandingPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const api = useAPI();
   const [bannerOpen, setBannerOpen] = useState(true);
   const { user } = useOutletContext<BasePageContext>();
+
+  useQuery({
+    queryKey: [DataTable.RISK_SUMMARY],
+    queryFn: () => api.getRiskSummaries(),
+  });
 
   usePageTitle(t("homepage.bnraLong", "Belgian National Risk Assessment"));
 

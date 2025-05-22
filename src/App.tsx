@@ -12,7 +12,7 @@ import OverviewPage from "./pages/main/OverviewPage";
 import AuthPage from "./pages/AuthPage";
 import TranslationsPage from "./pages/TranslationsPage/TranslationsPage";
 import LearningPage from "./pages/learning/LearningPage";
-import RiskCataloguePage from "./pages/learning/RiskCataloguePage";
+import LearningRiskCataloguePage from "./pages/learning/RiskCataloguePage";
 import QuantitativeScalesPage from "./pages/learning/QuantitativeScalesPage";
 import RegistrationPage from "./pages/auth/RegistrationPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
@@ -36,6 +36,9 @@ import RiskEvolutionPage from "./pages/RiskEvolution/RiskEvolutionPage";
 import ExportRiskFilePage from "./pages/ExportRiskFilePage/ExportRiskFilePage";
 import ExportBNRAPage from "./pages/ExportBNRAPage/ExportBNRAPage";
 import { useEffect } from "react";
+import RiskCataloguePage from "./pages/RiskCataloguePage/RiskCataloguePage";
+import MethodologyPage from "./pages/MethodologyPage/MethodologyPage";
+import MethodologyScalesPage from "./pages/MethodologyScalesPage/MethodologyScalesPage";
 
 export default function App() {
   useEffect(() => {
@@ -89,6 +92,51 @@ export default function App() {
             },
 
             {
+              path: "/risks",
+              element: <RiskCataloguePage />,
+            },
+
+            {
+              path: "/risks/:risk_file_id",
+              element: <BaseRiskFilePage />,
+              children: [
+                {
+                  path: "/risks/:risk_file_id",
+                  element: <RiskFileSummaryPage />,
+                },
+                {
+                  path: "/risks/:risk_file_id/identification",
+                  element: <RiskIdentificationPage />,
+                },
+                {
+                  path: "/risks/:risk_file_id/analysis",
+                  element: <RiskAnalysisPage />,
+                },
+                {
+                  path: "/risks/:risk_file_id/evolution",
+                  element: <RiskEvolutionPage />,
+                },
+                {
+                  path: "/risks/:risk_file_id/data",
+                  element: <RiskDataPage />,
+                },
+                {
+                  path: "/risks/:risk_file_id/input",
+                  element: <RiskInputPage />,
+                },
+              ],
+            },
+
+            {
+              path: "/methodology",
+              element: <MethodologyPage />,
+            },
+            {
+              path: "/methodology/scales",
+              element: <MethodologyScalesPage />,
+            },
+
+            {
               path: "/",
               element: <AuthPage />,
               children: [
@@ -96,45 +144,45 @@ export default function App() {
                   path: "/",
                   element: <BaseRisksPage />,
                   children: [
-                    {
-                      path: "/risks",
-                      element: <HazardCataloguePage />,
-                    },
+                    // {
+                    //   path: "/risks",
+                    //   element: <HazardCataloguePage />,
+                    // },
                     {
                       path: "/risks/matrix",
                       element: <RiskMatrixPage />,
                     },
 
-                    {
-                      path: "/risks/:risk_file_id",
-                      element: <BaseRiskFilePage />,
-                      children: [
-                        {
-                          path: "/risks/:risk_file_id",
-                          element: <RiskFileSummaryPage />,
-                        },
-                        {
-                          path: "/risks/:risk_file_id/identification",
-                          element: <RiskIdentificationPage />,
-                        },
-                        {
-                          path: "/risks/:risk_file_id/analysis",
-                          element: <RiskAnalysisPage />,
-                        },
-                        {
-                          path: "/risks/:risk_file_id/evolution",
-                          element: <RiskEvolutionPage />,
-                        },
-                        {
-                          path: "/risks/:risk_file_id/data",
-                          element: <RiskDataPage />,
-                        },
-                        {
-                          path: "/risks/:risk_file_id/input",
-                          element: <RiskInputPage />,
-                        },
-                      ],
-                    },
+                    // {
+                    //   path: "/risks/:risk_file_id",
+                    //   element: <BaseRiskFilePage />,
+                    //   children: [
+                    //     {
+                    //       path: "/risks/:risk_file_id",
+                    //       element: <RiskFileSummaryPage />,
+                    //     },
+                    //     {
+                    //       path: "/risks/:risk_file_id/identification",
+                    //       element: <RiskIdentificationPage />,
+                    //     },
+                    //     {
+                    //       path: "/risks/:risk_file_id/analysis",
+                    //       element: <RiskAnalysisPage />,
+                    //     },
+                    //     {
+                    //       path: "/risks/:risk_file_id/evolution",
+                    //       element: <RiskEvolutionPage />,
+                    //     },
+                    //     {
+                    //       path: "/risks/:risk_file_id/data",
+                    //       element: <RiskDataPage />,
+                    //     },
+                    //     {
+                    //       path: "/risks/:risk_file_id/input",
+                    //       element: <RiskInputPage />,
+                    //     },
+                    //   ],
+                    // },
                   ],
                 },
 
@@ -144,7 +192,7 @@ export default function App() {
                 },
                 {
                   path: "/learning/risk-catalogue",
-                  element: <RiskCataloguePage />,
+                  element: <LearningRiskCataloguePage />,
                 },
                 {
                   path: "/learning/quantitative-categories",

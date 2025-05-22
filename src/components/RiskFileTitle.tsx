@@ -2,8 +2,13 @@ import { Box, Stack, Typography } from "@mui/material";
 import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
 import { CategoryIcon, RiskTypeIcon } from "../functions/getIcons";
 import { useTranslation } from "react-i18next";
+import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
 
-export default function RiskFileTitle({ riskFile }: { riskFile: DVRiskFile }) {
+export default function RiskFileTitle({
+  riskFile,
+}: {
+  riskFile: DVRiskFile | DVRiskSummary;
+}) {
   const { t } = useTranslation();
 
   return (
@@ -15,7 +20,13 @@ export default function RiskFileTitle({ riskFile }: { riskFile: DVRiskFile }) {
         {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && (
           <RiskTypeIcon riskFile={riskFile} />
         )}
-        <CategoryIcon category={riskFile.cr4de_risk_category} />
+        <CategoryIcon
+          category={
+            "cr4de_risk_category" in riskFile
+              ? riskFile.cr4de_risk_category
+              : riskFile.cr4de_category
+          }
+        />
         {riskFile.cr4de_risk_type === RISK_TYPE.MANMADE && (
           <RiskTypeIcon riskFile={riskFile} />
         )}

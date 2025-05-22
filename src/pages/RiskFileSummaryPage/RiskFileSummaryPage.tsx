@@ -1,48 +1,34 @@
 import { useOutletContext } from "react-router-dom";
 import { useState } from "react";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
-import {
-  Box,
-  Container,
-  SpeedDial,
-  SpeedDialAction,
-  SpeedDialIcon,
-  Stack,
-  Typography,
-} from "@mui/material";
-import SummaryCharts from "../../components/charts/SummaryCharts";
+import { Box, Container, Stack, Typography } from "@mui/material";
+import SummaryCharts from "../../components/charts/SummaryCharts.new";
 import { SCENARIOS } from "../../functions/scenarios";
 import useAPI from "../../hooks/useAPI";
 import TextInputBox from "../../components/TextInputBox";
-import CancelIcon from "@mui/icons-material/Cancel";
-import SaveIcon from "@mui/icons-material/Save";
 import { useTranslation } from "react-i18next";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import RiskFileTitle from "../../components/RiskFileTitle";
-import BNRASpeedDial from "../../components/BNRASpeedDial";
-import RiskFileSummaryTutorial from "./RiskFileSummaryTutorial";
 import { getLanguage } from "../../functions/translations";
-import handleExportRiskfile from "../../functions/export/exportBNRA";
 
 export default function RiskFileSummaryPage() {
   const api = useAPI();
   const { i18n } = useTranslation();
-  const { user, riskFile, reloadRiskFile } =
-    useOutletContext<RiskFilePageContext>();
+  const { user, riskSummary } = useOutletContext<RiskFilePageContext>();
 
   const [, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [summary, setSummary] = useState(
-    riskFile.cr4de_mrs_summary || "<h6>Not available</h6>"
+    riskSummary.cr4de_summary_en || "<h6>Not available</h6>"
   );
   const [summaryNL, setSummaryNL] = useState(
-    riskFile.cr4de_mrs_summary_nl || "<h6>Not available</h6>"
+    riskSummary.cr4de_summary_nl || "<h6>Not available</h6>"
   );
   const [summaryFR, setSummaryFR] = useState(
-    riskFile.cr4de_mrs_summary_fr || "<h6>Not available</h6>"
+    riskSummary.cr4de_summary_fr || "<h6>Not available</h6>"
   );
   const [summaryDE, setSummaryDE] = useState(
-    riskFile.cr4de_mrs_summary_de || "<h6>Not available</h6>"
+    riskSummary.cr4de_summary_de || "<h6>Not available</h6>"
   );
 
   // const labels: { name: string; label: string; color: string }[] = [
@@ -89,23 +75,23 @@ export default function RiskFileSummaryPage() {
   //     : []),
   // ];
 
-  const saveRiskFile = async () => {
-    setSaving(true);
-    await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-      cr4de_mrs_summary: summary,
-      cr4de_mrs_summary_nl: summaryNL,
-      cr4de_mrs_summary_fr: summaryFR,
-      cr4de_mrs_summary_de: summaryDE,
-    });
-    await reloadRiskFile({ id: riskFile.cr4de_riskfilesid });
+  // const saveRiskFile = async () => {
+  //   setSaving(true);
+  //   await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+  //     cr4de_mrs_summary: summary,
+  //     cr4de_mrs_summary_nl: summaryNL,
+  //     cr4de_mrs_summary_fr: summaryFR,
+  //     cr4de_mrs_summary_de: summaryDE,
+  //   });
+  //   await reloadRiskFile({ id: riskFile.cr4de_riskfilesid });
 
-    setEditing(false);
-    setSaving(false);
-  };
+  //   setEditing(false);
+  //   setSaving(false);
+  // };
 
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
-      <RiskFileTitle riskFile={riskFile} />
+      <RiskFileTitle riskFile={riskSummary} />
       <Stack direction="row" sx={{ mb: 8 }} columnGap={4}>
         <Box id="summary-text" sx={{ flex: 1 }}>
           {!editing && getLanguage(i18n.language) === "en" && (
@@ -213,20 +199,20 @@ export default function RiskFileSummaryPage() {
             </>
           )}
         </Box>
-        {riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING && (
+        {riskSummary.cr4de_risk_type !== RISK_TYPE.EMERGING && (
           <Box>
             <Box id="summary-charts" sx={{ bgcolor: "white" }}>
               <SummaryCharts
-                riskFile={riskFile}
-                scenario={riskFile.cr4de_mrs || SCENARIOS.MAJOR}
-                manmade={riskFile.cr4de_risk_type === RISK_TYPE.MANMADE}
+                riskSummary={riskSummary}
+                scenario={riskSummary.cr4de_mrs || SCENARIOS.MAJOR}
+                manmade={riskSummary.cr4de_risk_type === RISK_TYPE.MANMADE}
                 canDownload={Boolean(user && user.roles.internal)}
               />
             </Box>
           </Box>
         )}
       </Stack>
-      {user && (
+      {/* {user && (
         <Box sx={{ position: "fixed", bottom: 96, right: 40 }}>
           {!editing && (
             <BNRASpeedDial
@@ -276,7 +262,7 @@ export default function RiskFileSummaryPage() {
             </SpeedDial>
           )}
         </Box>
-      )}
+      )} */}
     </Container>
   );
 }
