@@ -90,7 +90,6 @@ any) => {
             if (onNavigate) onNavigate(payload.id);
           }}
         />
-
         {CustomTooltip ? (
           <CustomTooltip
             x={x}
@@ -110,7 +109,7 @@ any) => {
             stroke="#333"
             cursor="pointer"
           >
-            {payload.name}
+            {t(payload.name)}
           </text>
         )}
       </Layer>
@@ -181,7 +180,6 @@ export default function ActionsSankeyChart({
   onClick?: ((id: string) => void) | null;
   onNavigate?: (id: string) => void;
 }) {
-  const { t } = useTranslation();
   if (!riskFile || !cascades) return null;
 
   const scenarioSuffix: string = getScenarioSuffix(scenario);
@@ -189,7 +187,7 @@ export default function ActionsSankeyChart({
   const actions = cascades.effects
     .map((e) => ({
       id: e.cr4de_effect_hazard.cr4de_riskfilesid,
-      name: e.cr4de_effect_hazard.cr4de_title,
+      name: `risk.${e.cr4de_effect_hazard.cr4de_hazard_id}.name`,
       cascade: e,
       cp: getIndirectImpact(e, riskFile, scenario).cp,
     }))
@@ -216,14 +214,14 @@ export default function ActionsSankeyChart({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nodes: any[] = [
-    { name: riskFile.cr4de_title },
+    { name: `risk.${riskFile.cr4de_hazard_id}.name` },
     ...actions.filter((c) => c.cp >= minP),
   ];
   const otherActions = actions.filter((e) => e.cp < minP);
 
   if (minP >= 0 && otherActions.length > 0) {
     nodes.push({
-      name: t("Other Actions"),
+      name: "Other Actions",
       hidden: otherActions,
     });
   }
