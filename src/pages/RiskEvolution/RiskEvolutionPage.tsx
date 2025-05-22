@@ -107,7 +107,7 @@ export default function RiskEvolutionPage() {
                 {catalyzingEffects.map((c) => (
                   <ListItemButton
                     key={c.cr4de_bnrariskcascadeid}
-                    LinkComponent={Link}
+                    component={Link}
                     to={`/risks/${c.cr4de_cause_hazard.cr4de_riskfilesid}/analysis`}
                     target="_blank"
                   >

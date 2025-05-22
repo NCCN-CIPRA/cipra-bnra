@@ -1,7 +1,3 @@
-import fs from "fs";
-import path from "path";
-import { pdf } from "@react-pdf/renderer";
-import { createElement } from "react";
 import { getAPI } from "../hooks/useAPI";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";

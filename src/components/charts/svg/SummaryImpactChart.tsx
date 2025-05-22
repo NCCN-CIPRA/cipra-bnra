@@ -30,7 +30,6 @@ const needle = (
   iR: number,
   oR: number,
   color: string,
-  padding: number,
   needleWidth: number = 30
 ) => {
   let total = 0;
@@ -100,7 +99,7 @@ export default function SummaryImpactChart({
           <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
         ))}
       </Pie>
-      {needle(value, data, cx, cy, iR, oR, "#555", piePadding, needleWidth)}
+      {needle(value, data, cx, cy, iR, oR, "#555", needleWidth)}
     </PieChart>
   );
 }

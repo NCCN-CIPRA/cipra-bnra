@@ -74,7 +74,7 @@ export default function SummarySection({
       }}
       // wrap={false}
     >
-      <Footer riskFile={riskFile} />
+      <Footer />
       <View>
         <Text style={h3Style}>
           {t(`risk.${riskFile.cr4de_hazard_id}.name`, riskFile.cr4de_title)}
