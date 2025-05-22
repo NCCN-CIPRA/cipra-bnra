@@ -72,7 +72,7 @@ any) {
           navigate(`/risks/${payload.id}/analysis`);
         }}
       >
-        {payload.name}
+        {t(payload.name)}
       </text>
     </Tooltip>
   );
