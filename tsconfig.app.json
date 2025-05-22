@@ -27,6 +27,7 @@
     "node_modules",
     "public",
     "**/_deprecated/**",
-    "*.new.*"
+    "*.new.*",
+    "src/scripts/**"
   ]
 }
