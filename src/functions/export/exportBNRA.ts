@@ -1,11 +1,12 @@
 import { EXPORT_TYPE, exportBNRA } from "../../functions/export/export.worker";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { saveAs } from "file-saver";
-import { API } from "../../hooks/useAPI";
+import { API } from "../../functions/api";
 import ExportWorker from "./export.worker?worker&inline";
 import "../../components/export/fonts";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 
 interface ExporterWorker {
   exportBNRA: typeof exportBNRA;
@@ -24,15 +25,27 @@ export function getExporter() {
   return wrap<ExporterWorker>(new ExportWorker());
 }
 
-export default function handleExportRiskfile(riskFile: DVRiskFile, api: API) {
+export default function handleExportRiskfile(
+  risk: DVRiskSummary | DVRiskFile,
+  api: API
+) {
   return async (onProgress?: (message: string) => void) => {
     if (onProgress) onProgress("Loading data");
 
+    const riskFileId =
+      "_cr4de_risk_file_value" in risk
+        ? risk._cr4de_risk_file_value
+        : risk.cr4de_riskfilesid;
+
+    const riskFile =
+      "_cr4de_risk_file_value" in risk
+        ? await api.getRiskFile(riskFileId)
+        : risk;
     const riskFiles = await api.getRiskFiles(
       "$select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type"
     );
     const cascades = await api.getRiskCascades(
-      `$filter=_cr4de_cause_hazard_value eq '${riskFile.cr4de_riskfilesid}' or _cr4de_effect_hazard_value eq '${riskFile.cr4de_riskfilesid}'`
+      `$filter=_cr4de_cause_hazard_value eq '${riskFileId}' or _cr4de_effect_hazard_value eq '${riskFileId}'`
     );
     const attachments = await api
       .getAttachments<DVAttachment<unknown, DVAttachment>>(
@@ -63,8 +76,6 @@ export default function handleExportRiskfile(riskFile: DVRiskFile, api: API) {
       },
       proxy(onProgress || (() => {}))
     );
-
-    console.log(blob);
 
     if (blob) {
       saveAs(blob, "BNRA_export.pdf");

@@ -10,12 +10,12 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import ProbabilitySankey from "../../../components/charts/ProbabilitySankey";
 import ImpactSankey from "../../../components/charts/ImpactSankey";
 import { RiskFilePageContext } from "../../BaseRiskFilePage";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { useTranslation } from "react-i18next";
 import { Cascades } from "../../../functions/cascades";
 
-export default function SankeyDiagram({
+export default memo(function SankeyDiagram({
   riskFile,
   cascades,
   scenario,
@@ -32,7 +32,6 @@ export default function SankeyDiagram({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isEditing } = useOutletContext<RiskFilePageContext>();
 
   useEffect(() => {
     setScenario(scenario);
@@ -40,14 +39,7 @@ export default function SankeyDiagram({
   }, [riskFile, cascades]);
 
   const goToRiskFile = (id: string) => {
-    if (
-      !isEditing ||
-      window.confirm(
-        "Are you sure you wish to leave the page? You are still editing a field and unsaved changes will be lost."
-      )
-    ) {
-      navigate(`/risks/${id}/analysis`);
-    }
+    navigate(`/risks/${id}/analysis`);
   };
 
   return (
@@ -225,4 +217,4 @@ export default function SankeyDiagram({
       </Box>
     </Stack>
   );
-}
+});

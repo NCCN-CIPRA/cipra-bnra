@@ -1,39 +1,27 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Box, Typography, Tooltip, Stack, Button } from "@mui/material";
-import { unwrap } from "../../../functions/intensityParameters";
-import {
-  SCENARIO_PARAMS,
-  SCENARIOS,
-  unwrap as unwrapScenarios,
-} from "../../../functions/scenarios";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
+import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { useTranslation } from "react-i18next";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 
 export default function ScenarioSection({
-  riskFile,
+  riskSummary,
 }: {
-  riskFile: DVRiskFile;
+  riskSummary: DVRiskSummary;
 }) {
   const { t } = useTranslation();
   const [selectedScenario, setSelectedScenario] = useState(
-    riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE
+    riskSummary.cr4de_mrs || SCENARIOS.CONSIDERABLE
   );
 
-  const parameters = useMemo(
-    () => unwrap(riskFile.cr4de_intensity_parameters),
-    [riskFile]
-  );
-  const scenarios = useMemo(
-    () =>
-      unwrapScenarios(
-        parameters,
-        riskFile.cr4de_scenario_considerable,
-        riskFile.cr4de_scenario_major,
-        riskFile.cr4de_scenario_extreme
-      ),
-    [parameters, riskFile]
-  );
+  if (!riskSummary.cr4de_scenarios) return null;
+
+  const scenarioString =
+    riskSummary.cr4de_risk_type === RISK_TYPE.MANMADE
+      ? "actor groups"
+      : "scenario";
 
   return (
     <>
@@ -49,6 +37,7 @@ export default function ScenarioSection({
           py: 1,
           mt: 2,
           backgroundColor: "white",
+          transition: "all .2s ease",
         }}
       >
         <Stack
@@ -66,11 +55,11 @@ export default function ScenarioSection({
                 selectedScenario === SCENARIOS.CONSIDERABLE ? "bold" : "normal",
               opacity: selectedScenario === SCENARIOS.CONSIDERABLE ? 1 : 0.15,
               borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
-              borderRadius: "50%",
+              borderRadius: 48,
               backgroundColor: `${
                 SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color
               }20`,
-              width: 48,
+              width: selectedScenario === SCENARIOS.CONSIDERABLE ? 130 : 48,
               minWidth: 48,
               height: 48,
               "&:hover": {
@@ -80,10 +69,24 @@ export default function ScenarioSection({
                 }20`,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
               },
+              transition: "all .2s ease",
+              textTransform: "none",
+              flexDirection: "column",
+              lineHeight: 1.5,
             }}
             onClick={() => setSelectedScenario(SCENARIOS.CONSIDERABLE)}
           >
-            C
+            <Box>
+              {" "}
+              C
+              {selectedScenario === SCENARIOS.CONSIDERABLE ? "onsiderable" : ""}
+            </Box>
+
+            <Box sx={{ whiteSpace: "nowrap" }}>
+              {selectedScenario === SCENARIOS.CONSIDERABLE
+                ? scenarioString
+                : ""}
+            </Box>
           </Button>
           <Button
             variant="outlined"
@@ -93,9 +96,9 @@ export default function ScenarioSection({
                 selectedScenario === SCENARIOS.MAJOR ? "bold" : "normal",
               opacity: selectedScenario === SCENARIOS.MAJOR ? 1 : 0.35,
               borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
-              borderRadius: "50%",
+              borderRadius: 48,
               backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
-              width: 48,
+              width: selectedScenario === SCENARIOS.MAJOR ? 130 : 48,
               minWidth: 48,
               height: 48,
               "&:hover": {
@@ -103,10 +106,18 @@ export default function ScenarioSection({
                 backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}20`,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
               },
+              transition: "all .2s ease",
+              textTransform: "none",
+              flexDirection: "column",
+              lineHeight: 1.5,
             }}
             onClick={() => setSelectedScenario(SCENARIOS.MAJOR)}
           >
-            M
+            <Box> M{selectedScenario === SCENARIOS.MAJOR ? "ajor" : ""}</Box>
+
+            <Box sx={{ whiteSpace: "nowrap" }}>
+              {selectedScenario === SCENARIOS.MAJOR ? scenarioString : ""}
+            </Box>
           </Button>
           <Button
             variant="outlined"
@@ -116,9 +127,9 @@ export default function ScenarioSection({
                 selectedScenario === SCENARIOS.EXTREME ? "bold" : "normal",
               opacity: selectedScenario === SCENARIOS.EXTREME ? 1 : 0.1,
               borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
-              borderRadius: "50%",
+              borderRadius: 48,
               backgroundColor: `${SCENARIO_PARAMS[SCENARIOS.EXTREME].color}20`,
-              width: 48,
+              width: selectedScenario === SCENARIOS.EXTREME ? 130 : 48,
               minWidth: 48,
               height: 48,
               "&:hover": {
@@ -128,33 +139,45 @@ export default function ScenarioSection({
                 }20`,
                 borderColor: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
               },
+              transition: "all .2s ease",
+              textTransform: "none",
+              flexDirection: "column",
+              lineHeight: 1.5,
             }}
             onClick={() => setSelectedScenario(SCENARIOS.EXTREME)}
           >
-            E
+            <Box>
+              {" "}
+              E{selectedScenario === SCENARIOS.EXTREME ? "xtreme" : ""}
+            </Box>
+            <Box sx={{ whiteSpace: "nowrap" }}>
+              {selectedScenario === SCENARIOS.EXTREME ? scenarioString : ""}
+            </Box>
           </Button>
         </Stack>
         <Stack>
-          {scenarios[selectedScenario].map((p) => {
+          {riskSummary.cr4de_scenarios[selectedScenario].map((p) => {
             return (
               <Box
-                key={`${riskFile.cr4de_riskfilesid}-${p.name}`}
+                key={`${riskSummary._cr4de_risk_file_value}-${p.name}`}
                 sx={{ mb: 4 }}
               >
-                <Typography variant="subtitle2">
-                  {p.name}{" "}
-                  <Tooltip
-                    title={
-                      <Box
-                        dangerouslySetInnerHTML={{
-                          __html: p.description || "",
-                        }}
-                      />
-                    }
-                  >
-                    <HelpOutlineIcon fontSize="small" />
-                  </Tooltip>
-                </Typography>
+                {p.description && (
+                  <Typography variant="subtitle2">
+                    {p.name}{" "}
+                    <Tooltip
+                      title={
+                        <Box
+                          dangerouslySetInnerHTML={{
+                            __html: p.description || "",
+                          }}
+                        />
+                      }
+                    >
+                      <HelpOutlineIcon fontSize="small" />
+                    </Tooltip>
+                  </Typography>
+                )}
                 {/* <Box dangerouslySetInnerHTML={{ __html: p.description || "" }} /> */}
                 <Box dangerouslySetInnerHTML={{ __html: p.value || "" }} />
               </Box>

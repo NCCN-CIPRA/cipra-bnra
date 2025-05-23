@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { CssBaseline, Box, Toolbar } from "@mui/material";
 import { Outlet } from "react-router-dom";
-import AppContext from "../functions/AppContext";
+import { AppContextProvider } from "../functions/AppContext";
 import SideDrawer from "../components/SideDrawer";
 import TitleBar from "../components/TitleBar";
-import BreadcrumbNavigation, {
-  Breadcrumb,
-} from "../components/BreadcrumbNavigation";
+import BreadcrumbNavigation from "../components/BreadcrumbNavigation";
 import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
 import satisfies from "../types/satisfies";
 
@@ -22,26 +20,13 @@ export default function BasePage() {
   const { user, refreshUser, setFakeRole } = useLoggedInUser();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [pageTitle, setPageTitle] = useState("BNRA 2023 - 2026");
-  const [breadcrumbs, setBreadcrumbs] = useState<(Breadcrumb | null)[]>([
-    {
-      name: "BNRA",
-      url: "/",
-    },
-  ]);
 
   return (
-    <AppContext.Provider
-      value={{
-        setPageTitle,
-        setBreadcrumbs,
-      }}
-    >
+    <AppContextProvider>
       <CssBaseline />
       <TitleBar
         user={user}
         setFakeRole={setFakeRole}
-        title={pageTitle}
         onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
       />
       <SideDrawer
@@ -53,11 +38,7 @@ export default function BasePage() {
       {/* <Box sx={{ display: "flex", flexFlow: "column nowrap", minHeight: "100vh", mb: `${bottomBarHeight}px` }}> */}
       <Box sx={{ flexGrow: 1 }}>
         <Toolbar />
-        {breadcrumbs && (
-          <Box sx={{ m: 2, ml: "76px" }}>
-            <BreadcrumbNavigation breadcrumbs={breadcrumbs} />
-          </Box>
-        )}
+        <BreadcrumbNavigation />
         <Outlet
           context={satisfies<BasePageContext>({
             user,
@@ -83,6 +64,6 @@ export default function BasePage() {
           <img alt="BNRA" src="https://bnra.powerappsportals.com/logo_text.png" style={{ height: 40 }} />
         </Stack> */}
       {/* </Box> */}
-    </AppContext.Provider>
+    </AppContextProvider>
   );
 }

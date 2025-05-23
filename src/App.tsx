@@ -20,10 +20,8 @@ import ErrorPage from "./pages/ErrorPage";
 import ProcessManagementPage from "./pages/admin/Management/ProcessManagementPage";
 import ExpertManagementPage from "./pages/admin/ExpertManagementPage";
 import AdminPage from "./pages/AdminPage";
-import HazardCataloguePage from "./pages/HazardCataloguePage/HazardCataloguePage";
 import BaseRisksPage from "./pages/BaseRisksPage";
 import BaseRiskFilePage from "./pages/BaseRiskFilePage";
-import RiskIdentificationPage from "./pages/RiskIdentificationPage/RiskIdentificationPage";
 import RiskFileSummaryPage from "./pages/RiskFileSummaryPage/RiskFileSummaryPage";
 import RiskAnalysisPage from "./pages/RiskAnalysisPage/RiskAnalysisPage";
 import RiskDataPage from "./pages/RiskDataPage/RiskDataPage";
@@ -39,6 +37,7 @@ import { useEffect } from "react";
 import RiskCataloguePage from "./pages/RiskCataloguePage/RiskCataloguePage";
 import MethodologyPage from "./pages/MethodologyPage/MethodologyPage";
 import MethodologyScalesPage from "./pages/MethodologyScalesPage/MethodologyScalesPage";
+import RiskDescriptionPage from "./pages/RiskDescriptionPage/RiskDescriptionPage";
 
 export default function App() {
   useEffect(() => {
@@ -105,8 +104,8 @@ export default function App() {
                   element: <RiskFileSummaryPage />,
                 },
                 {
-                  path: "/risks/:risk_file_id/identification",
-                  element: <RiskIdentificationPage />,
+                  path: "/risks/:risk_file_id/description",
+                  element: <RiskDescriptionPage />,
                 },
                 {
                   path: "/risks/:risk_file_id/analysis",

@@ -10,7 +10,7 @@ import Joyride, {
 import { useState } from "react";
 import TourTooltip from "../../../components/TourTooltip";
 
-export default function StandardIdentificationTutorial({
+export default function ManmadeIdentificationTutorial({
   run,
   setRun,
 }: // setStep,
@@ -69,41 +69,16 @@ export default function StandardIdentificationTutorial({
       ),
     },
     {
-      target: "#historical-events",
-      // placement: "center",
+      target: "#mrag",
+      placement: "top",
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.s.tutorial.3.1">
-              This section provides some examples of events related to the risk
-              that occurred in Belgium or abroad.
-            </Trans>
-          </Typography>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.s.tutorial.3.2">
-              It is by no means meant to be an exhaustive list.
-            </Trans>
-          </Typography>
-        </Box>
-      ),
-    },
-    {
-      target: "#scenarios",
-      // placement: "center",
-      content: (
-        <Box sx={{ textAlign: "left" }}>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.s.tutorial.4.1">
-              Each risk of the BNRA is characterised using 3 intensity
-              scenarios; a &#quot;<i>considerable</i>&#quot;, a &#quot;
-              <i>major</i>&#quot; and an &#quot;<i>extreme</i>&#quot; scenario.
-              These are built using risk-specific <b>intensity parameters</b>.
-            </Trans>
-          </Typography>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.s.tutorial.4.2">
-              The <b>intensity parameters</b> are risk-specific factors that
-              influence the development and consequences of the risk.
+            <Trans i18nKey="rfDescription.m.tutorial.3.1">
+              Each <b>Malicious Actors Risk File</b> is divided into 3 actor
+              groups which are characterised by their levels of capabilities;
+              i.e. actor groups with &quot;<i>considerable</i>&quot;, &quot;
+              <i>major</i>&quot; and &quot;<i>extreme</i>&quot; capabilities.
             </Trans>
           </Typography>
         </Box>
@@ -115,30 +90,9 @@ export default function StandardIdentificationTutorial({
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.s.tutorial.4.3">
-              The different scenario may be inspected using the buttons
-              provided.
-            </Trans>
-          </Typography>
-        </Box>
-      ),
-    },
-    {
-      target: "#mrs",
-      // placement: "center",
-      content: (
-        <Box sx={{ textAlign: "left" }}>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.s.tutorial.5.1">
-              This sections provides a more in-depth description of the{" "}
-              <i>Most Relevant Scenario</i>.
-            </Trans>
-          </Typography>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.s.tutorial.5.2">
-              The <i>Most Relevant Scenario</i> is defined as the scenario that
-              poses the highest total risk, i.e. total probability X total
-              expected impact of the scenario.
+            <Trans i18nKey="rfDescription.m.tutorial.4.3">
+              The different actor group definitions may be inspected using the
+              buttons provided.
             </Trans>
           </Typography>
         </Box>
@@ -146,7 +100,7 @@ export default function StandardIdentificationTutorial({
     },
     {
       target: "#scenario-matrix",
-      // placement: "center",
+      placement: "top",
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
@@ -224,7 +178,7 @@ export default function StandardIdentificationTutorial({
           skip: t("button.skip", "Skip"),
         }}
         tooltipComponent={TourTooltip}
-        disableScrolling={stepIndex === 6}
+        disableScrolling={stepIndex === 3}
       />
     </>
   );

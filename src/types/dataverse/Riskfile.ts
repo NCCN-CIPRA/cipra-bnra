@@ -35,21 +35,21 @@ export const CATEGORY_NAMES: Partial<{ [key in RISK_CATEGORY]: string }> = {
   "Emerging Risk": "Emerging Risks",
 };
 
-export interface RiskFileEditableFields<T = ParsedRiskFields> extends T {
+export type RiskFileEditableFields<T = ParsedRiskFields> = {
   cr4de_definition: string | null;
   cr4de_horizon_analysis: string | null;
-}
+} & T;
 
-interface ParsedRiskFields {
+export type ParsedRiskFields = {
   cr4de_historical_events: HistoricalEvent[] | null;
   cr4de_intensity_parameters: IntensityParameter[] | null;
   cr4de_scenarios: Scenarios | null;
-}
+};
 
-interface UnparsedRiskFields {
+export type UnparsedRiskFields = {
   cr4de_historical_events: string | null;
   cr4de_intensity_parameters: string | null;
   cr4de_scenario_considerable: string | null;
   cr4de_scenario_major: string | null;
   cr4de_scenario_extreme: string | null;
-}
+};

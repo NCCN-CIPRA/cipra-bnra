@@ -41,7 +41,7 @@ export default function BNRASpeedDial({
 
   if (
     HelpComponent &&
-    !exportAction &&
+    !(user && exportAction) &&
     !(user && user.roles.analist && editAction)
   ) {
     return (

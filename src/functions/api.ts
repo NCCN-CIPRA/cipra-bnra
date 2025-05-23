@@ -1,17 +1,25 @@
 import { DVAttachment } from "../types/dataverse/DVAttachment";
-import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DVContact } from "../types/dataverse/DVContact";
-import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
 import { DVFeedback } from "../types/dataverse/DVFeedback";
 import { DVInvitation } from "../types/dataverse/DVInvitation";
 import { DVPage } from "../types/dataverse/DVPage";
 import { DVParticipation } from "../types/dataverse/DVParticipation";
-import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
+import {
+  DVRiskCascade,
+  getCascadeResultSnapshot,
+} from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { DVTranslation } from "../types/dataverse/DVTranslation";
 import { DVValidation } from "../types/dataverse/DVValidation";
-import { DVAnalysisRun } from "../types/dataverse/DVAnalysisRun";
 import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
+import {
+  ParsedRiskFields,
+  UnparsedRiskFields,
+} from "../types/dataverse/Riskfile";
+import { unwrap as unwrapHE } from "./historicalEvents";
+import { unwrap as unwrapS } from "./scenarios";
+import { unwrap as unwrapIP } from "./intensityParameters";
+import { getResultSnapshot } from "../types/dataverse/DVSmallRisk";
 
 export interface AuthResponse<T = null> {
   data?: T;
@@ -84,23 +92,23 @@ export interface API {
   updateValidation(id: string, fields: object): Promise<void>;
   deleteValidation(id: string): Promise<void>;
 
-  getDirectAnalyses<T = DVDirectAnalysis>(query?: string): Promise<T[]>;
-  getDirectAnalysis<T = DVDirectAnalysis>(
-    id: string,
-    query?: string
-  ): Promise<T>;
-  createDirectAnalysis(fields: object): Promise<CreateResponse>;
-  updateDirectAnalysis(id: string, fields: object): Promise<void>;
-  deleteDirectAnalysis(id: string): Promise<void>;
+  // getDirectAnalyses<T = DVDirectAnalysis>(query?: string): Promise<T[]>;
+  // getDirectAnalysis<T = DVDirectAnalysis>(
+  //   id: string,
+  //   query?: string
+  // ): Promise<T>;
+  // createDirectAnalysis(fields: object): Promise<CreateResponse>;
+  // updateDirectAnalysis(id: string, fields: object): Promise<void>;
+  // deleteDirectAnalysis(id: string): Promise<void>;
 
-  getCascadeAnalyses<T = DVCascadeAnalysis>(query?: string): Promise<T[]>;
-  getCascadeAnalysis<T = DVCascadeAnalysis>(
-    id: string,
-    query?: string
-  ): Promise<T>;
-  createCascadeAnalysis(fields: object): Promise<CreateResponse>;
-  updateCascadeAnalysis(id: string, fields: object): Promise<void>;
-  deleteCascadeAnalysis(id: string): Promise<void>;
+  // getCascadeAnalyses<T = DVCascadeAnalysis>(query?: string): Promise<T[]>;
+  // getCascadeAnalysis<T = DVCascadeAnalysis>(
+  //   id: string,
+  //   query?: string
+  // ): Promise<T>;
+  // createCascadeAnalysis(fields: object): Promise<CreateResponse>;
+  // updateCascadeAnalysis(id: string, fields: object): Promise<void>;
+  // deleteCascadeAnalysis(id: string): Promise<void>;
 
   getAttachments<T = DVAttachment>(query?: string): Promise<T[]>;
   serveAttachmentFile(attachment: DVAttachment): Promise<void>;
@@ -129,18 +137,112 @@ export interface API {
     step: string
   ): Promise<void>;
 
-  getAnalysisRuns<T = DVAnalysisRun>(query?: string): Promise<T[]>;
-  getAnalysisRun<T = DVAnalysisRun>(id: string, query?: string): Promise<T>;
-  createAnalysisRun(fields: object): Promise<CreateResponse>;
+  // getAnalysisRuns<T = DVAnalysisRun>(query?: string): Promise<T[]>;
+  // getAnalysisRun<T = DVAnalysisRun>(id: string, query?: string): Promise<T>;
+  // createAnalysisRun(fields: object): Promise<CreateResponse>;
 
-  getContactRoles<T = DVContact>(query?: string): Promise<T[]>;
+  // getContactRoles<T = DVContact>(query?: string): Promise<T[]>;
+}
+
+function getOne<InType, OutType = InType>(
+  customFetch: (url: string) => Promise<Response>,
+  tableName: string,
+  defaultQuery?: string,
+  transform: (d: InType) => OutType = (d) => d as unknown as OutType
+) {
+  return async <T = OutType>(
+    id: string,
+    query: string | undefined = defaultQuery
+  ) => {
+    const response = await customFetch(
+      `https://bnra.powerappsportals.com/_api/${tableName}(${id})${
+        query ? "?" + query : ""
+      }`
+    );
+
+    return transform(await response.json()) as unknown as T;
+  };
+}
+function getMultiple<InType, OutType = InType>(
+  customFetch: (url: string) => Promise<Response>,
+  tableName: string,
+  defaultQuery?: string,
+  transform: (d: InType) => OutType = (d) => d as unknown as OutType
+) {
+  return async <T = OutType>(query: string | undefined = defaultQuery) => {
+    const response = await customFetch(
+      `https://bnra.powerappsportals.com/_api/${tableName}${
+        query ? "?" + query : ""
+      }`
+    );
+
+    return (await response.json()).value.map(transform) as T[];
+  };
+}
+function create<R>(
+  customFetch: (url: string, opts?: RequestInit) => Promise<Response>,
+  tableName: string,
+  antiForgeryToken: string
+) {
+  return async <T = R>(fields: Partial<T>): Promise<CreateResponse> => {
+    const response = await customFetch(
+      `https://bnra.powerappsportals.com/_api/${tableName}`,
+      {
+        method: "POST",
+        headers: {
+          __RequestVerificationToken: antiForgeryToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      }
+    );
+
+    return { id: response.headers.get("entityId") as string };
+  };
+}
+function update<R>(
+  customFetch: (url: string, opts?: RequestInit) => Promise<Response>,
+  tableName: string,
+  antiForgeryToken: string
+) {
+  return async <T = R>(id: string, fields: Partial<T>) => {
+    await customFetch(
+      `https://bnra.powerappsportals.com/_api/${tableName}(${id})`,
+      {
+        method: "PATCH",
+        headers: {
+          __RequestVerificationToken: antiForgeryToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fields),
+      }
+    );
+  };
+}
+function remove(
+  customFetch: (url: string, opts?: RequestInit) => Promise<Response>,
+  tableName: string,
+  antiForgeryToken: string
+) {
+  return async (id: string) => {
+    await customFetch(
+      `https://bnra.powerappsportals.com/_api/${tableName}(${id})`,
+      {
+        method: "DELETE",
+        headers: {
+          __RequestVerificationToken: antiForgeryToken,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  };
 }
 
 export const getAPI = (
   antiForgeryToken: string,
   navigate: (url: string) => void,
   customFetch: (input: string, init?: RequestInit) => Promise<Response>
-) => {
+): API => {
   const authFetch = async (input: string, init?: RequestInit | undefined) => {
     const response = await customFetch(input, init);
 
@@ -295,540 +397,295 @@ export const getAPI = (
       }
     },
 
-    getContacts: async function <T = DVContact>(query?: string): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/contacts${
-          query ? "?" + query : ""
-        }`
-      );
+    getContacts: getMultiple<DVContact>(authFetch, "contacts"),
+    createContact: create<DVContact>(authFetch, "contacts", antiForgeryToken),
+    updateContact: update<DVContact>(authFetch, "contacts", antiForgeryToken),
+    deleteContact: remove(authFetch, "contacts", antiForgeryToken),
 
-      return (await response.json()).value;
-    },
-    createContact: async function (fields: object): Promise<CreateResponse> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/contacts`,
-        {
-          method: "POST",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
+    getInvitations: getMultiple<DVInvitation>(authFetch, "adx_invitations"),
 
-      return { id: response.headers.get("entityId") as string };
-    },
-    updateContact: async function (id: string, fields: object): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/contacts(${id})`,
-        {
-          method: "PATCH",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-    },
-    deleteContact: async function (id: string): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/contacts(${id})`,
-        {
-          method: "DELETE",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    },
+    getRiskSummaries: getMultiple<
+      DVRiskSummary<unknown, UnparsedRiskFields>,
+      DVRiskSummary<unknown, ParsedRiskFields>
+    >(
+      authFetch,
+      "cr4de_bnrariskfilesummaries",
+      undefined,
+      transformRiskSummary
+    ),
+    getRiskSummary: getOne<
+      DVRiskSummary<unknown, UnparsedRiskFields>,
+      DVRiskSummary<unknown, ParsedRiskFields>
+    >(
+      authFetch,
+      "cr4de_bnrariskfilesummaries",
+      undefined,
+      transformRiskSummary
+    ),
+    createRiskSummary: create<DVRiskSummary>(
+      authFetch,
+      "cr4de_bnrariskfilesummaries",
+      antiForgeryToken
+    ),
+    updateRiskSummary: update<DVRiskSummary>(
+      authFetch,
+      "cr4de_bnrariskfilesummaries",
+      antiForgeryToken
+    ),
+    deleteRiskSummary: remove(
+      authFetch,
+      "cr4de_bnrariskfilesummaries",
+      antiForgeryToken
+    ),
 
-    getInvitations: async function <T = DVInvitation>(
-      query?: string
-    ): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/adx_invitations${
-          query ? "?" + query : ""
-        }`
-      );
+    getRiskFiles: getMultiple<DVRiskFile>(
+      authFetch,
+      "cr4de_riskfileses",
+      undefined,
+      transformRiskFile
+    ),
+    getRiskFile: getOne<DVRiskFile>(
+      authFetch,
+      "cr4de_riskfileses",
+      undefined,
+      transformRiskFile
+    ),
+    updateRiskFile: update<DVRiskFile>(
+      authFetch,
+      "cr4de_riskfileses",
+      antiForgeryToken
+    ),
+    deleteRiskFile: remove(authFetch, "cr4de_riskfileses", antiForgeryToken),
 
-      return (await response.json()).value;
-    },
+    getRiskCascades: getMultiple<DVRiskCascade>(
+      authFetch,
+      "cr4de_bnrariskcascades",
+      undefined,
+      transformRiskCascade
+    ),
+    getRiskCascade: getOne<DVRiskCascade>(
+      authFetch,
+      "cr4de_bnrariskcascades",
+      undefined,
+      transformRiskCascade
+    ),
+    createCascade: create<DVRiskCascade>(
+      authFetch,
+      "cr4de_bnrariskcascades",
+      antiForgeryToken
+    ),
+    updateCascade: update<DVRiskCascade>(
+      authFetch,
+      "cr4de_bnrariskcascades",
+      antiForgeryToken
+    ),
+    deleteCascade: remove(
+      authFetch,
+      "cr4de_bnrariskcascades",
+      antiForgeryToken
+    ),
 
-    getRiskSummaries: async function <T = DVRiskSummary>(
-      query?: string
-    ): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskfilesummaries${
-          query ? "?" + query : ""
-        }`
-      );
+    getParticipants: getMultiple<DVParticipation>(
+      authFetch,
+      "cr4de_bnraparticipations"
+    ),
+    createParticipant: create<DVParticipation>(
+      authFetch,
+      "cr4de_bnraparticipations",
+      antiForgeryToken
+    ),
+    updateParticipant: update<DVParticipation>(
+      authFetch,
+      "cr4de_bnraparticipations",
+      antiForgeryToken
+    ),
+    deleteParticipant: remove(
+      authFetch,
+      "cr4de_bnraparticipations",
+      antiForgeryToken
+    ),
 
-      return (await response.json()).value;
-    },
-    getRiskSummary: async function <T = DVRiskSummary>(
-      id: string,
-      query?: string
-    ): Promise<T> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskfilesummaries(${id})${
-          query ? "?" + query : ""
-        }`
-      );
+    getValidations: getMultiple<DVValidation>(
+      authFetch,
+      "cr4de_bnravalidations"
+    ),
+    getValidation: getOne<DVValidation>(authFetch, "cr4de_bnravalidations"),
+    createValidation: create<DVValidation>(
+      authFetch,
+      "cr4de_bnravalidations",
+      antiForgeryToken
+    ),
+    updateValidation: update<DVValidation>(
+      authFetch,
+      "cr4de_bnravalidations",
+      antiForgeryToken
+    ),
+    deleteValidation: remove(
+      authFetch,
+      "cr4de_bnravalidations",
+      antiForgeryToken
+    ),
 
-      return (await response.json()) as T;
-    },
-    createRiskSummary: async function (
-      fields: object
-    ): Promise<CreateResponse> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskfilesummaries`,
-        {
-          method: "POST",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
+    // getDirectAnalyses: async function <T = DVDirectAnalysis>(
+    //   query?: string
+    // ): Promise<T[]> {
+    //   const response = await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises${
+    //       query ? "?" + query : ""
+    //     }`
+    //   );
 
-      return { id: response.headers.get("entityId") as string };
-    },
-    updateRiskSummary: async function (
-      id: string,
-      fields: object
-    ): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskfilesummaries(${id})`,
-        {
-          method: "PATCH",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-    },
-    deleteRiskSummary: async function (id: string): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskfilesummaries(${id})`,
-        {
-          method: "DELETE",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    },
+    //   return (await response.json()).value;
+    // },
+    // getDirectAnalysis: async function <T = DVDirectAnalysis>(
+    //   id: string,
+    //   query?: string
+    // ): Promise<T> {
+    //   const response = await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})${
+    //       query ? "?" + query : ""
+    //     }`
+    //   );
 
-    getRiskFiles: async function <T = DVRiskFile>(
-      query?: string
-    ): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_riskfileses${
-          query ? "?" + query : ""
-        }`
-      );
+    //   return (await response.json()) as T;
+    // },
+    // createDirectAnalysis: async function (
+    //   fields: object
+    // ): Promise<CreateResponse> {
+    //   const response = await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises`,
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         __RequestVerificationToken: antiForgeryToken,
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify(fields),
+    //     }
+    //   );
 
-      return (await response.json()).value;
-    },
-    getRiskFile: async function <T = DVRiskFile>(
-      id: string,
-      query?: string
-    ): Promise<T> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${id})${
-          query ? "?" + query : ""
-        }`
-      );
+    //   return { id: response.headers.get("entityId") as string };
+    // },
+    // updateDirectAnalysis: async function (
+    //   id: string,
+    //   fields: object
+    // ): Promise<void> {
+    //   const response = await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})`,
+    //     {
+    //       method: "PATCH",
+    //       headers: {
+    //         __RequestVerificationToken: antiForgeryToken,
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify(fields),
+    //     }
+    //   );
 
-      return (await response.json()) as T;
-    },
-    updateRiskFile: async function (id: string, fields: object): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${id})`,
-        {
-          method: "PATCH",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-    },
-    deleteRiskFile: async function (id: string): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${id})`,
-        {
-          method: "DELETE",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    },
+    //   if (response.status < 200 || response.status >= 300) {
+    //     throw new Error(response.status.toString());
+    //   }
+    // },
+    // deleteDirectAnalysis: async function (id: string): Promise<void> {
+    //   await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})`,
+    //     {
+    //       method: "DELETE",
+    //       headers: {
+    //         __RequestVerificationToken: antiForgeryToken,
+    //         "Content-Type": "application/json",
+    //       },
+    //     }
+    //   );
+    // },
 
-    getRiskCascades: async function <T = DVRiskCascade>(
-      query?: string
-    ): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades${
-          query ? "?" + query : ""
-        }`
-      );
+    // getCascadeAnalyses: async function <T = DVCascadeAnalysis>(
+    //   query?: string
+    // ): Promise<T[]> {
+    //   const results = [];
 
-      return (await response.json()).value;
-    },
-    getRiskCascade: async function <T = DVRiskCascade>(
-      id: string,
-      query?: string
-    ): Promise<T> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${id})${
-          query ? "?" + query : ""
-        }`
-      );
+    //   let response = await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises${
+    //       query ? "?" + query : ""
+    //     }`
+    //   );
 
-      return (await response.json()) as T;
-    },
-    createCascade: async function (fields: object): Promise<CreateResponse> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades`,
-        {
-          method: "POST",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
+    //   // eslint-disable-next-line no-constant-condition
+    //   while (true) {
+    //     const result = await response.json();
 
-      return { id: response.headers.get("entityId") as string };
-    },
-    updateCascade: async function (id: string, fields: object): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${id})`,
-        {
-          method: "PATCH",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-    },
-    deleteCascade: async function (id: string): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrariskcascades(${id})`,
-        {
-          method: "DELETE",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    },
+    //     results.push(...result.value);
 
-    getParticipants: async function <T = DVParticipation>(
-      query?: string
-    ): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnraparticipations${
-          query ? "?" + query : ""
-        }`
-      );
+    //     if (!result["@odata.nextLink"]) {
+    //       return results;
+    //     }
 
-      return (await response.json()).value;
-    },
-    createParticipant: async function (
-      fields: object
-    ): Promise<CreateResponse> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnraparticipations`,
-        {
-          method: "POST",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
+    //     response = await authFetch(result["@odata.nextLink"]);
+    //   }
+    // },
+    // getCascadeAnalysis: async function <T = DVCascadeAnalysis>(
+    //   id: string,
+    //   query?: string
+    // ): Promise<T> {
+    //   const response = await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises(${id})${
+    //       query ? "?" + query : ""
+    //     }`
+    //   );
 
-      return { id: response.headers.get("entityId") as string };
-    },
-    updateParticipant: async function (
-      id: string,
-      fields: object
-    ): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnraparticipations(${id})`,
-        {
-          method: "PATCH",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-    },
-    deleteParticipant: async function (id: string): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnraparticipations(${id})`,
-        {
-          method: "DELETE",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    },
+    //   return (await response.json()) as T;
+    // },
+    // createCascadeAnalysis: async function (
+    //   fields: object
+    // ): Promise<CreateResponse> {
+    //   const response = await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises`,
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         __RequestVerificationToken: antiForgeryToken,
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify(fields),
+    //     }
+    //   );
 
-    getValidations: async function <T = DVValidation>(
-      query?: string
-    ): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations${
-          query ? "?" + query : ""
-        }`
-      );
+    //   return { id: response.headers.get("entityId") as string };
+    // },
+    // updateCascadeAnalysis: async function (
+    //   id: string,
+    //   fields: object
+    // ): Promise<void> {
+    //   await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises(${id})`,
+    //     {
+    //       method: "PATCH",
+    //       headers: {
+    //         __RequestVerificationToken: antiForgeryToken,
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify(fields),
+    //     }
+    //   );
+    // },
+    // deleteCascadeAnalysis: async function (id: string): Promise<void> {
+    //   await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises(${id})`,
+    //     {
+    //       method: "DELETE",
+    //       headers: {
+    //         __RequestVerificationToken: antiForgeryToken,
+    //         "Content-Type": "application/json",
+    //       },
+    //     }
+    //   );
+    // },
 
-      return (await response.json()).value;
-    },
-    getValidation: async function <T = DVValidation>(
-      id: string,
-      query?: string
-    ): Promise<T> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${id})${
-          query ? "?" + query : ""
-        }`
-      );
-
-      return (await response.json()) as T;
-    },
-    createValidation: async function (fields: object): Promise<CreateResponse> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations`,
-        {
-          method: "POST",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-
-      return { id: response.headers.get("entityId") as string };
-    },
-    updateValidation: async function (
-      id: string,
-      fields: object
-    ): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${id})`,
-        {
-          method: "PATCH",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-    },
-    deleteValidation: async function (id: string): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnravalidations(${id})`,
-        {
-          method: "DELETE",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    },
-
-    getDirectAnalyses: async function <T = DVDirectAnalysis>(
-      query?: string
-    ): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises${
-          query ? "?" + query : ""
-        }`
-      );
-
-      return (await response.json()).value;
-    },
-    getDirectAnalysis: async function <T = DVDirectAnalysis>(
-      id: string,
-      query?: string
-    ): Promise<T> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})${
-          query ? "?" + query : ""
-        }`
-      );
-
-      return (await response.json()) as T;
-    },
-    createDirectAnalysis: async function (
-      fields: object
-    ): Promise<CreateResponse> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises`,
-        {
-          method: "POST",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-
-      return { id: response.headers.get("entityId") as string };
-    },
-    updateDirectAnalysis: async function (
-      id: string,
-      fields: object
-    ): Promise<void> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})`,
-        {
-          method: "PATCH",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error(response.status.toString());
-      }
-    },
-    deleteDirectAnalysis: async function (id: string): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises(${id})`,
-        {
-          method: "DELETE",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    },
-
-    getCascadeAnalyses: async function <T = DVCascadeAnalysis>(
-      query?: string
-    ): Promise<T[]> {
-      const results = [];
-
-      let response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises${
-          query ? "?" + query : ""
-        }`
-      );
-
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const result = await response.json();
-
-        results.push(...result.value);
-
-        if (!result["@odata.nextLink"]) {
-          return results;
-        }
-
-        response = await authFetch(result["@odata.nextLink"]);
-      }
-    },
-    getCascadeAnalysis: async function <T = DVCascadeAnalysis>(
-      id: string,
-      query?: string
-    ): Promise<T> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises(${id})${
-          query ? "?" + query : ""
-        }`
-      );
-
-      return (await response.json()) as T;
-    },
-    createCascadeAnalysis: async function (
-      fields: object
-    ): Promise<CreateResponse> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises`,
-        {
-          method: "POST",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-
-      return { id: response.headers.get("entityId") as string };
-    },
-    updateCascadeAnalysis: async function (
-      id: string,
-      fields: object
-    ): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises(${id})`,
-        {
-          method: "PATCH",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-    },
-    deleteCascadeAnalysis: async function (id: string): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises(${id})`,
-        {
-          method: "DELETE",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    },
-
-    getAttachments: async function <T = DVAttachment>(
-      query?: string
-    ): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnraattachments${
-          query ? "?" + query : ""
-        }`
-      );
-
-      return (await response.json()).value;
-    },
+    getAttachments: getMultiple<DVAttachment>(
+      authFetch,
+      "cr4de_bnraattachments",
+      "$expand=cr4de_referencedSource"
+    ),
     serveAttachmentFile: async function (attachment: DVAttachment) {
       if (attachment.cr4de_url) {
         window.open(attachment.cr4de_url, "_blank");
@@ -1034,55 +891,22 @@ export const getAPI = (
       );
     },
 
-    getTranslations: async function <T = DVTranslation>(
-      query?: string
-    ): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnratranslations${
-          query ? "?" + query : ""
-        }`
-      );
+    getTranslations: getMultiple<DVTranslation>(
+      authFetch,
+      "cr4de_bnratranslations"
+    ),
+    updateTranslation: update<DVTranslation>(
+      authFetch,
+      "cr4de_bnratranslations",
+      antiForgeryToken
+    ),
+    deleteTranslation: remove(
+      authFetch,
+      "cr4de_bnratranslations",
+      antiForgeryToken
+    ),
 
-      return (await response.json()).value;
-    },
-    updateTranslation: async function (
-      id: string,
-      fields: object
-    ): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnratranslations(${id})`,
-        {
-          method: "PATCH",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-    },
-    deleteTranslation: async function (id: string): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnratranslations(${id})`,
-        {
-          method: "DELETE",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    },
-
-    getPages: async function <T = DVPage>(query?: string): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrapages${
-          query ? "?" + query : ""
-        }`
-      );
-
-      return (await response.json()).value;
-    },
+    getPages: getMultiple<DVPage>(authFetch, "cr4de_bnrapages"),
     getPage: async function <T = DVPage>(name: string): Promise<T> {
       const response = await authFetch(
         `https://bnra.powerappsportals.com/_api/cr4de_bnrapages?$filter=cr4de_name eq '${name}'`
@@ -1092,19 +916,7 @@ export const getAPI = (
 
       return results[0];
     },
-    updatePage: async function (id: string, fields: object): Promise<void> {
-      await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrapages(${id})`,
-        {
-          method: "PATCH",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-    },
+    updatePage: update<DVPage>(authFetch, "cr4de_bnrapages", antiForgeryToken),
 
     sendInvitationEmail: async function (contactIds: string[]): Promise<void> {
       await customFetch(
@@ -1142,53 +954,85 @@ export const getAPI = (
       );
     },
 
-    getAnalysisRuns: async function <T = DVAnalysisRun>(
-      query?: string
-    ): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns${
-          query ? "?" + query : ""
-        }`
-      );
+    // getAnalysisRuns: async function <T = DVAnalysisRun>(
+    //   query?: string
+    // ): Promise<T[]> {
+    //   const response = await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns${
+    //       query ? "?" + query : ""
+    //     }`
+    //   );
 
-      return (await response.json()).value;
-    },
-    getAnalysisRun: async function <T = DVAnalysisRun>(
-      id: string,
-      query?: string
-    ): Promise<T> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns(${id})${
-          query ? "?" + query : ""
-        }`
-      );
+    //   return (await response.json()).value;
+    // },
+    // getAnalysisRun: async function <T = DVAnalysisRun>(
+    //   id: string,
+    //   query?: string
+    // ): Promise<T> {
+    //   const response = await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns(${id})${
+    //       query ? "?" + query : ""
+    //     }`
+    //   );
 
-      return (await response.json()) as T;
-    },
-    createAnalysisRun: async function (
-      fields: object
-    ): Promise<CreateResponse> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns`,
-        {
-          method: "POST",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
+    //   return (await response.json()) as T;
+    // },
+    // createAnalysisRun: async function (
+    //   fields: object
+    // ): Promise<CreateResponse> {
+    //   const response = await authFetch(
+    //     `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns`,
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         __RequestVerificationToken: antiForgeryToken,
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify(fields),
+    //     }
+    //   );
 
-      return { id: response.headers.get("entityId") as string };
-    },
+    //   return { id: response.headers.get("entityId") as string };
+    // },
 
-    getContactRoles: async function <T = DVContact>(): Promise<T[]> {
-      const response = await customFetch(
-        `https://bnra.powerappsportals.com/_api/adx_webroles`
-      );
+    // getContactRoles: async function <T = DVContact>(): Promise<T[]> {
+    //   const response = await customFetch(
+    //     `https://bnra.powerappsportals.com/_api/adx_webroles`
+    //   );
 
-      return (await response.json()).value;
-    },
+    //   return (await response.json()).value;
+    // },
+  };
+};
+
+const transformRiskSummary = (
+  rs: DVRiskSummary<unknown, UnparsedRiskFields>
+): DVRiskSummary<unknown, ParsedRiskFields> => {
+  const ip = unwrapIP(rs.cr4de_intensity_parameters);
+
+  return {
+    ...rs,
+    cr4de_historical_events: unwrapHE(rs.cr4de_historical_events),
+    cr4de_intensity_parameters: ip,
+    cr4de_scenarios: unwrapS(
+      ip,
+      rs.cr4de_scenario_considerable,
+      rs.cr4de_scenario_major,
+      rs.cr4de_scenario_extreme
+    ),
+  };
+};
+
+const transformRiskFile = (rf: DVRiskFile): DVRiskFile => {
+  return {
+    ...rf,
+    results: getResultSnapshot(rf),
+  };
+};
+
+const transformRiskCascade = (rc: DVRiskCascade): DVRiskCascade => {
+  return {
+    ...rc,
+    results: getCascadeResultSnapshot(rc),
   };
 };

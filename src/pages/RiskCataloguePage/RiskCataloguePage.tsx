@@ -1,20 +1,8 @@
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
-import {
-  Box,
-  Card,
-  CardContent,
-  FormControl,
-  Input,
-  InputAdornment,
-  InputLabel,
-  Paper,
-  styled,
-  TextField,
-} from "@mui/material";
+import { Box, InputAdornment, Paper, styled, TextField } from "@mui/material";
 import {
   DataGrid,
   GridColDef,
@@ -24,13 +12,14 @@ import {
   Toolbar,
 } from "@mui/x-data-grid";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
-import { useQuery } from "@tanstack/react-query";
+import { usePrefetchQuery, useQuery } from "@tanstack/react-query";
 import { DataTable } from "../../types/dataverse/tables";
 import useAPI from "../../hooks/useAPI";
 
 import SearchIcon from "@mui/icons-material/Search";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { CategoryIcon } from "../../functions/getIcons";
+import { BasePageContext } from "../BasePage";
 
 const columns: GridColDef<DVRiskSummary>[] = [
   { field: "cr4de_hazard_id", headerName: "ID", width: 80 },
@@ -45,7 +34,6 @@ const columns: GridColDef<DVRiskSummary>[] = [
     headerName: "Category",
     width: 100,
     renderCell: (params) => {
-      console.log(params);
       return (
         <Box
           sx={{
@@ -115,10 +103,23 @@ export default function RiskCataloguePage() {
   const { t } = useTranslation();
   const api = useAPI();
   const navigate = useNavigate();
+  const { user } = useOutletContext<BasePageContext>();
 
   const { data: riskFiles, isLoading: isLoadingRiskFiles } = useQuery({
     queryKey: [DataTable.RISK_SUMMARY],
     queryFn: () => api.getRiskSummaries(),
+  });
+
+  useQuery({
+    queryKey: [DataTable.RISK_FILE],
+    queryFn: () => api.getRiskFiles(),
+    enabled: Boolean(user && user.roles.verified),
+  });
+
+  useQuery({
+    queryKey: [DataTable.RISK_CASCADE],
+    queryFn: () => api.getRiskCascades(),
+    enabled: Boolean(user && user.roles.verified),
   });
 
   usePageTitle(t("sideDrawer.hazardCatalogue", "Hazard Catalogue"));
@@ -132,7 +133,7 @@ export default function RiskCataloguePage() {
       <DataGrid
         rows={riskFiles}
         columns={columns}
-        getRowId={(rf) => rf.cr4de_bnrariskfilesummaryid}
+        getRowId={(rf) => rf._cr4de_risk_file_value}
         initialState={{
           pagination: {
             paginationModel: {
@@ -143,7 +144,7 @@ export default function RiskCataloguePage() {
         // pageSizeOptions={[5]}
         // checkboxSelection
         // disableRowSelectionOnClick
-        onRowClick={(p) => navigate(`${p.row.cr4de_bnrariskfilesummaryid}`)}
+        onRowClick={(p) => navigate(`${p.row._cr4de_risk_file_value}`)}
         slots={{ toolbar: CustomToolbar }}
         showToolbar
         loading={isLoadingRiskFiles}

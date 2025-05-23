@@ -10,7 +10,7 @@ import Joyride, {
 import { useState } from "react";
 import TourTooltip from "../../../components/TourTooltip";
 
-export default function ManmadeIdentificationTutorial({
+export default function StandardIdentificationTutorial({
   run,
   setRun,
 }: // setStep,
@@ -69,44 +69,55 @@ export default function ManmadeIdentificationTutorial({
       ),
     },
     {
-      target: "#mrag",
-      placement: "top",
+      target: "#historical-events",
+      // placement: "center",
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.m.tutorial.3.1">
-              Each <b>Malicious Actors Risk File</b> is divided into 3 actor
-              groups which are characterised by their levels of capabilities;
-              i.e. actor groups with &quot;<i>considerable</i>&quot;, &quot;
-              <i>major</i>&quot; and &quot;<i>extreme</i>&quot; capabilities.
+            <Trans i18nKey="rfDescription.s.tutorial.3.1">
+              This section provides some examples of events related to the risk
+              that occurred in Belgium or abroad.
             </Trans>
           </Typography>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.m.tutorial.4.1">
-              This sections provides a more in-depth description of the{" "}
-              <i>Most Relevant Actor Group</i>.
-            </Trans>
-          </Typography>
-          <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.m.tutorial.4.2">
-              The <i>Most Relevant Scenario</i> is defined as the scenario that
-              poses the highest total risk, i.e. total probability X total
-              expected impact of the scenario.
+            <Trans i18nKey="rfDescription.s.tutorial.3.2">
+              It is by no means meant to be an exhaustive list.
             </Trans>
           </Typography>
         </Box>
       ),
     },
     {
-      target: "#scenario-matrix",
-      placement: "top",
+      target: "#scenarios",
+      // placement: "center",
       content: (
         <Box sx={{ textAlign: "left" }}>
           <Typography variant="body1" my={2}>
-            <Trans i18nKey="rfDescription.s.tutorial.5.3">
-              The graph on the right shows this visually. The 3 scenarios are
-              plotted according to their impact (on the X-axis) and their
-              probability (on the Y-axis).
+            <Trans i18nKey="rfDescription.s.tutorial.4.1">
+              Each risk of the BNRA is characterised using 3 intensity
+              scenarios; a &#quot;<i>considerable</i>&#quot;, a &#quot;
+              <i>major</i>&#quot; and an &#quot;<i>extreme</i>&#quot; scenario.
+              These are built using risk-specific <b>intensity parameters</b>.
+            </Trans>
+          </Typography>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfDescription.s.tutorial.4.2">
+              The <b>intensity parameters</b> are risk-specific factors that
+              influence the development and consequences of the risk.
+            </Trans>
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      target: "#scenario-buttons",
+      // placement: "center",
+      content: (
+        <Box sx={{ textAlign: "left" }}>
+          <Typography variant="body1" my={2}>
+            <Trans i18nKey="rfDescription.s.tutorial.4.3">
+              The different scenario may be inspected using the buttons
+              provided.
             </Trans>
           </Typography>
         </Box>
@@ -177,7 +188,7 @@ export default function ManmadeIdentificationTutorial({
           skip: t("button.skip", "Skip"),
         }}
         tooltipComponent={TourTooltip}
-        disableScrolling={stepIndex === 3}
+        disableScrolling={stepIndex === 6}
       />
     </>
   );
