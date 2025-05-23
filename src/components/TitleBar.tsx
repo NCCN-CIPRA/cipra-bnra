@@ -18,15 +18,14 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Trans, useTranslation } from "react-i18next";
 import { LoggedInUser } from "../hooks/useLoggedInUser";
+import { usePageTitleValue } from "../hooks/usePageTitle";
 
 export default function TitleBar({
-  title,
   showUser = true,
   onDrawerToggle,
   user,
   setFakeRole,
 }: {
-  title: string;
   showUser?: boolean;
   onDrawerToggle?: () => void;
   user: LoggedInUser | null | undefined;
@@ -34,6 +33,7 @@ export default function TitleBar({
 }) {
   const { i18n } = useTranslation();
   const [role, setRole] = useState(user?.realRoles?.admin ? "Beheerders" : "");
+  const { pageTitle } = usePageTitleValue();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -71,7 +71,7 @@ export default function TitleBar({
               </IconButton>
             )}
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              {title}
+              {pageTitle}
             </Typography>
             {user?.realRoles?.admin && (
               <>

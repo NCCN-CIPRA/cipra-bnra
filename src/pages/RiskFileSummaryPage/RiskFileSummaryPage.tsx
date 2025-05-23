@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import RiskFileTitle from "../../components/RiskFileTitle";
 import { getLanguage } from "../../functions/translations";
+import BNRASpeedDial from "../../components/BNRASpeedDial";
 
 export default function RiskFileSummaryPage() {
   const api = useAPI();
@@ -212,57 +213,16 @@ export default function RiskFileSummaryPage() {
           </Box>
         )}
       </Stack>
-      {/* {user && (
+      {user && (
         <Box sx={{ position: "fixed", bottom: 96, right: 40 }}>
-          {!editing && (
-            <BNRASpeedDial
-              offset={{ x: 0, y: 56 }}
-              editAction={() => setEditing(true)}
-              exportAction={handleExportRiskfile(riskFile, api)}
-              HelpComponent={RiskFileSummaryTutorial}
-            />
-          )}
-          {editing && user.roles.admin && (
-            <SpeedDial
-              ariaLabel="BNRA Speeddial"
-              sx={{ position: "fixed", bottom: 72, right: 16 }}
-              icon={<SpeedDialIcon />}
-            >
-              <SpeedDialAction
-                icon={<CancelIcon />}
-                tooltipTitle={"Cancel"}
-                onClick={() => {
-                  if (
-                    !window.confirm(
-                      "This will erase all your changes. Are you sure?"
-                    )
-                  )
-                    return;
-
-                  setSummary(
-                    riskFile.cr4de_mrs_summary || "<h6>Not available</h6>"
-                  );
-                  setSummaryNL(
-                    riskFile.cr4de_mrs_summary_nl || "<h6>Not available</h6>"
-                  );
-                  setSummaryFR(
-                    riskFile.cr4de_mrs_summary_fr || "<h6>Not available</h6>"
-                  );
-                  setSummaryDE(
-                    riskFile.cr4de_mrs_summary_de || "<h6>Not available</h6>"
-                  );
-                  setEditing(false);
-                }}
-              />
-              <SpeedDialAction
-                icon={<SaveIcon />}
-                tooltipTitle={"Save Page"}
-                onClick={() => saveRiskFile()}
-              />
-            </SpeedDial>
-          )}
+          <BNRASpeedDial
+            offset={{ x: 0, y: 56 }}
+            // editAction={() => setEditing(true)}
+            // exportAction={handleExportRiskfile(riskFile, api)}
+            // HelpComponent={RiskFileSummaryTutorial}
+          />
         </Box>
-      )} */}
+      )}
     </Container>
   );
 }

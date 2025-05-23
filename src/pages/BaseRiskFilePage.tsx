@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Outlet,
   useLocation,
@@ -6,7 +6,7 @@ import {
   useOutletContext,
   useParams,
 } from "react-router-dom";
-import { RISK_TYPE } from "../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
 import useAPI, { DataTable } from "../hooks/useAPI";
 import {
   BottomNavigation,
@@ -28,6 +28,8 @@ import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import { BasePageContext } from "./BasePage";
 import { useQuery } from "@tanstack/react-query";
 import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
+import { Cascades, getCascadesCatalogue } from "../functions/cascades";
+import { getRiskCatalogue } from "../functions/riskfiles";
 
 type RouteParams = {
   risk_file_id: string;
@@ -35,6 +37,8 @@ type RouteParams = {
 
 export interface RiskFilePageContext extends BasePageContext {
   riskSummary: DVRiskSummary;
+  riskFile: DVRiskFile | null;
+  cascades: Cascades | null;
 }
 
 export default function BaseRiskFilePage() {
@@ -54,8 +58,33 @@ export default function BaseRiskFilePage() {
     queryKey: [DataTable.RISK_SUMMARY],
     queryFn: () => api.getRiskSummaries(),
     select: (data) =>
-      data.find((rf) => rf.cr4de_bnrariskfilesummaryid === params.risk_file_id),
+      data.find((rf) => rf._cr4de_risk_file_value === params.risk_file_id),
   });
+
+  const { data: riskFiles } = useQuery({
+    queryKey: [DataTable.RISK_FILE],
+    queryFn: () => api.getRiskFiles(),
+  });
+
+  const { data: cascadeList } = useQuery({
+    queryKey: [DataTable.RISK_CASCADE],
+    queryFn: () => api.getRiskCascades(),
+    // select: (data) =>
+    //   data.find(
+    //     (rf) => rf.cr4de_riskfilesid === riskSummary._cr4de_risk_file_value
+    //   ),
+  });
+
+  const rc = useMemo(() => {
+    if (!riskFiles) return null;
+
+    return getRiskCatalogue(riskFiles);
+  }, [riskFiles]);
+  const cascades = useMemo(() => {
+    if (!riskFiles || !cascadeList || !rc) return null;
+
+    return getCascadesCatalogue(riskFiles, rc, cascadeList);
+  }, [riskFiles, cascadeList, rc]);
 
   // const { data: participants, getData: loadParticipants } = useLazyRecords<
   //   DVParticipation<DVContact>
@@ -88,7 +117,7 @@ export default function BaseRiskFilePage() {
 
   let tab = 0;
   const extraTab = isEmerging ? 0 : 1;
-  if (pathname.indexOf("identification") >= 0) tab = 1;
+  if (pathname.indexOf("description") >= 0) tab = 1;
   if (pathname.indexOf("analysis") >= 0) tab = 2;
   if (pathname.indexOf("evolution") >= 0) tab = 3;
   if (pathname.indexOf("data") >= 0) tab = 3 + extraTab;
@@ -117,6 +146,8 @@ export default function BaseRiskFilePage() {
             user,
             ...baseContext,
             riskSummary,
+            riskFile: rc?.[riskSummary._cr4de_risk_file_value] || null,
+            cascades: cascades?.[riskSummary._cr4de_risk_file_value] || null,
           })}
         />
       ) : (
@@ -147,7 +178,7 @@ export default function BaseRiskFilePage() {
             )}
             icon={<FingerprintIcon />}
             onClick={() =>
-              navigate(`/risks/${params.risk_file_id}/identification`)
+              navigate(`/risks/${params.risk_file_id}/description`)
             }
           />
           {user && user.roles.beReader && (

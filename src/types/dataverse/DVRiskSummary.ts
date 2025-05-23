@@ -1,5 +1,10 @@
 import { SCENARIOS } from "../../functions/scenarios";
-import { RISK_CATEGORY, RISK_TYPE, RiskFileEditableFields } from "./Riskfile";
+import {
+  ParsedRiskFields,
+  RISK_CATEGORY,
+  RISK_TYPE,
+  RiskFileEditableFields,
+} from "./Riskfile";
 
 export type CauseRisksSummary = {
   cause_risk_id: string;
@@ -13,11 +18,10 @@ export type EffectRisksSummary = {
   effect_risk_i: string;
 }[];
 
-export interface DVRiskSummary<RiskFileType = unknown>
-  extends RiskFileEditableFields {
+export type DVRiskSummary<RiskFileType = unknown, T = ParsedRiskFields> = {
   cr4de_bnrariskfilesummaryid: string;
 
-  _cr4de_risk_file_value: string | null;
+  _cr4de_risk_file_value: string;
   cr4de_risk_file: RiskFileType | null;
 
   cr4de_hazard_id: string;
@@ -53,4 +57,4 @@ export interface DVRiskSummary<RiskFileType = unknown>
 
   createdon: string;
   modifiedon: string;
-}
+} & RiskFileEditableFields<T>;
