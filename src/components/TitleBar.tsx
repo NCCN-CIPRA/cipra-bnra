@@ -25,11 +25,13 @@ export default function TitleBar({
   onDrawerToggle,
   user,
   setFakeRole,
+  defaultTitle,
 }: {
   showUser?: boolean;
   onDrawerToggle?: () => void;
   user: LoggedInUser | null | undefined;
   setFakeRole: (role: string) => void;
+  defaultTitle?: string;
 }) {
   const { i18n } = useTranslation();
   const [role, setRole] = useState(user?.realRoles?.admin ? "Beheerders" : "");
@@ -71,7 +73,7 @@ export default function TitleBar({
               </IconButton>
             )}
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              {pageTitle}
+              {pageTitle || defaultTitle}
             </Typography>
             {user?.realRoles?.admin && (
               <>

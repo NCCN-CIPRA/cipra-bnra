@@ -18,7 +18,6 @@ import useAPI, { DataTable } from "../../hooks/useAPI";
 import {
   DVRiskFile,
   RESULT_SNAPSHOT,
-  RISK_FILE_QUANTI_FIELDS,
   RISK_TYPE,
   RISKFILE_RESULT_FIELD,
 } from "../../types/dataverse/DVRiskFile";

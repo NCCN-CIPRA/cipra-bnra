@@ -6,16 +6,15 @@ import {
 } from "../../../functions/scenarios";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBars";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ProbabilitySankey from "../../../components/charts/ProbabilitySankey";
 import ImpactSankey from "../../../components/charts/ImpactSankey";
-import { RiskFilePageContext } from "../../BaseRiskFilePage";
-import { memo, useEffect } from "react";
+import { useEffect } from "react";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { useTranslation } from "react-i18next";
 import { Cascades } from "../../../functions/cascades";
 
-export default memo(function SankeyDiagram({
+export default function SankeyDiagram({
   riskFile,
   cascades,
   scenario,
@@ -217,4 +216,4 @@ export default memo(function SankeyDiagram({
       </Box>
     </Stack>
   );
-});
+}

@@ -11,7 +11,6 @@ import {
 } from "../../types/dataverse/DVRiskFile";
 import {
   Grid,
-  Button,
   Box,
   Card,
   Stack,
@@ -146,22 +145,21 @@ function ScenarioSection({
   parameter,
   directAnalyses,
   initialOpen = false,
-
-  reloadRiskFile,
-  reloadDirectAnalyses,
-}: {
+}: // reloadRiskFile,
+// reloadDirectAnalyses,
+{
   riskFile: DVRiskFile;
   scenario: SCENARIOS;
   parameter: string;
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   initialOpen?: boolean;
 
-  reloadRiskFile: () => void;
-  reloadDirectAnalyses: () => void;
+  // reloadRiskFile: () => void;
+  // reloadDirectAnalyses: () => void;
 }) {
   const api = useAPI();
   const [open, setOpen] = useState(initialOpen);
-  const [isSaving, setIsSaving] = useState(false);
+  // const [isSaving, setIsSaving] = useState(false);
   const [lastParam, setLastParam] = useState(parameter);
   const [discussionRequired, setDiscussionRequired] = useState(
     riskFile.cr4de_discussion_required
@@ -197,17 +195,17 @@ function ScenarioSection({
 
   const qualiInput = useRef<null | string>(null);
 
-  const handleSave = async (field: string, value: string | null) => {
-    setIsSaving(true);
+  // const handleSave = async (field: string, value: string | null) => {
+  //   setIsSaving(true);
 
-    await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-      [field]: value,
-    });
+  //   await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+  //     [field]: value,
+  //   });
 
-    await reloadRiskFile();
+  //   await reloadRiskFile();
 
-    setIsSaving(false);
-  };
+  //   setIsSaving(false);
+  // };
 
   const distribution = useMemo(() => {
     const d = quantiNames.reduce((dist, field) => {
@@ -395,17 +393,17 @@ function ScenarioSection({
                 <Select
                   value={discussionRequired || "unknown"}
                   sx={{ width: 200 }}
-                  onChange={async (e) => {
-                    setDiscussionRequired(e.target.value as DiscussionRequired);
-                    await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-                      cr4de_discussion_required: JSON.stringify({
-                        ...riskFile.cr4de_discussion_required,
-                        [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]:
-                          e.target.value,
-                      }),
-                    });
-                    reloadRiskFile();
-                  }}
+                  // onChange={async (e) => {
+                  //   setDiscussionRequired(e.target.value as DiscussionRequired);
+                  //   await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+                  //     cr4de_discussion_required: JSON.stringify({
+                  //       ...riskFile.cr4de_discussion_required,
+                  //       [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]:
+                  //         e.target.value,
+                  //     }),
+                  //   });
+                  //   reloadRiskFile();
+                  // }}
                 >
                   <MenuItem value="unknown">Unknown</MenuItem>
                   <MenuItem value={DiscussionRequired.REQUIRED}>
@@ -455,12 +453,12 @@ function ScenarioSection({
               />
             </CardContent>
             <CardActions>
-              <Button
+              {/* <Button
                 loading={isSaving}
                 onClick={() => handleSave(qualiName, qualiInput.current)}
               >
                 Save
-              </Button>
+              </Button> */}
             </CardActions>
 
             <Attachments
@@ -493,7 +491,7 @@ function ScenarioSection({
                   qualiName={qualiName}
                   quantiNames={quantiNames}
                   scenario={scenario}
-                  reloadDirectAnalyses={reloadDirectAnalyses}
+                  // reloadDirectAnalyses={reloadDirectAnalyses}
                   setReloadAttachments={() => setReloadAttachments(true)}
                 />
                 {i < a.length - 1 && (
@@ -514,7 +512,7 @@ function ExpertInput({
   qualiName,
   quantiNames,
   scenario,
-  reloadDirectAnalyses,
+  // reloadDirectAnalyses,
   setReloadAttachments,
 }: {
   directAnalysis: DVDirectAnalysis<unknown, DVContact>;
@@ -522,7 +520,7 @@ function ExpertInput({
   qualiName: keyof DVDirectAnalysis<unknown, unknown>;
   quantiNames: (keyof DVDirectAnalysis<unknown, unknown>)[];
   scenario: SCENARIOS;
-  reloadDirectAnalyses: () => void;
+  // reloadDirectAnalyses: () => void;
   setReloadAttachments: () => void;
 }) {
   const api = useAPI();
@@ -560,20 +558,20 @@ function ExpertInput({
           <Rating
             name="size-small"
             value={rating}
-            onChange={async (_e, newValue) => {
-              setRating(newValue);
-              await api.updateDirectAnalysis(
-                directAnalysis.cr4de_bnradirectanalysisid,
-                {
-                  cr4de_quality: JSON.stringify({
-                    ...directAnalysis.cr4de_quality,
-                    [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]:
-                      newValue,
-                  }),
-                }
-              );
-              reloadDirectAnalyses();
-            }}
+            // onChange={async (_e, newValue) => {
+            // setRating(newValue);
+            // await api.updateDirectAnalysis(
+            //   directAnalysis.cr4de_bnradirectanalysisid,
+            //   {
+            //     cr4de_quality: JSON.stringify({
+            //       ...directAnalysis.cr4de_quality,
+            //       [`${parameter}_${SCENARIO_PARAMS[scenario].prefix}`]:
+            //         newValue,
+            //     }),
+            //   }
+            // );
+            // reloadDirectAnalyses();
+            // }}
             size="small"
           />
         </Stack>
@@ -642,15 +640,14 @@ function ExpertInput({
 export default function Step2APage({
   riskFile,
   directAnalyses,
-
-  reloadRiskFile,
-  reloadDirectAnalyses,
-}: {
+}: // reloadRiskFile,
+// reloadDirectAnalyses,
+{
   riskFile: DVRiskFile;
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
 
-  reloadRiskFile: () => void;
-  reloadDirectAnalyses: () => void;
+  // reloadRiskFile: () => void;
+  // reloadDirectAnalyses: () => void;
 }) {
   const theme = useTheme();
   const [parameter, setParameter] = useState("dp");
@@ -694,24 +691,24 @@ export default function Step2APage({
           parameter={parameter}
           directAnalyses={directAnalyses}
           initialOpen={true}
-          reloadRiskFile={reloadRiskFile}
-          reloadDirectAnalyses={reloadDirectAnalyses}
+          // reloadRiskFile={reloadRiskFile}
+          // reloadDirectAnalyses={reloadDirectAnalyses}
         />
         <ScenarioSection
           riskFile={riskFile}
           scenario={SCENARIOS.MAJOR}
           parameter={parameter}
           directAnalyses={directAnalyses}
-          reloadRiskFile={reloadRiskFile}
-          reloadDirectAnalyses={reloadDirectAnalyses}
+          // reloadRiskFile={reloadRiskFile}
+          // reloadDirectAnalyses={reloadDirectAnalyses}
         />
         <ScenarioSection
           riskFile={riskFile}
           scenario={SCENARIOS.EXTREME}
           parameter={parameter}
           directAnalyses={directAnalyses}
-          reloadRiskFile={reloadRiskFile}
-          reloadDirectAnalyses={reloadDirectAnalyses}
+          // reloadRiskFile={reloadRiskFile}
+          // reloadDirectAnalyses={reloadDirectAnalyses}
         />
       </Stack>
     </Stack>

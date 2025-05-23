@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import { Trans } from "react-i18next";
-import { DPRows, DPs } from "./P.data";
+import { DPRows, DPs } from "../../../types/P";
 
 export const DPValueStack = ({ value }: { value: number }) => {
   if (value < 0)

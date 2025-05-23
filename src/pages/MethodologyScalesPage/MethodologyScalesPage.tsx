@@ -5,56 +5,31 @@ import {
   Stack,
   Typography,
   Link,
-  Unstable_TrapFocus as TrapFocus,
-  Fade,
   Paper,
   Card,
   CardContent,
   CardMedia,
   CardActions,
   styled,
-  Theme,
-  CSSObject,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  Drawer as MuiDrawer,
-  Divider,
-  List,
-  ListItemText,
-  Tooltip,
   TableContainer,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
-  Grow,
-  IconButton,
-  TableFooter,
 } from "@mui/material";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { Trans, useTranslation } from "react-i18next";
 import usePageTitle from "../../hooks/usePageTitle";
-import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
 import { useState } from "react";
-import { BasePageContext } from "../BasePage";
-import { getLanguage } from "../../functions/translations";
-import { CategoryIcon } from "../../functions/getIcons";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { DP1, DP2, DP3, DP4, DP5 } from "../learning/QuantitativeScales/P.data";
-import * as DP50 from "../learning/QuantitativeScales/P2050.data";
+import { DP1, DP2, DP3, DP4, DP5 } from "../../types/P";
 
 import scalesImage from "../../assets/images/scales.png";
 import cascadesImage from "../../assets/images/cascades.png";
 import scenariosImage from "../../assets/images/scenarios.png";
 import catalogueImage from "../../assets/images/catalogue.png";
 import SideBar from "./SideBar";
-import CCTempChart from "../../components/charts/CCTempChart";
-import CCExampleChart from "../../components/charts/CCExampleChart";
 
 const drawerWidth = 320;
 
@@ -77,46 +52,46 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
   }),
 }));
 
-const getCleanLanguage = (language: string) => {
-  if (language.indexOf("en") >= 0) return "en";
-  if (language.indexOf("nl") >= 0) return "nl";
-  if (language.indexOf("fr") >= 0) return "fr";
-  if (language.indexOf("de") >= 0) return "de";
-};
+// const getCleanLanguage = (language: string) => {
+//   if (language.indexOf("en") >= 0) return "en";
+//   if (language.indexOf("nl") >= 0) return "nl";
+//   if (language.indexOf("fr") >= 0) return "fr";
+//   if (language.indexOf("de") >= 0) return "de";
+// };
 
-const onDownload = (filename: string) => {
-  const link = document.createElement("a");
-  link.download = filename;
-  link.href = `https://raw.githubusercontent.com/NCCN-CIPRA/cipra-bnra/refs/heads/main/src/assets/pdf/${filename}`;
-  link.click();
-};
+// const onDownload = (filename: string) => {
+//   const link = document.createElement("a");
+//   link.download = filename;
+//   link.href = `https://raw.githubusercontent.com/NCCN-CIPRA/cipra-bnra/refs/heads/main/src/assets/pdf/${filename}`;
+//   link.click();
+// };
 
 export default function MethodologyScalesPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user } = useOutletContext<BasePageContext>();
+  // const { user } = useOutletContext<BasePageContext>();
   const [open, setOpen] = useState(true);
 
-  const [collapsed, setCollapsed] = useState<{ [key: string]: boolean }>({
-    p: false,
-    i: false,
-    h: false,
-    ha: false,
-    hb: false,
-    hc: false,
-    s: false,
-    sa: false,
-    sb: false,
-    sc: false,
-    sd: false,
-    e: false,
-    ea: false,
-    f: false,
-    fa: false,
-    fb: false,
-    cp: false,
-    m: false,
-  });
+  // const [collapsed, setCollapsed] = useState<{ [key: string]: boolean }>({
+  //   p: false,
+  //   i: false,
+  //   h: false,
+  //   ha: false,
+  //   hb: false,
+  //   hc: false,
+  //   s: false,
+  //   sa: false,
+  //   sb: false,
+  //   sc: false,
+  //   sd: false,
+  //   e: false,
+  //   ea: false,
+  //   f: false,
+  //   fa: false,
+  //   fb: false,
+  //   cp: false,
+  //   m: false,
+  // });
 
   usePageTitle(
     t("methodology.framework.title", "National Risk Assessment Framework")

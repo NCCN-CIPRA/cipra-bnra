@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Button, Stack, Link, Tooltip, Alert } from "@mui/material";
+import { Box, Stack, Link, Tooltip, Alert } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
@@ -14,7 +14,6 @@ import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import ErrorIcon from "@mui/icons-material/Error";
 import { DiscussionRequired } from "../../types/DiscussionRequired";
 import TextInputBox from "../../components/TextInputBox";
-import useAPI from "../../hooks/useAPI";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useOutletContext } from "react-router-dom";
 import { AuthPageContext } from "../AuthPage";
@@ -58,11 +57,11 @@ const AccordionDetails = styled(MuiAccordionDetails)(() => ({
 export default function Emerging({
   riskFile,
   effects,
-  reloadCascades,
-}: {
+}: // reloadCascades,
+{
   riskFile: DVRiskFile;
   effects: DVRiskCascade<unknown, SmallRisk>[];
-  reloadCascades: () => Promise<unknown>;
+  // reloadCascades: () => Promise<unknown>;
 }) {
   return (
     <>
@@ -82,7 +81,7 @@ export default function Emerging({
               key={ca.cr4de_bnrariskcascadeid}
               riskFile={riskFile}
               cascade={ca}
-              reloadCascades={reloadCascades}
+              // reloadCascades={reloadCascades}
             />
           ))}
         </Box>
@@ -94,13 +93,13 @@ export default function Emerging({
 function CatalyzedSection({
   riskFile,
   cascade,
-  reloadCascades,
-}: {
+}: // reloadCascades,
+{
   riskFile: DVRiskFile;
   cascade: DVRiskCascade<unknown, SmallRisk>;
-  reloadCascades: () => Promise<unknown>;
+  // reloadCascades: () => Promise<unknown>;
 }) {
-  const api = useAPI();
+  // const api = useAPI();
   const { user } = useOutletContext<AuthPageContext>();
   const discussionRequired =
     cascade.cr4de_discussion_required_cause || DiscussionRequired.NOT_NECESSARY;
@@ -109,22 +108,22 @@ function CatalyzedSection({
     discussionRequired === DiscussionRequired.PREFERRED ||
       discussionRequired === DiscussionRequired.REQUIRED
   );
-  const [saving, setSaving] = useState(false);
+  // const [saving, setSaving] = useState(false);
 
   const [quali, setQuali] = useState<string | null>(
     cascade.cr4de_quali_cause || ""
   );
 
-  const handleSave = async () => {
-    setSaving(true);
-    await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
-      cr4de_quali_cause: quali,
-      cr4de_discussion_required_cause: DiscussionRequired.RESOLVED,
-    });
-    await reloadCascades();
-    setSaving(false);
-    setOpen(false);
-  };
+  // const handleSave = async () => {
+  //   setSaving(true);
+  //   await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+  //     cr4de_quali_cause: quali,
+  //     cr4de_discussion_required_cause: DiscussionRequired.RESOLVED,
+  //   });
+  //   await reloadCascades();
+  //   setSaving(false);
+  //   setOpen(false);
+  // };
 
   return (
     <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
@@ -193,7 +192,7 @@ function CatalyzedSection({
                 }}
               />
             )}
-            {user.roles.analist && (
+            {/* {user.roles.analist && (
               <Box sx={{ textAlign: "center", mt: 4 }}>
                 <Button
                   loading={saving}
@@ -203,7 +202,7 @@ function CatalyzedSection({
                   Save & Close
                 </Button>
               </Box>
-            )}
+            )} */}
           </Box>
         </Stack>
       </AccordionDetails>

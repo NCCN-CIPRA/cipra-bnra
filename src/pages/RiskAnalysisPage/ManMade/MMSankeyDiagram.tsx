@@ -6,9 +6,8 @@ import {
 } from "../../../functions/scenarios";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBars";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ImpactSankey from "../../../components/charts/ImpactSankey";
-import { RiskFilePageContext } from "../../BaseRiskFilePage";
 import { useEffect } from "react";
 import ActionsSankey from "../../../components/charts/ActionsSankey";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
@@ -32,7 +31,6 @@ export default function MMSankeyDiagram({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isEditing } = useOutletContext<RiskFilePageContext>();
 
   useEffect(() => {
     setScenario(scenario);
@@ -40,14 +38,7 @@ export default function MMSankeyDiagram({
   }, [riskFile]);
 
   const goToRiskFile = (id: string) => {
-    if (
-      !isEditing ||
-      window.confirm(
-        "Are you sure you wish to leave the page? You are still editing a field and unsaved changes will be lost."
-      )
-    ) {
-      navigate(`/risks/${id}/analysis`);
-    }
+    navigate(`/risks/${id}/analysis`);
   };
 
   return (

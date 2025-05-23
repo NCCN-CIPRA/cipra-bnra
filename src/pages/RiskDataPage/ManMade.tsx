@@ -1,12 +1,11 @@
 import { useState, useMemo } from "react";
-import { Box, Button, Stack, Paper, Link, Tooltip, Alert } from "@mui/material";
+import { Box, Stack, Paper, Link, Tooltip, Alert } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import {
   DVRiskFile,
   DiscussionsRequired,
 } from "../../types/dataverse/DVRiskFile";
-import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
 import MuiAccordionSummary, {
   AccordionSummaryProps,
@@ -18,7 +17,6 @@ import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import {
   DIRECT_ANALYSIS_SECTIONS_MANMADE,
   PARAMETER,
-  getDASpread,
   getQualiFieldName,
   getQuantiFieldNames,
   getQuantiLabel,
@@ -29,9 +27,7 @@ import ErrorIcon from "@mui/icons-material/Error";
 import { DiscussionRequired } from "../../types/DiscussionRequired";
 import TextInputBox from "../../components/TextInputBox";
 import { Slider } from "./Slider";
-import useAPI from "../../hooks/useAPI";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { DVContact } from "../../types/dataverse/DVContact";
 import CascadeMatrix from "./CascadeMatrix";
 import { useOutletContext } from "react-router-dom";
 import { AuthPageContext } from "../AuthPage";
@@ -81,19 +77,19 @@ export default function ManMade({
   effects,
   catalyzingEffects,
   climateChange,
-  directAnalyses,
-  cascadeAnalyses,
-  reloadRiskFile,
-  reloadCascades,
-}: {
+}: // directAnalyses,
+// cascadeAnalyses,
+// reloadRiskFile,
+// reloadCascades,
+{
   riskFile: DVRiskFile;
   effects: DVRiskCascade<unknown, SmallRisk>[];
   catalyzingEffects: DVRiskCascade<SmallRisk, unknown>[];
   climateChange: DVRiskCascade<SmallRisk, unknown> | null;
-  directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
-  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
-  reloadRiskFile: () => Promise<unknown>;
-  reloadCascades: () => Promise<unknown>;
+  // directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
+  // cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
+  // reloadRiskFile: () => Promise<unknown>;
+  // reloadCascades: () => Promise<unknown>;
 }) {
   return (
     <>
@@ -110,9 +106,9 @@ export default function ManMade({
         <Box sx={{ mb: 8 }}>
           <ParameterSection
             riskFile={riskFile}
-            directAnalyses={directAnalyses}
-            cascadeAnalyses={cascadeAnalyses}
-            reloadRiskFile={reloadRiskFile}
+            // directAnalyses={directAnalyses}
+            // cascadeAnalyses={cascadeAnalyses}
+            // reloadRiskFile={reloadRiskFile}
           />
         </Box>
         <Box sx={{ mb: 8 }}>
@@ -121,7 +117,7 @@ export default function ManMade({
               key={ca.cr4de_bnrariskcascadeid}
               riskFile={riskFile}
               cascade={ca}
-              reloadCascades={reloadCascades}
+              // reloadCascades={reloadCascades}
             />
           ))}
         </Box>
@@ -131,16 +127,16 @@ export default function ManMade({
               key={climateChange.cr4de_bnrariskcascadeid}
               riskFile={riskFile}
               cascade={climateChange}
-              directAnalyses={directAnalyses}
-              reloadRiskFile={reloadRiskFile}
-              reloadCascades={reloadCascades}
+              // directAnalyses={directAnalyses}
+              // reloadRiskFile={reloadRiskFile}
+              // reloadCascades={reloadCascades}
             />
           )}
           {catalyzingEffects.map((ca) => (
             <EmergingSection
               key={ca.cr4de_bnrariskcascadeid}
               cascade={ca}
-              reloadCascades={reloadCascades}
+              // reloadCascades={reloadCascades}
             />
           ))}
         </Box>
@@ -151,14 +147,14 @@ export default function ManMade({
 
 function ParameterSection({
   riskFile,
-  directAnalyses,
-  cascadeAnalyses,
-  reloadRiskFile,
-}: {
+}: // directAnalyses,
+// cascadeAnalyses,
+// reloadRiskFile,
+{
   riskFile: DVRiskFile;
-  directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
-  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
-  reloadRiskFile: () => Promise<unknown>;
+  // directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
+  // cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
+  // reloadRiskFile: () => Promise<unknown>;
 }) {
   const { user } = useOutletContext<AuthPageContext>();
   const section = DIRECT_ANALYSIS_SECTIONS_MANMADE[PARAMETER.DP];
@@ -238,23 +234,23 @@ function ParameterSection({
           <ScenarioSection
             riskFile={riskFile}
             scenario={SCENARIOS.CONSIDERABLE}
-            directAnalyses={directAnalyses}
-            cascadeAnalyses={cascadeAnalyses}
-            reloadRiskFile={reloadRiskFile}
+            // directAnalyses={directAnalyses}
+            // cascadeAnalyses={cascadeAnalyses}
+            // reloadRiskFile={reloadRiskFile}
           />
           <ScenarioSection
             riskFile={riskFile}
             scenario={SCENARIOS.MAJOR}
-            directAnalyses={directAnalyses}
-            cascadeAnalyses={cascadeAnalyses}
-            reloadRiskFile={reloadRiskFile}
+            // directAnalyses={directAnalyses}
+            // cascadeAnalyses={cascadeAnalyses}
+            // reloadRiskFile={reloadRiskFile}
           />
           <ScenarioSection
             riskFile={riskFile}
             scenario={SCENARIOS.EXTREME}
-            directAnalyses={directAnalyses}
-            cascadeAnalyses={cascadeAnalyses}
-            reloadRiskFile={reloadRiskFile}
+            // directAnalyses={directAnalyses}
+            // cascadeAnalyses={cascadeAnalyses}
+            // reloadRiskFile={reloadRiskFile}
           />
         </Stack>
       </AccordionDetails>
@@ -265,17 +261,16 @@ function ParameterSection({
 function ScenarioSection({
   riskFile,
   scenario,
-
-  directAnalyses,
-  reloadRiskFile,
-}: {
+}: // directAnalyses,
+// reloadRiskFile,
+{
   riskFile: DVRiskFile;
   scenario: SCENARIOS;
-  directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
-  cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
-  reloadRiskFile: () => Promise<unknown>;
+  // directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
+  // cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
+  // reloadRiskFile: () => Promise<unknown>;
 }) {
-  const api = useAPI();
+  // const api = useAPI();
   const { user } = useOutletContext<AuthPageContext>();
   const section = DIRECT_ANALYSIS_SECTIONS_MANMADE[PARAMETER.DP];
   const discussionRequired = useMemo(() => {
@@ -291,7 +286,7 @@ function ScenarioSection({
     discussionRequired === DiscussionRequired.PREFERRED ||
       discussionRequired === DiscussionRequired.REQUIRED
   );
-  const [saving, setSaving] = useState(false);
+  // const [saving, setSaving] = useState(false);
 
   const qualiName = useMemo(
     () => getQualiFieldName(scenario, section),
@@ -308,20 +303,20 @@ function ScenarioSection({
     (riskFile[qualiName as keyof DVRiskFile] as string | null) || ""
   );
 
-  const handleSave = async () => {
-    setSaving(true);
-    await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-      [qualiName]: quali,
-      cr4de_discussion_required: JSON.stringify({
-        ...riskFile.cr4de_discussion_required,
-        [`${section.name}_${SCENARIO_PARAMS[scenario].prefix}`]:
-          DiscussionRequired.RESOLVED,
-      }),
-    });
-    await reloadRiskFile();
-    setSaving(false);
-    setOpen(false);
-  };
+  // const handleSave = async () => {
+  //   setSaving(true);
+  //   await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
+  //     [qualiName]: quali,
+  //     cr4de_discussion_required: JSON.stringify({
+  //       ...riskFile.cr4de_discussion_required,
+  //       [`${section.name}_${SCENARIO_PARAMS[scenario].prefix}`]:
+  //         DiscussionRequired.RESOLVED,
+  //     }),
+  //   });
+  //   await reloadRiskFile();
+  //   setSaving(false);
+  //   setOpen(false);
+  // };
 
   return (
     <Stack
@@ -414,21 +409,23 @@ function ScenarioSection({
                             (riskFile[n as keyof DVRiskFile] as string) || "M3"
                           }
                           spread={
-                            user.roles.analist
-                              ? getDASpread(directAnalyses, n)
-                              : null
+                            // user.roles.analist
+                            //   ? getDASpread(directAnalyses, n)
+                            //   : null
+                            null
                           }
                           onChange={
-                            user.roles.analist
-                              ? async (newValue) => {
-                                  await api.updateRiskFile(
-                                    riskFile.cr4de_riskfilesid,
-                                    {
-                                      [n]: newValue,
-                                    }
-                                  );
-                                }
-                              : null
+                            // user.roles.analist
+                            //   ? async (newValue) => {
+                            //       await api.updateRiskFile(
+                            //         riskFile.cr4de_riskfilesid,
+                            //         {
+                            //           [n]: newValue,
+                            //         }
+                            //       );
+                            //     }
+                            //   : null
+                            null
                           }
                         />
                       ) : (
@@ -458,13 +455,13 @@ function ScenarioSection({
               setReloadAttachments(true);
             }}
           /> */}
-          {user.roles.analist && (
+          {/* {user.roles.analist && (
             <Box sx={{ textAlign: "center" }}>
               <Button loading={saving} variant="outlined" onClick={handleSave}>
                 Save & Close
               </Button>
             </Box>
-          )}
+          )} */}
         </Box>
       )}
     </Stack>
@@ -474,14 +471,14 @@ function ScenarioSection({
 function AttackSection({
   riskFile,
   cascade,
-  reloadCascades,
-}: {
+}: // reloadCascades,
+{
   riskFile: DVRiskFile;
   cascade: DVRiskCascade<unknown, SmallRisk>;
-  reloadCascades: () => Promise<unknown>;
+  // reloadCascades: () => Promise<unknown>;
 }) {
   const { user } = useOutletContext<AuthPageContext>();
-  const api = useAPI();
+  // const api = useAPI();
   const discussionRequired =
     cascade.cr4de_discussion_required_cause || DiscussionRequired.NOT_NECESSARY;
 
@@ -489,22 +486,22 @@ function AttackSection({
     discussionRequired === DiscussionRequired.PREFERRED ||
       discussionRequired === DiscussionRequired.REQUIRED
   );
-  const [saving, setSaving] = useState(false);
+  // const [saving, setSaving] = useState(false);
 
   const [quali, setQuali] = useState<string | null>(
     cascade.cr4de_quali_cause || ""
   );
 
-  const handleSave = async () => {
-    setSaving(true);
-    await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
-      cr4de_quali_cause: quali,
-      cr4de_discussion_required_cause: DiscussionRequired.RESOLVED,
-    });
-    await reloadCascades();
-    setSaving(false);
-    setOpen(false);
-  };
+  // const handleSave = async () => {
+  //   setSaving(true);
+  //   await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+  //     cr4de_quali_cause: quali,
+  //     cr4de_discussion_required_cause: DiscussionRequired.RESOLVED,
+  //   });
+  //   await reloadCascades();
+  //   setSaving(false);
+  //   setOpen(false);
+  // };
 
   return (
     <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
@@ -554,12 +551,13 @@ function AttackSection({
               cause={cascade.cr4de_cause_hazard as DVRiskFile}
               effect={riskFile}
               isCause={true}
-              onChange={async (field, newValue) => {
-                await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
-                  [field]: newValue,
-                });
-                reloadCascades();
-              }}
+              onChange={async () => {}}
+              // onChange={async (field, newValue) => {
+              //   await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+              //     [field]: newValue,
+              //   });
+              //   reloadCascades();
+              // }}
             />
           </Box>
 
@@ -588,7 +586,7 @@ function AttackSection({
                 }}
               />
             )}
-            {user.roles.analist && (
+            {/* {user.roles.analist && (
               <Box sx={{ textAlign: "center", mt: 4 }}>
                 <Button
                   loading={saving}
@@ -598,7 +596,7 @@ function AttackSection({
                   Save & Close
                 </Button>
               </Box>
-            )}
+            )} */}
           </Box>
         </Stack>
       </AccordionDetails>
@@ -608,14 +606,14 @@ function AttackSection({
 
 function EmergingSection({
   cascade,
-  reloadCascades,
-}: {
+}: // reloadCascades,
+{
   cascade: DVRiskCascade<SmallRisk>;
-  reloadCascades: () => Promise<unknown>;
+  // reloadCascades: () => Promise<unknown>;
 }) {
   const { user } = useOutletContext<AuthPageContext>();
 
-  const api = useAPI();
+  // const api = useAPI();
   const discussionRequired =
     cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
 
@@ -623,20 +621,20 @@ function EmergingSection({
     discussionRequired === DiscussionRequired.PREFERRED ||
       discussionRequired === DiscussionRequired.REQUIRED
   );
-  const [saving, setSaving] = useState(false);
+  // const [saving, setSaving] = useState(false);
 
   const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali || "");
 
-  const handleSave = async () => {
-    setSaving(true);
-    await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
-      cr4de_quali: quali,
-      cr4de_discussion_required: DiscussionRequired.RESOLVED,
-    });
-    await reloadCascades();
-    setSaving(false);
-    setOpen(false);
-  };
+  // const handleSave = async () => {
+  //   setSaving(true);
+  //   await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+  //     cr4de_quali: quali,
+  //     cr4de_discussion_required: DiscussionRequired.RESOLVED,
+  //   });
+  //   await reloadCascades();
+  //   setSaving(false);
+  //   setOpen(false);
+  // };
 
   return (
     <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
@@ -702,7 +700,7 @@ function EmergingSection({
                 }}
               />
             )}
-            {user.roles.analist && (
+            {/* {user.roles.analist && (
               <Box sx={{ textAlign: "center", mt: 4 }}>
                 <Button
                   loading={saving}
@@ -712,7 +710,7 @@ function EmergingSection({
                   Save & Close
                 </Button>
               </Box>
-            )}
+            )} */}
           </Box>
         </Stack>
       </AccordionDetails>
@@ -723,18 +721,18 @@ function EmergingSection({
 function CCSection({
   riskFile,
   cascade,
-  directAnalyses,
-  reloadCascades,
-}: {
+}: // directAnalyses,
+// reloadCascades,
+{
   riskFile: DVRiskFile;
   cascade: DVRiskCascade<SmallRisk>;
-  directAnalyses: DVDirectAnalysis[];
-  reloadRiskFile: () => Promise<unknown>;
-  reloadCascades: () => Promise<unknown>;
+  // directAnalyses: DVDirectAnalysis[];
+  // reloadRiskFile: () => Promise<unknown>;
+  // reloadCascades: () => Promise<unknown>;
 }) {
   const { user } = useOutletContext<AuthPageContext>();
 
-  const api = useAPI();
+  // const api = useAPI();
   const discussionRequired =
     cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
 
@@ -742,20 +740,20 @@ function CCSection({
     discussionRequired === DiscussionRequired.PREFERRED ||
       discussionRequired === DiscussionRequired.REQUIRED
   );
-  const [saving, setSaving] = useState(false);
+  // const [saving, setSaving] = useState(false);
 
   const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali || "");
 
-  const handleSave = async () => {
-    setSaving(true);
-    await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
-      cr4de_quali: quali,
-      cr4de_discussion_required: DiscussionRequired.RESOLVED,
-    });
-    await reloadCascades();
-    setSaving(false);
-    setOpen(false);
-  };
+  // const handleSave = async () => {
+  //   setSaving(true);
+  //   await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+  //     cr4de_quali: quali,
+  //     cr4de_discussion_required: DiscussionRequired.RESOLVED,
+  //   });
+  //   await reloadCascades();
+  //   setSaving(false);
+  //   setOpen(false);
+  // };
 
   return (
     <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
@@ -849,26 +847,28 @@ function CCSection({
                         initialValue={riskFile[n as keyof DVRiskFile] as string}
                         name={n}
                         spread={
-                          user.roles.analist
-                            ? getDASpread(
-                                directAnalyses,
-                                `cr4de_dp50_quanti${n.slice(
-                                  -2
-                                )}` as keyof DVDirectAnalysis
-                              )
-                            : null
+                          // user.roles.analist
+                          //   ? getDASpread(
+                          //       directAnalyses,
+                          //       `cr4de_dp50_quanti${n.slice(
+                          //         -2
+                          //       )}` as keyof DVDirectAnalysis
+                          //     )
+                          //   : null
+                          null
                         }
                         onChange={
-                          user.roles.analist
-                            ? async (newValue) => {
-                                await api.updateRiskFile(
-                                  riskFile.cr4de_riskfilesid,
-                                  {
-                                    [n]: newValue,
-                                  }
-                                );
-                              }
-                            : null
+                          // user.roles.analist
+                          //   ? async (newValue) => {
+                          //       await api.updateRiskFile(
+                          //         riskFile.cr4de_riskfilesid,
+                          //         {
+                          //           [n]: newValue,
+                          //         }
+                          //       );
+                          //     }
+                          //   : null
+                          null
                         }
                       />
                     ) : (
@@ -878,7 +878,7 @@ function CCSection({
                 </Stack>
               ))}
             </Stack>
-            {user.roles.analist && (
+            {/* {user.roles.analist && (
               <Box sx={{ textAlign: "center", mt: 4 }}>
                 <Button
                   loading={saving}
@@ -888,7 +888,7 @@ function CCSection({
                   Save & Close
                 </Button>
               </Box>
-            )}
+            )} */}
           </Box>
         </Stack>
       </AccordionDetails>

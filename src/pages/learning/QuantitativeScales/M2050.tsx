@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
-import { M } from "./M2050.data";
+import { M } from "../../../types/M2050";
 
 export function MValueStack({ value }: { value: number }) {
   const { t } = useTranslation();

@@ -1,46 +1,27 @@
 import { Alert, Box, Typography } from "@mui/material";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import * as IP from "../../../functions/intensityParameters";
 import { SCENARIOS } from "../../../functions/scenarios";
 import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import { useState } from "react";
 import CapacitiesSection from "./CapacitiesSection";
-import Bibliography from "../Bibliography";
 import ActionsSection from "./PreferredActionsSection";
 import MMSankeyDiagram from "./MMSankeyDiagram";
 import MMImpactSection from "./MMImpactSection";
 import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../../components/RiskFileTitle";
-import { getIndirectImpact } from "../../../functions/Impact";
-import { DVAttachment } from "../../../types/dataverse/DVAttachment";
-import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import MMAnalysisTutorial from "./MMAnalysisTutorial";
 import { Cascades } from "../../../functions/cascades";
 import handleExportRiskfile from "../../../functions/export/exportBNRA";
 import useAPI from "../../../hooks/useAPI";
+import RiskFileBibliography from "../../../components/RiskFileBibliography";
 
 export default function ManMade({
   riskFile,
   cascades,
-  mode = "view",
-  isEditing,
-  attachments,
-  loadAttachments,
-  hazardCatalogue,
-
-  setIsEditing,
-  reloadRiskFile,
 }: {
   riskFile: DVRiskFile;
   cascades: Cascades;
-  mode?: "view" | "edit";
-  isEditing: boolean;
-  attachments: DVAttachment<unknown, DVAttachment<unknown, unknown>>[];
-  hazardCatalogue: SmallRisk[] | null;
-  loadAttachments: () => Promise<unknown>;
-  setIsEditing: (isEditing: boolean) => void;
-  reloadRiskFile: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
   const api = useAPI();
@@ -49,12 +30,6 @@ export default function ManMade({
   const [scenario, setScenario] = useState(MRS);
 
   const rf = riskFile;
-
-  const intensityParameters = IP.unwrap(rf.cr4de_intensity_parameters);
-
-  const effects = cascades.effects.map((c) =>
-    getIndirectImpact(c, riskFile, MRS)
-  );
 
   return (
     <>
@@ -69,7 +44,6 @@ export default function ManMade({
           <MMSankeyDiagram
             riskFile={riskFile}
             cascades={cascades}
-            debug={mode === "edit"}
             manmade
             scenario={scenario}
             setScenario={setScenario}
@@ -95,18 +69,7 @@ export default function ManMade({
 
             <ScenarioMatrix riskFile={riskFile} mrs={MRS} />
 
-            <CapacitiesSection
-              intensityParameters={intensityParameters}
-              riskFile={rf}
-              scenario={MRS}
-              mode={mode}
-              attachments={attachments}
-              updateAttachments={loadAttachments}
-              isEditingOther={isEditing}
-              setIsEditing={setIsEditing}
-              reloadRiskFile={reloadRiskFile}
-              allRisks={hazardCatalogue}
-            />
+            <CapacitiesSection riskFile={rf} scenario={MRS} />
           </Box>
         )}
 
@@ -115,43 +78,16 @@ export default function ManMade({
             {t("Preferred Malicious Actions")}
           </Typography>
 
-          <ActionsSection
-            riskFile={rf}
-            effects={effects}
-            scenario={MRS}
-            mode={mode}
-            attachments={attachments}
-            updateAttachments={loadAttachments}
-            isEditingOther={isEditing}
-            setIsEditing={setIsEditing}
-            reloadRiskFile={reloadRiskFile}
-            allRisks={hazardCatalogue}
-          />
+          <ActionsSection riskFile={rf} />
         </Box>
 
         <Box className="impact-assess" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Other Impactful Actions")}</Typography>
 
-          <MMImpactSection
-            riskFile={rf}
-            effects={effects}
-            scenario={MRS}
-            mode={mode}
-            attachments={attachments}
-            updateAttachments={loadAttachments}
-            isEditingOther={isEditing}
-            setIsEditing={setIsEditing}
-            reloadRiskFile={reloadRiskFile}
-            allRisks={hazardCatalogue}
-          />
+          <MMImpactSection riskFile={rf} />
         </Box>
 
-        <Bibliography
-          riskFile={riskFile}
-          cascades={cascades.all}
-          attachments={attachments}
-          reloadAttachments={loadAttachments}
-        />
+        <RiskFileBibliography risk={riskFile} />
         <BNRASpeedDial
           offset={{ x: 0, y: 56 }}
           exportAction={handleExportRiskfile(riskFile, api)}

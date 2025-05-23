@@ -8,7 +8,6 @@ import RiskPage from "./pages/learning/RiskPage";
 import "./App.css";
 import BasePage from "./pages/BasePage";
 import InformationPortalPage from "./pages/InformationPortalPage/InformationPortalPage";
-import OverviewPage from "./pages/main/OverviewPage";
 import AuthPage from "./pages/AuthPage";
 import TranslationsPage from "./pages/TranslationsPage/TranslationsPage";
 import LearningPage from "./pages/learning/LearningPage";
@@ -207,16 +206,16 @@ export default function App() {
                 },
 
                 {
-                  path: "/overview",
-                  element: <OverviewPage />,
-                },
-
-                {
                   path: "/export",
                   element: <ExportBNRAPage />,
                 },
 
                 // DEPRECATED
+
+                // {
+                //   path: "/overview",
+                //   element: <OverviewPage />,
+                // },
                 // {
                 //   path: "/validation/:validation_id",
                 //   element: <ValidationPage />,

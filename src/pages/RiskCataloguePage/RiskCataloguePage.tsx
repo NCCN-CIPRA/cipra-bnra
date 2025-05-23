@@ -12,7 +12,7 @@ import {
   Toolbar,
 } from "@mui/x-data-grid";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
-import { usePrefetchQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "../../types/dataverse/tables";
 import useAPI from "../../hooks/useAPI";
 
