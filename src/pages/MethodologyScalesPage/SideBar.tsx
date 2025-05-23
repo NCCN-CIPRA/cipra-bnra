@@ -1,15 +1,4 @@
 import {
-  Box,
-  Container,
-  Button,
-  Stack,
-  Typography,
-  Fade,
-  Paper,
-  Card,
-  CardContent,
-  CardMedia,
-  CardActions,
   styled,
   Theme,
   CSSObject,
@@ -23,15 +12,8 @@ import {
   Tooltip,
   Avatar,
 } from "@mui/material";
-import { Link, useNavigate, useOutletContext } from "react-router-dom";
-import useBreadcrumbs from "../../hooks/useBreadcrumbs";
-import { Trans, useTranslation } from "react-i18next";
-import usePageTitle from "../../hooks/usePageTitle";
-import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
-import { useState } from "react";
-import { BasePageContext } from "../BasePage";
-import { getLanguage } from "../../functions/translations";
-import { CategoryIcon } from "../../functions/getIcons";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 

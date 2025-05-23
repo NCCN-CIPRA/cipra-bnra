@@ -3,7 +3,7 @@ import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { getScenarioSuffix, SCENARIOS } from "../../../functions/scenarios";
 import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import Scenario from "./Scenario";
-import { lazy, Suspense, useState } from "react";
+import { useState } from "react";
 import ProbabilitySection from "./ProbabilitySection";
 import ImpactSection from "./ImpactSection";
 import CBSection from "./CBSection";

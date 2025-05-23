@@ -14,30 +14,28 @@ import { useNavigate } from "react-router-dom";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { Trans, useTranslation } from "react-i18next";
 import usePageTitle from "../../hooks/usePageTitle";
-import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
-import { CategoryIcon } from "../../functions/getIcons";
 
 import scalesImage from "../../assets/images/scales.png";
 import cascadesImage from "../../assets/images/cascades.png";
 import scenariosImage from "../../assets/images/scenarios.png";
 import catalogueImage from "../../assets/images/catalogue.png";
 
-const getCleanLanguage = (language: string) => {
-  if (language.indexOf("en") >= 0) return "en";
-  if (language.indexOf("nl") >= 0) return "nl";
-  if (language.indexOf("fr") >= 0) return "fr";
-  if (language.indexOf("de") >= 0) return "de";
-};
+// const getCleanLanguage = (language: string) => {
+//   if (language.indexOf("en") >= 0) return "en";
+//   if (language.indexOf("nl") >= 0) return "nl";
+//   if (language.indexOf("fr") >= 0) return "fr";
+//   if (language.indexOf("de") >= 0) return "de";
+// };
 
-const onDownload = (filename: string) => {
-  const link = document.createElement("a");
-  link.download = filename;
-  link.href = `https://raw.githubusercontent.com/NCCN-CIPRA/cipra-bnra/refs/heads/main/src/assets/pdf/${filename}`;
-  link.click();
-};
+// const onDownload = (filename: string) => {
+//   const link = document.createElement("a");
+//   link.download = filename;
+//   link.href = `https://raw.githubusercontent.com/NCCN-CIPRA/cipra-bnra/refs/heads/main/src/assets/pdf/${filename}`;
+//   link.click();
+// };
 
 export default function MethodologyPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   usePageTitle(

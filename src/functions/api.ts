@@ -20,6 +20,9 @@ import { unwrap as unwrapHE } from "./historicalEvents";
 import { unwrap as unwrapS } from "./scenarios";
 import { unwrap as unwrapIP } from "./intensityParameters";
 import { getResultSnapshot } from "../types/dataverse/DVSmallRisk";
+import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
+import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
+import { DVAnalysisRun } from "../types/dataverse/DVAnalysisRun";
 
 export interface AuthResponse<T = null> {
   data?: T;
@@ -92,7 +95,7 @@ export interface API {
   updateValidation(id: string, fields: object): Promise<void>;
   deleteValidation(id: string): Promise<void>;
 
-  // getDirectAnalyses<T = DVDirectAnalysis>(query?: string): Promise<T[]>;
+  getDirectAnalyses<T = DVDirectAnalysis>(query?: string): Promise<T[]>;
   // getDirectAnalysis<T = DVDirectAnalysis>(
   //   id: string,
   //   query?: string
@@ -101,7 +104,7 @@ export interface API {
   // updateDirectAnalysis(id: string, fields: object): Promise<void>;
   // deleteDirectAnalysis(id: string): Promise<void>;
 
-  // getCascadeAnalyses<T = DVCascadeAnalysis>(query?: string): Promise<T[]>;
+  getCascadeAnalyses<T = DVCascadeAnalysis>(query?: string): Promise<T[]>;
   // getCascadeAnalysis<T = DVCascadeAnalysis>(
   //   id: string,
   //   query?: string
@@ -137,9 +140,9 @@ export interface API {
     step: string
   ): Promise<void>;
 
-  // getAnalysisRuns<T = DVAnalysisRun>(query?: string): Promise<T[]>;
+  getAnalysisRuns<T = DVAnalysisRun>(query?: string): Promise<T[]>;
   // getAnalysisRun<T = DVAnalysisRun>(id: string, query?: string): Promise<T>;
-  // createAnalysisRun(fields: object): Promise<CreateResponse>;
+  createAnalysisRun(fields: object): Promise<CreateResponse>;
 
   // getContactRoles<T = DVContact>(query?: string): Promise<T[]>;
 }
@@ -526,14 +529,10 @@ export const getAPI = (
       antiForgeryToken
     ),
 
-    // getDirectAnalyses: async function <T = DVDirectAnalysis>(
-    //   query?: string
-    // ): Promise<T[]> {
-    //   const response = await authFetch(
-    //     `https://bnra.powerappsportals.com/_api/cr4de_bnradirectanalysises${
-    //       query ? "?" + query : ""
-    //     }`
-    //   );
+    getDirectAnalyses: getMultiple<DVDirectAnalysis>(
+      authFetch,
+      "cr4de_bnradirectanalysises"
+    ),
 
     //   return (await response.json()).value;
     // },
@@ -599,16 +598,10 @@ export const getAPI = (
     //   );
     // },
 
-    // getCascadeAnalyses: async function <T = DVCascadeAnalysis>(
-    //   query?: string
-    // ): Promise<T[]> {
-    //   const results = [];
-
-    //   let response = await authFetch(
-    //     `https://bnra.powerappsportals.com/_api/cr4de_bnracascadeanalysises${
-    //       query ? "?" + query : ""
-    //     }`
-    //   );
+    getCascadeAnalyses: getMultiple<DVCascadeAnalysis>(
+      authFetch,
+      "cr4de_bnracascadeanalysises"
+    ),
 
     //   // eslint-disable-next-line no-constant-condition
     //   while (true) {
@@ -954,17 +947,17 @@ export const getAPI = (
       );
     },
 
-    // getAnalysisRuns: async function <T = DVAnalysisRun>(
-    //   query?: string
-    // ): Promise<T[]> {
-    //   const response = await authFetch(
-    //     `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns${
-    //       query ? "?" + query : ""
-    //     }`
-    //   );
+    getAnalysisRuns: async function <T = DVAnalysisRun>(
+      query?: string
+    ): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns${
+          query ? "?" + query : ""
+        }`
+      );
 
-    //   return (await response.json()).value;
-    // },
+      return (await response.json()).value;
+    },
     // getAnalysisRun: async function <T = DVAnalysisRun>(
     //   id: string,
     //   query?: string
@@ -977,23 +970,23 @@ export const getAPI = (
 
     //   return (await response.json()) as T;
     // },
-    // createAnalysisRun: async function (
-    //   fields: object
-    // ): Promise<CreateResponse> {
-    //   const response = await authFetch(
-    //     `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns`,
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         __RequestVerificationToken: antiForgeryToken,
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify(fields),
-    //     }
-    //   );
+    createAnalysisRun: async function (
+      fields: object
+    ): Promise<CreateResponse> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns`,
+        {
+          method: "POST",
+          headers: {
+            __RequestVerificationToken: antiForgeryToken,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(fields),
+        }
+      );
 
-    //   return { id: response.headers.get("entityId") as string };
-    // },
+      return { id: response.headers.get("entityId") as string };
+    },
 
     // getContactRoles: async function <T = DVContact>(): Promise<T[]> {
     //   const response = await customFetch(

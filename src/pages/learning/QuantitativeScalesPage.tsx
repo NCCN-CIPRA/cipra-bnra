@@ -26,8 +26,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import { DP1, DP2, DP3, DP4, DP5 } from "./QuantitativeScales/P.data";
-import * as DP50 from "./QuantitativeScales/P2050.data";
+import { DP1, DP2, DP3, DP4, DP5 } from "../../types/P";
+import * as DP50 from "../../types/P2050";
 import CCExampleChart from "../../components/charts/CCExampleChart";
 import CCTempChart from "../../components/charts/CCTempChart";
 

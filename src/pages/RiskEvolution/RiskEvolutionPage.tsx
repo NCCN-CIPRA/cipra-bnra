@@ -9,56 +9,35 @@ import CCSection from "./CCSection";
 import { Link, useOutletContext } from "react-router-dom";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { SCENARIOS } from "../../functions/scenarios";
-import Bibliography from "../RiskAnalysisPage/Bibliography";
 import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../components/RiskFileTitle";
 import DisclaimerSection from "../RiskAnalysisPage/DisclaimerSection";
-import { useEffect } from "react";
 import BNRASpeedDial from "../../components/BNRASpeedDial";
 import RiskEvolutionTutorial from "./RiskEvolutionTutorial";
 import handleExportRiskfile from "../../functions/export/exportBNRA";
 import useAPI from "../../hooks/useAPI";
+import NCCNLoader from "../../components/NCCNLoader";
+import RiskFileBibliography from "../../components/RiskFileBibliography";
 
 export default function RiskEvolutionPage() {
   const { t } = useTranslation();
   const api = useAPI();
-  const {
-    user,
-    hazardCatalogue,
-    riskFile,
-    cascades,
-    causes,
-    catalyzingEffects,
-    climateChange,
-    reloadRiskFile,
-    isEditing,
-    setIsEditing,
-    attachments,
-    loadAttachments,
-  } = useOutletContext<RiskFilePageContext>();
 
-  useEffect(() => {
-    if (!attachments) loadAttachments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { riskFile, cascades } = useOutletContext<RiskFilePageContext>();
+
+  if (!riskFile || !cascades)
+    return (
+      <Box sx={{ width: "100%", mt: 20, textAlign: "center" }}>
+        <NCCNLoader />
+      </Box>
+    );
 
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
       <Box sx={{ mb: 10 }}>
         <RiskFileTitle riskFile={riskFile} />
 
-        <DisclaimerSection
-          riskFile={riskFile}
-          mode={user && user.roles.analist ? "edit" : "view"}
-          attachments={attachments}
-          updateAttachments={loadAttachments}
-          isEditingOther={isEditing}
-          setIsEditing={setIsEditing}
-          reloadRiskFile={() =>
-            reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
-          }
-          allRisks={hazardCatalogue}
-        />
+        <DisclaimerSection riskFile={riskFile} />
 
         <Box className="climate-change" sx={{ mt: 2 }}>
           <Typography variant="h5">
@@ -66,23 +45,14 @@ export default function RiskEvolutionPage() {
           </Typography>
 
           <CCSection
-            cc={climateChange}
-            mode={user && user.roles.analist ? "edit" : "view"}
+            cc={cascades.climateChange}
             riskFile={riskFile}
-            causes={causes}
+            causes={cascades.causes}
             scenario={riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE}
-            attachments={attachments}
-            updateAttachments={loadAttachments}
-            isEditingOther={isEditing}
-            setIsEditing={setIsEditing}
-            reloadRiskFile={() =>
-              reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
-            }
-            allRisks={hazardCatalogue}
           />
         </Box>
 
-        {catalyzingEffects.length > 0 && (
+        {cascades.catalyzingEffects.length > 0 && (
           <Box className="catalyzing-effects" sx={{ mt: 8 }}>
             <Typography variant="h5">
               {t("Other Catalysing Effects", "Other Catalysing Effects")}
@@ -104,7 +74,7 @@ export default function RiskEvolutionPage() {
                 </Typography>
               </Box>
               <List>
-                {catalyzingEffects.map((c) => (
+                {cascades.catalyzingEffects.map((c) => (
                   <ListItemButton
                     key={c.cr4de_bnrariskcascadeid}
                     component={Link}
@@ -121,12 +91,7 @@ export default function RiskEvolutionPage() {
           </Box>
         )}
 
-        <Bibliography
-          riskFile={riskFile}
-          cascades={cascades[riskFile.cr4de_riskfilesid].all}
-          attachments={attachments}
-          reloadAttachments={loadAttachments}
-        />
+        <RiskFileBibliography risk={riskFile} />
 
         <BNRASpeedDial
           offset={{ x: 0, y: 56 }}

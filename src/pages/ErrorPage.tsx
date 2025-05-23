@@ -11,7 +11,7 @@ export default function ErrorPage() {
       <TitleBar
         user={null}
         setFakeRole={() => {}}
-        title={"BNRA 2023 - 2026"}
+        defaultTitle={"BNRA"}
         showUser={false}
       />
       <Box

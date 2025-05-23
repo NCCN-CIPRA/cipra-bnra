@@ -3,7 +3,6 @@ import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import {
   Grid,
-  Button,
   Box,
   Card,
   Stack,
@@ -93,20 +92,19 @@ export default function Step2BTab({
   cascades,
   directAnalyses,
   cascadeAnalyses,
-
-  reloadCascades,
-  reloadDirectAnalyses,
-  reloadCascadeAnalyses,
-}: {
+}: // reloadCascades,
+// reloadDirectAnalyses,
+// reloadCascadeAnalyses,
+{
   riskFile: DVRiskFile;
   cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
 
-  reloadRiskFile: () => void;
-  reloadCascades: () => void;
-  reloadDirectAnalyses: () => void;
-  reloadCascadeAnalyses: () => void;
+  // reloadRiskFile: () => void;
+  // reloadCascades: () => void;
+  // reloadDirectAnalyses: () => void;
+  // reloadCascadeAnalyses: () => void;
 }) {
   const api = useAPI();
 
@@ -119,7 +117,7 @@ export default function Step2BTab({
       )
     )
   );
-  const [isSaving, setIsSaving] = useState(false);
+  // const [isSaving, setIsSaving] = useState(false);
   const [discussionRequired, setDiscussionRequired] =
     useState<DiscussionRequired | null>(null);
 
@@ -314,32 +312,32 @@ export default function Step2BTab({
 
   const cascade = cascades[cascadeIndex];
 
-  const handleSave = async (innerCascadeIndex: number) => {
-    setIsSaving(true);
+  // const handleSave = async (innerCascadeIndex: number) => {
+  //   setIsSaving(true);
 
-    if (
-      riskFile.cr4de_riskfilesid !==
-      cascades[innerCascadeIndex]._cr4de_cause_hazard_value
-    ) {
-      await api.updateCascade(
-        cascades[innerCascadeIndex].cr4de_bnrariskcascadeid,
-        {
-          cr4de_quali: qualiInput.current,
-        }
-      );
-    } else {
-      await api.updateCascade(
-        cascades[innerCascadeIndex].cr4de_bnrariskcascadeid,
-        {
-          cr4de_quali_cause: qualiInput.current,
-        }
-      );
-    }
+  //   if (
+  //     riskFile.cr4de_riskfilesid !==
+  //     cascades[innerCascadeIndex]._cr4de_cause_hazard_value
+  //   ) {
+  //     await api.updateCascade(
+  //       cascades[innerCascadeIndex].cr4de_bnrariskcascadeid,
+  //       {
+  //         cr4de_quali: qualiInput.current,
+  //       }
+  //     );
+  //   } else {
+  //     await api.updateCascade(
+  //       cascades[innerCascadeIndex].cr4de_bnrariskcascadeid,
+  //       {
+  //         cr4de_quali_cause: qualiInput.current,
+  //       }
+  //     );
+  //   }
 
-    await reloadCascades();
+  //   await reloadCascades();
 
-    setIsSaving(false);
-  };
+  //   setIsSaving(false);
+  // };
 
   return (
     <>
@@ -747,22 +745,22 @@ export default function Step2BTab({
                 <Select
                   value={discussionRequired || "unknown"}
                   sx={{ width: 200 }}
-                  onChange={async (e) => {
-                    setDiscussionRequired(e.target.value as DiscussionRequired);
-                    if (
-                      riskFile.cr4de_riskfilesid !==
-                      cascade._cr4de_cause_hazard_value
-                    ) {
-                      await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
-                        cr4de_discussion_required: e.target.value,
-                      });
-                    } else {
-                      await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
-                        cr4de_discussion_required_cause: e.target.value,
-                      });
-                    }
-                    reloadCascades();
-                  }}
+                  // onChange={async (e) => {
+                  //   setDiscussionRequired(e.target.value as DiscussionRequired);
+                  //   if (
+                  //     riskFile.cr4de_riskfilesid !==
+                  //     cascade._cr4de_cause_hazard_value
+                  //   ) {
+                  //     await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+                  //       cr4de_discussion_required: e.target.value,
+                  //     });
+                  //   } else {
+                  //     await api.updateCascade(cascade.cr4de_bnrariskcascadeid, {
+                  //       cr4de_discussion_required_cause: e.target.value,
+                  //     });
+                  //   }
+                  //   reloadCascades();
+                  // }}
                 >
                   <MenuItem value="unknown">Unknown</MenuItem>
                   <MenuItem value={DiscussionRequired.REQUIRED}>
@@ -823,12 +821,12 @@ export default function Step2BTab({
               )}
             </CardContent>
             <CardActions>
-              <Button
+              {/* <Button
                 loading={isSaving}
                 onClick={() => handleSave(cascadeIndex)}
               >
                 Save
-              </Button>
+              </Button> */}
             </CardActions>
 
             <Attachments
@@ -856,7 +854,7 @@ export default function Step2BTab({
                       <ExpertInputCC
                         directAnalysis={da}
                         cascade={cascade}
-                        reloadDirectAnalyses={reloadDirectAnalyses}
+                        // reloadDirectAnalyses={reloadDirectAnalyses}
                         setReloadAttachments={() => setReloadAttachments(true)}
                       />
                       {i < a.length - 1 && (
@@ -877,7 +875,7 @@ export default function Step2BTab({
                         ) as DVDirectAnalysis
                       }
                       cascadeAnalysis={ca}
-                      reloadCascadeAnalyses={reloadCascadeAnalyses}
+                      // reloadCascadeAnalyses={reloadCascadeAnalyses}
                       setReloadAttachments={() => setReloadAttachments(true)}
                     />
                     {i < a.length - 1 && (
@@ -897,14 +895,14 @@ function ExpertInput({
   cascade,
   directAnalysis,
   cascadeAnalysis,
-  reloadCascadeAnalyses,
+  // reloadCascadeAnalyses,
   setReloadAttachments,
 }: {
   riskFile: DVRiskFile;
   cascade: DVRiskCascade<SmallRisk, SmallRisk>;
   directAnalysis: DVDirectAnalysis;
   cascadeAnalysis: DVCascadeAnalysis<unknown, unknown, DVContact>;
-  reloadCascadeAnalyses: () => void;
+  // reloadCascadeAnalyses: () => void;
   setReloadAttachments: () => void;
 }) {
   const api = useAPI();
@@ -930,16 +928,16 @@ function ExpertInput({
           <Rating
             name="size-small"
             value={rating}
-            onChange={async (_e, newValue) => {
-              setRating(newValue);
-              await api.updateCascadeAnalysis(
-                cascadeAnalysis.cr4de_bnracascadeanalysisid,
-                {
-                  cr4de_quality: newValue,
-                }
-              );
-              reloadCascadeAnalyses();
-            }}
+            // onChange={async (_e, newValue) => {
+            //   setRating(newValue);
+            //   await api.updateCascadeAnalysis(
+            //     cascadeAnalysis.cr4de_bnracascadeanalysisid,
+            //     {
+            //       cr4de_quality: newValue,
+            //     }
+            //   );
+            //   reloadCascadeAnalyses();
+            // }}
             size="small"
           />
         </Stack>
@@ -1018,17 +1016,17 @@ function ExpertInput({
 function ExpertInputCC({
   directAnalysis,
   cascade,
-  reloadDirectAnalyses,
+  // reloadDirectAnalyses,
   setReloadAttachments,
 }: {
   directAnalysis: DVDirectAnalysis<unknown, DVContact>;
   cascade: DVRiskCascade;
-  reloadDirectAnalyses: () => void;
+  // reloadDirectAnalyses: () => void;
   setReloadAttachments: () => void;
 }) {
   const api = useAPI();
 
-  const [rating, setRating] = useState(
+  const [rating] = useState(
     (directAnalysis.cr4de_quality && directAnalysis.cr4de_quality.cc) ?? null
   );
 
@@ -1042,19 +1040,19 @@ function ExpertInputCC({
           <Rating
             name="size-small"
             value={rating}
-            onChange={async (_e, newValue) => {
-              setRating(newValue);
-              await api.updateDirectAnalysis(
-                directAnalysis.cr4de_bnradirectanalysisid,
-                {
-                  cr4de_quality: JSON.stringify({
-                    ...directAnalysis.cr4de_quality,
-                    cc: newValue,
-                  }),
-                }
-              );
-              reloadDirectAnalyses();
-            }}
+            // onChange={async (_e, newValue) => {
+            //   setRating(newValue);
+            //   await api.updateDirectAnalysis(
+            //     directAnalysis.cr4de_bnradirectanalysisid,
+            //     {
+            //       cr4de_quality: JSON.stringify({
+            //         ...directAnalysis.cr4de_quality,
+            //         cc: newValue,
+            //       }),
+            //     }
+            //   );
+            //   reloadDirectAnalyses();
+            // }}
             size="small"
           />
         </Stack>

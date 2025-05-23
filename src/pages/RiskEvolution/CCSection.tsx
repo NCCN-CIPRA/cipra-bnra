@@ -1,8 +1,6 @@
-import { Box, Button, Stack } from "@mui/material";
-import TextInputBox from "../../components/TextInputBox";
+import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import useAPI from "../../hooks/useAPI";
 import { Cause as Cause2023 } from "../../functions/Probability";
 import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
 import {
@@ -13,7 +11,6 @@ import {
 } from "../../functions/scenarios";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import { DVAttachment } from "../../types/dataverse/DVAttachment";
 
 type Cause2050 = Cause2023 & {
   p2050: number;
@@ -24,42 +21,18 @@ export default function CCSection({
   causes,
   cc,
   scenario,
-  mode,
-  attachments = null,
-  updateAttachments = null,
-  isEditingOther,
-  setIsEditing,
-  reloadRiskFile,
-  allRisks,
 }: {
   riskFile: DVRiskFile;
   causes: DVRiskCascade<SmallRisk, unknown>[];
   cc: DVRiskCascade<SmallRisk, unknown> | null;
   scenario: SCENARIOS;
-  mode: "view" | "edit";
-  attachments?: DVAttachment[] | null;
-  updateAttachments?: null | (() => Promise<unknown>);
-  isEditingOther: boolean;
-  setIsEditing: (isEditing: boolean) => void;
-  reloadRiskFile: () => Promise<unknown>;
-  allRisks: SmallRisk[] | null;
 }) {
-  const api = useAPI();
-  const [saving, setSaving] = useState(false);
-  const [editing, setEditing] = useState(false);
   const [, setCCQuanti] = useState<Cause2050[] | null>(null);
   const [ccQuali, setCCQuali] = useState<string | null>(
     riskFile.cr4de_mrs_cc || null
   );
 
   useEffect(() => setCCQuali(riskFile.cr4de_mrs_cc || null), [riskFile]);
-
-  useEffect(
-    () => setIsEditing(editing),
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [editing]
-  );
 
   const scenarioSuffix = getScenarioSuffix(scenario);
   useEffect(() => {
@@ -172,29 +145,6 @@ export default function CCSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFile, causes, scenarioSuffix]);
 
-  const saveRiskFile = async () => {
-    setSaving(true);
-    await api.updateRiskFile(riskFile.cr4de_riskfilesid, {
-      cr4de_mrs_cc: ccQuali,
-    });
-    reloadRiskFile();
-
-    setEditing(false);
-    // await reloadRiskFile();
-    setSaving(false);
-    // setOpen(false);
-  };
-
-  const startEdit = () => {
-    if (isEditingOther) {
-      window.alert(
-        "You are already editing another section. Please close this section before editing another."
-      );
-    } else {
-      setEditing(true);
-    }
-  };
-
   return (
     <Box
       sx={{
@@ -213,81 +163,14 @@ export default function CCSection({
         />
       </Box>
       <Box className="cc-quali">
-        {!editing && (
-          <Box
-            className="htmleditor"
-            sx={{
-              mb: 4,
-              fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
-            }}
-            dangerouslySetInnerHTML={{ __html: ccQuali || "" }}
-          />
-        )}
-        {editing && (
-          <Box
-            sx={{
-              mb: 4,
-              fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
-            }}
-          >
-            <TextInputBox
-              limitedOptions
-              initialValue={ccQuali}
-              setUpdatedValue={(str) => setCCQuali(str || "")}
-              sources={attachments}
-              updateSources={updateAttachments}
-              allRisks={allRisks}
-            />
-          </Box>
-        )}
-        {mode === "edit" && (
-          <Stack
-            direction="row"
-            sx={{ borderTop: "1px solid #eee", pt: 1, mr: 2 }}
-          >
-            {!editing && (
-              <>
-                <Button onClick={startEdit}>Edit</Button>
-                <Box sx={{ flex: 1 }} />
-                <Button
-                  color="error"
-                  loading={saving}
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Are you sure you wish to reset this field to default? All changes made to this field will be gone."
-                      )
-                    )
-                      saveRiskFile();
-                  }}
-                >
-                  Reset to default
-                </Button>
-              </>
-            )}
-            {editing && (
-              <>
-                <Button loading={saving} onClick={() => saveRiskFile()}>
-                  Save
-                </Button>
-                <Box sx={{ flex: 1 }} />
-                <Button
-                  color="warning"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Are you sure you wish to discard your changes?"
-                      )
-                    )
-                      setEditing(false);
-                  }}
-                >
-                  Discard Changes
-                </Button>
-              </>
-            )}
-          </Stack>
-        )}
+        <Box
+          className="htmleditor"
+          sx={{
+            mb: 4,
+            fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
+          }}
+          dangerouslySetInnerHTML={{ __html: ccQuali || "" }}
+        />
       </Box>
       <Box sx={{ clear: "both" }} />
     </Box>
