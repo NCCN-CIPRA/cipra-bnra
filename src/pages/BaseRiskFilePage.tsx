@@ -64,11 +64,13 @@ export default function BaseRiskFilePage() {
   const { data: riskFiles } = useQuery({
     queryKey: [DataTable.RISK_FILE],
     queryFn: () => api.getRiskFiles(),
+    enabled: Boolean(user && user.roles.verified),
   });
 
   const { data: cascadeList } = useQuery({
     queryKey: [DataTable.RISK_CASCADE],
     queryFn: () => api.getRiskCascades(),
+    enabled: Boolean(user && user.roles.verified),
     // select: (data) =>
     //   data.find(
     //     (rf) => rf.cr4de_riskfilesid === riskSummary._cr4de_risk_file_value
