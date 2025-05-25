@@ -37,4 +37,14 @@ export default defineConfig(({ command }) => ({
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
   },
+  test: {
+    globals: true,
+    setupFiles: "./src/test/setup.ts",
+    environment: "jsdom",
+    server: {
+      deps: {
+        inline: ["@mui/x-data-grid"],
+      },
+    },
+  },
 }));
