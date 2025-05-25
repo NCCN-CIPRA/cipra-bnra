@@ -1,14 +1,6 @@
-import React, { isValidElement } from "react";
+import React from "react";
 import { render } from "@testing-library/react";
-import {
-  MemoryRouter,
-  Outlet,
-  Route,
-  RouteObject,
-  RouterProvider,
-  Routes,
-  createMemoryRouter,
-} from "react-router-dom";
+import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "@mui/material";
 import theme from "../theme";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -27,22 +19,15 @@ export function renderWithContext(
   ui: React.ReactElement,
   {
     path = "/",
-    routes = [],
     client = queryClient,
     outletContext = {},
   }: {
     path?: string;
-    routes?: RouteObject[];
     client?: QueryClient;
-    outletContext?: any;
+    outletContext?: unknown;
   } = {}
 ) {
   const routerOptions = { element: ui, path };
-
-  const router = createMemoryRouter([{ ...routerOptions }, ...routes], {
-    initialEntries: [routerOptions.path],
-    initialIndex: 1,
-  });
 
   return render(
     <QueryClientProvider client={client}>
