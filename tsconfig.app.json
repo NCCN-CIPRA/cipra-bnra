@@ -29,6 +29,7 @@
     "public",
     "**/_deprecated/**",
     "*.new.*",
-    "src/scripts/**"
+    "src/scripts/**",
+    "src/dev/**"
   ]
 }
