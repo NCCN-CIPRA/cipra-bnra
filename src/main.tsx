@@ -22,13 +22,6 @@ const queryClient = new QueryClient({
   },
 });
 
-import patchFetch from "./functions/devFetch";
-
-// Override fetch in dev environment
-// if (window.location.href.match(/localhost.*/)) {
-//   patchFetch();
-// }
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
@@ -36,39 +29,5 @@ createRoot(document.getElementById("root")!).render(
         <App />
       </ThemeProvider>
     </QueryClientProvider>
-    {/* {
-      // These iframes are used for development purposes only
-      window.location.href.indexOf("localhost") >= 0 && (
-        <>
-          <iframe
-            id="localApi"
-            title="localApi"
-            name="localApi"
-            src="https://bnra.powerappsportals.com/__dev/localapi"
-            style={{ display: "none" }}
-            onLoad={() => {
-              // @ts-expect-error window
-              window.fetch.loaded = true;
-
-              // @ts-expect-error window
-              window.frames.localApi.postMessage("getUserInfo", "*");
-            }}
-          />
-          <iframe
-            id="loginWindow"
-            title="loginWindow"
-            style={{
-              display: "none",
-              position: "absolute",
-              width: "100vw",
-              height: "100vh",
-              top: 0,
-              zIndex: 10000,
-              backgroundColor: "white",
-            }}
-          />
-        </>
-      )
-    } */}
   </StrictMode>
 );
