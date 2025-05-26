@@ -29,7 +29,8 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSummary>[] => [
     headerName: "Title",
     flex: 1,
     editable: true,
-    valueGetter: (_value, params) => t(`risk.${params.cr4de_hazard_id}.name`),
+    valueGetter: (_value, params) =>
+      t(`risk.${params.cr4de_hazard_id}.name`, params.cr4de_title),
   },
   {
     field: "cr4de_category",
