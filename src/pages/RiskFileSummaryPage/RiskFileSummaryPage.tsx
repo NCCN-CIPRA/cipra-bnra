@@ -20,7 +20,7 @@ export default function RiskFileSummaryPage() {
     <Container sx={{ mt: 2, pb: 8 }}>
       <RiskFileTitle riskFile={riskSummary} />
       <Stack direction="row" sx={{ mb: 8 }} columnGap={4}>
-        <Box id="summary-text" sx={{ flex: 1 }}>
+        <Box id="summary-text" data-testid="summary-text" sx={{ flex: 1 }}>
           <Box
             className="htmleditor"
             sx={{

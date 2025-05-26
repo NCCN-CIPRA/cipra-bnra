@@ -158,9 +158,7 @@ function getOne<InType, OutType = InType>(
     query: string | undefined = defaultQuery
   ) => {
     const response = await customFetch(
-      `https://bnra.powerappsportals.com/_api/${tableName}(${id})${
-        query ? "?" + query : ""
-      }`
+      `/_api/${tableName}(${id})${query ? "?" + query : ""}`
     );
 
     return transform(await response.json()) as unknown as T;
@@ -174,9 +172,7 @@ function getMultiple<InType, OutType = InType>(
 ) {
   return async <T = OutType>(query: string | undefined = defaultQuery) => {
     const response = await customFetch(
-      `https://bnra.powerappsportals.com/_api/${tableName}${
-        query ? "?" + query : ""
-      }`
+      `/_api/${tableName}${query ? "?" + query : ""}`
     );
 
     return (await response.json()).value.map(transform) as T[];
@@ -188,17 +184,14 @@ function create<R>(
   antiForgeryToken: string
 ) {
   return async <T = R>(fields: Partial<T>): Promise<CreateResponse> => {
-    const response = await customFetch(
-      `https://bnra.powerappsportals.com/_api/${tableName}`,
-      {
-        method: "POST",
-        headers: {
-          __RequestVerificationToken: antiForgeryToken,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(fields),
-      }
-    );
+    const response = await customFetch(`/_api/${tableName}`, {
+      method: "POST",
+      headers: {
+        __RequestVerificationToken: antiForgeryToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(fields),
+    });
 
     return { id: response.headers.get("entityId") as string };
   };
@@ -209,17 +202,14 @@ function update<R>(
   antiForgeryToken: string
 ) {
   return async <T = R>(id: string, fields: Partial<T>) => {
-    await customFetch(
-      `https://bnra.powerappsportals.com/_api/${tableName}(${id})`,
-      {
-        method: "PATCH",
-        headers: {
-          __RequestVerificationToken: antiForgeryToken,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(fields),
-      }
-    );
+    await customFetch(`/_api/${tableName}(${id})`, {
+      method: "PATCH",
+      headers: {
+        __RequestVerificationToken: antiForgeryToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(fields),
+    });
   };
 }
 function remove(
@@ -228,18 +218,27 @@ function remove(
   antiForgeryToken: string
 ) {
   return async (id: string) => {
-    await customFetch(
-      `https://bnra.powerappsportals.com/_api/${tableName}(${id})`,
-      {
-        method: "DELETE",
-        headers: {
-          __RequestVerificationToken: antiForgeryToken,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    await customFetch(`/_api/${tableName}(${id})`, {
+      method: "DELETE",
+      headers: {
+        __RequestVerificationToken: antiForgeryToken,
+        "Content-Type": "application/json",
+      },
+    });
   };
 }
+
+export const getAntiForgeryToken = async (headers = {}) => {
+  const response = await fetch(
+    `https://bnra.powerappsportals.com/_layout/tokenhtml?_=${Date.now()}`,
+    {
+      method: "GET",
+      headers,
+    }
+  );
+
+  return (await response.text()).split("value")[1].split('"')[1];
+};
 
 export const getAPI = (
   antiForgeryToken: string,

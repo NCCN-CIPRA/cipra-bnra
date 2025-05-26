@@ -15,7 +15,7 @@ import ReactPDF from "@react-pdf/renderer";
 import { BNRAExport } from "../components/export/BNRAExport";
 import "./fonts";
 import svg2PDF from "./svg2PDF";
-import { cookie } from "./cookie";
+import { cookie } from "../dev/cookie";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
 
 (async () => {

@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import { comlink } from "vite-plugin-comlink";
+import configureServer from "./src/dev/devApiProxy";
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
@@ -15,6 +16,10 @@ export default defineConfig(({ command }) => ({
       },
     }),
     nodePolyfills(),
+    {
+      name: "dev-api-proxy",
+      configureServer: configureServer,
+    },
   ],
   worker: {
     plugins: () => [

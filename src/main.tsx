@@ -25,9 +25,9 @@ const queryClient = new QueryClient({
 import patchFetch from "./functions/devFetch";
 
 // Override fetch in dev environment
-if (window.location.href.match(/localhost.*/)) {
-  patchFetch();
-}
+// if (window.location.href.match(/localhost.*/)) {
+//   patchFetch();
+// }
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -36,7 +36,7 @@ createRoot(document.getElementById("root")!).render(
         <App />
       </ThemeProvider>
     </QueryClientProvider>
-    {
+    {/* {
       // These iframes are used for development purposes only
       window.location.href.indexOf("localhost") >= 0 && (
         <>
@@ -69,6 +69,6 @@ createRoot(document.getElementById("root")!).render(
           />
         </>
       )
-    }
+    } */}
   </StrictMode>
 );

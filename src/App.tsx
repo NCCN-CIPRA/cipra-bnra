@@ -37,24 +37,13 @@ import RiskCataloguePage from "./pages/RiskCataloguePage/RiskCataloguePage";
 import MethodologyPage from "./pages/MethodologyPage/MethodologyPage";
 import MethodologyScalesPage from "./pages/MethodologyScalesPage/MethodologyScalesPage";
 import RiskDescriptionPage from "./pages/RiskDescriptionPage/RiskDescriptionPage";
+import { getAntiForgeryToken } from "./functions/api";
 
 export default function App() {
   useEffect(() => {
-    const getAntiForgeryToken = async () => {
-      const response = await fetch(
-        `https://bnra.powerappsportals.com/_layout/tokenhtml?_=${Date.now()}`,
-        {
-          method: "GET",
-        }
-      );
-
-      localStorage.setItem(
-        "antiforgerytoken",
-        await (await response.text()).split("value")[1].split('"')[1]
-      );
-    };
-
-    getAntiForgeryToken();
+    getAntiForgeryToken().then((token) =>
+      localStorage.setItem("antiforgerytoken", token)
+    );
   }, []);
 
   const router = createBrowserRouter([

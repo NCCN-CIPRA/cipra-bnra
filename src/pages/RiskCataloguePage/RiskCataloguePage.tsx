@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
@@ -21,13 +22,14 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import { CategoryIcon } from "../../functions/getIcons";
 import { BasePageContext } from "../BasePage";
 
-const columns: GridColDef<DVRiskSummary>[] = [
+const columns = (t: typeof i18next.t): GridColDef<DVRiskSummary>[] => [
   { field: "cr4de_hazard_id", headerName: "ID", width: 80 },
   {
-    field: "cr4de_title",
+    field: "title",
     headerName: "Title",
     flex: 1,
     editable: true,
+    valueGetter: (_value, params) => t(`risk.${params.cr4de_hazard_id}.name`),
   },
   {
     field: "cr4de_category",
@@ -132,7 +134,7 @@ export default function RiskCataloguePage() {
     <Paper sx={{ mb: 0, mx: 9, height: "calc(100vh - 170px)" }}>
       <DataGrid
         rows={riskFiles}
-        columns={columns}
+        columns={columns(t)}
         getRowId={(rf) => rf._cr4de_risk_file_value}
         initialState={{
           pagination: {
