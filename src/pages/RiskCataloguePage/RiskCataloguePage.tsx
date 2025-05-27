@@ -42,7 +42,7 @@ const columns = (
   { field: "cr4de_hazard_id", headerName: "ID", width: 80 },
   {
     field: "title",
-    headerName: t("hazardCatalogue.tutorial.2.3"),
+    headerName: t("hazardCatalogue.tutorial.2.3", "Title"),
     flex: 1,
     editable: true,
     valueGetter: (_value, params) =>
