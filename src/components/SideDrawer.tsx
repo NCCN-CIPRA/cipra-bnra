@@ -60,21 +60,19 @@ export default function SideDrawer({
               />
             </ListItemButton>
           </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} to="/risks" onClick={onClose}>
+              <ListItemIcon sx={{ pl: "7px" }}>
+                <ListAltIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={t("sideDrawer.hazardCatalogue", "Hazard Catalogue")}
+              />
+            </ListItemButton>
+          </ListItem>
+
           {user?.roles.beReader && (
             <>
-              <ListItem disablePadding>
-                <ListItemButton component={Link} to="/risks" onClick={onClose}>
-                  <ListItemIcon sx={{ pl: "7px" }}>
-                    <ListAltIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={t(
-                      "sideDrawer.hazardCatalogue",
-                      "Hazard Catalogue"
-                    )}
-                  />
-                </ListItemButton>
-              </ListItem>
               <ListItem disablePadding>
                 <ListItemButton
                   component={Link}

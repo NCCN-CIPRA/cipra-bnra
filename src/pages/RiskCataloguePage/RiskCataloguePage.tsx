@@ -3,10 +3,20 @@ import i18next from "i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
-import { Box, InputAdornment, Paper, styled, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  InputAdornment,
+  LinearProgress,
+  Paper,
+  styled,
+  TextField,
+  Typography,
+} from "@mui/material";
 import {
   DataGrid,
   GridColDef,
+  GridRenderCellParams,
   QuickFilter,
   QuickFilterClear,
   QuickFilterControl,
@@ -21,12 +31,18 @@ import SearchIcon from "@mui/icons-material/Search";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { CategoryIcon } from "../../functions/getIcons";
 import { BasePageContext } from "../BasePage";
+import { LoggedInUser } from "../../hooks/useLoggedInUser";
+import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
+import { capFirst } from "../../functions/capFirst";
 
-const columns = (t: typeof i18next.t): GridColDef<DVRiskSummary>[] => [
+const columns = (
+  user: LoggedInUser | null | undefined,
+  t: typeof i18next.t
+): GridColDef<DVRiskSummary>[] => [
   { field: "cr4de_hazard_id", headerName: "ID", width: 80 },
   {
     field: "title",
-    headerName: "Title",
+    headerName: t("hazardCatalogue.tutorial.2.3"),
     flex: 1,
     editable: true,
     valueGetter: (_value, params) =>
@@ -34,7 +50,7 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSummary>[] => [
   },
   {
     field: "cr4de_category",
-    headerName: "Category",
+    headerName: capFirst(t("category")),
     width: 100,
     renderCell: (params) => {
       return (
@@ -51,6 +67,100 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSummary>[] => [
       );
     },
   },
+  ...(user
+    ? [
+        {
+          field: "cr4de_mrs",
+          headerName: t("hazardCatalogue.mrs"),
+          width: 150,
+          editable: true,
+          renderCell: (params: GridRenderCellParams<DVRiskSummary>) => {
+            return params.value ? (
+              <Button
+                variant="outlined"
+                sx={{
+                  color: SCENARIO_PARAMS[params.value as SCENARIOS].color,
+                  borderColor: SCENARIO_PARAMS[params.value as SCENARIOS].color,
+                  borderRadius: "50%",
+                  backgroundColor: `${
+                    SCENARIO_PARAMS[params.value as SCENARIOS].color
+                  }20`,
+                  width: 30,
+                  minWidth: 30,
+                  height: 30,
+                  pointerEvents: "none",
+                  ml: 7,
+                }}
+              >
+                {params.value[0].toUpperCase()}
+              </Button>
+            ) : (
+              <Typography
+                sx={{
+                  borderRadius: "50%",
+                  width: 30,
+                  minWidth: 30,
+                  height: 30,
+                  pointerEvents: "none",
+                  ml: 8.5,
+                }}
+              >
+                -
+              </Typography>
+            );
+          },
+        },
+        {
+          field: "cr4de_mrs_p",
+          headerName: t("learning.probability.2.text.title"),
+          width: 200,
+          editable: true,
+          renderCell: (params: GridRenderCellParams<DVRiskSummary>) => {
+            return (
+              <Box
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  px: 1,
+                }}
+              >
+                <LinearProgress
+                  variant="determinate"
+                  value={params.value * 20}
+                  sx={{ width: "100%", height: 8 }}
+                />
+              </Box>
+            );
+          },
+        },
+        {
+          field: "cr4de_mrs_i",
+          headerName: "Impact",
+          width: 200,
+          editable: true,
+          renderCell: (params: GridRenderCellParams<DVRiskSummary>) => {
+            console.log(params);
+            return (
+              <Box
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  px: 1,
+                }}
+              >
+                <LinearProgress
+                  variant="determinate"
+                  value={params.value * 20}
+                  sx={{ width: "100%", height: 8 }}
+                />
+              </Box>
+            );
+          },
+        },
+      ]
+    : []),
 ];
 
 const StyledQuickFilter = styled(QuickFilter)({
@@ -135,7 +245,7 @@ export default function RiskCataloguePage() {
     <Paper sx={{ mb: 0, mx: 9, height: "calc(100vh - 170px)" }}>
       <DataGrid
         rows={riskFiles}
-        columns={columns(t)}
+        columns={columns(user, t)}
         getRowId={(rf) => rf._cr4de_risk_file_value}
         initialState={{
           pagination: {

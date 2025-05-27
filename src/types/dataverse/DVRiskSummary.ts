@@ -47,6 +47,7 @@ export type DVRiskSummary<RiskFileType = unknown, T = ParsedRiskFields> = {
   cr4de_summary_de: string | null;
 
   cr4de_mrs_p: number | null;
+  cr4de_mrs_i: number | null;
   cr4de_mrs_h: number | null;
   cr4de_mrs_s: number | null;
   cr4de_mrs_e: number | null;

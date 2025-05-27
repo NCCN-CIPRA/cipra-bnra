@@ -767,6 +767,7 @@ export default function CalculationPage() {
         cr4de_mrs_p: rf.results
           ? Math.round(10 * rf.results![scenario].TP) / 10
           : 0,
+        cr4de_mrs_i: rf.results ? rf.results![scenario].TI : 0,
         cr4de_mrs_h: rf.results ? rf.results![scenario].TI_H : 0,
         cr4de_mrs_s: rf.results ? rf.results![scenario].TI_S : 0,
         cr4de_mrs_e: rf.results ? rf.results![scenario].TI_E : 0,
