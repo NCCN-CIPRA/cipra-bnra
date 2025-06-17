@@ -174,7 +174,7 @@ export default function EmailManagementTab() {
   return (
     <>
       <Container>
-        <Paper sx={{ p: 2 }}>
+        <Paper sx={{ p: 2, mb: 15 }}>
           <Stack direction="column" rowGap={2}>
             <Stack direction="row">
               <FormControl sx={{ flex: 1 }}>

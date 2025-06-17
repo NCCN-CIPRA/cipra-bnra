@@ -5,7 +5,7 @@ import ContactsIcon from "@mui/icons-material/Contacts";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import EmailIcon from "@mui/icons-material/Email";
-import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import UserListTab from "./UserListTab";
 import { AdminPageContext } from "../AdminPage";
 import EmailManagementTab from "./EmailManagementTab";
@@ -24,10 +24,13 @@ import EmailManagementTab from "./EmailManagementTab";
  * 5. When the contact clicks the link in the invitation email, they can finish their registration
  *
  */
+type UserManagementParams = {
+  tabName: string;
+};
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const { tabName } = useParams<UserManagementParams>();
   const { user } = useOutletContext<AdminPageContext>();
 
   usePageTitle("User Management");
@@ -37,10 +40,18 @@ export default function UserManagementPage() {
   ]);
 
   let tab = 0;
-  if (pathname.indexOf("bulk") >= 0) tab = 1;
-  if (pathname.indexOf("emails") >= 0) tab = 2;
-  if (pathname.indexOf("statistics") >= 0) tab = 3;
-
+  switch (tabName) {
+    case "bulk":
+      tab = 1;
+      break;
+    case "emails":
+      tab = 2;
+      break;
+    case "statistics":
+      tab = 3;
+      break;
+  }
+  console.log(tabName);
   return (
     <>
       {tab === 0 && <UserListTab user={user} />}

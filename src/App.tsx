@@ -236,7 +236,10 @@ export default function App() {
                 { path: "/admin/process", element: <ProcessManagementPage /> },
                 { path: "/admin/experts", element: <ExpertManagementPage /> },
                 { path: "/admin/corrections", element: <CorrectionsPage /> },
-                { path: "/admin/users", element: <UserManagementPage /> },
+                {
+                  path: "/admin/users/:tabName?",
+                  element: <UserManagementPage />,
+                },
               ],
             },
           ],
