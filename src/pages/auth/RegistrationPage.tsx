@@ -18,6 +18,7 @@ import useAPI from "../../hooks/useAPI";
 import { Trans, useTranslation } from "react-i18next";
 import Typography from "@mui/material/Typography";
 import FormGroup from "@mui/material/FormGroup";
+import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -67,6 +68,11 @@ export default function RegistrationPage() {
   const [loading, setLoading] = useState(false);
 
   const [registrationForm, setRegistrationForm] = useState("");
+
+  useBreadcrumbs([
+    { name: "BNRA", url: "/" },
+    { name: "Registration", url: "" },
+  ]);
 
   const handleRegisterStart = async () => {
     setLoading(true);
@@ -272,12 +278,12 @@ export default function RegistrationPage() {
                       <Trans i18nKey="auth.registration.disclaimer4">
                         U kunt uw recht van toegang, rechtzetting, verwijdering,
                         beperking of verzet tegen de verwerking van uw gegevens
-                        uitoefenen door te mailen naar{" "}
-                        <a href="mailto:cipra.bnra@nccn.fgov.be">
-                          cipra.bnra@nccn.fgov.be
-                        </a>
-                        .
-                      </Trans>
+                        uitoefenen door te mailen naar
+                      </Trans>{" "}
+                      <a href="mailto:cipra.bnra@nccn.fgov.be">
+                        cipra.bnra@nccn.fgov.be
+                      </a>
+                      .
                     </Typography>
 
                     <FormGroup sx={{ mt: 2 }}>
@@ -325,22 +331,22 @@ export default function RegistrationPage() {
                         </Trans>
                       </AlertTitle>
                       <Trans i18nKey="auth.registration.error.content">
-                        Please try again or contact{" "}
-                        <a href="mailto:cipra.bnra@nccn.fgov.be">
-                          cipra.bnra@nccn.fgov.be
-                        </a>
-                      </Trans>
+                        Please try again or contact
+                      </Trans>{" "}
+                      <a href="mailto:cipra.bnra@nccn.fgov.be">
+                        cipra.bnra@nccn.fgov.be
+                      </a>
                     </Alert>
                   )}
                   <Typography variant="body2" paragraph>
                     <Trans i18nKey="auth.registration.introduction1">
                       Please enter the invitation code you received from your
                       NCCN contact below. If you did not receive a code, please
-                      contact{" "}
-                      <a href="mailto:cipra.bnra@nccn.fgov.be">
-                        cipra.bnra@nccn.fgov.be
-                      </a>
-                    </Trans>
+                      contact
+                    </Trans>{" "}
+                    <a href="mailto:cipra.bnra@nccn.fgov.be">
+                      cipra.bnra@nccn.fgov.be
+                    </a>
                   </Typography>
                   <TextField
                     id="outlined-email-input"

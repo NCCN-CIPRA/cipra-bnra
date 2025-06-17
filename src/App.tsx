@@ -70,7 +70,7 @@ export default function App() {
               element: <AuthenticationPage />,
             },
             {
-              path: "/auth/register/:registration_code",
+              path: "/auth/register/:registration_code?",
               element: <RegistrationPage />,
             },
             {
