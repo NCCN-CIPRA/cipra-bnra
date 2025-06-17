@@ -4,11 +4,6 @@ import {
   Button,
   Card,
   CardActions,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   IconButton,
   Paper,
   Table,
@@ -17,14 +12,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from "@mui/material";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import useRecords from "../../hooks/useRecords";
 import { DVTranslation } from "../../types/dataverse/DVTranslation";
-import { Stack } from "@mui/system";
 import Delete from "@mui/icons-material/Delete";
+import TranslationDialog from "../../components/TranslationDialog";
 
 const TranslationsTable = React.memo(
   ({
@@ -120,119 +114,6 @@ const TranslationsTable = React.memo(
     </TableContainer>
   )
 );
-
-function TranslationDialog({
-  open,
-  translation,
-  isLoading,
-  setIsLoading,
-  onClose,
-  reloadData,
-}: {
-  open: boolean;
-  translation: DVTranslation;
-  isLoading: boolean;
-  setIsLoading: (l: boolean) => void;
-  onClose: () => void;
-  reloadData: () => void;
-}) {
-  const api = useAPI();
-  const [newTranslation, setNewTranslation] = useState(translation);
-
-  const handleSaveTranslation = async () => {
-    setIsLoading(true);
-
-    await api.updateTranslation(newTranslation.cr4de_bnratranslationid, {
-      cr4de_en: newTranslation.cr4de_en,
-      cr4de_nl: newTranslation.cr4de_nl,
-      cr4de_fr: newTranslation.cr4de_fr,
-      cr4de_de: newTranslation.cr4de_de,
-    });
-
-    reloadData();
-    setIsLoading(false);
-    onClose();
-  };
-
-  return (
-    <Dialog open={open} onClose={onClose} fullWidth>
-      <DialogTitle>Edit Translations</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          <Typography variant="body1" paragraph>
-            {newTranslation.cr4de_name}
-          </Typography>
-          <Typography variant="h6">EN: </Typography>
-          <Stack direction="column" spacing={3} sx={{ pb: 4 }}>
-            <TextField
-              multiline
-              rows={3}
-              value={newTranslation.cr4de_en}
-              onChange={(e) =>
-                setNewTranslation({
-                  ...newTranslation,
-                  cr4de_en: e.target.value,
-                })
-              }
-            />
-          </Stack>
-          <Typography variant="h6">NL: </Typography>
-          <Stack direction="column" spacing={3} sx={{ pb: 4 }}>
-            <TextField
-              multiline
-              rows={3}
-              value={newTranslation.cr4de_nl}
-              onChange={(e) =>
-                setNewTranslation({
-                  ...newTranslation,
-                  cr4de_nl: e.target.value,
-                })
-              }
-            />
-          </Stack>
-          <Typography variant="h6">FR: </Typography>
-          <Stack direction="column" spacing={3} sx={{ pb: 4 }}>
-            <TextField
-              multiline
-              rows={3}
-              value={newTranslation.cr4de_fr}
-              onChange={(e) =>
-                setNewTranslation({
-                  ...newTranslation,
-                  cr4de_fr: e.target.value,
-                })
-              }
-            />
-          </Stack>
-          <Typography variant="h6">DE: </Typography>
-          <Stack direction="column" spacing={3} sx={{ pb: 4 }}>
-            <TextField
-              multiline
-              rows={3}
-              value={newTranslation.cr4de_de}
-              onChange={(e) =>
-                setNewTranslation({
-                  ...newTranslation,
-                  cr4de_de: e.target.value,
-                })
-              }
-            />
-          </Stack>
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => onClose()}>Cancel</Button>
-        <Button
-          loading={isLoading}
-          variant="text"
-          onClick={() => handleSaveTranslation()}
-        >
-          Save
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
 
 export default function TranslationsPage() {
   const api = useAPI();

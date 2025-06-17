@@ -336,7 +336,10 @@ export default function CorrectionsPage() {
         fields[f.field] = base;
       }
       // console.log(fields);
-      await api.updateRiskFile(rf.riskFile.cr4de_riskfilesid, fields);
+      await api.updateRiskFile(
+        rf.riskFile.cr4de_riskfilesid,
+        fields as Partial<DVRiskFile>
+      );
 
       //   logger(`Saving calculations (${i + 1}/${results.length})`, 1);
       setCalculationProgress((100 * (i + 1)) / corrections.length);

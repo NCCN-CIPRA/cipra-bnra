@@ -17,15 +17,36 @@ import { useTranslation } from "react-i18next";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
+// eslint-disable-next-line react-refresh/only-export-components
+export const sections = {
+  probability: "probability",
+  human: "impact-human",
+  ha: "impact-human-ha",
+  hb: "impact-human-hb",
+  hc: "impact-human-hc",
+  societal: "impact-societal",
+  sa: "impact-societal-sa",
+  sb: "impact-societal-sb",
+  sc: "impact-societal-sc",
+  sd: "impact-societal-sd",
+  environmental: "impact-environmental",
+  ea: "impact-environmental-ea",
+  financial: "impact-financial",
+  fa: "impact-financial-fa",
+  fb: "impact-financial",
+};
+
 export default function SideBar({
   open,
   width,
   pageName,
+  activeSection,
   handleDrawerToggle,
 }: {
   open: boolean;
   width: number;
   pageName: string;
+  activeSection: string | null;
   handleDrawerToggle: () => void;
 }) {
   const { t } = useTranslation();
@@ -33,7 +54,7 @@ export default function SideBar({
   const probability = [
     {
       title: t("methodology.scales.probability.title", "Probability"),
-      id: "probability",
+      id: sections.ha,
       inset: 1,
       letter: "P",
     },
@@ -41,19 +62,19 @@ export default function SideBar({
   const human = [
     {
       title: t("learning.impact.ha.title", ""),
-      id: "impact-ha",
+      id: sections.ha,
       inset: 1,
       letter: "Ha",
     },
     {
       title: t("learning.impact.hb.title", ""),
-      id: "impact-hb",
+      id: sections.hb,
       inset: 1,
       letter: "Hb",
     },
     {
       title: t("learning.impact.hc.title", ""),
-      id: "impact-hc",
+      id: sections.hc,
       inset: 1,
       letter: "Hc",
     },
@@ -61,27 +82,49 @@ export default function SideBar({
   const societal = [
     {
       title: t("learning.impact.sa.title", ""),
-      id: "impact-sa",
+      id: sections.sa,
       inset: 1,
       letter: "Sa",
     },
     {
       title: t("learning.impact.sb.title", ""),
-      id: "impact-sb",
+      id: sections.sb,
       inset: 1,
       letter: "Sb",
     },
     {
       title: t("learning.impact.sc.title", ""),
-      id: "impact-sc",
+      id: sections.sc,
       inset: 1,
       letter: "Sc",
     },
     {
       title: t("learning.impact.sd.title", ""),
-      id: "impact-sd",
+      id: sections.sd,
       inset: 1,
       letter: "Sd",
+    },
+  ];
+  const environmental = [
+    {
+      title: t("learning.impact.ea.title", ""),
+      id: sections.ea,
+      inset: 1,
+      letter: "Ea",
+    },
+  ];
+  const financial = [
+    {
+      title: t("learning.impact.fa.title", ""),
+      id: sections.fa,
+      inset: 1,
+      letter: "Fa",
+    },
+    {
+      title: t("learning.impact.fb.title", ""),
+      id: sections.fb,
+      inset: 1,
+      letter: "Fb",
     },
   ];
 
@@ -223,11 +266,12 @@ export default function SideBar({
                 <ListItemText
                   secondary={title}
                   sx={{ opacity: open ? 1 : 0, ml: inset ? 4 : 2 }}
-                  secondaryTypographyProps={
-                    pageName === id
-                      ? { fontWeight: "bold", color: "primary" }
-                      : {}
-                  }
+                  slotProps={{
+                    secondary:
+                      activeSection === id
+                        ? { fontWeight: "bold", color: "primary" }
+                        : {},
+                  }}
                 />
               </ListItemButton>
             ) : (
@@ -286,11 +330,142 @@ export default function SideBar({
                 <ListItemText
                   secondary={title}
                   sx={{ opacity: open ? 1 : 0, ml: inset ? 4 : 2 }}
-                  secondaryTypographyProps={
-                    pageName === id
-                      ? { fontWeight: "bold", color: "primary" }
-                      : {}
-                  }
+                  slotProps={{
+                    secondary:
+                      activeSection === id
+                        ? { fontWeight: "bold", color: "primary" }
+                        : {},
+                  }}
+                />
+              </ListItemButton>
+            ) : (
+              <Tooltip title={title}>
+                <ListItemButton
+                  sx={[
+                    {
+                      minHeight: 48,
+                      px: 2.5,
+                      justifyContent: "center",
+                    },
+                  ]}
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: pageName === id ? "rgb(0, 164, 154)" : undefined,
+                      width: 32,
+                      height: 32,
+                    }}
+                  >
+                    {letter || title[0]}
+                  </Avatar>
+                </ListItemButton>
+              </Tooltip>
+            )}
+          </ListItem>
+        ))}
+      </List>
+
+      <Divider />
+      <List dense>
+        {open && (
+          <ListItem>
+            <ListItemText
+              primary={t("learning.impact.e.title", "")}
+              slotProps={{ primary: { style: { fontWeight: "bold" } } }}
+            />
+          </ListItem>
+        )}
+        {environmental.map(({ title, id, letter, inset }) => (
+          <ListItem
+            key={id}
+            disablePadding
+            sx={{ display: "block", whiteSpace: "normal" }}
+          >
+            {open ? (
+              <ListItemButton
+                sx={[
+                  {
+                    minHeight: 48,
+                    px: 2.5,
+
+                    justifyContent: "initial",
+                  },
+                ]}
+              >
+                <ListItemText
+                  secondary={title}
+                  sx={{ opacity: open ? 1 : 0, ml: inset ? 4 : 2 }}
+                  slotProps={{
+                    secondary:
+                      activeSection === id
+                        ? { fontWeight: "bold", color: "primary" }
+                        : {},
+                  }}
+                />
+              </ListItemButton>
+            ) : (
+              <Tooltip title={title}>
+                <ListItemButton
+                  sx={[
+                    {
+                      minHeight: 48,
+                      px: 2.5,
+                      justifyContent: "center",
+                    },
+                  ]}
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: pageName === id ? "rgb(0, 164, 154)" : undefined,
+                      width: 32,
+                      height: 32,
+                    }}
+                  >
+                    {letter || title[0]}
+                  </Avatar>
+                </ListItemButton>
+              </Tooltip>
+            )}
+          </ListItem>
+        ))}
+      </List>
+
+      <Divider />
+      <List dense>
+        {open && (
+          <ListItem>
+            <ListItemText
+              primary={t("learning.impact.f.title", "")}
+              slotProps={{ primary: { style: { fontWeight: "bold" } } }}
+            />
+          </ListItem>
+        )}
+        {financial.map(({ title, id, letter, inset }) => (
+          <ListItem
+            key={id}
+            disablePadding
+            sx={{ display: "block", whiteSpace: "normal" }}
+          >
+            {open ? (
+              <ListItemButton
+                sx={[
+                  {
+                    minHeight: 48,
+                    px: 2.5,
+
+                    justifyContent: "initial",
+                  },
+                ]}
+              >
+                <ListItemText
+                  secondary={title}
+                  sx={{ opacity: open ? 1 : 0, ml: inset ? 4 : 2 }}
+                  slotProps={{
+                    secondary:
+                      activeSection === id
+                        ? { fontWeight: "bold", color: "primary" }
+                        : {},
+                  }}
                 />
               </ListItemButton>
             ) : (

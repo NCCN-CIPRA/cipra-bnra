@@ -73,12 +73,11 @@ const columns: GridColDef<DVContact<DVParticipation[]>>[] = [
     width: 300,
     valueGetter: (_value, row) => {
       if (
-        new Date(row.msdyn_portaltermsagreementdate as string) <
-        new Date(2025, 5, 10)
+        new Date(row.createdon as string) < new Date(2025, 5, 10) ||
+        row.emailaddress1.indexOf("nccn.fgov.be") >= 0
       ) {
         return ROLE.READER;
       }
-
       if (!row.cr4de_permissions) return ROLE.APPROVE;
 
       const role = ROLES_REVERSE[row.cr4de_permissions];
@@ -414,6 +413,9 @@ export default function UserListTab({ user }: { user: LoggedInUser }) {
             paginationModel: {
               pageSize: 10,
             },
+          },
+          sorting: {
+            sortModel: [{ field: "createdon", sort: "desc" }],
           },
         }}
         pageSizeOptions={[10, 20, 50, 500]}

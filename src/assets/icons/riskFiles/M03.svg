@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 368.33 354">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        stroke: #000;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        stroke-width: 12px;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5 {
+        fill: none;
+        stroke-linejoin: round;
+      }
+
+      .cls-1, .cls-3, .cls-4, .cls-5 {
+        stroke-linecap: round;
+      }
+
+      .cls-6 {
+        mask: url(#mask);
+      }
+
+      .cls-3, .cls-4, .cls-5 {
+        stroke: #00a49a;
+      }
+
+      .cls-4 {
+        stroke-width: 6px;
+      }
+
+      .cls-7 {
+        fill: #d9d9d9;
+        fill-rule: evenodd;
+      }
+
+      .cls-5 {
+        stroke-width: 9px;
+      }
+    </style>
+    <mask id="mask" x="6.07" y="142.09" width="361.02" height="217.93" maskUnits="userSpaceOnUse">
+      <g id="_7o20Jknp98a" data-name="7o20Jknp98a">
+        <path class="cls-7" d="M367.08,142.09H6.07v217.93h361.02v-217.93ZM229,198c0,24.85-20.15,45-45,45s-45-20.15-45-45,20.15-45,45-45,45,20.15,45,45M149,268c-30.38,0-55,24.62-55,55v25h180v-25c0-30.38-24.62-55-55-55h-70Z"/>
+      </g>
+    </mask>
+  </defs>
+  <g class="cls-6">
+    <g>
+      <path class="cls-1" d="M84,243c16.57,0,30-13.43,30-30s-13.43-30-30-30-30,13.43-30,30,13.43,30,30,30"/>
+      <path class="cls-2" d="M19,313c0-24.85,20.15-45,45-45h40c24.85,0,45,20.15,45,45v15H19v-15Z"/>
+      <path class="cls-1" d="M284,243c16.57,0,30-13.43,30-30s-13.43-30-30-30-30,13.43-30,30,13.43,30,30,30"/>
+      <path class="cls-2" d="M219,313c0-24.85,20.15-45,45-45h40c24.85,0,45,20.15,45,45v15h-130v-15Z"/>
+    </g>
+  </g>
+  <path class="cls-1" d="M184,243c24.85,0,45-20.15,45-45s-20.15-45-45-45-45,20.15-45,45,20.15,45,45,45"/>
+  <path class="cls-2" d="M94,323c0-30.38,24.62-55,55-55h70c30.38,0,55,24.62,55,55v25H94v-25Z"/>
+  <path class="cls-5" d="M203.1,180l-37.54,37.54M203.1,217.54l-37.54-37.54"/>
+  <path class="cls-4" d="M92.94,204.06l-17.87,17.87M92.94,221.94l-17.87-17.87"/>
+  <path class="cls-4" d="M292.94,204.06l-17.87,17.87M292.94,221.94l-17.87-17.87"/>
+  <path class="cls-3" d="M362.33,54H6.33M314.33,6l48,48-48,48"/>
+</svg>

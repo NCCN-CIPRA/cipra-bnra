@@ -4,15 +4,18 @@
 import { Image, Page, Text, View } from "@react-pdf/renderer";
 import { DPI, PAGE_SIZE, PAGE_STYLES, POINTS_PER_CM, SCALE } from "./styles";
 import { NCCN_GREEN } from "../../functions/colors";
+import { Trans } from "react-i18next";
 
 export default function FrontPage({
   nccnLogo,
   bnraLogo,
   triangles,
+  raw = false,
 }: {
   nccnLogo: string;
   bnraLogo: string;
   triangles: string;
+  raw?: boolean;
 }) {
   return (
     <>
@@ -25,23 +28,28 @@ export default function FrontPage({
       >
         <View
           style={{
-            width: "70%",
+            width: "40%",
             margin: "auto",
             textAlign: "center",
             marginTop: PAGE_STYLES.padding,
             marginBottom: 0,
+            minHeight: 3 * POINTS_PER_CM,
           }}
         >
-          <Text
-            style={{
-              fontFamily: "NH",
-              fontSize: 30 * SCALE,
-              color: "white",
-              fontWeight: "bold",
-            }}
-          >
-            Belgian National Risk Assessment
-          </Text>
+          {!raw && (
+            <Text
+              style={{
+                fontFamily: "NH",
+                fontSize: 30 * SCALE,
+                color: "white",
+                fontWeight: "bold",
+              }}
+            >
+              <Trans i18nKey="report.frontpage.title">
+                Belgian National Risk Assessment
+              </Trans>
+            </Text>
+          )}
         </View>
         <View
           style={{
@@ -50,32 +58,39 @@ export default function FrontPage({
             textAlign: "center",
             marginTop: 10 * SCALE,
             marginBottom: 30 * SCALE,
+            minHeight: 3 * POINTS_PER_CM,
           }}
         >
-          <Text
-            style={{
-              fontFamily: "NH",
-              fontSize: 20 * SCALE,
-              color: "white",
-              fontWeight: "normal",
-            }}
-          >
-            Full Report
-          </Text>
-          <Text
-            style={{
-              fontFamily: "NH",
-              fontSize: 20 * SCALE,
-              color: "white",
-              fontWeight: "normal",
-            }}
-          >
-            2023 - 2026
-          </Text>
+          {!raw && (
+            <>
+              <Text
+                style={{
+                  fontFamily: "NH",
+                  fontSize: 20 * SCALE,
+                  color: "white",
+                  fontWeight: "normal",
+                }}
+              >
+                <Trans i18nKey="report.frontpage.full_report">
+                  Full Report
+                </Trans>
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "NH",
+                  fontSize: 20 * SCALE,
+                  color: "white",
+                  fontWeight: "normal",
+                }}
+              >
+                <Trans i18nKey="report.frontpage.year">2023 - 2026</Trans>
+              </Text>
+            </>
+          )}
         </View>
-        {/* <Image
+        <Image
           source={{ uri: "https://bnra.powerappsportals.com/report-front.png" }}
-        /> */}
+        />
         <View
           style={{
             position: "absolute",
@@ -85,14 +100,14 @@ export default function FrontPage({
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            paddingLeft: PAGE_STYLES.padding,
-            paddingRight: PAGE_STYLES.padding,
-            paddingBottom: PAGE_STYLES.padding - 1.5 * POINTS_PER_CM,
+            paddingLeft: PAGE_STYLES.padding - 0.8 * POINTS_PER_CM,
+            paddingRight: PAGE_STYLES.padding - 1.5 * POINTS_PER_CM,
+            paddingBottom: PAGE_STYLES.padding - 2 * POINTS_PER_CM,
           }}
           // debug={true}
         >
-          <Image src={nccnLogo} style={{ height: 3 * POINTS_PER_CM }} />
-          <Image src={bnraLogo} style={{ height: 2 * POINTS_PER_CM }} />
+          <Image src={nccnLogo} style={{ height: 4 * POINTS_PER_CM }} />
+          <Image src={bnraLogo} style={{ height: 2.6 * POINTS_PER_CM }} />
         </View>
       </Page>
       <Page
@@ -123,7 +138,7 @@ export default function FrontPage({
               fontWeight: "semibold",
             }}
           >
-            Better prepared. Better response.
+            Anticiper pour mieux gérer
           </Text>
           <View
             style={{

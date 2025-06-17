@@ -1,6 +1,6 @@
 import { Trans, useTranslation } from "react-i18next";
 import { Stack, Typography } from "@mui/material";
-import { M } from "../../../types/M";
+import { M } from "../../../components/indicators/M";
 
 export function MValueStack({ value }: { value: number }) {
   const { t } = useTranslation();

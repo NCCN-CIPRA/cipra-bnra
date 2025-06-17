@@ -140,7 +140,6 @@ const columns = (
           width: 200,
           editable: true,
           renderCell: (params: GridRenderCellParams<DVRiskSummary>) => {
-            console.log(params);
             return (
               <Box
                 sx={{

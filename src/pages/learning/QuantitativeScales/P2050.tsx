@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import { Trans } from "react-i18next";
-import { DPRows, DPs } from "../../../types/P2050";
+import { DPRows, DPs } from "../../../components/indicators/P2050";
 
 export const DPValueStack = ({ value }: { value: number }) => {
   if (value < 0) return null;

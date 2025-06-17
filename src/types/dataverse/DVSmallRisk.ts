@@ -15,14 +15,25 @@ export interface SmallRisk {
   cr4de_label_hilp: boolean | null;
   cr4de_label_cc: boolean | null;
   cr4de_label_cb: boolean | null;
-  cr4de_label_impact: "Human" | "Societal" | "Environmental" | "Financial" | null;
+  cr4de_label_impact:
+    | "Human"
+    | "Societal"
+    | "Environmental"
+    | "Financial"
+    | null;
   cr4de_result_snapshot: string | null;
 
   results?: RESULT_SNAPSHOT | null;
 }
 
-export const getResultSnapshot = (riskFile: SmallRisk): RESULT_SNAPSHOT | null => {
-  if (riskFile.cr4de_result_snapshot === null || riskFile.cr4de_result_snapshot === "") return null;
+export const getResultSnapshot = (
+  riskFile: SmallRisk
+): RESULT_SNAPSHOT | null => {
+  if (
+    riskFile.cr4de_result_snapshot == null ||
+    riskFile.cr4de_result_snapshot === ""
+  )
+    return null;
 
   return JSON.parse(riskFile.cr4de_result_snapshot);
 };

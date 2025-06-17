@@ -24,7 +24,6 @@ import {
 import {
   CASCADE_RESULT_SNAPSHOT,
   DVRiskCascade,
-  getCascadeResultSnapshot,
   RISK_CASCADE_QUANTI_FIELDS,
 } from "../../types/dataverse/DVRiskCascade";
 import {
@@ -43,10 +42,7 @@ import {
 import { v4 as uuid } from "uuid";
 import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVContact } from "../../types/dataverse/DVContact";
-import {
-  getResultSnapshot,
-  SmallRisk,
-} from "../../types/dataverse/DVSmallRisk";
+import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import RiskFilesDataGrid from "./RiskFilesDataGrid";
 import RiskMatrix from "./RiskMatrix";
 import RiskNetworkGraph from "./RiskNetworkGraph";
@@ -69,16 +65,10 @@ import {
 } from "../../functions/scenarios";
 import { getTotalProbabilityRelativeScale } from "../../functions/Probability";
 import roundString from "../../functions/roundNumberString";
-import {
-  Cascades,
-  getAverageCP,
-  getCascades,
-  getCausesWithDP,
-  getEffectsWithDI,
-} from "../../functions/cascades";
+import { getAverageCP } from "../../functions/cascades";
 import { getDamageIndicatorAbsoluteScale } from "../../functions/Impact";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
-import { useTranslation } from "react-i18next";
+// import { useTranslation } from "react-i18next";
 
 const round = (v: number, dig: number) =>
   parseFloat(roundString(v, dig).replace(",", "."));
@@ -272,7 +262,7 @@ const getScenarioResult = (
 
 export default function CalculationPage() {
   const api = useAPI();
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const logLines = useRef<string[]>(["Loading data..."]);
   const [, setUpdateLog] = useState(Date.now());
 
@@ -676,147 +666,147 @@ export default function CalculationPage() {
   const saveSummaries = async () => {
     if (!riskFiles || !cascades || !summaries) return;
 
-    const riskFilesCalc = riskFiles.map((rf) => ({
-      ...rf,
-      results: getResultSnapshot(rf),
-    }));
+    // const riskFilesCalc = riskFiles.map((rf) => ({
+    //   ...rf,
+    //   results: getResultSnapshot(rf),
+    // }));
 
-    const hc: { [key: string]: DVRiskFile } = riskFilesCalc.reduce(
-      (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),
-      {}
-    );
-    const riskCascades: DVRiskCascade<SmallRisk, SmallRisk>[] = cascades.map(
-      (c) => ({
-        ...c,
-        cr4de_cause_hazard: hc[c._cr4de_cause_hazard_value],
-        cr4de_effect_hazard: hc[c._cr4de_effect_hazard_value],
-        results: getCascadeResultSnapshot(c),
-      })
-    );
+    // const hc: { [key: string]: DVRiskFile } = riskFilesCalc.reduce(
+    //   (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),
+    //   {}
+    // );
+    // const riskCascades: DVRiskCascade<SmallRisk, SmallRisk>[] = cascades.map(
+    //   (c) => ({
+    //     ...c,
+    //     cr4de_cause_hazard: hc[c._cr4de_cause_hazard_value],
+    //     cr4de_effect_hazard: hc[c._cr4de_effect_hazard_value],
+    //     results: getCascadeResultSnapshot(c),
+    //   })
+    // );
 
-    const realCascades = riskFilesCalc.reduce(
-      (acc, rf) => getCascades(rf, acc, hc)(riskCascades),
-      {} as { [key: string]: Cascades }
-    );
+    // const realCascades = riskFilesCalc.reduce(
+    //   (acc, rf) => getCascades(rf, acc, hc)(riskCascades),
+    //   {} as { [key: string]: Cascades }
+    // );
 
-    for (const rf of riskFilesCalc) {
-      const summary = summaries.find(
-        (s) => s.cr4de_hazard_id === rf.cr4de_hazard_id
-      );
+    // for (const rf of riskFilesCalc) {
+    //   const summary = summaries.find(
+    //     (s) => s.cr4de_hazard_id === rf.cr4de_hazard_id
+    //   );
 
-      const scenario = rf.cr4de_mrs || SCENARIOS.CONSIDERABLE;
-      const causes = getCausesWithDP(
-        rf,
-        realCascades[rf.cr4de_riskfilesid],
-        scenario
-      );
-      const effects = getEffectsWithDI(
-        rf,
-        realCascades[rf.cr4de_riskfilesid],
-        scenario
-      );
+    //   const scenario = rf.cr4de_mrs || SCENARIOS.CONSIDERABLE;
+    //   const causes = getCausesWithDP(
+    //     rf,
+    //     realCascades[rf.cr4de_riskfilesid],
+    //     scenario
+    //   );
+    //   const effects = getEffectsWithDI(
+    //     rf,
+    //     realCascades[rf.cr4de_riskfilesid],
+    //     scenario
+    //   );
 
-      let minP = 0;
-      let cumulP = 0;
+    //   let minP = 0;
+    //   let cumulP = 0;
 
-      if (rf.results) {
-        const Ptot = rf.results[scenario].TP;
+    //   if (rf.results) {
+    //     const Ptot = rf.results[scenario].TP;
 
-        for (const c of causes.sort((a, b) => b.p - a.p)) {
-          cumulP += c.p / Ptot;
+    //     for (const c of causes.sort((a, b) => b.p - a.p)) {
+    //       cumulP += c.p / Ptot;
 
-          if (cumulP >= 0.805) {
-            minP = c.p;
-            break;
-          }
-        }
-      }
+    //       if (cumulP >= 0.805) {
+    //         minP = c.p;
+    //         break;
+    //       }
+    //     }
+    //   }
 
-      const Itot = effects.reduce((tot, e) => tot + e.i, 0.000000001);
+    //   const Itot = effects.reduce((tot, e) => tot + e.i, 0.000000001);
 
-      let minI = 0;
-      let cumulI = 0;
-      for (const e of effects.sort((a, b) => b.i - a.i)) {
-        cumulI += e.i / Itot;
+    //   let minI = 0;
+    //   let cumulI = 0;
+    //   for (const e of effects.sort((a, b) => b.i - a.i)) {
+    //     cumulI += e.i / Itot;
 
-        if (cumulI >= 0.8) {
-          minI = e.i;
-          break;
-        }
-      }
+    //     if (cumulI >= 0.8) {
+    //       minI = e.i;
+    //       break;
+    //     }
+    //   }
 
-      const newSummary = {
-        "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${rf.cr4de_riskfilesid})`,
+    //   const newSummary = {
+    //     "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${rf.cr4de_riskfilesid})`,
 
-        cr4de_title: rf.cr4de_title,
-        cr4de_risk_type: rf.cr4de_risk_type,
-        cr4de_category: rf.cr4de_risk_category,
-        cr4de_key_risk: rf.cr4de_key_risk,
+    //     cr4de_title: rf.cr4de_title,
+    //     cr4de_risk_type: rf.cr4de_risk_type,
+    //     cr4de_category: rf.cr4de_risk_category,
+    //     cr4de_key_risk: rf.cr4de_key_risk,
 
-        cr4de_label_hilp: rf.cr4de_label_hilp,
-        cr4de_label_cc: rf.cr4de_label_cc,
-        cr4de_label_cb: rf.cr4de_label_cb,
-        cr4de_label_impact: rf.cr4de_label_impact,
+    //     cr4de_label_hilp: rf.cr4de_label_hilp,
+    //     cr4de_label_cc: rf.cr4de_label_cc,
+    //     cr4de_label_cb: rf.cr4de_label_cb,
+    //     cr4de_label_impact: rf.cr4de_label_impact,
 
-        cr4de_mrs: rf.cr4de_mrs,
-        cr4de_summary_en: rf.cr4de_mrs_summary,
-        cr4de_summary_nl: rf.cr4de_mrs_summary_nl,
-        cr4de_summary_fr: rf.cr4de_mrs_summary_fr,
-        cr4de_summary_de: rf.cr4de_mrs_summary_de,
+    //     cr4de_mrs: rf.cr4de_mrs,
+    //     cr4de_summary_en: rf.cr4de_mrs_summary,
+    //     cr4de_summary_nl: rf.cr4de_mrs_summary_nl,
+    //     cr4de_summary_fr: rf.cr4de_mrs_summary_fr,
+    //     cr4de_summary_de: rf.cr4de_mrs_summary_de,
 
-        cr4de_mrs_p: rf.results
-          ? Math.round(10 * rf.results![scenario].TP) / 10
-          : 0,
-        cr4de_mrs_i: rf.results ? rf.results![scenario].TI : 0,
-        cr4de_mrs_h: rf.results ? rf.results![scenario].TI_H : 0,
-        cr4de_mrs_s: rf.results ? rf.results![scenario].TI_S : 0,
-        cr4de_mrs_e: rf.results ? rf.results![scenario].TI_E : 0,
-        cr4de_mrs_f: rf.results ? rf.results![scenario].TI_F : 0,
+    //     cr4de_mrs_p: rf.results
+    //       ? Math.round(10 * rf.results![scenario].TP) / 10
+    //       : 0,
+    //     cr4de_mrs_i: rf.results ? rf.results![scenario].TI : 0,
+    //     cr4de_mrs_h: rf.results ? rf.results![scenario].TI_H : 0,
+    //     cr4de_mrs_s: rf.results ? rf.results![scenario].TI_S : 0,
+    //     cr4de_mrs_e: rf.results ? rf.results![scenario].TI_E : 0,
+    //     cr4de_mrs_f: rf.results ? rf.results![scenario].TI_F : 0,
 
-        cr4de_causing_risks:
-          rf.cr4de_risk_type === RISK_TYPE.STANDARD
-            ? JSON.stringify(
-                causes
-                  .filter((c) => c.p >= minP)
-                  .map((c) => ({
-                    cause_risk_id: "id" in c ? c.id : null,
-                    cause_risk_title:
-                      "id" in c ? t(c.name) : "No underlying cause",
-                    cause_risk_p: c.p,
-                  }))
-              )
-            : null,
-        cr4de_effect_risks:
-          rf.cr4de_risk_type === RISK_TYPE.EMERGING
-            ? null
-            : JSON.stringify(
-                effects
-                  .filter((e) => e.i >= minI)
-                  .map((e) => ({
-                    effect_risk_id: "id" in e ? e.id : null,
-                    effect_risk_title: t(e.name),
-                    effect_risk_i: e.i,
-                  }))
-              ),
+    //     cr4de_causing_risks:
+    //       rf.cr4de_risk_type === RISK_TYPE.STANDARD
+    //         ? JSON.stringify(
+    //             causes
+    //               .filter((c) => c.p >= minP)
+    //               .map((c) => ({
+    //                 cause_risk_id: "id" in c ? c.id : null,
+    //                 cause_risk_title:
+    //                   "id" in c ? t(c.name) : "No underlying cause",
+    //                 cause_risk_p: c.p,
+    //               }))
+    //           )
+    //         : null,
+    //     cr4de_effect_risks:
+    //       rf.cr4de_risk_type === RISK_TYPE.EMERGING
+    //         ? null
+    //         : JSON.stringify(
+    //             effects
+    //               .filter((e) => e.i >= minI)
+    //               .map((e) => ({
+    //                 effect_risk_id: "id" in e ? e.id : null,
+    //                 effect_risk_title: t(e.name),
+    //                 effect_risk_i: e.i,
+    //               }))
+    //           ),
 
-        cr4de_definition: rf.cr4de_definition,
-        cr4de_horizon_analysis: rf.cr4de_horizon_analysis,
-        cr4de_historical_events: rf.cr4de_historical_events,
-        cr4de_intensity_parameters: rf.cr4de_intensity_parameters,
-        cr4de_scenario_considerable: rf.cr4de_scenario_considerable,
-        cr4de_scenario_major: rf.cr4de_scenario_major,
-        cr4de_scenario_extreme: rf.cr4de_scenario_extreme,
-      };
+    //     cr4de_definition: rf.cr4de_definition,
+    //     cr4de_horizon_analysis: rf.cr4de_horizon_analysis,
+    //     cr4de_historical_events: rf.cr4de_historical_events,
+    //     cr4de_intensity_parameters: rf.cr4de_intensity_parameters,
+    //     cr4de_scenario_considerable: rf.cr4de_scenario_considerable,
+    //     cr4de_scenario_major: rf.cr4de_scenario_major,
+    //     cr4de_scenario_extreme: rf.cr4de_scenario_extreme,
+    //   };
 
-      if (summary) {
-        await api.updateRiskSummary(
-          summary.cr4de_bnrariskfilesummaryid,
-          newSummary
-        );
-      } else {
-        await api.createRiskSummary(newSummary);
-      }
-    }
+    //   if (summary) {
+    //     await api.updateRiskSummary(
+    //       summary.cr4de_bnrariskfilesummaryid,
+    //       newSummary
+    //     );
+    //   } else {
+    //     await api.createRiskSummary(newSummary);
+    //   }
+    // }
   };
 
   const saveSnapshot = async () => {
@@ -1063,7 +1053,7 @@ export default function CalculationPage() {
       });
       await api.updateRiskFile(riskId, {
         "cr4de_latest_calculation@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_bnraanalysisruns(${result.id})`,
-      });
+      } as Partial<DVRiskFile>);
 
       //   logger(`Saving calculations (${i + 1}/${results.length})`, 1);
       setCalculationProgress((i + 1) / calculations.length);

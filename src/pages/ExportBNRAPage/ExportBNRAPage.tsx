@@ -39,6 +39,7 @@ enum EXPORT_TYPE {
   ALL = "ALL",
   SINGLE = "SINGLE",
   DATA = "DATA",
+  FRONTPAGE = "FRONT_PAGE",
 }
 
 const ITEM_HEIGHT = 48;
@@ -58,7 +59,6 @@ export default function ExportBNRAPage() {
   // const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [type, setType] = useState(EXPORT_TYPE.ALL);
   const [selectedRiskFiles, setSelectedRiskFiles] = useState<DVRiskFile[]>([]);
-  const ref = useRef(false);
 
   const handleChangeType = (event: SelectChangeEvent) => {
     setType(event.target.value as EXPORT_TYPE);
@@ -178,13 +178,13 @@ export default function ExportBNRAPage() {
   };
 
   const handleExport = async () => {
-    if (ref.current) {
-      return false;
-    }
-    ref.current = true;
     if (!riskFiles || !cascades || !attachments) return;
 
-    if (type !== EXPORT_TYPE.ALL && selectedRiskFiles.length <= 0) {
+    if (
+      type !== EXPORT_TYPE.ALL &&
+      type !== EXPORT_TYPE.FRONTPAGE &&
+      selectedRiskFiles.length <= 0
+    ) {
       logger("Please select at least 1 risk file");
 
       return;
@@ -194,7 +194,6 @@ export default function ExportBNRAPage() {
       return logger(message);
     };
 
-    console.log("exporting");
     const blob = await exporter.exportBNRA(
       {
         exportType: type,
@@ -208,7 +207,7 @@ export default function ExportBNRAPage() {
     console.log(blob);
 
     if (blob) {
-      if (type === EXPORT_TYPE.ALL) {
+      if (type === EXPORT_TYPE.ALL || type == EXPORT_TYPE.FRONTPAGE) {
         saveAs(blob, "BNRA_export.pdf");
       } else if (type === EXPORT_TYPE.SINGLE) {
         saveAs(blob, "BNRA_export.pdf");
@@ -283,54 +282,62 @@ export default function ExportBNRAPage() {
                       </MenuItem>
                       <MenuItem value={EXPORT_TYPE.SINGLE}>Risk File</MenuItem>
                       <MenuItem value={EXPORT_TYPE.DATA}>Raw Data</MenuItem>
+                      <MenuItem value={EXPORT_TYPE.FRONTPAGE}>
+                        Frontpages
+                      </MenuItem>
                     </Select>
                   </FormControl>
-                  {type !== EXPORT_TYPE.ALL && (
-                    <FormControl fullWidth sx={{ my: 1 }}>
-                      <InputLabel id="rf-label">Risk Files</InputLabel>
-                      <Select
-                        labelId="rf-label"
-                        id="rf-chip"
-                        multiple
-                        value={selectedRiskFiles}
-                        onChange={handleChangeRFs}
-                        input={
-                          <OutlinedInput
-                            id="select-multiple-chip"
-                            label="Risk Files"
-                          />
-                        }
-                        renderValue={(selected) => (
-                          <Box
-                            sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
-                          >
-                            {selected.map((rf) => (
-                              <Chip
-                                key={rf.cr4de_riskfilesid}
-                                label={rf.cr4de_title}
-                              />
-                            ))}
-                          </Box>
-                        )}
-                        MenuProps={MenuProps}
-                      >
-                        {riskFiles &&
-                          riskFiles.map((rf) => (
-                            <MenuItem
-                              key={rf.cr4de_riskfilesid}
-                              value={rf.cr4de_riskfilesid}
-                              style={{
-                                fontWeight: selectedRiskFiles.includes(rf)
-                                  ? 600
-                                  : 400,
+                  {type !== EXPORT_TYPE.ALL &&
+                    type !== EXPORT_TYPE.FRONTPAGE && (
+                      <FormControl fullWidth sx={{ my: 1 }}>
+                        <InputLabel id="rf-label">Risk Files</InputLabel>
+                        <Select
+                          labelId="rf-label"
+                          id="rf-chip"
+                          multiple
+                          value={selectedRiskFiles}
+                          onChange={handleChangeRFs}
+                          input={
+                            <OutlinedInput
+                              id="select-multiple-chip"
+                              label="Risk Files"
+                            />
+                          }
+                          renderValue={(selected) => (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 0.5,
                               }}
                             >
-                              {rf.cr4de_title}
-                            </MenuItem>
-                          ))}
-                      </Select>
-                    </FormControl>
-                  )}
+                              {selected.map((rf) => (
+                                <Chip
+                                  key={rf.cr4de_riskfilesid}
+                                  label={rf.cr4de_title}
+                                />
+                              ))}
+                            </Box>
+                          )}
+                          MenuProps={MenuProps}
+                        >
+                          {riskFiles &&
+                            riskFiles.map((rf) => (
+                              <MenuItem
+                                key={rf.cr4de_riskfilesid}
+                                value={rf.cr4de_riskfilesid}
+                                style={{
+                                  fontWeight: selectedRiskFiles.includes(rf)
+                                    ? 600
+                                    : 400,
+                                }}
+                              >
+                                {rf.cr4de_title}
+                              </MenuItem>
+                            ))}
+                        </Select>
+                      </FormControl>
+                    )}
                 </Stack>
               </Stack>
               <Box

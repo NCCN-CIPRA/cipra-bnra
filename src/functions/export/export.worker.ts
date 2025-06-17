@@ -15,11 +15,13 @@ import RiskFileExport from "../../components/export/RiskFilePDF";
 import exportExcel from "./exportExcel";
 import svg2PDF from "../svg2PDF.worker";
 import "../../components/export/fonts";
+import FrontPageExport from "../../components/export/FontPageExport";
 
 export enum EXPORT_TYPE {
   ALL = "ALL",
   SINGLE = "SINGLE",
   DATA = "DATA",
+  FRONTPAGE = "FRONT_PAGE",
 }
 
 i18n
@@ -88,6 +90,14 @@ export const exportBNRA = async (
         riskFiles,
         allCascades,
       });
+    } else if (exportType === EXPORT_TYPE.FRONTPAGE) {
+      const svgImages = await renderSVG([], {}, svg2PDF);
+      doc = await pdf(
+        createElement(FrontPageExport, {
+          svgImages,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        }) as any
+      ).toBlob();
     } else {
       const svgImages = await renderSVG(
         exportType === EXPORT_TYPE.ALL ? riskFiles : exportedRiskFiles,

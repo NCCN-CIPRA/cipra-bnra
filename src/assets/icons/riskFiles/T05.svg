@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 401 398">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #00a69a;
+      }
+
+      .cls-2, .cls-3 {
+        stroke-linecap: round;
+      }
+
+      .cls-2, .cls-3, .cls-4 {
+        fill: none;
+        stroke-linejoin: round;
+      }
+
+      .cls-2, .cls-4 {
+        stroke: #2e2e2e;
+        stroke-width: 20px;
+      }
+
+      .cls-3 {
+        stroke: #00a69a;
+        stroke-width: 16px;
+      }
+    </style>
+  </defs>
+  <g id="Nuclear_sites" data-name="Nuclear sites">
+    <g>
+      <path class="cls-4" d="M302.71,168.78c-13.06-52.07-13.46-106.52-1.16-158.78h0s-101.05,0-101.05,0H99.45c12.3,52.26,11.9,106.7-1.16,158.78l-54.98,219.22H357.69l-54.98-219.22Z"/>
+      <g>
+        <path class="cls-3" d="M271.09,243.96c0,26.12-14.2,48.93-35.29,61.13l-20.13-34.85c8.57-5.15,14.3-14.55,14.3-25.28,0-.33,0-.67-.02-1h41.14Z"/>
+        <path class="cls-3" d="M235.8,182.81l-21,36.37c-4.23-2.36-9.11-3.7-14.3-3.7s-10.07,1.34-14.3,3.7l-21-36.37c10.39-6.01,22.44-9.44,35.3-9.44s24.91,3.43,35.3,9.44Z"/>
+        <path class="cls-3" d="M185.33,270.24l-20.13,34.85c-21.09-12.2-35.29-35.02-35.29-61.13h41.14c-.02,.33-.02,.67-.02,1,0,10.73,5.73,20.13,14.3,25.28Z"/>
+        <circle class="cls-1" cx="200.5" cy="244.96" r="11.79"/>
+      </g>
+      <line class="cls-4" x1="108" y1="100" x2="293" y2="100"/>
+      <line class="cls-2" x1="10" y1="388" x2="391" y2="388"/>
+      <line class="cls-2" x1="86" y1="10" x2="315" y2="10"/>
+    </g>
+  </g>
+</svg>

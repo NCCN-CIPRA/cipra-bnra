@@ -8,9 +8,14 @@ import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import RiskFileTitle from "../../components/RiskFileTitle";
 import { getLanguage } from "../../functions/translations";
 import BNRASpeedDial from "../../components/BNRASpeedDial";
+import handleExportRiskfile from "../../functions/export/exportBNRA";
+import useAPI from "../../hooks/useAPI";
+import RiskFileSummaryTutorial from "./RiskFileSummaryTutorial";
+import HTMLEditor from "../../components/HTMLEditor";
 
 export default function RiskFileSummaryPage() {
   const { i18n } = useTranslation();
+  const api = useAPI();
   const { user, riskSummary } = useOutletContext<RiskFilePageContext>();
 
   const summary =
@@ -21,13 +26,18 @@ export default function RiskFileSummaryPage() {
       <RiskFileTitle riskFile={riskSummary} />
       <Stack direction="row" sx={{ mb: 8 }} columnGap={4}>
         <Box id="summary-text" data-testid="summary-text" sx={{ flex: 1 }}>
-          <Box
-            className="htmleditor"
-            sx={{
-              mb: 4,
-              fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
-            }}
-            dangerouslySetInnerHTML={{ __html: summary }}
+          <HTMLEditor
+            initialHTML={summary}
+            onSave={(newSummary) =>
+              Promise.all([
+                api.updateRiskSummary(riskSummary.cr4de_bnrariskfilesummaryid, {
+                  cr4de_summary_en: newSummary,
+                }),
+                api.updateRiskFile(riskSummary._cr4de_risk_file_value, {
+                  cr4de_mrs_summary: newSummary,
+                }),
+              ])
+            }
           />
         </Box>
         {riskSummary.cr4de_risk_type !== RISK_TYPE.EMERGING && (
@@ -48,8 +58,8 @@ export default function RiskFileSummaryPage() {
           <BNRASpeedDial
             offset={{ x: 0, y: 56 }}
             // editAction={() => setEditing(true)}
-            // exportAction={handleExportRiskfile(riskFile, api)}
-            // HelpComponent={RiskFileSummaryTutorial}
+            exportAction={handleExportRiskfile(riskSummary, api)}
+            HelpComponent={RiskFileSummaryTutorial}
           />
         </Box>
       )}

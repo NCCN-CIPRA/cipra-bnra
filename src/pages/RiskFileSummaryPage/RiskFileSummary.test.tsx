@@ -6,13 +6,6 @@ import { vi } from "vitest";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { SCENARIOS } from "../../functions/scenarios";
 
-// Mock the dependencies
-vi.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    i18n: { language: "en" },
-  }),
-}));
-
 vi.mock("../../functions/translations", () => ({
   getLanguage: (lang: string) => (lang === "en" ? "en" : "nl"),
 }));
@@ -26,6 +19,7 @@ vi.mock("../../components/RiskFileTitle", () => ({
 }));
 
 vi.mock("../../components/charts/SummaryCharts.new", () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   default: ({ riskSummary, scenario, manmade, canDownload }: any) => (
     <div data-testid="summary-charts">
       <div data-testid="chart-risk-id">

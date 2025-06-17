@@ -69,13 +69,13 @@ export interface API {
 
   getRiskSummaries<T = DVRiskSummary>(query?: string): Promise<T[]>;
   getRiskSummary<T = DVRiskSummary>(id: string, query?: string): Promise<T>;
-  createRiskSummary(fields: object): Promise<CreateResponse>;
-  updateRiskSummary(id: string, fields: object): Promise<void>;
+  createRiskSummary(fields: Partial<DVRiskSummary>): Promise<CreateResponse>;
+  updateRiskSummary(id: string, fields: Partial<DVRiskSummary>): Promise<void>;
   deleteRiskSummary(id: string): Promise<void>;
 
   getRiskFiles<T = DVRiskFile>(query?: string): Promise<T[]>;
   getRiskFile<T = DVRiskFile>(id: string, query?: string): Promise<T>;
-  updateRiskFile(id: string, fields: object): Promise<void>;
+  updateRiskFile(id: string, fields: Partial<DVRiskFile>): Promise<void>;
   deleteRiskFile(id: string): Promise<void>;
 
   getRiskCascades<T = DVRiskCascade>(query?: string): Promise<T[]>;
@@ -126,7 +126,8 @@ export interface API {
   deleteFeedback(id: string): Promise<void>;
 
   getTranslations<T = DVTranslation>(query?: string): Promise<T[]>;
-  updateTranslation(id: string, fields: object): Promise<void>;
+  createTranslation(fields: Partial<DVTranslation>): Promise<CreateResponse>;
+  updateTranslation(id: string, fields: Partial<DVTranslation>): Promise<void>;
   deleteTranslation(id: string): Promise<void>;
 
   getPages<T = DVPage>(query?: string): Promise<T[]>;
@@ -886,6 +887,11 @@ export const getAPI = (
     getTranslations: getMultiple<DVTranslation>(
       authFetch,
       "cr4de_bnratranslations"
+    ),
+    createTranslation: create<DVTranslation>(
+      authFetch,
+      "cr4de_bnratranslations",
+      antiForgeryToken
     ),
     updateTranslation: update<DVTranslation>(
       authFetch,

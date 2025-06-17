@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
-import { CP } from "../../../types/CP";
+import { CP } from "../../../components/indicators/CP";
 
 export type ConditionalProbabilityField = {
   prefix: string;
