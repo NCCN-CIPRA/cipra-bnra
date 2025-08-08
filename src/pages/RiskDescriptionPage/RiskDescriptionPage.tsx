@@ -1,10 +1,11 @@
 import { useOutletContext } from "react-router-dom";
-import { Container } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import Standard from "./Standard/Standard";
 import Emerging from "./Emerging/Emerging";
 import Manmade from "./Manmade/Manmade";
+import NCCNLoader from "../../components/NCCNLoader";
 
 export default function RiskDescriptionPage() {
   const { riskSummary, riskFile, cascades } = useOutletContext<RiskFilePageContext>();
