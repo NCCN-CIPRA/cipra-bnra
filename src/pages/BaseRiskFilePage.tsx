@@ -173,16 +173,18 @@ export default function BaseRiskFilePage() {
             icon={<AodIcon />}
             onClick={() => navigate(`/risks/${params.risk_file_id}`)}
           />
-          <BottomNavigationAction
-            label={t(
-              "risk.bottombar.riskIdentification",
-              "Risk Identification"
-            )}
-            icon={<FingerprintIcon />}
-            onClick={() =>
-              navigate(`/risks/${params.risk_file_id}/description`)
-            }
-          />
+          {user && user.roles.beReader && (
+             <BottomNavigationAction
+              label={t(
+                "risk.bottombar.riskIdentification",
+                "Risk Identification"
+              )}
+              icon={<FingerprintIcon />}
+              onClick={() =>
+                navigate(`/risks/${params.risk_file_id}/description`)
+              }
+            />
+          )}
           {user && user.roles.beReader && (
             <BottomNavigationAction
               label={t("risk.bottombar.riskAnalysis", "Risk Analysis")}
