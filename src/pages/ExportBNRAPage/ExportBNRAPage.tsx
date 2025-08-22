@@ -193,7 +193,7 @@ export default function ExportBNRAPage() {
     const callback = (message: string) => {
       return logger(message);
     };
-
+try {
     const blob = await exporter.exportBNRA(
       {
         exportType: type,
@@ -204,6 +204,9 @@ export default function ExportBNRAPage() {
       },
       proxy(callback)
     );
+  catch (e) {
+  console.log(e)
+}
     console.log(blob);
 
     if (blob) {
