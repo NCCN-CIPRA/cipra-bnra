@@ -3,7 +3,6 @@ import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { saveAs } from "file-saver";
 import { API } from "../../functions/api";
-import ExportWorker from "./export.worker?worker&inline";
 import "../../components/export/fonts";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
@@ -13,16 +12,13 @@ interface ExporterWorker {
 }
 
 export function getExporter() {
-  if (window.location.href.indexOf("localhost") >= 0) {
-    return new ComlinkWorker<ExporterWorker>(
-      new URL("./export.worker", import.meta.url),
-      {
-        type: "module",
-      }
-    );
-  }
-
-  return wrap<ExporterWorker>(new ExportWorker());
+  // Use URL approach for both environments
+  return new ComlinkWorker<ExporterWorker>(
+    new URL("./export.worker", import.meta.url),
+    {
+      type: "module",
+    }
+  );
 }
 
 export default function handleExportRiskfile(
