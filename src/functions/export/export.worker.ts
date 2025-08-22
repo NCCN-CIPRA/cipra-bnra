@@ -16,6 +16,7 @@ import exportExcel from "./exportExcel";
 import svg2PDF from "../svg2PDF.worker";
 import "../../components/export/fonts";
 import FrontPageExport from "../../components/export/FontPageExport";
+import { expose } from "comlink";
 
 export enum EXPORT_TYPE {
   ALL = "ALL",
@@ -44,7 +45,7 @@ i18n
     },
   });
 
-export const exportBNRA = async (
+const exportBNRA = async (
   data: {
     exportType: EXPORT_TYPE;
     exportedRiskFiles: DVRiskFile[];
@@ -151,3 +152,9 @@ export const exportBNRA = async (
     return null;
   }
 };
+
+const operations = { exportBNRA };
+
+expose(operations);
+
+export type ExportBNRAWorker = typeof operations;

@@ -1,19 +1,23 @@
-import { EXPORT_TYPE, exportBNRA } from "../../functions/export/export.worker";
+import { EXPORT_TYPE } from "../../functions/export/export.worker";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { saveAs } from "file-saver";
 import { API } from "../../functions/api";
-import ExportWorker from "./export.worker?worker&inline";
+import workerUrl from "./export.worker?worker&url";
+import type { ExportBNRAWorker } from "../../functions/export/export.worker";
 import "../../components/export/fonts";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 
-interface ExporterWorker {
-  exportBNRA: typeof exportBNRA;
-}
-
 export function getExporter() {
-  return wrap<ExporterWorker>(new ExportWorker());
+  const jsWorker = `import ${JSON.stringify(
+    new URL(workerUrl, import.meta.url)
+  )}`;
+  const blobWorker = new Blob([jsWorker], { type: "application/javascript" });
+  const ww = new Worker(URL.createObjectURL(blobWorker), { type: "module" });
+  const worker = wrap<ExportBNRAWorker>(ww);
+
+  return worker;
 }
 
 export default function handleExportRiskfile(

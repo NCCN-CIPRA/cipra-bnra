@@ -8,8 +8,8 @@ import configureServer from "./src/dev/devApiProxy";
 // https://vite.dev/config/
 export default defineConfig(async ({ command }) => ({
   plugins: [
-    react(),
     comlink(),
+    react(),
     svgr({
       svgrOptions: {
         // svgr options
