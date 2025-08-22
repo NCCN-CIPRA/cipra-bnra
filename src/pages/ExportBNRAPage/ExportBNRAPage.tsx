@@ -31,7 +31,7 @@ import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { saveAs } from "file-saver";
 import { proxy } from "comlink";
 import { getExporter } from "../../functions/export/exportBNRA";
-import { getCascadeResultSnapshot } from "../../functions/snapshot";
+// import { getCascadeResultSnapshot } from "../../functions/snapshot";
 
 enum EXPORT_TYPE {
   ALL = "ALL",
@@ -126,7 +126,7 @@ export default function ExportBNRAPage() {
       results.map((r) => {
         return {
           ...r,
-          results: getCascadeResultSnapshot(r),
+          // results: getCascadeResultSnapshot(r),
         } as DVRiskCascade<SmallRisk, SmallRisk>;
       }),
   });
@@ -192,20 +192,20 @@ export default function ExportBNRAPage() {
       return logger(message);
     };
     let blob;
-try {
-    blob = await exporter.exportBNRA(
-      {
-        exportType: type,
-        exportedRiskFiles: selectedRiskFiles,
-        riskFiles,
-        allCascades: cascades,
-        allAttachments: attachments,
-      },
-      proxy(callback)
-    );
-} catch (e) {
-  console.log(e)
-}
+    try {
+      blob = await exporter.exportBNRA(
+        {
+          exportType: type,
+          exportedRiskFiles: selectedRiskFiles,
+          riskFiles,
+          allCascades: cascades,
+          allAttachments: attachments,
+        },
+        proxy(callback)
+      );
+    } catch (e) {
+      console.log(e);
+    }
     console.log(blob);
 
     if (blob) {
