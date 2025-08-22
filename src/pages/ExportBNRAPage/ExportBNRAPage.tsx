@@ -204,7 +204,7 @@ try {
       },
       proxy(callback)
     );
-  catch (e) {
+} catch (e) {
   console.log(e)
 }
     console.log(blob);
