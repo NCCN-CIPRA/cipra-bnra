@@ -191,8 +191,9 @@ export default function ExportBNRAPage() {
     const callback = (message: string) => {
       return logger(message);
     };
-
-    const blob = await exporter.exportBNRA(
+    let blob;
+try {
+    blob = await exporter.exportBNRA(
       {
         exportType: type,
         exportedRiskFiles: selectedRiskFiles,
@@ -202,6 +203,9 @@ export default function ExportBNRAPage() {
       },
       proxy(callback)
     );
+} catch (e) {
+  console.log(e)
+}
     console.log(blob);
 
     if (blob) {
