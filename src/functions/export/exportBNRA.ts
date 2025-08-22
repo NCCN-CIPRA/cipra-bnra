@@ -1,6 +1,6 @@
 import { EXPORT_TYPE, exportBNRA } from "../../functions/export/export.worker";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
-import { proxy } from "vite-plugin-comlink/symbol";
+import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { saveAs } from "file-saver";
 import { API } from "../../functions/api";
 import ExportWorker from "./export.worker?worker&inline";
