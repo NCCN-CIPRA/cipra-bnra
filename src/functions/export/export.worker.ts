@@ -54,17 +54,17 @@ export const exportBNRA = async (
   },
   onProgress: (message: string) => void
 ): Promise<Blob | null> => {
-  const {
-    exportType,
-    exportedRiskFiles,
-    riskFiles,
-    allCascades,
-    allAttachments,
-  } = data;
-  onProgress("Start export process...");
-  const { pdf } = await import("@react-pdf/renderer");
-
   try {
+    const {
+      exportType,
+      exportedRiskFiles,
+      riskFiles,
+      allCascades,
+      allAttachments,
+    } = data;
+    onProgress("Start export process...");
+    const { pdf } = await import("@react-pdf/renderer");
+
     let doc: Blob;
 
     const hc: { [key: string]: DVRiskFile } = riskFiles.reduce(
