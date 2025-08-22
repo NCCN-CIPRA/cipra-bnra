@@ -1,15 +1,23 @@
 import { useOutletContext } from "react-router-dom";
-import { Container } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import Standard from "./Standard/Standard";
 import Emerging from "./Emerging/Emerging";
 import Manmade from "./Manmade/Manmade";
+import NCCNLoader from "../../components/NCCNLoader";
 
 export default function RiskDescriptionPage() {
-  const { riskSummary } = useOutletContext<RiskFilePageContext>();
+  const { riskSummary, riskFile, cascades } = useOutletContext<RiskFilePageContext>();
 
-  if (riskSummary.cr4de_risk_type === RISK_TYPE.STANDARD)
+  if (!riskFile || !cascades)
+    return (
+      <Box sx={{ width: "100%", mt: 20, textAlign: "center" }}>
+        <NCCNLoader />
+      </Box>
+    );
+
+ if (riskSummary.cr4de_risk_type === RISK_TYPE.STANDARD)
     return (
       <Container sx={{ mt: 2, pb: 8 }}>
         <Standard riskSummary={riskSummary} />
