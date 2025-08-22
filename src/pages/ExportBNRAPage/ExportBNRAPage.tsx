@@ -22,10 +22,7 @@ import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import useRecords from "../../hooks/useRecords";
 import { DataTable } from "../../hooks/useAPI";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import {
-  DVRiskCascade,
-  getCascadeResultSnapshot,
-} from "../../types/dataverse/DVRiskCascade";
+import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import {
   getResultSnapshot,
   SmallRisk,
@@ -34,6 +31,7 @@ import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { saveAs } from "file-saver";
 import { proxy } from "comlink";
 import { getExporter } from "../../functions/export/exportBNRA";
+import { getCascadeResultSnapshot } from "../../functions/snapshot";
 
 enum EXPORT_TYPE {
   ALL = "ALL",
