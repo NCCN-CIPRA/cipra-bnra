@@ -23,6 +23,7 @@ import {
   TableBody,
   Link,
   Collapse,
+  Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
@@ -371,9 +372,11 @@ export default function Attachments({
                   Section
                 </TableCell>
               )}
-              <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
-                <Trans i18nKey="source.list.type">Source Type</Trans>
-              </TableCell>
+              {user?.roles.analist && !isExternal && (
+                <TableCell sx={{ width: 0, whiteSpace: "nowrap" }}>
+                  <Trans i18nKey="source.list.type">Source Type</Trans>
+                </TableCell>
+              )}
               {user?.roles.analist && !isExternal && (
                 <TableCell align="right" sx={{ width: 0 }}></TableCell>
               )}
@@ -435,32 +438,38 @@ export default function Attachments({
                       {a.cr4de_reference}
                     </TableCell>
                     <TableCell component="th" scope="row">
-                      <Link
-                        sx={{ "&:hover": { cursor: "pointer" } }}
-                        onClick={async () => {
-                          if (a) {
-                            setIsDownloading(true);
-                          }
-                          await api.serveAttachmentFile(a);
-                          setIsDownloading(false);
-                        }}
-                      >
-                        {a.cr4de_name}
-                      </Link>
+                      {user.roles.analist || a.cr4de_url !== null ? (
+                        <Link
+                          sx={{ "&:hover": { cursor: "pointer" } }}
+                          onClick={async () => {
+                            if (a) {
+                              setIsDownloading(true);
+                            }
+                            await api.serveAttachmentFile(a);
+                            setIsDownloading(false);
+                          }}
+                        >
+                          {a.cr4de_name}
+                        </Link>
+                      ) : (
+                        <Typography variant="subtitle1">-</Typography>
+                      )}
                     </TableCell>
                     {user?.roles.analist && !isExternal && (
                       <TableCell>
                         {a.cr4de_field ? a.cr4de_field : "-"}
                       </TableCell>
                     )}
-                    <TableCell>
-                      {a.cr4de_url
-                        ? t("source.type.link")
-                        : t("source.type.file")}
-                      {user?.roles.analist && a.cr4de_referencedSource
-                        ? "*"
-                        : ""}
-                    </TableCell>
+                    {user?.roles.analist && !isExternal && (
+                      <TableCell>
+                        {a.cr4de_url
+                          ? t("source.type.link")
+                          : t("source.type.file")}
+                        {user?.roles.analist && a.cr4de_referencedSource
+                          ? "*"
+                          : ""}
+                      </TableCell>
+                    )}
                     {user?.roles.analist && !isExternal && (
                       <TableCell
                         align="center"
