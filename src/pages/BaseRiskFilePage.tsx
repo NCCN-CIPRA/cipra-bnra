@@ -81,6 +81,7 @@ export default function BaseRiskFilePage() {
   const { data: riskFiles } = useQuery({
     queryKey: [DataTable.RISK_FILE],
     queryFn: () => api.getRiskFiles(),
+    select: (data) => data.filter((rf) => !rf.cr4de_hazard_id.startsWith("X")),
     enabled: Boolean(
       user && user.roles.analist && environment === Environment.DYNAMIC
     ),
@@ -89,6 +90,7 @@ export default function BaseRiskFilePage() {
   const { data: riskSnapshots } = useQuery({
     queryKey: [DataTable.RISK_SNAPSHOT],
     queryFn: () => api.getRiskSnapshots(),
+    select: (data) => data.filter((rf) => !rf.cr4de_hazard_id.startsWith("X")),
     enabled: Boolean(
       user && user.roles.verified && environment === Environment.PUBLIC
     ),
@@ -112,6 +114,10 @@ export default function BaseRiskFilePage() {
 
   const rc: RiskCatalogue<unknown, RiskSnapshotResults> | null = useMemo(() => {
     let rcTemp = null;
+
+    if (!riskFiles && !riskSnapshots) return null;
+    console.log("Calculate RC");
+
     if (riskFiles) rcTemp = getRiskCatalogue(riskFiles);
 
     if (riskSnapshots) rcTemp = getRiskCatalogueFromSnapshots(riskSnapshots);
@@ -134,6 +140,7 @@ export default function BaseRiskFilePage() {
 
   const cascades = useMemo(() => {
     if (!rc) return null;
+    console.log("Calculate cascades");
 
     let ccTemp = null;
     if (cascadeList && riskFiles)
@@ -158,6 +165,7 @@ export default function BaseRiskFilePage() {
       return publicRiskSummary;
 
     if (!riskFiles) return null;
+    console.log("Calculate summary");
 
     const innerRiskFile = riskFiles.find(
       (rf) => rf.cr4de_riskfilesid === params.risk_file_id
@@ -175,6 +183,7 @@ export default function BaseRiskFilePage() {
   }, [publicRiskSummary, riskFiles, cascadeList, rc, params, environment]);
 
   const riskFile = useMemo(() => {
+    console.log("Calculate riskfile");
     if (!riskFiles) return null;
 
     return (

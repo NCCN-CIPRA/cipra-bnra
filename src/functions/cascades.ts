@@ -7,7 +7,10 @@ import {
   SerializedCauseSnapshotResults,
   SerializedEffectSnapshotResults,
 } from "../types/dataverse/DVCascadeSnapshot";
-import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
+import {
+  DVRiskCascade,
+  parseCascadeSnapshot,
+} from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
 import {
   DVRiskSnapshot,
@@ -649,19 +652,11 @@ export const getCascadesSnapshotCatalogue = (
   DVRiskSnapshot<unknown, RiskSnapshotResults>,
   DVRiskSnapshot<unknown, RiskSnapshotResults>
 > => {
+  const parsedSnapshots = cascadeSnapshotList.map((c) =>
+    parseCascadeSnapshot(c)
+  );
   return riskFiles.reduce(
-    (acc, rf) =>
-      getCascadeSnapshots(
-        rf,
-        acc,
-        rc
-      )(
-        cascadeSnapshotList.map((c) => ({
-          ...c,
-          cr4de_quanti_cause: JSON.parse(c.cr4de_quanti_cause),
-          cr4de_quanti_effect: JSON.parse(c.cr4de_quanti_effect),
-        }))
-      ),
+    (acc, rf) => getCascadeSnapshots(rf, acc, rc)(parsedSnapshots),
     {} as CascadeSnapshotCatalogue<
       DVRiskSnapshot<unknown, RiskSnapshotResults>,
       DVRiskSnapshot<unknown, RiskSnapshotResults>

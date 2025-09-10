@@ -23,7 +23,7 @@ import {
   Toolbar,
 } from "@mui/x-data-grid";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DataTable } from "../../types/dataverse/tables";
 import useAPI from "../../hooks/useAPI";
 
@@ -34,6 +34,7 @@ import { BasePageContext } from "../BasePage";
 import { LoggedInUser } from "../../hooks/useLoggedInUser";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import { capFirst } from "../../functions/capFirst";
+import { Environment } from "../../types/global";
 
 const columns = (
   user: LoggedInUser | null | undefined,
@@ -215,24 +216,37 @@ export default function RiskCataloguePage() {
   const { t } = useTranslation();
   const api = useAPI();
   const navigate = useNavigate();
-  const { user } = useOutletContext<BasePageContext>();
+  const { user, environment } = useOutletContext<BasePageContext>();
+  const queryClient = useQueryClient();
 
   const { data: riskFiles, isLoading: isLoadingRiskFiles } = useQuery({
     queryKey: [DataTable.RISK_SUMMARY],
     queryFn: () => api.getRiskSummaries(),
   });
 
-  useQuery({
-    queryKey: [DataTable.RISK_FILE],
-    queryFn: () => api.getRiskFiles(),
-    enabled: Boolean(user && user.roles.verified),
-  });
+  if (riskFiles) {
+    if (user && user.roles.analist && environment === Environment.DYNAMIC) {
+      queryClient.prefetchQuery({
+        queryKey: [DataTable.RISK_FILE],
+        queryFn: () => api.getRiskFiles(),
+      });
 
-  useQuery({
-    queryKey: [DataTable.RISK_CASCADE],
-    queryFn: () => api.getRiskCascades(),
-    enabled: Boolean(user && user.roles.verified),
-  });
+      queryClient.prefetchQuery({
+        queryKey: [DataTable.RISK_CASCADE],
+        queryFn: () => api.getRiskCascades(),
+      });
+    } else {
+      queryClient.prefetchQuery({
+        queryKey: [DataTable.RISK_SNAPSHOT],
+        queryFn: () => api.getRiskSnapshots(),
+      });
+
+      queryClient.prefetchQuery({
+        queryKey: [DataTable.CASCADE_SNAPSHOT],
+        queryFn: () => api.getCascadeSnapshots(),
+      });
+    }
+  }
 
   usePageTitle(t("sideDrawer.hazardCatalogue", "Hazard Catalogue"));
   useBreadcrumbs([
