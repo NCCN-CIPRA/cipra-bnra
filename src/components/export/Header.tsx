@@ -2,8 +2,14 @@ import { useTranslation } from "react-i18next";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { Text, View } from "@react-pdf/renderer";
 import { bodyStyle, PAGE_STYLES, smallStyle } from "./styles";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 
-export default function Header({ riskFile }: { riskFile: DVRiskFile }) {
+export default function Header({
+  riskFile,
+}: {
+  riskFile: DVRiskFile | DVRiskSummary | DVRiskSnapshot;
+}) {
   const { t } = useTranslation();
 
   return (

@@ -1,13 +1,12 @@
 import { TooltipProps } from "recharts";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { SCENARIOS } from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
-import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { NameType } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Stack, Typography } from "@mui/material";
 import { Trans } from "react-i18next";
 import ClimateChangeChartSvg from "./svg/ClimateChangeChart";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 
 const getPercentage = (orig: number, n: number) => {
   if (Math.round(100 * orig) / 100 <= 0) return "100%";
@@ -17,10 +16,6 @@ const getPercentage = (orig: number, n: number) => {
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
   if (active && payload && payload.length) {
-    console.log(
-      payload[3].value,
-      Math.round(100 * (payload[3].value as number)) / 100
-    );
     return (
       <Box
         sx={{
@@ -333,8 +328,8 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
 };
 
 export default function ClimateChangeChart(props: {
-  riskFile: DVRiskFile;
-  causes: DVRiskCascade<SmallRisk, unknown>[];
+  riskFile: DVRiskSnapshot;
+  causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[];
   scenario: SCENARIOS;
   width?: number;
   height?: number;

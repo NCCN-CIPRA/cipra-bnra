@@ -1,7 +1,18 @@
 import { CascadeCalculation } from "../types/dataverse/DVAnalysisRun";
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
+import {
+  CauseSnapshotResults,
+  DVCascadeSnapshot,
+  EffectSnapshotResults,
+  SerializedCauseSnapshotResults,
+  SerializedEffectSnapshotResults,
+} from "../types/dataverse/DVCascadeSnapshot";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../types/dataverse/DVRiskSnapshot";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { RiskCatalogue } from "./riskfiles";
 import {
@@ -10,6 +21,7 @@ import {
   getCascadeParameter,
   getScenarioParameter,
 } from "./scenarios";
+import { snapshotFromRiskCascade } from "./snapshot";
 
 export type CASCADE_LETTER =
   | "c2c"
@@ -44,7 +56,29 @@ export type Cascades = {
   climateChange: DVRiskCascade<SmallRisk, SmallRisk> | null;
 };
 
+export type CascadeSnapshots<
+  Tc = unknown,
+  Te = unknown,
+  Rc = CauseSnapshotResults,
+  Re = EffectSnapshotResults
+> = {
+  all: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re>[];
+  causes: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re>[];
+  effects: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re>[];
+  catalyzingEffects: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re>[];
+  climateChange: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re> | null;
+};
+
 export type CascadeCatalogue = { [key: string]: Cascades };
+
+export type CascadeSnapshotCatalogue<
+  Tc = unknown,
+  Te = unknown,
+  Rc = CauseSnapshotResults,
+  Re = EffectSnapshotResults
+> = {
+  [key: string]: CascadeSnapshots<Tc, Te, Rc, Re>;
+};
 
 export function getCauses(
   riskFile: SmallRisk,
@@ -67,6 +101,69 @@ export function getCauses(
     }));
 }
 
+export function getCausesNew(
+  vars:
+    | {
+        riskFile: SmallRisk;
+        cascades: DVRiskCascade[];
+        hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+      }
+    | {
+        riskFile: DVRiskSnapshot;
+        cascades: DVCascadeSnapshot[];
+        hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+      }
+): DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[] {
+  if ("cr4de_riskfilesid" in vars.riskFile) {
+    // SmallRisk
+    const { riskFile, cascades, hazardCatalogue } = vars as {
+      riskFile: SmallRisk;
+      cascades: DVRiskCascade[];
+      hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+    };
+
+    return cascades
+      .filter(
+        (c) =>
+          c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+          (hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_risk_type ===
+            RISK_TYPE.STANDARD ||
+            hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_risk_type ===
+              RISK_TYPE.MANMADE)
+      )
+      .map((c) => snapshotFromRiskCascade(c))
+      .map((c) => ({
+        ...c,
+        cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
+        cr4de_effect_risk: hazardCatalogue[c._cr4de_effect_risk_value],
+        cr4de_quanti_cause: JSON.parse(c.cr4de_quanti_cause),
+        cr4de_quanti_effect: JSON.parse(c.cr4de_quanti_effect),
+      }));
+  }
+
+  // RiskSnapshot
+  const { riskFile, cascades, hazardCatalogue } = vars as {
+    riskFile: DVRiskSnapshot;
+    cascades: DVCascadeSnapshot[];
+    hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+  };
+
+  return cascades
+    .filter(
+      (c) =>
+        c._cr4de_effect_risk_value === riskFile._cr4de_risk_file_value &&
+        (hazardCatalogue[c._cr4de_cause_risk_value]?.cr4de_risk_type ===
+          RISK_TYPE.STANDARD ||
+          hazardCatalogue[c._cr4de_cause_risk_value]?.cr4de_risk_type ===
+            RISK_TYPE.MANMADE)
+    )
+    .map((c) => ({
+      ...c,
+      cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
+      cr4de_effect_risk: hazardCatalogue[c._cr4de_effect_risk_value],
+    }));
+}
+
 export function getCausesWithDP(
   riskFile: DVRiskFile,
   cascades: Cascades,
@@ -86,6 +183,25 @@ export function getCausesWithDP(
   ];
 }
 
+export function getCausesWithDPNew(
+  riskFile: DVRiskSnapshot,
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>,
+  scenario: SCENARIOS
+) {
+  return [
+    {
+      name: "2A.dp.title",
+      p: riskFile.cr4de_quanti[scenario].dp.yearly.scale,
+    },
+    ...cascades.causes.map((c) => ({
+      id: c.cr4de_cause_risk._cr4de_risk_file_value,
+      name: `risk.${c.cr4de_cause_risk.cr4de_hazard_id}.name`,
+      p: c.cr4de_quanti_cause[scenario].ip.yearly.scale,
+      cascade: c,
+    })),
+  ];
+}
+
 export function getEffects(
   riskFile: SmallRisk,
   cascades: DVRiskCascade[],
@@ -97,6 +213,57 @@ export function getEffects(
       ...c,
       cr4de_cause_hazard: hazardCatalogue[c._cr4de_cause_hazard_value],
       cr4de_effect_hazard: hazardCatalogue[c._cr4de_effect_hazard_value],
+    }));
+}
+
+export function getEffectsNew(
+  vars:
+    | {
+        riskFile: SmallRisk;
+        cascades: DVRiskCascade[];
+        hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+      }
+    | {
+        riskFile: DVRiskSnapshot;
+        cascades: DVCascadeSnapshot[];
+        hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+      }
+): DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[] {
+  if ("cr4de_riskfilesid" in vars.riskFile) {
+    // SmallRisk
+    const { riskFile, cascades, hazardCatalogue } = vars as {
+      riskFile: SmallRisk;
+      cascades: DVRiskCascade[];
+      hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+    };
+
+    return cascades
+      .filter((c) => c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid)
+      .map((c) => snapshotFromRiskCascade(c))
+      .map((c) => ({
+        ...c,
+        cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
+        cr4de_effect_risk: hazardCatalogue[c._cr4de_effect_risk_value],
+        cr4de_quanti_cause: JSON.parse(c.cr4de_quanti_cause),
+        cr4de_quanti_effect: JSON.parse(c.cr4de_quanti_effect),
+      }));
+  }
+
+  // RiskSnapshot
+  const { riskFile, cascades, hazardCatalogue } = vars as {
+    riskFile: DVRiskSnapshot;
+    cascades: DVCascadeSnapshot[];
+    hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+  };
+
+  return cascades
+    .filter(
+      (c) => c._cr4de_cause_risk_value === riskFile._cr4de_risk_file_value
+    )
+    .map((c) => ({
+      ...c,
+      cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
+      cr4de_effect_risk: hazardCatalogue[c._cr4de_effect_risk_value],
     }));
 }
 
@@ -145,6 +312,51 @@ export function getEffectsWithDI(
   ];
 }
 
+export function getEffectsWithDINew(
+  riskFile: DVRiskSnapshot,
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>,
+  scenario: SCENARIOS
+) {
+  return [
+    {
+      name: "Direct Impact",
+      i: riskFile.cr4de_quanti[scenario].di.all.scale,
+      iH:
+        riskFile.cr4de_quanti[scenario].di.ha.scale +
+        riskFile.cr4de_quanti[scenario].di.hb.scale +
+        riskFile.cr4de_quanti[scenario].di.hc.scale,
+      iS:
+        riskFile.cr4de_quanti[scenario].di.sa.scale +
+        riskFile.cr4de_quanti[scenario].di.sb.scale +
+        riskFile.cr4de_quanti[scenario].di.sc.scale +
+        riskFile.cr4de_quanti[scenario].di.sd.scale,
+      iE: riskFile.cr4de_quanti[scenario].di.ea.scale,
+      iF:
+        riskFile.cr4de_quanti[scenario].di.fa.scale +
+        riskFile.cr4de_quanti[scenario].di.fb.scale,
+    },
+    ...cascades.effects.map((e) => ({
+      id: e.cr4de_effect_risk._cr4de_risk_file_value,
+      name: `risk.${e.cr4de_effect_risk.cr4de_hazard_id}.name`,
+      i: e.cr4de_quanti_effect[scenario].ii.all.scale,
+      iH:
+        e.cr4de_quanti_effect[scenario].ii.ha.scale +
+        e.cr4de_quanti_effect[scenario].ii.hb.scale +
+        e.cr4de_quanti_effect[scenario].ii.hc.scale,
+      iS:
+        e.cr4de_quanti_effect[scenario].ii.sa.scale +
+        e.cr4de_quanti_effect[scenario].ii.sb.scale +
+        e.cr4de_quanti_effect[scenario].ii.sc.scale +
+        e.cr4de_quanti_effect[scenario].ii.sd.scale,
+      iE: e.cr4de_quanti_effect[scenario].ii.ea.scale,
+      iF:
+        e.cr4de_quanti_effect[scenario].ii.fa.scale +
+        e.cr4de_quanti_effect[scenario].ii.fb.scale,
+      cascade: e,
+    })),
+  ];
+}
+
 export function getCatalyzingEffects<T extends DVRiskCascade>(
   riskFile: SmallRisk,
   cascades: T[],
@@ -155,10 +367,10 @@ export function getCatalyzingEffects<T extends DVRiskCascade>(
     .filter(
       (c) =>
         c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
-        hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type ===
+        hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_risk_type ===
           RISK_TYPE.EMERGING &&
         (includeClimateChange ||
-          hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_title.indexOf(
+          hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_title.indexOf(
             "Climate"
           ) < 0)
     )
@@ -166,6 +378,74 @@ export function getCatalyzingEffects<T extends DVRiskCascade>(
       ...c,
       cr4de_cause_hazard: hazardCatalogue[c._cr4de_cause_hazard_value],
       cr4de_effect_hazard: hazardCatalogue[c._cr4de_effect_hazard_value],
+    }));
+}
+
+export function getCatalyzingEffectsNew(
+  vars:
+    | {
+        riskFile: SmallRisk;
+        cascades: DVRiskCascade[];
+        hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+      }
+    | {
+        riskFile: DVRiskSnapshot;
+        cascades: DVCascadeSnapshot[];
+        hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+      },
+  includeClimateChange: boolean = true
+): DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[] {
+  if ("cr4de_riskfilesid" in vars.riskFile) {
+    // SmallRisk
+    const { riskFile, cascades, hazardCatalogue } = vars as {
+      riskFile: SmallRisk;
+      cascades: DVRiskCascade[];
+      hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+    };
+
+    return cascades
+      .filter(
+        (c) =>
+          c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+          hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_risk_type ===
+            RISK_TYPE.EMERGING &&
+          (includeClimateChange ||
+            hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_title.indexOf(
+              "Climate"
+            ) < 0)
+      )
+      .map((c) => snapshotFromRiskCascade(c))
+      .map((c) => ({
+        ...c,
+        cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
+        cr4de_effect_risk: hazardCatalogue[c._cr4de_effect_risk_value],
+        cr4de_quanti_cause: JSON.parse(c.cr4de_quanti_cause),
+        cr4de_quanti_effect: JSON.parse(c.cr4de_quanti_effect),
+      }));
+  }
+
+  // RiskSnapshot
+  const { riskFile, cascades, hazardCatalogue } = vars as {
+    riskFile: DVRiskSnapshot;
+    cascades: DVCascadeSnapshot[];
+    hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+  };
+
+  return cascades
+    .filter(
+      (c) =>
+        c._cr4de_effect_risk_value === riskFile._cr4de_risk_file_value &&
+        hazardCatalogue[c._cr4de_cause_risk_value]?.cr4de_risk_type ===
+          RISK_TYPE.EMERGING &&
+        (includeClimateChange ||
+          hazardCatalogue[c._cr4de_cause_risk_value]?.cr4de_title.indexOf(
+            "Climate"
+          ) < 0)
+    )
+    .map((c) => ({
+      ...c,
+      cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
+      cr4de_effect_risk: hazardCatalogue[c._cr4de_effect_risk_value],
     }));
 }
 
@@ -177,9 +457,9 @@ export function getClimateChange<T extends DVRiskCascade>(
   const cc = cascades.find(
     (c) =>
       c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
-      hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type ===
+      hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_risk_type ===
         RISK_TYPE.EMERGING &&
-      hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_title.indexOf(
+      hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_title.indexOf(
         "Climate"
       ) >= 0
   );
@@ -190,6 +470,75 @@ export function getClimateChange<T extends DVRiskCascade>(
       cr4de_effect_hazard: hazardCatalogue[cc._cr4de_effect_hazard_value],
     };
   }
+  return null;
+}
+
+export function getClimateChangeNew(
+  vars:
+    | {
+        riskFile: SmallRisk;
+        cascades: DVRiskCascade[];
+        hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+      }
+    | {
+        riskFile: DVRiskSnapshot;
+        cascades: DVCascadeSnapshot[];
+        hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+      }
+): DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot> | null {
+  if ("cr4de_riskfilesid" in vars.riskFile) {
+    // SmallRisk
+    const { riskFile, cascades, hazardCatalogue } = vars as {
+      riskFile: SmallRisk;
+      cascades: DVRiskCascade[];
+      hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+    };
+
+    const cc = cascades.find(
+      (c) =>
+        c._cr4de_effect_hazard_value === riskFile.cr4de_riskfilesid &&
+        hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_risk_type ===
+          RISK_TYPE.EMERGING &&
+        hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_title.indexOf(
+          "Climate"
+        ) >= 0
+    );
+    if (cc) {
+      const ss = snapshotFromRiskCascade(cc);
+      return {
+        ...ss,
+        cr4de_cause_risk: hazardCatalogue[cc._cr4de_cause_hazard_value],
+        cr4de_effect_risk: hazardCatalogue[cc._cr4de_effect_hazard_value],
+        cr4de_quanti_cause: JSON.parse(ss.cr4de_quanti_cause),
+        cr4de_quanti_effect: JSON.parse(ss.cr4de_quanti_effect),
+      };
+    }
+  } else {
+    // RiskSnapshot
+    const { riskFile, cascades, hazardCatalogue } = vars as {
+      riskFile: DVRiskSnapshot;
+      cascades: DVCascadeSnapshot[];
+      hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
+    };
+
+    const cc = cascades.find(
+      (c) =>
+        c._cr4de_effect_risk_value === riskFile._cr4de_risk_file_value &&
+        hazardCatalogue[c._cr4de_cause_risk_value]?.cr4de_risk_type ===
+          RISK_TYPE.EMERGING &&
+        hazardCatalogue[c._cr4de_cause_risk_value]?.cr4de_title.indexOf(
+          "Climate"
+        ) >= 0
+    );
+    if (cc) {
+      return {
+        ...cc,
+        cr4de_cause_risk: hazardCatalogue[cc._cr4de_cause_risk_value],
+        cr4de_effect_risk: hazardCatalogue[cc._cr4de_effect_risk_value],
+      };
+    }
+  }
+
   return null;
 }
 
@@ -260,12 +609,105 @@ export const getAverageCP = (
 
 export const getCascadesCatalogue = (
   riskFiles: DVRiskFile[],
-  rc: RiskCatalogue,
+  rc: { [id: string]: SmallRisk },
   cascadeList: DVRiskCascade[]
 ): CascadeCatalogue => {
   return riskFiles.reduce(
     (acc, rf) => getCascades(rf, acc, rc)(cascadeList),
     {} as CascadeCatalogue
+  );
+};
+
+export const getCascadesCatalogueNew = (
+  riskFiles: DVRiskFile[],
+  rc: RiskCatalogue<unknown, RiskSnapshotResults>,
+  cascadeList: DVRiskCascade[]
+): CascadeSnapshotCatalogue<
+  DVRiskSnapshot<unknown, RiskSnapshotResults>,
+  DVRiskSnapshot<unknown, RiskSnapshotResults>
+> => {
+  return riskFiles.reduce(
+    (acc, rf) => getCascadesNew(rf, acc, rc)(cascadeList),
+    {} as CascadeSnapshotCatalogue<
+      DVRiskSnapshot<unknown, RiskSnapshotResults>,
+      DVRiskSnapshot<unknown, RiskSnapshotResults>
+    >
+  );
+};
+
+export const getCascadesSnapshotCatalogue = (
+  riskFiles: DVRiskSnapshot[],
+  rc: RiskCatalogue<unknown, RiskSnapshotResults>,
+  cascadeSnapshotList: DVCascadeSnapshot<
+    unknown,
+    unknown,
+    unknown,
+    SerializedCauseSnapshotResults,
+    SerializedEffectSnapshotResults
+  >[]
+): CascadeSnapshotCatalogue<
+  DVRiskSnapshot<unknown, RiskSnapshotResults>,
+  DVRiskSnapshot<unknown, RiskSnapshotResults>
+> => {
+  return riskFiles.reduce(
+    (acc, rf) =>
+      getCascadeSnapshots(
+        rf,
+        acc,
+        rc
+      )(
+        cascadeSnapshotList.map((c) => ({
+          ...c,
+          cr4de_quanti_cause: JSON.parse(c.cr4de_quanti_cause),
+          cr4de_quanti_effect: JSON.parse(c.cr4de_quanti_effect),
+        }))
+      ),
+    {} as CascadeSnapshotCatalogue<
+      DVRiskSnapshot<unknown, RiskSnapshotResults>,
+      DVRiskSnapshot<unknown, RiskSnapshotResults>
+    >
+  );
+};
+
+export const getParsedCascadeSnapshots = (
+  cascadeSnapshotList: DVCascadeSnapshot<
+    unknown,
+    unknown,
+    unknown,
+    SerializedCauseSnapshotResults,
+    SerializedEffectSnapshotResults
+  >[],
+  riskSnapshotCatalogue: RiskCatalogue
+): DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[] => {
+  return cascadeSnapshotList.map((c) => ({
+    ...c,
+    cr4de_cause_risk: riskSnapshotCatalogue[c._cr4de_cause_risk_value],
+    cr4de_effect_risk: riskSnapshotCatalogue[c._cr4de_effect_risk_value],
+    cr4de_quanti_cause: JSON.parse(c.cr4de_quanti_cause),
+    cr4de_quanti_effect: JSON.parse(c.cr4de_quanti_effect),
+  }));
+};
+
+export const getParsedCascadesSnapshotCatalogue = (
+  riskFiles: DVRiskSnapshot[],
+  rc: RiskCatalogue<unknown, RiskSnapshotResults>,
+  cascadeSnapshotList: DVCascadeSnapshot<
+    unknown,
+    unknown,
+    unknown,
+    CauseSnapshotResults,
+    EffectSnapshotResults
+  >[]
+): CascadeSnapshotCatalogue<
+  DVRiskSnapshot<unknown, RiskSnapshotResults>,
+  DVRiskSnapshot<unknown, RiskSnapshotResults>
+> => {
+  return riskFiles.reduce(
+    (acc, rf) => getCascadeSnapshots(rf, acc, rc)(cascadeSnapshotList),
+    {} as CascadeSnapshotCatalogue<
+      DVRiskSnapshot<unknown, RiskSnapshotResults>,
+      DVRiskSnapshot<unknown, RiskSnapshotResults>
+    >
   );
 };
 
@@ -281,6 +723,45 @@ export const getCascades =
       [riskFile.cr4de_riskfilesid]: getRiskCascades(riskFile, rcResult, hc),
     };
   };
+
+export const getCascadesNew =
+  (
+    riskFile: DVRiskFile,
+    cs: { [riskId: string]: CascadeSnapshots },
+    hc: RiskCatalogue<unknown, RiskSnapshotResults>
+  ) =>
+  (rcResult: DVRiskCascade[]) => {
+    return {
+      ...cs,
+      [riskFile.cr4de_riskfilesid]: getRiskCascadesNew(riskFile, rcResult, hc),
+    } as CascadeSnapshotCatalogue<
+      DVRiskSnapshot<unknown, RiskSnapshotResults>,
+      DVRiskSnapshot<unknown, RiskSnapshotResults>
+    >;
+  };
+
+export function getCascadeSnapshots(
+  riskSnapshot: DVRiskSnapshot,
+  cs: CascadeSnapshotCatalogue<
+    DVRiskSnapshot<unknown, RiskSnapshotResults>,
+    DVRiskSnapshot<unknown, RiskSnapshotResults>
+  >,
+  hc: RiskCatalogue<unknown, RiskSnapshotResults>
+) {
+  return (rcResult: DVCascadeSnapshot[]) => {
+    return {
+      ...cs,
+      [riskSnapshot._cr4de_risk_file_value]: getRiskCascadeSnapshots(
+        riskSnapshot,
+        rcResult,
+        hc
+      ),
+    } as CascadeSnapshotCatalogue<
+      DVRiskSnapshot<unknown, RiskSnapshotResults>,
+      DVRiskSnapshot<unknown, RiskSnapshotResults>
+    >;
+  };
+}
 
 export const getRiskCascades = (
   riskFile: DVRiskFile,
@@ -300,3 +781,72 @@ export const getRiskCascades = (
     climateChange,
   };
 };
+
+export const getRiskCascadesNew = (
+  riskFile: DVRiskFile,
+  cascades: DVRiskCascade[],
+  hc: RiskCatalogue<unknown, RiskSnapshotResults>
+): CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot> => {
+  const causes = getCausesNew({ riskFile, cascades, hazardCatalogue: hc });
+  const effects = getEffectsNew({ riskFile, cascades, hazardCatalogue: hc });
+  const catalyzingEffects = getCatalyzingEffectsNew(
+    { riskFile, cascades, hazardCatalogue: hc },
+    false
+  );
+  const climateChange = getClimateChangeNew({
+    riskFile,
+    cascades,
+    hazardCatalogue: hc,
+  });
+
+  return {
+    all: [...causes, ...effects, ...catalyzingEffects],
+    causes,
+    effects,
+    catalyzingEffects,
+    climateChange,
+  };
+};
+
+export function getRiskCascadeSnapshots(
+  riskSnapshot: DVRiskSnapshot,
+  cascades: DVCascadeSnapshot[],
+  riskCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>
+): CascadeSnapshots<
+  DVRiskSnapshot,
+  DVRiskSnapshot,
+  CauseSnapshotResults,
+  EffectSnapshotResults
+> {
+  const causes = getCausesNew({
+    riskFile: riskSnapshot,
+    cascades,
+    hazardCatalogue: riskCatalogue,
+  });
+  const effects = getEffectsNew({
+    riskFile: riskSnapshot,
+    cascades,
+    hazardCatalogue: riskCatalogue,
+  });
+  const catalyzingEffects = getCatalyzingEffectsNew(
+    {
+      riskFile: riskSnapshot,
+      cascades,
+      hazardCatalogue: riskCatalogue,
+    },
+    false
+  );
+  const climateChange = getClimateChangeNew({
+    riskFile: riskSnapshot,
+    cascades,
+    hazardCatalogue: riskCatalogue,
+  });
+
+  return {
+    all: [...causes, ...effects, ...catalyzingEffects],
+    causes,
+    effects,
+    catalyzingEffects,
+    climateChange,
+  };
+}

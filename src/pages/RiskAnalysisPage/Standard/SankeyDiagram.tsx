@@ -1,33 +1,30 @@
 import { Stack, Typography, Box, Button } from "@mui/material";
-import {
-  SCENARIOS,
-  SCENARIO_PARAMS,
-  getScenarioParameter,
-} from "../../../functions/scenarios";
+import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBars";
 import { useNavigate } from "react-router-dom";
 import ProbabilitySankey from "../../../components/charts/ProbabilitySankey";
 import ImpactSankey from "../../../components/charts/ImpactSankey";
 import { useEffect } from "react";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { useTranslation } from "react-i18next";
-import { Cascades } from "../../../functions/cascades";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../../types/dataverse/DVRiskSnapshot";
+import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
 
 export default function SankeyDiagram({
+  riskSummary,
   riskFile,
-  cascades,
   scenario,
   setScenario,
   debug = false,
-  manmade = false,
 }: {
-  riskFile: DVRiskFile;
-  cascades: Cascades;
+  riskSummary: DVRiskSummary;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
   scenario: SCENARIOS;
   setScenario: (s: SCENARIOS) => void;
   debug?: boolean;
-  manmade?: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -35,7 +32,7 @@ export default function SankeyDiagram({
   useEffect(() => {
     setScenario(scenario);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [riskFile, cascades]);
+  }, [riskFile]);
 
   const goToRiskFile = (id: string) => {
     navigate(`/risks/${id}/analysis`);
@@ -48,15 +45,15 @@ export default function SankeyDiagram({
         sx={{ width: "calc(50% - 150px)", height: 600 }}
       >
         <ProbabilitySankey
+          riskSummary={riskSummary}
           riskFile={riskFile}
-          cascades={cascades}
           maxCauses={null}
           shownCausePortion={0.8}
           minCausePortion={null}
           scenario={scenario}
           onClick={goToRiskFile}
           debug={debug}
-          manmade={manmade}
+          manmade={false}
         />
       </Box>
       <Stack
@@ -91,7 +88,7 @@ export default function SankeyDiagram({
           }}
         >
           <ProbabilityBars
-            tp={getScenarioParameter(riskFile, "TP", scenario) || 0}
+            tp={riskFile.cr4de_quanti[scenario].tp.yearly.scale || 0}
             chartWidth={200}
           />
         </Box>
@@ -204,8 +201,8 @@ export default function SankeyDiagram({
         sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}
       >
         <ImpactSankey
+          riskSummary={riskSummary}
           riskFile={riskFile}
-          cascades={cascades}
           maxEffects={null}
           shownEffectPortion={0.8}
           minEffectPortion={null}

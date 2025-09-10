@@ -1,11 +1,7 @@
 import { useState, useMemo } from "react";
-import { Box, Stack, Paper, Link, Tooltip, Alert } from "@mui/material";
+import { Box, Stack, Paper, Link } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
-import {
-  DVRiskFile,
-  DiscussionsRequired,
-} from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
 import MuiAccordionSummary, {
   AccordionSummaryProps,
@@ -19,18 +15,14 @@ import {
   PARAMETER,
   getQualiFieldName,
   getQuantiFieldNames,
-  getQuantiLabel,
 } from "../../functions/inputProcessing";
-import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import ErrorIcon from "@mui/icons-material/Error";
-import { DiscussionRequired } from "../../types/DiscussionRequired";
 import TextInputBox from "../../components/TextInputBox";
 import { Slider } from "./Slider";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CascadeMatrix from "./CascadeMatrix";
+import { CascadeSnapshotMatrix } from "./CascadeMatrix";
 import { useOutletContext } from "react-router-dom";
 import { AuthPageContext } from "../AuthPage";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 
 const capFirst = (s: string) => {
   return `${s[0].toUpperCase()}${s.slice(1)}`;
@@ -82,10 +74,10 @@ export default function ManMade({
 // reloadRiskFile,
 // reloadCascades,
 {
-  riskFile: DVRiskFile;
-  effects: DVRiskCascade<unknown, SmallRisk>[];
-  catalyzingEffects: DVRiskCascade<SmallRisk, unknown>[];
-  climateChange: DVRiskCascade<SmallRisk, unknown> | null;
+  riskFile: DVRiskSnapshot;
+  effects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[];
+  catalyzingEffects: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
+  climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
   // directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   // cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
   // reloadRiskFile: () => Promise<unknown>;
@@ -94,7 +86,7 @@ export default function ManMade({
   return (
     <>
       <Box sx={{ mx: 4 }}>
-        {riskFile.cr4de_consensus_type === null && (
+        {/* {riskFile.cr4de_consensus_type === null && (
           <Box sx={{ mb: 4, border: "1px solid #ff9800aa" }}>
             <Alert severity="warning">
               The consensus phase for this risk file has not yet been started so
@@ -102,7 +94,7 @@ export default function ManMade({
               displayed.
             </Alert>
           </Box>
-        )}
+        )} */}
         <Box sx={{ mb: 8 }}>
           <ParameterSection
             riskFile={riskFile}
@@ -114,7 +106,7 @@ export default function ManMade({
         <Box sx={{ mb: 8 }}>
           {effects.map((ca) => (
             <AttackSection
-              key={ca.cr4de_bnrariskcascadeid}
+              key={ca._cr4de_risk_cascade_value}
               riskFile={riskFile}
               cascade={ca}
               // reloadCascades={reloadCascades}
@@ -124,7 +116,7 @@ export default function ManMade({
         <Box sx={{ mb: 8 }}>
           {climateChange && (
             <CCSection
-              key={climateChange.cr4de_bnrariskcascadeid}
+              key={climateChange._cr4de_risk_cascade_value}
               riskFile={riskFile}
               cascade={climateChange}
               // directAnalyses={directAnalyses}
@@ -134,7 +126,7 @@ export default function ManMade({
           )}
           {catalyzingEffects.map((ca) => (
             <EmergingSection
-              key={ca.cr4de_bnrariskcascadeid}
+              key={ca._cr4de_risk_cascade_value}
               cascade={ca}
               // reloadCascades={reloadCascades}
             />
@@ -151,53 +143,54 @@ function ParameterSection({
 // cascadeAnalyses,
 // reloadRiskFile,
 {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot;
   // directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   // cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
   // reloadRiskFile: () => Promise<unknown>;
 }) {
-  const { user } = useOutletContext<AuthPageContext>();
+  // const { user } = useOutletContext<AuthPageContext>();
   const section = DIRECT_ANALYSIS_SECTIONS_MANMADE[PARAMETER.DP];
-  const discussionRequired = useMemo(() => {
-    if (!riskFile.cr4de_discussion_required) return false;
+  // const discussionRequired = useMemo(() => {
+  //   if (!riskFile.cr4de_discussion_required) return false;
 
-    if (
-      Object.keys(riskFile.cr4de_discussion_required).some(
-        (k) =>
-          k.indexOf(section.name) >= 0 &&
-          riskFile.cr4de_discussion_required &&
-          riskFile.cr4de_discussion_required[k as keyof DiscussionsRequired] ===
-            DiscussionRequired.REQUIRED
-      )
-    )
-      return DiscussionRequired.REQUIRED;
-    if (
-      Object.keys(riskFile.cr4de_discussion_required).some(
-        (k) =>
-          k.indexOf(section.name) >= 0 &&
-          riskFile.cr4de_discussion_required &&
-          riskFile.cr4de_discussion_required[k as keyof DiscussionsRequired] ===
-            DiscussionRequired.PREFERRED
-      )
-    )
-      return DiscussionRequired.PREFERRED;
-    if (
-      Object.keys(riskFile.cr4de_discussion_required).some(
-        (k) =>
-          k.indexOf(section.name) >= 0 &&
-          riskFile.cr4de_discussion_required &&
-          riskFile.cr4de_discussion_required[k as keyof DiscussionsRequired] ===
-            DiscussionRequired.RESOLVED
-      )
-    )
-      return DiscussionRequired.RESOLVED;
-    return DiscussionRequired.NOT_NECESSARY;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [riskFile]);
+  //   if (
+  //     Object.keys(riskFile.cr4de_discussion_required).some(
+  //       (k) =>
+  //         k.indexOf(section.name) >= 0 &&
+  //         riskFile.cr4de_discussion_required &&
+  //         riskFile.cr4de_discussion_required[k as keyof DiscussionsRequired] ===
+  //           DiscussionRequired.REQUIRED
+  //     )
+  //   )
+  //     return DiscussionRequired.REQUIRED;
+  //   if (
+  //     Object.keys(riskFile.cr4de_discussion_required).some(
+  //       (k) =>
+  //         k.indexOf(section.name) >= 0 &&
+  //         riskFile.cr4de_discussion_required &&
+  //         riskFile.cr4de_discussion_required[k as keyof DiscussionsRequired] ===
+  //           DiscussionRequired.PREFERRED
+  //     )
+  //   )
+  //     return DiscussionRequired.PREFERRED;
+  //   if (
+  //     Object.keys(riskFile.cr4de_discussion_required).some(
+  //       (k) =>
+  //         k.indexOf(section.name) >= 0 &&
+  //         riskFile.cr4de_discussion_required &&
+  //         riskFile.cr4de_discussion_required[k as keyof DiscussionsRequired] ===
+  //           DiscussionRequired.RESOLVED
+  //     )
+  //   )
+  //     return DiscussionRequired.RESOLVED;
+  //   return DiscussionRequired.NOT_NECESSARY;
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [riskFile]);
 
   const [open, setOpen] = useState(
-    discussionRequired === DiscussionRequired.PREFERRED ||
-      discussionRequired === DiscussionRequired.REQUIRED
+    false
+    // discussionRequired === DiscussionRequired.PREFERRED ||
+    //   discussionRequired === DiscussionRequired.REQUIRED
   );
 
   return (
@@ -207,7 +200,7 @@ function ParameterSection({
         onClick={() => setOpen(!open)}
       >
         <Typography sx={{ flex: 1 }}>{section.label}</Typography>
-        {user.roles.analist &&
+        {/* {user.roles.analist &&
           discussionRequired === DiscussionRequired.REQUIRED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <ErrorIcon color="warning" />
@@ -224,7 +217,7 @@ function ParameterSection({
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <CheckCircleIcon color="success" />
             </Tooltip>
-          )}
+          )} */}
       </AccordionSummary>
       <AccordionDetails>
         <Stack
@@ -264,7 +257,7 @@ function ScenarioSection({
 }: // directAnalyses,
 // reloadRiskFile,
 {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot;
   scenario: SCENARIOS;
   // directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   // cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
@@ -273,18 +266,19 @@ function ScenarioSection({
   // const api = useAPI();
   const { user } = useOutletContext<AuthPageContext>();
   const section = DIRECT_ANALYSIS_SECTIONS_MANMADE[PARAMETER.DP];
-  const discussionRequired = useMemo(() => {
-    if (!riskFile.cr4de_discussion_required) return false;
+  // const discussionRequired = useMemo(() => {
+  //   if (!riskFile.cr4de_discussion_required) return false;
 
-    return riskFile.cr4de_discussion_required[
-      `${section.name}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
-    ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [riskFile]);
+  //   return riskFile.cr4de_discussion_required[
+  //     `${section.name}_${SCENARIO_PARAMS[scenario].prefix}` as keyof DiscussionsRequired
+  //   ];
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [riskFile]);
 
   const [open, setOpen] = useState(
-    discussionRequired === DiscussionRequired.PREFERRED ||
-      discussionRequired === DiscussionRequired.REQUIRED
+    false
+    // discussionRequired === DiscussionRequired.PREFERRED ||
+    //   discussionRequired === DiscussionRequired.REQUIRED
   );
   // const [saving, setSaving] = useState(false);
 
@@ -300,7 +294,7 @@ function ScenarioSection({
   );
 
   const [quali, setQuali] = useState<string | null>(
-    (riskFile[qualiName as keyof DVRiskFile] as string | null) || ""
+    (riskFile[qualiName as keyof DVRiskSnapshot] as string | null) || ""
   );
 
   // const handleSave = async () => {
@@ -341,7 +335,7 @@ function ScenarioSection({
         <Typography variant="subtitle1" sx={{ flex: 1 }}>
           {capFirst(scenario)}
         </Typography>
-        {user.roles.analist &&
+        {/* {user.roles.analist &&
           discussionRequired === DiscussionRequired.REQUIRED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <ErrorIcon color="warning" />
@@ -358,7 +352,7 @@ function ScenarioSection({
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <CheckCircleIcon color="success" />
             </Tooltip>
-          )}
+          )} */}
       </Paper>
 
       {open && (
@@ -393,7 +387,7 @@ function ScenarioSection({
                 {quantiNames.map((n) => (
                   <Stack key={n} direction="row" sx={{ alignItems: "center" }}>
                     <Typography variant="caption" sx={{ flex: 1 }}>
-                      <i>{getQuantiLabel(n, riskFile)}</i> Estimation:
+                      <i>Motivation</i> Estimation:
                     </Typography>
                     <Box
                       sx={{
@@ -403,34 +397,34 @@ function ScenarioSection({
                         fontWeight: "bold",
                       }}
                     >
-                      {riskFile.cr4de_consensus_type !== null ? (
-                        <Slider
-                          initialValue={
-                            (riskFile[n as keyof DVRiskFile] as string) || "M3"
-                          }
-                          spread={
-                            // user.roles.analist
-                            //   ? getDASpread(directAnalyses, n)
-                            //   : null
-                            null
-                          }
-                          onChange={
-                            // user.roles.analist
-                            //   ? async (newValue) => {
-                            //       await api.updateRiskFile(
-                            //         riskFile.cr4de_riskfilesid,
-                            //         {
-                            //           [n]: newValue,
-                            //         }
-                            //       );
-                            //     }
-                            //   : null
-                            null
-                          }
-                        />
-                      ) : (
+                      {/* {riskFile.cr4de_consensus_type !== null ? ( */}
+                      <Slider
+                        initialValue={
+                          "M" + riskFile.cr4de_quanti[scenario].dp.yearly.scale
+                        }
+                        spread={
+                          // user.roles.analist
+                          //   ? getDASpread(directAnalyses, n)
+                          //   : null
+                          null
+                        }
+                        onChange={
+                          // user.roles.analist
+                          //   ? async (newValue) => {
+                          //       await api.updateRiskFile(
+                          //         riskFile.cr4de_riskfilesid,
+                          //         {
+                          //           [n]: newValue,
+                          //         }
+                          //       );
+                          //     }
+                          //   : null
+                          null
+                        }
+                      />
+                      {/* ) : (
                         <Typography variant="subtitle2">N/A</Typography>
-                      )}
+                      )} */}
                     </Box>
                   </Stack>
                 ))}
@@ -473,18 +467,19 @@ function AttackSection({
   cascade,
 }: // reloadCascades,
 {
-  riskFile: DVRiskFile;
-  cascade: DVRiskCascade<unknown, SmallRisk>;
+  riskFile: DVRiskSnapshot;
+  cascade: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>;
   // reloadCascades: () => Promise<unknown>;
 }) {
   const { user } = useOutletContext<AuthPageContext>();
   // const api = useAPI();
-  const discussionRequired =
-    cascade.cr4de_discussion_required_cause || DiscussionRequired.NOT_NECESSARY;
+  // const discussionRequired =
+  //   cascade.cr4de_discussion_required_cause || DiscussionRequired.NOT_NECESSARY;
 
   const [open, setOpen] = useState(
-    discussionRequired === DiscussionRequired.PREFERRED ||
-      discussionRequired === DiscussionRequired.REQUIRED
+    false
+    // discussionRequired === DiscussionRequired.PREFERRED ||
+    //   discussionRequired === DiscussionRequired.REQUIRED
   );
   // const [saving, setSaving] = useState(false);
 
@@ -511,20 +506,20 @@ function AttackSection({
       >
         <Typography sx={{ flex: 1 }}>
           <Link
-            href={`/learning/risk/${riskFile.cr4de_riskfilesid}`}
+            href={`/learning/risk/${riskFile._cr4de_risk_file_value}`}
             target="_blank"
           >
             {riskFile.cr4de_title}
           </Link>{" "}
           causes{" "}
           <Link
-            href={`/learning/risk/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}`}
+            href={`/learning/risk/${cascade.cr4de_effect_risk._cr4de_risk_file_value}`}
             target="_blank"
           >
-            {cascade.cr4de_effect_hazard.cr4de_title}
+            {cascade.cr4de_effect_risk.cr4de_title}
           </Link>
         </Typography>
-        {user.roles.analist &&
+        {/* {user.roles.analist &&
           discussionRequired === DiscussionRequired.REQUIRED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <ErrorIcon color="warning" />
@@ -541,15 +536,15 @@ function AttackSection({
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <CheckCircleIcon color="success" />
             </Tooltip>
-          )}
+          )} */}
       </AccordionSummary>
       <AccordionDetails>
         <Stack direction="column" sx={{ width: "100%" }}>
           <Box sx={{ maxWidth: "800px", mx: "auto", my: 4, px: 4 }}>
-            <CascadeMatrix
+            <CascadeSnapshotMatrix
               cascade={cascade}
-              cause={cascade.cr4de_cause_hazard as DVRiskFile}
-              effect={riskFile}
+              cause={riskFile}
+              effect={cascade.cr4de_effect_risk}
               isCause={true}
               onChange={async () => {}}
               // onChange={async (field, newValue) => {
@@ -608,18 +603,19 @@ function EmergingSection({
   cascade,
 }: // reloadCascades,
 {
-  cascade: DVRiskCascade<SmallRisk>;
+  cascade: DVCascadeSnapshot<unknown, DVRiskSnapshot>;
   // reloadCascades: () => Promise<unknown>;
 }) {
   const { user } = useOutletContext<AuthPageContext>();
 
   // const api = useAPI();
-  const discussionRequired =
-    cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
+  // const discussionRequired =
+  //   cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
 
   const [open, setOpen] = useState(
-    discussionRequired === DiscussionRequired.PREFERRED ||
-      discussionRequired === DiscussionRequired.REQUIRED
+    false
+    // discussionRequired === DiscussionRequired.PREFERRED ||
+    //   discussionRequired === DiscussionRequired.REQUIRED
   );
   // const [saving, setSaving] = useState(false);
 
@@ -645,13 +641,13 @@ function EmergingSection({
         <Typography sx={{ flex: 1 }}>
           Catalyzing Risk:{" "}
           <Link
-            href={`/learning/risk/${cascade.cr4de_cause_hazard.cr4de_riskfilesid}`}
+            href={`/learning/risk/${cascade.cr4de_cause_risk._cr4de_risk_file_value}`}
             target="_blank"
           >
-            {cascade.cr4de_cause_hazard.cr4de_title}
+            {cascade.cr4de_cause_risk.cr4de_title}
           </Link>
         </Typography>
-        {user.roles.analist &&
+        {/* {user.roles.analist &&
           discussionRequired === DiscussionRequired.REQUIRED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <ErrorIcon color="warning" />
@@ -668,7 +664,7 @@ function EmergingSection({
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <CheckCircleIcon color="success" />
             </Tooltip>
-          )}
+          )} */}
       </AccordionSummary>
       <AccordionDetails>
         <Stack
@@ -724,8 +720,8 @@ function CCSection({
 }: // directAnalyses,
 // reloadCascades,
 {
-  riskFile: DVRiskFile;
-  cascade: DVRiskCascade<SmallRisk>;
+  riskFile: DVRiskSnapshot;
+  cascade: DVCascadeSnapshot<unknown, DVRiskSnapshot>;
   // directAnalyses: DVDirectAnalysis[];
   // reloadRiskFile: () => Promise<unknown>;
   // reloadCascades: () => Promise<unknown>;
@@ -733,12 +729,13 @@ function CCSection({
   const { user } = useOutletContext<AuthPageContext>();
 
   // const api = useAPI();
-  const discussionRequired =
-    cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
+  // const discussionRequired =
+  //   cascade.cr4de_discussion_required || DiscussionRequired.NOT_NECESSARY;
 
   const [open, setOpen] = useState(
-    discussionRequired === DiscussionRequired.PREFERRED ||
-      discussionRequired === DiscussionRequired.REQUIRED
+    false
+    // discussionRequired === DiscussionRequired.PREFERRED ||
+    //   discussionRequired === DiscussionRequired.REQUIRED
   );
   // const [saving, setSaving] = useState(false);
 
@@ -764,13 +761,13 @@ function CCSection({
         <Typography sx={{ flex: 1 }}>
           Catalyzing Risk:{" "}
           <Link
-            href={`/learning/risk/${cascade.cr4de_cause_hazard.cr4de_riskfilesid}`}
+            href={`/learning/risk/${cascade.cr4de_cause_risk._cr4de_risk_file_value}`}
             target="_blank"
           >
-            {cascade.cr4de_cause_hazard.cr4de_title}
+            {cascade.cr4de_cause_risk.cr4de_title}
           </Link>
         </Typography>
-        {user.roles.analist &&
+        {/* {user.roles.analist &&
           discussionRequired === DiscussionRequired.REQUIRED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <ErrorIcon color="warning" />
@@ -787,7 +784,7 @@ function CCSection({
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <CheckCircleIcon color="success" />
             </Tooltip>
-          )}
+          )} */}
       </AccordionSummary>
       <AccordionDetails>
         <Stack
@@ -829,10 +826,7 @@ function CCSection({
               ).map((n) => (
                 <Stack key={n} direction="row" sx={{ alignItems: "center" }}>
                   <Typography variant="caption" sx={{ flex: 1 }}>
-                    <i>
-                      {getQuantiLabel(n as keyof DVDirectAnalysis, riskFile)}
-                    </i>{" "}
-                    Estimation:
+                    <i>DP50</i> Estimation:
                   </Typography>
                   <Box
                     sx={{
@@ -842,38 +836,40 @@ function CCSection({
                       fontWeight: "bold",
                     }}
                   >
-                    {riskFile.cr4de_consensus_type !== null ? (
-                      <Slider
-                        initialValue={riskFile[n as keyof DVRiskFile] as string}
-                        name={n}
-                        spread={
-                          // user.roles.analist
-                          //   ? getDASpread(
-                          //       directAnalyses,
-                          //       `cr4de_dp50_quanti${n.slice(
-                          //         -2
-                          //       )}` as keyof DVDirectAnalysis
-                          //     )
-                          //   : null
-                          null
-                        }
-                        onChange={
-                          // user.roles.analist
-                          //   ? async (newValue) => {
-                          //       await api.updateRiskFile(
-                          //         riskFile.cr4de_riskfilesid,
-                          //         {
-                          //           [n]: newValue,
-                          //         }
-                          //       );
-                          //     }
-                          //   : null
-                          null
-                        }
-                      />
-                    ) : (
+                    {/* {riskFile.cr4de_consensus_type !== null ? ( */}
+                    <Slider
+                      initialValue={
+                        riskFile[n as keyof DVRiskSnapshot] as string
+                      }
+                      name={n}
+                      spread={
+                        // user.roles.analist
+                        //   ? getDASpread(
+                        //       directAnalyses,
+                        //       `cr4de_dp50_quanti${n.slice(
+                        //         -2
+                        //       )}` as keyof DVDirectAnalysis
+                        //     )
+                        //   : null
+                        null
+                      }
+                      onChange={
+                        // user.roles.analist
+                        //   ? async (newValue) => {
+                        //       await api.updateRiskFile(
+                        //         riskFile.cr4de_riskfilesid,
+                        //         {
+                        //           [n]: newValue,
+                        //         }
+                        //       );
+                        //     }
+                        //   : null
+                        null
+                      }
+                    />
+                    {/* ) : (
                       <Typography variant="subtitle2">N/A</Typography>
-                    )}
+                    )} */}
                   </Box>
                 </Stack>
               ))}

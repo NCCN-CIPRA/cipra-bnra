@@ -1,18 +1,25 @@
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { SCENARIOS } from "../../functions/scenarios";
-import { Cascades } from "../../functions/cascades";
 import ImpactSankeyChart from "./svg/ImpactSankeyChart";
 import { Box, Typography, Tooltip } from "@mui/material";
 import round from "../../functions/roundNumberString";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import {
+  DVRiskSummary,
+  EffectRisksSummary,
+} from "../../types/dataverse/DVRiskSummary";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../types/dataverse/DVRiskSnapshot";
+import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 
 function CustomTooltip({
   x,
   y,
   height,
   payload,
-  totalImpact,
+  // totalImpact,
   fontSize,
   onClick,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,11 +27,13 @@ any) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  const cascade: EffectRisksSummary | undefined = payload.cascade;
+  console.log(cascade);
   return (
     <Tooltip
       title={
         <Box sx={{}}>
-          {payload.cascade && (
+          {cascade && !cascade.other_effects && (
             <>
               <Typography variant="subtitle1" color="inherit">
                 {t(payload.name)}
@@ -32,7 +41,7 @@ any) {
 
               <Typography variant="body1" sx={{ mt: 1 }}>
                 {t("analysis.effect.explained", {
-                  percentage: round((100 * payload.i) / totalImpact, 2),
+                  percentage: round(100 * cascade.effect_risk_i, 2),
                 })}
               </Typography>
 
@@ -89,31 +98,25 @@ any) {
                           </Typography> */}
             </>
           )}
-          {payload.hidden && (
+          {cascade?.other_effects && (
             <>
               <Typography variant="subtitle1" color="inherit">
                 {t("Other effects")}:
               </Typography>
 
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {payload.hidden.map((h: any) =>
-                h.cascade ? (
-                  <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
-                    <b>{t(h.name)}:</b>{" "}
-                    {t("analysis.effect.other.explained", {
-                      percentage: round((100 * h.i) / totalImpact, 2),
-                    })}
-                  </Typography>
-                ) : (
-                  <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
-                    <b>{t("2A.dp.title", "Direct Impact")}</b>
-                    {": "}
-                    {t("analysis.effect.other.explained", {
-                      percentage: round((100 * h.i) / totalImpact, 2),
-                    })}
-                  </Typography>
-                )
-              )}
+              {payload.hidden.map((h: EffectRisksSummary) => (
+                <Typography
+                  key={h.effect_risk_title}
+                  variant="body1"
+                  sx={{ mt: 1 }}
+                >
+                  <b>{t(h.effect_risk_title)}:</b>{" "}
+                  {t("analysis.effect.other.explained", {
+                    percentage: round(100 * h.effect_risk_i, 2),
+                  })}
+                </Typography>
+              ))}
             </>
           )}
           {!payload.cascade && !payload.hidden && (
@@ -126,7 +129,7 @@ any) {
                 <b>{t("2A.dp.title", "Direct Impact")}</b>
                 {": "}
                 {t("analysis.di.explained", {
-                  percentage: round((100 * payload.i) / totalImpact, 2),
+                  percentage: round(100 * payload.i, 2),
                 })}
               </Typography>
             </>
@@ -156,8 +159,8 @@ any) {
 }
 
 export default function ImpactSankey({
+  riskSummary = null,
   riskFile = null,
-  cascades = null,
   maxEffects = null,
   minEffectPortion = null,
   shownEffectPortion = null,
@@ -165,8 +168,8 @@ export default function ImpactSankey({
   debug = false,
   onClick = null,
 }: {
-  riskFile?: DVRiskFile | null;
-  cascades?: Cascades | null;
+  riskSummary?: DVRiskSummary | null;
+  riskFile?: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   maxEffects?: number | null;
   minEffectPortion?: number | null;
   shownEffectPortion?: number | null;
@@ -177,13 +180,15 @@ export default function ImpactSankey({
   return (
     <>
       <Box sx={{ width: "100%", height: 30, mb: 2, textAlign: "right" }}>
-        {/* <Typography variant="h6">
-          {riskFile?.cr4de_risk_type === RISK_TYPE.MANMADE ? "Most Impactful Actions" : "Impact Breakdown"}
-        </Typography> */}
+        <Typography variant="h6">
+          {riskFile?.cr4de_risk_type === RISK_TYPE.MANMADE
+            ? "Most Impactful Actions"
+            : "Impact Breakdown"}
+        </Typography>
       </Box>
       <ImpactSankeyChart
+        riskSummary={riskSummary}
         riskFile={riskFile}
-        cascades={cascades}
         maxEffects={maxEffects}
         shownEffectPortion={shownEffectPortion}
         minEffectPortion={minEffectPortion}

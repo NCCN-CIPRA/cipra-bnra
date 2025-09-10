@@ -1,11 +1,17 @@
 import { Box, Typography, Tooltip } from "@mui/material";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { SCENARIOS } from "../../functions/scenarios";
-import { Cascades } from "../../functions/cascades";
 import ProbabilitySankeyChart from "./svg/ProbabilitySankeyChart";
 import round from "../../functions/roundNumberString";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../types/dataverse/DVRiskSnapshot";
+import {
+  CauseRisksSummary,
+  DVRiskSummary,
+} from "../../types/dataverse/DVRiskSummary";
 
 function CustomTooltip({
   x,
@@ -20,11 +26,13 @@ any) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  const cascade: CauseRisksSummary | undefined = payload.cascade;
+
   return (
     <Tooltip
       title={
         <Box sx={{}}>
-          {payload.cascade && (
+          {cascade && !cascade.other_causes && (
             <>
               <Typography variant="subtitle1" color="inherit">
                 {t(payload.name)}
@@ -32,7 +40,7 @@ any) {
 
               <Typography variant="body1" sx={{ mt: 1 }}>
                 {t("analysis.cause.explained", {
-                  percentage: round((100 * payload.p) / totalProbability, 2),
+                  percentage: round(100 * cascade.cause_risk_p, 2),
                 })}
               </Typography>
 
@@ -78,31 +86,24 @@ any) {
                       </Typography> */}
             </>
           )}
-          {payload.hidden && (
+          {cascade?.other_causes && (
             <>
               <Typography variant="subtitle1" color="inherit">
                 {t("Other causes")}:
               </Typography>
 
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {payload.hidden.map((h: any) =>
-                h.cascade ? (
-                  <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
-                    <b>{t(h.name)}:</b>{" "}
-                    {t("analysis.cause.other.explained", {
-                      percentage: round((100 * h.p) / totalProbability, 2),
-                    })}
-                  </Typography>
-                ) : (
-                  <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
-                    <b>{t("2A.dp.title", "Direct Probability")}</b>
-                    {": "}
-                    {t("analysis.cause.other.explained", {
-                      percentage: round((100 * h.p) / totalProbability, 2),
-                    })}
-                  </Typography>
-                )
-              )}
+              {payload.hidden.map((h: CauseRisksSummary) => (
+                <Typography
+                  key={h.cause_risk_title}
+                  variant="body1"
+                  sx={{ mt: 1 }}
+                >
+                  <b>{t(h.cause_risk_title)}:</b>{" "}
+                  {t("analysis.cause.other.explained", {
+                    percentage: round(100 * h.cause_risk_p, 2),
+                  })}
+                </Typography>
+              ))}
             </>
           )}
           {!payload.cascade && !payload.hidden && (
@@ -145,8 +146,8 @@ any) {
 }
 
 export default function ProbabilitySankey({
+  riskSummary = null,
   riskFile = null,
-  cascades = null,
   maxCauses = null,
   minCausePortion = null,
   shownCausePortion = null,
@@ -155,8 +156,8 @@ export default function ProbabilitySankey({
   manmade = false,
   onClick = null,
 }: {
-  riskFile?: DVRiskFile | null;
-  cascades?: Cascades | null;
+  riskSummary?: DVRiskSummary | null;
+  riskFile?: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   maxCauses?: number | null;
   minCausePortion?: number | null;
   shownCausePortion?: number | null;
@@ -173,8 +174,8 @@ export default function ProbabilitySankey({
         {/* <Typography variant="h6">Probability Breakdown</Typography> */}
       </Box>
       <ProbabilitySankeyChart
+        riskSummary={riskSummary}
         riskFile={riskFile}
-        cascades={cascades}
         maxCauses={maxCauses}
         shownCausePortion={shownCausePortion}
         minCausePortion={minCausePortion}

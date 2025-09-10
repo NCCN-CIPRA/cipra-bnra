@@ -9,12 +9,15 @@ import EmergingIdentificationTutorial from "./EmergingIdentificationTutorial";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import handleExportRiskfile from "../../../functions/export/exportBNRA";
 import useAPI from "../../../hooks/useAPI";
+import { BasePageContext } from "../../BasePage";
+import { useOutletContext } from "react-router-dom";
 
 export default function Emerging({
   riskSummary,
 }: {
   riskSummary: DVRiskSummary;
 }) {
+  const { environment } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
   const api = useAPI();
 
@@ -62,7 +65,7 @@ export default function Emerging({
 
       <BNRASpeedDial
         offset={{ x: 0, y: 56 }}
-        exportAction={handleExportRiskfile(riskSummary, api)}
+        exportAction={handleExportRiskfile(riskSummary, api, environment)}
         HelpComponent={EmergingIdentificationTutorial}
       />
     </Box>

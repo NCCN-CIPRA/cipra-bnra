@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef } from "react";
 import {
   Container,
   Typography,
@@ -29,9 +29,8 @@ import {
 } from "../../types/dataverse/DVSmallRisk";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { saveAs } from "file-saver";
-import { proxy } from "comlink";
-import { getExporter } from "../../functions/export/exportBNRA";
-// import { getCascadeResultSnapshot } from "../../functions/snapshot";
+import { getCascadeResultSnapshot } from "../../functions/snapshot";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 
 enum EXPORT_TYPE {
   ALL = "ALL",
@@ -56,7 +55,9 @@ export default function ExportBNRAPage() {
   const [, setUpdateLog] = useState(Date.now());
   // const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [type, setType] = useState(EXPORT_TYPE.ALL);
-  const [selectedRiskFiles, setSelectedRiskFiles] = useState<DVRiskFile[]>([]);
+  const [selectedRiskFiles, setSelectedRiskFiles] = useState<DVRiskSummary[]>(
+    []
+  );
 
   const handleChangeType = (event: SelectChangeEvent) => {
     setType(event.target.value as EXPORT_TYPE);
@@ -76,21 +77,21 @@ export default function ExportBNRAPage() {
           if (typeof rf === "string") {
             if (
               value.find(
-                (r) => typeof r !== "string" && r.cr4de_riskfilesid === rf
+                (r) => typeof r !== "string" && r._cr4de_risk_file_value === rf
               )
             )
               return undefined;
             return riskFiles?.find((r) => r.cr4de_riskfilesid === rf);
           } else if (
             value.find(
-              (r) => typeof r === "string" && r === rf.cr4de_riskfilesid
+              (r) => typeof r === "string" && r === rf._cr4de_risk_file_value
             )
           ) {
             return undefined;
           }
           return rf;
         })
-        .filter((rf) => rf !== undefined) as DVRiskFile[]
+        .filter((rf) => rf !== undefined) as DVRiskSummary[]
     );
   };
 
@@ -126,7 +127,7 @@ export default function ExportBNRAPage() {
       results.map((r) => {
         return {
           ...r,
-          // results: getCascadeResultSnapshot(r),
+          results: getCascadeResultSnapshot(r),
         } as DVRiskCascade<SmallRisk, SmallRisk>;
       }),
   });
@@ -166,7 +167,7 @@ export default function ExportBNRAPage() {
 
   const isLoading = loadingRiskFiles || loadingCascades;
 
-  const exporter = useMemo(getExporter, [riskFiles]);
+  // const exporter = useMemo(getExporter, [riskFiles]);
 
   const reloadData = () => {
     logger("Loading data...");
@@ -188,25 +189,20 @@ export default function ExportBNRAPage() {
       return;
     }
 
-    const callback = (message: string) => {
-      return logger(message);
-    };
-    let blob;
-    try {
-      blob = await exporter.exportBNRA(
-        {
-          exportType: type,
-          exportedRiskFiles: selectedRiskFiles,
-          riskFiles,
-          allCascades: cascades,
-          allAttachments: attachments,
-        },
-        proxy(callback)
-      );
-    } catch (e) {
-      console.log(e);
-    }
-    console.log(blob);
+    // const callback = (message: string) => {
+    //   return logger(message);
+    // };
+    const blob = null;
+    // const blob = await exporter.exportBNRA(
+    //   {
+    //     exportType: type,
+    //     exportedRiskFiles: selectedRiskFiles,
+    //     riskFiles,
+    //     allCascades: cascades,
+    //     allAttachments: attachments,
+    //   },
+    //   proxy(callback)
+    // );
 
     if (blob) {
       if (type === EXPORT_TYPE.ALL || type == EXPORT_TYPE.FRONTPAGE) {
@@ -315,7 +311,7 @@ export default function ExportBNRAPage() {
                             >
                               {selected.map((rf) => (
                                 <Chip
-                                  key={rf.cr4de_riskfilesid}
+                                  key={rf._cr4de_risk_file_value}
                                   label={rf.cr4de_title}
                                 />
                               ))}
@@ -328,11 +324,13 @@ export default function ExportBNRAPage() {
                               <MenuItem
                                 key={rf.cr4de_riskfilesid}
                                 value={rf.cr4de_riskfilesid}
-                                style={{
-                                  fontWeight: selectedRiskFiles.includes(rf)
-                                    ? 600
-                                    : 400,
-                                }}
+                                style={
+                                  {
+                                    // fontWeight: selectedRiskFiles.includes(rf)
+                                    //   ? 600
+                                    //   : 400,
+                                  }
+                                }
                               >
                                 {rf.cr4de_title}
                               </MenuItem>

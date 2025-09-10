@@ -19,18 +19,23 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Trans, useTranslation } from "react-i18next";
 import { LoggedInUser } from "../hooks/useLoggedInUser";
 import { usePageTitleValue } from "../hooks/usePageTitle";
+import { Environment } from "../types/global";
 
 export default function TitleBar({
   showUser = true,
   onDrawerToggle,
   user,
+  environment,
   setFakeRole,
+  setEnvironment,
   defaultTitle,
 }: {
   showUser?: boolean;
   onDrawerToggle?: () => void;
   user: LoggedInUser | null | undefined;
+  environment: Environment;
   setFakeRole: (role: string) => void;
+  setEnvironment: (newEnv: Environment) => void;
   defaultTitle?: string;
 }) {
   const { i18n } = useTranslation();
@@ -75,11 +80,35 @@ export default function TitleBar({
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               {pageTitle || defaultTitle}
             </Typography>
-            {user?.realRoles?.admin && (
+            {user?.roles?.analist && (
               <>
                 <Typography variant="subtitle1" sx={{ mr: 2 }}>
                   {__APP_VERSION__}
                 </Typography>
+                <FormControl
+                  variant="filled"
+                  sx={{ width: 200, mr: 4 }}
+                  size="small"
+                >
+                  <InputLabel id="env-label">Environment</InputLabel>
+                  <Select
+                    labelId="env-label"
+                    id="env-select"
+                    value={environment}
+                    label="Environment"
+                    onChange={(e) => {
+                      setEnvironment(e.target.value as Environment);
+                    }}
+                    sx={{ bgcolor: "white" }}
+                  >
+                    <MenuItem value={Environment.PUBLIC}>Public</MenuItem>
+                    <MenuItem value={Environment.DYNAMIC}>Dynamic</MenuItem>
+                  </Select>
+                </FormControl>
+              </>
+            )}
+            {user?.realRoles?.admin && (
+              <>
                 <FormControl
                   variant="filled"
                   sx={{ width: 200, mr: 4 }}

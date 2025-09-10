@@ -1,10 +1,12 @@
 import { Document } from "@react-pdf/renderer";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import { Cascades } from "../../functions/cascades";
+import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import {
+  CascadeSnapshotCatalogue,
+  CascadeSnapshots,
+} from "../../functions/cascades";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { RiskFileCharts, SVGImages } from "../../functions/export/renderSVG";
-import { getScenarioParameter, SCENARIOS } from "../../functions/scenarios";
-import { getCategoryImpactRescaled } from "../../functions/CategoryImpact";
+import { SCENARIOS } from "../../functions/scenarios";
 import SummarySection from "./SummarySection";
 import DescriptionSection from "./DescriptionSection";
 import AnalysisSection from "./AnalysisSection";
@@ -15,11 +17,15 @@ import BibliographySection, {
 import { LoggedInUser } from "../../hooks/useLoggedInUser";
 import MMAnalysisSection from "./MMAnalysisSection";
 import EmergingDescriptionSection from "./EmergingDescriptionSection";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { RiskCatalogue } from "../../functions/riskfiles";
 
 export type RiskFilePDFProps = {
-  riskFile: DVRiskFile;
-  cascades: Cascades;
-  attachments: DVAttachment<unknown, unknown, DVRiskFile>[] | null;
+  riskSummary: DVRiskSummary;
+  riskFile: DVRiskSnapshot;
+  cascades: CascadeSnapshots<DVRiskSnapshot>;
+  attachments: DVAttachment<unknown, unknown, DVRiskSnapshot>[] | null;
   user?: LoggedInUser | null | undefined;
   charts: RiskFileCharts | null;
   // hazardCatalogue: SmallRisk[] | null;
@@ -28,13 +34,15 @@ export type RiskFilePDFProps = {
 
 export default function RiskFileExport({
   toExport,
+  riskSnapshots,
   allCascades,
   allAttachments,
   svgImages,
 }: {
-  toExport: DVRiskFile[];
-  allCascades: { [key: string]: Cascades };
-  allAttachments: DVAttachment<unknown, unknown, DVRiskFile>[];
+  toExport: DVRiskSummary[];
+  riskSnapshots: RiskCatalogue;
+  allCascades: CascadeSnapshotCatalogue<DVRiskSnapshot>;
+  allAttachments: DVAttachment<unknown, unknown, DVRiskSnapshot>[];
   svgImages: SVGImages;
 }) {
   const svgRisks = toExport.map((rf, i) => ({
@@ -46,11 +54,14 @@ export default function RiskFileExport({
     <Document>
       {svgRisks.map((rf) => (
         <RiskFilePDF
-          key={rf.cr4de_riskfilesid}
-          riskFile={rf}
-          cascades={allCascades[rf.cr4de_riskfilesid]}
+          key={rf._cr4de_risk_file_value}
+          riskSummary={rf}
+          riskFile={riskSnapshots[rf._cr4de_risk_file_value]}
+          cascades={allCascades[rf._cr4de_risk_file_value]}
           attachments={allAttachments.filter(
-            (a) => a.cr4de_risk_file?.cr4de_riskfilesid === rf.cr4de_riskfilesid
+            (a) =>
+              a.cr4de_risk_file?._cr4de_risk_file_value ===
+              rf._cr4de_risk_file_value
           )}
           // user={user}
           charts={rf.charts}
@@ -61,6 +72,7 @@ export default function RiskFileExport({
 }
 
 export function RiskFilePDF({
+  riskSummary,
   riskFile,
   cascades,
   user = null,
@@ -70,17 +82,17 @@ export function RiskFilePDF({
   if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && charts) {
     const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
 
-    const tp = getScenarioParameter(riskFile, "TP", scenario) || 0;
+    const tp = riskFile.cr4de_quanti[scenario].tp.yearly.scale;
 
-    const H = getCategoryImpactRescaled(riskFile, "H", scenario);
-    const S = getCategoryImpactRescaled(riskFile, "S", scenario);
-    const E = getCategoryImpactRescaled(riskFile, "E", scenario);
-    const F = getCategoryImpactRescaled(riskFile, "F", scenario);
+    const H = riskFile.cr4de_quanti[scenario].ti.h.scaleCat;
+    const S = riskFile.cr4de_quanti[scenario].ti.s.scaleCat;
+    const E = riskFile.cr4de_quanti[scenario].ti.e.scaleCat;
+    const F = riskFile.cr4de_quanti[scenario].ti.f.scaleCat;
 
     return (
       <>
         <SummarySection
-          riskFile={riskFile}
+          riskFile={riskSummary}
           tp={tp}
           H={H}
           S={S}
@@ -102,7 +114,6 @@ export function RiskFilePDF({
         />
         {attachments !== null && (
           <BibliographySection
-            riskFile={riskFile}
             allAttachments={getSpecificAttachments(attachments)}
             // user={user}
           />
@@ -114,17 +125,17 @@ export function RiskFilePDF({
   if (riskFile.cr4de_risk_type === RISK_TYPE.MANMADE && charts) {
     const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
 
-    const tp = getScenarioParameter(riskFile, "TP", scenario) || 0;
+    const tp = riskFile.cr4de_quanti[scenario].tp.yearly.scale;
 
-    const H = getCategoryImpactRescaled(riskFile, "H", scenario);
-    const S = getCategoryImpactRescaled(riskFile, "S", scenario);
-    const E = getCategoryImpactRescaled(riskFile, "E", scenario);
-    const F = getCategoryImpactRescaled(riskFile, "F", scenario);
+    const H = riskFile.cr4de_quanti[scenario].ti.h.scaleCat;
+    const S = riskFile.cr4de_quanti[scenario].ti.s.scaleCat;
+    const E = riskFile.cr4de_quanti[scenario].ti.e.scaleCat;
+    const F = riskFile.cr4de_quanti[scenario].ti.f.scaleCat;
 
     return (
       <>
         <SummarySection
-          riskFile={riskFile}
+          riskFile={riskSummary}
           tp={tp}
           H={H}
           S={S}

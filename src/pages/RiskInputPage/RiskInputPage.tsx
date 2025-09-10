@@ -3,8 +3,8 @@ import { TabContext, TabPanel, TabList } from "@mui/lab";
 import Step2APage from "./Step2ATab";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { useOutletContext, useSearchParams } from "react-router-dom";
-import Step2BTab from "./Step2BTab";
-import InputOverviewTab from "./InputOverviewTab";
+// import Step2BTab from "./Step2BTab";
+// import InputOverviewTab from "./InputOverviewTab";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import NCCNLoader from "../../components/NCCNLoader";
 import { useQuery } from "@tanstack/react-query";
@@ -81,25 +81,25 @@ export default function RiskInputPage() {
           </TabList>
         </Box>
         <TabPanel value="0">
-          <InputOverviewTab
+          {/* <InputOverviewTab
             riskFile={riskFile}
             participants={participants}
             cascades={cascades.all}
             directAnalyses={directAnalyses}
             cascadeAnalyses={cascadeAnalyses}
-          />
+          /> */}
         </TabPanel>
         <TabPanel value="1">Validation</TabPanel>
         <TabPanel value="2">
           <Step2APage riskFile={riskFile} directAnalyses={directAnalyses} />
         </TabPanel>
         <TabPanel value="3">
-          <Step2BTab
+          {/* <Step2BTab
             riskFile={riskFile}
             cascades={cascades.all}
             directAnalyses={directAnalyses}
             cascadeAnalyses={cascadeAnalyses}
-          />
+          /> */}
         </TabPanel>
         <TabPanel value="4">Feedback</TabPanel>
       </Box>

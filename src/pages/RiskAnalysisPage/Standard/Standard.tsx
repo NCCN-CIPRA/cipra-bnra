@@ -1,6 +1,5 @@
 import { Alert, Box, Typography } from "@mui/material";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { getScenarioSuffix, SCENARIOS } from "../../../functions/scenarios";
+import { SCENARIOS } from "../../../functions/scenarios";
 import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import Scenario from "./Scenario";
 import { useState } from "react";
@@ -12,31 +11,35 @@ import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../../components/RiskFileTitle";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import StandardAnalysisTutorial from "./StandardAnalysisTutorial";
-import { Cascades } from "../../../functions/cascades";
 import handleExportRiskfile from "../../../functions/export/exportBNRA";
 import useAPI from "../../../hooks/useAPI";
 import SankeyDiagram from "./SankeyDiagram";
 import RiskFileBibliography from "../../../components/RiskFileBibliography";
+import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../../types/dataverse/DVRiskSnapshot";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../../BasePage";
 
 export default function Standard({
+  riskSummary,
   riskFile,
-  cascades,
 }: {
-  riskFile: DVRiskFile;
-  cascades: Cascades;
+  riskSummary: DVRiskSummary;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
 }) {
+  const { environment } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
   const api = useAPI();
 
-  const MRS = riskFile.cr4de_mrs || SCENARIOS.EXTREME;
-  const MRSSuffix = getScenarioSuffix(MRS);
+  const MRS = riskSummary.cr4de_mrs || SCENARIOS.EXTREME;
   const [scenario, setScenario] = useState(MRS);
-
-  const rf = riskFile;
 
   return (
     <Box sx={{ mb: 10 }}>
-      <RiskFileTitle riskFile={riskFile} />
+      <RiskFileTitle riskFile={riskSummary} />
 
       <Box sx={{ mt: 8 }}>
         <Typography variant="h5">
@@ -44,8 +47,8 @@ export default function Standard({
         </Typography>
 
         <SankeyDiagram
+          riskSummary={riskSummary}
           riskFile={riskFile}
-          cascades={cascades}
           scenario={scenario}
           setScenario={setScenario}
         />
@@ -62,7 +65,7 @@ export default function Standard({
         </Box>
       )}
 
-      {rf.cr4de_intensity_parameters && (
+      {riskFile.cr4de_intensity_parameters && (
         <Box className="mrs" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Most Relevant Scenario")}</Typography>
 
@@ -70,11 +73,11 @@ export default function Standard({
 
           {/* <IntensityParametersTable initialParameters={rf.cr4de_intensity_parameters} /> */}
 
-          <Scenario riskFile={rf} scenario={MRS} />
+          <Scenario riskFile={riskFile} scenario={MRS} />
         </Box>
       )}
 
-      <DisclaimerSection riskFile={rf} />
+      <DisclaimerSection riskFile={riskFile} />
 
       <Box className="probability-assess" sx={{ mt: 8, clear: "both" }}>
         <Typography variant="h5">{t("Probability Assessment")}</Typography>
@@ -87,20 +90,20 @@ export default function Standard({
             backgroundColor: "white",
           }}
         >
-          <ProbabilitySection riskFile={rf} />
+          <ProbabilitySection riskFile={riskFile} />
         </Box>
       </Box>
 
       <Box className="impact-assess" sx={{ mt: 8 }}>
         <Typography variant="h5">{t("Impact Assessment")}</Typography>
 
-        <ImpactSection riskFile={rf} impactName="human" />
+        <ImpactSection riskFile={riskFile} impactName="human" />
 
-        <ImpactSection riskFile={rf} impactName="societal" />
+        <ImpactSection riskFile={riskFile} impactName="societal" />
 
-        <ImpactSection riskFile={rf} impactName="environmental" />
+        <ImpactSection riskFile={riskFile} impactName="environmental" />
 
-        <ImpactSection riskFile={rf} impactName="financial" />
+        <ImpactSection riskFile={riskFile} impactName="financial" />
 
         <Box
           className="cb-impact"
@@ -113,15 +116,15 @@ export default function Standard({
           }}
         >
           <Typography variant="h6">Cross-border Impact</Typography>
-          <CBSection riskFile={riskFile} scenarioSuffix={MRSSuffix} />
+          <CBSection riskFile={riskFile} />
         </Box>
       </Box>
 
-      <RiskFileBibliography risk={riskFile} />
+      <RiskFileBibliography risk={riskSummary} />
 
       <BNRASpeedDial
         offset={{ x: 0, y: 56 }}
-        exportAction={handleExportRiskfile(riskFile, api)}
+        exportAction={handleExportRiskfile(riskSummary, api, environment)}
         HelpComponent={StandardAnalysisTutorial}
       />
     </Box>

@@ -1,11 +1,11 @@
 import { Box, Typography, Tooltip } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { SCENARIOS } from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
 import { useTranslation } from "react-i18next";
-import { Cascades } from "../../functions/cascades";
+import { CascadeSnapshots } from "../../functions/cascades";
 import ActionsSankeyChart from "./svg/ActionsSankeyChart";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 
 function CustomTooltip({
   x,
@@ -88,8 +88,8 @@ export default function ActionsSankey({
   debug = false,
   onClick = null,
 }: {
-  riskFile?: DVRiskFile | null;
-  cascades?: Cascades | null;
+  riskFile?: DVRiskSnapshot | null;
+  cascades?: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot> | null;
   maxActions?: number | null;
   minActionPortion?: number | null;
   shownActionPortion?: number | null;

@@ -14,14 +14,15 @@ import {
 } from "./styles";
 import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import getScaleString from "../../functions/getScaleString";
-import { getSummary } from "../../functions/translations";
+import { getSnapshotSummary } from "../../functions/translations";
 import i18next from "i18next";
 import { BLACK } from "../../functions/colors";
 import Watermark from "./Watermark";
 import { LoggedInUser } from "../../hooks/useLoggedInUser";
 import { SummaryCharts } from "../../functions/export/renderSVG";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 
 export default function SummarySection({
   riskFile,
@@ -33,7 +34,7 @@ export default function SummarySection({
   user,
   charts,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSummary;
   tp: number;
   H: number;
   S: number;
@@ -154,7 +155,11 @@ export default function SummarySection({
         }
         // debug={true}
       >
-        {html2PDF(getSummary(riskFile, i18next.language), "summary", riskFile)}
+        {html2PDF(
+          getSnapshotSummary(riskFile, i18next.language),
+          "summary",
+          riskFile
+        )}
       </View>
       {!user?.roles.analist && <Watermark user={user} />}
     </Page>

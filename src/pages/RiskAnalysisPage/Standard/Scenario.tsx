@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
+import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 
 export default function Scenario({
   riskFile,
   scenario,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot<unknown, unknown>;
   scenario: SCENARIOS;
 }) {
   return (
@@ -22,7 +22,9 @@ export default function Scenario({
     >
       <Box
         className="htmleditor"
-        dangerouslySetInnerHTML={{ __html: riskFile.cr4de_mrs_scenario || "" }}
+        dangerouslySetInnerHTML={{
+          __html: riskFile.cr4de_quali_scenario_mrs || "",
+        }}
       />
     </Box>
   );

@@ -1,7 +1,4 @@
 import { Box, Typography } from "@mui/material";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import CatalyzingSection from "./CatalyzingSection";
 import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../../components/RiskFileTitle";
@@ -10,21 +7,28 @@ import EmergingAnalysisTutorial from "./EmergingAnalysisTutorial";
 import handleExportRiskfile from "../../../functions/export/exportBNRA";
 import useAPI from "../../../hooks/useAPI";
 import RiskFileBibliography from "../../../components/RiskFileBibliography";
+import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
+import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
+import { DVCascadeSnapshot } from "../../../types/dataverse/DVCascadeSnapshot";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../../BasePage";
 
 export default function Emerging({
-  riskFile,
+  riskSummary,
   cascades,
 }: {
-  riskFile: DVRiskFile;
-  cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
+  riskSummary: DVRiskSummary;
+  cascades: DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[];
 }) {
+  const { environment } = useOutletContext<BasePageContext>();
+
   const { t } = useTranslation();
   const api = useAPI();
 
   return (
     <>
       <Box sx={{ mb: 10 }}>
-        <RiskFileTitle riskFile={riskFile} />
+        <RiskFileTitle riskFile={riskSummary} />
 
         <Box className="catalyzing" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Catalysing Effects")}</Typography>
@@ -32,10 +36,10 @@ export default function Emerging({
           <CatalyzingSection cascades={cascades} />
         </Box>
 
-        <RiskFileBibliography risk={riskFile} />
+        <RiskFileBibliography risk={riskSummary} />
         <BNRASpeedDial
           offset={{ x: 0, y: 56 }}
-          exportAction={handleExportRiskfile(riskFile, api)}
+          exportAction={handleExportRiskfile(riskSummary, api, environment)}
           HelpComponent={EmergingAnalysisTutorial}
         />
       </Box>

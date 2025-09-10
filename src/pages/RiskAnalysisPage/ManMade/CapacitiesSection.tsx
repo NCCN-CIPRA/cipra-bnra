@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
+import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 
 export default function CapacitiesSection({
   riskFile,
   scenario,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot;
   scenario: SCENARIOS;
 }) {
   return (
@@ -19,10 +19,12 @@ export default function CapacitiesSection({
         background: "white",
       }}
     >
-      {riskFile.cr4de_mrs_scenario && (
+      {riskFile.cr4de_quali_scenario_mrs && (
         <Box
           className="htmleditor"
-          dangerouslySetInnerHTML={{ __html: riskFile.cr4de_mrs_scenario }}
+          dangerouslySetInnerHTML={{
+            __html: riskFile.cr4de_quali_scenario_mrs,
+          }}
         />
       )}
     </Box>

@@ -38,6 +38,7 @@ import MethodologyPage from "./pages/MethodologyPage/MethodologyPage";
 import MethodologyScalesPage from "./pages/MethodologyScalesPage/MethodologyScalesPage";
 import RiskDescriptionPage from "./pages/RiskDescriptionPage/RiskDescriptionPage";
 import { getAntiForgeryToken } from "./functions/api";
+import AdministrationPage from "./pages/AdministrationPage/AdministrationPage";
 
 export default function App() {
   useEffect(() => {
@@ -236,6 +237,10 @@ export default function App() {
                 { path: "/admin/process", element: <ProcessManagementPage /> },
                 { path: "/admin/experts", element: <ExpertManagementPage /> },
                 { path: "/admin/corrections", element: <CorrectionsPage /> },
+                {
+                  path: "/admin/functions/:tabName?",
+                  element: <AdministrationPage />,
+                },
                 {
                   path: "/admin/users/:tabName?",
                   element: <UserManagementPage />,

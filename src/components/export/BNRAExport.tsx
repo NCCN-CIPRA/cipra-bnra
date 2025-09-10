@@ -1,9 +1,5 @@
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
-import {
-  DVRiskFile,
-  RISK_CATEGORY,
-  RISK_TYPE,
-} from "../../types/dataverse/DVRiskFile";
+import { RISK_CATEGORY, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 // import BibliographySection from "./BibliographySection";
 import { Document, Page, Text } from "@react-pdf/renderer";
 
@@ -11,12 +7,15 @@ import { DPI, PAGE_SIZE } from "./styles";
 import { NCCN_GREEN } from "../../functions/colors";
 import { SVGImages } from "../../functions/export/renderSVG";
 import CategoryFrontPage from "./CategoryFrontPage";
-import { Cascades } from "../../functions/cascades";
+import { CascadeSnapshotCatalogue } from "../../functions/cascades";
 import BibliographySection, {
   getSpecificAttachments,
 } from "./BibliographySection";
 import { RiskFilePDF } from "./RiskFilePDF";
 import FrontPage from "./FrontPage";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { RiskCatalogue } from "../../functions/riskfiles";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 
 const categories: (RISK_TYPE.MANMADE | RISK_CATEGORY)[] = [
   RISK_TYPE.MANMADE,
@@ -31,13 +30,15 @@ const categories: (RISK_TYPE.MANMADE | RISK_CATEGORY)[] = [
 
 export function BNRAExport({
   riskFiles,
+  riskSnapshots,
   allCascades,
   allAttachments,
   svgImages,
 }: {
-  riskFiles: DVRiskFile[];
-  allCascades: { [key: string]: Cascades };
-  allAttachments: DVAttachment<unknown, unknown, DVRiskFile>[];
+  riskFiles: DVRiskSummary[];
+  riskSnapshots: RiskCatalogue;
+  allCascades: CascadeSnapshotCatalogue<DVRiskSnapshot>;
+  allAttachments: DVAttachment<unknown, unknown, DVRiskSnapshot>[];
   svgImages: SVGImages;
 }) {
   try {
@@ -61,7 +62,7 @@ export function BNRAExport({
                 (rf) =>
                   rf.cr4de_risk_type === c ||
                   (rf.cr4de_risk_type !== RISK_TYPE.MANMADE &&
-                    rf.cr4de_risk_category === c)
+                    rf.cr4de_category === c)
               )
               .sort((a, b) =>
                 a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id)
@@ -69,9 +70,10 @@ export function BNRAExport({
               .map((riskFile) => {
                 return (
                   <RiskFilePDF
-                    key={riskFile.cr4de_riskfilesid}
-                    riskFile={riskFile}
-                    cascades={allCascades[riskFile.cr4de_riskfilesid]}
+                    key={riskFile._cr4de_risk_file_value}
+                    riskSummary={riskFile}
+                    riskFile={riskSnapshots[riskFile._cr4de_risk_file_value]}
+                    cascades={allCascades[riskFile._cr4de_risk_file_value]}
                     attachments={null}
                     // user={user}
                     charts={riskFile.charts}
@@ -81,7 +83,6 @@ export function BNRAExport({
           </>
         ))}
         <BibliographySection
-          riskFile={null}
           allAttachments={getSpecificAttachments(allAttachments)}
         />
         <Page

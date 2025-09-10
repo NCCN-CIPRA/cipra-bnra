@@ -9,7 +9,11 @@ import "./RiskAnalysisPage.css";
 import NCCNLoader from "../../components/NCCNLoader";
 
 export default function RiskAnalysisPage() {
-  const { riskFile, cascades } = useOutletContext<RiskFilePageContext>();
+  const {
+    riskSummary,
+    riskSnapshot: riskFile,
+    cascades,
+  } = useOutletContext<RiskFilePageContext>();
 
   if (!riskFile || !cascades)
     return (
@@ -21,20 +25,24 @@ export default function RiskAnalysisPage() {
   if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD)
     return (
       <Container sx={{ mt: 2, pb: 8 }}>
-        <Standard riskFile={riskFile} cascades={cascades} />
+        <Standard riskSummary={riskSummary} riskFile={riskFile} />
       </Container>
     );
 
   if (riskFile.cr4de_risk_type === RISK_TYPE.MANMADE)
     return (
       <Container sx={{ mt: 2, pb: 8 }}>
-        <ManMade riskFile={riskFile} cascades={cascades} />
+        <ManMade
+          riskSummary={riskSummary}
+          riskFile={riskFile}
+          cascades={cascades}
+        />
       </Container>
     );
 
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
-      <Emerging riskFile={riskFile} cascades={cascades.all} />
+      <Emerging riskSummary={riskSummary} cascades={cascades.all} />
     </Container>
   );
 }

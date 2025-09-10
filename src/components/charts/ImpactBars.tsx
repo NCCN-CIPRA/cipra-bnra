@@ -1,5 +1,4 @@
 import { TooltipProps } from "recharts";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { Box, Stack, Typography } from "@mui/material";
 import { SCENARIOS } from "../../functions/scenarios";
 import {
@@ -7,6 +6,10 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 import ImpactBarChart from "./svg/ImpactBarChart";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../types/dataverse/DVRiskSnapshot";
 
 const CustomTooltip = ({
   active,
@@ -59,7 +62,7 @@ export default function ImpactBars({
   width,
   height,
 }: {
-  riskFile: DVRiskFile | null;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   scenario: SCENARIOS;
   width?: number;
   height?: number;

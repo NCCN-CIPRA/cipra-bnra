@@ -5,16 +5,14 @@ import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { getResultSnapshot, SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { DataTable } from "../hooks/useAPI";
 import useLazyRecord, { GetRecordParams } from "../hooks/useLazyRecord";
-import {
-  DVRiskCascade,
-  getCascadeResultSnapshot,
-} from "../types/dataverse/DVRiskCascade";
+import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import useLazyRecords, { GetRecordsParams } from "../hooks/useLazyRecords";
 import { LoggedInUser } from "../hooks/useLoggedInUser";
 import { Cascades, getCascades } from "../functions/cascades";
 import satisfies from "../types/satisfies";
 import { AuthPageContext } from "./AuthPage";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
+import { getCascadeResultSnapshot } from "../functions/snapshot";
 
 export interface RiskPageContext {
   user: LoggedInUser | null | undefined;

@@ -11,20 +11,19 @@ import {
 } from "./styles";
 import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import getImpactColor from "../../functions/getImpactColor";
 import Header from "./Header";
 import LeftBorderSection from "./LeftBorderSection";
-import { getScenarioSuffix, SCENARIOS } from "../../functions/scenarios";
 import { BLACK } from "../../functions/colors";
 import { RiskFileCharts } from "../../functions/export/renderSVG";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 // import { LoggedInUser } from "../../hooks/useLoggedInUser";
 
 export default function AnalysisSection({
   riskFile,
   charts,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot;
   charts: RiskFileCharts;
   // user: LoggedInUser | null | undefined;
 }) {
@@ -131,7 +130,7 @@ export default function AnalysisSection({
           color="#eee"
           // style={{ paddingTop: 5 * SCALE, marginBottom: 10 * SCALE }}
         >
-          {html2PDF(riskFile.cr4de_mrs_probability, "analysis", riskFile)}
+          {html2PDF(riskFile.cr4de_quali_p_mrs, "analysis", riskFile)}
         </LeftBorderSection>
       </View>
 
@@ -154,7 +153,7 @@ export default function AnalysisSection({
           >
             {t("learning.impact.h.title")}
           </Text>
-          {html2PDF(riskFile.cr4de_mrs_impact_h, "analysis", riskFile)}
+          {html2PDF(riskFile.cr4de_quali_h_mrs, "analysis", riskFile)}
         </LeftBorderSection>
 
         <LeftBorderSection color={getImpactColor("S")}>
@@ -168,7 +167,7 @@ export default function AnalysisSection({
           >
             {t("learning.impact.s.title")}
           </Text>
-          {html2PDF(riskFile.cr4de_mrs_impact_s, "analysis", riskFile)}
+          {html2PDF(riskFile.cr4de_quali_s_mrs, "analysis", riskFile)}
         </LeftBorderSection>
 
         <LeftBorderSection color={getImpactColor("E")}>
@@ -182,7 +181,7 @@ export default function AnalysisSection({
           >
             {t("learning.impact.e.title")}
           </Text>
-          {html2PDF(riskFile.cr4de_mrs_impact_e, "analysis", riskFile)}
+          {html2PDF(riskFile.cr4de_quali_e_mrs, "analysis", riskFile)}
         </LeftBorderSection>
 
         <LeftBorderSection color={getImpactColor("F")}>
@@ -196,7 +195,7 @@ export default function AnalysisSection({
           >
             {t("learning.impact.f.title")}
           </Text>
-          {html2PDF(riskFile.cr4de_mrs_impact_f, "analysis", riskFile)}
+          {html2PDF(riskFile.cr4de_quali_f_mrs, "analysis", riskFile)}
         </LeftBorderSection>
 
         <LeftBorderSection color="#eee" style={{ marginBottom: -5 * SCALE }}>
@@ -210,15 +209,7 @@ export default function AnalysisSection({
           >
             {t("Cross-border Impact")}
           </Text>
-          {html2PDF(
-            riskFile[
-              `cr4de_cross_border_impact_quali${getScenarioSuffix(
-                riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE
-              )}`
-            ],
-            "analysis",
-            riskFile
-          )}
+          {html2PDF(riskFile.cr4de_quali_cb_mrs, "analysis", riskFile)}
           <View
             style={{ marginTop: -5 * SCALE, width: "100%", height: "1pt" }}
           />

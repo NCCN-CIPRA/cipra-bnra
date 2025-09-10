@@ -9,12 +9,15 @@ import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import ManmadeIdentificationTutorial from "./ManmadeIdentificationTutorial";
 import handleExportRiskfile from "../../../functions/export/exportBNRA";
 import useAPI from "../../../hooks/useAPI";
+import { BasePageContext } from "../../BasePage";
+import { useOutletContext } from "react-router-dom";
 
 export default function Manmade({
   riskSummary,
 }: {
   riskSummary: DVRiskSummary;
 }) {
+  const { environment } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
   const api = useAPI();
 
@@ -50,7 +53,7 @@ export default function Manmade({
 
       <BNRASpeedDial
         offset={{ x: 0, y: 56 }}
-        exportAction={handleExportRiskfile(riskSummary, api)}
+        exportAction={handleExportRiskfile(riskSummary, api, environment)}
         HelpComponent={ManmadeIdentificationTutorial}
       />
     </Box>

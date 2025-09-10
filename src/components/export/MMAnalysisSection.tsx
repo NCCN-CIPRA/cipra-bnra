@@ -11,19 +11,19 @@ import {
 } from "./styles";
 import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import getImpactColor from "../../functions/getImpactColor";
 import Header from "./Header";
 import LeftBorderSection from "./LeftBorderSection";
 import { BLACK } from "../../functions/colors";
 import { RiskFileCharts } from "../../functions/export/renderSVG";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 // import { LoggedInUser } from "../../hooks/useLoggedInUser";
 
 export default function MMAnalysisSection({
   riskFile,
   charts,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot;
   charts: RiskFileCharts;
   // user: LoggedInUser | null | undefined;
 }) {
@@ -128,7 +128,7 @@ export default function MMAnalysisSection({
           color="#eee"
           style={{ paddingTop: 5 * SCALE, marginBottom: 10 * SCALE }}
         >
-          {html2PDF(riskFile.cr4de_mrs_probability, "analysis", riskFile)}
+          {html2PDF(riskFile.cr4de_quali_p_mrs, "analysis", riskFile)}
         </LeftBorderSection>
       </View>
 
@@ -151,7 +151,7 @@ export default function MMAnalysisSection({
           >
             {t("learning.impact.h.title")}
           </Text> */}
-          {html2PDF(riskFile.cr4de_mrs_actions, "analysis", riskFile)}
+          {html2PDF(riskFile.cr4de_quali_actions_mrs, "analysis", riskFile)}
         </LeftBorderSection>
       </View>
 
@@ -164,7 +164,7 @@ export default function MMAnalysisSection({
       >
         <Text style={h5Style}>{t("Other Impactful Actions")}</Text>
         <LeftBorderSection color={getImpactColor("S")}>
-          {html2PDF(riskFile.cr4de_mrs_mm_impact, "analysis", riskFile)}
+          {html2PDF(riskFile.cr4de_quali_mm_mrs, "analysis", riskFile)}
         </LeftBorderSection>
       </View>
     </Page>

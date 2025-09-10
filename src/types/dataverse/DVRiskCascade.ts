@@ -1,3 +1,38 @@
+import { RiskCatalogue } from "../../functions/riskfiles";
+import {
+  DVCascadeSnapshot,
+  SerializedCauseSnapshotResults,
+  SerializedEffectSnapshotResults,
+} from "./DVCascadeSnapshot";
+import { DVRiskSnapshot } from "./DVRiskSnapshot";
+
+export function parseCascadeSnapshot<R, S, T>(
+  snapshot: DVCascadeSnapshot<
+    R,
+    S,
+    T,
+    SerializedCauseSnapshotResults,
+    SerializedEffectSnapshotResults
+  >
+): DVCascadeSnapshot<R, S, T> {
+  return {
+    ...snapshot,
+    cr4de_quanti_cause: JSON.parse(snapshot.cr4de_quanti_cause),
+    cr4de_quanti_effect: JSON.parse(snapshot.cr4de_quanti_effect),
+  };
+}
+
+export function linkCascadeSnapshot<T, C, E>(
+  snapshot: DVCascadeSnapshot<T, unknown, unknown, C, E>,
+  riskCatalogue: RiskCatalogue
+): DVCascadeSnapshot<T, DVRiskSnapshot, DVRiskSnapshot, C, E> {
+  return {
+    ...snapshot,
+    cr4de_cause_risk: riskCatalogue[snapshot._cr4de_cause_risk_value],
+    cr4de_effect_risk: riskCatalogue[snapshot._cr4de_effect_risk_value],
+  };
+}
+
 export interface DVRiskCascade<CauseType = unknown, EffectType = unknown> {
   cr4de_bnrariskcascadeid: string;
 
@@ -134,10 +169,4 @@ export type CASCADE_RESULT_SNAPSHOT = {
   II_C2All_Fb: number | null;
   II_M2All_Fb: number | null;
   II_E2All_Fb: number | null;
-};
-
-export const getCascadeResultSnapshot = (cascade: DVRiskCascade): CASCADE_RESULT_SNAPSHOT | null => {
-  if (cascade.cr4de_result_snapshot === null || cascade.cr4de_result_snapshot === "") return null;
-
-  return JSON.parse(cascade.cr4de_result_snapshot);
 };

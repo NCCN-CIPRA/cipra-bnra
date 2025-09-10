@@ -2,6 +2,10 @@ export enum DataTable {
   CONTACT = "contacts",
 
   RISK_SUMMARY = "summaries",
+
+  RISK_SNAPSHOT = "riskSnapshot",
+  CASCADE_SNAPSHOT = "cascadeSnaphshot",
+
   RISK_FILE = "riskfiles",
   RISK_CASCADE = "cascades",
 

@@ -2,10 +2,10 @@ import { Page, Text, View } from "@react-pdf/renderer";
 import Footer from "./Footer";
 import { bodyStyle, h4Style, PAGE_DPI, PAGE_SIZE, PAGE_STYLES } from "./styles";
 import { Trans } from "react-i18next";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { useMemo } from "react";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { BLACK } from "../../functions/colors";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 
 export type SpecificAttachment = { cr4de_reference: string } & Omit<
   DVAttachment,
@@ -13,7 +13,7 @@ export type SpecificAttachment = { cr4de_reference: string } & Omit<
 >;
 
 export function getSpecificAttachments(
-  attachments: DVAttachment<unknown, unknown, DVRiskFile>[]
+  attachments: DVAttachment<unknown, unknown, DVRiskSnapshot>[]
 ): SpecificAttachment[] {
   return attachments
     .filter((a) => a.cr4de_reference && a.cr4de_risk_file)
@@ -33,7 +33,6 @@ export function getSpecificAttachments(
 export default function BibliographySection({
   allAttachments,
 }: {
-  riskFile: DVRiskFile | null;
   allAttachments: SpecificAttachment[] | null;
 }) {
   const attachments = useMemo(() => {

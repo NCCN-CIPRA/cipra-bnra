@@ -9,7 +9,11 @@ import NCCNLoader from "../../components/NCCNLoader";
 import RiskFileTitle from "../../components/RiskFileTitle";
 
 export default function RiskDataPage() {
-  const { riskFile, cascades } = useOutletContext<RiskFilePageContext>();
+  const {
+    riskSnapshot: riskFile,
+    riskSummary,
+    cascades,
+  } = useOutletContext<RiskFilePageContext>();
 
   // useEffect(() => {
   //   if (!directAnalyses) loadDirectAnalyses();
@@ -27,13 +31,14 @@ export default function RiskDataPage() {
   return (
     <Stack direction="column" sx={{ width: "100%" }}>
       <Container sx={{ mt: 2 }}>
-        <RiskFileTitle riskFile={riskFile} />
+        <RiskFileTitle riskFile={riskSummary} />
       </Container>
       <Box sx={{ mt: 6, mb: 16 }}>
         {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && (
           <Standard
             riskFile={riskFile}
             causes={cascades.causes}
+            effects={cascades.effects}
             catalyzingEffects={cascades.catalyzingEffects}
             climateChange={cascades.climateChange}
             // directAnalyses={directAnalyses}

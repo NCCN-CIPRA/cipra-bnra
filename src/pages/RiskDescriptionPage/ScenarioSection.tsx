@@ -4,7 +4,8 @@ import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { useTranslation } from "react-i18next";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
-import { RISK_TYPE } from "../../types/dataverse/Riskfile";
+import { ParsedRiskFields, RISK_TYPE } from "../../types/dataverse/Riskfile";
+import { parseRiskFields } from "../../functions/parseDataverseFields";
 
 export default function ScenarioSection({
   riskSummary,
@@ -16,7 +17,12 @@ export default function ScenarioSection({
     riskSummary.cr4de_mrs || SCENARIOS.CONSIDERABLE
   );
 
-  if (!riskSummary.cr4de_scenarios) return null;
+  const parsedSummary: DVRiskSummary<unknown, ParsedRiskFields> = {
+    ...riskSummary,
+    ...parseRiskFields(riskSummary),
+  };
+
+  if (!parsedSummary.cr4de_scenarios) return null;
 
   const scenarioString =
     riskSummary.cr4de_risk_type === RISK_TYPE.MANMADE
@@ -156,10 +162,10 @@ export default function ScenarioSection({
           </Button>
         </Stack>
         <Stack>
-          {riskSummary.cr4de_scenarios[selectedScenario].map((p) => {
+          {parsedSummary.cr4de_scenarios[selectedScenario].map((p) => {
             return (
               <Box
-                key={`${riskSummary._cr4de_risk_file_value}-${p.name}`}
+                key={`${parsedSummary._cr4de_risk_file_value}-${p.name}`}
                 sx={{ mb: 4 }}
               >
                 {p.description && (

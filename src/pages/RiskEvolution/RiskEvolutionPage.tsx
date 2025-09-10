@@ -18,12 +18,18 @@ import handleExportRiskfile from "../../functions/export/exportBNRA";
 import useAPI from "../../hooks/useAPI";
 import NCCNLoader from "../../components/NCCNLoader";
 import RiskFileBibliography from "../../components/RiskFileBibliography";
+import { BasePageContext } from "../BasePage";
 
 export default function RiskEvolutionPage() {
+  const { environment } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
   const api = useAPI();
 
-  const { riskFile, cascades } = useOutletContext<RiskFilePageContext>();
+  const {
+    riskSummary,
+    riskSnapshot: riskFile,
+    cascades,
+  } = useOutletContext<RiskFilePageContext>();
 
   if (!riskFile || !cascades)
     return (
@@ -35,7 +41,7 @@ export default function RiskEvolutionPage() {
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
       <Box sx={{ mb: 10 }}>
-        <RiskFileTitle riskFile={riskFile} />
+        <RiskFileTitle riskFile={riskSummary} />
 
         <DisclaimerSection riskFile={riskFile} />
 
@@ -76,13 +82,13 @@ export default function RiskEvolutionPage() {
               <List>
                 {cascades.catalyzingEffects.map((c) => (
                   <ListItemButton
-                    key={c.cr4de_bnrariskcascadeid}
+                    key={c._cr4de_risk_cascade_value}
                     component={Link}
-                    to={`/risks/${c.cr4de_cause_hazard.cr4de_riskfilesid}/analysis`}
+                    to={`/risks/${c._cr4de_cause_risk_value}/analysis`}
                     target="_blank"
                   >
                     <Typography variant="subtitle2" sx={{ pl: 2 }}>
-                      {c.cr4de_cause_hazard.cr4de_title}
+                      {c.cr4de_cause_risk.cr4de_title}
                     </Typography>
                   </ListItemButton>
                 ))}
@@ -91,11 +97,11 @@ export default function RiskEvolutionPage() {
           </Box>
         )}
 
-        <RiskFileBibliography risk={riskFile} />
+        <RiskFileBibliography risk={riskSummary} />
 
         <BNRASpeedDial
           offset={{ x: 0, y: 56 }}
-          exportAction={handleExportRiskfile(riskFile, api)}
+          exportAction={handleExportRiskfile(riskSummary, api, environment)}
           HelpComponent={RiskEvolutionTutorial}
         />
       </Box>

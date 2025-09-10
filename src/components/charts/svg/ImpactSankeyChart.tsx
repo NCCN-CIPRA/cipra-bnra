@@ -1,15 +1,17 @@
 import { Layer, Rectangle, ResponsiveContainer, Sankey } from "recharts";
 import getCategoryColor from "../../../functions/getCategoryColor";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import {
-  SCENARIOS,
-  getScenarioParameter,
-  getScenarioSuffix,
-} from "../../../functions/scenarios";
+import { SCENARIOS, getScenarioSuffix } from "../../../functions/scenarios";
 import round from "../../../functions/roundNumberString";
 import { useTranslation } from "react-i18next";
-import { Cascades, getEffectsWithDI } from "../../../functions/cascades";
 import { JSXElementConstructor } from "react";
+import {
+  DVRiskSummary,
+  EffectRisksSummary,
+} from "../../../types/dataverse/DVRiskSummary";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../../types/dataverse/DVRiskSnapshot";
 
 const baseY = 50;
 
@@ -136,11 +138,8 @@ const ISankeyLink = (props: any) => {
 };
 
 export default function ImpactSankeyChart({
+  riskSummary = null,
   riskFile = null,
-  cascades = null,
-  maxEffects = null,
-  minEffectPortion = null,
-  shownEffectPortion = null,
   scenario,
   debug = false,
   width = "100%",
@@ -149,8 +148,8 @@ export default function ImpactSankeyChart({
   onClick = null,
   onNavigate,
 }: {
-  riskFile?: DVRiskFile | null;
-  cascades?: Cascades | null;
+  riskSummary: DVRiskSummary | null;
+  riskFile?: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   maxEffects?: number | null;
   minEffectPortion?: number | null;
   shownEffectPortion?: number | null;
@@ -163,69 +162,76 @@ export default function ImpactSankeyChart({
   onClick?: ((id: string) => void) | null;
   onNavigate?: (id: string) => void;
 }) {
-  if (!riskFile || !cascades) return null;
+  console.log(riskSummary, riskFile);
+  if (!riskSummary || !riskFile) return null;
+
+  const effects = JSON.parse(
+    riskSummary.cr4de_effect_risks as string
+  ) as EffectRisksSummary[];
 
   const scenarioSuffix: string = getScenarioSuffix(scenario);
 
-  const effects = getEffectsWithDI(riskFile, cascades, scenario);
+  // const effects = getEffectsWithDI(riskFile, cascades, scenario);
 
-  let minI = 0;
+  // let minI = 0;
 
-  if (maxEffects !== null) {
-    minI =
-      maxEffects === null || effects.length < maxEffects
-        ? -1
-        : effects.sort((a, b) => b.i - a.i)[
-            Math.min(maxEffects - 1, effects.length - 1)
-          ].i;
-  } else if (minEffectPortion !== null) {
-    const Itot = effects.reduce((tot, e) => tot + e.i, 0.000000001);
-    minI = minEffectPortion * Itot;
-  } else if (shownEffectPortion !== null) {
-    const Itot = effects.reduce((tot, e) => tot + e.i, 0.000000001);
+  // if (maxEffects !== null) {
+  //   minI =
+  //     maxEffects === null || effects.length < maxEffects
+  //       ? -1
+  //       : effects.sort((a, b) => b.i - a.i)[
+  //           Math.min(maxEffects - 1, effects.length - 1)
+  //         ].i;
+  // } else if (minEffectPortion !== null) {
+  //   const Itot = effects.reduce((tot, e) => tot + e.i, 0.000000001);
+  //   minI = minEffectPortion * Itot;
+  // } else if (shownEffectPortion !== null) {
+  //   const Itot = effects.reduce((tot, e) => tot + e.i, 0.000000001);
 
-    let cumulI = 0;
-    for (const e of effects.sort((a, b) => b.i - a.i)) {
-      cumulI += e.i / Itot;
+  //   let cumulI = 0;
+  //   for (const e of effects.sort((a, b) => b.i - a.i)) {
+  //     cumulI += e.i / Itot;
 
-      if (cumulI >= shownEffectPortion) {
-        minI = e.i;
-        break;
-      }
-    }
-  }
+  //     if (cumulI >= shownEffectPortion) {
+  //       minI = e.i;
+  //       break;
+  //     }
+  //   }
+  // }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nodes: any[] = [
     { name: `risk.${riskFile.cr4de_hazard_id}.name` },
-    ...effects.filter((c) => c.i >= minI),
+    ...effects.map((c) => ({
+      name: c.effect_risk_title,
+      cascade: c,
+      hidden: c.other_effects || undefined,
+    })),
   ];
-  if (minI >= 0)
-    nodes.push({
-      name: "Other",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      hidden: effects.filter((e: any) => e.i < minI),
-    });
+  // if (minI >= 0)
+  //   nodes.push({
+  //     name: "Other",
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     hidden: effects.filter((e: any) => e.i < minI),
+  //   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const links: any[] = effects
-    .filter((e) => e.i >= minI)
-    .map((e, i: number) => ({
-      source: 0,
-      target: i + 1,
-      value: Math.max(0.000000001, e.i),
-    }));
-  if (minI > 0)
-    links.push({
-      source: 0,
-      target: nodes.length - 1,
-      value: effects
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((e: any) => e.i < minI)
-        .reduce((tot, e) => tot + e.i, 0.000000001),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      hidden: effects.filter((e: any) => e.i < minI),
-    });
+  const links: any[] = effects.map((e, i: number) => ({
+    source: 0,
+    target: i + 1,
+    value: Math.max(0.000000001, e.effect_risk_i),
+  }));
+  // if (minI > 0)
+  //   links.push({
+  //     source: 0,
+  //     target: nodes.length - 1,
+  //     value: effects
+  //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //       .filter((e: any) => e.i < minI)
+  //       .reduce((tot, e) => tot + e.i, 0.000000001),
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     hidden: effects.filter((e: any) => e.i < minI),
+  //   });
 
   const data = {
     nodes,
@@ -240,7 +246,7 @@ export default function ImpactSankeyChart({
           node={
             <ISankeyNode
               onClick={onClick}
-              totalImpact={getScenarioParameter(riskFile, "TI", scenario) || 0}
+              totalImpact={riskFile.cr4de_quanti[scenario].ti.all.scaleTot}
               totalNodes={data.nodes.length}
               showComponents={debug}
               scenarioSuffix={scenarioSuffix}
@@ -266,7 +272,7 @@ export default function ImpactSankeyChart({
       node={
         <ISankeyNode
           onClick={onClick}
-          totalImpact={getScenarioParameter(riskFile, "TI", scenario) || 0}
+          totalImpact={riskFile.cr4de_quanti[scenario].ti.all.scaleTot}
           totalNodes={data.nodes.length}
           showComponents={debug}
           scenarioSuffix={scenarioSuffix}

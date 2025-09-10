@@ -12,7 +12,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import { SCENARIOS } from "../../functions/scenarios";
-import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
+// import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
@@ -44,7 +44,7 @@ export default function ClimateChangeGraph({
         <Typography variant="subtitle2">Climate Change diagram</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{}}>
-        <Stack direction="row" sx={{ mb: 8 }}>
+        {/* <Stack direction="row" sx={{ mb: 8 }}>
           {riskFile && causes && (
             <ClimateChangeChart
               riskFile={riskFile}
@@ -56,7 +56,7 @@ export default function ClimateChangeGraph({
               }
             />
           )}
-        </Stack>
+        </Stack> */}
       </AccordionDetails>
       <AccordionActions>
         <Stack direction="row" spacing={5} sx={{ flex: 1 }}>

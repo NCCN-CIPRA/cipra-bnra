@@ -7,26 +7,39 @@ import TitleBar from "../components/TitleBar";
 import BreadcrumbNavigation from "../components/BreadcrumbNavigation";
 import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
 import satisfies from "../types/satisfies";
+import { Environment } from "../types/global";
 
 export interface BasePageContext {
   user: LoggedInUser | null | undefined;
+  environment: Environment;
   refreshUser: () => void;
   setFakeRole: (role: string) => void;
+  setEnvironment: (newEnv: Environment) => void;
 }
 
 const drawerWidth = 320;
 
 export default function BasePage() {
   const { user, refreshUser, setFakeRole } = useLoggedInUser();
+  const [environment, setEnvironment] = useState<Environment>(
+    (localStorage.getItem("bnraEnv") as Environment) || Environment.PUBLIC
+  );
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const setAndSaveEnvironment = (newEnv: Environment) => {
+    setEnvironment(newEnv);
+    localStorage.setItem("bnraEnv", newEnv);
+  };
 
   return (
     <AppContextProvider>
       <CssBaseline />
       <TitleBar
         user={user}
+        environment={environment}
         setFakeRole={setFakeRole}
+        setEnvironment={setAndSaveEnvironment}
         onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
       />
       <SideDrawer
@@ -42,8 +55,10 @@ export default function BasePage() {
         <Outlet
           context={satisfies<BasePageContext>({
             user,
+            environment,
             refreshUser,
             setFakeRole,
+            setEnvironment: setAndSaveEnvironment,
           })}
         />
       </Box>

@@ -1,20 +1,18 @@
 import { Stack, Typography, Box, Button } from "@mui/material";
-import {
-  SCENARIOS,
-  SCENARIO_PARAMS,
-  getScenarioParameter,
-} from "../../../functions/scenarios";
+import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBars";
 import { useNavigate } from "react-router-dom";
 import ImpactSankey from "../../../components/charts/ImpactSankey";
 import { useEffect } from "react";
 import ActionsSankey from "../../../components/charts/ActionsSankey";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { useTranslation } from "react-i18next";
-import { Cascades } from "../../../functions/cascades";
+import { CascadeSnapshots } from "../../../functions/cascades";
+import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
+import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
 
 export default function MMSankeyDiagram({
+  riskSummary,
   riskFile,
   cascades,
   scenario,
@@ -22,8 +20,9 @@ export default function MMSankeyDiagram({
   debug = false,
   manmade = false,
 }: {
-  riskFile: DVRiskFile;
-  cascades: Cascades;
+  riskSummary: DVRiskSummary | null;
+  riskFile: DVRiskSnapshot;
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
   setScenario: (s: SCENARIOS) => void;
   debug?: boolean;
@@ -91,7 +90,7 @@ export default function MMSankeyDiagram({
           }}
         >
           <ProbabilityBars
-            tp={getScenarioParameter(riskFile, "TP", scenario) || 0}
+            tp={riskFile.cr4de_quanti[scenario].tp.yearly.scale}
             chartWidth={200}
             manmade={true}
           />
@@ -205,8 +204,8 @@ export default function MMSankeyDiagram({
         sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}
       >
         <ImpactSankey
+          riskSummary={riskSummary}
           riskFile={riskFile}
-          cascades={cascades}
           maxEffects={null}
           shownEffectPortion={0.8}
           minEffectPortion={null}

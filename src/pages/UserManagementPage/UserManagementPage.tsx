@@ -51,7 +51,7 @@ export default function UserManagementPage() {
       tab = 3;
       break;
   }
-  console.log(tabName);
+
   return (
     <>
       {tab === 0 && <UserListTab user={user} />}
