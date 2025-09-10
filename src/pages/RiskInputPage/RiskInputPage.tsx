@@ -13,10 +13,15 @@ import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVContact } from "../../types/dataverse/DVContact";
 import { DVDirectAnalysis } from "../../types/dataverse/DVDirectAnalysis";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
+import InputOverviewTab from "./InputOverviewTab";
+import Step2BTab from "./Step2BTab";
+import { useMemo } from "react";
+import { getCascades } from "../../functions/cascades";
+import { getRiskFileCatalogue } from "../../functions/riskfiles";
 
 export default function RiskInputPage() {
   const api = useAPI();
-  const { riskSummary, riskFile, cascades } =
+  const { riskSummary, riskFile: baseRiskFile } =
     useOutletContext<RiskFilePageContext>();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -26,6 +31,16 @@ export default function RiskInputPage() {
       subtab: newValue,
     });
   };
+
+  const { data: riskFiles } = useQuery({
+    queryKey: [DataTable.RISK_FILE],
+    queryFn: () => api.getRiskFiles(),
+  });
+
+  const { data: allCascades } = useQuery({
+    queryKey: [DataTable.RISK_CASCADE],
+    queryFn: () => api.getRiskCascades(),
+  });
 
   const { data: participants } = useQuery({
     queryKey: [DataTable.PARTICIPATION],
@@ -50,6 +65,21 @@ export default function RiskInputPage() {
         `$filter=_cr4de_risk_file_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_expert($select=emailaddress1)`
       ),
   });
+  console.log(riskFiles);
+  const riskFile =
+    baseRiskFile ||
+    riskFiles?.find(
+      (rf) => rf.cr4de_riskfilesid === riskSummary._cr4de_risk_file_value
+    );
+
+  const cascades = useMemo(() => {
+    if (!riskFile || !riskFiles || !allCascades) return null;
+
+    const rc = getRiskFileCatalogue(riskFiles);
+    return getCascades(riskFile, {}, rc)(allCascades)[
+      riskFile.cr4de_riskfilesid
+    ];
+  }, [riskFile, riskFiles, allCascades]);
 
   if (
     !riskFile ||
@@ -81,25 +111,25 @@ export default function RiskInputPage() {
           </TabList>
         </Box>
         <TabPanel value="0">
-          {/* <InputOverviewTab
+          <InputOverviewTab
             riskFile={riskFile}
             participants={participants}
             cascades={cascades.all}
             directAnalyses={directAnalyses}
             cascadeAnalyses={cascadeAnalyses}
-          /> */}
+          />
         </TabPanel>
         <TabPanel value="1">Validation</TabPanel>
         <TabPanel value="2">
           <Step2APage riskFile={riskFile} directAnalyses={directAnalyses} />
         </TabPanel>
         <TabPanel value="3">
-          {/* <Step2BTab
+          <Step2BTab
             riskFile={riskFile}
             cascades={cascades.all}
             directAnalyses={directAnalyses}
             cascadeAnalyses={cascadeAnalyses}
-          /> */}
+          />
         </TabPanel>
         <TabPanel value="4">Feedback</TabPanel>
       </Box>

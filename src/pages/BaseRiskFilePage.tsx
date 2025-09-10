@@ -116,7 +116,6 @@ export default function BaseRiskFilePage() {
     let rcTemp = null;
 
     if (!riskFiles && !riskSnapshots) return null;
-    console.log("Calculate RC");
 
     if (riskFiles) rcTemp = getRiskCatalogue(riskFiles);
 
