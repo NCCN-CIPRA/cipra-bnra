@@ -111,7 +111,7 @@ export default function BaseRiskFilePage() {
       user && user.roles.verified && environment === Environment.PUBLIC
     ),
   });
-
+  console.log(riskFiles);
   const rc: RiskCatalogue<unknown, RiskSnapshotResults> | null = useMemo(() => {
     let rcTemp = null;
 
@@ -182,8 +182,8 @@ export default function BaseRiskFilePage() {
   }, [publicRiskSummary, riskFiles, cascadeList, rc, params, environment]);
 
   const riskFile = useMemo(() => {
-    console.log("Calculate riskfile");
     if (!riskFiles) return null;
+    console.log("Calculate riskfile");
 
     return (
       riskFiles.find((rf) => rf.cr4de_riskfilesid === params.risk_file_id) ||
