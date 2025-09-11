@@ -323,20 +323,20 @@ export function getEffectsWithDINew(
   return [
     {
       name: "Direct Impact",
-      i: riskFile.cr4de_quanti[scenario].di.all.scale,
+      i: riskFile.cr4de_quanti[scenario].di.all.scaleTot,
       iH:
-        riskFile.cr4de_quanti[scenario].di.ha.scale +
-        riskFile.cr4de_quanti[scenario].di.hb.scale +
-        riskFile.cr4de_quanti[scenario].di.hc.scale,
+        riskFile.cr4de_quanti[scenario].di.ha.scaleTot +
+        riskFile.cr4de_quanti[scenario].di.hb.scaleTot +
+        riskFile.cr4de_quanti[scenario].di.hc.scaleTot,
       iS:
-        riskFile.cr4de_quanti[scenario].di.sa.scale +
-        riskFile.cr4de_quanti[scenario].di.sb.scale +
-        riskFile.cr4de_quanti[scenario].di.sc.scale +
-        riskFile.cr4de_quanti[scenario].di.sd.scale,
-      iE: riskFile.cr4de_quanti[scenario].di.ea.scale,
+        riskFile.cr4de_quanti[scenario].di.sa.scaleTot +
+        riskFile.cr4de_quanti[scenario].di.sb.scaleTot +
+        riskFile.cr4de_quanti[scenario].di.sc.scaleTot +
+        riskFile.cr4de_quanti[scenario].di.sd.scaleTot,
+      iE: riskFile.cr4de_quanti[scenario].di.ea.scaleTot,
       iF:
-        riskFile.cr4de_quanti[scenario].di.fa.scale +
-        riskFile.cr4de_quanti[scenario].di.fb.scale,
+        riskFile.cr4de_quanti[scenario].di.fa.scaleTot +
+        riskFile.cr4de_quanti[scenario].di.fb.scaleTot,
     },
     ...cascades.effects.map((e) => ({
       id: e.cr4de_effect_risk._cr4de_risk_file_value,

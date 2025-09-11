@@ -406,56 +406,56 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
       },
       di: {
         all: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI", SCENARIOS.CONSIDERABLE) || 0,
         },
         ha: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Ha", SCENARIOS.CONSIDERABLE) ||
             0,
         },
         hb: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Hb", SCENARIOS.CONSIDERABLE) ||
             0,
         },
         hc: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Hc", SCENARIOS.CONSIDERABLE) ||
             0,
         },
         sa: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Sa", SCENARIOS.CONSIDERABLE) ||
             0,
         },
         sb: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Sb", SCENARIOS.CONSIDERABLE) ||
             0,
         },
         sc: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Sc", SCENARIOS.CONSIDERABLE) ||
             0,
         },
         sd: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Sd", SCENARIOS.CONSIDERABLE) ||
             0,
         },
         ea: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Ea", SCENARIOS.CONSIDERABLE) ||
             0,
         },
         fa: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Fa", SCENARIOS.CONSIDERABLE) ||
             0,
         },
         fb: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Fb", SCENARIOS.CONSIDERABLE) ||
             0,
         },
@@ -623,37 +623,47 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
       },
       di: {
         all: {
-          scale: getScenarioParameter(riskFile, "DI", SCENARIOS.MAJOR) || 0,
+          scaleTot: getScenarioParameter(riskFile, "DI", SCENARIOS.MAJOR) || 0,
         },
         ha: {
-          scale: getScenarioParameter(riskFile, "DI_Ha", SCENARIOS.MAJOR) || 0,
+          scaleTot:
+            getScenarioParameter(riskFile, "DI_Ha", SCENARIOS.MAJOR) || 0,
         },
         hb: {
-          scale: getScenarioParameter(riskFile, "DI_Hb", SCENARIOS.MAJOR) || 0,
+          scaleTot:
+            getScenarioParameter(riskFile, "DI_Hb", SCENARIOS.MAJOR) || 0,
         },
         hc: {
-          scale: getScenarioParameter(riskFile, "DI_Hc", SCENARIOS.MAJOR) || 0,
+          scaleTot:
+            getScenarioParameter(riskFile, "DI_Hc", SCENARIOS.MAJOR) || 0,
         },
         sa: {
-          scale: getScenarioParameter(riskFile, "DI_Sa", SCENARIOS.MAJOR) || 0,
+          scaleTot:
+            getScenarioParameter(riskFile, "DI_Sa", SCENARIOS.MAJOR) || 0,
         },
         sb: {
-          scale: getScenarioParameter(riskFile, "DI_Sb", SCENARIOS.MAJOR) || 0,
+          scaleTot:
+            getScenarioParameter(riskFile, "DI_Sb", SCENARIOS.MAJOR) || 0,
         },
         sc: {
-          scale: getScenarioParameter(riskFile, "DI_Sc", SCENARIOS.MAJOR) || 0,
+          scaleTot:
+            getScenarioParameter(riskFile, "DI_Sc", SCENARIOS.MAJOR) || 0,
         },
         sd: {
-          scale: getScenarioParameter(riskFile, "DI_Sd", SCENARIOS.MAJOR) || 0,
+          scaleTot:
+            getScenarioParameter(riskFile, "DI_Sd", SCENARIOS.MAJOR) || 0,
         },
         ea: {
-          scale: getScenarioParameter(riskFile, "DI_Ea", SCENARIOS.MAJOR) || 0,
+          scaleTot:
+            getScenarioParameter(riskFile, "DI_Ea", SCENARIOS.MAJOR) || 0,
         },
         fa: {
-          scale: getScenarioParameter(riskFile, "DI_Fa", SCENARIOS.MAJOR) || 0,
+          scaleTot:
+            getScenarioParameter(riskFile, "DI_Fa", SCENARIOS.MAJOR) || 0,
         },
         fb: {
-          scale: getScenarioParameter(riskFile, "DI_Fb", SCENARIOS.MAJOR) || 0,
+          scaleTot:
+            getScenarioParameter(riskFile, "DI_Fb", SCENARIOS.MAJOR) || 0,
         },
       },
     },
@@ -820,46 +830,47 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
       },
       di: {
         all: {
-          scale: getScenarioParameter(riskFile, "DI", SCENARIOS.EXTREME) || 0,
+          scaleTot:
+            getScenarioParameter(riskFile, "DI", SCENARIOS.EXTREME) || 0,
         },
         ha: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Ha", SCENARIOS.EXTREME) || 0,
         },
         hb: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Hb", SCENARIOS.EXTREME) || 0,
         },
         hc: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Hc", SCENARIOS.EXTREME) || 0,
         },
         sa: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Sa", SCENARIOS.EXTREME) || 0,
         },
         sb: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Sb", SCENARIOS.EXTREME) || 0,
         },
         sc: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Sc", SCENARIOS.EXTREME) || 0,
         },
         sd: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Sd", SCENARIOS.EXTREME) || 0,
         },
         ea: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Ea", SCENARIOS.EXTREME) || 0,
         },
         fa: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Fa", SCENARIOS.EXTREME) || 0,
         },
         fb: {
-          scale:
+          scaleTot:
             getScenarioParameter(riskFile, "DI_Fb", SCENARIOS.EXTREME) || 0,
         },
       },

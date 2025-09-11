@@ -1,4 +1,9 @@
-export const riskSnapshotScenarioResultsMock = {
+import {
+  RiskSnapshotResults,
+  RiskSnapshotScenarioResults,
+} from "../types/dataverse/DVRiskSnapshot";
+
+export const riskSnapshotScenarioResultsMock: RiskSnapshotScenarioResults = {
   tp: {
     yearly: {
       scale: 1,
@@ -91,21 +96,21 @@ export const riskSnapshotScenarioResultsMock = {
     },
   },
   di: {
-    all: { scale: 1 },
-    ha: { scale: 1 },
-    hb: { scale: 1 },
-    hc: { scale: 1 },
-    sa: { scale: 1 },
-    sb: { scale: 1 },
-    sc: { scale: 1 },
-    sd: { scale: 1 },
-    ea: { scale: 1 },
-    fa: { scale: 1 },
-    fb: { scale: 1 },
+    all: { scaleTot: 1 },
+    ha: { scaleTot: 1 },
+    hb: { scaleTot: 1 },
+    hc: { scaleTot: 1 },
+    sa: { scaleTot: 1 },
+    sb: { scaleTot: 1 },
+    sc: { scaleTot: 1 },
+    sd: { scaleTot: 1 },
+    ea: { scaleTot: 1 },
+    fa: { scaleTot: 1 },
+    fb: { scaleTot: 1 },
   },
 };
 
-export const quantiScenariosMock = {
+export const quantiScenariosMock: RiskSnapshotResults = {
   considerable: riskSnapshotScenarioResultsMock,
   major: riskSnapshotScenarioResultsMock,
   extreme: riskSnapshotScenarioResultsMock,

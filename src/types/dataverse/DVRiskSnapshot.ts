@@ -162,16 +162,23 @@ export type RiskSnapshotScenarioResults = {
     };
   };
   di: {
-    all: { scale: number };
-    ha: { scale: number };
-    hb: { scale: number };
-    hc: { scale: number };
-    sa: { scale: number };
-    sb: { scale: number };
-    sc: { scale: number };
-    sd: { scale: number };
-    ea: { scale: number };
-    fa: { scale: number };
-    fb: { scale: number };
+    all: {
+      scaleTot: number;
+    };
+    ha: {
+      // Number from 0 - 5.5 on the Ha scale -> Not available due to scaling factors
+      // scale: number;
+      // Number from 0 - 5.5 on the total impact scale
+      scaleTot: number;
+    };
+    hb: { scaleTot: number };
+    hc: { scaleTot: number };
+    sa: { scaleTot: number };
+    sb: { scaleTot: number };
+    sc: { scaleTot: number };
+    sd: { scaleTot: number };
+    ea: { scaleTot: number };
+    fa: { scaleTot: number };
+    fb: { scaleTot: number };
   };
 };

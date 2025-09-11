@@ -216,7 +216,7 @@ export default function ExportBNRAPage() {
     };
     const blob = await exporter.exportBNRA(
       {
-        exportType: EXPORT_TYPE.SINGLE,
+        exportType: type,
         exportedRiskFiles: selectedRiskFiles,
         riskSnapshots,
         riskFiles: allSummaries,
