@@ -72,7 +72,6 @@ function Editor({
   initialHTML: string;
   ref: RefObject<RichTextEditorRef | null>;
 }) {
-  console.log(initialHTML);
   return (
     <>
       <Box sx={{ bgcolor: "white" }}>

@@ -61,7 +61,7 @@ export default function ClimateChangeChart({
             riskFile.cr4de_quanti.extreme.tp.yearly.scale
         )) /
       3;
-    console.log(causes);
+
     const enhCauses = [
       {
         name: "No underlying cause",
@@ -113,7 +113,7 @@ export default function ClimateChangeChart({
         },
         [[], 0] as [Cause2050[], number]
       )[0];
-    console.log(enhCauses);
+
     const tp50_c = riskFile.cr4de_quanti.considerable.tp50.yearly.scale;
     const tp50_m = riskFile.cr4de_quanti.major.tp50.yearly.scale;
     const tp50_e = riskFile.cr4de_quanti.extreme.tp50.yearly.scale;

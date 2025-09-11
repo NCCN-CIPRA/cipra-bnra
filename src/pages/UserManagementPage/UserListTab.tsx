@@ -212,7 +212,6 @@ function createCustomToolbar(
           selectedId[1].msdyn_portaltermsagreementdate !== null &&
           permissions === ROLE.APPROVED
         ) {
-          console.log(selectedId[1]);
           continue;
         }
 

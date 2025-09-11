@@ -34,7 +34,7 @@ export default function ImpactBarChart({
 }) {
   const { t } = useTranslation();
   if (!riskFile) return null;
-  console.log(riskFile);
+
   const H = riskFile.cr4de_quanti[scenario].ti.h.scaleCat;
   const S = riskFile.cr4de_quanti[scenario].ti.s.scaleCat;
   const E = riskFile.cr4de_quanti[scenario].ti.e.scaleCat;

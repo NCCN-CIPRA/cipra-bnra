@@ -162,7 +162,6 @@ export default function ImpactSankeyChart({
   onClick?: ((id: string) => void) | null;
   onNavigate?: (id: string) => void;
 }) {
-  console.log(riskSummary, riskFile);
   if (!riskSummary || !riskFile) return null;
 
   const effects = JSON.parse(

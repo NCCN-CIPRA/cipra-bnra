@@ -28,7 +28,7 @@ any) {
   const navigate = useNavigate();
 
   const cascade: EffectRisksSummary | undefined = payload.cascade;
-  console.log(cascade);
+
   return (
     <Tooltip
       title={

@@ -65,7 +65,7 @@ export default function RiskInputPage() {
         `$filter=_cr4de_risk_file_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_expert($select=emailaddress1)`
       ),
   });
-  console.log(riskFiles);
+
   const riskFile =
     baseRiskFile ||
     riskFiles?.find(

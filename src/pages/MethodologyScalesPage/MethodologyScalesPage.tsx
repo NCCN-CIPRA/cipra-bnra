@@ -129,7 +129,7 @@ export default function MethodologyScalesPage() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
   const { activeSection } = useIntersectionObserver(Object.values(sections));
-  console.log(activeSection);
+
   usePageTitle(
     t("methodology.framework.title", "National Risk Assessment Framework")
   );
