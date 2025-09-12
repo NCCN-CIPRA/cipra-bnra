@@ -1003,34 +1003,15 @@ export const getAPI = (
       );
     },
 
-    getChangeLogs: async function <T = DVChangeLog>(
-      query?: string
-    ): Promise<T[]> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrachangelogs${
-          query ? "?" + query : ""
-        }`
-      );
-
-      return (await response.json()).value;
-    },
-    createChangeLog: async function (
-      fields: Partial<DVChangeLog<SerializedChangeDiff>>
-    ): Promise<CreateResponse> {
-      const response = await authFetch(
-        `https://bnra.powerappsportals.com/_api/cr4de_bnrachangelogs`,
-        {
-          method: "POST",
-          headers: {
-            __RequestVerificationToken: antiForgeryToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fields),
-        }
-      );
-
-      return { id: response.headers.get("entityId") as string };
-    },
+    getChangeLogs: getMultiple<DVChangeLog<SerializedChangeDiff>>(
+      authFetch,
+      "cr4de_bnrachangelogs"
+    ),
+    createChangeLog: create<DVChangeLog<SerializedChangeDiff>>(
+      authFetch,
+      "cr4de_bnrachangelogs",
+      antiForgeryToken
+    ),
 
     getTranslations: getMultiple<DVTranslation>(
       authFetch,

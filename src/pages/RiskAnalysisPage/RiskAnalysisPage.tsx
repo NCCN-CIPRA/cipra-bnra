@@ -21,7 +21,7 @@ export default function RiskAnalysisPage() {
         <NCCNLoader />
       </Box>
     );
-
+  console.log(riskFile);
   if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD)
     return (
       <Container sx={{ mt: 2, pb: 8 }}>

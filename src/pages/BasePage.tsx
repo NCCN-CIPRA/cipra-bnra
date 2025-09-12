@@ -8,6 +8,8 @@ import BreadcrumbNavigation from "../components/BreadcrumbNavigation";
 import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
 import satisfies from "../types/satisfies";
 import { Environment } from "../types/global";
+import { useQueryClient } from "@tanstack/react-query";
+import useAPI, { DataTable } from "../hooks/useAPI";
 
 export interface BasePageContext {
   user: LoggedInUser | null | undefined;
@@ -24,6 +26,8 @@ export default function BasePage() {
   const [environment, setEnvironment] = useState<Environment>(
     (localStorage.getItem("bnraEnv") as Environment) || Environment.PUBLIC
   );
+  const queryClient = useQueryClient();
+  const api = useAPI();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -31,6 +35,26 @@ export default function BasePage() {
     setEnvironment(newEnv);
     localStorage.setItem("bnraEnv", newEnv);
   };
+
+  if (user && user.roles.analist && environment === Environment.DYNAMIC) {
+    queryClient.prefetchQuery({
+      queryKey: [DataTable.RISK_FILE],
+      queryFn: () => api.getRiskFiles(),
+    });
+    queryClient.prefetchQuery({
+      queryKey: [DataTable.RISK_CASCADE],
+      queryFn: () => api.getRiskCascades(),
+    });
+  } else if (user) {
+    queryClient.prefetchQuery({
+      queryKey: [DataTable.RISK_SNAPSHOT],
+      queryFn: () => api.getRiskSnapshots(),
+    });
+    queryClient.prefetchQuery({
+      queryKey: [DataTable.CASCADE_SNAPSHOT],
+      queryFn: () => api.getCascadeSnapshots(),
+    });
+  }
 
   return (
     <AppContextProvider>

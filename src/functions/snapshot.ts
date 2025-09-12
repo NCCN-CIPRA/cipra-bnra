@@ -36,7 +36,7 @@ import {
   getCategoryImpactRescaled,
   getDamageIndicatorToCategoryImpactRatio,
 } from "./CategoryImpact";
-import { getAbsoluteImpact } from "./Impact";
+import { getAbsoluteImpact, getAbsoluteImpactFromFloat } from "./Impact";
 import { getAbsoluteProbability, getDPDailyProbability } from "./Probability";
 import {
   getScenarioParameter,
@@ -292,7 +292,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.CONSIDERABLE
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.CONSIDERABLE].TI_Ha_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.CONSIDERABLE].TI_Ha_abs || 0
+            )
+          ),
         },
         hb: {
           scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hb),
@@ -303,7 +307,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.CONSIDERABLE
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hb_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hb_abs || 0
+            )
+          ),
         },
         hc: {
           scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hc),
@@ -314,7 +322,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.CONSIDERABLE
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hc_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hc_abs || 0
+            )
+          ),
         },
         s: {
           scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_S),
@@ -331,7 +343,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.CONSIDERABLE
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sa_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sa_abs || 0
+            )
+          ),
         },
         sb: {
           scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sb),
@@ -342,7 +358,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.CONSIDERABLE
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sb_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sb_abs || 0
+            )
+          ),
         },
         sc: {
           scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sc),
@@ -353,7 +373,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.CONSIDERABLE
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sc_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sc_abs || 0
+            )
+          ),
         },
         sd: {
           scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sd),
@@ -364,7 +388,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.CONSIDERABLE
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sd_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sd_abs || 0
+            )
+          ),
         },
         e: {
           scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_E),
@@ -381,7 +409,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.CONSIDERABLE
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Ea_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Ea_abs || 0
+            )
+          ),
         },
         f: {
           scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_F),
@@ -398,7 +430,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.CONSIDERABLE
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Fa_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Fa_abs || 0
+            )
+          ),
         },
         fb: {
           scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Fb),
@@ -409,7 +445,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.CONSIDERABLE
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Fb_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Fb_abs || 0
+            )
+          ),
         },
       },
       di: {
@@ -525,7 +565,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.MAJOR
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Ha_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Ha_abs || 0
+            )
+          ),
         },
         hb: {
           scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hb),
@@ -536,7 +580,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.MAJOR
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hb_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hb_abs || 0
+            )
+          ),
         },
         hc: {
           scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hc),
@@ -547,7 +595,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.MAJOR
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hc_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hc_abs || 0
+            )
+          ),
         },
         s: {
           scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_S),
@@ -564,7 +616,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.MAJOR
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sa_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sa_abs || 0
+            )
+          ),
         },
         sb: {
           scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sb),
@@ -575,7 +631,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.MAJOR
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sb_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sb_abs || 0
+            )
+          ),
         },
         sc: {
           scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sc),
@@ -586,7 +646,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.MAJOR
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sc_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sc_abs || 0
+            )
+          ),
         },
         sd: {
           scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sd),
@@ -597,7 +661,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.MAJOR
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sd_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sd_abs || 0
+            )
+          ),
         },
         e: {
           scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_E),
@@ -614,7 +682,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.MAJOR
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Ea_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Ea_abs || 0
+            )
+          ),
         },
         f: {
           scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_F),
@@ -631,7 +703,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.MAJOR
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Fa_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Fa_abs || 0
+            )
+          ),
         },
         fb: {
           scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Fb),
@@ -642,7 +718,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.MAJOR
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Fb_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Fb_abs || 0
+            )
+          ),
         },
       },
       di: {
@@ -748,7 +828,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.EXTREME
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Ha_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Ha_abs || 0
+            )
+          ),
         },
         hb: {
           scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hb),
@@ -759,7 +843,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.EXTREME
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hb_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hb_abs || 0
+            )
+          ),
         },
         hc: {
           scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hc),
@@ -770,7 +858,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.EXTREME
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hc_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hc_abs || 0
+            )
+          ),
         },
         s: {
           scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_S),
@@ -787,7 +879,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.EXTREME
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sa_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sa_abs || 0
+            )
+          ),
         },
         sb: {
           scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sb),
@@ -798,7 +894,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.EXTREME
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sb_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sb_abs || 0
+            )
+          ),
         },
         sc: {
           scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sc),
@@ -809,7 +909,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.EXTREME
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sc_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sc_abs || 0
+            )
+          ),
         },
         sd: {
           scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sd),
@@ -820,7 +924,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.EXTREME
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sd_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sd_abs || 0
+            )
+          ),
         },
         e: {
           scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_E),
@@ -837,7 +945,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.EXTREME
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Ea_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Ea_abs || 0
+            )
+          ),
         },
         f: {
           scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_F),
@@ -854,7 +966,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.EXTREME
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Fa_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Fa_abs || 0
+            )
+          ),
         },
         fb: {
           scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Fb),
@@ -865,7 +981,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               SCENARIOS.EXTREME
             )
           ),
-          abs: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Fb_abs),
+          abs: Math.round(
+            getAbsoluteImpactFromFloat(
+              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Fb_abs || 0
+            )
+          ),
         },
       },
       di: {
