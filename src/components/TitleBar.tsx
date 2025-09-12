@@ -5,21 +5,15 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import {
-  FormControl,
-  IconButton,
-  InputLabel,
-  Menu,
-  MenuItem,
-  Select,
-  Stack,
-} from "@mui/material";
+import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Trans, useTranslation } from "react-i18next";
 import { LoggedInUser } from "../hooks/useLoggedInUser";
 import { usePageTitleValue } from "../hooks/usePageTitle";
 import { Environment } from "../types/global";
+import TranslateIcon from "@mui/icons-material/Translate";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 export default function TitleBar({
   showUser = true,
@@ -42,14 +36,57 @@ export default function TitleBar({
   const [role, setRole] = useState(user?.realRoles?.admin ? "Beheerders" : "");
   const { pageTitle } = usePageTitleValue();
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  const [anchorElLanguage, setAnchorElLanguage] = useState<null | HTMLElement>(
+    null
+  );
+  const [anchorElSettings, setAnchorElSettings] = useState<null | HTMLElement>(
+    null
+  );
+  const [anchorElRole, setAnchorElRole] = useState<null | HTMLElement>(null);
+  const [anchorElEnv, setAnchorElEnv] = useState<null | HTMLElement>(null);
+  // const [anchorElScales, setAnchorElScales] = useState<null | HTMLElement>(
+  //   null
+  // );
+  // const [anchorElDiff, setAnchorElDiff] = useState<null | HTMLElement>(null);
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
+  const handleOpenLanguageMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElLanguage(event.currentTarget);
+  };
+  const handleOpenSettingsMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElSettings(event.currentTarget);
+  };
+  const handleOpenRoleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    handleCloseSubMenus();
+    setAnchorElRole(event.currentTarget);
+  };
+  const handleOpenEnvMenu = (event: React.MouseEvent<HTMLElement>) => {
+    handleCloseSubMenus();
+    setAnchorElEnv(event.currentTarget);
+  };
+  const handleCloseMenus = () => {
+    setAnchorElUser(null);
+    setAnchorElLanguage(null);
+    setAnchorElSettings(null);
+    setAnchorElRole(null);
+    setAnchorElEnv(null);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleCloseSubMenus = () => {
+    setAnchorElRole(null);
+    setAnchorElEnv(null);
+  };
+
+  const getRoleDisplay = () => {
+    if (user?.roles.admin) return "Admin";
+    if (user?.roles.analist) return "Analist";
+    if (user?.roles.internal) return "Internal NCCN";
+    if (user?.roles.expert) return "Expert";
+    if (user?.roles.beReader) return "Rapport Lezer";
+    return "Anoniem";
   };
 
   useEffect(() => {
@@ -81,101 +118,255 @@ export default function TitleBar({
               {pageTitle || defaultTitle}
             </Typography>
             {user?.roles?.analist && (
-              <>
-                <Typography variant="subtitle1" sx={{ mr: 2 }}>
-                  {__APP_VERSION__}
-                </Typography>
-                <FormControl
-                  variant="filled"
-                  sx={{ width: 200, mr: 4 }}
-                  size="small"
-                >
-                  <InputLabel id="env-label">Environment</InputLabel>
-                  <Select
-                    labelId="env-label"
-                    id="env-select"
-                    value={environment}
-                    label="Environment"
-                    onChange={(e) => {
-                      setEnvironment(e.target.value as Environment);
-                    }}
-                    sx={{ bgcolor: "white" }}
-                  >
-                    <MenuItem value={Environment.PUBLIC}>Public</MenuItem>
-                    <MenuItem value={Environment.DYNAMIC}>Dynamic</MenuItem>
-                  </Select>
-                </FormControl>
-              </>
+              <Typography variant="subtitle1" sx={{ mr: 2 }}>
+                {__APP_VERSION__}
+              </Typography>
             )}
-            {user?.realRoles?.admin && (
-              <>
-                <FormControl
-                  variant="filled"
-                  sx={{ width: 200, mr: 4 }}
-                  size="small"
+            {user?.realRoles?.analist && (
+              <Box sx={{ flexGrow: 0, mr: 1 }}>
+                <Tooltip title="Settings">
+                  <IconButton color="inherit" onClick={handleOpenSettingsMenu}>
+                    <SettingsIcon />
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: "45px" }}
+                  id="menu-settings"
+                  anchorEl={anchorElSettings}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorElSettings)}
+                  onClose={handleCloseMenus}
                 >
-                  <InputLabel id="demo-simple-select-label">Role</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={role}
-                    label="Role"
-                    onChange={(e) => {
-                      setRole(e.target.value);
-                      setFakeRole(e.target.value);
-                    }}
-                    sx={{ bgcolor: "white" }}
-                  >
-                    <MenuItem value={"Beheerders"}>Admin</MenuItem>
-                    <MenuItem value={"Analisten"}>Analist</MenuItem>
-                    <MenuItem value={"Intern NCCN"}>Intern NCCN</MenuItem>
-                    <MenuItem value={"Experten"}>Expert</MenuItem>
-                    <MenuItem value={"Geverifieerde gebruikers"}>
-                      Rapport Lezer
-                    </MenuItem>
-                    <MenuItem value={"Anonymous"}>Anoniem</MenuItem>
-                  </Select>
-                </FormControl>
-              </>
+                  <MenuItem onMouseEnter={handleOpenRoleMenu}>
+                    <Typography sx={{ textAlign: "left", flex: 1 }}>
+                      User Role:
+                    </Typography>
+                    <Typography variant="body2" sx={{ pl: 2 }}>
+                      {getRoleDisplay()}
+                    </Typography>
+                    <Menu
+                      id="menu-role"
+                      sx={{ top: -8, left: -10 }}
+                      anchorEl={anchorElRole}
+                      anchorOrigin={{
+                        vertical: "top",
+                        horizontal: "left",
+                      }}
+                      keepMounted
+                      transformOrigin={{
+                        vertical: "top",
+                        horizontal: "right",
+                      }}
+                      open={Boolean(anchorElRole)}
+                      onClose={handleCloseMenus}
+                      slotProps={{
+                        root: { sx: { pointerEvents: "none" } },
+                        paper: { sx: { pointerEvents: "auto" } },
+                      }}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          setRole("Beheerders");
+                          setFakeRole("Beheerders");
+                          handleCloseMenus();
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Admin
+                        </Typography>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          setRole("Analisten");
+                          setFakeRole("Analisten");
+                          handleCloseMenus();
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Analist
+                        </Typography>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          setRole("Intern NCCN");
+                          setFakeRole("Intern NCCN");
+                          handleCloseMenus();
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Intern NCCN
+                        </Typography>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          setRole("Experten");
+                          setFakeRole("Experten");
+                          handleCloseMenus();
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Expert
+                        </Typography>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          setRole("Geverifieerde gebruikers");
+                          setFakeRole("Geverifieerde gebruikers");
+                          handleCloseMenus();
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Rapport Lezer
+                        </Typography>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          setRole("Anonymous");
+                          setFakeRole("Anonymous");
+                          handleCloseMenus();
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Anoniem
+                        </Typography>
+                      </MenuItem>
+                    </Menu>
+                  </MenuItem>
+                  <MenuItem onMouseEnter={handleOpenEnvMenu}>
+                    <Typography sx={{ textAlign: "left", flex: 1 }}>
+                      Environment:
+                    </Typography>
+                    <Typography variant="body2" sx={{ pl: 2 }}>
+                      {environment}
+                    </Typography>
+
+                    <Menu
+                      id="menu-env"
+                      sx={{ top: -8, left: -10 }}
+                      anchorEl={anchorElEnv}
+                      anchorOrigin={{
+                        vertical: "top",
+                        horizontal: "left",
+                      }}
+                      keepMounted
+                      transformOrigin={{
+                        vertical: "top",
+                        horizontal: "right",
+                      }}
+                      open={Boolean(anchorElEnv)}
+                      onClose={handleCloseMenus}
+                      slotProps={{
+                        root: { sx: { pointerEvents: "none" } },
+                        paper: { sx: { pointerEvents: "auto" } },
+                      }}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          setEnvironment(Environment.PUBLIC);
+                          handleCloseMenus();
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Public - Static data
+                        </Typography>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          setEnvironment(Environment.DYNAMIC);
+                          handleCloseMenus();
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          CIPRA Only - Dynamic data
+                        </Typography>
+                      </MenuItem>
+                    </Menu>
+                  </MenuItem>
+                  <MenuItem disabled>
+                    <Typography sx={{ textAlign: "left", flex: 1 }}>
+                      Damage Indicators:
+                    </Typography>
+                    <Typography variant="body2" sx={{ pl: 2 }}>
+                      V1.0
+                    </Typography>
+                  </MenuItem>
+                  <MenuItem disabled>
+                    <Typography sx={{ textAlign: "left", flex: 1 }}>
+                      Data Diff:
+                    </Typography>
+                    <Typography variant="body2" sx={{ pl: 2 }}>
+                      disabled
+                    </Typography>
+                  </MenuItem>
+                </Menu>
+              </Box>
             )}
-            <Stack direction="row" sx={{ mr: 4 }}>
-              <Button
-                variant={i18n.languages[0] === "en" ? "outlined" : "text"}
-                color="inherit"
-                size="small"
-                sx={{ minWidth: 35 }}
-                onClick={() => i18n.changeLanguage("en")}
+            <Box sx={{ flexGrow: 0, mr: 4 }}>
+              <Tooltip title="Language">
+                <IconButton color="inherit" onClick={handleOpenLanguageMenu}>
+                  <TranslateIcon />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: "45px" }}
+                id="menu-language"
+                anchorEl={anchorElLanguage}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorElLanguage)}
+                onClose={handleCloseMenus}
               >
-                en
-              </Button>
-              <Button
-                variant={i18n.languages[0] === "fr" ? "outlined" : "text"}
-                color="inherit"
-                size="small"
-                sx={{ minWidth: 35 }}
-                onClick={() => i18n.changeLanguage("fr")}
-              >
-                fr
-              </Button>
-              <Button
-                variant={i18n.languages[0] === "nl" ? "outlined" : "text"}
-                color="inherit"
-                size="small"
-                sx={{ minWidth: 35 }}
-                onClick={() => i18n.changeLanguage("nl")}
-              >
-                nl
-              </Button>
-              <Button
-                variant={i18n.languages[0] === "de" ? "outlined" : "text"}
-                color="inherit"
-                size="small"
-                sx={{ minWidth: 35 }}
-                onClick={() => i18n.changeLanguage("de")}
-              >
-                de
-              </Button>
-            </Stack>
+                <MenuItem
+                  onClick={() => {
+                    i18n.changeLanguage("de");
+                    handleCloseMenus();
+                  }}
+                >
+                  <Typography sx={{ textAlign: "center" }}>Deutsch</Typography>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    i18n.changeLanguage("en");
+                    handleCloseMenus();
+                  }}
+                >
+                  <Typography sx={{ textAlign: "center" }}>English</Typography>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    i18n.changeLanguage("fr");
+                    handleCloseMenus();
+                  }}
+                >
+                  <Typography sx={{ textAlign: "center" }}>Français</Typography>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    i18n.changeLanguage("nl");
+                    handleCloseMenus();
+                  }}
+                >
+                  <Typography sx={{ textAlign: "center" }}>
+                    Nederlands
+                  </Typography>
+                </MenuItem>
+              </Menu>
+            </Box>
             {showUser && user == null && (
               <Button color="inherit" component={Link} to="/auth">
                 <Trans i18nKey="button.login">Login</Trans>
@@ -187,13 +378,13 @@ export default function TitleBar({
                   variant="text"
                   color="inherit"
                   startIcon={<AccountCircleIcon />}
-                  onClick={handleMenu}
+                  onClick={handleOpenUserMenu}
                 >
                   {user?.firstname} {user?.lastname}
                 </Button>
                 <Menu
                   id="menu-appbar"
-                  anchorEl={anchorEl}
+                  anchorEl={anchorElUser}
                   anchorOrigin={{
                     vertical: "top",
                     horizontal: "right",
@@ -203,12 +394,12 @@ export default function TitleBar({
                     vertical: "top",
                     horizontal: "right",
                   }}
-                  open={Boolean(anchorEl)}
-                  onClose={handleClose}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseMenus}
                 >
                   <MenuItem
                     onClick={() => {
-                      handleClose();
+                      handleCloseMenus();
                       window.location.href =
                         "https://bnra.powerappsportals.com/Account/Login/LogOff?returnUrl=/auth";
                     }}
