@@ -18,11 +18,13 @@ export const riskSnapshotScenarioResultsMock: RiskSnapshotScenarioResults = {
     yearly: {
       scale: 1, // Total probability of the scenario on the tp scale (0 - 5)
     },
+    daily: { abs: 1 },
   },
   dp50: {
     yearly: {
       scale: 1, // Total probability of the scenario on the tp scale (0 - 5)
     },
+    daily: { abs: 1 },
   },
   ti: {
     all: {
@@ -97,16 +99,16 @@ export const riskSnapshotScenarioResultsMock: RiskSnapshotScenarioResults = {
   },
   di: {
     all: { scaleTot: 1 },
-    ha: { scaleTot: 1 },
-    hb: { scaleTot: 1 },
-    hc: { scaleTot: 1 },
-    sa: { scaleTot: 1 },
-    sb: { scaleTot: 1 },
-    sc: { scaleTot: 1 },
-    sd: { scaleTot: 1 },
-    ea: { scaleTot: 1 },
-    fa: { scaleTot: 1 },
-    fb: { scaleTot: 1 },
+    ha: { scaleTot: 1, abs: 1 },
+    hb: { scaleTot: 1, abs: 1 },
+    hc: { scaleTot: 1, abs: 1 },
+    sa: { scaleTot: 1, abs: 1 },
+    sb: { scaleTot: 1, abs: 1 },
+    sc: { scaleTot: 1, abs: 1 },
+    sd: { scaleTot: 1, abs: 1 },
+    ea: { scaleTot: 1, abs: 1 },
+    fa: { scaleTot: 1, abs: 1 },
+    fb: { scaleTot: 1, abs: 1 },
   },
 };
 

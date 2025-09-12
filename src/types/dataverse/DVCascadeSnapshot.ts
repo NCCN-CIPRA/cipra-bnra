@@ -73,9 +73,18 @@ export type CPMatrixRow = {
   [SCENARIOS.EXTREME]: string;
 };
 
+export type CPMatrixAbsRow = {
+  [SCENARIOS.CONSIDERABLE]: number;
+  [SCENARIOS.MAJOR]: number;
+  [SCENARIOS.EXTREME]: number;
+};
+
 export type CauseSnapshotScenarioResults = {
   cp: {
-    matrix: CPMatrixRow;
+    matrix: {
+      scale: CPMatrixRow;
+      abs: CPMatrixAbsRow;
+    };
   };
   ip: {
     yearly: {
@@ -98,7 +107,10 @@ export type EffectSnapshotResults = {
 export type EffectSnapshotScenarioResults = {
   cp: {
     avg: number;
-    matrix: CPMatrixRow;
+    matrix: {
+      scale: CPMatrixRow;
+      abs: CPMatrixAbsRow;
+    };
   };
   ii: {
     all: {

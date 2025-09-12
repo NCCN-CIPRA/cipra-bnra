@@ -82,12 +82,18 @@ export type RiskSnapshotScenarioResults = {
   };
   dp: {
     yearly: {
-      scale: number; // Total probability of the scenario on the tp scale (0 - 5)
+      scale: number; // Direct probability of the scenario on the tp scale (0 - 5)
+    };
+    daily: {
+      abs: number; // Direct daily probability in absolute terms (0 - 1)
     };
   };
   dp50: {
     yearly: {
-      scale: number; // Total probability of the scenario on the tp scale (0 - 5)
+      scale: number; // Direct probability in 2050 of the scenario on the tp scale (0 - 5)
+    };
+    daily: {
+      abs: number; // Direct daily probability in 2050 in absolute terms (0 - 1)
     };
   };
   ti: {
@@ -168,17 +174,45 @@ export type RiskSnapshotScenarioResults = {
     ha: {
       // Number from 0 - 5.5 on the Ha scale -> Not available due to scaling factors
       // scale: number;
-      // Number from 0 - 5.5 on the total impact scale
-      scaleTot: number;
+
+      scaleTot: number; // Number from 0 - 5.5 on the total impact scale
+      abs: number; // Absolute impact in €
     };
-    hb: { scaleTot: number };
-    hc: { scaleTot: number };
-    sa: { scaleTot: number };
-    sb: { scaleTot: number };
-    sc: { scaleTot: number };
-    sd: { scaleTot: number };
-    ea: { scaleTot: number };
-    fa: { scaleTot: number };
-    fb: { scaleTot: number };
+    hb: {
+      scaleTot: number;
+      abs: number; // Absolute impact in €
+    };
+    hc: {
+      scaleTot: number;
+      abs: number; // Absolute impact in €
+    };
+    sa: {
+      scaleTot: number;
+      abs: number; // Absolute impact in €
+    };
+    sb: {
+      scaleTot: number;
+      abs: number; // Absolute impact in €
+    };
+    sc: {
+      scaleTot: number;
+      abs: number; // Absolute impact in €
+    };
+    sd: {
+      scaleTot: number;
+      abs: number; // Absolute impact in €
+    };
+    ea: {
+      scaleTot: number;
+      abs: number; // Absolute impact in €
+    };
+    fa: {
+      scaleTot: number;
+      abs: number; // Absolute impact in €
+    };
+    fb: {
+      scaleTot: number;
+      abs: number; // Absolute impact in €
+    };
   };
 };

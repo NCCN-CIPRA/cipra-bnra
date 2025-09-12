@@ -424,7 +424,7 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix[
+            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
               SCENARIOS.CONSIDERABLE
             ]
           }
@@ -443,7 +443,7 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix[
+            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
               SCENARIOS.MAJOR
             ]
           }
@@ -458,7 +458,7 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix[
+            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
               SCENARIOS.EXTREME
             ]
           }
@@ -481,7 +481,7 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix[
+            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
               SCENARIOS.CONSIDERABLE
             ]
           }
@@ -496,7 +496,7 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix[
+            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
               SCENARIOS.MAJOR
             ]
           }
@@ -511,7 +511,7 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix[
+            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
               SCENARIOS.EXTREME
             ]
           }
@@ -530,7 +530,7 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix[
+            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
               SCENARIOS.CONSIDERABLE
             ]
           }
@@ -549,7 +549,7 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix[
+            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
               SCENARIOS.MAJOR
             ]
           }
@@ -564,7 +564,7 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix[
+            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
               SCENARIOS.EXTREME
             ]
           }

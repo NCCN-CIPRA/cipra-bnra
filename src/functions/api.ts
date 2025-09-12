@@ -30,6 +30,10 @@ import {
   SerializedCauseSnapshotResults,
   SerializedEffectSnapshotResults,
 } from "../types/dataverse/DVCascadeSnapshot";
+import {
+  DVChangeLog,
+  SerializedChangeDiff,
+} from "../types/dataverse/DVChangeLog";
 
 export interface AuthResponse<T = null> {
   data?: T;
@@ -195,6 +199,9 @@ export interface API {
   createFeedback(fields: object): Promise<CreateResponse>;
   updateFeedback(id: string, fields: object): Promise<void>;
   deleteFeedback(id: string): Promise<void>;
+
+  getChangeLogs<T = DVFeedback>(query?: string): Promise<T[]>;
+  createChangeLog(fields: object): Promise<CreateResponse>;
 
   getTranslations<T = DVTranslation>(query?: string): Promise<T[]>;
   createTranslation(fields: Partial<DVTranslation>): Promise<CreateResponse>;
@@ -994,6 +1001,35 @@ export const getAPI = (
           },
         }
       );
+    },
+
+    getChangeLogs: async function <T = DVChangeLog>(
+      query?: string
+    ): Promise<T[]> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnrachangelogs${
+          query ? "?" + query : ""
+        }`
+      );
+
+      return (await response.json()).value;
+    },
+    createChangeLog: async function (
+      fields: Partial<DVChangeLog<SerializedChangeDiff>>
+    ): Promise<CreateResponse> {
+      const response = await authFetch(
+        `https://bnra.powerappsportals.com/_api/cr4de_bnrachangelogs`,
+        {
+          method: "POST",
+          headers: {
+            __RequestVerificationToken: antiForgeryToken,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(fields),
+        }
+      );
+
+      return { id: response.headers.get("entityId") as string };
     },
 
     getTranslations: getMultiple<DVTranslation>(

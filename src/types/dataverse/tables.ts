@@ -19,6 +19,7 @@ export enum DataTable {
 
   ATTACHMENT = "attachments",
 
+  CHANGE_LOG = "changeLogs",
   TRANSLATIONS = "translations",
 
   PAGE = "pages",

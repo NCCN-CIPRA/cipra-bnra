@@ -36,6 +36,8 @@ import {
   getCategoryImpactRescaled,
   getDamageIndicatorToCategoryImpactRatio,
 } from "./CategoryImpact";
+import { getAbsoluteImpact } from "./Impact";
+import { getAbsoluteProbability, getDPDailyProbability } from "./Probability";
 import {
   getScenarioParameter,
   getScenarioSuffix,
@@ -249,10 +251,16 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
         yearly: {
           scale: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.DP),
         },
+        daily: {
+          abs: getDPDailyProbability(riskFile.cr4de_dp_quanti_c),
+        },
       },
       dp50: {
         yearly: {
           scale: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.DP50),
+        },
+        daily: {
+          abs: getDPDailyProbability(riskFile.cr4de_climate_change_quanti_c),
         },
       },
       tp: {
@@ -413,51 +421,61 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Ha", SCENARIOS.CONSIDERABLE) ||
             0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_c),
         },
         hb: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Hb", SCENARIOS.CONSIDERABLE) ||
             0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_c),
         },
         hc: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Hc", SCENARIOS.CONSIDERABLE) ||
             0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_c),
         },
         sa: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sa", SCENARIOS.CONSIDERABLE) ||
             0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_c),
         },
         sb: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sb", SCENARIOS.CONSIDERABLE) ||
             0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_c),
         },
         sc: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sc", SCENARIOS.CONSIDERABLE) ||
             0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_c),
         },
         sd: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sd", SCENARIOS.CONSIDERABLE) ||
             0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_c),
         },
         ea: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Ea", SCENARIOS.CONSIDERABLE) ||
             0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_c),
         },
         fa: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Fa", SCENARIOS.CONSIDERABLE) ||
             0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_c),
         },
         fb: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Fb", SCENARIOS.CONSIDERABLE) ||
             0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_c),
         },
       },
     },
@@ -476,10 +494,16 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
         yearly: {
           scale: r(riskFile.results?.[SCENARIOS.MAJOR]?.DP),
         },
+        daily: {
+          abs: getDPDailyProbability(riskFile.cr4de_dp_quanti_m),
+        },
       },
       dp50: {
         yearly: {
           scale: r(riskFile.results?.[SCENARIOS.MAJOR]?.DP50),
+        },
+        daily: {
+          abs: getDPDailyProbability(riskFile.cr4de_climate_change_quanti_m),
         },
       },
       ti: {
@@ -628,42 +652,52 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
         ha: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Ha", SCENARIOS.MAJOR) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_m),
         },
         hb: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Hb", SCENARIOS.MAJOR) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_m),
         },
         hc: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Hc", SCENARIOS.MAJOR) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_m),
         },
         sa: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sa", SCENARIOS.MAJOR) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_m),
         },
         sb: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sb", SCENARIOS.MAJOR) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_m),
         },
         sc: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sc", SCENARIOS.MAJOR) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_m),
         },
         sd: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sd", SCENARIOS.MAJOR) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_m),
         },
         ea: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Ea", SCENARIOS.MAJOR) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_m),
         },
         fa: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Fa", SCENARIOS.MAJOR) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_m),
         },
         fb: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Fb", SCENARIOS.MAJOR) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_m),
         },
       },
     },
@@ -683,10 +717,16 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
         yearly: {
           scale: r(riskFile.results?.[SCENARIOS.EXTREME]?.DP),
         },
+        daily: {
+          abs: getDPDailyProbability(riskFile.cr4de_dp_quanti_e),
+        },
       },
       dp50: {
         yearly: {
           scale: r(riskFile.results?.[SCENARIOS.EXTREME]?.DP50),
+        },
+        daily: {
+          abs: getDPDailyProbability(riskFile.cr4de_climate_change_quanti_e),
         },
       },
       ti: {
@@ -836,42 +876,52 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
         ha: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Ha", SCENARIOS.EXTREME) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_e),
         },
         hb: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Hb", SCENARIOS.EXTREME) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_e),
         },
         hc: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Hc", SCENARIOS.EXTREME) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_e),
         },
         sa: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sa", SCENARIOS.EXTREME) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_e),
         },
         sb: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sb", SCENARIOS.EXTREME) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_e),
         },
         sc: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sc", SCENARIOS.EXTREME) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_e),
         },
         sd: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Sd", SCENARIOS.EXTREME) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_e),
         },
         ea: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Ea", SCENARIOS.EXTREME) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_e),
         },
         fa: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Fa", SCENARIOS.EXTREME) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_e),
         },
         fb: {
           scaleTot:
             getScenarioParameter(riskFile, "DI_Fb", SCENARIOS.EXTREME) || 0,
+          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_e),
         },
       },
     },
@@ -1111,9 +1161,16 @@ export function snapshotFromRiskCascade(
       [SCENARIOS.CONSIDERABLE]: {
         cp: {
           matrix: {
-            considerable: cascade.cr4de_c2c || "CP0",
-            major: cascade.cr4de_m2c || "CP0",
-            extreme: cascade.cr4de_e2c || "CP0",
+            scale: {
+              considerable: cascade.cr4de_c2c || "CP0",
+              major: cascade.cr4de_m2c || "CP0",
+              extreme: cascade.cr4de_e2c || "CP0",
+            },
+            abs: {
+              considerable: getAbsoluteProbability(cascade.cr4de_c2c),
+              major: getAbsoluteProbability(cascade.cr4de_m2c),
+              extreme: getAbsoluteProbability(cascade.cr4de_e2c),
+            },
           },
         },
         ip: {
@@ -1130,9 +1187,16 @@ export function snapshotFromRiskCascade(
       [SCENARIOS.MAJOR]: {
         cp: {
           matrix: {
-            considerable: cascade.cr4de_c2m || "CP0",
-            major: cascade.cr4de_m2m || "CP0",
-            extreme: cascade.cr4de_e2m || "CP0",
+            scale: {
+              considerable: cascade.cr4de_c2m || "CP0",
+              major: cascade.cr4de_m2m || "CP0",
+              extreme: cascade.cr4de_e2m || "CP0",
+            },
+            abs: {
+              considerable: getAbsoluteProbability(cascade.cr4de_c2m),
+              major: getAbsoluteProbability(cascade.cr4de_m2m),
+              extreme: getAbsoluteProbability(cascade.cr4de_e2m),
+            },
           },
         },
         ip: {
@@ -1149,9 +1213,16 @@ export function snapshotFromRiskCascade(
       [SCENARIOS.EXTREME]: {
         cp: {
           matrix: {
-            considerable: cascade.cr4de_c2e || "CP0",
-            major: cascade.cr4de_m2e || "CP0",
-            extreme: cascade.cr4de_e2e || "CP0",
+            scale: {
+              considerable: cascade.cr4de_c2e || "CP0",
+              major: cascade.cr4de_m2e || "CP0",
+              extreme: cascade.cr4de_e2e || "CP0",
+            },
+            abs: {
+              considerable: getAbsoluteProbability(cascade.cr4de_c2e),
+              major: getAbsoluteProbability(cascade.cr4de_m2e),
+              extreme: getAbsoluteProbability(cascade.cr4de_e2e),
+            },
           },
         },
         ip: {
@@ -1172,9 +1243,16 @@ export function snapshotFromRiskCascade(
         cp: {
           avg: r(cascade.results?.CP_AVG_C2All),
           matrix: {
-            considerable: cascade.cr4de_c2c || "CP0",
-            major: cascade.cr4de_c2m || "CP0",
-            extreme: cascade.cr4de_c2e || "CP0",
+            scale: {
+              considerable: cascade.cr4de_c2c || "CP0",
+              major: cascade.cr4de_c2m || "CP0",
+              extreme: cascade.cr4de_c2e || "CP0",
+            },
+            abs: {
+              considerable: getAbsoluteProbability(cascade.cr4de_c2c),
+              major: getAbsoluteProbability(cascade.cr4de_c2m),
+              extreme: getAbsoluteProbability(cascade.cr4de_c2e),
+            },
           },
         },
         ii: {
@@ -1229,9 +1307,16 @@ export function snapshotFromRiskCascade(
         cp: {
           avg: r(cascade.results?.CP_AVG_M2All),
           matrix: {
-            considerable: cascade.cr4de_m2c || "CP0",
-            major: cascade.cr4de_m2m || "CP0",
-            extreme: cascade.cr4de_m2e || "CP0",
+            scale: {
+              considerable: cascade.cr4de_m2c || "CP0",
+              major: cascade.cr4de_m2m || "CP0",
+              extreme: cascade.cr4de_m2e || "CP0",
+            },
+            abs: {
+              considerable: getAbsoluteProbability(cascade.cr4de_m2c),
+              major: getAbsoluteProbability(cascade.cr4de_m2m),
+              extreme: getAbsoluteProbability(cascade.cr4de_m2e),
+            },
           },
         },
         ii: {
@@ -1286,9 +1371,16 @@ export function snapshotFromRiskCascade(
         cp: {
           avg: r(cascade.results?.CP_AVG_E2All),
           matrix: {
-            considerable: cascade.cr4de_e2c || "CP0",
-            major: cascade.cr4de_e2m || "CP0",
-            extreme: cascade.cr4de_e2e || "CP0",
+            scale: {
+              considerable: cascade.cr4de_e2c || "CP0",
+              major: cascade.cr4de_e2m || "CP0",
+              extreme: cascade.cr4de_e2e || "CP0",
+            },
+            abs: {
+              considerable: getAbsoluteProbability(cascade.cr4de_e2c),
+              major: getAbsoluteProbability(cascade.cr4de_e2m),
+              extreme: getAbsoluteProbability(cascade.cr4de_e2e),
+            },
           },
         },
         ii: {
