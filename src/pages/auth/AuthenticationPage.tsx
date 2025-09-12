@@ -241,7 +241,9 @@ export default function AuthenticationPage() {
           <TabPanel value={tab} index={1}>
             <Stack spacing={2} direction="row" mt={2}>
               <form
-                action="/Account/Login/ExternalLogin?ReturnUrl=/"
+                action={`/Account/Login/ExternalLogin?ReturnUrl=${
+                  params.get("returnUrl") || "/"
+                }`}
                 method="post"
               >
                 <input
