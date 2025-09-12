@@ -16,6 +16,7 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import useAPI from "../../hooks/useAPI";
 import { Trans, useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -58,6 +59,7 @@ export default function AuthenticationPage() {
   const [resetPassword, setResetPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [params] = useSearchParams();
 
   const handleChangeTab = async (
     _event: React.SyntheticEvent,
@@ -72,7 +74,12 @@ export default function AuthenticationPage() {
     const result = await api.login(email, password, remember);
 
     if (!result.error) {
-      window.location.href = "/";
+      const returnUrl = params.get("returnUrl");
+      if (returnUrl) {
+        window.location.href = returnUrl;
+      } else {
+        window.location.href = "/";
+      }
     } else {
       setError(result.error);
     }

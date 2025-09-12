@@ -28,9 +28,9 @@ import { CascadeSnapshotMatrix } from "./CascadeMatrix";
 import TornadoIcon from "@mui/icons-material/Tornado";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
-import { AuthPageContext } from "../AuthPage";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
+import { BasePageContext } from "../BasePage";
 
 const capFirst = (s: string) => {
   return `${s[0].toUpperCase()}${s.slice(1)}`;
@@ -206,7 +206,7 @@ function ParameterSection({
   // cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
   // reloadRiskFile: () => Promise<unknown>;
 }) {
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
 
   const section = DIRECT_ANALYSIS_SECTIONS_STANDARD[parameter];
   const discussionRequired = useMemo(() => {
@@ -260,19 +260,19 @@ function ParameterSection({
         onClick={() => setOpen(!open)}
       >
         <Typography sx={{ flex: 1 }}>{section.label}</Typography>
-        {user.roles.analist &&
+        {user?.roles.analist &&
           discussionRequired === DiscussionRequired.REQUIRED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <ErrorIcon color="warning" />
             </Tooltip>
           )}
-        {user.roles.analist &&
+        {user?.roles.analist &&
           discussionRequired === DiscussionRequired.PREFERRED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <ErrorIcon color="info" />
             </Tooltip>
           )}
-        {user.roles.analist &&
+        {user?.roles.analist &&
           discussionRequired === DiscussionRequired.RESOLVED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <CheckCircleIcon color="success" />
@@ -329,7 +329,7 @@ function ScenarioSection({
   // reloadRiskFile: () => Promise<unknown>;
 }) {
   // const api = useAPI();
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
   const section = DIRECT_ANALYSIS_SECTIONS_STANDARD[parameter];
   const discussionRequired = useMemo(() => {
     return DiscussionRequired.NOT_NECESSARY;
@@ -400,19 +400,19 @@ function ScenarioSection({
         <Typography variant="subtitle1" sx={{ flex: 1 }}>
           {capFirst(scenario)}
         </Typography>
-        {user.roles.analist &&
+        {user?.roles.analist &&
           discussionRequired === DiscussionRequired.REQUIRED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <ErrorIcon color="warning" />
             </Tooltip>
           )}
-        {user.roles.analist &&
+        {user?.roles.analist &&
           discussionRequired === DiscussionRequired.PREFERRED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <ErrorIcon color="info" />
             </Tooltip>
           )}
-        {user.roles.analist &&
+        {user?.roles.analist &&
           discussionRequired === DiscussionRequired.RESOLVED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <CheckCircleIcon color="success" />

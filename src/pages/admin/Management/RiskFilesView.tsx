@@ -13,7 +13,7 @@ import { Virtuoso } from "react-virtuoso";
 import RiskFileListItem from "./RiskFileListItem";
 import ContactFilterField from "./ContactFilterField";
 import { useOutletContext } from "react-router-dom";
-import { AuthPageContext } from "../../AuthPage";
+import { BasePageContext } from "../../BasePage";
 
 const SPECIAL_FILTERS = {
   MY_RISK_FILES: false,
@@ -45,7 +45,7 @@ export default function RiskFilesView({
   selectRiskFile: (rf: SelectableRiskFile) => void;
   selectAll: (reset?: boolean) => void;
 }) {
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
 
   const [filteredRiskFiles, setFilteredRiskFiles] =
     useState<SelectableRiskFile[]>(riskFiles);

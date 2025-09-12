@@ -3,7 +3,7 @@ import { SelectableRiskFile } from "./Selectables";
 import { CircularProgress, Box } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useOutletContext } from "react-router-dom";
-import { AuthPageContext } from "../../AuthPage";
+import { BasePageContext } from "../../BasePage";
 
 const SPECIAL_FILTERS = {
   MY_RISK_FILES: false,
@@ -37,7 +37,7 @@ const columns: GridColDef[] = [
 ];
 
 export default function PrioritiesView() {
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
 
   const [riskFiles] = useState<RiskFile[] | null>(null);
   const [filteredRiskFiles, setFilteredRiskFiles] = useState<RiskFile[] | null>(

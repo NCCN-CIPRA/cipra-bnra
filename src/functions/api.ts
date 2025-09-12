@@ -316,19 +316,18 @@ export const getAntiForgeryToken = async (headers = {}) => {
 
 export const getAPI = (
   antiForgeryToken: string,
-  navigate: (url: string) => void,
   customFetch: (input: string, init?: RequestInit) => Promise<Response>
 ): API => {
   const authFetch = async (input: string, init?: RequestInit | undefined) => {
     const response = await customFetch(input, init);
 
-    if (response.status === 403) {
-      navigate("/auth");
+    // if (response.status === 403) {
+    //   navigate("/auth");
 
-      throw new Error("Not Authenticated");
-    } else if (response.status === 404) {
-      throw new Error("Not Found");
-    }
+    //   throw new Error("Not Authenticated");
+    // } else if (response.status === 404) {
+    //   throw new Error("Not Found");
+    // }
 
     return response;
   };

@@ -20,9 +20,9 @@ import TextInputBox from "../../components/TextInputBox";
 import { Slider } from "./Slider";
 import { CascadeSnapshotMatrix } from "./CascadeMatrix";
 import { useOutletContext } from "react-router-dom";
-import { AuthPageContext } from "../AuthPage";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
+import { BasePageContext } from "../BasePage";
 
 const capFirst = (s: string) => {
   return `${s[0].toUpperCase()}${s.slice(1)}`;
@@ -264,7 +264,7 @@ function ScenarioSection({
   // reloadRiskFile: () => Promise<unknown>;
 }) {
   // const api = useAPI();
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
   const section = DIRECT_ANALYSIS_SECTIONS_MANMADE[PARAMETER.DP];
   // const discussionRequired = useMemo(() => {
   //   if (!riskFile.cr4de_discussion_required) return false;
@@ -359,7 +359,7 @@ function ScenarioSection({
         <Box sx={{ p: 2 }}>
           <Typography variant="subtitle2">Final Consensus Results:</Typography>
           <Box sx={{ mt: 2, mb: 4 }}>
-            {user.roles.analist ? (
+            {user?.roles.analist ? (
               <TextInputBox
                 initialValue={quali}
                 setUpdatedValue={(newValue) => {
@@ -471,7 +471,7 @@ function AttackSection({
   cascade: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>;
   // reloadCascades: () => Promise<unknown>;
 }) {
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
   // const api = useAPI();
   // const discussionRequired =
   //   cascade.cr4de_discussion_required_cause || DiscussionRequired.NOT_NECESSARY;
@@ -560,7 +560,7 @@ function AttackSection({
             <Typography variant="subtitle2" sx={{ mb: 2 }}>
               Final Consensus Results:
             </Typography>
-            {user.roles.analist ? (
+            {user?.roles.analist ? (
               <TextInputBox
                 initialValue={quali}
                 setUpdatedValue={(newValue) => {
@@ -606,7 +606,7 @@ function EmergingSection({
   cascade: DVCascadeSnapshot<unknown, DVRiskSnapshot>;
   // reloadCascades: () => Promise<unknown>;
 }) {
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
 
   // const api = useAPI();
   // const discussionRequired =
@@ -675,7 +675,7 @@ function EmergingSection({
             <Typography variant="subtitle2" sx={{ mb: 2 }}>
               Final Consensus Results:
             </Typography>
-            {user.roles.analist ? (
+            {user?.roles.analist ? (
               <TextInputBox
                 initialValue={quali}
                 setUpdatedValue={(newValue) => {
@@ -726,7 +726,7 @@ function CCSection({
   // reloadRiskFile: () => Promise<unknown>;
   // reloadCascades: () => Promise<unknown>;
 }) {
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
 
   // const api = useAPI();
   // const discussionRequired =
@@ -795,7 +795,7 @@ function CCSection({
             <Typography variant="subtitle2" sx={{ mb: 2 }}>
               Final Consensus Results:
             </Typography>
-            {user.roles.analist ? (
+            {user?.roles.analist ? (
               <TextInputBox
                 initialValue={quali}
                 setUpdatedValue={(newValue) => {

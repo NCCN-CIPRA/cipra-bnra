@@ -10,9 +10,9 @@ import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TextInputBox from "../../components/TextInputBox";
 import { useOutletContext } from "react-router-dom";
-import { AuthPageContext } from "../AuthPage";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
+import { BasePageContext } from "../BasePage";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion elevation={0} square {...props} />
@@ -96,7 +96,7 @@ function CatalyzedSection({
   // reloadCascades: () => Promise<unknown>;
 }) {
   // const api = useAPI();
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
   // const discussionRequired =
   //   cascade.cr4de_discussion_required_cause || DiscussionRequired.NOT_NECESSARY;
 
@@ -168,7 +168,7 @@ function CatalyzedSection({
             <Typography variant="subtitle2" sx={{ mb: 2 }}>
               Final Consensus Results:
             </Typography>
-            {user.roles.analist ? (
+            {user?.roles.analist ? (
               <TextInputBox
                 initialValue={quali}
                 setUpdatedValue={(newValue) => {

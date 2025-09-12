@@ -39,7 +39,7 @@ import HowToRegIcon from "@mui/icons-material/HowToReg";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useOutletContext } from "react-router-dom";
-import { AuthPageContext } from "../AuthPage";
+import { BasePageContext } from "../BasePage";
 
 interface SelectableContact
   extends DVContact<DVParticipation<undefined, DVRiskFile>[], DVInvitation[]> {
@@ -646,7 +646,7 @@ const ParticipantInput = ({
 
 export default function ExpertManagementPage() {
   const api = useAPI();
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
 
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState<string | null>(null);

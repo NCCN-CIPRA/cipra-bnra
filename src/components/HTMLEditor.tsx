@@ -121,9 +121,11 @@ function Editor({
 
 export default function HTMLEditor({
   initialHTML,
+  canEdit = false,
   onSave,
 }: {
   initialHTML: string;
+  canEdit?: boolean;
   onSave: (newHTML: string | null) => Promise<unknown>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -169,19 +171,21 @@ export default function HTMLEditor({
       onMouseEnter={handlePopoverOpen}
       onMouseLeave={handlePopoverClose}
     >
-      <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          opacity: showButtons ? 1 : 0,
-          transition: "all .2s ease",
-        }}
-      >
-        <IconButton aria-label="edit" onClick={() => setIsEditing(true)}>
-          <EditIcon />
-        </IconButton>
-      </Box>
+      {canEdit && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            opacity: showButtons ? 1 : 0,
+            transition: "all .2s ease",
+          }}
+        >
+          <IconButton aria-label="edit" onClick={() => setIsEditing(true)}>
+            <EditIcon />
+          </IconButton>
+        </Box>
+      )}
       <Box
         className="htmleditor"
         sx={{

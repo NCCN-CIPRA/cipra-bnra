@@ -40,7 +40,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { useOutletContext } from "react-router-dom";
-import { AuthPageContext } from "../pages/AuthPage";
+import { BasePageContext } from "../pages/BasePage";
 
 export interface Action {
   icon: ReactNode;
@@ -74,7 +74,7 @@ export default function Attachments({
   const api = useAPI();
   const theme = useTheme();
   const { t } = useTranslation();
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
 
   const [openDialog, setOpenDialog] = useState(false);
   const [expanded, setExpanded] = useState(alwaysOpen);
@@ -438,7 +438,7 @@ export default function Attachments({
                       {a.cr4de_reference}
                     </TableCell>
                     <TableCell component="th" scope="row">
-                      {user.roles.analist || a.cr4de_url !== null ? (
+                      {user?.roles.analist || a.cr4de_url !== null ? (
                         <Link
                           sx={{ "&:hover": { cursor: "pointer" } }}
                           onClick={async () => {
