@@ -443,8 +443,8 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
-              SCENARIOS.MAJOR
+            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
+              SCENARIOS.CONSIDERABLE
             ]
           }
           onChange={(newValue) =>
@@ -458,8 +458,8 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
-              SCENARIOS.EXTREME
+            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
+              SCENARIOS.CONSIDERABLE
             ]
           }
           onChange={(newValue) =>
@@ -481,8 +481,8 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
-              SCENARIOS.CONSIDERABLE
+            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
+              SCENARIOS.MAJOR
             ]
           }
           onChange={(newValue) =>
@@ -511,8 +511,8 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
-              SCENARIOS.EXTREME
+            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
+              SCENARIOS.MAJOR
             ]
           }
           onChange={(newValue) =>
@@ -530,8 +530,8 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
-              SCENARIOS.CONSIDERABLE
+            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
+              SCENARIOS.EXTREME
             ]
           }
           onChange={(newValue) =>
@@ -549,8 +549,8 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={
-            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
-              SCENARIOS.MAJOR
+            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
+              SCENARIOS.EXTREME
             ]
           }
           onChange={(newValue) =>
