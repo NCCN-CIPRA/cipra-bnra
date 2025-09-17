@@ -3,8 +3,8 @@ import { SCENARIOS } from "../../../functions/scenarios";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBars";
 import { useNavigate } from "react-router-dom";
-import ProbabilitySankey from "../../../components/charts/ProbabilitySankey";
-import ImpactSankey from "../../../components/charts/ImpactSankey";
+import { ProbabilitySankeyBox } from "../../../components/charts/ProbabilitySankey";
+import { ImpactSankeyBox } from "../../../components/charts/ImpactSankey";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -46,7 +46,7 @@ export default function SankeyDiagram({
         className="sankey-probability"
         sx={{ width: "calc(50% - 150px)", height: 600 }}
       >
-        <ProbabilitySankey
+        <ProbabilitySankeyBox
           riskSnapshot={riskFile}
           cascades={cascades}
           scenario={scenario}
@@ -100,7 +100,7 @@ export default function SankeyDiagram({
         className="sankey-impact"
         sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}
       >
-        <ImpactSankey
+        <ImpactSankeyBox
           riskSnapshot={riskFile}
           cascades={cascades}
           scenario={scenario}

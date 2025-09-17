@@ -8,8 +8,8 @@ import { useTranslation } from "react-i18next";
 import { CascadeSnapshots } from "../../../functions/cascades";
 import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
-import ActionsSankey from "../../../components/charts/ActionsSankey";
-import ImpactSankey from "../../../components/charts/ImpactSankey";
+import { ActionsSankeyBox } from "../../../components/charts/ActionsSankey";
+import { ImpactSankeyBox } from "../../../components/charts/ImpactSankey";
 
 export default function MMSankeyDiagram({
   // riskSummary,
@@ -46,7 +46,7 @@ export default function MMSankeyDiagram({
         className="sankey-actions"
         sx={{ width: "calc(50% - 150px)", height: 600 }}
       >
-        <ActionsSankey
+        <ActionsSankeyBox
           riskSnapshot={riskFile}
           cascades={cascades}
           scenario={scenario}
@@ -198,7 +198,7 @@ export default function MMSankeyDiagram({
         className="sankey-impact"
         sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}
       >
-        <ImpactSankey
+        <ImpactSankeyBox
           riskSnapshot={riskFile}
           cascades={cascades}
           scenario={scenario}

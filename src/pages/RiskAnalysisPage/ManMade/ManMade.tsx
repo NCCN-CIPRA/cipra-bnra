@@ -44,7 +44,7 @@ export default function ManMade({
         <RiskFileTitle riskFile={riskSummary} />
 
         <Box sx={{ mt: 8 }}>
-          <Typography variant="h5">
+          <Typography variant="h5" sx={{ mb: 4 }}>
             {t("risks.ananylis.quantiResults", "Quantitative Analysis Results")}
           </Typography>
 

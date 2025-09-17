@@ -31,13 +31,12 @@ export type EffectSankeyNode = {
   otherEffects?: EffectRisksSummary[];
 };
 
-export default function ImpactSankey({
+export function ImpactSankeyBox({
   riskSnapshot,
   cascades,
   scenario,
   width = "100%",
   height = "100%",
-  tooltip = true,
   onClick,
 }: {
   riskSnapshot: DVRiskSnapshot;
@@ -45,6 +44,43 @@ export default function ImpactSankey({
   scenario: SCENARIOS;
   width?: number | string;
   height?: number | string;
+  onClick: (id: string) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <>
+      <Box
+        sx={{ width: "100%", height: 30, pr: 0.5, mb: 2, textAlign: "right" }}
+      >
+        <Typography variant="h6">{t("Impact Breakdown")}</Typography>
+      </Box>
+      <ResponsiveContainer width={width} height={height}>
+        <ImpactSankey
+          riskSnapshot={riskSnapshot}
+          cascades={cascades}
+          scenario={scenario}
+          tooltip={true}
+          onClick={onClick}
+        />
+      </ResponsiveContainer>
+    </>
+  );
+}
+
+export default function ImpactSankey({
+  riskSnapshot,
+  cascades,
+  scenario,
+  width,
+  height,
+  tooltip = true,
+  onClick,
+}: {
+  riskSnapshot: DVRiskSnapshot;
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
+  scenario: SCENARIOS;
+  width?: number;
+  height?: number;
   tooltip?: boolean;
   onClick: (id: string) => void;
 }) {
@@ -69,29 +105,29 @@ export default function ImpactSankey({
   };
 
   return (
-    <ResponsiveContainer width={width} height={height}>
-      <Sankey
-        data={data}
-        node={(props: NodeProps & { payload: EffectSankeyNode }) => (
-          <ISankeyNode
-            {...props}
-            totalEffects={effects.length}
-            totalI={riskSnapshot.cr4de_quanti[scenario].ti.all.scaleTot}
-            fontSize={14}
-            onNavigate={onClick}
-          />
-        )}
-        link={(props: LinkProps) => (
-          <ISankeyLink {...props} totalEffects={data.nodes.length} />
-        )}
-        // Disable sorting  the nodes
-        iterations={0}
-        // More spacing between nodes
-        nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
-      >
-        {tooltip && <Tooltip content={EffectTooltip} />}
-      </Sankey>
-    </ResponsiveContainer>
+    <Sankey
+      width={width}
+      height={height}
+      data={data}
+      node={(props: NodeProps & { payload: EffectSankeyNode }) => (
+        <ISankeyNode
+          {...props}
+          totalEffects={data.nodes.length}
+          totalI={riskSnapshot.cr4de_quanti[scenario].ti.all.scaleTot}
+          fontSize={14}
+          onNavigate={onClick}
+        />
+      )}
+      link={(props: LinkProps) => (
+        <ISankeyLink {...props} totalEffects={data.nodes.length} />
+      )}
+      // Disable sorting  the nodes
+      iterations={0}
+      // More spacing between nodes
+      nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
+    >
+      {tooltip && <Tooltip content={EffectTooltip} />}
+    </Sankey>
   );
 }
 

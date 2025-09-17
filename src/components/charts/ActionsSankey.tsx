@@ -33,13 +33,12 @@ export type ActionSankeyNode = {
 
 const baseY = 50;
 
-export default function ActionsSankey({
+export function ActionsSankeyBox({
   riskSnapshot,
   cascades,
   scenario,
   width = "100%",
   height = "100%",
-  tooltip = true,
   onClick,
 }: {
   riskSnapshot: DVRiskSnapshot;
@@ -47,10 +46,47 @@ export default function ActionsSankey({
   scenario: SCENARIOS;
   width?: number | string;
   height?: number | string;
+  onClick: (id: string) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <>
+      <Box
+        sx={{ width: "100%", height: 30, pl: 0.5, mb: 2, textAlign: "left" }}
+      >
+        <Typography variant="h6">{t("Preferred Malicious Actions")}</Typography>
+      </Box>
+      <ResponsiveContainer width={width} height={height}>
+        <ActionsSankey
+          riskSnapshot={riskSnapshot}
+          cascades={cascades}
+          scenario={scenario}
+          tooltip={true}
+          onClick={onClick}
+        />
+      </ResponsiveContainer>
+    </>
+  );
+}
+
+export default function ActionsSankey({
+  riskSnapshot,
+  cascades,
+  scenario,
+  width,
+  height,
+  tooltip = true,
+  onClick,
+}: {
+  riskSnapshot: DVRiskSnapshot;
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
+  scenario: SCENARIOS;
+  width?: number;
+  height?: number;
   tooltip?: boolean;
   onClick: (id: string) => void;
 }) {
-  const totP = cascades.effects.reduce(
+  const totCP = cascades.effects.reduce(
     (p, e) => p + e.cr4de_quanti_effect[scenario].cp.avg,
     0.00000001
   );
@@ -59,7 +95,7 @@ export default function ActionsSankey({
     .map((e) => ({
       id: e.cr4de_effect_risk._cr4de_risk_file_value,
       name: `risk.${e.cr4de_effect_risk.cr4de_hazard_id}.name`,
-      p: e.cr4de_quanti_effect[scenario].cp.avg / totP,
+      p: e.cr4de_quanti_effect[scenario].cp.avg / totCP,
     }))
     .sort((a, b) => b.p - a.p);
 
@@ -67,7 +103,7 @@ export default function ActionsSankey({
 
   let cumulP = 0;
   for (const c of actions) {
-    cumulP += c.p / totP;
+    cumulP += c.p;
 
     if (cumulP >= 0.8) {
       minP = c.p;
@@ -117,12 +153,14 @@ export default function ActionsSankey({
   return (
     <ResponsiveContainer width={width} height={height}>
       <Sankey
+        width={width}
+        height={height}
         data={data}
         node={(props: NodeProps & { payload: ActionSankeyNode }) => (
           <ASankeyNode
             {...props}
-            totalCauses={data.nodes.length - 1}
-            totalP={riskSnapshot.cr4de_quanti[scenario].tp.yearly.scale}
+            totalCauses={data.nodes.length}
+            // totalP={riskSnapshot.cr4de_quanti[scenario].tp.yearly.scale}
             fontSize={14}
             onNavigate={onClick}
           />
@@ -149,13 +187,11 @@ function ASankeyNode({
   width,
   height,
   totalCauses,
-  totalP,
   fontSize,
   onNavigate,
 }: NodeProps & {
   payload: ActionSankeyNode;
   totalCauses: number;
-  totalP: number;
   fontSize: number;
   onNavigate?: (riskId: string) => void;
 }) {
@@ -176,16 +212,6 @@ function ASankeyNode({
           fill={getCategoryColor("")}
           fillOpacity="1"
         />
-        <text
-          textAnchor="middle"
-          x={-y - height / 2 - 18}
-          y={x - 15}
-          fontSize={fontSize || "16"}
-          stroke="#333"
-          transform="rotate(270)"
-        >
-          {`${t("Total Probability")}:  ${round(totalP, 2)} / 5`}
-        </text>
       </Layer>
     );
   } else {
