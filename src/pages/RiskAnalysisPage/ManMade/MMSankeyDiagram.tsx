@@ -3,23 +3,23 @@ import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBars";
 import { useNavigate } from "react-router-dom";
-import ImpactSankey from "../../../components/charts/ImpactSankey";
 import { useEffect } from "react";
-import ActionsSankey from "../../../components/charts/ActionsSankey";
 import { useTranslation } from "react-i18next";
 import { CascadeSnapshots } from "../../../functions/cascades";
 import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
+import ActionsSankey from "../../../components/charts/ActionsSankey";
+import ImpactSankey from "../../../components/charts/ImpactSankey";
 
 export default function MMSankeyDiagram({
-  riskSummary,
+  // riskSummary,
   riskFile,
   cascades,
   scenario,
   setScenario,
-  debug = false,
-  manmade = false,
-}: {
+}: // debug = false,
+// manmade = false,
+{
   riskSummary: DVRiskSummary | null;
   riskFile: DVRiskSnapshot;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
@@ -47,15 +47,10 @@ export default function MMSankeyDiagram({
         sx={{ width: "calc(50% - 150px)", height: 600 }}
       >
         <ActionsSankey
-          riskFile={riskFile}
+          riskSnapshot={riskFile}
           cascades={cascades}
-          maxActions={null}
-          shownActionPortion={0.8}
-          minActionPortion={null}
           scenario={scenario}
           onClick={goToRiskFile}
-          debug={debug}
-          manmade={manmade}
         />
       </Box>
       <Stack
@@ -204,14 +199,10 @@ export default function MMSankeyDiagram({
         sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}
       >
         <ImpactSankey
-          riskSummary={riskSummary}
-          riskFile={riskFile}
-          maxEffects={null}
-          shownEffectPortion={0.8}
-          minEffectPortion={null}
+          riskSnapshot={riskFile}
+          cascades={cascades}
           scenario={scenario}
           onClick={goToRiskFile}
-          debug={debug}
         />
       </Box>
     </Stack>

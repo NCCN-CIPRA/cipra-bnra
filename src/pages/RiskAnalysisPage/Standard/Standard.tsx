@@ -22,13 +22,16 @@ import {
 } from "../../../types/dataverse/DVRiskSnapshot";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../../BasePage";
+import { CascadeSnapshots } from "../../../functions/cascades";
 
 export default function Standard({
   riskSummary,
   riskFile,
+  cascades,
 }: {
   riskSummary: DVRiskSummary;
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
 }) {
   const { environment } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
@@ -49,6 +52,7 @@ export default function Standard({
         <SankeyDiagram
           riskSummary={riskSummary}
           riskFile={riskFile}
+          cascades={cascades}
           scenario={scenario}
           setScenario={setScenario}
         />

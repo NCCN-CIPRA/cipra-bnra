@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { Box, Container, Stack } from "@mui/material";
-import SummaryCharts from "../../components/charts/SummaryCharts.new";
+import SummaryCharts from "../../components/charts/SummaryCharts";
 import { SCENARIOS } from "../../functions/scenarios";
 import { useTranslation } from "react-i18next";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";

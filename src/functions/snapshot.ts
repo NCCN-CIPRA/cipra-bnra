@@ -1441,49 +1441,49 @@ export function snapshotFromRiskCascade(
         },
         ii: {
           all: {
-            scale: r(cascade.results?.II_C2All),
+            scale: r(cascade.results?.II_M2All),
           },
           h: {
-            scale: r(cascade.results?.II_C2All_H),
+            scale: r(cascade.results?.II_M2All_H),
           },
           ha: {
-            scale: r(cascade.results?.II_C2All_Ha),
+            scale: r(cascade.results?.II_M2All_Ha),
           },
           hb: {
-            scale: r(cascade.results?.II_C2All_Hb),
+            scale: r(cascade.results?.II_M2All_Hb),
           },
           hc: {
-            scale: r(cascade.results?.II_C2All_Hc),
+            scale: r(cascade.results?.II_M2All_Hc),
           },
           s: {
-            scale: r(cascade.results?.II_C2All_S),
+            scale: r(cascade.results?.II_M2All_S),
           },
           sa: {
-            scale: r(cascade.results?.II_C2All_Sa),
+            scale: r(cascade.results?.II_M2All_Sa),
           },
           sb: {
-            scale: r(cascade.results?.II_C2All_Sb),
+            scale: r(cascade.results?.II_M2All_Sb),
           },
           sc: {
-            scale: r(cascade.results?.II_C2All_Sc),
+            scale: r(cascade.results?.II_M2All_Sc),
           },
           sd: {
-            scale: r(cascade.results?.II_C2All_Sd),
+            scale: r(cascade.results?.II_M2All_Sd),
           },
           e: {
-            scale: r(cascade.results?.II_C2All_E),
+            scale: r(cascade.results?.II_M2All_E),
           },
           ea: {
-            scale: r(cascade.results?.II_C2All_Ea),
+            scale: r(cascade.results?.II_M2All_Ea),
           },
           f: {
-            scale: r(cascade.results?.II_C2All_F),
+            scale: r(cascade.results?.II_M2All_F),
           },
           fa: {
-            scale: r(cascade.results?.II_C2All_Fa),
+            scale: r(cascade.results?.II_M2All_Fa),
           },
           fb: {
-            scale: r(cascade.results?.II_C2All_Fb),
+            scale: r(cascade.results?.II_M2All_Fb),
           },
         },
       },
@@ -1505,49 +1505,49 @@ export function snapshotFromRiskCascade(
         },
         ii: {
           all: {
-            scale: r(cascade.results?.II_C2All),
+            scale: r(cascade.results?.II_E2All),
           },
           h: {
-            scale: r(cascade.results?.II_C2All_H),
+            scale: r(cascade.results?.II_E2All_H),
           },
           ha: {
-            scale: r(cascade.results?.II_C2All_Ha),
+            scale: r(cascade.results?.II_E2All_Ha),
           },
           hb: {
-            scale: r(cascade.results?.II_C2All_Hb),
+            scale: r(cascade.results?.II_E2All_Hb),
           },
           hc: {
-            scale: r(cascade.results?.II_C2All_Hc),
+            scale: r(cascade.results?.II_E2All_Hc),
           },
           s: {
-            scale: r(cascade.results?.II_C2All_S),
+            scale: r(cascade.results?.II_E2All_S),
           },
           sa: {
-            scale: r(cascade.results?.II_C2All_Sa),
+            scale: r(cascade.results?.II_E2All_Sa),
           },
           sb: {
-            scale: r(cascade.results?.II_C2All_Sb),
+            scale: r(cascade.results?.II_E2All_Sb),
           },
           sc: {
-            scale: r(cascade.results?.II_C2All_Sc),
+            scale: r(cascade.results?.II_E2All_Sc),
           },
           sd: {
-            scale: r(cascade.results?.II_C2All_Sd),
+            scale: r(cascade.results?.II_E2All_Sd),
           },
           e: {
-            scale: r(cascade.results?.II_C2All_E),
+            scale: r(cascade.results?.II_E2All_E),
           },
           ea: {
-            scale: r(cascade.results?.II_C2All_Ea),
+            scale: r(cascade.results?.II_E2All_Ea),
           },
           f: {
-            scale: r(cascade.results?.II_C2All_F),
+            scale: r(cascade.results?.II_E2All_F),
           },
           fa: {
-            scale: r(cascade.results?.II_C2All_Fa),
+            scale: r(cascade.results?.II_E2All_Fa),
           },
           fb: {
-            scale: r(cascade.results?.II_C2All_Fb),
+            scale: r(cascade.results?.II_E2All_Fb),
           },
         },
       },

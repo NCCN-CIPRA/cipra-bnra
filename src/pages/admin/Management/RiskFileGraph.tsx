@@ -1,23 +1,11 @@
-import { Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { addDays } from "../../../functions/days";
 import { DVParticipation } from "../../../types/dataverse/DVParticipation";
 import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { DVValidation } from "../../../types/dataverse/DVValidation";
 import { SelectableContact } from "./Selectables";
-import { TooltipProps } from "recharts/types/component/Tooltip";
-import {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
 
 interface RFBucket {
   date: number;
@@ -30,80 +18,82 @@ interface RFBucket {
   finished: number;
 }
 
-const CustomTooltip = ({
-  payload,
-  label,
-}: TooltipProps<ValueType, NameType>) => {
-  if (!payload || payload.length <= 0) return <div></div>;
+// const CustomTooltip = ({
+//   payload,
+//   label,
+// }: TooltipProps<ValueType, NameType>) => {
+//   if (!payload || payload.length <= 0) return <div></div>;
 
-  return (
-    <Box
-      sx={{ borderRadius: 4, backgroundColor: "rgba(255,255,255,.9)", p: 2 }}
-    >
-      <Typography variant="subtitle2">
-        {new Date(label).toISOString().slice(0, 10)}
-      </Typography>
-      <table>
-        <tbody>
-          {payload.map((p) => (
-            <tr key={p.name}>
-              <td>
-                <Typography variant="body1" sx={{ color: p.fill }}>
-                  {p.name}:
-                </Typography>
-              </td>
-              <td>
-                <Typography
-                  variant="body1"
-                  sx={{ fontWeight: "bold", textAlign: "right", pl: 2 }}
-                >
-                  {p.value}
-                </Typography>
-              </td>
-            </tr>
-          ))}
-          <tr>
-            <td>
-              <Typography variant="body1" sx={{ pt: 2 }}>
-                Total:
-              </Typography>
-            </td>
-            <td>
-              <Typography
-                variant="body1"
-                sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}
-              >
-                {/* @ts-expect-error value */}
-                {payload.reduce((tot, p) => tot + p.value, 0)}
-              </Typography>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <Typography variant="body1" sx={{ pt: 2 }}>
-                % Risk files finished:
-              </Typography>
-            </td>
-            <td>
-              <Typography
-                variant="body1"
-                sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}
-              >
-                {Math.round(
-                  // @ts-expect-error value
-                  (1000 * payload[0].value) /
-                    // @ts-expect-error value
-                    payload.reduce((tot, p) => tot + p.value, 0)
-                ) / 10}
-                %
-              </Typography>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </Box>
-  );
-};
+//   return (
+//     <Box
+//       sx={{ borderRadius: 4, backgroundColor: "rgba(255,255,255,.9)", p: 2 }}
+//     >
+//       <Typography variant="subtitle2">
+//         {new Date(label).toISOString().slice(0, 10)}
+//       </Typography>
+//       <table>
+//         <tbody>
+//           {
+//             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//             payload.map((p: any) => (
+//               <tr key={p.name}>
+//                 <td>
+//                   <Typography variant="body1" sx={{ color: p.fill }}>
+//                     {p.name}:
+//                   </Typography>
+//                 </td>
+//                 <td>
+//                   <Typography
+//                     variant="body1"
+//                     sx={{ fontWeight: "bold", textAlign: "right", pl: 2 }}
+//                   >
+//                     {p.value}
+//                   </Typography>
+//                 </td>
+//               </tr>
+//             ))
+//           }
+//           <tr>
+//             <td>
+//               <Typography variant="body1" sx={{ pt: 2 }}>
+//                 Total:
+//               </Typography>
+//             </td>
+//             <td>
+//               <Typography
+//                 variant="body1"
+//                 sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}
+//               >
+//                 {/* @ts-expect-error value */}
+//                 {payload.reduce((tot, p) => tot + p.value, 0)}
+//               </Typography>
+//             </td>
+//           </tr>
+//           <tr>
+//             <td>
+//               <Typography variant="body1" sx={{ pt: 2 }}>
+//                 % Risk files finished:
+//               </Typography>
+//             </td>
+//             <td>
+//               <Typography
+//                 variant="body1"
+//                 sx={{ fontWeight: "bold", textAlign: "right", pl: 2, pt: 2 }}
+//               >
+//                 {Math.round(
+//                   (1000 * payload[0].value) /
+//                     // @ts-expect-error value
+//                     payload.reduce((tot, p) => tot + p.value, 0)
+//                 ) / 10}
+//                 %
+//               </Typography>
+//             </td>
+//           </tr>
+//         </tbody>
+//       </table>
+//     </Box>
+//   );
+// };
 
 export default function RiskFileGraph({
   participations,
@@ -259,7 +249,7 @@ export default function RiskFileGraph({
           type="number"
         />
         <YAxis />
-        <Tooltip content={<CustomTooltip />} />
+        {/* <Tooltip content={<CustomTooltip />} /> */}
         {/* <Area
           type="monotone"
           dataKey="enoughInput"

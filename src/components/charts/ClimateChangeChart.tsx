@@ -1,4 +1,4 @@
-import { TooltipProps } from "recharts";
+import { TooltipContentProps } from "recharts";
 import { SCENARIOS } from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
 import { NameType } from "recharts/types/component/DefaultTooltipContent";
@@ -14,7 +14,10 @@ const getPercentage = (orig: number, n: number) => {
   return round((100 * Math.round(100 * n)) / Math.round(100 * orig));
 };
 
-const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
+const CustomTooltip = ({
+  active,
+  payload,
+}: TooltipContentProps<number, NameType>) => {
   if (active && payload && payload.length) {
     return (
       <Box

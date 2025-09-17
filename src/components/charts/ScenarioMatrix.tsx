@@ -10,7 +10,11 @@ import {
   RiskSnapshotResults,
 } from "../../types/dataverse/DVRiskSnapshot";
 
-const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
+const CustomTooltip = ({
+  active,
+  payload,
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+TooltipProps<number, NameType> & { payload: any }) => {
   if (active && payload && payload.length) {
     return (
       <Box

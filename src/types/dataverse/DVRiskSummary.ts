@@ -14,7 +14,7 @@ export type CauseRisksSummary = {
     cause_risk_id: string;
     cause_risk_title: string;
     cause_risk_p: number;
-  };
+  }[];
 };
 
 export type EffectRisksSummary = {
@@ -25,7 +25,7 @@ export type EffectRisksSummary = {
     effect_risk_id: string;
     effect_risk_title: string;
     effect_risk_i: number;
-  };
+  }[];
 };
 
 export type DVRiskSummary<RiskFileType = unknown, T = UnparsedRiskFields> = {

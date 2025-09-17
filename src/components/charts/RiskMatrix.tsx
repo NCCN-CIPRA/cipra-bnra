@@ -7,10 +7,10 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  TooltipProps,
   Cell,
   LabelList,
   Legend,
+  TooltipContentProps,
 } from "recharts";
 import {
   NameType,
@@ -24,10 +24,7 @@ import {
   SCENARIO_PARAMS,
   getScenarioSuffix,
 } from "../../functions/scenarios";
-import {
-  CATEGORY_NAMES,
-  RISK_CATEGORY,
-} from "../../types/dataverse/DVRiskFile";
+import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { hexToRGB } from "../../functions/colors";
 import { capFirst } from "../../functions/capFirst";
@@ -195,7 +192,7 @@ export default function RiskMatrix({
   const CustomTooltip = ({
     active,
     payload,
-  }: TooltipProps<ValueType, NameType>) => {
+  }: TooltipContentProps<ValueType, NameType>) => {
     if (active) {
       return (
         <Stack
@@ -351,7 +348,7 @@ export default function RiskMatrix({
             />
             <Tooltip
               cursor={{ strokeDasharray: "3 3" }}
-              content={<CustomTooltip />}
+              content={CustomTooltip}
             />
             {Object.entries(CATEGORIES).map(([CATEGORY, shape]) => {
               const catData =
@@ -452,31 +449,31 @@ export default function RiskMatrix({
         <Box sx={{ position: "absolute", bottom: 0, width: "100%" }}>
           <Box className="custom-legend-wrapper" sx={{ flex: 1, height: 60 }}>
             <Legend
-              chartHeight={30}
+              // chartHeight={30}
               height={30}
               wrapperStyle={{ position: "relative" }}
               align="center"
-              payload={
-                categoryLegend
-                  ? Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
-                      value: t(
-                        CATEGORY,
-                        CATEGORY_NAMES[CATEGORY as RISK_CATEGORY] as string
-                      ),
-                      type:
-                        categoryDisplay === "both" ||
-                        categoryDisplay === "shapes"
-                          ? shape.shape
-                          : "circle",
-                      color:
-                        categoryDisplay === "both" ||
-                        categoryDisplay === "colors"
-                          ? CATEGORIES[CATEGORY as RISK_CATEGORY]?.color ||
-                            "rgba(150,150,150,1)"
-                          : "rgba(150,150,150,1)",
-                    }))
-                  : []
-              }
+              // payload={
+              //   categoryLegend
+              //     ? Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
+              //         value: t(
+              //           CATEGORY,
+              //           CATEGORY_NAMES[CATEGORY as RISK_CATEGORY] as string
+              //         ),
+              //         type:
+              //           categoryDisplay === "both" ||
+              //           categoryDisplay === "shapes"
+              //             ? shape.shape
+              //             : "circle",
+              //         color:
+              //           categoryDisplay === "both" ||
+              //           categoryDisplay === "colors"
+              //             ? CATEGORIES[CATEGORY as RISK_CATEGORY]?.color ||
+              //               "rgba(150,150,150,1)"
+              //             : "rgba(150,150,150,1)",
+              //       }))
+              //     : []
+              // }
             />
           </Box>
           <Box
@@ -484,26 +481,26 @@ export default function RiskMatrix({
             sx={{ flex: 1, height: 30, textAlign: "center" }}
           >
             <Legend
-              chartHeight={30}
+              // chartHeight={30}
               height={30}
               wrapperStyle={{ position: "relative" }}
               align="center"
-              payload={
-                scenarioLegend
-                  ? Object.entries(SCENARIO_PARAMS).map(
-                      ([scenario, params]) => ({
-                        value: t(
-                          `2A.${scenario}.title`,
-                          `${scenario[0].toUpperCase()}${scenario.slice(
-                            1
-                          )} Scenario`
-                        ),
-                        type: "circle",
-                        color: params.color,
-                      })
-                    )
-                  : []
-              }
+              // payload={
+              //   scenarioLegend
+              //     ? Object.entries(SCENARIO_PARAMS).map(
+              //         ([scenario, params]) => ({
+              //           value: t(
+              //             `2A.${scenario}.title`,
+              //             `${scenario[0].toUpperCase()}${scenario.slice(
+              //               1
+              //             )} Scenario`
+              //           ),
+              //           type: "circle",
+              //           color: params.color,
+              //         })
+              //       )
+              //     : []
+              // }
             />
           </Box>
         </Box>

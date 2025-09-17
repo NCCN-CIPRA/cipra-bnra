@@ -1,21 +1,23 @@
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import ProbabilityBars from "./ProbabilityBars";
 import getScaleString from "../../functions/getScaleString";
-import { SCENARIOS } from "../../functions/scenarios";
+import { SCENARIOS, getScenarioParameter } from "../../functions/scenarios";
 import { useCallback } from "react";
 import FileSaver from "file-saver";
 import { useGenerateImage } from "recharts-to-png";
 import SaveIcon from "@mui/icons-material/Download";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { Trans, useTranslation } from "react-i18next";
+import { getCategoryImpactRescaled } from "../../functions/CategoryImpact";
 import SummaryImpactChart, { pieWidth } from "./svg/SummaryImpactChart";
-import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 
 export default function SummaryCharts({
-  riskSummary,
+  riskFile,
+  scenario,
   manmade = false,
   canDownload = false,
 }: {
-  riskSummary: DVRiskSummary;
+  riskFile: DVRiskFile;
   scenario: SCENARIOS;
   manmade?: boolean;
   canDownload?: boolean;
@@ -48,17 +50,17 @@ export default function SummaryCharts({
     // Verify that png is not undefined
     if (png) {
       // Download with FileSaver
-      FileSaver.saveAs(png, `${riskSummary.cr4de_hazard_id}-summary.png`);
+      FileSaver.saveAs(png, `${riskFile.cr4de_hazard_id}-summary.png`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getDivJpeg]);
 
-  const tp = riskSummary.cr4de_mrs_p || 0;
+  const tp = getScenarioParameter(riskFile, "TP", scenario) || 0;
 
-  const H = riskSummary.cr4de_mrs_h || 0;
-  const S = riskSummary.cr4de_mrs_s || 0;
-  const E = riskSummary.cr4de_mrs_e || 0;
-  const F = riskSummary.cr4de_mrs_f || 0;
+  const H = getCategoryImpactRescaled(riskFile, "H", scenario);
+  const S = getCategoryImpactRescaled(riskFile, "S", scenario);
+  const E = getCategoryImpactRescaled(riskFile, "E", scenario);
+  const F = getCategoryImpactRescaled(riskFile, "F", scenario);
 
   return (
     <Box sx={{ position: "relative" }}>

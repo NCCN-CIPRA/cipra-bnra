@@ -16,6 +16,10 @@ import {
   DVRiskSnapshot,
   RiskSnapshotResults,
 } from "../types/dataverse/DVRiskSnapshot";
+import {
+  CauseRisksSummary,
+  EffectRisksSummary,
+} from "../types/dataverse/DVRiskSummary";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { RiskCatalogue } from "./riskfiles";
 import {
@@ -205,6 +209,64 @@ export function getCausesWithDPNew(
   ];
 }
 
+export function getCauseSummaries(
+  riskFile: DVRiskSnapshot,
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>,
+  scenario: SCENARIOS,
+  showOther: boolean
+): CauseRisksSummary[] {
+  const causes = getCausesWithDPNew(riskFile, cascades, scenario).sort(
+    (a, b) => b.p - a.p
+  );
+
+  let minP = 0;
+  let cumulP = 0;
+
+  const Ptot = riskFile.cr4de_quanti[scenario].tp.yearly.scale;
+
+  for (const c of causes) {
+    cumulP += c.p / Ptot;
+
+    if (cumulP >= 0.805) {
+      minP = c.p;
+      break;
+    }
+  }
+
+  const selectedCauses = causes
+    .filter((c) => c.p >= minP)
+    .map((c) => ({
+      cause_risk_id: "id" in c ? c.id : "",
+      cause_risk_title: "id" in c ? c.name : "No underlying cause",
+      cause_risk_p: c.p / Ptot,
+    }));
+  const otherCauses =
+    selectedCauses.length < causes.length
+      ? [
+          {
+            cause_risk_id: "",
+            cause_risk_title: "Other causes",
+            cause_risk_p:
+              causes
+                .filter((c) => c.p < minP)
+                .reduce((otherP, c) => otherP + c.p, 0) / Ptot,
+            other_causes: showOther
+              ? causes
+                  .filter((c) => c.p < minP)
+                  .map((c) => ({
+                    cause_risk_id: "id" in c ? c.id : "",
+                    cause_risk_title:
+                      "id" in c ? c.name : "No underlying cause",
+                    cause_risk_p: c.p / Ptot,
+                  }))
+              : undefined,
+          },
+        ]
+      : [];
+
+  return [...selectedCauses, ...otherCauses];
+}
+
 export function getEffects(
   riskFile: SmallRisk,
   cascades: DVRiskCascade[],
@@ -358,6 +420,62 @@ export function getEffectsWithDINew(
       cascade: e,
     })),
   ];
+}
+
+export function getEffectsSummaries(
+  riskSnapshot: DVRiskSnapshot,
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>,
+  scenario: SCENARIOS,
+  showOther: boolean
+): EffectRisksSummary[] {
+  const effects = getEffectsWithDINew(riskSnapshot, cascades, scenario).sort(
+    (a, b) => b.i - a.i
+  );
+  const Itot = effects.reduce((tot, e) => tot + e.i, 0.000000001);
+
+  let minI = 0;
+  let cumulI = 0;
+  for (const e of effects) {
+    cumulI += e.i / Itot;
+
+    if (cumulI >= 0.8) {
+      minI = e.i;
+      break;
+    }
+  }
+
+  const selectedEffects = effects
+    .filter((e) => e.i >= minI)
+    .map((e) => ({
+      effect_risk_id: "id" in e ? e.id : "",
+      effect_risk_title: e.name,
+      effect_risk_i: e.i / Itot,
+    }));
+
+  const otherEffects =
+    selectedEffects.length < effects.length
+      ? [
+          {
+            effect_risk_id: "",
+            effect_risk_title: "Other effects",
+            effect_risk_i:
+              effects
+                .filter((c) => c.i < minI)
+                .reduce((otherI, c) => otherI + c.i, 0) / Itot,
+            other_effects: showOther
+              ? effects
+                  .filter((c) => c.i < minI)
+                  .map((e) => ({
+                    effect_risk_id: "id" in e ? e.id : "",
+                    effect_risk_title: e.name,
+                    effect_risk_i: e.i / Itot,
+                  }))
+              : undefined,
+          },
+        ]
+      : [];
+
+  return [...selectedEffects, ...otherEffects];
 }
 
 export function getCatalyzingEffects<T extends DVRiskCascade>(
