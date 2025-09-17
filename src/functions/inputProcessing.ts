@@ -31,7 +31,6 @@ export interface STATS {
 
 export enum PARAMETER {
   DP,
-  DP2050,
   H,
   S,
   E,
@@ -46,10 +45,10 @@ export const DIRECT_ANALYSIS_SECTIONS_STANDARD: {
     name: "dp",
     label: "Direct Probability",
   },
-  [PARAMETER.DP2050]: {
-    name: "dp50",
-    label: "Direct Probability 2050",
-  },
+  // [PARAMETER.DP2050]: {
+  //   name: "dp50",
+  //   label: "Direct Probability 2050",
+  // },
   [PARAMETER.H]: {
     name: "h",
     label: "Direct Human Impact",
@@ -323,7 +322,44 @@ export const getQuantiFieldNames = (
   );
 };
 
-export const quantiLabels = {};
+export function getSnapshotQuantiFieldNames(
+  p: PARAMETER
+): (
+  | "dp"
+  | "ha"
+  | "hb"
+  | "hc"
+  | "sa"
+  | "sb"
+  | "sc"
+  | "sd"
+  | "fa"
+  | "fb"
+  | "ea"
+)[] {
+  if (p === PARAMETER.DP) return ["dp"];
+  if (p === PARAMETER.H) return ["ha", "hb", "hc"];
+  if (p === PARAMETER.S) return ["sa", "sb", "sc", "sd"];
+  if (p === PARAMETER.E) return ["ea"];
+  if (p === PARAMETER.F) return ["fa", "fb"];
+  return [];
+}
+
+export const quantiLabels = {
+  dp: "Direct probability",
+  m: "Motivation",
+  ha: "Fatalities",
+  hb: "Injured / sick people",
+  hc: "People in need of assistance",
+  sa: "Supply shortfalls and unmet human needs",
+  sb: "Diminished public order and domestic security",
+  sc: "Damage to the reputation of Belgium",
+  sd: "Loss of confidence in or functioning of the state and/or its values",
+  ea: "Damaged ecosystems",
+  fa: "Financial asset damages",
+  fb: "Reduction of economic performance",
+  cb: "Cross-border effects",
+};
 
 export const getQuantiLabel = (
   fieldName: keyof DVDirectAnalysis,

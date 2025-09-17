@@ -21,7 +21,9 @@ import {
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import {
   DVRiskSnapshot,
+  SerializedRiskSnapshotQualis,
   SerializedRiskSnapshotResults,
+  serializeRiskSnapshotQualis,
   serializeRiskSnapshotResults,
 } from "../types/dataverse/DVRiskSnapshot";
 import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
@@ -37,7 +39,9 @@ import {
   getDamageIndicatorToCategoryImpactRatio,
 } from "./CategoryImpact";
 import { getAbsoluteImpact, getAbsoluteImpactFromFloat } from "./Impact";
-import { getAbsoluteProbability, getDPDailyProbability } from "./Probability";
+import { pAbsFromMScale3 } from "./indicators/motivation";
+import { returnPeriodMonthsFromPScale5 } from "./indicators/probability";
+import { getAbsoluteProbability } from "./Probability";
 import {
   getScenarioParameter,
   getScenarioSuffix,
@@ -61,7 +65,11 @@ const r = (v: number | null | undefined, p: number = 100) =>
 
 export function updateSnapshots(
   summaries: DVRiskSummary<unknown, UnparsedRiskFields>[],
-  riskSnapshots: DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>[],
+  riskSnapshots: DVRiskSnapshot<
+    unknown,
+    SerializedRiskSnapshotResults,
+    SerializedRiskSnapshotQualis
+  >[],
   cascadesSnapshots: DVCascadeSnapshot<
     unknown,
     unknown,
@@ -74,7 +82,11 @@ export function updateSnapshots(
 ): {
   updatedSummaries: Partial<DVRiskSummary<unknown, UnparsedRiskFields>>[];
   updatedRiskSnapshots: Partial<
-    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>
+    DVRiskSnapshot<
+      unknown,
+      SerializedRiskSnapshotResults,
+      SerializedRiskSnapshotQualis
+    >
   >[];
   updatedCascadesSnapshots: Partial<
     DVCascadeSnapshot<
@@ -89,13 +101,21 @@ export function updateSnapshots(
   const newSummaries: Partial<DVRiskSummary<unknown, UnparsedRiskFields>>[] =
     [];
   const newRiskSnapshots: Partial<
-    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>
+    DVRiskSnapshot<
+      unknown,
+      SerializedRiskSnapshotResults,
+      SerializedRiskSnapshotQualis
+    >
   >[] = [];
   const updatedSummaries: Partial<
     DVRiskSummary<unknown, UnparsedRiskFields>
   >[] = [];
   const updatedRiskSnapshots: Partial<
-    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>
+    DVRiskSnapshot<
+      unknown,
+      SerializedRiskSnapshotResults,
+      SerializedRiskSnapshotQualis
+    >
   >[] = [];
   const cascadeSnapshotDict: {
     [cascadeId: string]: Partial<
@@ -165,7 +185,11 @@ export function updateSnapshots(
 
 function updateSnapshot(
   summaries: DVRiskSummary<unknown, UnparsedRiskFields>[],
-  riskSnapshots: DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>[],
+  riskSnapshots: DVRiskSnapshot<
+    unknown,
+    SerializedRiskSnapshotResults,
+    SerializedRiskSnapshotQualis
+  >[],
   cascadesSnapshots: {
     [cascadeId: string]: Partial<
       DVCascadeSnapshot<
@@ -185,7 +209,11 @@ function updateSnapshot(
       (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid
     ) || {};
   const existingSnapshot: Partial<
-    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>
+    DVRiskSnapshot<
+      unknown,
+      SerializedRiskSnapshotResults,
+      SerializedRiskSnapshotQualis
+    >
   > =
     riskSnapshots.find(
       (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid
@@ -247,21 +275,30 @@ function updateSnapshot(
 function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
   return serializeRiskSnapshotResults({
     considerable: {
+      m: {
+        p: pAbsFromMScale3(
+          parseInt(riskFile.cr4de_dp_quanti_c?.replace("M", "") || "0")
+        ),
+        scale: parseInt(riskFile.cr4de_dp_quanti_c?.replace("M", "") || "0"),
+        scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.DP),
+      },
       dp: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.DP),
-        },
-        daily: {
-          abs: getDPDailyProbability(riskFile.cr4de_dp_quanti_c),
-        },
+        scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.DP),
+        rp: returnPeriodMonthsFromPScale5(
+          parseInt(riskFile.cr4de_dp_quanti_c?.replace("DP", "") || "0")
+        ),
+        scale: parseInt(riskFile.cr4de_dp_quanti_c?.replace("DP", "") || "0"),
       },
       dp50: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.DP50),
-        },
-        daily: {
-          abs: getDPDailyProbability(riskFile.cr4de_climate_change_quanti_c),
-        },
+        scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.DP),
+        rp: returnPeriodMonthsFromPScale5(
+          parseInt(
+            riskFile.cr4de_climate_change_quanti_c?.replace("DP", "") || "0"
+          )
+        ),
+        scale: parseInt(
+          riskFile.cr4de_climate_change_quanti_c?.replace("DP", "") || "0"
+        ),
       },
       tp: {
         yearly: {
@@ -530,21 +567,30 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
           scale: r(riskFile.results?.[SCENARIOS.MAJOR]?.TP50),
         },
       },
+      m: {
+        p: pAbsFromMScale3(
+          parseInt(riskFile.cr4de_dp_quanti_m?.replace("M", "") || "0")
+        ),
+        scale: parseInt(riskFile.cr4de_dp_quanti_m?.replace("M", "") || "0"),
+        scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.DP),
+      },
       dp: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.MAJOR]?.DP),
-        },
-        daily: {
-          abs: getDPDailyProbability(riskFile.cr4de_dp_quanti_m),
-        },
+        scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.DP),
+        rp: returnPeriodMonthsFromPScale5(
+          parseInt(riskFile.cr4de_dp_quanti_m?.replace("DP", "") || "0")
+        ),
+        scale: parseInt(riskFile.cr4de_dp_quanti_m?.replace("DP", "") || "0"),
       },
       dp50: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.MAJOR]?.DP50),
-        },
-        daily: {
-          abs: getDPDailyProbability(riskFile.cr4de_climate_change_quanti_m),
-        },
+        scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.DP),
+        rp: returnPeriodMonthsFromPScale5(
+          parseInt(
+            riskFile.cr4de_climate_change_quanti_m?.replace("DP", "") || "0"
+          )
+        ),
+        scale: parseInt(
+          riskFile.cr4de_climate_change_quanti_m?.replace("DP", "") || "0"
+        ),
       },
       ti: {
         all: {
@@ -793,21 +839,30 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
           scale: r(riskFile.results?.[SCENARIOS.EXTREME]?.TP50),
         },
       },
+      m: {
+        p: pAbsFromMScale3(
+          parseInt(riskFile.cr4de_dp_quanti_e?.replace("M", "") || "0")
+        ),
+        scale: parseInt(riskFile.cr4de_dp_quanti_e?.replace("M", "") || "0"),
+        scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.DP),
+      },
       dp: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.EXTREME]?.DP),
-        },
-        daily: {
-          abs: getDPDailyProbability(riskFile.cr4de_dp_quanti_e),
-        },
+        scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.DP),
+        rp: returnPeriodMonthsFromPScale5(
+          parseInt(riskFile.cr4de_dp_quanti_e?.replace("DP", "") || "0")
+        ),
+        scale: parseInt(riskFile.cr4de_dp_quanti_e?.replace("DP", "") || "0"),
       },
       dp50: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.EXTREME]?.DP50),
-        },
-        daily: {
-          abs: getDPDailyProbability(riskFile.cr4de_climate_change_quanti_e),
-        },
+        scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.DP),
+        rp: returnPeriodMonthsFromPScale5(
+          parseInt(
+            riskFile.cr4de_climate_change_quanti_e?.replace("DP", "") || "0"
+          )
+        ),
+        scale: parseInt(
+          riskFile.cr4de_climate_change_quanti_e?.replace("DP", "") || "0"
+        ),
       },
       ti: {
         all: {
@@ -1048,6 +1103,35 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
   });
 }
 
+function getSerializedQualiResults(riskFile: DVRiskFile) {
+  return serializeRiskSnapshotQualis({
+    considerable: {
+      dp: riskFile.cr4de_dp_quali_c || "",
+      h: riskFile.cr4de_di_quali_h_c || "",
+      s: riskFile.cr4de_di_quali_s_c || "",
+      e: riskFile.cr4de_di_quali_f_c || "",
+      f: riskFile.cr4de_di_quali_e_c || "",
+      cb: riskFile.cr4de_cross_border_impact_quali_c || "",
+    },
+    major: {
+      dp: riskFile.cr4de_dp_quali_m || "",
+      h: riskFile.cr4de_di_quali_h_m || "",
+      s: riskFile.cr4de_di_quali_s_m || "",
+      e: riskFile.cr4de_di_quali_f_m || "",
+      f: riskFile.cr4de_di_quali_e_m || "",
+      cb: riskFile.cr4de_cross_border_impact_quali_m || "",
+    },
+    extreme: {
+      dp: riskFile.cr4de_dp_quali_e || "",
+      h: riskFile.cr4de_di_quali_h_e || "",
+      s: riskFile.cr4de_di_quali_s_e || "",
+      e: riskFile.cr4de_di_quali_f_e || "",
+      f: riskFile.cr4de_di_quali_e_e || "",
+      cb: riskFile.cr4de_cross_border_impact_quali_e || "",
+    },
+  });
+}
+
 export function summaryFromRiskfile(
   riskFile: DVRiskFile,
   cascades: Cascades,
@@ -1204,7 +1288,11 @@ export function summaryFromRiskfile(
 
 export function snapshotFromRiskfile(
   riskFile: DVRiskFile
-): DVRiskSnapshot<DVRiskFile, SerializedRiskSnapshotResults> {
+): DVRiskSnapshot<
+  DVRiskFile,
+  SerializedRiskSnapshotResults,
+  SerializedRiskSnapshotQualis
+> {
   return {
     cr4de_bnrariskfilesnapshotid: "",
 
@@ -1246,6 +1334,7 @@ export function snapshotFromRiskfile(
     cr4de_quali_cc_mrs: riskFile.cr4de_mrs_cc,
 
     cr4de_quanti: getSerializedRiskSnapshotResults(riskFile),
+    cr4de_quali: getSerializedQualiResults(riskFile),
   };
 }
 

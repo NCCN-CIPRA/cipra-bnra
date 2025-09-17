@@ -14,17 +14,20 @@ export const riskSnapshotScenarioResultsMock: RiskSnapshotScenarioResults = {
       scale: 1, // Total probability of the scenario on the tp scale (0 - 5)
     },
   },
+  m: {
+    p: 1,
+    scale: 1,
+    scaleTot: 1,
+  },
   dp: {
-    yearly: {
-      scale: 1, // Total probability of the scenario on the tp scale (0 - 5)
-    },
-    daily: { abs: 1 },
+    scaleTot: 1,
+    rp: 1,
+    scale: 1,
   },
   dp50: {
-    yearly: {
-      scale: 1, // Total probability of the scenario on the tp scale (0 - 5)
-    },
-    daily: { abs: 1 },
+    scaleTot: 1,
+    rp: 1,
+    scale: 1,
   },
   ti: {
     all: {

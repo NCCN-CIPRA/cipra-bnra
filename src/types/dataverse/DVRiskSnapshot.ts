@@ -5,10 +5,20 @@ export type SerializedRiskSnapshotResults = string & {
   __json_seralized: RiskSnapshotResults;
 };
 
+export type SerializedRiskSnapshotQualis = string & {
+  __json_seralized: RiskSnapshotQualis;
+};
+
 export function serializeRiskSnapshotResults(
   quanti: RiskSnapshotResults
 ): SerializedRiskSnapshotResults {
   return JSON.stringify(quanti) as SerializedRiskSnapshotResults;
+}
+
+export function serializeRiskSnapshotQualis(
+  quali: RiskSnapshotQualis
+): SerializedRiskSnapshotQualis {
+  return JSON.stringify(quali) as SerializedRiskSnapshotQualis;
 }
 
 export function parseRiskSnapshot<T>(
@@ -20,14 +30,30 @@ export function parseRiskSnapshot<T>(
   };
 }
 
+export function parseRiskSnapshotQuali<T, S>(
+  snapshot: DVRiskSnapshot<T, S, SerializedRiskSnapshotQualis>
+): DVRiskSnapshot<T, S, RiskSnapshotQualis> {
+  return {
+    ...snapshot,
+    cr4de_quali: JSON.parse(snapshot.cr4de_quali),
+  };
+}
+
 export type DVRiskSnapshotQuantiType =
   | unknown
   | SerializedRiskSnapshotResults
   | RiskSnapshotResults;
 
+export type DVRiskSnapshotQualiType =
+  | never
+  | unknown
+  | SerializedRiskSnapshotQualis
+  | RiskSnapshotQualis;
+
 export type DVRiskSnapshot<
   RiskFileType = unknown,
-  QuantiType extends DVRiskSnapshotQuantiType = RiskSnapshotResults
+  QuantiType extends DVRiskSnapshotQuantiType = RiskSnapshotResults,
+  QualiType extends DVRiskSnapshotQualiType = SerializedRiskSnapshotQualis
 > = {
   cr4de_bnrariskfilesnapshotid: string;
 
@@ -61,6 +87,7 @@ export type DVRiskSnapshot<
   cr4de_quali_cc_mrs: string | null;
 
   cr4de_quanti: QuantiType;
+  cr4de_quali: QualiType;
 };
 
 export type RiskSnapshotResults = {
@@ -80,21 +107,20 @@ export type RiskSnapshotScenarioResults = {
       scale: number; // Total probability of the scenario on the tp scale (0 - 5)
     };
   };
+  m: {
+    p: number; // Absolute probability
+    scale: number; // Motivation of the actor on the m scale (0 - 3)
+    scaleTot: number; // Direct probability of the scenario on the tp scale (0 - 5)
+  };
   dp: {
-    yearly: {
-      scale: number; // Direct probability of the scenario on the tp scale (0 - 5)
-    };
-    daily: {
-      abs: number; // Direct daily probability in absolute terms (0 - 1)
-    };
+    rp: number; // Return period
+    scale: number; // Direct probability of the scenario on the dp scale (0 - 5)
+    scaleTot: number; // Direct probability of the scenario on the tp scale (0 - 5)
   };
   dp50: {
-    yearly: {
-      scale: number; // Direct probability in 2050 of the scenario on the tp scale (0 - 5)
-    };
-    daily: {
-      abs: number; // Direct daily probability in 2050 in absolute terms (0 - 1)
-    };
+    rp: number; // Return period
+    scale: number; // Direct probability of the scenario on the dp scale (0 - 5)
+    scaleTot: number; // Direct probability of the scenario on the tp scale (0 - 5)
   };
   ti: {
     all: {
@@ -215,4 +241,19 @@ export type RiskSnapshotScenarioResults = {
       abs: number; // Absolute impact in €
     };
   };
+};
+
+export type RiskSnapshotQualis = {
+  [SCENARIOS.CONSIDERABLE]: RiskSnapshotScenarioQualis;
+  [SCENARIOS.MAJOR]: RiskSnapshotScenarioQualis;
+  [SCENARIOS.EXTREME]: RiskSnapshotScenarioQualis;
+};
+
+export type RiskSnapshotScenarioQualis = {
+  dp: string;
+  h: string;
+  s: string;
+  e: string;
+  f: string;
+  cb: string;
 };

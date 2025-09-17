@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { Box, Stack, Paper, Link, Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
 import MuiAccordionSummary, {
   AccordionSummaryProps,
@@ -9,28 +8,40 @@ import MuiAccordionSummary, {
 import MuiAccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import {
-  SCENARIOS,
-  SCENARIO_PARAMS,
-  getScenarioSuffix,
-} from "../../functions/scenarios";
-import {
-  DIRECT_ANALYSIS_SECTIONS_STANDARD,
   PARAMETER,
-  getQualiFieldName,
-  getQuantiFieldNames,
+  DIRECT_ANALYSIS_SECTIONS_STANDARD,
+  getSnapshotQuantiFieldNames,
+  quantiLabels,
 } from "../../functions/inputProcessing";
 import ErrorIcon from "@mui/icons-material/Error";
 import { DiscussionRequired } from "../../types/DiscussionRequired";
-import { Slider } from "./Slider";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { CascadeSnapshotMatrix } from "./CascadeMatrix";
 import TornadoIcon from "@mui/icons-material/Tornado";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
-import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import {
+  DVRiskSnapshot,
+  parseRiskSnapshotQuali,
+  RiskSnapshotQualis,
+  RiskSnapshotResults,
+  RiskSnapshotScenarioQualis,
+} from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { BasePageContext } from "../BasePage";
+import { Slider } from "./Slider";
+import { getImpactScaleFloat } from "../../functions/Impact";
+
+const QUALI_FIELDS = {
+  [PARAMETER.DP]: "dp",
+  [PARAMETER.H]: "h",
+  [PARAMETER.S]: "s",
+  [PARAMETER.E]: "e",
+  [PARAMETER.F]: "f",
+  [PARAMETER.CB]: "cb",
+};
 
 const capFirst = (s: string) => {
   return `${s[0].toUpperCase()}${s.slice(1)}`;
@@ -93,6 +104,8 @@ export default function Standard({
   // reloadRiskFile: () => Promise<unknown>;
   // reloadCascades: () => Promise<unknown>;
 }) {
+  const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
+
   return (
     <>
       <Box sx={{ mx: 4 }}>
@@ -107,42 +120,42 @@ export default function Standard({
         )} */}
         <Box sx={{ mb: 8 }}>
           <ParameterSection
-            riskFile={riskFile}
+            riskFile={parsedRiskFile}
             parameter={PARAMETER.DP}
             // directAnalyses={directAnalyses}
             // cascadeAnalyses={cascadeAnalyses}
             // reloadRiskFile={reloadRiskFile}
           />
           <ParameterSection
-            riskFile={riskFile}
+            riskFile={parsedRiskFile}
             parameter={PARAMETER.H}
             // directAnalyses={directAnalyses}
             // cascadeAnalyses={cascadeAnalyses}
             // reloadRiskFile={reloadRiskFile}
           />
           <ParameterSection
-            riskFile={riskFile}
+            riskFile={parsedRiskFile}
             parameter={PARAMETER.S}
             // directAnalyses={directAnalyses}
             // cascadeAnalyses={cascadeAnalyses}
             // reloadRiskFile={reloadRiskFile}
           />
           <ParameterSection
-            riskFile={riskFile}
+            riskFile={parsedRiskFile}
             parameter={PARAMETER.E}
             // directAnalyses={directAnalyses}
             // cascadeAnalyses={cascadeAnalyses}
             // reloadRiskFile={reloadRiskFile}
           />
           <ParameterSection
-            riskFile={riskFile}
+            riskFile={parsedRiskFile}
             parameter={PARAMETER.F}
             // directAnalyses={directAnalyses}
             // cascadeAnalyses={cascadeAnalyses}
             // reloadRiskFile={reloadRiskFile}
           />
           <ParameterSection
-            riskFile={riskFile}
+            riskFile={parsedRiskFile}
             parameter={PARAMETER.CB}
             // directAnalyses={directAnalyses}
             // cascadeAnalyses={cascadeAnalyses}
@@ -200,7 +213,7 @@ function ParameterSection({
 // cascadeAnalyses,
 // reloadRiskFile,
 {
-  riskFile: DVRiskSnapshot;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, RiskSnapshotQualis>;
   parameter: PARAMETER;
   // directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   // cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
@@ -321,7 +334,7 @@ function ScenarioSection({
 }: // directAnalyses,
 // reloadRiskFile,
 {
-  riskFile: DVRiskSnapshot;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, RiskSnapshotQualis>;
   parameter: PARAMETER;
   scenario: SCENARIOS;
   // directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
@@ -330,7 +343,7 @@ function ScenarioSection({
 }) {
   // const api = useAPI();
   const { user } = useOutletContext<BasePageContext>();
-  const section = DIRECT_ANALYSIS_SECTIONS_STANDARD[parameter];
+  // const section = DIRECT_ANALYSIS_SECTIONS_STANDARD[parameter];
   const discussionRequired = useMemo(() => {
     return DiscussionRequired.NOT_NECESSARY;
     // if (!riskFile.cr4de_discussion_required) return false;
@@ -347,19 +360,21 @@ function ScenarioSection({
   );
   // const [saving, setSaving] = useState(false);
 
-  const qualiName = useMemo(
-    () => getQualiFieldName(scenario, section),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [scenario, parameter]
-  );
+  // const qualiName = useMemo(
+  //   () => getQualiFieldName(scenario, section),
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  //   [scenario, parameter]
+  // );
   const quantiNames = useMemo(
-    () => getQuantiFieldNames(scenario, section) as (keyof DVRiskFile)[],
+    () => getSnapshotQuantiFieldNames(parameter),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [scenario, parameter]
   );
 
   const [quali] = useState<string | null>(
-    (riskFile[qualiName as keyof DVRiskSnapshot] as string | null) || ""
+    (riskFile.cr4de_quali[scenario][
+      QUALI_FIELDS[parameter] as keyof RiskSnapshotScenarioQualis
+    ] as string | null) || ""
   );
 
   // const handleSave = async () => {
@@ -376,7 +391,7 @@ function ScenarioSection({
   //   setSaving(false);
   //   setOpen(false);
   // };
-
+  console.log(riskFile);
   return (
     <Stack
       direction="column"
@@ -439,13 +454,10 @@ function ScenarioSection({
 
             {quantiNames.length > 0 && (
               <Stack direction="column" sx={{ mt: 2 }}>
-                {/* {quantiNames.map((n) => (
+                {quantiNames.map((n) => (
                   <Stack key={n} direction="row" sx={{ alignItems: "center" }}>
                     <Typography variant="caption" sx={{ flex: 1 }}>
-                      <i>
-                        {getQuantiLabel(n as keyof DVDirectAnalysis, riskFile)}
-                      </i>{" "}
-                      Estimation:
+                      <i>{quantiLabels[n]}</i> Estimation:
                     </Typography>
                     <Box
                       sx={{
@@ -455,41 +467,47 @@ function ScenarioSection({
                         fontWeight: "bold",
                       }}
                     >
-                      {riskFile.cr4de_consensus_type !== null ? (
-                        <Slider
-                          initialValue={
-                            riskFile[n as keyof DVRiskFile] as string
-                          }
-                          name={n}
-                          spread={
-                            // user.roles.analist
-                            //   ? getDASpread(
-                            //       directAnalyses,
-                            //       n as keyof DVDirectAnalysis
-                            //     )
-                            //   : null
-                            null
-                          }
-                          onChange={
-                            // user.roles.analist
-                            //   ? async (newValue) => {
-                            //       await api.updateRiskFile(
-                            //         riskFile.cr4de_riskfilesid,
-                            //         {
-                            //           [n]: newValue,
-                            //         }
-                            //       );
-                            //     }
-                            //   : null
-                            null
-                          }
-                        />
-                      ) : (
+                      {/* {riskFile.cr4de_consensus_type !== null ? ( */}
+                      <Slider
+                        initialValue={
+                          n === "dp"
+                            ? riskFile.cr4de_quanti[scenario].dp.scale
+                            : getImpactScaleFloat(
+                                riskFile.cr4de_quanti[scenario].di[n].abs,
+                                1
+                              )
+                        }
+                        prefix={n === "dp" ? n.toUpperCase() : capFirst(n)}
+                        maxScale={5}
+                        // spread={
+                        //   // user.roles.analist
+                        //   //   ? getDASpread(
+                        //   //       directAnalyses,
+                        //   //       n as keyof DVDirectAnalysis
+                        //   //     )
+                        //   //   : null
+                        //   null
+                        // }
+                        // onChange={
+                        // user.roles.analist
+                        //   ? async (newValue) => {
+                        //       await api.updateRiskFile(
+                        //         riskFile.cr4de_riskfilesid,
+                        //         {
+                        //           [n]: newValue,
+                        //         }
+                        //       );
+                        //     }
+                        //   : null
+                        //   null
+                        // }
+                      />
+                      {/* ) : (
                         <Typography variant="subtitle2">N/A</Typography>
-                      )}
+                      )} */}
                     </Box>
                   </Stack>
-                ))} */}
+                ))}
               </Stack>
             )}
           </Box>
@@ -1005,8 +1023,7 @@ function CCSection({
                               position: "absolute",
                               top: -18,
                               left: `calc(${
-                                (riskFile.cr4de_quanti[n].dp50.yearly.scale +
-                                  0) *
+                                (riskFile.cr4de_quanti[n].dp50.scale + 0) *
                                 18.18
                               }% - 15px)`,
                               width: 30,
@@ -1021,37 +1038,37 @@ function CCSection({
                           </Box>
                         </Tooltip>
                         <Slider
-                          mx={0}
-                          initialValue={
-                            "DP" + riskFile.cr4de_quanti[n].dp50.yearly.scale
-                          }
-                          name={`cr4de_climate_change_quanti${getScenarioSuffix(
-                            n
-                          )}`}
-                          spread={
-                            // user.roles.analist
-                            //   ? getDASpread(
-                            //       directAnalyses,
-                            //       `cr4de_dp50_quanti${n.slice(
-                            //         -2
-                            //       )}` as keyof DVDirectAnalysis
-                            //     )
-                            //   : null
-                            null
-                          }
-                          onChange={
-                            // user.roles.analist
-                            //   ? async (newValue) => {
-                            //       await api.updateRiskFile(
-                            //         riskFile.cr4de_riskfilesid,
-                            //         {
-                            //           [n]: newValue,
-                            //         }
-                            //       );
-                            //     }
-                            //   : null
-                            null
-                          }
+                          // mx={0}
+                          initialValue={riskFile.cr4de_quanti[n].dp50.scale}
+                          prefix={"DP"}
+                          maxScale={5}
+                          // name={`cr4de_climate_change_quanti${getScenarioSuffix(
+                          //   n
+                          // )}`}
+                          // spread={
+                          //   // user.roles.analist
+                          //   //   ? getDASpread(
+                          //   //       directAnalyses,
+                          //   //       `cr4de_dp50_quanti${n.slice(
+                          //   //         -2
+                          //   //       )}` as keyof DVDirectAnalysis
+                          //   //     )
+                          //   //   : null
+                          //   null
+                          // }
+                          // onChange={
+                          // user.roles.analist
+                          //   ? async (newValue) => {
+                          //       await api.updateRiskFile(
+                          //         riskFile.cr4de_riskfilesid,
+                          //         {
+                          //           [n]: newValue,
+                          //         }
+                          //       );
+                          //     }
+                          //   : null
+                          //   null
+                          // }
                         />
                       </Box>
                       {/* ) : (

@@ -198,7 +198,7 @@ export function getCausesWithDPNew(
   return [
     {
       name: "2A.dp.title",
-      p: riskFile.cr4de_quanti[scenario].dp.yearly.scale,
+      p: riskFile.cr4de_quanti[scenario].dp.scaleTot,
     },
     ...cascades.causes.map((c) => ({
       id: c.cr4de_cause_risk._cr4de_risk_file_value,

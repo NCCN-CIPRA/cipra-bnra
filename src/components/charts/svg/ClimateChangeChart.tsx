@@ -65,12 +65,12 @@ export default function ClimateChangeChart({
     const enhCauses = [
       {
         name: "No underlying cause",
-        p_c: riskFile.cr4de_quanti.considerable.dp.yearly.scale,
-        p2050_c: riskFile.cr4de_quanti.considerable.dp50.yearly.scale,
-        p_m: riskFile.cr4de_quanti.major.dp.yearly.scale,
-        p2050_m: riskFile.cr4de_quanti.major.dp50.yearly.scale,
-        p_e: riskFile.cr4de_quanti.extreme.dp.yearly.scale,
-        p2050_e: riskFile.cr4de_quanti.extreme.dp50.yearly.scale,
+        p_c: riskFile.cr4de_quanti.considerable.dp.scaleTot,
+        p2050_c: riskFile.cr4de_quanti.considerable.dp50.scaleTot,
+        p_m: riskFile.cr4de_quanti.major.dp.scaleTot,
+        p2050_m: riskFile.cr4de_quanti.major.dp50.scaleTot,
+        p_e: riskFile.cr4de_quanti.extreme.dp.scaleTot,
+        p2050_e: riskFile.cr4de_quanti.extreme.dp50.scaleTot,
       },
       ...(causes
         .filter((c) => c.cr4de_quanti_cause[scenario].ip50.yearly.scale !== 0)

@@ -43,8 +43,8 @@ export default function SnapshotTab() {
     setAction("Saving snapshots: 0%");
 
     const doSummaries = false;
-    const doRisks = false;
-    const doCascades = true;
+    const doRisks = true;
+    const doCascades = false;
 
     let maxProgress = 0;
     if (doSummaries) maxProgress += res.updatedSummaries.length;

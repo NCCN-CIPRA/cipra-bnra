@@ -23,6 +23,7 @@ import { DVAnalysisRun } from "../types/dataverse/DVAnalysisRun";
 import { getCascadeResultSnapshot } from "./snapshot";
 import {
   DVRiskSnapshot,
+  SerializedRiskSnapshotQualis,
   SerializedRiskSnapshotResults,
 } from "../types/dataverse/DVRiskSnapshot";
 import {
@@ -92,11 +93,23 @@ export interface API {
     query?: string
   ): Promise<T>;
   createRiskSnapshot(
-    fields: Partial<DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>>
+    fields: Partial<
+      DVRiskSnapshot<
+        unknown,
+        SerializedRiskSnapshotResults,
+        SerializedRiskSnapshotQualis
+      >
+    >
   ): Promise<CreateResponse>;
   updateRiskSnapshot(
     id: string,
-    fields: Partial<DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>>
+    fields: Partial<
+      DVRiskSnapshot<
+        unknown,
+        SerializedRiskSnapshotResults,
+        SerializedRiskSnapshotQualis
+      >
+    >
   ): Promise<void>;
   deleteRiskSnapshot(id: string): Promise<void>;
 
