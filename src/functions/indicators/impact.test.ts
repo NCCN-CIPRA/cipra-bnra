@@ -116,7 +116,7 @@ describe("DI5-Scale Conversion Functions", () => {
 });
 
 describe("5 <-> 7 Conversion Functions", () => {
-  test.only("round trips should return identity", () => {
+  test("round trips should return identity", () => {
     expect(tiScale5to7(tiScale7to5(2.5))).toBeCloseTo(2.5);
     expect(diScale5to7(diScale7to5(2.5))).toBeCloseTo(2.5);
   });
