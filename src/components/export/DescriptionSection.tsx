@@ -14,20 +14,21 @@ import {
 } from "./styles";
 import html2PDF from "../../functions/html2pdf";
 import { Trans } from "react-i18next";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import Header from "./Header";
 import { unwrap as unwrapHE } from "../../functions/historicalEvents";
 import { colors } from "../../functions/getCategoryColor";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import LeftBorderSection from "./LeftBorderSection";
 import { BLACK } from "../../functions/colors";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 // import { LoggedInUser } from "../../hooks/useLoggedInUser";
 
 export default function DescriptionSection({
   riskFile,
   scenarioChart,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot;
   // user: LoggedInUser | null | undefined;
   scenarioChart: string;
 }) {
@@ -38,7 +39,7 @@ export default function DescriptionSection({
   const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
 
   const mrs_description = html2PDF(
-    riskFile.cr4de_mrs_scenario,
+    riskFile.cr4de_quali_scenario_mrs,
     "description",
     riskFile
   );

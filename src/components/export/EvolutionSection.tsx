@@ -12,18 +12,18 @@ import {
 } from "./styles";
 import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { BLACK } from "../../functions/colors";
 import Header from "./Header";
-import { Cascades } from "../../functions/cascades";
+import { CascadeSnapshots } from "../../functions/cascades";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 
 export default function EvolutionSection({
   riskFile,
   cascades,
   climateChangeChart,
 }: {
-  riskFile: DVRiskFile;
-  cascades: Cascades;
+  riskFile: DVRiskSnapshot;
+  cascades: CascadeSnapshots<DVRiskSnapshot>;
   climateChangeChart: string;
 }) {
   const { t } = useTranslation();
@@ -71,7 +71,7 @@ export default function EvolutionSection({
           }}
           // debug={true}
         />
-        {html2PDF(riskFile.cr4de_mrs_cc, "evolution", riskFile)}
+        {html2PDF(riskFile.cr4de_quali_cc_mrs, "evolution", riskFile)}
       </View>
 
       <View
@@ -86,7 +86,7 @@ export default function EvolutionSection({
         </Text>
         {cascades.catalyzingEffects.map((c) => (
           <View
-            key={c.cr4de_bnrariskcascadeid}
+            key={c._cr4de_risk_cascade_value}
             style={{ marginBottom: 10 * SCALE }}
           >
             <Text
@@ -96,7 +96,7 @@ export default function EvolutionSection({
                 marginBottom: 2 * SCALE,
               }}
             >
-              {c.cr4de_cause_hazard.cr4de_title}
+              {c.cr4de_cause_risk.cr4de_title}
             </Text>
             {html2PDF(c.cr4de_description, "evolution", riskFile)}
           </View>

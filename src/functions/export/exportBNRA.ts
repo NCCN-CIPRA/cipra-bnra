@@ -1,52 +1,95 @@
-import { EXPORT_TYPE, exportBNRA } from "../../functions/export/export.worker";
+import { EXPORT_TYPE } from "../../functions/export/export.worker";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { saveAs } from "file-saver";
 import { API } from "../../functions/api";
-import ExportWorker from "./export.worker?worker&inline";
+import workerUrl from "./export.worker?worker&url";
+import type { ExportBNRAWorker } from "../../functions/export/export.worker";
 import "../../components/export/fonts";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-
-interface ExporterWorker {
-  exportBNRA: typeof exportBNRA;
-}
+import { Environment } from "../../types/global";
+import {
+  DVRiskSnapshot,
+  parseRiskSnapshot,
+} from "../../types/dataverse/DVRiskSnapshot";
+import { getParsedCascadeSnapshots, getRiskCascades } from "../cascades";
+import {
+  getParsedRiskCatalogue,
+  getRiskCatalogueFromSnapshots,
+  getRiskFileCatalogue,
+} from "../riskfiles";
+import {
+  snapshotFromRiskCascade,
+  snapshotFromRiskfile,
+  summaryFromRiskfile,
+} from "../snapshot";
+import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
+import {
+  linkCascadeSnapshot,
+  parseCascadeSnapshot,
+} from "../../types/dataverse/DVRiskCascade";
 
 export function getExporter() {
-  if (window.location.href.indexOf("localhost") >= 0) {
-    return new ComlinkWorker<ExporterWorker>(
-      new URL("./export.worker", import.meta.url),
-      {
-        type: "module",
-      }
-    );
-  }
+  const jsWorker = `import ${JSON.stringify(
+    new URL(workerUrl, import.meta.url)
+  )}`;
+  const blobWorker = new Blob([jsWorker], { type: "application/javascript" });
+  const ww = new Worker(URL.createObjectURL(blobWorker), { type: "module" });
+  const worker = wrap<ExportBNRAWorker>(ww);
 
-  return wrap<ExporterWorker>(new ExportWorker());
+  return worker;
 }
 
 export default function handleExportRiskfile(
-  risk: DVRiskSummary | DVRiskFile,
-  api: API
+  risk: DVRiskSummary,
+  api: API,
+  environment: Environment
 ) {
   return async (onProgress?: (message: string) => void) => {
     if (onProgress) onProgress("Loading data");
 
-    const riskFileId =
-      "_cr4de_risk_file_value" in risk
-        ? risk._cr4de_risk_file_value
-        : risk.cr4de_riskfilesid;
+    let riskSummaries: DVRiskSummary[],
+      riskSnapshots: DVRiskSnapshot[],
+      cascadeSnapshots: DVCascadeSnapshot<
+        unknown,
+        DVRiskSnapshot,
+        DVRiskSnapshot
+      >[];
 
-    const riskFile =
-      "_cr4de_risk_file_value" in risk
-        ? await api.getRiskFile(riskFileId)
-        : risk;
-    const riskFiles = await api.getRiskFiles(
-      "$select=cr4de_riskfilesid,cr4de_title,cr4de_hazard_id,cr4de_risk_type"
-    );
-    const cascades = await api.getRiskCascades(
-      `$filter=_cr4de_cause_hazard_value eq '${riskFileId}' or _cr4de_effect_hazard_value eq '${riskFileId}'`
-    );
+    if (environment == Environment.PUBLIC) {
+      riskSummaries = await api.getRiskSummaries();
+      riskSnapshots = await api.getRiskSnapshots();
+      const hc = getRiskCatalogueFromSnapshots(riskSnapshots);
+
+      cascadeSnapshots = getParsedCascadeSnapshots(
+        await api.getCascadeSnapshots(),
+        hc
+      );
+    } else {
+      const riskFiles = await api.getRiskFiles();
+      const rc = getRiskFileCatalogue(riskFiles);
+      const cascades = await api.getRiskCascades();
+      const baseCascadesCatalogue = getRiskCascades(
+        rc[risk._cr4de_risk_file_value],
+        cascades,
+        rc
+      );
+      riskSummaries = riskFiles.map((rf) =>
+        summaryFromRiskfile(rf, baseCascadesCatalogue)
+      );
+      riskSnapshots = riskFiles.map((rf) =>
+        parseRiskSnapshot(snapshotFromRiskfile(rf))
+      );
+      const rsc = getParsedRiskCatalogue(riskFiles);
+
+      cascadeSnapshots = cascades.map((c) =>
+        linkCascadeSnapshot(
+          parseCascadeSnapshot(snapshotFromRiskCascade(c)),
+          rsc
+        )
+      );
+    }
+
     const attachments = await api
       .getAttachments<DVAttachment<unknown, DVAttachment>>(
         `$orderby=cr4de_reference&$filter=cr4de_reference ne null&$expand=cr4de_referencedSource`
@@ -69,9 +112,10 @@ export default function handleExportRiskfile(
     const blob = await exporter.exportBNRA(
       {
         exportType: EXPORT_TYPE.SINGLE,
-        exportedRiskFiles: [riskFile],
-        riskFiles: riskFiles,
-        allCascades: cascades,
+        exportedRiskFiles: [risk],
+        riskFiles: riskSummaries,
+        riskSnapshots: riskSnapshots,
+        allCascades: cascadeSnapshots,
         allAttachments: attachments,
       },
       proxy(onProgress || (() => {}))

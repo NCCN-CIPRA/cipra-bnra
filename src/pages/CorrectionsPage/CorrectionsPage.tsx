@@ -18,10 +18,7 @@ import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import useRecords from "../../hooks/useRecords";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import {
-  DVRiskCascade,
-  getCascadeResultSnapshot,
-} from "../../types/dataverse/DVRiskCascade";
+import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import {
   getResultSnapshot,
   SmallRisk,
@@ -42,6 +39,7 @@ import {
   getDirectImpact,
   getIndirectImpact,
 } from "../../functions/Impact";
+import { getCascadeResultSnapshot } from "../../functions/snapshot";
 
 const replacements: string[][] = [
   ["Animal diseases \\(not zoonoses\\)", "Animal diseases excluding zoonoses"],

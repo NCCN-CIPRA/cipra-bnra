@@ -1,15 +1,15 @@
 import * as xlsx from "xlsx";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { getScenarioParameter, SCENARIOS } from "../scenarios";
+import { SCENARIOS } from "../scenarios";
 import {
-  Cascades,
-  getCascades,
-  getCausesWithDP,
-  getEffectsWithDI,
+  CascadeSnapshotCatalogue,
+  CascadeSnapshots,
+  getCausesWithDPNew,
+  getEffectsWithDINew,
 } from "../cascades";
-import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { t } from "i18next";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { RiskCatalogue } from "../riskfiles";
 
 export enum Pareto {
   SIGNIFICANT = "significant",
@@ -55,37 +55,20 @@ export type ExcelEffect = {
 
 export default function exportExcel({
   exportedRiskFiles,
-  riskFiles,
-  allCascades,
+  riskSnapshots,
+  cascadeCatalogue,
 }: {
-  exportedRiskFiles: DVRiskFile[];
-  riskFiles: DVRiskFile[];
-  allCascades: DVRiskCascade[];
+  exportedRiskFiles: DVRiskSummary[];
+  riskSnapshots: RiskCatalogue;
+  cascadeCatalogue: CascadeSnapshotCatalogue<DVRiskSnapshot, DVRiskSnapshot>;
 }) {
-  const hc: { [key: string]: DVRiskFile } = riskFiles.reduce(
-    (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),
-    {}
-  );
-  const riskCascades: DVRiskCascade<SmallRisk, SmallRisk>[] = allCascades.map(
-    (c) => ({
-      ...c,
-      cr4de_cause_hazard: hc[c._cr4de_cause_hazard_value],
-      cr4de_effect_hazard: hc[c._cr4de_effect_hazard_value],
-    })
-  );
-
-  const cascades: { [key: string]: Cascades } = riskFiles.reduce(
-    (acc, rf) => getCascades(rf, acc, hc)(riskCascades),
-    {}
-  );
-
   const workbook = xlsx.utils.book_new();
 
   for (const riskFile of exportedRiskFiles) {
     addRiskFile({
       workbook,
-      riskFile,
-      cascades: cascades[riskFile.cr4de_riskfilesid],
+      riskSnapshot: riskSnapshots[riskFile._cr4de_risk_file_value],
+      cascades: cascadeCatalogue[riskFile._cr4de_risk_file_value],
     });
   }
   const excelBuffer = xlsx.write(workbook, { bookType: "xlsx", type: "array" });
@@ -96,40 +79,38 @@ export default function exportExcel({
 
 function addRiskFile({
   workbook,
-  riskFile,
+  riskSnapshot,
   cascades,
 }: {
   workbook: xlsx.WorkBook;
-  riskFile: DVRiskFile;
-  cascades: Cascades;
+  riskSnapshot: DVRiskSnapshot;
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
 }) {
-  const causes = getCauses(riskFile, cascades);
-  const effects = getEffects(riskFile, cascades);
+  const causes = getCauses(riskSnapshot, cascades);
+  const effects = getEffects(riskSnapshot, cascades);
 
   const PSheet = xlsx.utils.json_to_sheet(causes);
   xlsx.utils.book_append_sheet(
     workbook,
     PSheet,
-    `P - ${riskFile.cr4de_hazard_id}`
+    `P - ${riskSnapshot.cr4de_hazard_id}`
   );
 
   const ISheet = xlsx.utils.json_to_sheet(effects);
   xlsx.utils.book_append_sheet(
     workbook,
     ISheet,
-    `I - ${riskFile.cr4de_hazard_id}`
+    `I - ${riskSnapshot.cr4de_hazard_id}`
   );
 }
 
 function getCauses(
-  riskFile: DVRiskFile<unknown>,
-  cascades: Cascades
+  riskSnapshot: DVRiskSnapshot,
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>
 ): ExcelCause[] {
-  if (!riskFile.results) throw new Error("No result snapshot");
-
   return [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].reduce(
     (acc, s) => {
-      const causes = getCausesWithDP(riskFile, cascades, s);
+      const causes = getCausesWithDPNew(riskSnapshot, cascades, s);
 
       return [
         ...acc,
@@ -155,16 +136,14 @@ function getCauses(
             causeId: "id" in c ? c.id : "Direct Probability",
             causeTitle: t(c.name),
             pareto:
-              c.pCumul <=
-              0.8 * (getScenarioParameter(riskFile, "TP", s) || 0.001)
+              c.pCumul <= 0.8 * riskSnapshot.cr4de_quanti[s].tp.yearly.scale
                 ? Pareto.SIGNIFICANT
                 : Pareto.OTHER,
             pRank: i + 1,
             pAbs: Math.round(100000 * c.p) / 100000,
             pPerc:
               Math.round(
-                (100000 * c.p) /
-                  (getScenarioParameter(riskFile, "TP", s) || 0.001)
+                (100000 * c.p) / riskSnapshot.cr4de_quanti[s].tp.yearly.scale
               ) / 100000,
           }))
           .sort((a, b) => a.pRank - b.pRank),
@@ -174,12 +153,13 @@ function getCauses(
   );
 }
 
-function getEffects(riskFile: DVRiskFile, cascades: Cascades): ExcelEffect[] {
-  if (!riskFile.results) throw new Error("No result snapshot");
-
+function getEffects(
+  riskSnapshot: DVRiskSnapshot,
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>
+): ExcelEffect[] {
   return [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].reduce(
     (acc, s) => {
-      const effects = getEffectsWithDI(riskFile, cascades, s);
+      const effects = getEffectsWithDINew(riskSnapshot, cascades, s);
 
       return [
         ...acc,
@@ -247,64 +227,54 @@ function getEffects(riskFile: DVRiskFile, cascades: Cascades): ExcelEffect[] {
             effectId: "id" in e ? e.id : "Direct Impact",
             effectTitle: t(e.name),
             iTotPareto:
-              e.iTotCumul <=
-              0.8 * (getScenarioParameter(riskFile, "TI", s) || 0.001)
+              e.iTotCumul <= 0.8 * riskSnapshot.cr4de_quanti[s].ti.all.scaleTot
                 ? Pareto.SIGNIFICANT
                 : Pareto.OTHER,
             iTotRank: i + 1,
             iTotAbs: Math.round(100000 * e.iTot) / 100000,
             iTotPerc:
               Math.round(
-                (100000 * e.iTot) /
-                  (getScenarioParameter(riskFile, "TI", s) || 0.001)
+                (100000 * e.iTot) / riskSnapshot.cr4de_quanti[s].ti.all.scaleTot
               ) / 100000,
             iHPareto:
-              e.iHCumul <=
-              0.8 * (getScenarioParameter(riskFile, "TI_H", s) || 0.001)
+              e.iHCumul <= 0.8 * riskSnapshot.cr4de_quanti[s].ti.h.scaleTot
                 ? Pareto.SIGNIFICANT
                 : Pareto.OTHER,
             iHRank: i + 1,
             iHAbs: Math.round(100000 * e.iTot) / 100000,
             iHPerc:
               Math.round(
-                (100000 * e.iH) /
-                  (getScenarioParameter(riskFile, "TI_H", s) || 0.001)
+                (100000 * e.iH) / riskSnapshot.cr4de_quanti[s].ti.h.scaleTot
               ) / 100000,
             iSPareto:
-              e.iSCumul <=
-              0.8 * (getScenarioParameter(riskFile, "TI_S", s) || 0.001)
+              e.iSCumul <= 0.8 * riskSnapshot.cr4de_quanti[s].ti.s.scaleTot
                 ? Pareto.SIGNIFICANT
                 : Pareto.OTHER,
             iSRank: 0,
             iSAbs: Math.round(100000 * e.iS) / 100000,
             iSPerc:
               Math.round(
-                (100000 * e.iS) /
-                  (getScenarioParameter(riskFile, "TI_S", s) || 0.001)
+                (100000 * e.iS) / riskSnapshot.cr4de_quanti[s].ti.s.scaleTot
               ) / 100000,
             iEPareto:
-              e.iECumul <=
-              0.8 * (getScenarioParameter(riskFile, "TI_E", s) || 0.001)
+              e.iECumul <= 0.8 * riskSnapshot.cr4de_quanti[s].ti.e.scaleTot
                 ? Pareto.SIGNIFICANT
                 : Pareto.OTHER,
             iERank: 0,
             iEAbs: Math.round(100000 * e.iE) / 100000,
             iEPerc:
               Math.round(
-                (100000 * e.iE) /
-                  (getScenarioParameter(riskFile, "TI_E", s) || 0.001)
+                (100000 * e.iE) / riskSnapshot.cr4de_quanti[s].ti.e.scaleTot
               ) / 100000,
             iFPareto:
-              e.iFCumul <=
-              0.8 * (getScenarioParameter(riskFile, "TI_F", s) || 0.001)
+              e.iFCumul <= 0.8 * riskSnapshot.cr4de_quanti[s].ti.f.scaleTot
                 ? Pareto.SIGNIFICANT
                 : Pareto.OTHER,
             iFRank: 0,
             iFAbs: Math.round(100000 * e.iF) / 100000,
             iFPerc:
               Math.round(
-                (100000 * e.iF) /
-                  (getScenarioParameter(riskFile, "TI_F", s) || 0.001)
+                (100000 * e.iF) / riskSnapshot.cr4de_quanti[s].ti.f.scaleTot
               ) / 100000,
           }))
           .sort((a, b) => a.iTotRank - b.iTotRank),

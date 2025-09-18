@@ -4,10 +4,7 @@ import { DVFeedback } from "../types/dataverse/DVFeedback";
 import { DVInvitation } from "../types/dataverse/DVInvitation";
 import { DVPage } from "../types/dataverse/DVPage";
 import { DVParticipation } from "../types/dataverse/DVParticipation";
-import {
-  DVRiskCascade,
-  getCascadeResultSnapshot,
-} from "../types/dataverse/DVRiskCascade";
+import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { DVTranslation } from "../types/dataverse/DVTranslation";
 import { DVValidation } from "../types/dataverse/DVValidation";
@@ -23,6 +20,21 @@ import { getResultSnapshot } from "../types/dataverse/DVSmallRisk";
 import { DVDirectAnalysis } from "../types/dataverse/DVDirectAnalysis";
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import { DVAnalysisRun } from "../types/dataverse/DVAnalysisRun";
+import { getCascadeResultSnapshot } from "./snapshot";
+import {
+  DVRiskSnapshot,
+  SerializedRiskSnapshotQualis,
+  SerializedRiskSnapshotResults,
+} from "../types/dataverse/DVRiskSnapshot";
+import {
+  DVCascadeSnapshot,
+  SerializedCauseSnapshotResults,
+  SerializedEffectSnapshotResults,
+} from "../types/dataverse/DVCascadeSnapshot";
+import {
+  DVChangeLog,
+  SerializedChangeDiff,
+} from "../types/dataverse/DVChangeLog";
 
 export interface AuthResponse<T = null> {
   data?: T;
@@ -72,6 +84,82 @@ export interface API {
   createRiskSummary(fields: Partial<DVRiskSummary>): Promise<CreateResponse>;
   updateRiskSummary(id: string, fields: Partial<DVRiskSummary>): Promise<void>;
   deleteRiskSummary(id: string): Promise<void>;
+
+  getRiskSnapshots<T = DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>>(
+    query?: string
+  ): Promise<T[]>;
+  getRiskSnapshot<T = DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>>(
+    id: string,
+    query?: string
+  ): Promise<T>;
+  createRiskSnapshot(
+    fields: Partial<
+      DVRiskSnapshot<
+        unknown,
+        SerializedRiskSnapshotResults,
+        SerializedRiskSnapshotQualis
+      >
+    >
+  ): Promise<CreateResponse>;
+  updateRiskSnapshot(
+    id: string,
+    fields: Partial<
+      DVRiskSnapshot<
+        unknown,
+        SerializedRiskSnapshotResults,
+        SerializedRiskSnapshotQualis
+      >
+    >
+  ): Promise<void>;
+  deleteRiskSnapshot(id: string): Promise<void>;
+
+  getCascadeSnapshots<
+    T = DVCascadeSnapshot<
+      unknown,
+      unknown,
+      unknown,
+      SerializedCauseSnapshotResults,
+      SerializedEffectSnapshotResults
+    >
+  >(
+    query?: string
+  ): Promise<T[]>;
+  getCascadeSnapshot<
+    T = DVCascadeSnapshot<
+      unknown,
+      unknown,
+      unknown,
+      SerializedCauseSnapshotResults,
+      SerializedEffectSnapshotResults
+    >
+  >(
+    id: string,
+    query?: string
+  ): Promise<T>;
+  createCascadeSnapshot(
+    fields: Partial<
+      DVCascadeSnapshot<
+        unknown,
+        unknown,
+        unknown,
+        SerializedCauseSnapshotResults,
+        SerializedEffectSnapshotResults
+      >
+    >
+  ): Promise<CreateResponse>;
+  updateCascadeSnapshot(
+    id: string,
+    fields: Partial<
+      DVCascadeSnapshot<
+        unknown,
+        unknown,
+        unknown,
+        SerializedCauseSnapshotResults,
+        SerializedEffectSnapshotResults
+      >
+    >
+  ): Promise<void>;
+  deleteCascadeSnapshot(id: string): Promise<void>;
 
   getRiskFiles<T = DVRiskFile>(query?: string): Promise<T[]>;
   getRiskFile<T = DVRiskFile>(id: string, query?: string): Promise<T>;
@@ -124,6 +212,9 @@ export interface API {
   createFeedback(fields: object): Promise<CreateResponse>;
   updateFeedback(id: string, fields: object): Promise<void>;
   deleteFeedback(id: string): Promise<void>;
+
+  getChangeLogs<T = DVFeedback>(query?: string): Promise<T[]>;
+  createChangeLog(fields: object): Promise<CreateResponse>;
 
   getTranslations<T = DVTranslation>(query?: string): Promise<T[]>;
   createTranslation(fields: Partial<DVTranslation>): Promise<CreateResponse>;
@@ -230,6 +321,8 @@ function remove(
 }
 
 export const getAntiForgeryToken = async (headers = {}) => {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
   const response = await fetch(
     `https://bnra.powerappsportals.com/_layout/tokenhtml?_=${Date.now()}`,
     {
@@ -243,19 +336,18 @@ export const getAntiForgeryToken = async (headers = {}) => {
 
 export const getAPI = (
   antiForgeryToken: string,
-  navigate: (url: string) => void,
   customFetch: (input: string, init?: RequestInit) => Promise<Response>
 ): API => {
   const authFetch = async (input: string, init?: RequestInit | undefined) => {
     const response = await customFetch(input, init);
 
-    if (response.status === 403) {
-      navigate("/auth");
+    // if (response.status === 403) {
+    //   navigate("/auth");
 
-      throw new Error("Not Authenticated");
-    } else if (response.status === 404) {
-      throw new Error("Not Found");
-    }
+    //   throw new Error("Not Authenticated");
+    // } else if (response.status === 404) {
+    //   throw new Error("Not Found");
+    // }
 
     return response;
   };
@@ -407,24 +499,12 @@ export const getAPI = (
 
     getInvitations: getMultiple<DVInvitation>(authFetch, "adx_invitations"),
 
-    getRiskSummaries: getMultiple<
-      DVRiskSummary<unknown, UnparsedRiskFields>,
-      DVRiskSummary<unknown, ParsedRiskFields>
-    >(
+    getRiskSummaries: getMultiple(
       authFetch,
       "cr4de_bnrariskfilesummaries",
-      undefined,
-      transformRiskSummary
+      undefined
     ),
-    getRiskSummary: getOne<
-      DVRiskSummary<unknown, UnparsedRiskFields>,
-      DVRiskSummary<unknown, ParsedRiskFields>
-    >(
-      authFetch,
-      "cr4de_bnrariskfilesummaries",
-      undefined,
-      transformRiskSummary
-    ),
+    getRiskSummary: getOne(authFetch, "cr4de_bnrariskfilesummaries", undefined),
     createRiskSummary: create<DVRiskSummary>(
       authFetch,
       "cr4de_bnrariskfilesummaries",
@@ -438,6 +518,58 @@ export const getAPI = (
     deleteRiskSummary: remove(
       authFetch,
       "cr4de_bnrariskfilesummaries",
+      antiForgeryToken
+    ),
+
+    getRiskSnapshots: getMultiple(
+      authFetch,
+      "cr4de_bnrariskfilesnapshots",
+      undefined
+    ),
+    getRiskSnapshot: getOne(
+      authFetch,
+      "cr4de_bnrariskfilesnapshots",
+      undefined
+    ),
+    createRiskSnapshot: create<DVRiskSummary>(
+      authFetch,
+      "cr4de_bnrariskfilesnapshots",
+      antiForgeryToken
+    ),
+    updateRiskSnapshot: update<DVRiskSummary>(
+      authFetch,
+      "cr4de_bnrariskfilesnapshots",
+      antiForgeryToken
+    ),
+    deleteRiskSnapshot: remove(
+      authFetch,
+      "cr4de_bnrariskfilesnapshots",
+      antiForgeryToken
+    ),
+
+    getCascadeSnapshots: getMultiple(
+      authFetch,
+      "cr4de_bnrariskcascadesnapshots",
+      undefined
+    ),
+    getCascadeSnapshot: getOne(
+      authFetch,
+      "cr4de_bnrariskcascadesnapshots",
+      undefined
+    ),
+    createCascadeSnapshot: create<DVCascadeSnapshot>(
+      authFetch,
+      "cr4de_bnrariskcascadesnapshots",
+      antiForgeryToken
+    ),
+    updateCascadeSnapshot: update<DVCascadeSnapshot>(
+      authFetch,
+      "cr4de_bnrariskcascadesnapshots",
+      antiForgeryToken
+    ),
+    deleteCascadeSnapshot: remove(
+      authFetch,
+      "cr4de_bnrariskcascadesnapshots",
       antiForgeryToken
     ),
 
@@ -884,6 +1016,16 @@ export const getAPI = (
       );
     },
 
+    getChangeLogs: getMultiple<DVChangeLog<SerializedChangeDiff>>(
+      authFetch,
+      "cr4de_bnrachangelogs"
+    ),
+    createChangeLog: create<DVChangeLog<SerializedChangeDiff>>(
+      authFetch,
+      "cr4de_bnrachangelogs",
+      antiForgeryToken
+    ),
+
     getTranslations: getMultiple<DVTranslation>(
       authFetch,
       "cr4de_bnratranslations"
@@ -918,7 +1060,7 @@ export const getAPI = (
 
     sendInvitationEmail: async function (contactIds: string[]): Promise<void> {
       await customFetch(
-        "https://prod-03.westeurope.logic.azure.com:443/workflows/987f8d4c173d41ff81d3d3259346d6c6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=0h3uYyRN7UPfaTsc4VqJwezF8ZXqwwHEiFPD1iuv-ts",
+        "https://defaultde192ca2f7784bb0b5f15cce580378.9a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/987f8d4c173d41ff81d3d3259346d6c6/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Cu_Yr1xialo9tLN_TOSTP1Yy1IwPSWapQmAI0v1cpU8",
         {
           method: "POST",
           headers: {
@@ -937,7 +1079,7 @@ export const getAPI = (
     ): Promise<void> {
       // Send an email to CIPRA analists
       await authFetch(
-        "https://prod-233.westeurope.logic.azure.com:443/workflows/9ca84342adac4c8192391b17507e8a93/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KvQCYydJbAMruMqSy7Psc3U6pqDXC8QehNcDwzGS3QY",
+        "https://defaultde192ca2f7784bb0b5f15cce580378.9a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/79ca88049c3644349691202d00a5c58c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pKd41laX7G9mr13hN2EENl2z-4ZanCZdPLetYklIbUw",
         {
           method: "POST",
           headers: {
@@ -1003,7 +1145,7 @@ export const getAPI = (
   };
 };
 
-const transformRiskSummary = (
+export const transformRiskSummary = (
   rs: DVRiskSummary<unknown, UnparsedRiskFields>
 ): DVRiskSummary<unknown, ParsedRiskFields> => {
   const ip = unwrapIP(rs.cr4de_intensity_parameters);
@@ -1021,14 +1163,14 @@ const transformRiskSummary = (
   };
 };
 
-const transformRiskFile = (rf: DVRiskFile): DVRiskFile => {
+export const transformRiskFile = (rf: DVRiskFile): DVRiskFile => {
   return {
     ...rf,
     results: getResultSnapshot(rf),
   };
 };
 
-const transformRiskCascade = (rc: DVRiskCascade): DVRiskCascade => {
+export const transformRiskCascade = (rc: DVRiskCascade): DVRiskCascade => {
   return {
     ...rc,
     results: getCascadeResultSnapshot(rc),

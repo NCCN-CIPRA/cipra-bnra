@@ -1,11 +1,17 @@
 import { Layer, Rectangle, ResponsiveContainer, Sankey } from "recharts";
 import getCategoryColor from "../../../functions/getCategoryColor";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { SCENARIOS, getScenarioParameter } from "../../../functions/scenarios";
+import { SCENARIOS } from "../../../functions/scenarios";
 import round from "../../../functions/roundNumberString";
 import { useTranslation } from "react-i18next";
-import { Cascades, getCausesWithDP } from "../../../functions/cascades";
 import { JSXElementConstructor } from "react";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../../types/dataverse/DVRiskSnapshot";
+import {
+  CauseRisksSummary,
+  DVRiskSummary,
+} from "../../../types/dataverse/DVRiskSummary";
 
 const baseY = 50;
 
@@ -134,11 +140,8 @@ const PSankeyLink = (props: any) => {
 };
 
 export default function ProbabilitySankyChart({
+  riskSummary = null,
   riskFile = null,
-  cascades = null,
-  maxCauses = null,
-  minCausePortion = null,
-  shownCausePortion = null,
   scenario,
   debug = false,
   width = "100%",
@@ -147,8 +150,8 @@ export default function ProbabilitySankyChart({
   onClick = null,
   onNavigate,
 }: {
-  riskFile?: DVRiskFile | null;
-  cascades?: Cascades | null;
+  riskSummary: DVRiskSummary | null;
+  riskFile?: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   maxCauses?: number | null;
   minCausePortion?: number | null;
   shownCausePortion?: number | null;
@@ -162,70 +165,75 @@ export default function ProbabilitySankyChart({
   onClick?: ((id: string) => void) | null;
   onNavigate?: (id: string) => void;
 }) {
-  if (!riskFile || !cascades) return null;
+  if (!riskSummary || !riskFile) return null;
 
-  const causes = getCausesWithDP(riskFile, cascades, scenario);
+  const causes = JSON.parse(
+    riskSummary.cr4de_causing_risks as string
+  ) as CauseRisksSummary[];
 
-  let minP = 0;
+  // let minP = 0;
 
-  if (maxCauses !== null) {
-    minP =
-      maxCauses === null || causes.length <= maxCauses
-        ? -1
-        : causes.sort((a, b) => b.p - a.p)[
-            Math.min(maxCauses - 1, causes.length - 1)
-          ].p;
-  } else if (minCausePortion !== null) {
-    const Ptot = causes.reduce((tot, c) => tot + c.p, 0.000000001);
-    minP = minCausePortion * Ptot;
-  } else if (shownCausePortion !== null) {
-    const Ptot = causes.reduce((tot, c) => tot + c.p, 0.000000001);
+  // if (maxCauses !== null) {
+  //   minP =
+  //     maxCauses === null || causes.length <= maxCauses
+  //       ? -1
+  //       : causes.sort((a, b) => b.p - a.p)[
+  //           Math.min(maxCauses - 1, causes.length - 1)
+  //         ].p;
+  // } else if (minCausePortion !== null) {
+  //   const Ptot = causes.reduce((tot, c) => tot + c.p, 0.000000001);
+  //   minP = minCausePortion * Ptot;
+  // } else if (shownCausePortion !== null) {
+  //   const Ptot = causes.reduce((tot, c) => tot + c.p, 0.000000001);
 
-    let cumulP = 0;
-    for (const c of causes.sort((a, b) => b.p - a.p)) {
-      cumulP += c.p / Ptot;
+  //   let cumulP = 0;
+  //   for (const c of causes.sort((a, b) => b.p - a.p)) {
+  //     cumulP += c.p / Ptot;
 
-      if (cumulP >= shownCausePortion) {
-        minP = c.p;
-        break;
-      }
-    }
-  }
+  //     if (cumulP >= shownCausePortion) {
+  //       minP = c.p;
+  //       break;
+  //     }
+  //   }
+  // }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nodes: any[] = [
     { name: `risk.${riskFile.cr4de_hazard_id}.name` },
-    ...causes.filter((c) => c.p >= minP),
+    ...causes.map((c) => ({
+      name: c.cause_risk_title,
+      cascade: c,
+      hidden: c.other_causes || undefined,
+    })),
   ];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const otherCauses = causes.filter((c: any) => c.p < minP);
+  // console.log(nodes);
+  // // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // const otherCauses = causes.filter((c: any) => c.p < minP);
 
-  if (minP >= 0 && otherCauses.length > 0) {
-    nodes.push({
-      name: "Other",
-      hidden: otherCauses,
-    });
-  }
+  // if (minP >= 0 && otherCauses.length > 0) {
+  //   nodes.push({
+  //     name: "Other",
+  //     hidden: otherCauses,
+  //   });
+  // }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const links: any[] = causes
-    .filter((e) => e.p >= minP)
-    .map((e, i: number) => ({
-      source: i + 1,
-      target: 0,
-      value: Math.max(0.000000001, e.p),
-    }));
-  if (minP > 0 && otherCauses.length > 0)
-    links.push({
-      source: nodes.length - 1,
-      target: 0,
-      value: causes
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((e: any) => e.p < minP)
-        .reduce((tot, e) => tot + e.p, 0.000000001),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      hidden: causes.filter((e: any) => e.p < minP),
-    });
+  const links: any[] = causes.map((e, i: number) => ({
+    source: i + 1,
+    target: 0,
+    value: Math.max(0.000000001, e.cause_risk_p),
+  }));
+  // if (minP > 0 && otherCauses.length > 0)
+  //   links.push({
+  //     source: nodes.length - 1,
+  //     target: 0,
+  //     value: causes
+  //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //       .filter((e: any) => e.p < minP)
+  //       .reduce((tot, e) => tot + e.p, 0.000000001),
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     hidden: causes.filter((e: any) => e.p < minP),
+  //   });
 
   const data = {
     nodes,
@@ -240,7 +248,7 @@ export default function ProbabilitySankyChart({
           node={
             <PSankeyNode
               onClick={onClick}
-              totalProbability={getScenarioParameter(riskFile, "TP", scenario)}
+              totalProbability={riskFile.cr4de_quanti[scenario].tp.yearly.scale}
               totalNodes={data.nodes.length}
               showComponents={debug}
               scenarioSuffix={scenario}
@@ -266,7 +274,7 @@ export default function ProbabilitySankyChart({
       node={
         <PSankeyNode
           onClick={onClick}
-          totalProbability={getScenarioParameter(riskFile, "TP", scenario)}
+          totalProbability={riskFile.cr4de_quanti[scenario].tp.yearly.scale}
           totalNodes={data.nodes.length}
           showComponents={debug}
           scenarioSuffix={scenario}

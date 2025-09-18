@@ -16,16 +16,15 @@ import { DataTable } from "../../hooks/useAPI";
 import { getCategoryImpactRescaled } from "../../functions/CategoryImpact";
 import ProbabilitySankeyChart from "../../components/charts/svg/ProbabilitySankeyChart";
 import useRecords from "../../hooks/useRecords";
-import {
-  DVRiskCascade,
-  getCascadeResultSnapshot,
-} from "../../types/dataverse/DVRiskCascade";
+import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import {
   Cascades,
+  CascadeSnapshots,
   getCatalyzingEffects,
   getCauses,
   getClimateChange,
   getEffects,
+  getRiskCascadesNew,
 } from "../../functions/cascades";
 import ImpactSankey from "../../components/charts/svg/ImpactSankeyChart";
 import ImpactBarChart from "../../components/charts/svg/ImpactBarChart";
@@ -38,6 +37,16 @@ import BibliographySection from "./BibliographySection";
 import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
 import useLoggedInUser, { LoggedInUser } from "../../hooks/useLoggedInUser";
 import { ProbabilityBarsChart } from "../../components/charts/svg/ProbabilityBarsChart";
+import {
+  getCascadeResultSnapshot,
+  snapshotFromRiskfile,
+  summaryFromRiskfile,
+} from "../../functions/snapshot";
+import {
+  DVRiskSnapshot,
+  parseRiskSnapshot,
+} from "../../types/dataverse/DVRiskSnapshot";
+import { getParsedRiskCatalogue } from "../../functions/riskfiles";
 
 const barWidth = 300;
 const barHeight = 500;
@@ -46,13 +55,12 @@ export default function ExportRiskFilePage() {
   const params = useParams();
   const { user } = useLoggedInUser();
 
-  const { data: hazardCatalogue } = useRecords<SmallRisk>({
+  const { data: hazardCatalogue } = useRecords<DVRiskFile>({
     table: DataTable.RISK_FILE,
-    query:
-      "$orderby=cr4de_hazard_id&$select=cr4de_hazard_id,cr4de_title,cr4de_risk_type,cr4de_risk_category,cr4de_definition,cr4de_mrs,cr4de_label_hilp,cr4de_label_cc,cr4de_label_cb,cr4de_label_impact,cr4de_result_snapshot",
-    transformResult: (data: SmallRisk[]) =>
+    query: "$orderby=cr4de_hazard_id",
+    transformResult: (data: DVRiskFile[]) =>
       data
-        .filter((r: SmallRisk) => !r.cr4de_hazard_id.startsWith("X"))
+        .filter((r: DVRiskFile) => !r.cr4de_hazard_id.startsWith("X"))
         .map((rf) => ({
           ...rf,
           results: getResultSnapshot(rf),
@@ -129,7 +137,16 @@ export default function ExportRiskFilePage() {
     };
   }, [hazardCatalogue, riskFile, rawCascades]);
 
-  if (!riskFile || !cascades || attachments == null) return null;
+  const cascadeSnapshots = useMemo(() => {
+    if (!riskFile || !rawCascades || !hazardCatalogue) return null;
+
+    const hc = getParsedRiskCatalogue(hazardCatalogue);
+
+    return getRiskCascadesNew(riskFile, rawCascades, hc);
+  }, [riskFile, rawCascades, hazardCatalogue]);
+
+  if (!riskFile || !cascades || !cascadeSnapshots || attachments == null)
+    return null;
 
   const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
 
@@ -145,6 +162,7 @@ export default function ExportRiskFilePage() {
       <ExportRiskFileCharts
         riskFile={riskFile}
         cascades={cascades}
+        cascadeSnapshots={cascadeSnapshots}
         attachments={attachments}
         tp={tp}
         H={H}
@@ -180,6 +198,7 @@ export default function ExportRiskFilePage() {
 export function ExportRiskFileCharts({
   riskFile,
   cascades,
+  cascadeSnapshots,
   tp,
   H,
   S,
@@ -192,6 +211,7 @@ export function ExportRiskFileCharts({
 {
   riskFile: DVRiskFile;
   cascades: Cascades;
+  cascadeSnapshots: CascadeSnapshots<DVRiskSnapshot>;
   attachments: DVAttachment[];
   tp: number;
   H: number;
@@ -204,6 +224,9 @@ export function ExportRiskFileCharts({
   // cascades: Cascades;
   // attachments: DVAttachment<unknown, DVAttachment<unknown, unknown>>[] | null;
 }) {
+  const riskSummary = summaryFromRiskfile(riskFile, cascades);
+  const riskSnapshot = parseRiskSnapshot(snapshotFromRiskfile(riskFile));
+
   return (
     <>
       <div
@@ -265,8 +288,8 @@ export function ExportRiskFileCharts({
         style={{ position: "absolute", top: -100000 }}
       >
         <ProbabilitySankeyChart
-          riskFile={riskFile}
-          cascades={cascades}
+          riskSummary={riskSummary}
+          riskFile={riskSnapshot}
           maxCauses={null}
           shownCausePortion={0.8}
           minCausePortion={null}
@@ -283,8 +306,8 @@ export function ExportRiskFileCharts({
         style={{ position: "absolute", top: -100000 }}
       >
         <ImpactSankey
-          riskFile={riskFile}
-          cascades={cascades}
+          riskSummary={riskSummary}
+          riskFile={riskSnapshot}
           maxEffects={null}
           shownEffectPortion={0.8}
           minEffectPortion={null}
@@ -300,7 +323,7 @@ export function ExportRiskFileCharts({
         style={{ position: "absolute", top: -100000 }}
       >
         <ImpactBarChart
-          riskFile={riskFile}
+          riskFile={riskSnapshot}
           scenario={scenario}
           width={barWidth}
           height={barHeight}
@@ -311,7 +334,7 @@ export function ExportRiskFileCharts({
         style={{ position: "absolute", top: -100000 }}
       >
         <ScenarioMatrix
-          riskFile={riskFile}
+          riskFile={riskSnapshot}
           mrs={scenario}
           fontSize={20}
           width={600}
@@ -324,8 +347,8 @@ export function ExportRiskFileCharts({
         style={{ position: "absolute", top: -100000 }}
       >
         <ClimateChangeChart
-          riskFile={riskFile}
-          causes={cascades.causes}
+          riskFile={riskSnapshot}
+          causes={cascadeSnapshots.causes}
           scenario={scenario}
           width={1000}
           height={600}

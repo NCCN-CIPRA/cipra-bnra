@@ -15,7 +15,7 @@ import { LoggedInUser } from "../hooks/useLoggedInUser";
 import HomeIcon from "@mui/icons-material/Home";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
-import FunctionsIcon from "@mui/icons-material/Functions";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import GroupIcon from "@mui/icons-material/Group";
 import TranslateIcon from "@mui/icons-material/Translate";
@@ -115,14 +115,17 @@ export default function SideDrawer({
                   <ListItem disablePadding>
                     <ListItemButton
                       component={Link}
-                      to="/analysis/calculator"
+                      to="/admin/functions"
                       onClick={onClose}
                     >
                       <ListItemIcon sx={{ pl: "7px" }}>
-                        <FunctionsIcon />
+                        <AdminPanelSettingsIcon />
                       </ListItemIcon>
                       <ListItemText
-                        primary={t("sideDrawer.calculator", "Risk Calculator")}
+                        primary={t(
+                          "sideDrawer.administration",
+                          "Administration"
+                        )}
                       />
                     </ListItemButton>
                   </ListItem>
@@ -140,8 +143,8 @@ export default function SideDrawer({
                       />
                     </ListItemButton>
                   </ListItem>
-                  <Divider />
-                  <ListItem disablePadding>
+                  {/* <Divider /> */}
+                  {/* <ListItem disablePadding>
                     <ListItemButton
                       component={Link}
                       to="/admin/process"
@@ -154,7 +157,7 @@ export default function SideDrawer({
                         primary={t("sideDrawer.experts", "Expert Management")}
                       />
                     </ListItemButton>
-                  </ListItem>
+                  </ListItem> */}
                   <ListItem disablePadding>
                     <ListItemButton
                       component={Link}

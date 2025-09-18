@@ -1,5 +1,4 @@
 import { Alert, Box, Typography } from "@mui/material";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import { SCENARIOS } from "../../../functions/scenarios";
 import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import { useState } from "react";
@@ -11,22 +10,30 @@ import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../../components/RiskFileTitle";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import MMAnalysisTutorial from "./MMAnalysisTutorial";
-import { Cascades } from "../../../functions/cascades";
+import { CascadeSnapshots } from "../../../functions/cascades";
 import handleExportRiskfile from "../../../functions/export/exportBNRA";
 import useAPI from "../../../hooks/useAPI";
 import RiskFileBibliography from "../../../components/RiskFileBibliography";
+// import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
+import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
+import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../../BasePage";
 
 export default function ManMade({
+  riskSummary,
   riskFile,
   cascades,
 }: {
-  riskFile: DVRiskFile;
-  cascades: Cascades;
+  riskSummary: DVRiskSummary;
+  riskFile: DVRiskSnapshot;
+  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
 }) {
+  const { environment } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
   const api = useAPI();
 
-  const MRS = riskFile.cr4de_mrs || SCENARIOS.EXTREME;
+  const MRS = riskSummary.cr4de_mrs || SCENARIOS.EXTREME;
   const [scenario, setScenario] = useState(MRS);
 
   const rf = riskFile;
@@ -34,14 +41,15 @@ export default function ManMade({
   return (
     <>
       <Box sx={{ mb: 10 }}>
-        <RiskFileTitle riskFile={riskFile} />
+        <RiskFileTitle riskFile={riskSummary} />
 
         <Box sx={{ mt: 8 }}>
-          <Typography variant="h5">
+          <Typography variant="h5" sx={{ mb: 4 }}>
             {t("risks.ananylis.quantiResults", "Quantitative Analysis Results")}
           </Typography>
 
           <MMSankeyDiagram
+            riskSummary={riskSummary}
             riskFile={riskFile}
             cascades={cascades}
             manmade
@@ -69,7 +77,7 @@ export default function ManMade({
 
             <ScenarioMatrix riskFile={riskFile} mrs={MRS} />
 
-            <CapacitiesSection riskFile={rf} scenario={MRS} />
+            <CapacitiesSection riskFile={riskFile} scenario={MRS} />
           </Box>
         )}
 
@@ -78,19 +86,19 @@ export default function ManMade({
             {t("Preferred Malicious Actions")}
           </Typography>
 
-          <ActionsSection riskFile={rf} />
+          <ActionsSection riskFile={riskFile} />
         </Box>
 
         <Box className="impact-assess" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Other Impactful Actions")}</Typography>
 
-          <MMImpactSection riskFile={rf} />
+          <MMImpactSection riskFile={riskFile} />
         </Box>
 
-        <RiskFileBibliography risk={riskFile} />
+        <RiskFileBibliography risk={riskSummary} />
         <BNRASpeedDial
           offset={{ x: 0, y: 56 }}
-          exportAction={handleExportRiskfile(riskFile, api)}
+          exportAction={handleExportRiskfile(riskSummary, api, environment)}
           HelpComponent={MMAnalysisTutorial}
         />
       </Box>

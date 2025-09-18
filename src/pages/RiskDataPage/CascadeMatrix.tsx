@@ -12,6 +12,8 @@ import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { Trans, useTranslation } from "react-i18next";
 import { useState } from "react";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 
 const COLORS = {
   CP0: "#e0ffcc",
@@ -348,6 +350,223 @@ export default function CascadeMatrix({
             cascade[
               getCascadeField(SCENARIOS.EXTREME, SCENARIOS.EXTREME, isCause)
             ] as string
+          }
+          onChange={(newValue) =>
+            onChange(
+              getCascadeField(SCENARIOS.EXTREME, SCENARIOS.EXTREME, isCause),
+              newValue
+            )
+          }
+        />
+      </Grid>
+    </Grid>
+  );
+}
+
+export function CascadeSnapshotMatrix({
+  cause,
+  effect,
+  cascade,
+  isCause = false,
+  onChange,
+}: {
+  cause: DVRiskSnapshot;
+  effect: DVRiskSnapshot;
+  cascade: DVCascadeSnapshot;
+  isCause?: boolean;
+  onChange: (field: keyof DVRiskCascade, newValue: string) => Promise<void>;
+}) {
+  const theme = useTheme();
+
+  return (
+    <Grid container spacing={1}>
+      <Grid size={{ xs: 4.5 }}></Grid>
+      <Grid size={{ xs: 7.5 }}>
+        <Tooltip title={effect.cr4de_title}>
+          <Box sx={{ padding: theme.spacing(1), textAlign: "center" }}>
+            <Typography variant="h6">
+              {cause.cr4de_risk_type === RISK_TYPE.MANMADE ? (
+                <Trans i18nKey="2B.attack">Attack</Trans>
+              ) : (
+                <Trans i18nKey="2B.effect">Effect</Trans>
+              )}
+            </Typography>
+          </Box>
+        </Tooltip>
+      </Grid>
+
+      <Grid size={{ xs: 4.5 }}>
+        <Tooltip title={cause.cr4de_title}>
+          <Box sx={{ padding: theme.spacing(1), textAlign: "center" }}>
+            <Typography variant="h6">
+              {cause.cr4de_risk_type === RISK_TYPE.MANMADE ? (
+                <Trans i18nKey="2B.actor">Actor</Trans>
+              ) : (
+                <Trans i18nKey="2B.cause">Cause</Trans>
+              )}
+            </Typography>
+          </Box>
+        </Tooltip>
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ alignSelf: "flex-end" }}>
+        <ScenarioBox scenario={SCENARIOS.CONSIDERABLE} />
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ alignSelf: "flex-end" }}>
+        <ScenarioBox scenario={SCENARIOS.MAJOR} />
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ alignSelf: "flex-end" }}>
+        <ScenarioBox scenario={SCENARIOS.EXTREME} />
+      </Grid>
+
+      <Grid size={{ xs: 4.5 }}>
+        <ScenarioBox scenario={SCENARIOS.CONSIDERABLE} />
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
+        <CPX
+          value={
+            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
+              SCENARIOS.CONSIDERABLE
+            ]
+          }
+          onChange={(newValue) =>
+            onChange(
+              getCascadeField(
+                SCENARIOS.CONSIDERABLE,
+                SCENARIOS.CONSIDERABLE,
+                isCause
+              ),
+              newValue
+            )
+          }
+        />
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
+        <CPX
+          value={
+            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
+              SCENARIOS.CONSIDERABLE
+            ]
+          }
+          onChange={(newValue) =>
+            onChange(
+              getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, isCause),
+              newValue
+            )
+          }
+        />
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
+        <CPX
+          value={
+            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
+              SCENARIOS.CONSIDERABLE
+            ]
+          }
+          onChange={(newValue) =>
+            onChange(
+              getCascadeField(
+                SCENARIOS.CONSIDERABLE,
+                SCENARIOS.EXTREME,
+                isCause
+              ),
+              newValue
+            )
+          }
+        />
+      </Grid>
+
+      <Grid size={{ xs: 4.5 }}>
+        <ScenarioBox scenario={SCENARIOS.MAJOR} />
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
+        <CPX
+          value={
+            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
+              SCENARIOS.MAJOR
+            ]
+          }
+          onChange={(newValue) =>
+            onChange(
+              getCascadeField(SCENARIOS.MAJOR, SCENARIOS.CONSIDERABLE, isCause),
+              newValue
+            )
+          }
+        />
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
+        <CPX
+          value={
+            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
+              SCENARIOS.MAJOR
+            ]
+          }
+          onChange={(newValue) =>
+            onChange(
+              getCascadeField(SCENARIOS.MAJOR, SCENARIOS.MAJOR, isCause),
+              newValue
+            )
+          }
+        />
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
+        <CPX
+          value={
+            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
+              SCENARIOS.MAJOR
+            ]
+          }
+          onChange={(newValue) =>
+            onChange(
+              getCascadeField(SCENARIOS.MAJOR, SCENARIOS.EXTREME, isCause),
+              newValue
+            )
+          }
+        />
+      </Grid>
+
+      <Grid size={{ xs: 4.5 }}>
+        <ScenarioBox scenario={SCENARIOS.EXTREME} />
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
+        <CPX
+          value={
+            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
+              SCENARIOS.EXTREME
+            ]
+          }
+          onChange={(newValue) =>
+            onChange(
+              getCascadeField(
+                SCENARIOS.EXTREME,
+                SCENARIOS.CONSIDERABLE,
+                isCause
+              ),
+              newValue
+            )
+          }
+        />
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
+        <CPX
+          value={
+            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
+              SCENARIOS.EXTREME
+            ]
+          }
+          onChange={(newValue) =>
+            onChange(
+              getCascadeField(SCENARIOS.EXTREME, SCENARIOS.MAJOR, isCause),
+              newValue
+            )
+          }
+        />
+      </Grid>
+      <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
+        <CPX
+          value={
+            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
+              SCENARIOS.EXTREME
+            ]
           }
           onChange={(newValue) =>
             onChange(

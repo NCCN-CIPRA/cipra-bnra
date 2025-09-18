@@ -1,11 +1,11 @@
 import { Box } from "@mui/material";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import getImpactColor from "../../../functions/getImpactColor";
+import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 
 export default function PreferredActionsSection({
   riskFile,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot;
 }) {
   return (
     <Box
@@ -20,7 +20,9 @@ export default function PreferredActionsSection({
       <Box
         className="htmleditor"
         sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
-        dangerouslySetInnerHTML={{ __html: riskFile.cr4de_mrs_actions || "" }}
+        dangerouslySetInnerHTML={{
+          __html: riskFile.cr4de_quali_actions_mrs || "",
+        }}
       />
     </Box>
   );

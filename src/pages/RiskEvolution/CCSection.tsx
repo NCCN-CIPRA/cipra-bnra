@@ -1,16 +1,10 @@
 import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { Cause as Cause2023 } from "../../functions/Probability";
 import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
-import {
-  getCascadeParameter,
-  getScenarioParameter,
-  getScenarioSuffix,
-  SCENARIOS,
-} from "../../functions/scenarios";
-import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
+import { getScenarioSuffix, SCENARIOS } from "../../functions/scenarios";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 
 type Cause2050 = Cause2023 & {
   p2050: number;
@@ -22,37 +16,32 @@ export default function CCSection({
   cc,
   scenario,
 }: {
-  riskFile: DVRiskFile;
-  causes: DVRiskCascade<SmallRisk, unknown>[];
-  cc: DVRiskCascade<SmallRisk, unknown> | null;
+  riskFile: DVRiskSnapshot;
+  causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[];
+  cc: DVCascadeSnapshot<unknown, DVRiskSnapshot> | null;
   scenario: SCENARIOS;
 }) {
   const [, setCCQuanti] = useState<Cause2050[] | null>(null);
   const [ccQuali, setCCQuali] = useState<string | null>(
-    riskFile.cr4de_mrs_cc || null
+    riskFile.cr4de_quali_cc_mrs || null
   );
 
-  useEffect(() => setCCQuali(riskFile.cr4de_mrs_cc || null), [riskFile]);
+  useEffect(() => setCCQuali(riskFile.cr4de_quali_cc_mrs || null), [riskFile]);
 
   const scenarioSuffix = getScenarioSuffix(scenario);
   useEffect(() => {
     const dTPAvg =
       (Math.abs(
-        (getScenarioParameter(riskFile, "TP50", SCENARIOS.CONSIDERABLE) ||
-          0.000001) -
-          (getScenarioParameter(riskFile, "TP", SCENARIOS.CONSIDERABLE) ||
-            0.000001)
+        riskFile.cr4de_quanti.considerable.tp50.yearly.scale -
+          riskFile.cr4de_quanti.considerable.tp.yearly.scale
       ) +
         Math.abs(
-          (getScenarioParameter(riskFile, "TP50", SCENARIOS.MAJOR) ||
-            0.000001) -
-            (getScenarioParameter(riskFile, "TP", SCENARIOS.MAJOR) || 0.000001)
+          riskFile.cr4de_quanti.major.tp50.yearly.scale -
+            riskFile.cr4de_quanti.major.tp.yearly.scale
         ) +
         Math.abs(
-          (getScenarioParameter(riskFile, "TP50", SCENARIOS.EXTREME) ||
-            0.000001) -
-            (getScenarioParameter(riskFile, "TP", SCENARIOS.EXTREME) ||
-              0.000001)
+          riskFile.cr4de_quanti.extreme.tp50.yearly.scale -
+            riskFile.cr4de_quanti.extreme.tp.yearly.scale
         )) /
       3;
 
@@ -60,37 +49,25 @@ export default function CCSection({
       {
         id: null,
         name: "No underlying cause",
-        p_c:
-          getScenarioParameter(riskFile, "DP", SCENARIOS.CONSIDERABLE) ||
-          0.000001,
-        p2050_c:
-          getScenarioParameter(riskFile, "DP50", SCENARIOS.CONSIDERABLE) ||
-          0.000001,
-        p_m: getScenarioParameter(riskFile, "DP", SCENARIOS.MAJOR) || 0.000001,
-        p2050_m:
-          getScenarioParameter(riskFile, "DP50", SCENARIOS.MAJOR) || 0.000001,
-        p_e:
-          getScenarioParameter(riskFile, "DP", SCENARIOS.EXTREME) || 0.000001,
-        p2050_e:
-          getScenarioParameter(riskFile, "DP50", SCENARIOS.EXTREME) || 0.000001,
+        p_c: riskFile.cr4de_quanti.considerable.dp.scaleTot,
+        p2050_c: riskFile.cr4de_quanti.considerable.dp50.scaleTot,
+        p_m: riskFile.cr4de_quanti.major.dp.scaleTot,
+        p2050_m: riskFile.cr4de_quanti.major.dp.scaleTot,
+        p_e: riskFile.cr4de_quanti.extreme.dp.scaleTot,
+        p2050_e: riskFile.cr4de_quanti.extreme.dp.scaleTot,
       },
       ...(causes
-        .filter((c) => getCascadeParameter(c, scenario, "IP50") !== 0)
+        .filter((c) => c.cr4de_quanti_cause[scenario].ip50.yearly.scale !== 0)
         .map((c) => {
           return {
-            id: c.cr4de_cause_hazard.cr4de_riskfilesid,
-            name: c.cr4de_cause_hazard.cr4de_title,
-            p_c:
-              getCascadeParameter(c, SCENARIOS.CONSIDERABLE, "IP") || 0.000001,
-            p2050_c:
-              getCascadeParameter(c, SCENARIOS.CONSIDERABLE, "IP50") ||
-              0.000001,
-            p_m: getCascadeParameter(c, SCENARIOS.MAJOR, "IP") || 0.000001,
-            p2050_m:
-              getCascadeParameter(c, SCENARIOS.MAJOR, "IP50") || 0.000001,
-            p_e: getCascadeParameter(c, SCENARIOS.EXTREME, "IP") || 0.000001,
-            p2050_e:
-              getCascadeParameter(c, SCENARIOS.EXTREME, "IP50") || 0.000001,
+            id: c.cr4de_cause_risk._cr4de_risk_file_value,
+            name: c.cr4de_cause_risk.cr4de_title,
+            p_c: c.cr4de_quanti_cause.considerable.ip.yearly.scale,
+            p2050_c: c.cr4de_quanti_cause.considerable.ip50.yearly.scale,
+            p_m: c.cr4de_quanti_cause.major.ip.yearly.scale,
+            p2050_m: c.cr4de_quanti_cause.major.ip50.yearly.scale,
+            p_e: c.cr4de_quanti_cause.extreme.ip.yearly.scale,
+            p2050_e: c.cr4de_quanti_cause.extreme.ip50.yearly.scale,
           };
         }) || []),
     ]

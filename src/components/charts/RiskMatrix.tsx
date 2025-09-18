@@ -7,10 +7,10 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  TooltipProps,
   Cell,
   LabelList,
   Legend,
+  TooltipContentProps,
 } from "recharts";
 import {
   NameType,
@@ -22,22 +22,18 @@ import { IMPACT_CATEGORY } from "../../functions/Impact";
 import {
   SCENARIOS,
   SCENARIO_PARAMS,
-  getScenarioParameter,
   getScenarioSuffix,
 } from "../../functions/scenarios";
-import {
-  CATEGORY_NAMES,
-  RISK_CATEGORY,
-} from "../../types/dataverse/DVRiskFile";
+import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
 import getCategoryColor from "../../functions/getCategoryColor";
 import { hexToRGB } from "../../functions/colors";
 import { capFirst } from "../../functions/capFirst";
 import { useGenerateImage } from "recharts-to-png";
 import FileSaver from "file-saver";
 import { useTranslation } from "react-i18next";
-import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import { BasePageContext } from "../../pages/BasePage";
 import { useOutletContext } from "react-router-dom";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 
 interface MatrixRisk {
   riskId: string;
@@ -132,13 +128,13 @@ const getScaleString = (value: number) => {
   return "Very High";
 };
 
-const defaultFields = (c: SmallRisk) =>
+const defaultFields = (c: DVRiskSnapshot) =>
   ({
-    riskId: c.cr4de_riskfilesid,
+    riskId: c._cr4de_risk_file_value,
     title: c.cr4de_title,
     executiveSummary: ES_RISKS.indexOf(c.cr4de_hazard_id || "") >= 0,
     code: c.cr4de_hazard_id,
-    category: c.cr4de_risk_category,
+    category: c.cr4de_category,
   } as Partial<MatrixRisk>);
 
 export default function RiskMatrix({
@@ -155,7 +151,7 @@ export default function RiskMatrix({
   categoryDisplay = "shapes",
   scenarioDisplay = "colors",
 }: {
-  riskFiles: SmallRisk[] | null;
+  riskFiles: DVRiskSnapshot[] | null;
   selectedNodeId?: string | null;
   setSelectedNodeId?: (id: string | null) => void;
 
@@ -196,7 +192,7 @@ export default function RiskMatrix({
   const CustomTooltip = ({
     active,
     payload,
-  }: TooltipProps<ValueType, NameType>) => {
+  }: TooltipContentProps<ValueType, NameType>) => {
     if (active) {
       return (
         <Stack
@@ -249,21 +245,19 @@ export default function RiskMatrix({
     if (!riskFiles) return;
 
     const allDots = riskFiles
-      .filter((rf) => rf.cr4de_risk_category !== RISK_CATEGORY.EMERGING)
+      .filter((rf) => rf.cr4de_category !== RISK_CATEGORY.EMERGING)
       .reduce((d, rf) => {
         const tmp = [...d];
 
         [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].forEach(
           (s) => {
-            const tp = getScenarioParameter(rf, "TP", s);
-            const ti =
-              impact === "All"
-                ? getScenarioParameter(rf, "TI", s)
-                : getScenarioParameter(rf, `TI_${impact}`, s);
+            const i = impact.toLowerCase() as "all" | "h" | "s" | "e" | "f";
+            const tp = rf.cr4de_quanti[s].tp.yearly.scale;
+            const ti = rf.cr4de_quanti[s].ti[i].scaleTot;
 
             if (tp !== null && ti !== null) {
               tmp.push({
-                id: `${rf.cr4de_riskfilesid}${getScenarioSuffix(s)}`,
+                id: `${rf._cr4de_risk_file_value}${getScenarioSuffix(s)}`,
                 fullTitle: `${capFirst(s)} ${rf.cr4de_title}`,
                 scenario: s,
                 tp: tp,
@@ -354,7 +348,7 @@ export default function RiskMatrix({
             />
             <Tooltip
               cursor={{ strokeDasharray: "3 3" }}
-              content={<CustomTooltip />}
+              content={CustomTooltip}
             />
             {Object.entries(CATEGORIES).map(([CATEGORY, shape]) => {
               const catData =
@@ -455,31 +449,31 @@ export default function RiskMatrix({
         <Box sx={{ position: "absolute", bottom: 0, width: "100%" }}>
           <Box className="custom-legend-wrapper" sx={{ flex: 1, height: 60 }}>
             <Legend
-              chartHeight={30}
+              // chartHeight={30}
               height={30}
               wrapperStyle={{ position: "relative" }}
               align="center"
-              payload={
-                categoryLegend
-                  ? Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
-                      value: t(
-                        CATEGORY,
-                        CATEGORY_NAMES[CATEGORY as RISK_CATEGORY] as string
-                      ),
-                      type:
-                        categoryDisplay === "both" ||
-                        categoryDisplay === "shapes"
-                          ? shape.shape
-                          : "circle",
-                      color:
-                        categoryDisplay === "both" ||
-                        categoryDisplay === "colors"
-                          ? CATEGORIES[CATEGORY as RISK_CATEGORY]?.color ||
-                            "rgba(150,150,150,1)"
-                          : "rgba(150,150,150,1)",
-                    }))
-                  : []
-              }
+              // payload={
+              //   categoryLegend
+              //     ? Object.entries(CATEGORIES).map(([CATEGORY, shape]) => ({
+              //         value: t(
+              //           CATEGORY,
+              //           CATEGORY_NAMES[CATEGORY as RISK_CATEGORY] as string
+              //         ),
+              //         type:
+              //           categoryDisplay === "both" ||
+              //           categoryDisplay === "shapes"
+              //             ? shape.shape
+              //             : "circle",
+              //         color:
+              //           categoryDisplay === "both" ||
+              //           categoryDisplay === "colors"
+              //             ? CATEGORIES[CATEGORY as RISK_CATEGORY]?.color ||
+              //               "rgba(150,150,150,1)"
+              //             : "rgba(150,150,150,1)",
+              //       }))
+              //     : []
+              // }
             />
           </Box>
           <Box
@@ -487,26 +481,26 @@ export default function RiskMatrix({
             sx={{ flex: 1, height: 30, textAlign: "center" }}
           >
             <Legend
-              chartHeight={30}
+              // chartHeight={30}
               height={30}
               wrapperStyle={{ position: "relative" }}
               align="center"
-              payload={
-                scenarioLegend
-                  ? Object.entries(SCENARIO_PARAMS).map(
-                      ([scenario, params]) => ({
-                        value: t(
-                          `2A.${scenario}.title`,
-                          `${scenario[0].toUpperCase()}${scenario.slice(
-                            1
-                          )} Scenario`
-                        ),
-                        type: "circle",
-                        color: params.color,
-                      })
-                    )
-                  : []
-              }
+              // payload={
+              //   scenarioLegend
+              //     ? Object.entries(SCENARIO_PARAMS).map(
+              //         ([scenario, params]) => ({
+              //           value: t(
+              //             `2A.${scenario}.title`,
+              //             `${scenario[0].toUpperCase()}${scenario.slice(
+              //               1
+              //             )} Scenario`
+              //           ),
+              //           type: "circle",
+              //           color: params.color,
+              //         })
+              //       )
+              //     : []
+              // }
             />
           </Box>
         </Box>

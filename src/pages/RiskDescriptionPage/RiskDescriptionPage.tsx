@@ -8,16 +8,16 @@ import Manmade from "./Manmade/Manmade";
 import NCCNLoader from "../../components/NCCNLoader";
 
 export default function RiskDescriptionPage() {
-  const { riskSummary, riskFile, cascades } = useOutletContext<RiskFilePageContext>();
+  const { riskSummary, cascades } = useOutletContext<RiskFilePageContext>();
 
-  if (!riskFile || !cascades)
+  if (!riskSummary || !cascades)
     return (
       <Box sx={{ width: "100%", mt: 20, textAlign: "center" }}>
         <NCCNLoader />
       </Box>
     );
 
- if (riskSummary.cr4de_risk_type === RISK_TYPE.STANDARD)
+  if (riskSummary.cr4de_risk_type === RISK_TYPE.STANDARD)
     return (
       <Container sx={{ mt: 2, pb: 8 }}>
         <Standard riskSummary={riskSummary} />

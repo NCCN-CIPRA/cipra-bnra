@@ -7,18 +7,17 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { getScenarioParameter, SCENARIOS } from "../../../functions/scenarios";
+import { SCENARIOS } from "../../../functions/scenarios";
 import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 import { useTranslation } from "react-i18next";
-import {
-  getCategoryImpactRescaled,
-  getDamageIndicatorToCategoryImpactRatio,
-} from "../../../functions/CategoryImpact";
 import { ContentType } from "recharts/types/component/Tooltip";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../../types/dataverse/DVRiskSnapshot";
 
 export default function ImpactBarChart({
   riskFile,
@@ -27,7 +26,7 @@ export default function ImpactBarChart({
   height,
   CustomTooltip,
 }: {
-  riskFile: DVRiskFile | null;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   scenario: SCENARIOS;
   width?: number;
   height?: number;
@@ -36,47 +35,47 @@ export default function ImpactBarChart({
   const { t } = useTranslation();
   if (!riskFile) return null;
 
-  const H = getCategoryImpactRescaled(riskFile, "H", scenario);
-  const S = getCategoryImpactRescaled(riskFile, "S", scenario);
-  const E = getCategoryImpactRescaled(riskFile, "E", scenario);
-  const F = getCategoryImpactRescaled(riskFile, "F", scenario);
+  const H = riskFile.cr4de_quanti[scenario].ti.h.scaleCat;
+  const S = riskFile.cr4de_quanti[scenario].ti.s.scaleCat;
+  const E = riskFile.cr4de_quanti[scenario].ti.e.scaleCat;
+  const F = riskFile.cr4de_quanti[scenario].ti.f.scaleCat;
 
   const data = [
     {
       name: t("Human"),
       H: H,
-      Ha: getDamageIndicatorToCategoryImpactRatio(riskFile, "Ha", scenario) * H,
-      Hb: getDamageIndicatorToCategoryImpactRatio(riskFile, "Hb", scenario) * H,
-      Hc: getDamageIndicatorToCategoryImpactRatio(riskFile, "Hc", scenario) * H,
-      Ha_abs: getScenarioParameter(riskFile, "TI_Ha_abs", scenario),
-      Hb_abs: getScenarioParameter(riskFile, "TI_Hb_abs", scenario),
-      Hc_abs: getScenarioParameter(riskFile, "TI_Hc_abs", scenario),
+      Ha: riskFile.cr4de_quanti[scenario].ti.ha.scaleCatRel * H,
+      Hb: riskFile.cr4de_quanti[scenario].ti.hb.scaleCatRel * H,
+      Hc: riskFile.cr4de_quanti[scenario].ti.hc.scaleCatRel * H,
+      Ha_abs: riskFile.cr4de_quanti[scenario].ti.ha.abs,
+      Hb_abs: riskFile.cr4de_quanti[scenario].ti.hb.abs,
+      Hc_abs: riskFile.cr4de_quanti[scenario].ti.hc.abs,
     },
     {
       name: t("Societal"),
       S: S,
-      Sa: getDamageIndicatorToCategoryImpactRatio(riskFile, "Sa", scenario) * S,
-      Sb: getDamageIndicatorToCategoryImpactRatio(riskFile, "Sb", scenario) * S,
-      Sc: getDamageIndicatorToCategoryImpactRatio(riskFile, "Sc", scenario) * S,
-      Sd: getDamageIndicatorToCategoryImpactRatio(riskFile, "Sd", scenario) * S,
-      Sa_abs: getScenarioParameter(riskFile, "TI_Sa_abs", scenario),
-      Sb_abs: getScenarioParameter(riskFile, "TI_Sb_abs", scenario),
-      Sc_abs: getScenarioParameter(riskFile, "TI_Sc_abs", scenario),
-      Sd_abs: getScenarioParameter(riskFile, "TI_Sd_abs", scenario),
+      Sa: riskFile.cr4de_quanti[scenario].ti.sa.scaleCatRel * S,
+      Sb: riskFile.cr4de_quanti[scenario].ti.sb.scaleCatRel * S,
+      Sc: riskFile.cr4de_quanti[scenario].ti.sc.scaleCatRel * S,
+      Sd: riskFile.cr4de_quanti[scenario].ti.sd.scaleCatRel * S,
+      Sa_abs: riskFile.cr4de_quanti[scenario].ti.sa.abs,
+      Sb_abs: riskFile.cr4de_quanti[scenario].ti.sb.abs,
+      Sc_abs: riskFile.cr4de_quanti[scenario].ti.sc.abs,
+      Sd_abs: riskFile.cr4de_quanti[scenario].ti.sd.abs,
     },
     {
       name: t("Environmental"),
       E: E,
-      Ea: getDamageIndicatorToCategoryImpactRatio(riskFile, "Ea", scenario) * E,
-      Ea_abs: getScenarioParameter(riskFile, "TI_Ea_abs", scenario),
+      Ea: riskFile.cr4de_quanti[scenario].ti.ea.scaleCatRel * E,
+      Ea_abs: riskFile.cr4de_quanti[scenario].ti.ea.abs,
     },
     {
       name: t("Financial"),
       F: F,
-      Fa: getDamageIndicatorToCategoryImpactRatio(riskFile, "Fa", scenario) * F,
-      Fb: getDamageIndicatorToCategoryImpactRatio(riskFile, "Fb", scenario) * F,
-      Fa_abs: getScenarioParameter(riskFile, "TI_Fa_abs", scenario),
-      Fb_abs: getScenarioParameter(riskFile, "TI_Fb_abs", scenario),
+      Fa: riskFile.cr4de_quanti[scenario].ti.fa.scaleCatRel * F,
+      Fb: riskFile.cr4de_quanti[scenario].ti.fb.scaleCatRel * F,
+      Fa_abs: riskFile.cr4de_quanti[scenario].ti.fa.abs,
+      Fb_abs: riskFile.cr4de_quanti[scenario].ti.fb.abs,
     },
   ];
 

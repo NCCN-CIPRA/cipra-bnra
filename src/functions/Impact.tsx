@@ -98,8 +98,14 @@ export function getImpactScaleNumber(absoluteImpact: number) {
   return minDiff[0];
 }
 
-export function getImpactScaleFloat(absoluteImpact: number) {
-  return Math.log10(absoluteImpact / 1600000);
+export function getImpactScaleFloat(absoluteImpact: number, round?: number) {
+  const n = Math.log10(absoluteImpact / 1600000);
+
+  if (round) {
+    return Math.round(Math.pow(10, round) * n) / Math.pow(10, round);
+  }
+
+  return n;
 }
 
 export function getImpactScale(absoluteImpact: number, scalePrefix: string) {

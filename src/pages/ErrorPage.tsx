@@ -1,6 +1,7 @@
 import { Alert, AlertTitle, Box, CssBaseline, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import TitleBar from "../components/TitleBar";
+import { Environment } from "../types/global";
 
 export default function ErrorPage() {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ export default function ErrorPage() {
         setFakeRole={() => {}}
         defaultTitle={"BNRA"}
         showUser={false}
+        environment={Environment.PUBLIC}
+        setEnvironment={() => {}}
       />
       <Box
         sx={{

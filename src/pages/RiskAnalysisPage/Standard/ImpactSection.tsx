@@ -1,13 +1,13 @@
 import { Box, Typography } from "@mui/material";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
 import getImpactColor from "../../../functions/getImpactColor";
 import { IMPACT_CATEGORY } from "../../../functions/Impact";
+import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 
 export default function ImpactSection({
   riskFile,
   impactName,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot<unknown, unknown>;
   impactName: "human" | "societal" | "environmental" | "financial";
 }) {
   const impactLetter = impactName[0] as "h" | "s" | "e" | "f";
@@ -31,7 +31,7 @@ export default function ImpactSection({
         className="htmleditor"
         sx={{ mb: 0, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
         dangerouslySetInnerHTML={{
-          __html: riskFile[`cr4de_mrs_impact_${impactLetter}`] || "",
+          __html: riskFile[`cr4de_quali_${impactLetter}_mrs`] || "",
         }}
       />
     </Box>

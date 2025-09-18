@@ -13,11 +13,11 @@ import {
 } from "@mui/material";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS, getWorstCaseScenario } from "../../functions/scenarios";
-import SummaryCharts from "../../components/charts/SummaryCharts";
+import { SCENARIOS } from "../../functions/scenarios";
+// import SummaryCharts from "../../components/charts/SummaryCharts";
 
 export default function ExecutiveSummaryGraph({
-  riskFile,
+  // riskFile,
   calculations,
   selectedNodeId,
 }: {
@@ -39,8 +39,8 @@ export default function ExecutiveSummaryGraph({
 
   if (!calculation) return null;
 
-  const trueScenario =
-    scenario === "wcs" ? getWorstCaseScenario(calculation) : scenario;
+  // const trueScenario =
+  //   scenario === "wcs" ? getWorstCaseScenario(calculation) : scenario;
 
   return (
     <Accordion disabled={!calculations || !selectedNodeId}>
@@ -48,7 +48,7 @@ export default function ExecutiveSummaryGraph({
         <Typography variant="subtitle2">Executive Summary diagrams</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{}}>
-        <SummaryCharts riskFile={riskFile} scenario={trueScenario} />
+        {/* <SummaryCharts riskFile={riskFile} scenario={trueScenario} /> */}
       </AccordionDetails>
       <AccordionActions>
         <Stack direction="row" spacing={5} sx={{ flex: 1 }}>

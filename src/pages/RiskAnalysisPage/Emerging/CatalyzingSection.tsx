@@ -1,11 +1,11 @@
 import { Box, Typography } from "@mui/material";
-import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
-import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
+import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
+import { DVCascadeSnapshot } from "../../../types/dataverse/DVCascadeSnapshot";
 
 function CatalyzingEffect({
   cascade,
 }: {
-  cascade: DVRiskCascade<SmallRisk, SmallRisk>;
+  cascade: DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>;
 }) {
   return (
     <Box
@@ -18,10 +18,10 @@ function CatalyzingEffect({
       }}
     >
       <a
-        href={`/risks/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}/evolution`}
+        href={`/risks/${cascade.cr4de_effect_risk._cr4de_risk_file_value}/evolution`}
       >
         <Typography variant="h6" sx={{ mb: 2 }}>
-          {cascade.cr4de_effect_hazard.cr4de_title}
+          {cascade.cr4de_effect_risk.cr4de_title}
         </Typography>
       </a>
       <Box
@@ -36,12 +36,14 @@ function CatalyzingEffect({
 export default function CatalyzingSection({
   cascades,
 }: {
-  cascades: DVRiskCascade<SmallRisk, SmallRisk>[];
+  cascades: DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[];
 }) {
   return (
     <>
       {cascades.map((c) => {
-        return <CatalyzingEffect key={c.cr4de_bnrariskcascadeid} cascade={c} />;
+        return (
+          <CatalyzingEffect key={c._cr4de_risk_cascade_value} cascade={c} />
+        );
       })}
     </>
   );

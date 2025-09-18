@@ -1,13 +1,20 @@
 import { TooltipProps } from "recharts";
 import { NameType } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Stack, Typography } from "@mui/material";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { SCENARIOS } from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
 import { capFirst } from "../../functions/capFirst";
 import ScenarioMatrixChart from "./svg/ScenarioMatrixChart";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../types/dataverse/DVRiskSnapshot";
 
-const CustomTooltip = ({ active, payload }: TooltipProps<number, NameType>) => {
+const CustomTooltip = ({
+  active,
+  payload,
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+TooltipProps<number, NameType> & { payload: any }) => {
   if (active && payload && payload.length) {
     return (
       <Box
@@ -64,7 +71,7 @@ export default function ScenarioMatrix({
   width = 300,
   height = 270,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
   mrs: SCENARIOS;
   fontSize?: number;
   radius?: number;

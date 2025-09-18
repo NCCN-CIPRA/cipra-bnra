@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Box, Stack, Link, Tooltip, Alert } from "@mui/material";
+import { Box, Stack, Link } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
 import MuiAccordionSummary, {
   AccordionSummaryProps,
@@ -9,14 +8,11 @@ import MuiAccordionSummary, {
 import MuiAccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import ErrorIcon from "@mui/icons-material/Error";
-import { DiscussionRequired } from "../../types/DiscussionRequired";
 import TextInputBox from "../../components/TextInputBox";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useOutletContext } from "react-router-dom";
-import { AuthPageContext } from "../AuthPage";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
+import { BasePageContext } from "../BasePage";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion elevation={0} square {...props} />
@@ -59,14 +55,14 @@ export default function Emerging({
   effects,
 }: // reloadCascades,
 {
-  riskFile: DVRiskFile;
-  effects: DVRiskCascade<unknown, SmallRisk>[];
+  riskFile: DVRiskSnapshot;
+  effects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[];
   // reloadCascades: () => Promise<unknown>;
 }) {
   return (
     <>
       <Box sx={{ mx: 4 }}>
-        {riskFile.cr4de_consensus_type === null && (
+        {/* {riskFile.cr4de_consensus_type === null && (
           <Box sx={{ mb: 4, border: "1px solid #ff9800aa" }}>
             <Alert severity="warning">
               The consensus phase for this risk file has not yet been started so
@@ -74,11 +70,11 @@ export default function Emerging({
               displayed.
             </Alert>
           </Box>
-        )}
+        )} */}
         <Box sx={{ mb: 8 }}>
           {effects.map((ca) => (
             <CatalyzedSection
-              key={ca.cr4de_bnrariskcascadeid}
+              key={ca._cr4de_risk_cascade_value}
               riskFile={riskFile}
               cascade={ca}
               // reloadCascades={reloadCascades}
@@ -95,18 +91,19 @@ function CatalyzedSection({
   cascade,
 }: // reloadCascades,
 {
-  riskFile: DVRiskFile;
-  cascade: DVRiskCascade<unknown, SmallRisk>;
+  riskFile: DVRiskSnapshot;
+  cascade: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>;
   // reloadCascades: () => Promise<unknown>;
 }) {
   // const api = useAPI();
-  const { user } = useOutletContext<AuthPageContext>();
-  const discussionRequired =
-    cascade.cr4de_discussion_required_cause || DiscussionRequired.NOT_NECESSARY;
+  const { user } = useOutletContext<BasePageContext>();
+  // const discussionRequired =
+  //   cascade.cr4de_discussion_required_cause || DiscussionRequired.NOT_NECESSARY;
 
   const [open, setOpen] = useState(
-    discussionRequired === DiscussionRequired.PREFERRED ||
-      discussionRequired === DiscussionRequired.REQUIRED
+    false
+    // discussionRequired === DiscussionRequired.PREFERRED ||
+    //   discussionRequired === DiscussionRequired.REQUIRED
   );
   // const [saving, setSaving] = useState(false);
 
@@ -133,20 +130,20 @@ function CatalyzedSection({
       >
         <Typography sx={{ flex: 1 }}>
           <Link
-            href={`/learning/risk/${riskFile.cr4de_riskfilesid}`}
+            href={`/learning/risk/${riskFile._cr4de_risk_file_value}`}
             target="_blank"
           >
             {riskFile.cr4de_title}
           </Link>{" "}
           catalyzes{" "}
           <Link
-            href={`/learning/risk/${cascade.cr4de_effect_hazard.cr4de_riskfilesid}`}
+            href={`/learning/risk/${cascade.cr4de_effect_risk._cr4de_risk_file_value}`}
             target="_blank"
           >
-            {cascade.cr4de_effect_hazard.cr4de_title}
+            {cascade.cr4de_effect_risk.cr4de_title}
           </Link>
         </Typography>
-        {user.roles.analist &&
+        {/* {user.roles.analist &&
           discussionRequired === DiscussionRequired.REQUIRED && (
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <ErrorIcon color="warning" />
@@ -163,7 +160,7 @@ function CatalyzedSection({
             <Tooltip title="The input received for this section was divergent and may require further discussion">
               <CheckCircleIcon color="success" />
             </Tooltip>
-          )}
+          )} */}
       </AccordionSummary>
       <AccordionDetails>
         <Stack direction="column" sx={{ width: "100%" }}>
@@ -171,7 +168,7 @@ function CatalyzedSection({
             <Typography variant="subtitle2" sx={{ mb: 2 }}>
               Final Consensus Results:
             </Typography>
-            {user.roles.analist ? (
+            {user?.roles.analist ? (
               <TextInputBox
                 initialValue={quali}
                 setUpdatedValue={(newValue) => {

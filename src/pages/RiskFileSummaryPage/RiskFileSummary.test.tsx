@@ -18,7 +18,7 @@ vi.mock("../../components/RiskFileTitle", () => ({
   ),
 }));
 
-vi.mock("../../components/charts/SummaryCharts.new", () => ({
+vi.mock("../../components/charts/SummaryCharts", () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   default: ({ riskSummary, scenario, manmade, canDownload }: any) => (
     <div data-testid="summary-charts">

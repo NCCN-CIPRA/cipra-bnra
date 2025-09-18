@@ -8,12 +8,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import {
-  SCENARIOS,
-  SCENARIO_PARAMS,
-  getScenarioParameter,
-} from "../../../functions/scenarios";
+import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import { hexToRGB } from "../../../functions/colors";
 import { useTranslation } from "react-i18next";
 import { ContentType } from "recharts/types/component/Tooltip";
@@ -21,6 +16,10 @@ import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../../types/dataverse/DVRiskSnapshot";
 
 export default function ScenarioMatrixChart({
   riskFile,
@@ -31,7 +30,7 @@ export default function ScenarioMatrixChart({
   height = 270,
   CustomTooltip,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
   mrs: SCENARIOS;
   fontSize?: number;
   radius?: number;
@@ -46,8 +45,8 @@ export default function ScenarioMatrixChart({
       id: s,
       name: s,
       color: SCENARIO_PARAMS[s].color,
-      x: getScenarioParameter(riskFile, "TP", s),
-      y: getScenarioParameter(riskFile, "TI", s),
+      x: riskFile.cr4de_quanti[s].tp.yearly.scale,
+      y: riskFile.cr4de_quanti[s].ti.all.scaleTot,
       z: 1,
     })
   );

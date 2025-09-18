@@ -9,6 +9,13 @@ import { Cascades } from "../../functions/cascades";
 import * as Emerging from "./Emerging/Emerging";
 import * as ManMade from "./ManMade/ManMade";
 import { createElement } from "react";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import {
+  causeRisksSummaryMock,
+  effectRisksSummaryMock,
+  quantiScenariosMock,
+} from "../../test/mocks";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 
 const ResizeObserverMock = vi.fn(() => ({
   observe: vi.fn(),
@@ -40,27 +47,54 @@ const EmergingSpy = vi.spyOn(Emerging, "default");
 const ManMadeSpy = vi.spyOn(ManMade, "default");
 
 // Sample test data
-const mockRiskSummary = {
+const mockRiskSummary: Partial<DVRiskSummary> = {
   _cr4de_risk_file_value: "risk1",
   cr4de_hazard_id: "H001",
   cr4de_title: "Earthquake Risk",
   cr4de_risk_type: RISK_TYPE.STANDARD,
   cr4de_mrs: SCENARIOS.MAJOR,
+  cr4de_causing_risks: JSON.stringify([causeRisksSummaryMock]),
+  cr4de_effect_risks: JSON.stringify([effectRisksSummaryMock]),
 };
 
-const mockEmergingRisk = {
+const mockSnapshot: Partial<DVRiskSnapshot> = {
+  _cr4de_risk_file_value: "risk1",
+  cr4de_hazard_id: "H001",
+  cr4de_title: "Earthquake Risk",
+  cr4de_risk_type: RISK_TYPE.STANDARD,
+  cr4de_mrs: SCENARIOS.MAJOR,
+  cr4de_quanti: quantiScenariosMock,
+};
+
+const mockEmergingRiskSummary: Partial<DVRiskSummary> = {
   ...mockRiskSummary,
   _cr4de_risk_file_value: "emerging1",
   cr4de_title: "Emerging Technology Risk",
   cr4de_risk_type: RISK_TYPE.EMERGING,
 };
 
-const mockManmadeRisk = {
+const mockEmergingSnapshot: Partial<DVRiskSnapshot> = {
+  ...mockSnapshot,
+  _cr4de_risk_file_value: "emerging1",
+  cr4de_title: "Emerging Technology Risk",
+  cr4de_risk_type: RISK_TYPE.EMERGING,
+  cr4de_quanti: quantiScenariosMock,
+};
+
+const mockManmadeRiskSummary: Partial<DVRiskSummary> = {
   ...mockRiskSummary,
   _cr4de_risk_file_value: "manmade1",
   cr4de_title: "Cyber Attack Risk",
   cr4de_risk_type: RISK_TYPE.MANMADE,
   cr4de_mrs: SCENARIOS.CONSIDERABLE,
+};
+
+const mockManmadeSnapshot: Partial<DVRiskSnapshot> = {
+  ...mockSnapshot,
+  _cr4de_risk_file_value: "manmade1",
+  cr4de_title: "Cyber Attack Risk",
+  cr4de_risk_type: RISK_TYPE.MANMADE,
+  cr4de_quanti: quantiScenariosMock,
 };
 
 const cascadesMock: Cascades = {
@@ -92,7 +126,7 @@ describe("RiskFileSummaryPage", () => {
         outletContext: {
           user: null,
           riskSummary: mockRiskSummary,
-          riskFile: mockRiskSummary,
+          riskSnapshot: mockSnapshot,
           cascades: cascadesMock,
         },
         client: queryClient,
@@ -107,8 +141,8 @@ describe("RiskFileSummaryPage", () => {
       renderWithContext(<RiskAnalysisPage />, {
         outletContext: {
           user: null,
-          riskSummary: mockEmergingRisk,
-          riskFile: mockEmergingRisk,
+          riskSummary: mockEmergingRiskSummary,
+          riskSnapshot: mockEmergingSnapshot,
           cascades: cascadesMock,
         },
         client: queryClient,
@@ -123,8 +157,8 @@ describe("RiskFileSummaryPage", () => {
       renderWithContext(<RiskAnalysisPage />, {
         outletContext: {
           user: null,
-          riskSummary: mockManmadeRisk,
-          riskFile: mockManmadeRisk,
+          riskSummary: mockManmadeRiskSummary,
+          riskSnapshot: mockManmadeSnapshot,
           cascades: cascadesMock,
         },
         client: queryClient,

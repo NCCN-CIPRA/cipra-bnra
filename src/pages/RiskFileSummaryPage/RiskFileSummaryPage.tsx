@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { Box, Container, Stack } from "@mui/material";
-import SummaryCharts from "../../components/charts/SummaryCharts.new";
+import SummaryCharts from "../../components/charts/SummaryCharts";
 import { SCENARIOS } from "../../functions/scenarios";
 import { useTranslation } from "react-i18next";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
@@ -12,8 +12,10 @@ import handleExportRiskfile from "../../functions/export/exportBNRA";
 import useAPI from "../../hooks/useAPI";
 import RiskFileSummaryTutorial from "./RiskFileSummaryTutorial";
 import HTMLEditor from "../../components/HTMLEditor";
+import { BasePageContext } from "../BasePage";
 
 export default function RiskFileSummaryPage() {
+  const { environment } = useOutletContext<BasePageContext>();
   const { i18n } = useTranslation();
   const api = useAPI();
   const { user, riskSummary } = useOutletContext<RiskFilePageContext>();
@@ -31,7 +33,7 @@ export default function RiskFileSummaryPage() {
             onSave={(newSummary) =>
               Promise.all([
                 api.updateRiskSummary(riskSummary.cr4de_bnrariskfilesummaryid, {
-                  cr4de_summary_en: newSummary,
+                  cr4de_summary_en: newSummary || undefined,
                 }),
                 api.updateRiskFile(riskSummary._cr4de_risk_file_value, {
                   cr4de_mrs_summary: newSummary,
@@ -58,7 +60,7 @@ export default function RiskFileSummaryPage() {
           <BNRASpeedDial
             offset={{ x: 0, y: 56 }}
             // editAction={() => setEditing(true)}
-            exportAction={handleExportRiskfile(riskSummary, api)}
+            exportAction={handleExportRiskfile(riskSummary, api, environment)}
             HelpComponent={RiskFileSummaryTutorial}
           />
         </Box>

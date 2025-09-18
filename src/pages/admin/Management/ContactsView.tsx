@@ -19,7 +19,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { SelectableContact } from "./Selectables";
 import dayDifference from "../../../functions/days";
 import { useOutletContext } from "react-router-dom";
-import { AuthPageContext } from "../../AuthPage";
+import { BasePageContext } from "../../BasePage";
 
 const SPECIAL_FILTERS = {
   MY_RISK_FILES: false,
@@ -47,7 +47,7 @@ export default function ContactsView({
   selectContact: (c: SelectableContact) => void;
   selectAll: () => void;
 }) {
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
 
   const [isLoading] = useState(false);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
@@ -277,8 +277,9 @@ export default function ContactsView({
               size={{
                 xs: 12,
                 sm: 6,
-                md: 4
-              }}>
+                md: 4,
+              }}
+            >
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.MY_RISK_FILES} />}
                 label="Show my risk files only (author)"
@@ -289,8 +290,9 @@ export default function ContactsView({
               size={{
                 xs: 12,
                 sm: 6,
-                md: 4
-              }}>
+                md: 4,
+              }}
+            >
               <FormControlLabel
                 control={
                   <Checkbox checked={specialFilters.MY_RISK_FILES_BACKUP} />
@@ -303,8 +305,9 @@ export default function ContactsView({
               size={{
                 xs: 12,
                 sm: 6,
-                md: 4
-              }}>
+                md: 4,
+              }}
+            >
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.EXPERTS_ONLY} />}
                 label="Hide CIPRA analists"
@@ -315,8 +318,9 @@ export default function ContactsView({
               size={{
                 xs: 12,
                 sm: 6,
-                md: 4
-              }}>
+                md: 4,
+              }}
+            >
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.REGISTERED_ONLY} />}
                 label="Hide unregistered contacts"
@@ -327,8 +331,9 @@ export default function ContactsView({
               size={{
                 xs: 12,
                 sm: 6,
-                md: 4
-              }}>
+                md: 4,
+              }}
+            >
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.REMINDER} />}
                 label="Show only problematic risk files"
@@ -339,8 +344,9 @@ export default function ContactsView({
               size={{
                 xs: 12,
                 sm: 6,
-                md: 4
-              }}>
+                md: 4,
+              }}
+            >
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.UNINVITED_ONLY} />}
                 label="Show only uninvited contacts"
@@ -351,8 +357,9 @@ export default function ContactsView({
               size={{
                 xs: 12,
                 sm: 6,
-                md: 4
-              }}>
+                md: 4,
+              }}
+            >
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.DONE_2A} />}
                 label="Show only step2A finished"
@@ -363,8 +370,9 @@ export default function ContactsView({
               size={{
                 xs: 12,
                 sm: 6,
-                md: 4
-              }}>
+                md: 4,
+              }}
+            >
               <FormControlLabel
                 control={<Checkbox checked={specialFilters.DONE_2B} />}
                 label="Show only step 2B finished"

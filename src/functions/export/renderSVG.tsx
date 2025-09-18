@@ -1,10 +1,9 @@
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { ProbabilityBarsChart } from "../../components/charts/svg/ProbabilityBarsChart";
-import { getScenarioParameter, SCENARIOS } from "../scenarios";
-import { getCategoryImpactRescaled } from "../CategoryImpact";
+import { SCENARIOS } from "../scenarios";
 import SummaryImpactChart from "../../components/charts/svg/SummaryImpactChart";
 import ScenarioMatrixChart from "../../components/charts/svg/ScenarioMatrixChart";
-import { Cascades } from "../cascades";
+import { CascadeSnapshotCatalogue, CascadeSnapshots } from "../cascades";
 import ProbabilitySankeyChart from "../../components/charts/svg/ProbabilitySankeyChart";
 import ImpactSankeyChart from "../../components/charts/svg/ImpactSankeyChart";
 import ImpactBarChart from "../../components/charts/svg/ImpactBarChart";
@@ -14,6 +13,9 @@ import { ReactElement } from "react";
 import NCCNLogo from "../../assets/icons/NCCNLogo";
 import BNRALogo from "../../assets/icons/BNRALogo";
 import NCCNDetail from "../../assets/icons/NCCNDetail";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { RiskCatalogue } from "../riskfiles";
 
 export type SummaryCharts = {
   pBarChartURI: string;
@@ -47,8 +49,9 @@ const barWidth = 300;
 const barHeight = 500;
 
 export default async function renderSVG(
-  riskFiles: DVRiskFile[],
-  allCascades: { [key: string]: Cascades },
+  riskFiles: DVRiskSummary[],
+  riskSnapshots: RiskCatalogue,
+  allCascades: CascadeSnapshotCatalogue<DVRiskSnapshot>,
   svg2PDF: (
     jsxChart: ReactElement,
     width: number,
@@ -62,15 +65,21 @@ export default async function renderSVG(
     triangles: await svg2PDF(<NCCNDetail />, 100, 100, "image/png"),
     riskFiles: await Promise.all(
       riskFiles.map((rf) => {
-        return renderRFCharts(rf, allCascades[rf.cr4de_riskfilesid], svg2PDF);
+        return renderRFCharts(
+          rf,
+          riskSnapshots[rf._cr4de_risk_file_value],
+          allCascades[rf._cr4de_risk_file_value],
+          svg2PDF
+        );
       })
     ),
   };
 }
 
 export async function renderRFCharts(
-  riskFile: DVRiskFile,
-  cascades: Cascades,
+  riskSummary: DVRiskSummary,
+  riskSnapshot: DVRiskSnapshot,
+  cascades: CascadeSnapshots<DVRiskSnapshot>,
   svg2PDF: (
     jsxChart: ReactElement,
     width: number,
@@ -78,18 +87,18 @@ export async function renderRFCharts(
     type?: string
   ) => Promise<string>
 ) {
-  if (riskFile.cr4de_risk_type === RISK_TYPE.EMERGING) {
+  if (riskSummary.cr4de_risk_type === RISK_TYPE.EMERGING) {
     return null;
   }
 
-  const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
+  const scenario = riskSummary.cr4de_mrs || SCENARIOS.CONSIDERABLE;
 
-  const tp = getScenarioParameter(riskFile, "TP", scenario) || 0;
+  const tp = riskSnapshot.cr4de_quanti[scenario].tp.yearly.scale;
 
-  const H = getCategoryImpactRescaled(riskFile, "H", scenario);
-  const S = getCategoryImpactRescaled(riskFile, "S", scenario);
-  const E = getCategoryImpactRescaled(riskFile, "E", scenario);
-  const F = getCategoryImpactRescaled(riskFile, "F", scenario);
+  const H = riskSnapshot.cr4de_quanti[scenario].ti.h.scaleCat;
+  const S = riskSnapshot.cr4de_quanti[scenario].ti.s.scaleCat;
+  const E = riskSnapshot.cr4de_quanti[scenario].ti.e.scaleCat;
+  const F = riskSnapshot.cr4de_quanti[scenario].ti.f.scaleCat;
 
   return {
     summary: {
@@ -145,7 +154,7 @@ export async function renderRFCharts(
     },
     scenarioChart: await svg2PDF(
       <ScenarioMatrixChart
-        riskFile={riskFile}
+        riskFile={riskSnapshot}
         mrs={scenario}
         fontSize={20}
         width={600}
@@ -157,10 +166,10 @@ export async function renderRFCharts(
     ),
     sankey: {
       probability: await svg2PDF(
-        riskFile.cr4de_risk_type === RISK_TYPE.STANDARD ? (
+        riskSummary.cr4de_risk_type === RISK_TYPE.STANDARD ? (
           <ProbabilitySankeyChart
-            riskFile={riskFile}
-            cascades={cascades}
+            riskSummary={riskSummary}
+            riskFile={riskSnapshot}
             maxCauses={null}
             shownCausePortion={0.8}
             minCausePortion={null}
@@ -173,8 +182,7 @@ export async function renderRFCharts(
           />
         ) : (
           <ActionsSankeyChart
-            riskFile={riskFile}
-            cascades={cascades}
+            riskFile={riskSnapshot}
             maxActions={null}
             shownActionPortion={0.8}
             minActionPortion={null}
@@ -190,8 +198,8 @@ export async function renderRFCharts(
       ),
       impact: await svg2PDF(
         <ImpactSankeyChart
-          riskFile={riskFile}
-          cascades={cascades}
+          riskSummary={riskSummary}
+          riskFile={riskSnapshot}
           maxEffects={null}
           shownEffectPortion={0.8}
           minEffectPortion={null}
@@ -206,7 +214,7 @@ export async function renderRFCharts(
       ),
       impactBars: await svg2PDF(
         <ImpactBarChart
-          riskFile={riskFile}
+          riskFile={riskSnapshot}
           scenario={scenario}
           width={barWidth}
           height={barHeight}
@@ -217,7 +225,7 @@ export async function renderRFCharts(
     },
     climateChange: await svg2PDF(
       <ClimateChangeChart
-        riskFile={riskFile}
+        riskFile={riskSnapshot}
         causes={cascades.causes}
         scenario={scenario}
         width={1000}

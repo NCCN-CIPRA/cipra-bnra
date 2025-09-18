@@ -16,8 +16,8 @@ import { Trans, useTranslation } from "react-i18next";
 import useAPI from "../hooks/useAPI";
 import { useOutletContext } from "react-router-dom";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
-import { AuthPageContext } from "../pages/AuthPage";
 import { FeedbackStep } from "../types/dataverse/DVFeedback";
+import { BasePageContext } from "../pages/BasePage";
 
 export default function SurveyDialog({
   open,
@@ -32,7 +32,7 @@ export default function SurveyDialog({
 }) {
   const { t } = useTranslation();
   const api = useAPI();
-  const { user } = useOutletContext<AuthPageContext>();
+  const { user } = useOutletContext<BasePageContext>();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -43,7 +43,7 @@ export default function SurveyDialog({
   const [quali, setQuali] = useState("");
 
   const handleSubmitFeedback = async () => {
-    if (!riskFile) return;
+    if (!riskFile || !user) return;
 
     setIsLoading(true);
 

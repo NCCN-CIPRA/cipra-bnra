@@ -1,13 +1,10 @@
 import { Box } from "@mui/material";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import { SCENARIO_SUFFIX } from "../../../functions/scenarios";
+import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 
 export default function CBSection({
   riskFile,
-  scenarioSuffix,
 }: {
-  riskFile: DVRiskFile;
-  scenarioSuffix: SCENARIO_SUFFIX;
+  riskFile: DVRiskSnapshot<unknown, unknown>;
 }) {
   return (
     <>
@@ -15,8 +12,7 @@ export default function CBSection({
         className="htmleditor"
         sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
         dangerouslySetInnerHTML={{
-          __html:
-            riskFile[`cr4de_cross_border_impact_quali${scenarioSuffix}`] || "",
+          __html: riskFile.cr4de_quali_cb_mrs || "",
         }}
       />
     </>

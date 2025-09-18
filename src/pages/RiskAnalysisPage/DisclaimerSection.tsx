@@ -1,14 +1,17 @@
 import { Box, Stack, Typography } from "@mui/material";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../types/dataverse/DVRiskSnapshot";
 
 export default function DisclaimerSection({
   riskFile,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
 }) {
-  if (!riskFile.cr4de_mrs_disclaimer) return null;
+  if (!riskFile.cr4de_quali_disclaimer_mrs) return null;
 
   return (
     <Box sx={{ mt: 8 }}>
@@ -35,7 +38,7 @@ export default function DisclaimerSection({
               fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
             }}
             dangerouslySetInnerHTML={{
-              __html: riskFile.cr4de_mrs_disclaimer || "",
+              __html: riskFile.cr4de_quali_disclaimer_mrs || "",
             }}
           />
         </Box>

@@ -11,15 +11,15 @@ import {
 } from "./styles";
 import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import LeftBorderSection from "./LeftBorderSection";
 import { BLACK } from "../../functions/colors";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 // import { LoggedInUser } from "../../hooks/useLoggedInUser";
 
 export default function EmergingDescriptionSection({
   riskFile,
 }: {
-  riskFile: DVRiskFile;
+  riskFile: DVRiskSnapshot;
 }) {
   const { t } = useTranslation();
 

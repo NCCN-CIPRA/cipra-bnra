@@ -7,19 +7,13 @@ import {
   Legend,
   Bar,
 } from "recharts";
-import { DVRiskFile } from "../../../types/dataverse/DVRiskFile";
-import {
-  SCENARIOS,
-  SCENARIO_PARAMS,
-  getCascadeParameter,
-  getScenarioParameter,
-} from "../../../functions/scenarios";
+import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import { JSXElementConstructor, useMemo } from "react";
 import round from "../../../functions/roundNumberString";
-import { DVRiskCascade } from "../../../types/dataverse/DVRiskCascade";
-import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { Cause as Cause2023 } from "../../../functions/Probability";
 import { useTranslation } from "react-i18next";
+import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
+import { DVCascadeSnapshot } from "../../../types/dataverse/DVCascadeSnapshot";
 
 type Cause2050 = Cause2023 & {
   p_c: number;
@@ -40,8 +34,8 @@ export default function ClimateChangeChart({
   xLabelDy = 25,
   CustomTooltip,
 }: {
-  riskFile: DVRiskFile;
-  causes: DVRiskCascade<SmallRisk, unknown>[];
+  riskFile: DVRiskSnapshot;
+  causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[];
   scenario: SCENARIOS;
   width?: number;
   height?: number;
@@ -55,59 +49,40 @@ export default function ClimateChangeChart({
   const data = useMemo(() => {
     const dTPAvg =
       (Math.abs(
-        (getScenarioParameter(riskFile, "TP50", SCENARIOS.CONSIDERABLE) ||
-          0.000001) -
-          (getScenarioParameter(riskFile, "TP", SCENARIOS.CONSIDERABLE) ||
-            0.000001)
+        riskFile.cr4de_quanti.considerable.tp50.yearly.scale -
+          riskFile.cr4de_quanti.considerable.tp.yearly.scale
       ) +
         Math.abs(
-          (getScenarioParameter(riskFile, "TP50", SCENARIOS.MAJOR) ||
-            0.000001) -
-            (getScenarioParameter(riskFile, "TP", SCENARIOS.MAJOR) || 0.000001)
+          riskFile.cr4de_quanti.major.tp50.yearly.scale -
+            riskFile.cr4de_quanti.major.tp.yearly.scale
         ) +
         Math.abs(
-          (getScenarioParameter(riskFile, "TP50", SCENARIOS.EXTREME) ||
-            0.000001) -
-            (getScenarioParameter(riskFile, "TP", SCENARIOS.EXTREME) ||
-              0.000001)
+          riskFile.cr4de_quanti.extreme.tp50.yearly.scale -
+            riskFile.cr4de_quanti.extreme.tp.yearly.scale
         )) /
       3;
 
     const enhCauses = [
       {
         name: "No underlying cause",
-        p_c:
-          getScenarioParameter(riskFile, "DP", SCENARIOS.CONSIDERABLE) ||
-          0.000001,
-        p2050_c:
-          getScenarioParameter(riskFile, "DP50", SCENARIOS.CONSIDERABLE) ||
-          0.000001,
-        p_m: getScenarioParameter(riskFile, "DP", SCENARIOS.MAJOR) || 0.000001,
-        p2050_m:
-          getScenarioParameter(riskFile, "DP50", SCENARIOS.MAJOR) || 0.000001,
-        p_e:
-          getScenarioParameter(riskFile, "DP", SCENARIOS.EXTREME) || 0.000001,
-        p2050_e:
-          getScenarioParameter(riskFile, "DP50", SCENARIOS.EXTREME) || 0.000001,
+        p_c: riskFile.cr4de_quanti.considerable.dp.scaleTot,
+        p2050_c: riskFile.cr4de_quanti.considerable.dp50.scaleTot,
+        p_m: riskFile.cr4de_quanti.major.dp.scaleTot,
+        p2050_m: riskFile.cr4de_quanti.major.dp50.scaleTot,
+        p_e: riskFile.cr4de_quanti.extreme.dp.scaleTot,
+        p2050_e: riskFile.cr4de_quanti.extreme.dp50.scaleTot,
       },
       ...(causes
-        .filter(
-          (c) => getCascadeParameter(c, SCENARIOS.CONSIDERABLE, "IP50") !== 0
-        )
+        .filter((c) => c.cr4de_quanti_cause[scenario].ip50.yearly.scale !== 0)
         .map((c) => {
           return {
-            name: c.cr4de_cause_hazard.cr4de_title,
-            p_c:
-              getCascadeParameter(c, SCENARIOS.CONSIDERABLE, "IP") || 0.000001,
-            p2050_c:
-              getCascadeParameter(c, SCENARIOS.CONSIDERABLE, "IP50") ||
-              0.000001,
-            p_m: getCascadeParameter(c, SCENARIOS.MAJOR, "IP") || 0.000001,
-            p2050_m:
-              getCascadeParameter(c, SCENARIOS.MAJOR, "IP50") || 0.000001,
-            p_e: getCascadeParameter(c, SCENARIOS.EXTREME, "IP") || 0.000001,
-            p2050_e:
-              getCascadeParameter(c, SCENARIOS.EXTREME, "IP50") || 0.000001,
+            name: c.cr4de_cause_risk.cr4de_title,
+            p_c: c.cr4de_quanti_cause.considerable.ip.yearly.scale,
+            p2050_c: c.cr4de_quanti_cause.considerable.ip50.yearly.scale,
+            p_m: c.cr4de_quanti_cause.major.ip.yearly.scale,
+            p2050_m: c.cr4de_quanti_cause.major.ip50.yearly.scale,
+            p_e: c.cr4de_quanti_cause.extreme.ip.yearly.scale,
+            p2050_e: c.cr4de_quanti_cause.extreme.ip50.yearly.scale,
           };
         }) || []),
     ]
@@ -124,7 +99,7 @@ export default function ClimateChangeChart({
       )
       .reduce(
         ([cumulCauses, pCumul], c, i) => {
-          if (pCumul / dTPAvg > 0.8 && i > 2)
+          if (pCumul / dTPAvg > 0.8 && i > 0)
             return [cumulCauses, pCumul] as [Cause2050[], number];
 
           return [
@@ -139,20 +114,13 @@ export default function ClimateChangeChart({
         [[], 0] as [Cause2050[], number]
       )[0];
 
-    const tp50_c =
-      getScenarioParameter(riskFile, "TP50", SCENARIOS.CONSIDERABLE) ||
-      0.000001;
-    const tp50_m =
-      getScenarioParameter(riskFile, "TP50", SCENARIOS.MAJOR) || 0.000001;
-    const tp50_e =
-      getScenarioParameter(riskFile, "TP50", SCENARIOS.EXTREME) || 0.000001;
+    const tp50_c = riskFile.cr4de_quanti.considerable.tp50.yearly.scale;
+    const tp50_m = riskFile.cr4de_quanti.major.tp50.yearly.scale;
+    const tp50_e = riskFile.cr4de_quanti.extreme.tp50.yearly.scale;
 
-    const tp_c =
-      getScenarioParameter(riskFile, "TP", SCENARIOS.CONSIDERABLE) || 0.000001;
-    const tp_m =
-      getScenarioParameter(riskFile, "TP", SCENARIOS.MAJOR) || 0.000001;
-    const tp_e =
-      getScenarioParameter(riskFile, "TP", SCENARIOS.EXTREME) || 0.000001;
+    const tp_c = riskFile.cr4de_quanti.considerable.tp.yearly.scale;
+    const tp_m = riskFile.cr4de_quanti.major.tp.yearly.scale;
+    const tp_e = riskFile.cr4de_quanti.extreme.tp.yearly.scale;
 
     return [
       {

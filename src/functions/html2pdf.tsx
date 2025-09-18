@@ -12,6 +12,8 @@ import {
   smallStyle,
   italicStyle,
 } from "../components/export/styles";
+import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
+import { DVRiskSnapshot } from "../types/dataverse/DVRiskSnapshot";
 
 type HTMLTag = {
   tagName: string;
@@ -358,7 +360,7 @@ const tag2PDF = (
 export default function html2PDF(
   html: string | null,
   section: Section,
-  riskFile: DVRiskFile
+  riskFile: DVRiskFile | DVRiskSummary | DVRiskSnapshot
 ): (ReactElement | null)[] {
   if (html === null) return [null];
 

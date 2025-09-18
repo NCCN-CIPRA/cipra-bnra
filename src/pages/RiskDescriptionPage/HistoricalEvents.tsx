@@ -1,6 +1,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { colors } from "../../functions/getCategoryColor";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { unwrap } from "../../functions/historicalEvents";
 
 export default function HistoricalEvents({
   riskSummary,
@@ -11,12 +12,14 @@ export default function HistoricalEvents({
 
   if (!riskSummary.cr4de_historical_events) return null;
 
+  const historicalEvents = unwrap(riskSummary.cr4de_historical_events);
+
   return (
     <Box
       sx={{ display: "flex", rowGap: 3, flexDirection: "column", mt: 2, ml: 0 }}
       className="historical"
     >
-      {riskSummary.cr4de_historical_events.map((e, i) => {
+      {historicalEvents.map((e, i) => {
         return (
           <Box
             key={e.id}

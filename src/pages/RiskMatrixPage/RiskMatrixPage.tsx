@@ -1,4 +1,4 @@
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -14,7 +14,6 @@ import {
 } from "@mui/material";
 import usePageTitle from "../../hooks/usePageTitle";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
-import { RiskPageContext } from "../BaseRisksPage";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import RiskMatrix from "../../components/charts/RiskMatrix";
@@ -24,11 +23,14 @@ import {
   RISK_CATEGORY,
 } from "../../types/dataverse/DVRiskFile";
 import { IMPACT_CATEGORY } from "../../functions/Impact";
+import { useQuery } from "@tanstack/react-query";
+import useAPI, { DataTable } from "../../hooks/useAPI";
+import { parseRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 
 export default function RiskMatrixPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { hazardCatalogue } = useOutletContext<RiskPageContext>();
+  const api = useAPI();
 
   const [scenario, setScenario] = useState<"All" | "MRS" | SCENARIOS>("MRS");
   const [category, setCategory] = useState<"All" | RISK_CATEGORY>("All");
@@ -44,6 +46,15 @@ export default function RiskMatrixPage() {
   const [scenarioDisplay, setScenarioDisplay] = useState<
     "colors" | "shapes" | "none"
   >("colors");
+
+  const { data: riskSnapshots } = useQuery({
+    queryKey: [DataTable.RISK_SNAPSHOT],
+    queryFn: () => api.getRiskSnapshots(),
+    select: (data) =>
+      data
+        .filter((rf) => !rf.cr4de_hazard_id.startsWith("X"))
+        .map((rf) => parseRiskSnapshot(rf)),
+  });
 
   usePageTitle(t("sideDrawer.riskMatrix", "Risk Matrix"));
   useBreadcrumbs([
@@ -68,7 +79,7 @@ export default function RiskMatrixPage() {
           }}
         >
           <RiskMatrix
-            riskFiles={hazardCatalogue}
+            riskFiles={riskSnapshots || null}
             setSelectedNodeId={(id) => {
               if (id) navigate(`/risks/${id}`);
             }}

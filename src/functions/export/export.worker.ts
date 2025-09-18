@@ -1,14 +1,11 @@
 import "./workerShim";
 
 import { createElement } from "react";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import DataverseBackend from "../i18Backend";
 import renderSVG from "./renderSVG";
-import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
-import { Cascades, getCascades } from "../cascades";
+import { getParsedCascadesSnapshotCatalogue } from "../cascades";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { BNRAExport } from "../../components/export/BNRAExport";
 import RiskFileExport from "../../components/export/RiskFilePDF";
@@ -16,6 +13,11 @@ import exportExcel from "./exportExcel";
 import svg2PDF from "../svg2PDF.worker";
 import "../../components/export/fonts";
 import FrontPageExport from "../../components/export/FontPageExport";
+import { expose } from "comlink";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
+import { getRiskCatalogueFromSnapshots } from "../riskfiles";
 
 export enum EXPORT_TYPE {
   ALL = "ALL",
@@ -44,54 +46,46 @@ i18n
     },
   });
 
-export const exportBNRA = async (
+const exportBNRA = async (
   data: {
     exportType: EXPORT_TYPE;
-    exportedRiskFiles: DVRiskFile[];
-    riskFiles: DVRiskFile[];
-    allCascades: DVRiskCascade[];
+    exportedRiskFiles: DVRiskSummary[];
+    riskFiles: DVRiskSummary[];
+    riskSnapshots: DVRiskSnapshot[];
+    allCascades: DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[];
     allAttachments: DVAttachment[];
   },
   onProgress: (message: string) => void
 ): Promise<Blob | null> => {
-  const {
-    exportType,
-    exportedRiskFiles,
-    riskFiles,
-    allCascades,
-    allAttachments,
-  } = data;
-  onProgress("Start export process...");
-  const { pdf } = await import("@react-pdf/renderer");
-
   try {
+    const {
+      exportType,
+      exportedRiskFiles,
+      riskFiles,
+      riskSnapshots,
+      allCascades,
+      allAttachments,
+    } = data;
+    onProgress("Start export process...");
+    const { pdf } = await import("@react-pdf/renderer");
+
     let doc: Blob;
 
-    const hc: { [key: string]: DVRiskFile } = riskFiles.reduce(
-      (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),
-      {}
-    );
-    const riskCascades: DVRiskCascade<SmallRisk, SmallRisk>[] = allCascades.map(
-      (c) => ({
-        ...c,
-        cr4de_cause_hazard: hc[c._cr4de_cause_hazard_value],
-        cr4de_effect_hazard: hc[c._cr4de_effect_hazard_value],
-      })
-    );
-
-    const cascades: { [key: string]: Cascades } = riskFiles.reduce(
-      (acc, rf) => getCascades(rf, acc, hc)(riskCascades),
-      {}
+    const hc = getRiskCatalogueFromSnapshots(riskSnapshots);
+    const cascades = getParsedCascadesSnapshotCatalogue(
+      riskSnapshots,
+      hc,
+      allCascades
     );
 
     if (exportType === EXPORT_TYPE.DATA) {
       doc = exportExcel({
         exportedRiskFiles,
-        riskFiles,
-        allCascades,
+        riskSnapshots: hc,
+        cascadeCatalogue: cascades,
       });
     } else if (exportType === EXPORT_TYPE.FRONTPAGE) {
-      const svgImages = await renderSVG([], {}, svg2PDF);
+      const svgImages = await renderSVG([], {}, {}, svg2PDF);
       doc = await pdf(
         createElement(FrontPageExport, {
           svgImages,
@@ -101,6 +95,7 @@ export const exportBNRA = async (
     } else {
       const svgImages = await renderSVG(
         exportType === EXPORT_TYPE.ALL ? riskFiles : exportedRiskFiles,
+        hc,
         cascades,
         svg2PDF
       );
@@ -111,6 +106,7 @@ export const exportBNRA = async (
         doc = await pdf(
           createElement(RiskFileExport, {
             toExport: exportedRiskFiles,
+            riskSnapshots: hc,
             allCascades: cascades,
             svgImages,
             allAttachments: allAttachments.map((a) => ({
@@ -126,6 +122,7 @@ export const exportBNRA = async (
         doc = await pdf(
           createElement(BNRAExport, {
             riskFiles,
+            riskSnapshots: hc,
             allCascades: cascades,
             allAttachments: allAttachments.map((a) => ({
               ...a,
@@ -151,3 +148,9 @@ export const exportBNRA = async (
     return null;
   }
 };
+
+const operations = { exportBNRA };
+
+expose(operations);
+
+export type ExportBNRAWorker = typeof operations;

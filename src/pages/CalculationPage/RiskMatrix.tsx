@@ -5,18 +5,13 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  // Tooltip,
   ResponsiveContainer,
-  TooltipProps,
   Cell,
   LabelList,
   Legend,
 } from "recharts";
 import { RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
-import {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
 import {
   Typography,
   Accordion,
@@ -97,14 +92,14 @@ const CATEGORIES: {
   },
 };
 
-const CATEGORY_NAMES: { [key: string]: string } = {
-  Cyber: "Cyber Risks",
-  EcoTech: "Economical and Technological Risks",
-  Health: "Health Risks",
-  "Man-made": "Man-made Risks and Malicious Actors",
-  Nature: "Natural Risks",
-  Transversal: "Societal Risks",
-};
+// const CATEGORY_NAMES: { [key: string]: string } = {
+//   Cyber: "Cyber Risks",
+//   EcoTech: "Economical and Technological Risks",
+//   Health: "Health Risks",
+//   "Man-made": "Man-made Risks and Malicious Actors",
+//   Nature: "Natural Risks",
+//   Transversal: "Societal Risks",
+// };
 
 const ES_RISKS = [
   "C05",
@@ -179,66 +174,67 @@ export default function RiskMatrix({
     "colors"
   );
 
-  const CustomTooltip = ({
-    active,
-    payload,
-  }: TooltipProps<ValueType, NameType>) => {
-    if (active) {
-      if (scales === "absolute")
-        return (
-          <Stack
-            sx={{
-              backgroundColor: "rgba(255,255,255,0.8)",
-              border: "1px solid #eee",
-              p: 1,
-            }}
-          >
-            <Typography variant="subtitle1">
-              {payload?.[0].payload.title}
-            </Typography>
-            <Typography variant="subtitle2">{`Total Probability: ${
-              Math.round((payload?.[1].value as number) * 100000) / 1000
-            }%`}</Typography>
-            <Typography variant="subtitle2">{`Total Impact: ${getMoneyString(
-              payload?.[0].value as number
-            )}`}</Typography>
-            <Typography variant="subtitle2">{`Total Risk: ${getMoneyString(
-              payload?.[0].payload.tr as number
-            )}`}</Typography>
-          </Stack>
-        );
-      return (
-        <Stack
-          sx={{
-            backgroundColor: "rgba(255,255,255,0.8)",
-            border: "1px solid #eee",
-            p: 1,
-          }}
-        >
-          <Typography variant="subtitle1">
-            {payload?.[0].payload.title}
-          </Typography>
-          <Typography variant="subtitle2">
-            {`Total Probability: ${
-              Math.round((payload?.[1].value as number) * 10) / 10
-            }`}{" "}
-            / 5
-          </Typography>
-          <Typography variant="subtitle2">
-            {`Total Impact: ${
-              Math.round((payload?.[0].value as number) * 10) / 10
-            }`}{" "}
-            / 5
-          </Typography>
-          <Typography variant="subtitle2">{`Total Risk: ${
-            Math.round((payload?.[0].payload.tr as number) * 10) / 10
-          }`}</Typography>
-        </Stack>
-      );
-    }
+  // const CustomTooltip = ({
+  //   active,
+  //   payload,
+  // }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // TooltipProps<ValueType, NameType> & { payload: any }) => {
+  //   if (active) {
+  //     if (scales === "absolute")
+  //       return (
+  //         <Stack
+  //           sx={{
+  //             backgroundColor: "rgba(255,255,255,0.8)",
+  //             border: "1px solid #eee",
+  //             p: 1,
+  //           }}
+  //         >
+  //           <Typography variant="subtitle1">
+  //             {payload?.[0].payload.title}
+  //           </Typography>
+  //           <Typography variant="subtitle2">{`Total Probability: ${
+  //             Math.round((payload?.[1].value as number) * 100000) / 1000
+  //           }%`}</Typography>
+  //           <Typography variant="subtitle2">{`Total Impact: ${getMoneyString(
+  //             payload?.[0].value as number
+  //           )}`}</Typography>
+  //           <Typography variant="subtitle2">{`Total Risk: ${getMoneyString(
+  //             payload?.[0].payload.tr as number
+  //           )}`}</Typography>
+  //         </Stack>
+  //       );
+  //     return (
+  //       <Stack
+  //         sx={{
+  //           backgroundColor: "rgba(255,255,255,0.8)",
+  //           border: "1px solid #eee",
+  //           p: 1,
+  //         }}
+  //       >
+  //         <Typography variant="subtitle1">
+  //           {payload?.[0].payload.title}
+  //         </Typography>
+  //         <Typography variant="subtitle2">
+  //           {`Total Probability: ${
+  //             Math.round((payload?.[1].value as number) * 10) / 10
+  //           }`}{" "}
+  //           / 5
+  //         </Typography>
+  //         <Typography variant="subtitle2">
+  //           {`Total Impact: ${
+  //             Math.round((payload?.[0].value as number) * 10) / 10
+  //           }`}{" "}
+  //           / 5
+  //         </Typography>
+  //         <Typography variant="subtitle2">{`Total Risk: ${
+  //           Math.round((payload?.[0].payload.tr as number) * 10) / 10
+  //         }`}</Typography>
+  //       </Stack>
+  //     );
+  //   }
 
-    return null;
-  };
+  //   return null;
+  // };
 
   const getColor = (entry: MatrixRisk) => {
     if (scenarios === "colors") {
@@ -462,10 +458,10 @@ export default function RiskMatrix({
                 />
               </>
             )}
-            <Tooltip
+            {/* <Tooltip
               cursor={{ strokeDasharray: "3 3" }}
               content={<CustomTooltip />}
-            />
+            /> */}
             {Object.entries(CATEGORIES).map(([CATEGORY, shape]) => {
               const catData =
                 dots?.filter((d) => d.category === CATEGORY) || [];
@@ -529,16 +525,16 @@ export default function RiskMatrix({
               <Box sx={{ flex: 1 }}>
                 <Legend
                   wrapperStyle={{ position: "relative" }}
-                  payload={Object.entries(CATEGORIES).map(
-                    ([CATEGORY, shape]) => ({
-                      value: CATEGORY_NAMES[CATEGORY],
-                      type: shape.shape,
-                      color:
-                        categories === "both"
-                          ? CATEGORIES[CATEGORY].color
-                          : "rgba(150,150,150,1)",
-                    })
-                  )}
+                  // payload={Object.entries(CATEGORIES).map(
+                  //   ([CATEGORY, shape]) => ({
+                  //     value: CATEGORY_NAMES[CATEGORY],
+                  //     type: shape.shape,
+                  //     color:
+                  //       categories === "both"
+                  //         ? CATEGORIES[CATEGORY].color
+                  //         : "rgba(150,150,150,1)",
+                  //   })
+                  // )}
                 />
               </Box>
             ))}
@@ -546,15 +542,15 @@ export default function RiskMatrix({
             <Box sx={{ flex: 1 }}>
               <Legend
                 wrapperStyle={{ position: "relative" }}
-                payload={Object.entries(SCENARIO_PARAMS).map(
-                  ([scenario, params]) => ({
-                    value: `${scenario[0].toUpperCase()}${scenario.slice(
-                      1
-                    )} Scenario`,
-                    type: "circle",
-                    color: params.color,
-                  })
-                )}
+                // payload={Object.entries(SCENARIO_PARAMS).map(
+                //   ([scenario, params]) => ({
+                //     value: `${scenario[0].toUpperCase()}${scenario.slice(
+                //       1
+                //     )} Scenario`,
+                //     type: "circle",
+                //     color: params.color,
+                //   })
+                // )}
               />
             </Box>
           )}

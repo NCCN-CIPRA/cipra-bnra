@@ -7,26 +7,63 @@ import TitleBar from "../components/TitleBar";
 import BreadcrumbNavigation from "../components/BreadcrumbNavigation";
 import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
 import satisfies from "../types/satisfies";
+import { Environment } from "../types/global";
+import { useQueryClient } from "@tanstack/react-query";
+import useAPI, { DataTable } from "../hooks/useAPI";
 
 export interface BasePageContext {
   user: LoggedInUser | null | undefined;
+  environment: Environment;
   refreshUser: () => void;
   setFakeRole: (role: string) => void;
+  setEnvironment: (newEnv: Environment) => void;
 }
 
 const drawerWidth = 320;
 
 export default function BasePage() {
   const { user, refreshUser, setFakeRole } = useLoggedInUser();
+  const [environment, setEnvironment] = useState<Environment>(
+    (localStorage.getItem("bnraEnv") as Environment) || Environment.PUBLIC
+  );
+  const queryClient = useQueryClient();
+  const api = useAPI();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const setAndSaveEnvironment = (newEnv: Environment) => {
+    setEnvironment(newEnv);
+    localStorage.setItem("bnraEnv", newEnv);
+  };
+
+  if (user && user.roles.analist && environment === Environment.DYNAMIC) {
+    queryClient.prefetchQuery({
+      queryKey: [DataTable.RISK_FILE],
+      queryFn: () => api.getRiskFiles(),
+    });
+    queryClient.prefetchQuery({
+      queryKey: [DataTable.RISK_CASCADE],
+      queryFn: () => api.getRiskCascades(),
+    });
+  } else if (user) {
+    queryClient.prefetchQuery({
+      queryKey: [DataTable.RISK_SNAPSHOT],
+      queryFn: () => api.getRiskSnapshots(),
+    });
+    queryClient.prefetchQuery({
+      queryKey: [DataTable.CASCADE_SNAPSHOT],
+      queryFn: () => api.getCascadeSnapshots(),
+    });
+  }
 
   return (
     <AppContextProvider>
       <CssBaseline />
       <TitleBar
         user={user}
+        environment={environment}
         setFakeRole={setFakeRole}
+        setEnvironment={setAndSaveEnvironment}
         onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
       />
       <SideDrawer
@@ -42,8 +79,10 @@ export default function BasePage() {
         <Outlet
           context={satisfies<BasePageContext>({
             user,
+            environment,
             refreshUser,
             setFakeRole,
+            setEnvironment: setAndSaveEnvironment,
           })}
         />
       </Box>

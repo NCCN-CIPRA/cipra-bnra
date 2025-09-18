@@ -1,5 +1,4 @@
-import { TooltipProps } from "recharts";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { TooltipContentProps } from "recharts";
 import { Box, Stack, Typography } from "@mui/material";
 import { SCENARIOS } from "../../functions/scenarios";
 import {
@@ -7,12 +6,17 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 import ImpactBarChart from "./svg/ImpactBarChart";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../types/dataverse/DVRiskSnapshot";
+import round from "../../functions/roundNumberString";
 
 const CustomTooltip = ({
   active,
   payload,
   label,
-}: TooltipProps<ValueType, NameType>) => {
+}: TooltipContentProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
     return (
       <Box
@@ -33,7 +37,7 @@ const CustomTooltip = ({
           <Stack key={p.name} direction="row" rowGap={0.5}>
             <Typography variant="body2" sx={{ width: 50, fontWeight: "bold" }}>
               {p.name}
-              {p.payload[`${p.name}_abs`]}
+              {round(p.payload[p.name || ""], 1, ".")}
             </Typography>
           </Stack>
         ))}
@@ -59,7 +63,7 @@ export default function ImpactBars({
   width,
   height,
 }: {
-  riskFile: DVRiskFile | null;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   scenario: SCENARIOS;
   width?: number;
   height?: number;
