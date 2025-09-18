@@ -26,7 +26,6 @@ import {
   getEffects,
   getRiskCascadesNew,
 } from "../../functions/cascades";
-import ImpactSankey from "../../components/charts/svg/ImpactSankeyChart";
 import ImpactBarChart from "../../components/charts/svg/ImpactBarChart";
 import SummarySection from "./SummarySection";
 import DescriptionSection from "./DescriptionSection";
@@ -36,7 +35,6 @@ import ScenarioMatrix from "../../components/charts/ScenarioMatrix";
 import BibliographySection from "./BibliographySection";
 import ClimateChangeChart from "../../components/charts/ClimateChangeChart";
 import useLoggedInUser, { LoggedInUser } from "../../hooks/useLoggedInUser";
-import { ProbabilityBarsChart } from "../../components/charts/svg/ProbabilityBarsChart";
 import {
   getCascadeResultSnapshot,
   snapshotFromRiskfile,
@@ -47,6 +45,8 @@ import {
   parseRiskSnapshot,
 } from "../../types/dataverse/DVRiskSnapshot";
 import { getParsedRiskCatalogue } from "../../functions/riskfiles";
+import { ProbabilityBarsChart } from "../../components/charts/svg/ProbabilityBarsChart";
+import ImpactSankeyChart from "../../components/charts/svg/ImpactSankeyChart";
 
 const barWidth = 300;
 const barHeight = 500;
@@ -233,7 +233,12 @@ export function ExportRiskFileCharts({
         id={`pBars-${riskFile.cr4de_riskfilesid}`}
         style={{ position: "absolute", top: -100000 }}
       >
-        <ProbabilityBarsChart chartWidth={200} height={100} tp={tp} />
+        <ProbabilityBarsChart
+          chartWidth={200}
+          height={100}
+          tp={tp}
+          maxScale={5}
+        />
       </div>
       <div
         id={`hChart-${riskFile.cr4de_riskfilesid}`}
@@ -305,7 +310,7 @@ export function ExportRiskFileCharts({
         id={`impactChart-${riskFile.cr4de_riskfilesid}`}
         style={{ position: "absolute", top: -100000 }}
       >
-        <ImpactSankey
+        <ImpactSankeyChart
           riskSummary={riskSummary}
           riskFile={riskSnapshot}
           maxEffects={null}
@@ -327,6 +332,7 @@ export function ExportRiskFileCharts({
           scenario={scenario}
           width={barWidth}
           height={barHeight}
+          maxScales={5}
         />
       </div>
       <div

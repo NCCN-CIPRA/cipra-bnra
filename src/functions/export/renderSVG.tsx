@@ -1,11 +1,9 @@
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import { ProbabilityBarsChart } from "../../components/charts/svg/ProbabilityBarsChart";
 import { SCENARIOS } from "../scenarios";
 import SummaryImpactChart from "../../components/charts/svg/SummaryImpactChart";
 import ScenarioMatrixChart from "../../components/charts/svg/ScenarioMatrixChart";
 import { CascadeSnapshotCatalogue, CascadeSnapshots } from "../cascades";
 import ProbabilitySankeyChart from "../../components/charts/svg/ProbabilitySankeyChart";
-import ImpactSankeyChart from "../../components/charts/svg/ImpactSankeyChart";
 import ImpactBarChart from "../../components/charts/svg/ImpactBarChart";
 import ClimateChangeChart from "../../components/charts/svg/ClimateChangeChart";
 import ActionsSankeyChart from "../../components/charts/svg/ActionsSankeyChart";
@@ -16,6 +14,8 @@ import NCCNDetail from "../../assets/icons/NCCNDetail";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 import { RiskCatalogue } from "../riskfiles";
+import { ProbabilityBarsChart } from "../../components/charts/svg/ProbabilityBarsChart";
+import ImpactSankeyChart from "../../components/charts/svg/ImpactSankeyChart";
 
 export type SummaryCharts = {
   pBarChartURI: string;
@@ -103,7 +103,12 @@ export async function renderRFCharts(
   return {
     summary: {
       pBarChartURI: await svg2PDF(
-        <ProbabilityBarsChart chartWidth={2000} height={1000} tp={tp} />,
+        <ProbabilityBarsChart
+          chartWidth={2000}
+          height={1000}
+          tp={tp}
+          maxScale={5}
+        />,
         2000,
         1000
       ),
@@ -160,6 +165,7 @@ export async function renderRFCharts(
         width={600}
         height={540}
         radius={600}
+        maxScale={5}
       />,
       5000,
       2500
@@ -218,6 +224,7 @@ export async function renderRFCharts(
           scenario={scenario}
           width={barWidth}
           height={barHeight}
+          maxScales={5}
         />,
         5000,
         2500

@@ -20,6 +20,8 @@ import {
   DVRiskSnapshot,
   RiskSnapshotResults,
 } from "../../../types/dataverse/DVRiskSnapshot";
+import { tpScale5to7 } from "../../../functions/indicators/probability";
+import { tiScale5to7 } from "../../../functions/indicators/impact";
 
 export default function ScenarioMatrixChart({
   riskFile,
@@ -28,6 +30,7 @@ export default function ScenarioMatrixChart({
   radius = 150,
   width = 300,
   height = 270,
+  maxScale = 5,
   CustomTooltip,
 }: {
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
@@ -36,6 +39,7 @@ export default function ScenarioMatrixChart({
   radius?: number;
   width?: number;
   height?: number;
+  maxScale: number;
   CustomTooltip?: ContentType<ValueType, NameType> | null;
 }) {
   const { t } = useTranslation();
@@ -45,8 +49,14 @@ export default function ScenarioMatrixChart({
       id: s,
       name: s,
       color: SCENARIO_PARAMS[s].color,
-      x: riskFile.cr4de_quanti[s].tp.yearly.scale,
-      y: riskFile.cr4de_quanti[s].ti.all.scaleTot,
+      x:
+        maxScale === 7
+          ? tpScale5to7(riskFile.cr4de_quanti[s].tp.yearly.scale)
+          : riskFile.cr4de_quanti[s].tp.yearly.scale,
+      y:
+        maxScale === 7
+          ? tiScale5to7(riskFile.cr4de_quanti[s].ti.all.scaleTot)
+          : riskFile.cr4de_quanti[s].ti.all.scaleTot,
       z: 1,
     })
   );
@@ -79,8 +89,10 @@ export default function ScenarioMatrixChart({
       <YAxis
         type="number"
         dataKey="x"
-        domain={[0, 5.5]}
-        ticks={[1, 2, 3, 4, 5]}
+        domain={[0, maxScale + 0.5]}
+        ticks={Array(maxScale)
+          .fill(null)
+          .map((_, i) => i + 1)}
         fontSize={fontSize}
         // tickFormatter={(v: number) => `${v * 100}%`}
         name="probability"
@@ -97,8 +109,10 @@ export default function ScenarioMatrixChart({
         type="number"
         dataKey="y"
         scale="linear"
-        domain={[0, 5.5]}
-        ticks={[1, 2, 3, 4, 5]}
+        domain={[0, maxScale + 0.5]}
+        ticks={Array(maxScale)
+          .fill(null)
+          .map((_, i) => i + 1)}
         fontSize={fontSize}
         // tickFormatter={(v: number) => String(Math.round(Math.log10(v)) - 7)}
         name="impact"

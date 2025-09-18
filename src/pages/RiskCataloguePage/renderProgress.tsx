@@ -2,6 +2,12 @@ import * as React from "react";
 import clsx from "clsx";
 import { styled } from "@mui/material/styles";
 import { GridRenderCellParams, GridValidRowModel } from "@mui/x-data-grid";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../BasePage";
+import { Indicators } from "../../types/global";
+import round from "../../functions/roundNumberString";
+import { Typography } from "@mui/material";
+import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 
 interface ProgressBarProps {
   value: number;
@@ -44,12 +50,17 @@ const Bar = styled("div")({
 });
 
 const ProgressBar = React.memo(function ProgressBar(props: ProgressBarProps) {
+  const { indicators } = useOutletContext<BasePageContext>();
+
+  const maxScale = indicators === Indicators.V1 ? 5 : 7;
   const { value } = props;
-  const valueInPercent = (100 * value) / 5;
+  const valueInPercent = (100 * value) / maxScale;
 
   return (
     <Element>
-      <Value>{value} / 5</Value>
+      <Value>
+        {round(value, 2)} / {maxScale}
+      </Value>
       <Bar
         className={clsx({
           low: valueInPercent > 80,
@@ -68,6 +79,22 @@ export function renderProgress(
   if (params.value == null) {
     return "";
   }
+  if (params.row.cr4de_risk_type === RISK_TYPE.EMERGING)
+    return (
+      <Typography
+        sx={{
+          borderRadius: "50%",
+          width: 30,
+          minWidth: 30,
+          height: 50,
+          lineHeight: 50,
+          pointerEvents: "none",
+          ml: 8.5,
+        }}
+      >
+        -
+      </Typography>
+    );
 
   return (
     <Center>

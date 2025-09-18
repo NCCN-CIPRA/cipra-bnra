@@ -9,6 +9,11 @@ import SaveIcon from "@mui/icons-material/Download";
 import { Trans, useTranslation } from "react-i18next";
 import SummaryImpactChart, { pieWidth } from "./svg/SummaryImpactChart";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { tpScale5to7 } from "../../functions/indicators/probability";
+import { categoryImpactScale5to7 } from "../../functions/indicators/impact";
+import { BasePageContext } from "../../pages/BasePage";
+import { useOutletContext } from "react-router-dom";
+import { Indicators } from "../../types/global";
 
 export default function SummaryCharts({
   riskSummary,
@@ -21,7 +26,7 @@ export default function SummaryCharts({
   canDownload?: boolean;
 }) {
   const { t } = useTranslation();
-  // const { user } = useOutletContext<AuthPageContext>();
+  const { indicators } = useOutletContext<BasePageContext>();
 
   // useRecord<DVAnalysisRun>({
   //   table: DataTable.ANALYSIS_RUN,
@@ -53,12 +58,28 @@ export default function SummaryCharts({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getDivJpeg]);
 
-  const tp = riskSummary.cr4de_mrs_p || 0;
+  const maxScale = indicators === Indicators.V1 ? 5 : 7;
 
-  const H = riskSummary.cr4de_mrs_h || 0;
-  const S = riskSummary.cr4de_mrs_s || 0;
-  const E = riskSummary.cr4de_mrs_e || 0;
-  const F = riskSummary.cr4de_mrs_f || 0;
+  const tp = Indicators.V1
+    ? riskSummary.cr4de_mrs_p || 0
+    : tpScale5to7(riskSummary.cr4de_mrs_p || 0);
+
+  const H =
+    indicators === Indicators.V1
+      ? riskSummary.cr4de_mrs_h || 0
+      : categoryImpactScale5to7(riskSummary.cr4de_mrs_h || 0);
+  const S =
+    indicators === Indicators.V1
+      ? riskSummary.cr4de_mrs_s || 0
+      : categoryImpactScale5to7(riskSummary.cr4de_mrs_s || 0);
+  const E =
+    indicators === Indicators.V1
+      ? riskSummary.cr4de_mrs_e || 0
+      : categoryImpactScale5to7(riskSummary.cr4de_mrs_e || 0);
+  const F =
+    indicators === Indicators.V1
+      ? riskSummary.cr4de_mrs_f || 0
+      : categoryImpactScale5to7(riskSummary.cr4de_mrs_f || 0);
 
   return (
     <Box sx={{ position: "relative" }}>
@@ -74,7 +95,7 @@ export default function SummaryCharts({
             </Typography>
             <SummaryImpactChart category="H" value={H} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {t(getScaleString(H))}
+              {t(getScaleString(H, maxScale))}
             </Typography>
           </Stack>
           <Stack direction="column">
@@ -83,7 +104,7 @@ export default function SummaryCharts({
             </Typography>
             <SummaryImpactChart category="S" value={S} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {t(getScaleString(S))}
+              {t(getScaleString(S, maxScale))}
             </Typography>
           </Stack>
         </Stack>
@@ -96,7 +117,7 @@ export default function SummaryCharts({
             </Typography>
             <SummaryImpactChart category="E" value={E} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {t(getScaleString(E))}
+              {t(getScaleString(E, maxScale))}
             </Typography>
           </Stack>
           <Stack direction="column">
@@ -105,7 +126,7 @@ export default function SummaryCharts({
             </Typography>
             <SummaryImpactChart category="F" value={F} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {t(getScaleString(F))}
+              {t(getScaleString(F, maxScale))}
             </Typography>
           </Stack>
         </Stack>

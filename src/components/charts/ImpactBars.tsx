@@ -11,6 +11,9 @@ import {
   RiskSnapshotResults,
 } from "../../types/dataverse/DVRiskSnapshot";
 import round from "../../functions/roundNumberString";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../../pages/BasePage";
+import { Indicators } from "../../types/global";
 
 const CustomTooltip = ({
   active,
@@ -68,5 +71,16 @@ export default function ImpactBars({
   width?: number;
   height?: number;
 }) {
-  return ImpactBarChart({ riskFile, scenario, width, height, CustomTooltip });
+  const { indicators } = useOutletContext<BasePageContext>();
+
+  const maxScales = indicators === Indicators.V1 ? 5 : 7;
+
+  return ImpactBarChart({
+    riskFile,
+    scenario,
+    width,
+    height,
+    maxScales,
+    CustomTooltip,
+  });
 }

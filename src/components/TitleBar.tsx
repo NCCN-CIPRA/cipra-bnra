@@ -11,7 +11,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Trans, useTranslation } from "react-i18next";
 import { LoggedInUser } from "../hooks/useLoggedInUser";
 import { usePageTitleValue } from "../hooks/usePageTitle";
-import { Environment } from "../types/global";
+import { Environment, Indicators } from "../types/global";
 import TranslateIcon from "@mui/icons-material/Translate";
 import SettingsIcon from "@mui/icons-material/Settings";
 
@@ -20,16 +20,20 @@ export default function TitleBar({
   onDrawerToggle,
   user,
   environment,
+  indicators,
   setFakeRole,
   setEnvironment,
+  setIndicators,
   defaultTitle,
 }: {
   showUser?: boolean;
   onDrawerToggle?: () => void;
   user: LoggedInUser | null | undefined;
   environment: Environment;
+  indicators: Indicators;
   setFakeRole: (role: string) => void;
   setEnvironment: (newEnv: Environment) => void;
+  setIndicators: (newInd: Indicators) => void;
   defaultTitle?: string;
 }) {
   const { i18n } = useTranslation();
@@ -45,9 +49,7 @@ export default function TitleBar({
   );
   const [anchorElRole, setAnchorElRole] = useState<null | HTMLElement>(null);
   const [anchorElEnv, setAnchorElEnv] = useState<null | HTMLElement>(null);
-  // const [anchorElScales, setAnchorElScales] = useState<null | HTMLElement>(
-  //   null
-  // );
+  const [anchorElInd, setAnchorElInd] = useState<null | HTMLElement>(null);
   // const [anchorElDiff, setAnchorElDiff] = useState<null | HTMLElement>(null);
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -67,17 +69,23 @@ export default function TitleBar({
     handleCloseSubMenus();
     setAnchorElEnv(event.currentTarget);
   };
+  const handleOpenIndMenu = (event: React.MouseEvent<HTMLElement>) => {
+    handleCloseSubMenus();
+    setAnchorElInd(event.currentTarget);
+  };
   const handleCloseMenus = () => {
     setAnchorElUser(null);
     setAnchorElLanguage(null);
     setAnchorElSettings(null);
     setAnchorElRole(null);
     setAnchorElEnv(null);
+    setAnchorElInd(null);
   };
 
   const handleCloseSubMenus = () => {
     setAnchorElRole(null);
     setAnchorElEnv(null);
+    setAnchorElInd(null);
   };
 
   const getRoleDisplay = () => {
@@ -290,13 +298,55 @@ export default function TitleBar({
                       </MenuItem>
                     </Menu>
                   </MenuItem>
-                  <MenuItem disabled>
+                  <MenuItem onMouseEnter={handleOpenIndMenu}>
                     <Typography sx={{ textAlign: "left", flex: 1 }}>
-                      Damage Indicators:
+                      Indicators:
                     </Typography>
                     <Typography variant="body2" sx={{ pl: 2 }}>
-                      V1.0
+                      {indicators}
                     </Typography>
+
+                    <Menu
+                      id="menu-ind"
+                      sx={{ top: -8, left: -10 }}
+                      anchorEl={anchorElInd}
+                      anchorOrigin={{
+                        vertical: "top",
+                        horizontal: "left",
+                      }}
+                      keepMounted
+                      transformOrigin={{
+                        vertical: "top",
+                        horizontal: "right",
+                      }}
+                      open={Boolean(anchorElInd)}
+                      onClose={handleCloseMenus}
+                      slotProps={{
+                        root: { sx: { pointerEvents: "none" } },
+                        paper: { sx: { pointerEvents: "auto" } },
+                      }}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          setIndicators(Indicators.V1);
+                          handleCloseMenus();
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          V1 - 5 point scales
+                        </Typography>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          setIndicators(Indicators.V2);
+                          handleCloseMenus();
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          V2 - 7 point scales
+                        </Typography>
+                      </MenuItem>
+                    </Menu>
                   </MenuItem>
                   <MenuItem disabled>
                     <Typography sx={{ textAlign: "left", flex: 1 }}>

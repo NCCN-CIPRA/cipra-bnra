@@ -4,7 +4,7 @@ import {
   returnPeriodMonthsFromPScale7,
   pScale5FromReturnPeriodMonths,
   pScale7FromReturnPeriodMonths,
-  PScale5to7,
+  pScale5to7,
 } from "./probability"; // Adjust import path as needed
 
 describe("P5-Scale Conversion Functions", () => {
@@ -181,7 +181,7 @@ describe("Mathematical properties", () => {
 
   test("conversion functions should preserve ordering", () => {
     const pScale5Values = [0, 1, 2, 3, 4];
-    const pScale7Values = pScale5Values.map(PScale5to7);
+    const pScale7Values = pScale5Values.map(pScale5to7);
 
     // P-Scale 7 values should be in increasing order (same as P-Scale 5)
     for (let i = 0; i < pScale7Values.length - 1; i++) {

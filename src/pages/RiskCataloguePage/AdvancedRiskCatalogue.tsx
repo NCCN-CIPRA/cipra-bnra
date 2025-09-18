@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
@@ -10,8 +10,21 @@ import { capFirst } from "../../functions/capFirst";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { renderProgress } from "./renderProgress";
 import { getImpactScaleFloat } from "../../functions/Impact";
+import { BasePageContext } from "../BasePage";
+import { Indicators } from "../../types/global";
+import { tpScale5to7 } from "../../functions/indicators/probability";
+import {
+  iScale7FromEuros,
+  tiScale5to7,
+} from "../../functions/indicators/impact";
 
-const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
+const columns = (
+  t: typeof i18next.t,
+  maxScale: number = 5,
+  rescaleTP: (n: number) => number = (n) => n,
+  rescaleDI: (n: number) => number = (n) => n,
+  rescaleTI: (n: number) => number = (n) => n
+): GridColDef<DVRiskSnapshot>[] => [
   { field: "cr4de_hazard_id", headerName: "ID", width: 80 },
   {
     field: "title",
@@ -87,7 +100,10 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     width: 200,
     editable: true,
     valueGetter: (_, row) =>
-      row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].tp.yearly.scale,
+      rescaleTP(
+        row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].tp.yearly
+          .scale
+      ),
     renderCell: renderProgress,
   },
   {
@@ -96,7 +112,10 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     width: 200,
     editable: true,
     valueGetter: (_, row) =>
-      row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.all.scaleTot,
+      rescaleTI(
+        row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.all
+          .scaleTot
+      ),
     renderCell: renderProgress,
   },
   {
@@ -107,11 +126,15 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     valueGetter: (_, row) =>
       Math.round(
         (100 *
-          (row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].tp.yearly
-            .scale *
-            row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.all
-              .scaleTot)) /
-          5
+          (rescaleTP(
+            row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].tp.yearly
+              .scale
+          ) *
+            rescaleTI(
+              row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.all
+                .scaleTot
+            ))) /
+          maxScale
       ) / 100,
     renderCell: renderProgress,
   },
@@ -120,13 +143,17 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     headerName: "Ha",
     width: 200,
     editable: true,
-    valueGetter: (_, row) =>
-      Math.round(
-        100 *
-          getImpactScaleFloat(
-            row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.ha.abs
-          )
-      ) / 100,
+    valueGetter: (_, row) => {
+      return (
+        Math.round(
+          100 *
+            rescaleDI(
+              row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.ha
+                .abs
+            )
+        ) / 100
+      );
+    },
     renderCell: renderProgress,
   },
   {
@@ -137,7 +164,7 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     valueGetter: (_, row) =>
       Math.round(
         100 *
-          getImpactScaleFloat(
+          rescaleDI(
             row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.hb.abs
           )
       ) / 100,
@@ -151,7 +178,7 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     valueGetter: (_, row) =>
       Math.round(
         100 *
-          getImpactScaleFloat(
+          rescaleDI(
             row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.hc.abs
           )
       ) / 100,
@@ -165,7 +192,7 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     valueGetter: (_, row) =>
       Math.round(
         100 *
-          getImpactScaleFloat(
+          rescaleDI(
             row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.sa.abs
           )
       ) / 100,
@@ -179,7 +206,7 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     valueGetter: (_, row) =>
       Math.round(
         100 *
-          getImpactScaleFloat(
+          rescaleDI(
             row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.sb.abs
           )
       ) / 100,
@@ -193,7 +220,7 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     valueGetter: (_, row) =>
       Math.round(
         100 *
-          getImpactScaleFloat(
+          rescaleDI(
             row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.sc.abs
           )
       ) / 100,
@@ -207,7 +234,7 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     valueGetter: (_, row) =>
       Math.round(
         100 *
-          getImpactScaleFloat(
+          rescaleDI(
             row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.sd.abs
           )
       ) / 100,
@@ -221,7 +248,7 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     valueGetter: (_, row) =>
       Math.round(
         100 *
-          getImpactScaleFloat(
+          rescaleDI(
             row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.ea.abs
           )
       ) / 100,
@@ -235,7 +262,7 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     valueGetter: (_, row) =>
       Math.round(
         100 *
-          getImpactScaleFloat(
+          rescaleDI(
             row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.fa.abs
           )
       ) / 100,
@@ -249,7 +276,7 @@ const columns = (t: typeof i18next.t): GridColDef<DVRiskSnapshot>[] => [
     valueGetter: (_, row) =>
       Math.round(
         100 *
-          getImpactScaleFloat(
+          rescaleDI(
             row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.fb.abs
           )
       ) / 100,
@@ -266,12 +293,17 @@ export default function AdvancedRiskCatalogue({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { indicators } = useOutletContext<BasePageContext>();
 
   return (
     <Paper sx={{ mb: 0, mx: 9, height: "calc(100vh - 170px)" }}>
       <DataGrid
         rows={riskFiles}
-        columns={columns(t)}
+        columns={
+          indicators === Indicators.V1
+            ? columns(t, 5, (n) => n, getImpactScaleFloat)
+            : columns(t, 7, tpScale5to7, iScale7FromEuros, tiScale5to7)
+        }
         getRowId={(rf) => rf._cr4de_risk_file_value}
         initialState={{
           pagination: {

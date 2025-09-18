@@ -12,13 +12,18 @@ import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import {
   DIRECT_ANALYSIS_SECTIONS_MANMADE,
   PARAMETER,
-  getQualiFieldName,
+  // getQualiFieldName,
   getQuantiFieldNames,
 } from "../../functions/inputProcessing";
 import TextInputBox from "../../components/TextInputBox";
 import { CascadeSnapshotMatrix } from "./CascadeMatrix";
 import { useOutletContext } from "react-router-dom";
-import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import {
+  DVRiskSnapshot,
+  parseRiskSnapshotQuali,
+  RiskSnapshotQualis,
+  RiskSnapshotResults,
+} from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { BasePageContext } from "../BasePage";
 import { Slider } from "./Slider";
@@ -82,6 +87,8 @@ export default function ManMade({
   // reloadRiskFile: () => Promise<unknown>;
   // reloadCascades: () => Promise<unknown>;
 }) {
+  const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
+
   return (
     <>
       <Box sx={{ mx: 4 }}>
@@ -96,7 +103,7 @@ export default function ManMade({
         )} */}
         <Box sx={{ mb: 8 }}>
           <ParameterSection
-            riskFile={riskFile}
+            riskFile={parsedRiskFile}
             // directAnalyses={directAnalyses}
             // cascadeAnalyses={cascadeAnalyses}
             // reloadRiskFile={reloadRiskFile}
@@ -142,7 +149,7 @@ function ParameterSection({
 // cascadeAnalyses,
 // reloadRiskFile,
 {
-  riskFile: DVRiskSnapshot;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, RiskSnapshotQualis>;
   // directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   // cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
   // reloadRiskFile: () => Promise<unknown>;
@@ -256,14 +263,14 @@ function ScenarioSection({
 }: // directAnalyses,
 // reloadRiskFile,
 {
-  riskFile: DVRiskSnapshot;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, RiskSnapshotQualis>;
   scenario: SCENARIOS;
   // directAnalyses: DVDirectAnalysis<unknown, DVContact>[];
   // cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[];
   // reloadRiskFile: () => Promise<unknown>;
 }) {
   // const api = useAPI();
-  const { user } = useOutletContext<BasePageContext>();
+  // const { user } = useOutletContext<BasePageContext>();
   const section = DIRECT_ANALYSIS_SECTIONS_MANMADE[PARAMETER.DP];
   // const discussionRequired = useMemo(() => {
   //   if (!riskFile.cr4de_discussion_required) return false;
@@ -281,20 +288,22 @@ function ScenarioSection({
   );
   // const [saving, setSaving] = useState(false);
 
-  const qualiName = useMemo(
-    () => getQualiFieldName(scenario, section),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [scenario]
-  );
+  // const qualiName = useMemo(
+  //   () => getQualiFieldName(scenario, section),
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  //   [scenario]
+  // );
   const quantiNames = useMemo(
     () => getQuantiFieldNames(scenario, section),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [scenario]
   );
 
-  const [quali, setQuali] = useState<string | null>(
-    (riskFile[qualiName as keyof DVRiskSnapshot] as string | null) || ""
-  );
+  // const [quali, setQuali] = useState<string | null>(
+  //   (riskFile[qualiName as keyof DVRiskSnapshot] as string | null) || ""
+  // );
+
+  const [quali] = useState<string | null>(riskFile.cr4de_quali[scenario].dp);
 
   // const handleSave = async () => {
   //   setSaving(true);
@@ -358,7 +367,7 @@ function ScenarioSection({
         <Box sx={{ p: 2 }}>
           <Typography variant="subtitle2">Final Consensus Results:</Typography>
           <Box sx={{ mt: 2, mb: 4 }}>
-            {user?.roles.analist ? (
+            {/* {user?.roles.analist ? (
               <TextInputBox
                 initialValue={quali}
                 setUpdatedValue={(newValue) => {
@@ -366,20 +375,20 @@ function ScenarioSection({
                 }}
                 // onSave={async (newValue) => handleSave(qualiName, newValue)}
               />
-            ) : (
-              <Box
-                dangerouslySetInnerHTML={{
-                  __html: quali || "",
-                }}
-                sx={{
-                  mt: 1,
-                  mb: 2,
-                  ml: 1,
-                  pl: 1,
-                  borderLeft: "4px solid #eee",
-                }}
-              />
-            )}
+            ) : ( */}
+            <Box
+              dangerouslySetInnerHTML={{
+                __html: quali || "",
+              }}
+              sx={{
+                mt: 1,
+                mb: 2,
+                ml: 1,
+                pl: 1,
+                borderLeft: "4px solid #eee",
+              }}
+            />
+            {/* )} */}
 
             {quantiNames.length > 0 && (
               <Stack direction="column" sx={{ mt: 2 }}>

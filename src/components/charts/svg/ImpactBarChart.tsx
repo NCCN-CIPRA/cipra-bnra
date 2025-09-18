@@ -18,27 +18,42 @@ import {
   DVRiskSnapshot,
   RiskSnapshotResults,
 } from "../../../types/dataverse/DVRiskSnapshot";
+import { categoryImpactScale5to7 } from "../../../functions/indicators/impact";
 
 export default function ImpactBarChart({
   riskFile,
   scenario,
   width,
   height,
+  maxScales,
   CustomTooltip,
 }: {
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   scenario: SCENARIOS;
   width?: number;
   height?: number;
+  maxScales: number;
   CustomTooltip?: ContentType<ValueType, NameType>;
 }) {
   const { t } = useTranslation();
   if (!riskFile) return null;
 
-  const H = riskFile.cr4de_quanti[scenario].ti.h.scaleCat;
-  const S = riskFile.cr4de_quanti[scenario].ti.s.scaleCat;
-  const E = riskFile.cr4de_quanti[scenario].ti.e.scaleCat;
-  const F = riskFile.cr4de_quanti[scenario].ti.f.scaleCat;
+  const H =
+    maxScales === 7
+      ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.h.scaleCat)
+      : riskFile.cr4de_quanti[scenario].ti.h.scaleCat;
+  const S =
+    maxScales === 7
+      ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.s.scaleCat)
+      : riskFile.cr4de_quanti[scenario].ti.s.scaleCat;
+  const E =
+    maxScales === 7
+      ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.e.scaleCat)
+      : riskFile.cr4de_quanti[scenario].ti.e.scaleCat;
+  const F =
+    maxScales === 7
+      ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.f.scaleCat)
+      : riskFile.cr4de_quanti[scenario].ti.f.scaleCat;
 
   const data = [
     {
@@ -101,8 +116,10 @@ export default function ImpactBarChart({
           fontSize={22}
         />
         <YAxis
-          domain={[0, 5.5]}
-          ticks={[1, 2, 3, 4, 5]}
+          domain={[0, maxScales + 0.5]}
+          ticks={Array(maxScales)
+            .fill(null)
+            .map((_, i) => i + 1)}
           width={10}
           fontSize={22}
         />
@@ -143,7 +160,13 @@ export default function ImpactBarChart({
           interval={0}
           textAnchor="end"
         />
-        <YAxis domain={[0, 5.5]} ticks={[1, 2, 3, 4, 5]} width={10} />
+        <YAxis
+          domain={[0, maxScales + 0.5]}
+          ticks={Array(maxScales)
+            .fill(null)
+            .map((_, i) => i + 1)}
+          width={10}
+        />
         <Tooltip content={CustomTooltip} />
         <Bar dataKey="Ha" stackId="a" fill="#de6148" />
         <Bar dataKey="Hb" stackId="a" fill="#f39d87" />

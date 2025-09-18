@@ -57,6 +57,12 @@ const rescaleImpact = (i: number) => {
   return 0.5 + (4.5 * (i - 1.5)) / 3.5;
 };
 
+const unscaleImpact = (r: number) => {
+  if (r <= 0.5) return 3 * r;
+
+  return 1.5 + (3.5 * (r - 0.5)) / 4.5;
+};
+
 export const getCategoryImpactRescaled = (
   riskFile: DVRiskFile,
   category: IMPACT_CATEGORY,
@@ -64,10 +70,24 @@ export const getCategoryImpactRescaled = (
 ) => {
   const totalImpact = getCategoryImpactAbsolute(riskFile, category, scenario);
 
-  if (totalImpact < BASE_CATEGORY_IMPACT) {
-    return rescaleImpact(totalImpact / (2 * BASE_CATEGORY_IMPACT));
+  return getCategoryImpactRescaledFromAbsolute(totalImpact);
+};
+
+export const getCategoryImpactRescaledFromAbsolute = (
+  totalCategoryImpactAbsolute: number
+) => {
+  if (totalCategoryImpactAbsolute < BASE_CATEGORY_IMPACT) {
+    return rescaleImpact(
+      totalCategoryImpactAbsolute / (2 * BASE_CATEGORY_IMPACT)
+    );
   }
-  return rescaleImpact(Math.log10(totalImpact / 5) - 6);
+  return rescaleImpact(Math.log10(totalCategoryImpactAbsolute / 5) - 6);
+};
+
+export const getAbsoluteCategoryImpactUnscaled = (
+  categoryImpactScale: number
+) => {
+  return Math.pow(10, unscaleImpact(categoryImpactScale) + 6) * 5;
 };
 
 export const getDamageIndicatorToCategoryImpactRatio = (

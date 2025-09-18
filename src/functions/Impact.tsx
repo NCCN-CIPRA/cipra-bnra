@@ -80,6 +80,8 @@ export function getAbsoluteImpact(scaleString: string | null) {
 }
 
 export function getAbsoluteImpactFromFloat(scaleFloat: number) {
+  if (scaleFloat <= 0.5) return (scaleFloat / 0.5) * 5000000;
+
   return 1600000 * Math.pow(10, scaleFloat);
 }
 
@@ -99,6 +101,8 @@ export function getImpactScaleNumber(absoluteImpact: number) {
 }
 
 export function getImpactScaleFloat(absoluteImpact: number, round?: number) {
+  if (absoluteImpact <= 0) return 0;
+
   const n = Math.log10(absoluteImpact / 1600000);
 
   if (round) {

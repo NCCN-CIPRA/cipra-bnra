@@ -7,16 +7,18 @@ import TitleBar from "../components/TitleBar";
 import BreadcrumbNavigation from "../components/BreadcrumbNavigation";
 import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
 import satisfies from "../types/satisfies";
-import { Environment } from "../types/global";
+import { Environment, Indicators } from "../types/global";
 import { useQueryClient } from "@tanstack/react-query";
 import useAPI, { DataTable } from "../hooks/useAPI";
 
 export interface BasePageContext {
   user: LoggedInUser | null | undefined;
   environment: Environment;
+  indicators: Indicators;
   refreshUser: () => void;
   setFakeRole: (role: string) => void;
   setEnvironment: (newEnv: Environment) => void;
+  setIndicators: (newInd: Indicators) => void;
 }
 
 const drawerWidth = 320;
@@ -26,6 +28,9 @@ export default function BasePage() {
   const [environment, setEnvironment] = useState<Environment>(
     (localStorage.getItem("bnraEnv") as Environment) || Environment.PUBLIC
   );
+  const [indicators, setIndicators] = useState<Indicators>(
+    (localStorage.getItem("bnraIndicators") as Indicators) || Indicators.V1
+  );
   const queryClient = useQueryClient();
   const api = useAPI();
 
@@ -34,6 +39,11 @@ export default function BasePage() {
   const setAndSaveEnvironment = (newEnv: Environment) => {
     setEnvironment(newEnv);
     localStorage.setItem("bnraEnv", newEnv);
+  };
+
+  const setAndSaveIndicators = (newInd: Indicators) => {
+    setIndicators(newInd);
+    localStorage.setItem("bnraIndicators", newInd);
   };
 
   if (user && user.roles.analist && environment === Environment.DYNAMIC) {
@@ -62,8 +72,10 @@ export default function BasePage() {
       <TitleBar
         user={user}
         environment={environment}
+        indicators={indicators}
         setFakeRole={setFakeRole}
         setEnvironment={setAndSaveEnvironment}
+        setIndicators={setAndSaveIndicators}
         onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
       />
       <SideDrawer
@@ -80,9 +92,11 @@ export default function BasePage() {
           context={satisfies<BasePageContext>({
             user,
             environment,
+            indicators,
             refreshUser,
             setFakeRole,
             setEnvironment: setAndSaveEnvironment,
+            setIndicators: setAndSaveIndicators,
           })}
         />
       </Box>

@@ -9,6 +9,9 @@ import {
   DVRiskSnapshot,
   RiskSnapshotResults,
 } from "../../types/dataverse/DVRiskSnapshot";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../../pages/BasePage";
+import { Indicators } from "../../types/global";
 
 const CustomTooltip = ({
   active,
@@ -78,6 +81,10 @@ export default function ScenarioMatrix({
   width?: number;
   height?: number;
 }) {
+  const { indicators } = useOutletContext<BasePageContext>();
+
+  const maxScale = indicators === Indicators.V1 ? 5 : 7;
+
   return ScenarioMatrixChart({
     riskFile,
     mrs,
@@ -85,6 +92,7 @@ export default function ScenarioMatrix({
     radius,
     width,
     height,
+    maxScale,
     // @ts-expect-error any
     CustomTooltip,
   });

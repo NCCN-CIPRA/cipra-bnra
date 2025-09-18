@@ -1,3 +1,10 @@
+export type Color = {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+};
+
 export default function getImpactColor(impactPrefix: string) {
   if (impactPrefix === "Ha") return DAMAGE_INDICATOR_COLORS.Ha;
   if (impactPrefix === "Hb") return DAMAGE_INDICATOR_COLORS.Hb;
@@ -37,6 +44,27 @@ export const DAMAGE_INDICATOR_COLORS = {
   Fa: "#6996b3",
   Fb: "#c1e7ff",
 };
+
+export const IMPACT_COLORS = {
+  H: { r: 240, g: 74, b: 46, a: 1 },
+  S: { r: 255, g: 223, b: 28, a: 1 },
+  E: { r: 0, g: 164, b: 154, a: 1 },
+  F: { r: 45, g: 117, b: 240, a: 1 },
+};
+
+export function getImpactColorScales(maxScale: number = 5, baseColor: Color) {
+  const min = 0.2;
+  const max = 0.8;
+
+  const interval = (max - min) / (maxScale - 1);
+
+  const scales = [];
+  for (let alpha = min; alpha <= max; alpha += interval) {
+    scales.push(`rgba(${baseColor.r},${baseColor.g},${baseColor.b},${alpha}`);
+  }
+
+  return scales;
+}
 
 export const IMPACT_COLOR_SCALES = {
   H: [

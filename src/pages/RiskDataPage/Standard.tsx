@@ -391,7 +391,7 @@ function ScenarioSection({
   //   setSaving(false);
   //   setOpen(false);
   // };
-  console.log(riskFile);
+
   return (
     <Stack
       direction="column"

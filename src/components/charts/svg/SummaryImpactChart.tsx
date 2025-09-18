@@ -1,25 +1,28 @@
 import { Cell, Pie, PieChart } from "recharts";
 import { IMPACT_CATEGORY } from "../../../functions/Impact";
-import { IMPACT_COLOR_SCALES } from "../../../functions/getImpactColor";
+import {
+  getImpactColorScales,
+  IMPACT_COLORS,
+} from "../../../functions/getImpactColor";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../../../pages/BasePage";
+import { Indicators } from "../../../types/global";
 
 const RADIAN = Math.PI / 180;
-const data = [
-  { name: "1", value: 1, color: "red" },
-  { name: "2", value: 1, color: "orange" },
-  { name: "3", value: 1, color: "yellow" },
-  { name: "4", value: 1, color: "green" },
-  { name: "5", value: 1, color: "blue" },
-];
 export const pieWidth = 200;
 export const pieHeight = 100;
 
-const getBars = (impact: IMPACT_CATEGORY) => [
-  { name: "1", value: 1, color: IMPACT_COLOR_SCALES[impact][0] },
-  { name: "2", value: 1, color: IMPACT_COLOR_SCALES[impact][1] },
-  { name: "3", value: 1, color: IMPACT_COLOR_SCALES[impact][2] },
-  { name: "4", value: 1, color: IMPACT_COLOR_SCALES[impact][3] },
-  { name: "5", value: 1, color: IMPACT_COLOR_SCALES[impact][4] },
-];
+const getBars = (impact: IMPACT_CATEGORY, maxScales: number) => {
+  const scales = getImpactColorScales(maxScales, IMPACT_COLORS[impact]);
+
+  return Array(maxScales)
+    .fill(null)
+    .map((_, i) => ({
+      name: i.toString(),
+      value: 1,
+      color: scales[i],
+    }));
+};
 
 const needle = (
   value: number,
@@ -74,11 +77,16 @@ export default function SummaryImpactChart({
   height?: number;
   needleWidth?: number;
 }) {
+  const { indicators } = useOutletContext<BasePageContext>();
+
   const piePadding = width / 40;
   const cx = width / 2;
   const cy = height - needleWidth;
   const oR = Math.min(height - piePadding, (width - piePadding) / 2);
   const iR = oR / 2;
+
+  const maxScale = indicators === Indicators.V1 ? 5 : 7;
+  const bars = getBars(category, maxScale);
 
   return (
     <PieChart width={width} height={height}>
@@ -86,7 +94,7 @@ export default function SummaryImpactChart({
         dataKey="value"
         startAngle={180}
         endAngle={0}
-        data={getBars(category)}
+        data={bars}
         cx={cx - 5}
         cy={cy - 2 - needleWidth}
         innerRadius={iR}
@@ -95,11 +103,11 @@ export default function SummaryImpactChart({
         stroke="none"
         paddingAngle={1}
       >
-        {getBars(category).map((entry, index) => (
+        {bars.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
         ))}
       </Pie>
-      {needle(value, data, cx, cy, iR, oR, "#555", needleWidth)}
+      {needle(value, bars, cx, cy, iR, oR, "#555", needleWidth)}
     </PieChart>
   );
 }

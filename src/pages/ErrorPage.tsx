@@ -1,7 +1,7 @@
 import { Alert, AlertTitle, Box, CssBaseline, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import TitleBar from "../components/TitleBar";
-import { Environment } from "../types/global";
+import { Environment, Indicators } from "../types/global";
 
 export default function ErrorPage() {
   const navigate = useNavigate();
@@ -16,6 +16,8 @@ export default function ErrorPage() {
         showUser={false}
         environment={Environment.PUBLIC}
         setEnvironment={() => {}}
+        indicators={Indicators.V1}
+        setIndicators={() => {}}
       />
       <Box
         sx={{
