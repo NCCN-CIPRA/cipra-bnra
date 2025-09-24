@@ -117,9 +117,11 @@ export default function BaseRiskFilePage() {
 
     if (!riskFiles && !riskSnapshots) return null;
 
-    if (riskFiles) rcTemp = getRiskCatalogue(riskFiles);
+    if (environment === Environment.DYNAMIC && riskFiles)
+      rcTemp = getRiskCatalogue(riskFiles);
 
-    if (riskSnapshots) rcTemp = getRiskCatalogueFromSnapshots(riskSnapshots);
+    if (environment === Environment.PUBLIC && riskSnapshots)
+      rcTemp = getRiskCatalogueFromSnapshots(riskSnapshots);
 
     if (rcTemp) {
       return Object.keys(rcTemp).reduce(
@@ -135,20 +137,24 @@ export default function BaseRiskFilePage() {
     }
 
     return null;
-  }, [riskFiles, riskSnapshots]);
+  }, [riskFiles, riskSnapshots, environment]);
 
   const cascades = useMemo(() => {
     if (!rc) return null;
 
     let ccTemp = null;
-    if (cascadeList && riskFiles)
+    if (environment === Environment.DYNAMIC && cascadeList && riskFiles)
       ccTemp = getCascadesCatalogueNew(
         riskFiles,
         rc as RiskCatalogue<DVRiskFile, RiskSnapshotResults>,
         cascadeList
       );
 
-    if (cascadeSnapshotList && riskSnapshots)
+    if (
+      environment === Environment.PUBLIC &&
+      cascadeSnapshotList &&
+      riskSnapshots
+    )
       ccTemp = getCascadesSnapshotCatalogue(
         Object.values(rc),
         rc,
@@ -156,7 +162,14 @@ export default function BaseRiskFilePage() {
       );
 
     return ccTemp;
-  }, [riskFiles, cascadeList, riskSnapshots, cascadeSnapshotList, rc]);
+  }, [
+    environment,
+    riskFiles,
+    cascadeList,
+    riskSnapshots,
+    cascadeSnapshotList,
+    rc,
+  ]);
 
   const riskSummary = useMemo(() => {
     if (environment === Environment.PUBLIC || !riskFiles || !rc || !cascadeList)

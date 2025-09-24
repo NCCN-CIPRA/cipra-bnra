@@ -2,9 +2,11 @@ import { Layer, Rectangle, ResponsiveContainer, Sankey } from "recharts";
 import {
   CPMatrix,
   DVCascadeSnapshot,
+  parseCPMatrix,
+  serializeCPMatrix as serializeCPMatrixSnapshot,
 } from "../../types/dataverse/DVCascadeSnapshot";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { LinkProps, NodeProps } from "recharts/types/chart/Sankey";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import { Box, Button, Slider, Stack, Typography } from "@mui/material";
@@ -13,10 +15,20 @@ import { SankeyLink, SankeyNode } from "recharts/types/util/types";
 import {
   getIntervalStringMScale3,
   getIntervalStringMScale7,
+  mScale3FromPAbs,
+  mScale7FromPAbs,
+  pAbsFromMScale3,
+  pAbsFromMScale7,
 } from "../../functions/indicators/motivation";
 import { Indicators } from "../../types/global";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../BasePage";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  DVRiskCascade,
+  serializeCPMatrix,
+} from "../../types/dataverse/DVRiskCascade";
+import useAPI, { DataTable } from "../../hooks/useAPI";
 
 const scenarioHeight = 300;
 
@@ -78,51 +90,72 @@ export default function CascadeSankey({
   effect: DVRiskSnapshot;
   cascade: DVCascadeSnapshot;
 }) {
-  // const api = useAPI();
-  // const queryClient = useQueryClient();
+  const api = useAPI();
+  const queryClient = useQueryClient();
   const { indicators } = useOutletContext<BasePageContext>();
   const [hoverNodeIndex, setHoverNodeIndex] = useState<number | null>(null);
   const [hoverLinkIndex, setHoverLinkIndex] = useState<number | null>(null);
-  // const [innerCascade, setInnerCascade] = useState<DVCascadeSnapshot>(cascade);
-  // const mutation = useMutation({
-  //   mutationFn: async (
-  //     newC: Partial<DVRiskCascade> & { cr4de_bnrariskcascadeid: string }
-  //   ) => api.updateCascade(newC.cr4de_bnrariskcascadeid, newC),
-  // });
+  const [innerCascade, setInnerCascade] = useState<DVCascadeSnapshot>(cascade);
+  const mutation = useMutation({
+    mutationFn: async (
+      newC: Partial<DVRiskCascade> & { cr4de_bnrariskcascadeid: string }
+    ) => api.updateCascade(newC.cr4de_bnrariskcascadeid, newC),
+    onSuccess: async () => {
+      // If you're invalidating a single query
+      await queryClient.invalidateQueries({
+        queryKey: [DataTable.RISK_CASCADE],
+      });
+    },
+  });
 
   const causeScenarios = JSON.parse(cause.cr4de_scenarios || "");
   const effectScenarios = JSON.parse(effect.cr4de_scenarios || "");
 
-  const handleChangeCP = async () =>
-    // causeScenario: SCENARIOS,
-    // effectScenario: SCENARIOS,
-    // newAbsP: number
-    {
-      // const updatedCPMatrix = oldToNewCPMatrix(cause, cascade);
-      // updatedCPMatrix[causeScenario][effectScenario] = {
-      //   abs: newAbsP,
-      //   scale3: Math.round(10 * mScale3FromPAbs(newAbsP)) / 10,
-      //   scale7: Math.round(10 * mScale7FromPAbs(newAbsP)) / 10,
-      // };
-      // mutation.mutate(
-      //   {
-      //     cr4de_bnrariskcascadeid: cascade._cr4de_risk_cascade_value,
-      //     cr4de_quanti_input: serializeCPMatrix(updatedCPMatrix),
-      //   },
-      //   {
-      //     onSuccess: async () => {
-      //       // If you're invalidating a single query
-      //       await queryClient.invalidateQueries({
-      //         queryKey: [DataTable.RISK_CASCADE],
-      //       });
-      //     },
-      //   }
-      // );
+  const handleChangeCP = async (
+    causeScenario: SCENARIOS,
+    effectScenario: SCENARIOS,
+    newValue: number
+  ) => {
+    const pAbs =
+      indicators === Indicators.V1
+        ? pAbsFromMScale3(newValue)
+        : pAbsFromMScale7(newValue);
+    const updatedCPMatrix = parseCPMatrix(cascade.cr4de_quanti_cp);
+    updatedCPMatrix[causeScenario][effectScenario] = {
+      abs: Math.round(100 * pAbs) / 100,
+      scale3:
+        indicators === Indicators.V1
+          ? newValue
+          : Math.round(10 * mScale3FromPAbs(pAbs)) / 10,
+      scale7:
+        indicators === Indicators.V1
+          ? Math.round(10 * mScale7FromPAbs(pAbs)) / 10
+          : newValue,
     };
 
-  // useEffect(() => {
-  //   setInnerCascade(cascade);
-  // }, [setInnerCascade, cascade]);
+    const cpMatrix = updatedCPMatrix;
+
+    mutation.mutate({
+      cr4de_bnrariskcascadeid: cascade._cr4de_risk_cascade_value,
+      cr4de_quanti_input: serializeCPMatrix(cpMatrix),
+    });
+
+    setInnerCascade({
+      ...innerCascade,
+      cr4de_quanti_cp: serializeCPMatrixSnapshot({
+        [SCENARIOS.CONSIDERABLE]: {
+          ...cpMatrix[SCENARIOS.CONSIDERABLE],
+          avg: 0,
+        },
+        [SCENARIOS.MAJOR]: { ...cpMatrix[SCENARIOS.MAJOR], avg: 0 },
+        [SCENARIOS.EXTREME]: { ...cpMatrix[SCENARIOS.EXTREME], avg: 0 },
+      }),
+    });
+  };
+
+  useEffect(() => {
+    setInnerCascade(cascade);
+  }, [setInnerCascade, cascade]);
 
   let isJsonScenario = false;
   try {
@@ -132,9 +165,9 @@ export default function CascadeSankey({
     // empty
   }
 
-  const cpMatrix: CPMatrix = useMemo(
-    () => JSON.parse(cascade.cr4de_quanti_cp),
-    [cascade]
+  const cpMatrix = useMemo(
+    () => parseCPMatrix(innerCascade.cr4de_quanti_cp),
+    [innerCascade]
   );
 
   const data: {
