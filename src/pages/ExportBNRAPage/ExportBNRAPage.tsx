@@ -186,7 +186,10 @@ export default function ExportBNRAPage() {
         .then((d) =>
           d.map((c) =>
             parseCascadeSnapshot(
-              linkCascadeSnapshot(snapshotFromRiskCascade(c), rc)
+              linkCascadeSnapshot(
+                snapshotFromRiskCascade(rc[c._cr4de_cause_hazard_value], c),
+                rc
+              )
             )
           )
         );

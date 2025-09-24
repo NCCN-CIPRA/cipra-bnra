@@ -1,4 +1,5 @@
 import { RiskCatalogue } from "../../functions/riskfiles";
+import { SCENARIOS } from "../../functions/scenarios";
 import {
   DVCascadeSnapshot,
   SerializedCauseSnapshotResults,
@@ -79,7 +80,41 @@ export interface DVRiskCascade<CauseType = unknown, EffectType = unknown> {
 
   // Consolidated description of the catalyzing effect for the BE Report
   cr4de_description: string | null;
+
+  cr4de_quanti_input: SerializedCPMatrix | null;
 }
+
+export type SerializedCPMatrix = string & {
+  __json_seralized: CPMatrixCauseRow;
+};
+
+export function serializeCPMatrix(
+  quanti: CPMatrixCauseRow
+): SerializedCPMatrix {
+  return JSON.stringify(quanti) as SerializedCPMatrix;
+}
+
+export function parseCPMatrix(quanti: SerializedCPMatrix): CPMatrixCauseRow {
+  return JSON.parse(quanti) as CPMatrixCauseRow;
+}
+
+export type CPMatrixCauseRow = {
+  [SCENARIOS.CONSIDERABLE]: CPMatrixEffectRow;
+  [SCENARIOS.MAJOR]: CPMatrixEffectRow;
+  [SCENARIOS.EXTREME]: CPMatrixEffectRow;
+};
+
+export type CPMatrixEffectRow = {
+  [SCENARIOS.CONSIDERABLE]: CPMatrixValue;
+  [SCENARIOS.MAJOR]: CPMatrixValue;
+  [SCENARIOS.EXTREME]: CPMatrixValue;
+};
+
+export type CPMatrixValue = {
+  abs: number;
+  scale7: number;
+  scale3: number;
+};
 
 export const RISK_CASCADE_QUANTI_FIELDS: (keyof DVRiskCascade)[] = [
   "cr4de_c2c",

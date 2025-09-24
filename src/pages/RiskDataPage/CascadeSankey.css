@@ -1,0 +1,3 @@
+.recharts-layer:has(.noverable) {
+    pointer-events: none;
+}

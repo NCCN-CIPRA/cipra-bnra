@@ -84,7 +84,9 @@ export default function handleExportRiskfile(
 
       cascadeSnapshots = cascades.map((c) =>
         linkCascadeSnapshot(
-          parseCascadeSnapshot(snapshotFromRiskCascade(c)),
+          parseCascadeSnapshot(
+            snapshotFromRiskCascade(rsc[c._cr4de_cause_hazard_value], c)
+          ),
           rsc
         )
       );

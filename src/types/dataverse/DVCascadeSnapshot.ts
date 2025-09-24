@@ -1,4 +1,5 @@
 import { SCENARIOS } from "../../functions/scenarios";
+import { CPMatrixValue } from "./DVRiskCascade";
 
 export type SerializedCauseSnapshotResults = string & {
   __json_seralized: CauseSnapshotResults;
@@ -20,11 +21,23 @@ export function serializeEffectSnapshotResults(
   return JSON.stringify(quanti) as SerializedEffectSnapshotResults;
 }
 
-type DVCascadeSnapshotCauseResultType =
+export type SerializedCPMatrix = string & {
+  __json_seralized: CPMatrix;
+};
+
+export function serializeCPMatrix(quanti: CPMatrix): SerializedCPMatrix {
+  return JSON.stringify(quanti) as SerializedCPMatrix;
+}
+
+export function parseCPMatrix(quanti: SerializedCPMatrix): CPMatrix {
+  return JSON.parse(quanti) as CPMatrix;
+}
+
+export type DVCascadeSnapshotCauseResultType =
   | unknown
   | SerializedCauseSnapshotResults
   | CauseSnapshotResults;
-type DVCascadeSnapshotEffectResultType =
+export type DVCascadeSnapshotEffectResultType =
   | unknown
   | SerializedEffectSnapshotResults
   | EffectSnapshotResults;
@@ -50,6 +63,7 @@ export interface DVCascadeSnapshot<
   _cr4de_effect_risk_value: string;
   cr4de_effect_risk: EffectType;
 
+  cr4de_quanti_cp: SerializedCPMatrix;
   cr4de_quanti_cause: CauseResultType;
   cr4de_quanti_effect: EffectResultType;
 
@@ -61,31 +75,26 @@ export interface DVCascadeSnapshot<
   cr4de_description: string | null;
 }
 
+export type CPMatrix = {
+  [SCENARIOS.CONSIDERABLE]: CPMatrixEffectRow;
+  [SCENARIOS.MAJOR]: CPMatrixEffectRow;
+  [SCENARIOS.EXTREME]: CPMatrixEffectRow;
+};
+
+export type CPMatrixEffectRow = {
+  [SCENARIOS.CONSIDERABLE]: CPMatrixValue;
+  [SCENARIOS.MAJOR]: CPMatrixValue;
+  [SCENARIOS.EXTREME]: CPMatrixValue;
+  avg: number;
+};
+
 export type CauseSnapshotResults = {
   [SCENARIOS.CONSIDERABLE]: CauseSnapshotScenarioResults;
   [SCENARIOS.MAJOR]: CauseSnapshotScenarioResults;
   [SCENARIOS.EXTREME]: CauseSnapshotScenarioResults;
 };
 
-export type CPMatrixRow = {
-  [SCENARIOS.CONSIDERABLE]: string;
-  [SCENARIOS.MAJOR]: string;
-  [SCENARIOS.EXTREME]: string;
-};
-
-export type CPMatrixAbsRow = {
-  [SCENARIOS.CONSIDERABLE]: number;
-  [SCENARIOS.MAJOR]: number;
-  [SCENARIOS.EXTREME]: number;
-};
-
 export type CauseSnapshotScenarioResults = {
-  cp: {
-    matrix: {
-      scale: CPMatrixRow;
-      abs: CPMatrixAbsRow;
-    };
-  };
   ip: {
     yearly: {
       scale: number; // Indirect probability of the cascade causing the scenario on the tp scale (0 - 5)
@@ -105,13 +114,6 @@ export type EffectSnapshotResults = {
 };
 
 export type EffectSnapshotScenarioResults = {
-  cp: {
-    avg: number;
-    matrix: {
-      scale: CPMatrixRow;
-      abs: CPMatrixAbsRow;
-    };
-  };
   ii: {
     all: {
       scale: number; // Indirect impact of the cascade cause by the scenario on the ti scale (0 - 5)

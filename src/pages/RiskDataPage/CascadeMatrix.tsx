@@ -7,13 +7,20 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
+import {
+  SCENARIOS,
+  SCENARIO_PARAMS,
+  Scenarios,
+} from "../../functions/scenarios";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { Trans, useTranslation } from "react-i18next";
 import { useState } from "react";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
-import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
+import {
+  CPMatrix,
+  DVCascadeSnapshot,
+} from "../../types/dataverse/DVCascadeSnapshot";
 
 const COLORS = {
   CP0: "#e0ffcc",
@@ -378,6 +385,11 @@ export function CascadeSnapshotMatrix({
 }) {
   const theme = useTheme();
 
+  const causeScenarios: Scenarios = JSON.parse(cause.cr4de_scenarios || "");
+  const effectScenarios: Scenarios = JSON.parse(effect.cr4de_scenarios || "");
+
+  const cpMatrix: CPMatrix = JSON.parse(cascade.cr4de_quanti_cp);
+
   return (
     <Grid container spacing={1}>
       <Grid size={{ xs: 4.5 }}></Grid>
@@ -397,7 +409,13 @@ export function CascadeSnapshotMatrix({
 
       <Grid size={{ xs: 4.5 }}>
         <Tooltip title={cause.cr4de_title}>
-          <Box sx={{ padding: theme.spacing(1), textAlign: "center" }}>
+          <Box
+            sx={{
+              padding: theme.spacing(1),
+              textAlign: "center",
+              alignItems: "end",
+            }}
+          >
             <Typography variant="h6">
               {cause.cr4de_risk_type === RISK_TYPE.MANMADE ? (
                 <Trans i18nKey="2B.actor">Actor</Trans>
@@ -410,6 +428,17 @@ export function CascadeSnapshotMatrix({
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ alignSelf: "flex-end" }}>
         <ScenarioBox scenario={SCENARIOS.CONSIDERABLE} />
+        <Box
+          sx={{
+            ml: 0,
+            pl: 2,
+            mr: 2,
+            borderLeft: `8px solid ${
+              SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color
+            }55`,
+          }}
+          dangerouslySetInnerHTML={{ __html: effectScenarios.considerable }}
+        />
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ alignSelf: "flex-end" }}>
         <ScenarioBox scenario={SCENARIOS.MAJOR} />
@@ -420,14 +449,23 @@ export function CascadeSnapshotMatrix({
 
       <Grid size={{ xs: 4.5 }}>
         <ScenarioBox scenario={SCENARIOS.CONSIDERABLE} />
+        <Box
+          sx={{
+            ml: 0,
+            pl: 2,
+            mr: 2,
+            borderLeft: `8px solid ${
+              SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color
+            }55`,
+          }}
+          dangerouslySetInnerHTML={{ __html: causeScenarios.considerable }}
+        />
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={
-            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
-              SCENARIOS.CONSIDERABLE
-            ]
-          }
+          value={`CP${
+            cpMatrix[SCENARIOS.CONSIDERABLE][SCENARIOS.CONSIDERABLE].scale3
+          }`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(
@@ -442,11 +480,9 @@ export function CascadeSnapshotMatrix({
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={
-            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
-              SCENARIOS.CONSIDERABLE
-            ]
-          }
+          value={`CP${
+            cpMatrix[SCENARIOS.CONSIDERABLE][SCENARIOS.MAJOR].scale3
+          }`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, isCause),
@@ -457,11 +493,9 @@ export function CascadeSnapshotMatrix({
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={
-            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
-              SCENARIOS.CONSIDERABLE
-            ]
-          }
+          value={`CP${
+            cpMatrix[SCENARIOS.CONSIDERABLE][SCENARIOS.EXTREME].scale3
+          }`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(
@@ -477,14 +511,21 @@ export function CascadeSnapshotMatrix({
 
       <Grid size={{ xs: 4.5 }}>
         <ScenarioBox scenario={SCENARIOS.MAJOR} />
+        <Box
+          sx={{
+            ml: 0,
+            pl: 2,
+            mr: 2,
+            borderLeft: `8px solid ${SCENARIO_PARAMS[SCENARIOS.MAJOR].color}55`,
+          }}
+          dangerouslySetInnerHTML={{ __html: causeScenarios.major }}
+        />
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={
-            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
-              SCENARIOS.MAJOR
-            ]
-          }
+          value={`CP${
+            cpMatrix[SCENARIOS.MAJOR][SCENARIOS.CONSIDERABLE].scale3
+          }`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(SCENARIOS.MAJOR, SCENARIOS.CONSIDERABLE, isCause),
@@ -495,11 +536,7 @@ export function CascadeSnapshotMatrix({
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={
-            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
-              SCENARIOS.MAJOR
-            ]
-          }
+          value={`CP${cpMatrix[SCENARIOS.MAJOR][SCENARIOS.MAJOR].scale3}`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(SCENARIOS.MAJOR, SCENARIOS.MAJOR, isCause),
@@ -510,11 +547,7 @@ export function CascadeSnapshotMatrix({
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={
-            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
-              SCENARIOS.MAJOR
-            ]
-          }
+          value={`CP${cpMatrix[SCENARIOS.MAJOR][SCENARIOS.EXTREME].scale3}`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(SCENARIOS.MAJOR, SCENARIOS.EXTREME, isCause),
@@ -526,14 +559,23 @@ export function CascadeSnapshotMatrix({
 
       <Grid size={{ xs: 4.5 }}>
         <ScenarioBox scenario={SCENARIOS.EXTREME} />
+        <Box
+          sx={{
+            ml: 0,
+            pl: 2,
+            mr: 2,
+            borderLeft: `8px solid ${
+              SCENARIO_PARAMS[SCENARIOS.EXTREME].color
+            }55`,
+          }}
+          dangerouslySetInnerHTML={{ __html: causeScenarios.extreme }}
+        />
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={
-            cascade.cr4de_quanti_cause[SCENARIOS.CONSIDERABLE].cp.matrix.scale[
-              SCENARIOS.EXTREME
-            ]
-          }
+          value={`CP${
+            cpMatrix[SCENARIOS.EXTREME][SCENARIOS.CONSIDERABLE].scale3
+          }`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(
@@ -548,11 +590,7 @@ export function CascadeSnapshotMatrix({
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={
-            cascade.cr4de_quanti_cause[SCENARIOS.MAJOR].cp.matrix.scale[
-              SCENARIOS.EXTREME
-            ]
-          }
+          value={`CP${cpMatrix[SCENARIOS.EXTREME][SCENARIOS.MAJOR].scale3}`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(SCENARIOS.EXTREME, SCENARIOS.MAJOR, isCause),
@@ -563,11 +601,7 @@ export function CascadeSnapshotMatrix({
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={
-            cascade.cr4de_quanti_cause[SCENARIOS.EXTREME].cp.matrix.scale[
-              SCENARIOS.EXTREME
-            ]
-          }
+          value={`CP${cpMatrix[SCENARIOS.EXTREME][SCENARIOS.EXTREME].scale3}`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(SCENARIOS.EXTREME, SCENARIOS.EXTREME, isCause),

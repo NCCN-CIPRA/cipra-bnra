@@ -182,7 +182,7 @@ function CascadeSections({
                 onChangeReason={async (chosen, newReason) => {
                   setIsSaving(true);
                   await api.updateCascade(chosen.cascadeId, {
-                    cr4de_reason: newReason,
+                    cr4de_reason: newReason || "",
                   });
                   await onUpdateCascades();
                   setIsSaving(false);
@@ -253,7 +253,7 @@ function CascadeSections({
                 onChangeReason={async (chosen, newReason) => {
                   setIsSaving(true);
                   await api.updateCascade(chosen.cascadeId, {
-                    cr4de_reason: newReason,
+                    cr4de_reason: newReason || "",
                   });
                   await onUpdateCascades();
                   setIsSaving(false);
@@ -324,7 +324,7 @@ function CascadeSections({
                 onChangeReason={async (chosen, newReason) => {
                   setIsSaving(true);
                   await api.updateCascade(chosen.cascadeId, {
-                    cr4de_reason: newReason,
+                    cr4de_reason: newReason || "",
                   });
                   await onUpdateCascades();
                   setIsSaving(false);
@@ -395,7 +395,7 @@ function CascadeSections({
                 onChangeReason={async (chosen, newReason) => {
                   setIsSaving(true);
                   await api.updateCascade(chosen.cascadeId, {
-                    cr4de_reason: newReason,
+                    cr4de_reason: newReason || "",
                   });
                   await onUpdateCascades();
                   setIsSaving(false);
@@ -474,7 +474,7 @@ function CascadeSections({
                 onChangeReason={async (chosen, newReason) => {
                   setIsSaving(true);
                   await api.updateCascade(chosen.cascadeId, {
-                    cr4de_reason: newReason,
+                    cr4de_reason: newReason || "",
                   });
                   await onUpdateCascades();
                   setIsSaving(false);

@@ -169,7 +169,7 @@ export interface API {
   getRiskCascades<T = DVRiskCascade>(query?: string): Promise<T[]>;
   getRiskCascade<T = DVRiskCascade>(id: string, query?: string): Promise<T>;
   createCascade(fields: object): Promise<CreateResponse>;
-  updateCascade(id: string, fields: object): Promise<void>;
+  updateCascade(id: string, fields: Partial<DVRiskCascade>): Promise<void>;
   deleteCascade(id: string): Promise<void>;
 
   getParticipants<T = DVParticipation>(query?: string): Promise<T[]>;

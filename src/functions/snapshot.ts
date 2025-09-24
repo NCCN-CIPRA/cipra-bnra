@@ -8,19 +8,24 @@
 // results is wanted
 
 import {
+  CPMatrix,
   DVCascadeSnapshot,
   serializeCauseSnapshotResults,
+  serializeCPMatrix,
   SerializedCauseSnapshotResults,
   SerializedEffectSnapshotResults,
   serializeEffectSnapshotResults,
 } from "../types/dataverse/DVCascadeSnapshot";
 import {
   CASCADE_RESULT_SNAPSHOT,
+  CPMatrixCauseRow,
+  CPMatrixEffectRow,
   DVRiskCascade,
 } from "../types/dataverse/DVRiskCascade";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import {
   DVRiskSnapshot,
+  parseRiskSnapshot,
   SerializedRiskSnapshotQualis,
   SerializedRiskSnapshotResults,
   serializeRiskSnapshotQualis,
@@ -28,6 +33,7 @@ import {
 } from "../types/dataverse/DVRiskSnapshot";
 import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
 import { RISK_TYPE, UnparsedRiskFields } from "../types/dataverse/Riskfile";
+import { Indicators } from "../types/global";
 import {
   Cascades,
   getCascades,
@@ -39,10 +45,15 @@ import {
   getDamageIndicatorToCategoryImpactRatio,
 } from "./CategoryImpact";
 import { getAbsoluteImpact, getAbsoluteImpactFromFloat } from "./Impact";
-import { pAbsFromMScale3 } from "./indicators/motivation";
-import { returnPeriodMonthsFromPScale5 } from "./indicators/probability";
-import { getAbsoluteProbability } from "./Probability";
+import { pAbsFromCPScale5 } from "./indicators/cp";
 import {
+  mScale3FromPAbs,
+  mScale7FromPAbs,
+  pAbsFromMScale3,
+} from "./indicators/motivation";
+import { returnPeriodMonthsFromPScale5 } from "./indicators/probability";
+import {
+  getScenarioLetter,
   getScenarioParameter,
   getScenarioSuffix,
   SCENARIOS,
@@ -231,18 +242,23 @@ function updateSnapshot(
       existingSnapshot.cr4de_bnrariskfilesnapshotid;
   }
 
-  for (const cause of cascades.causes) {
-    const updatedCauseSnapshot = snapshotFromRiskCascade(cause);
-    if (cascadesSnapshots[cause.cr4de_bnrariskcascadeid]) {
-      updatedCauseSnapshot.cr4de_bnrariskcascadesnapshotid =
-        cascadesSnapshots[cause.cr4de_bnrariskcascadeid]
-          .cr4de_bnrariskcascadesnapshotid || "";
-    }
-    cascadesSnapshots[cause.cr4de_bnrariskcascadeid] = updatedCauseSnapshot;
-  }
+  // for (const cause of cascades.causes) {
+
+  // const updatedSnapshot = snapshotFromRiskfile(riskFile);
+  //   const updatedCauseSnapshot = snapshotFromRiskCascade(cause);
+  //   if (cascadesSnapshots[cause.cr4de_bnrariskcascadeid]) {
+  //     updatedCauseSnapshot.cr4de_bnrariskcascadesnapshotid =
+  //       cascadesSnapshots[cause.cr4de_bnrariskcascadeid]
+  //         .cr4de_bnrariskcascadesnapshotid || "";
+  //   }
+  //   cascadesSnapshots[cause.cr4de_bnrariskcascadeid] = updatedCauseSnapshot;
+  // }
 
   for (const effect of cascades.effects) {
-    const updatedEffectSnapshot = snapshotFromRiskCascade(effect);
+    const updatedEffectSnapshot = snapshotFromRiskCascade(
+      parseRiskSnapshot(updatedSnapshot),
+      effect
+    );
     if (cascadesSnapshots[effect.cr4de_bnrariskcascadeid]) {
       updatedEffectSnapshot.cr4de_bnrariskcascadesnapshotid =
         cascadesSnapshots[effect.cr4de_bnrariskcascadeid]
@@ -1338,7 +1354,95 @@ export function snapshotFromRiskfile(
   };
 }
 
+/**
+ * During the previous BNRA iteration, the total probability of an attack by an actor was given by:
+ *
+ * Motivation of actor group (scenario) * CP of attack cascade
+ *
+ * In the new method, only the CP of the attack cascade is taken into account, and this value is renamed to "Motivation" of the actor
+ * for this type of attack.
+ */
+export const getNewCPFromOldMAndCP = (
+  cause: DVRiskSnapshot,
+  cascade: DVRiskCascade,
+  causeScenario: SCENARIOS,
+  effectScenario: SCENARIOS,
+  indicators: Indicators | null
+) => {
+  const cpString =
+    cascade[
+      `cr4de_${getScenarioLetter(causeScenario)}2${getScenarioLetter(
+        effectScenario
+      )}`
+    ] || "CP0";
+  const cpVal = parseFloat(cpString.replace("CP", ""));
+  const cpAbs = pAbsFromCPScale5(cpVal);
+
+  const mVal = cause.cr4de_quanti[causeScenario].m.scale;
+  const mAbs =
+    cause.cr4de_risk_type === RISK_TYPE.MANMADE ? pAbsFromMScale3(mVal) : 1;
+
+  const totP = mAbs * cpAbs;
+  if (!indicators) return Math.round(100 * totP) / 100;
+
+  if (indicators === Indicators.V1)
+    return Math.round(10 * mScale3FromPAbs(totP)) / 10;
+
+  return Math.round(10 * mScale7FromPAbs(totP)) / 10;
+};
+
+const oldToNewCPMatrix = (
+  cause: DVRiskSnapshot,
+  cascade: DVRiskCascade
+): CPMatrixCauseRow => {
+  if (cascade.cr4de_quanti_input !== null)
+    return JSON.parse(cascade.cr4de_quanti_input);
+
+  const scenarios = [
+    SCENARIOS.CONSIDERABLE,
+    SCENARIOS.MAJOR,
+    SCENARIOS.EXTREME,
+  ];
+
+  return scenarios.reduce(
+    (accCause, causeScenario) => ({
+      ...accCause,
+      [causeScenario]: scenarios.reduce(
+        (accEffect, effectScenario) => ({
+          ...accEffect,
+          [effectScenario]: {
+            abs: getNewCPFromOldMAndCP(
+              cause,
+              cascade,
+              causeScenario,
+              effectScenario,
+              null
+            ),
+            scale3: getNewCPFromOldMAndCP(
+              cause,
+              cascade,
+              causeScenario,
+              effectScenario,
+              Indicators.V1
+            ),
+            scale7: getNewCPFromOldMAndCP(
+              cause,
+              cascade,
+              causeScenario,
+              effectScenario,
+              Indicators.V2
+            ),
+          },
+        }),
+        {} as CPMatrixEffectRow
+      ),
+    }),
+    {} as CPMatrixCauseRow
+  );
+};
+
 export function snapshotFromRiskCascade(
+  cause: DVRiskSnapshot,
   cascade: DVRiskCascade
 ): DVCascadeSnapshot<
   DVRiskCascade,
@@ -1347,6 +1451,22 @@ export function snapshotFromRiskCascade(
   SerializedCauseSnapshotResults,
   SerializedEffectSnapshotResults
 > {
+  const newCPMatrixSnapshot = oldToNewCPMatrix(cause, cascade);
+  const newCPMatrix: CPMatrix = {
+    [SCENARIOS.CONSIDERABLE]: {
+      ...newCPMatrixSnapshot[SCENARIOS.CONSIDERABLE],
+      avg: r(cascade.results?.CP_AVG_C2All),
+    },
+    [SCENARIOS.MAJOR]: {
+      ...newCPMatrixSnapshot[SCENARIOS.MAJOR],
+      avg: r(cascade.results?.CP_AVG_M2All),
+    },
+    [SCENARIOS.EXTREME]: {
+      ...newCPMatrixSnapshot[SCENARIOS.EXTREME],
+      avg: r(cascade.results?.CP_AVG_E2All),
+    },
+  };
+
   return {
     cr4de_bnrariskcascadesnapshotid: "",
 
@@ -1366,22 +1486,9 @@ export function snapshotFromRiskCascade(
     cr4de_quali_cause: cascade.cr4de_quali_cause,
     cr4de_description: cascade.cr4de_description,
 
+    cr4de_quanti_cp: serializeCPMatrix(newCPMatrix),
     cr4de_quanti_cause: serializeCauseSnapshotResults({
       [SCENARIOS.CONSIDERABLE]: {
-        cp: {
-          matrix: {
-            scale: {
-              considerable: cascade.cr4de_c2c || "CP0",
-              major: cascade.cr4de_m2c || "CP0",
-              extreme: cascade.cr4de_e2c || "CP0",
-            },
-            abs: {
-              considerable: getAbsoluteProbability(cascade.cr4de_c2c),
-              major: getAbsoluteProbability(cascade.cr4de_m2c),
-              extreme: getAbsoluteProbability(cascade.cr4de_e2c),
-            },
-          },
-        },
         ip: {
           yearly: {
             scale: r(cascade.results?.IP_All2C),
@@ -1394,20 +1501,6 @@ export function snapshotFromRiskCascade(
         },
       },
       [SCENARIOS.MAJOR]: {
-        cp: {
-          matrix: {
-            scale: {
-              considerable: cascade.cr4de_c2m || "CP0",
-              major: cascade.cr4de_m2m || "CP0",
-              extreme: cascade.cr4de_e2m || "CP0",
-            },
-            abs: {
-              considerable: getAbsoluteProbability(cascade.cr4de_c2m),
-              major: getAbsoluteProbability(cascade.cr4de_m2m),
-              extreme: getAbsoluteProbability(cascade.cr4de_e2m),
-            },
-          },
-        },
         ip: {
           yearly: {
             scale: r(cascade.results?.IP_All2M),
@@ -1420,20 +1513,6 @@ export function snapshotFromRiskCascade(
         },
       },
       [SCENARIOS.EXTREME]: {
-        cp: {
-          matrix: {
-            scale: {
-              considerable: cascade.cr4de_c2e || "CP0",
-              major: cascade.cr4de_m2e || "CP0",
-              extreme: cascade.cr4de_e2e || "CP0",
-            },
-            abs: {
-              considerable: getAbsoluteProbability(cascade.cr4de_c2e),
-              major: getAbsoluteProbability(cascade.cr4de_m2e),
-              extreme: getAbsoluteProbability(cascade.cr4de_e2e),
-            },
-          },
-        },
         ip: {
           yearly: {
             scale: r(cascade.results?.IP_All2E),
@@ -1449,21 +1528,6 @@ export function snapshotFromRiskCascade(
 
     cr4de_quanti_effect: serializeEffectSnapshotResults({
       [SCENARIOS.CONSIDERABLE]: {
-        cp: {
-          avg: r(cascade.results?.CP_AVG_C2All),
-          matrix: {
-            scale: {
-              considerable: cascade.cr4de_c2c || "CP0",
-              major: cascade.cr4de_c2m || "CP0",
-              extreme: cascade.cr4de_c2e || "CP0",
-            },
-            abs: {
-              considerable: getAbsoluteProbability(cascade.cr4de_c2c),
-              major: getAbsoluteProbability(cascade.cr4de_c2m),
-              extreme: getAbsoluteProbability(cascade.cr4de_c2e),
-            },
-          },
-        },
         ii: {
           all: {
             scale: r(cascade.results?.II_C2All),
@@ -1513,21 +1577,6 @@ export function snapshotFromRiskCascade(
         },
       },
       [SCENARIOS.MAJOR]: {
-        cp: {
-          avg: r(cascade.results?.CP_AVG_M2All),
-          matrix: {
-            scale: {
-              considerable: cascade.cr4de_m2c || "CP0",
-              major: cascade.cr4de_m2m || "CP0",
-              extreme: cascade.cr4de_m2e || "CP0",
-            },
-            abs: {
-              considerable: getAbsoluteProbability(cascade.cr4de_m2c),
-              major: getAbsoluteProbability(cascade.cr4de_m2m),
-              extreme: getAbsoluteProbability(cascade.cr4de_m2e),
-            },
-          },
-        },
         ii: {
           all: {
             scale: r(cascade.results?.II_M2All),
@@ -1577,21 +1626,6 @@ export function snapshotFromRiskCascade(
         },
       },
       [SCENARIOS.EXTREME]: {
-        cp: {
-          avg: r(cascade.results?.CP_AVG_E2All),
-          matrix: {
-            scale: {
-              considerable: cascade.cr4de_e2c || "CP0",
-              major: cascade.cr4de_e2m || "CP0",
-              extreme: cascade.cr4de_e2e || "CP0",
-            },
-            abs: {
-              considerable: getAbsoluteProbability(cascade.cr4de_e2c),
-              major: getAbsoluteProbability(cascade.cr4de_e2m),
-              extreme: getAbsoluteProbability(cascade.cr4de_e2e),
-            },
-          },
-        },
         ii: {
           all: {
             scale: r(cascade.results?.II_E2All),

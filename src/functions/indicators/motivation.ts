@@ -1,7 +1,14 @@
-const motivationLowerBoundScale3 = [0, 1 / 100, 50 / 100, 90 / 100];
+import round from "../roundNumberString";
 
-const motivationUpperBoundScale3 = [1 / 100, 50 / 100, 90 / 100, 100 / 100];
-const motivationLowerBoundScale7 = [
+export const motivationLowerBoundScale3 = [0, 1 / 100, 50 / 100, 90 / 100];
+
+export const motivationUpperBoundScale3 = [
+  1 / 100,
+  50 / 100,
+  90 / 100,
+  100 / 100,
+];
+export const motivationLowerBoundScale7 = [
   0,
   0.01 / 100,
   10 / 100,
@@ -11,7 +18,7 @@ const motivationLowerBoundScale7 = [
   75 / 100,
   90 / 100,
 ];
-const motivationUpperBoundScale7 = [
+export const motivationUpperBoundScale7 = [
   0.01 / 100,
   10 / 100,
   25 / 100,
@@ -100,4 +107,25 @@ export function MScale3to7(pScale5: number) {
 
 export function MScale7to3(pScale5: number) {
   return mScale3FromPAbs(pAbsFromMScale7(pScale5));
+}
+
+export function getIntervalStringMScale3(mScale3: number) {
+  if (mScale3 < 0.5)
+    return `< ${round(2 * mScale3 * pAbsFromMScale3(0.5), 2)}%`;
+
+  return `${round(100 * pAbsFromMScale3(mScale3 - 0.5), 1)}% - ${round(
+    100 * pAbsFromMScale3(mScale3 + 0.5),
+    2
+  )}%`;
+}
+
+export function getIntervalStringMScale7(mScale7: number) {
+  if (mScale7 <= 0) return "0%";
+  if (mScale7 < 0.5)
+    return `< ${round(2 * mScale7 * pAbsFromMScale7(0.5), 2)}%`;
+
+  return `${round(100 * pAbsFromMScale7(mScale7 - 0.5), 1)}% - ${round(
+    100 * pAbsFromMScale7(mScale7 + 0.5),
+    2
+  )}%`;
 }
