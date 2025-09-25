@@ -13,6 +13,8 @@ import {
   SCENARIOS,
 } from "./scenarios";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
+import { DVCascadeSnapshot } from "../types/dataverse/DVCascadeSnapshot";
+import { DVRiskSnapshot } from "../types/dataverse/DVRiskSnapshot";
 
 export type Effect = {
   id: string | null;
@@ -251,3 +253,22 @@ export const getDamageIndicatorAbsoluteScale = (
 
 //   return tiCategory / ti;
 // };
+
+export const getAverageIndirectImpact = (
+  c: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>,
+  riskFile: DVRiskSnapshot
+) => {
+  const totalTP =
+    riskFile.cr4de_quanti.considerable.tp.yearly.scale +
+    riskFile.cr4de_quanti.major.tp.yearly.scale +
+    riskFile.cr4de_quanti.extreme.tp.yearly.scale;
+
+  return (
+    (riskFile.cr4de_quanti.considerable.tp.yearly.scale / totalTP) *
+      c.cr4de_quanti_effect.considerable.ii.all.scale +
+    (riskFile.cr4de_quanti.major.tp.yearly.scale / totalTP) *
+      c.cr4de_quanti_effect.major.ii.all.scale +
+    (riskFile.cr4de_quanti.extreme.tp.yearly.scale / totalTP) *
+      c.cr4de_quanti_effect.extreme.ii.all.scale
+  );
+};

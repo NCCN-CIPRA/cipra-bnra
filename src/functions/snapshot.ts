@@ -1403,7 +1403,7 @@ const oldToNewCPMatrix = (
     SCENARIOS.MAJOR,
     SCENARIOS.EXTREME,
   ];
-
+  console.log(cascade);
   return scenarios.reduce(
     (accCause, causeScenario) => ({
       ...accCause,

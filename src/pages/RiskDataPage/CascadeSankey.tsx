@@ -29,6 +29,7 @@ import {
   serializeCPMatrix,
 } from "../../types/dataverse/DVRiskCascade";
 import useAPI, { DataTable } from "../../hooks/useAPI";
+import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 
 const scenarioHeight = 300;
 
@@ -157,10 +158,17 @@ export default function CascadeSankey({
     setInnerCascade(cascade);
   }, [setInnerCascade, cascade]);
 
-  let isJsonScenario = false;
+  let isJsonCauseScenario = false,
+    isJsonEffectScenario = false;
+  try {
+    JSON.parse(causeScenarios.considerable);
+    isJsonCauseScenario = true;
+  } catch {
+    // empty
+  }
   try {
     JSON.parse(effectScenarios.considerable);
-    isJsonScenario = true;
+    isJsonEffectScenario = true;
   } catch {
     // empty
   }
@@ -181,7 +189,9 @@ export default function CascadeSankey({
           name: "Considerable Actors",
           color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
           align: "left",
-          description: (
+          description: isJsonCauseScenario ? (
+            <ScenarioText scenario={JSON.parse(causeScenarios.considerable)} />
+          ) : (
             <Box
               dangerouslySetInnerHTML={{ __html: causeScenarios.considerable }}
             />
@@ -192,7 +202,9 @@ export default function CascadeSankey({
           name: "Major Actors",
           color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
           align: "left",
-          description: (
+          description: isJsonCauseScenario ? (
+            <ScenarioText scenario={JSON.parse(causeScenarios.major)} />
+          ) : (
             <Box dangerouslySetInnerHTML={{ __html: causeScenarios.major }} />
           ),
         },
@@ -201,7 +213,9 @@ export default function CascadeSankey({
           name: "Extreme Actors",
           color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
           align: "left",
-          description: (
+          description: isJsonCauseScenario ? (
+            <ScenarioText scenario={JSON.parse(causeScenarios.extreme)} />
+          ) : (
             <Box dangerouslySetInnerHTML={{ __html: causeScenarios.extreme }} />
           ),
         },
@@ -210,7 +224,7 @@ export default function CascadeSankey({
           name: "Considerable Attack",
           color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
           align: "right",
-          description: isJsonScenario ? (
+          description: isJsonEffectScenario ? (
             <ScenarioText scenario={JSON.parse(effectScenarios.considerable)} />
           ) : (
             <Box
@@ -223,7 +237,7 @@ export default function CascadeSankey({
           name: "Major Attack",
           color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
           align: "right",
-          description: isJsonScenario ? (
+          description: isJsonEffectScenario ? (
             <ScenarioText scenario={JSON.parse(effectScenarios.major)} />
           ) : (
             <Box
@@ -236,7 +250,7 @@ export default function CascadeSankey({
           name: "Extreme Attack",
           color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
           align: "right",
-          description: isJsonScenario ? (
+          description: isJsonEffectScenario ? (
             <ScenarioText scenario={JSON.parse(effectScenarios.extreme)} />
           ) : (
             <Box
@@ -347,7 +361,14 @@ export default function CascadeSankey({
         },
       ],
     }),
-    [causeScenarios, cpMatrix, effectScenarios, indicators, isJsonScenario]
+    [
+      causeScenarios,
+      cpMatrix,
+      effectScenarios,
+      indicators,
+      isJsonCauseScenario,
+      isJsonEffectScenario,
+    ]
   );
 
   return (
@@ -395,6 +416,7 @@ export default function CascadeSankey({
                 hoverLinkIndex === null ? null : data.links[hoverLinkIndex]
               }
               setHoverIndex={setHoverLinkIndex}
+              isMotivation={cause.cr4de_risk_type === RISK_TYPE.MANMADE}
               onChangeCP={handleChangeCP}
             />
           )}
@@ -525,6 +547,7 @@ function PSankeyLink(
     hoverNode: ScenarioSankeyNode | null;
     hoverLink: ScenarioSankeyLink | null;
     setHoverIndex: (l: number | null) => void;
+    isMotivation: boolean;
     onChangeCP: (
       causeScenario: SCENARIOS,
       effectScenario: SCENARIOS,
@@ -545,6 +568,7 @@ function PSankeyLink(
     targetY,
     targetControlX,
     linkWidth: rawLinkWidth,
+    isMotivation,
     onChangeCP,
   } = props;
   const { indicators } = useOutletContext<BasePageContext>();
@@ -596,7 +620,8 @@ function PSankeyLink(
             textAnchor="middle"
             fontWeight="bold"
           >
-            M{payload.cpValue}
+            {isMotivation ? "M" : "CP"}
+            {payload.cpValue}
           </text>
           <text
             pointerEvents="none"

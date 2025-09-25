@@ -7,6 +7,7 @@ import Emerging from "./Emerging";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import NCCNLoader from "../../components/NCCNLoader";
 import RiskFileTitle from "../../components/RiskFileTitle";
+import Attack from "./Attack";
 
 export default function RiskDataPage() {
   const {
@@ -28,14 +29,35 @@ export default function RiskDataPage() {
       </Box>
     );
 
+  const isAttackRisk = cascades.causes.some(
+    (c) => c.cr4de_cause_risk.cr4de_risk_type === RISK_TYPE.MANMADE
+  );
+
   return (
     <Stack direction="column" sx={{ width: "100%" }}>
       <Container sx={{ mt: 2 }}>
         <RiskFileTitle riskFile={riskSummary} />
       </Container>
-      <Box sx={{ mt: 6, mb: 16 }}>
-        {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && (
+      <Box sx={{ mt: 2, mb: 16 }}>
+        {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && !isAttackRisk && (
           <Standard
+            riskFile={riskFile}
+            causes={cascades.causes}
+            effects={cascades.effects}
+            catalyzingEffects={cascades.catalyzingEffects}
+            climateChange={cascades.climateChange}
+            // directAnalyses={directAnalyses}
+            // cascadeAnalyses={cascadeAnalyses}
+            // reloadRiskFile={() =>
+            //   reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+            // }
+            // reloadCascades={() =>
+            //   reloadRiskFile({ id: riskFile.cr4de_riskfilesid })
+            // }
+          />
+        )}
+        {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && isAttackRisk && (
+          <Attack
             riskFile={riskFile}
             causes={cascades.causes}
             effects={cascades.effects}

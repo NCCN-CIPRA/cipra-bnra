@@ -1,4 +1,9 @@
 import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
+import { DVCascadeSnapshot } from "../types/dataverse/DVCascadeSnapshot";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../types/dataverse/DVRiskSnapshot";
 import { SCENARIO_SUFFIX } from "./scenarios";
 
 export type Cause = {
@@ -172,3 +177,32 @@ export function getPartialProbabilityRelativeScale(p_daily: number) {
   // return ratio * rescaleProbability(tp);
   return rescaleProbability(getYearlyProbability(p_daily));
 }
+
+export const getAverageIndirectProbability = (
+  c: DVCascadeSnapshot<unknown, DVRiskSnapshot>,
+  riskFile: DVRiskSnapshot
+) => {
+  return (
+    (c.cr4de_quanti_cause.considerable.ip.yearly.scale /
+      riskFile.cr4de_quanti.considerable.tp.yearly.scale +
+      c.cr4de_quanti_cause.major.ip.yearly.scale /
+        riskFile.cr4de_quanti.major.tp.yearly.scale +
+      c.cr4de_quanti_cause.extreme.ip.yearly.scale /
+        riskFile.cr4de_quanti.extreme.tp.yearly.scale) /
+    3
+  );
+};
+
+export const getAverageDirectProbability = (
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, unknown>
+) => {
+  return (
+    (riskFile.cr4de_quanti.considerable.dp.scaleTot /
+      riskFile.cr4de_quanti.considerable.tp.yearly.scale +
+      riskFile.cr4de_quanti.major.dp.scaleTot /
+        riskFile.cr4de_quanti.major.tp.yearly.scale +
+      riskFile.cr4de_quanti.extreme.dp.scaleTot /
+        riskFile.cr4de_quanti.extreme.tp.yearly.scale) /
+    3
+  );
+};
