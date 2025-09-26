@@ -16,12 +16,12 @@ export function returnPeriodMonthsFromPDaily(pDaily: number) {
   return 1 / Math.pow(pDaily, 30.437);
 }
 
-export function pScale5FromReturnPeriodMonths(rpMonths: number) {
-  return 4.5 - Math.log10(rpMonths / (12 * 3));
+export function pScale5FromReturnPeriodMonths(rpMonths: number, round = 10) {
+  return Math.round(round * (4.5 - Math.log10(rpMonths / (12 * 3)))) / round;
 }
 
-export function pScale7FromReturnPeriodMonths(rpMonths: number) {
-  return (12 - Math.log(rpMonths / 12)) / 2.3;
+export function pScale7FromReturnPeriodMonths(rpMonths: number, round = 10) {
+  return Math.round((round * (12 - Math.log(rpMonths / 12))) / 2.3) / round;
 }
 
 export function pScale5to7(pScale5: number) {

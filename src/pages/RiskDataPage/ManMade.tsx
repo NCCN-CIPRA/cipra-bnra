@@ -8,7 +8,7 @@ import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { BasePageContext } from "../BasePage";
 import RiskDataAccordion from "./RiskDataAccordion";
 import { getAverageIndirectImpact } from "../../functions/Impact";
-import { EffectSection } from "./EffectSection";
+import { CascadeSection } from "./CascadeSection";
 
 export default function ManMade({
   riskFile,
@@ -23,6 +23,10 @@ export default function ManMade({
   return (
     <>
       <Box sx={{ mx: 4 }}>
+        <Typography variant="h4" sx={{ mx: 0, mb: 2 }}>
+          Potential attacks
+        </Typography>
+
         <Box sx={{ mb: 8 }}>
           {effects
             .sort(
@@ -31,13 +35,30 @@ export default function ManMade({
                 getAverageIndirectImpact(a, riskFile)
             )
             .map((ca) => (
-              <EffectSection
+              <CascadeSection
                 key={ca._cr4de_risk_cascade_value}
-                riskFile={riskFile}
+                cause={riskFile}
+                effect={ca.cr4de_effect_risk}
                 cascade={ca}
+                subtitle={
+                  <Typography variant="body1" color="warning">
+                    <b>
+                      {Math.round(
+                        10000 * getAverageIndirectImpact(ca, riskFile)
+                      ) / 100}
+                      %
+                    </b>{" "}
+                    of expected impact
+                  </Typography>
+                }
               />
             ))}
         </Box>
+
+        <Typography variant="h4" sx={{ mx: 0, mb: 2 }}>
+          Catalyzing risks
+        </Typography>
+
         <Box sx={{ mb: 8 }}>
           {catalyzingEffects.map((ca) => (
             <EmergingSection

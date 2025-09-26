@@ -1,6 +1,7 @@
 import { RiskCalculation } from "../types/dataverse/DVAnalysisRun";
 import { DVRiskCascade } from "../types/dataverse/DVRiskCascade";
 import {
+  DI_FIELD,
   DVRiskFile,
   RISKFILE_RESULT_FIELD,
 } from "../types/dataverse/DVRiskFile";
@@ -255,7 +256,7 @@ export const getDamageIndicatorAbsoluteScale = (
 // };
 
 export const getAverageIndirectImpact = (
-  c: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>,
+  c: DVCascadeSnapshot<unknown, unknown, unknown>,
   riskFile: DVRiskSnapshot
 ) => {
   const totalTP =
@@ -270,5 +271,35 @@ export const getAverageIndirectImpact = (
       c.cr4de_quanti_effect.major.ii.all.scale +
     (riskFile.cr4de_quanti.extreme.tp.yearly.scale / totalTP) *
       c.cr4de_quanti_effect.extreme.ii.all.scale
+  );
+};
+
+export const getAverageDirectImpact = (
+  riskFile: DVRiskSnapshot,
+  fields: DI_FIELD[]
+) => {
+  const totalTP =
+    riskFile.cr4de_quanti.considerable.tp.yearly.scale +
+    riskFile.cr4de_quanti.major.tp.yearly.scale +
+    riskFile.cr4de_quanti.extreme.tp.yearly.scale;
+
+  const considerableImpact = fields.reduce(
+    (t, f) => t + riskFile.cr4de_quanti.considerable.di[f].scaleTot,
+    0
+  );
+  const majorImpact = fields.reduce(
+    (t, f) => t + riskFile.cr4de_quanti.major.di[f].scaleTot,
+    0
+  );
+  const extremeImpact = fields.reduce(
+    (t, f) => t + riskFile.cr4de_quanti.extreme.di[f].scaleTot,
+    0
+  );
+
+  return (
+    (riskFile.cr4de_quanti.considerable.tp.yearly.scale / totalTP) *
+      considerableImpact +
+    (riskFile.cr4de_quanti.major.tp.yearly.scale / totalTP) * majorImpact +
+    (riskFile.cr4de_quanti.extreme.tp.yearly.scale / totalTP) * extremeImpact
   );
 };

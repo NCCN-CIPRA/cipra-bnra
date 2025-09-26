@@ -13,6 +13,7 @@ import {
   serializeCauseSnapshotResults,
   serializeCPMatrix,
   SerializedCauseSnapshotResults,
+  SerializedCPMatrix,
   SerializedEffectSnapshotResults,
   serializeEffectSnapshotResults,
 } from "../types/dataverse/DVCascadeSnapshot";
@@ -45,7 +46,11 @@ import {
   getDamageIndicatorToCategoryImpactRatio,
 } from "./CategoryImpact";
 import { getAbsoluteImpact, getAbsoluteImpactFromFloat } from "./Impact";
-import { pAbsFromCPScale5 } from "./indicators/cp";
+import {
+  cpScale5FromPAbs,
+  cpScale7FromPAbs,
+  pAbsFromCPScale5,
+} from "./indicators/cp";
 import {
   mScale3FromPAbs,
   mScale7FromPAbs,
@@ -86,7 +91,8 @@ export function updateSnapshots(
     unknown,
     unknown,
     SerializedCauseSnapshotResults,
-    SerializedEffectSnapshotResults
+    SerializedEffectSnapshotResults,
+    SerializedCPMatrix
   >[],
   riskFiles: DVRiskFile[],
   cascades: DVRiskCascade[]
@@ -105,7 +111,8 @@ export function updateSnapshots(
       unknown,
       unknown,
       SerializedCauseSnapshotResults,
-      SerializedEffectSnapshotResults
+      SerializedEffectSnapshotResults,
+      SerializedCPMatrix
     >
   >[];
 } {
@@ -135,7 +142,8 @@ export function updateSnapshots(
         unknown,
         unknown,
         SerializedCauseSnapshotResults,
-        SerializedEffectSnapshotResults
+        SerializedEffectSnapshotResults,
+        SerializedCPMatrix
       >
     >;
   } = cascadesSnapshots.reduce(
@@ -208,7 +216,8 @@ function updateSnapshot(
         unknown,
         unknown,
         SerializedCauseSnapshotResults,
-        SerializedEffectSnapshotResults
+        SerializedEffectSnapshotResults,
+        SerializedCPMatrix
       >
     >;
   },
@@ -259,6 +268,7 @@ function updateSnapshot(
       parseRiskSnapshot(updatedSnapshot),
       effect
     );
+
     if (cascadesSnapshots[effect.cr4de_bnrariskcascadeid]) {
       updatedEffectSnapshot.cr4de_bnrariskcascadesnapshotid =
         cascadesSnapshots[effect.cr4de_bnrariskcascadeid]
@@ -1125,24 +1135,24 @@ function getSerializedQualiResults(riskFile: DVRiskFile) {
       dp: riskFile.cr4de_dp_quali_c || "",
       h: riskFile.cr4de_di_quali_h_c || "",
       s: riskFile.cr4de_di_quali_s_c || "",
-      e: riskFile.cr4de_di_quali_f_c || "",
-      f: riskFile.cr4de_di_quali_e_c || "",
+      e: riskFile.cr4de_di_quali_e_c || "",
+      f: riskFile.cr4de_di_quali_f_c || "",
       cb: riskFile.cr4de_cross_border_impact_quali_c || "",
     },
     major: {
       dp: riskFile.cr4de_dp_quali_m || "",
       h: riskFile.cr4de_di_quali_h_m || "",
       s: riskFile.cr4de_di_quali_s_m || "",
-      e: riskFile.cr4de_di_quali_f_m || "",
-      f: riskFile.cr4de_di_quali_e_m || "",
+      e: riskFile.cr4de_di_quali_e_m || "",
+      f: riskFile.cr4de_di_quali_f_m || "",
       cb: riskFile.cr4de_cross_border_impact_quali_m || "",
     },
     extreme: {
       dp: riskFile.cr4de_dp_quali_e || "",
       h: riskFile.cr4de_di_quali_h_e || "",
       s: riskFile.cr4de_di_quali_s_e || "",
-      e: riskFile.cr4de_di_quali_f_e || "",
-      f: riskFile.cr4de_di_quali_e_e || "",
+      e: riskFile.cr4de_di_quali_e_e || "",
+      f: riskFile.cr4de_di_quali_f_e || "",
       cb: riskFile.cr4de_cross_border_impact_quali_e || "",
     },
   });
@@ -1354,14 +1364,6 @@ export function snapshotFromRiskfile(
   };
 }
 
-/**
- * During the previous BNRA iteration, the total probability of an attack by an actor was given by:
- *
- * Motivation of actor group (scenario) * CP of attack cascade
- *
- * In the new method, only the CP of the attack cascade is taken into account, and this value is renamed to "Motivation" of the actor
- * for this type of attack.
- */
 export const getNewCPFromOldMAndCP = (
   cause: DVRiskSnapshot,
   cascade: DVRiskCascade,
@@ -1378,17 +1380,50 @@ export const getNewCPFromOldMAndCP = (
   const cpVal = parseFloat(cpString.replace("CP", ""));
   const cpAbs = pAbsFromCPScale5(cpVal);
 
-  const mVal = cause.cr4de_quanti[causeScenario].m.scale;
-  const mAbs =
-    cause.cr4de_risk_type === RISK_TYPE.MANMADE ? pAbsFromMScale3(mVal) : 1;
+  if (cause.cr4de_risk_type === RISK_TYPE.MANMADE) {
+    /**
+     * During the previous BNRA iteration, the total probability of an attack by an actor was given by:
+     *
+     * Motivation of actor group (scenario) * CP of attack cascade
+     *
+     * In the new method, only the CP of the attack cascade is taken into account, and this value is renamed to "Motivation" of the actor
+     * for this type of attack.
+     */
+    const mVal = cause.cr4de_quanti[causeScenario].m.scale;
+    const mAbs = pAbsFromMScale3(mVal);
 
-  const totP = mAbs * cpAbs;
-  if (!indicators) return Math.round(100 * totP) / 100;
+    const totP = mAbs * cpAbs;
 
-  if (indicators === Indicators.V1)
-    return Math.round(10 * mScale3FromPAbs(totP)) / 10;
+    if (!indicators) return Math.round(100 * totP) / 100;
 
-  return Math.round(10 * mScale7FromPAbs(totP)) / 10;
+    if (indicators === Indicators.V1) {
+      return Math.round(10 * mScale3FromPAbs(totP)) / 10;
+    }
+
+    return Math.round(10 * mScale7FromPAbs(totP)) / 10;
+  }
+
+  if (!indicators) return Math.round(100 * cpAbs) / 100;
+
+  if (indicators === Indicators.V1) {
+    // console.log(
+    //   // cascade,
+    //   cause.cr4de_title,
+    //   cascade.cr4de_effect_hazard.cr4de_title,
+    //   causeScenario,
+    //   effectScenario,
+    //   `cr4de_${getScenarioLetter(causeScenario)}2${getScenarioLetter(
+    //     effectScenario
+    //   )}`,
+    //   cpString,
+    //   cpVal,
+    //   cpAbs,
+    //   Math.round(10 * cpScale5FromPAbs(cpAbs)) / 10
+    // );
+    return Math.round(10 * cpScale5FromPAbs(cpAbs)) / 10;
+  }
+
+  return Math.round(10 * cpScale7FromPAbs(cpAbs)) / 10;
 };
 
 const oldToNewCPMatrix = (
@@ -1403,7 +1438,7 @@ const oldToNewCPMatrix = (
     SCENARIOS.MAJOR,
     SCENARIOS.EXTREME,
   ];
-  console.log(cascade);
+
   return scenarios.reduce(
     (accCause, causeScenario) => ({
       ...accCause,
@@ -1419,6 +1454,13 @@ const oldToNewCPMatrix = (
               null
             ),
             scale3: getNewCPFromOldMAndCP(
+              cause,
+              cascade,
+              causeScenario,
+              effectScenario,
+              Indicators.V1
+            ),
+            scale5: getNewCPFromOldMAndCP(
               cause,
               cascade,
               causeScenario,
@@ -1449,7 +1491,8 @@ export function snapshotFromRiskCascade(
   unknown,
   unknown,
   SerializedCauseSnapshotResults,
-  SerializedEffectSnapshotResults
+  SerializedEffectSnapshotResults,
+  SerializedCPMatrix
 > {
   const newCPMatrixSnapshot = oldToNewCPMatrix(cause, cascade);
   const newCPMatrix: CPMatrix = {

@@ -33,6 +33,10 @@ export function parseCPMatrix(quanti: SerializedCPMatrix): CPMatrix {
   return JSON.parse(quanti) as CPMatrix;
 }
 
+export type DVCascadeSnapshotCPMatrixType =
+  | unknown
+  | SerializedCPMatrix
+  | CPMatrix;
 export type DVCascadeSnapshotCauseResultType =
   | unknown
   | SerializedCauseSnapshotResults
@@ -47,7 +51,8 @@ export interface DVCascadeSnapshot<
   CauseType = unknown,
   EffectType = unknown,
   CauseResultType extends DVCascadeSnapshotCauseResultType = CauseSnapshotResults,
-  EffectResultType extends DVCascadeSnapshotEffectResultType = EffectSnapshotResults
+  EffectResultType extends DVCascadeSnapshotEffectResultType = EffectSnapshotResults,
+  CPMatrixType extends DVCascadeSnapshotCPMatrixType = CPMatrix
 > {
   cr4de_bnrariskcascadesnapshotid: string;
 
@@ -63,7 +68,7 @@ export interface DVCascadeSnapshot<
   _cr4de_effect_risk_value: string;
   cr4de_effect_risk: EffectType;
 
-  cr4de_quanti_cp: SerializedCPMatrix;
+  cr4de_quanti_cp: CPMatrixType;
   cr4de_quanti_cause: CauseResultType;
   cr4de_quanti_effect: EffectResultType;
 

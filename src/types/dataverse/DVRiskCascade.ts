@@ -13,20 +13,22 @@ export function parseCascadeSnapshot<R, S, T>(
     S,
     T,
     SerializedCauseSnapshotResults,
-    SerializedEffectSnapshotResults
+    SerializedEffectSnapshotResults,
+    SerializedCPMatrix
   >
 ): DVCascadeSnapshot<R, S, T> {
   return {
     ...snapshot,
+    cr4de_quanti_cp: JSON.parse(snapshot.cr4de_quanti_cp),
     cr4de_quanti_cause: JSON.parse(snapshot.cr4de_quanti_cause),
     cr4de_quanti_effect: JSON.parse(snapshot.cr4de_quanti_effect),
   };
 }
 
-export function linkCascadeSnapshot<T, C, E>(
-  snapshot: DVCascadeSnapshot<T, unknown, unknown, C, E>,
+export function linkCascadeSnapshot<T, C, E, Cp>(
+  snapshot: DVCascadeSnapshot<T, unknown, unknown, C, E, Cp>,
   riskCatalogue: RiskCatalogue
-): DVCascadeSnapshot<T, DVRiskSnapshot, DVRiskSnapshot, C, E> {
+): DVCascadeSnapshot<T, DVRiskSnapshot, DVRiskSnapshot, C, E, Cp> {
   return {
     ...snapshot,
     cr4de_cause_risk: riskCatalogue[snapshot._cr4de_cause_risk_value],
@@ -113,7 +115,7 @@ export type CPMatrixEffectRow = {
 export type CPMatrixValue = {
   abs: number;
   scale7: number;
-  scale3: number;
+  scale5: number;
 };
 
 export const RISK_CASCADE_QUANTI_FIELDS: (keyof DVRiskCascade)[] = [

@@ -2,8 +2,6 @@ import { Layer, Rectangle, ResponsiveContainer, Sankey } from "recharts";
 import {
   CPMatrix,
   DVCascadeSnapshot,
-  parseCPMatrix,
-  serializeCPMatrix as serializeCPMatrixSnapshot,
 } from "../../types/dataverse/DVCascadeSnapshot";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { ReactNode, useEffect, useMemo, useState } from "react";
@@ -31,7 +29,7 @@ import {
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 
-const scenarioHeight = 300;
+const scenarioHeight = 1000;
 
 type ScenarioSankeyNode = {
   index: number;
@@ -40,6 +38,7 @@ type ScenarioSankeyNode = {
   color: string;
   align: "left" | "right";
   description: ReactNode;
+  bottom?: boolean;
 };
 
 interface ScenarioSankeyLink extends SankeyLink {
@@ -53,15 +52,22 @@ const ScenarioText = ({
   scenario,
 }: {
   scenario: IntensityParameter<string>[];
-}) => (
-  <Stack direction="column" sx={{ mt: 2 }}>
-    {scenario.map((p) => (
-      <Typography variant="body1" sx={{}}>
-        <b>{p.name}:</b> {p.value}
-      </Typography>
-    ))}
-  </Stack>
-);
+}) => {
+  return (
+    <Stack direction="column" sx={{ bgcolor: "white" }}>
+      {scenario.map((p) => (
+        <>
+          {p.name && (
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              <b>{p.name}:</b>
+            </Typography>
+          )}
+          <Box dangerouslySetInnerHTML={{ __html: p.value || "" }} />
+        </>
+      ))}
+    </Stack>
+  );
+};
 
 const getLinkProps = (
   cpMatrix: CPMatrix,
@@ -71,7 +77,7 @@ const getLinkProps = (
 ) => {
   const mValue =
     indicators === Indicators.V1
-      ? cpMatrix[causeScenario][effectScenario].scale3
+      ? cpMatrix[causeScenario][effectScenario].scale5
       : cpMatrix[causeScenario][effectScenario].scale7;
 
   return {
@@ -121,10 +127,16 @@ export default function CascadeSankey({
       indicators === Indicators.V1
         ? pAbsFromMScale3(newValue)
         : pAbsFromMScale7(newValue);
-    const updatedCPMatrix = parseCPMatrix(cascade.cr4de_quanti_cp);
+    const updatedCPMatrix = { ...cascade.cr4de_quanti_cp };
     updatedCPMatrix[causeScenario][effectScenario] = {
       abs: Math.round(100 * pAbs) / 100,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       scale3:
+        indicators === Indicators.V1
+          ? newValue
+          : Math.round(10 * mScale3FromPAbs(pAbs)) / 10,
+      scale5:
         indicators === Indicators.V1
           ? newValue
           : Math.round(10 * mScale3FromPAbs(pAbs)) / 10,
@@ -143,14 +155,14 @@ export default function CascadeSankey({
 
     setInnerCascade({
       ...innerCascade,
-      cr4de_quanti_cp: serializeCPMatrixSnapshot({
+      cr4de_quanti_cp: {
         [SCENARIOS.CONSIDERABLE]: {
           ...cpMatrix[SCENARIOS.CONSIDERABLE],
           avg: 0,
         },
         [SCENARIOS.MAJOR]: { ...cpMatrix[SCENARIOS.MAJOR], avg: 0 },
         [SCENARIOS.EXTREME]: { ...cpMatrix[SCENARIOS.EXTREME], avg: 0 },
-      }),
+      },
     });
   };
 
@@ -158,25 +170,10 @@ export default function CascadeSankey({
     setInnerCascade(cascade);
   }, [setInnerCascade, cascade]);
 
-  let isJsonCauseScenario = false,
-    isJsonEffectScenario = false;
-  try {
-    JSON.parse(causeScenarios.considerable);
-    isJsonCauseScenario = true;
-  } catch {
-    // empty
-  }
-  try {
-    JSON.parse(effectScenarios.considerable);
-    isJsonEffectScenario = true;
-  } catch {
-    // empty
-  }
-
-  const cpMatrix = useMemo(
-    () => parseCPMatrix(innerCascade.cr4de_quanti_cp),
-    [innerCascade]
-  );
+  const causeName =
+    cause.cr4de_risk_type === RISK_TYPE.MANMADE ? "Actors" : "Scenario";
+  const effectName =
+    cause.cr4de_risk_type === RISK_TYPE.MANMADE ? "Attack" : "Scenario";
 
   const data: {
     nodes: ScenarioSankeyNode[];
@@ -186,77 +183,59 @@ export default function CascadeSankey({
       nodes: [
         {
           index: 0,
-          name: "Considerable Actors",
+          name: `Considerable ${causeName}`,
           color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
           align: "left",
-          description: isJsonCauseScenario ? (
+          description: (
             <ScenarioText scenario={JSON.parse(causeScenarios.considerable)} />
-          ) : (
-            <Box
-              dangerouslySetInnerHTML={{ __html: causeScenarios.considerable }}
-            />
           ),
         },
         {
           index: 1,
-          name: "Major Actors",
+          name: `Major ${causeName}`,
           color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
           align: "left",
-          description: isJsonCauseScenario ? (
+          description: (
             <ScenarioText scenario={JSON.parse(causeScenarios.major)} />
-          ) : (
-            <Box dangerouslySetInnerHTML={{ __html: causeScenarios.major }} />
           ),
         },
         {
           index: 2,
-          name: "Extreme Actors",
+          name: `Extreme ${causeName}`,
           color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
           align: "left",
-          description: isJsonCauseScenario ? (
+          description: (
             <ScenarioText scenario={JSON.parse(causeScenarios.extreme)} />
-          ) : (
-            <Box dangerouslySetInnerHTML={{ __html: causeScenarios.extreme }} />
           ),
+          bottom: true,
         },
         {
           index: 3,
-          name: "Considerable Attack",
+          name: `Considerable ${effectName}`,
           color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
           align: "right",
-          description: isJsonEffectScenario ? (
+          description: (
             <ScenarioText scenario={JSON.parse(effectScenarios.considerable)} />
-          ) : (
-            <Box
-              dangerouslySetInnerHTML={{ __html: effectScenarios.considerable }}
-            />
           ),
         },
         {
           index: 4,
-          name: "Major Attack",
+          name: `Major ${effectName}`,
           color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
           align: "right",
-          description: isJsonEffectScenario ? (
+          description: (
             <ScenarioText scenario={JSON.parse(effectScenarios.major)} />
-          ) : (
-            <Box
-              dangerouslySetInnerHTML={{ __html: effectScenarios.considerable }}
-            />
           ),
         },
         {
           index: 5,
-          name: "Extreme Attack",
+          name: `Extreme ${effectName}`,
           color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
           align: "right",
-          description: isJsonEffectScenario ? (
+          description: (
             <ScenarioText scenario={JSON.parse(effectScenarios.extreme)} />
-          ) : (
-            <Box
-              dangerouslySetInnerHTML={{ __html: effectScenarios.considerable }}
-            />
           ),
+          bottom: true,
         },
       ],
       links: [
@@ -265,7 +244,7 @@ export default function CascadeSankey({
           source: 0,
           target: 3,
           ...getLinkProps(
-            cpMatrix,
+            innerCascade.cr4de_quanti_cp,
             SCENARIOS.CONSIDERABLE,
             SCENARIOS.CONSIDERABLE,
             indicators
@@ -276,7 +255,7 @@ export default function CascadeSankey({
           source: 0,
           target: 4,
           ...getLinkProps(
-            cpMatrix,
+            innerCascade.cr4de_quanti_cp,
             SCENARIOS.CONSIDERABLE,
             SCENARIOS.MAJOR,
             indicators
@@ -287,7 +266,7 @@ export default function CascadeSankey({
           source: 0,
           target: 5,
           ...getLinkProps(
-            cpMatrix,
+            innerCascade.cr4de_quanti_cp,
             SCENARIOS.CONSIDERABLE,
             SCENARIOS.EXTREME,
             indicators
@@ -298,7 +277,7 @@ export default function CascadeSankey({
           source: 1,
           target: 3,
           ...getLinkProps(
-            cpMatrix,
+            innerCascade.cr4de_quanti_cp,
             SCENARIOS.MAJOR,
             SCENARIOS.CONSIDERABLE,
             indicators
@@ -309,7 +288,7 @@ export default function CascadeSankey({
           source: 1,
           target: 4,
           ...getLinkProps(
-            cpMatrix,
+            innerCascade.cr4de_quanti_cp,
             SCENARIOS.MAJOR,
             SCENARIOS.MAJOR,
             indicators
@@ -320,7 +299,7 @@ export default function CascadeSankey({
           source: 1,
           target: 5,
           ...getLinkProps(
-            cpMatrix,
+            innerCascade.cr4de_quanti_cp,
             SCENARIOS.MAJOR,
             SCENARIOS.EXTREME,
             indicators
@@ -331,7 +310,7 @@ export default function CascadeSankey({
           source: 2,
           target: 3,
           ...getLinkProps(
-            cpMatrix,
+            innerCascade.cr4de_quanti_cp,
             SCENARIOS.EXTREME,
             SCENARIOS.CONSIDERABLE,
             indicators
@@ -342,7 +321,7 @@ export default function CascadeSankey({
           source: 2,
           target: 4,
           ...getLinkProps(
-            cpMatrix,
+            innerCascade.cr4de_quanti_cp,
             SCENARIOS.EXTREME,
             SCENARIOS.MAJOR,
             indicators
@@ -353,7 +332,7 @@ export default function CascadeSankey({
           source: 2,
           target: 5,
           ...getLinkProps(
-            cpMatrix,
+            innerCascade.cr4de_quanti_cp,
             SCENARIOS.EXTREME,
             SCENARIOS.EXTREME,
             indicators
@@ -362,12 +341,12 @@ export default function CascadeSankey({
       ],
     }),
     [
+      causeName,
       causeScenarios,
-      cpMatrix,
+      effectName,
       effectScenarios,
+      innerCascade.cr4de_quanti_cp,
       indicators,
-      isJsonCauseScenario,
-      isJsonEffectScenario,
     ]
   );
 
@@ -382,7 +361,7 @@ export default function CascadeSankey({
         display: "flex",
       }}
     >
-      <ResponsiveContainer width="40%" height={3 * scenarioHeight}>
+      <ResponsiveContainer width="40%" height={800}>
         <Sankey
           data={data}
           node={(props) => (
@@ -517,7 +496,7 @@ function PSankeyNode({
       />
       <text
         opacity={shouldShowName ? 1 : 0}
-        y={y + 20}
+        y={shouldShowDescription ? 20 : y + 20}
         // fontSize={fontSize ? fontSize - 2 : "14"}
         stroke="#333"
         cursor="pointer"
@@ -530,9 +509,16 @@ function PSankeyNode({
         width="75%"
         height={scenarioHeight}
         {...descriptionStyle}
-        y={y + 20}
+        y={shouldShowDescription ? 25 : y + 25}
       >
-        <Box>{p.description}</Box>
+        <Box
+          sx={{
+            textAlign: index < 3 ? "right" : "left",
+            mx: index < 3 ? 1 : 0,
+          }}
+        >
+          {p.description}
+        </Box>
       </foreignObject>
     </Layer>
   );
@@ -571,7 +557,7 @@ function PSankeyLink(
     isMotivation,
     onChangeCP,
   } = props;
-  const { indicators } = useOutletContext<BasePageContext>();
+  const { user, indicators } = useOutletContext<BasePageContext>();
   const [editValue, setEditValue] = useState<number | null>(null);
 
   let shouldBeOpaque = false;
@@ -608,17 +594,22 @@ function PSankeyLink(
 
           setHoverIndex(null);
         }}
-        onClick={() => setEditValue(payload.cpValue)}
+        onClick={() => {
+          if (!user?.roles.analist) return;
+
+          setEditValue(payload.cpValue);
+        }}
       />
       {editValue === null && (
         <>
           <text
             pointerEvents="none"
-            opacity={shouldBeOpaque ? 1 : 0}
-            x={sourceX + (targetX - sourceX) / 2}
-            y={(sourceY + targetY) / 2 - 5}
-            textAnchor="middle"
+            opacity={1}
+            x={shouldBeOpaque ? sourceX + (targetX - sourceX) / 2 : 25}
+            y={shouldBeOpaque ? (sourceY + targetY) / 2 - 5 : sourceY + 3}
+            textAnchor={shouldBeOpaque ? "middle" : "left"}
             fontWeight="bold"
+            fontSize={shouldBeOpaque ? 15 : 13}
           >
             {isMotivation ? "M" : "CP"}
             {payload.cpValue}

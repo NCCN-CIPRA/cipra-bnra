@@ -199,6 +199,7 @@ export type RiskSnapshotScenarioResults = {
     };
     ha: {
       // Number from 0 - 5.5 on the Ha scale -> Not available due to scaling factors
+      // Calculate using diScale5|7FromEuros
       // scale: number;
 
       scaleTot: number; // Number from 0 - 5.5 on the total impact scale

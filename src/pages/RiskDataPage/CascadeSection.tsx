@@ -2,23 +2,30 @@ import { useOutletContext } from "react-router-dom";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { BasePageContext } from "../BasePage";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import RiskDataAccordion from "./RiskDataAccordion";
 import { Box, Link, Stack, Typography } from "@mui/material";
 import CascadeSankey from "./CascadeSankey";
 import TextInputBox from "../../components/TextInputBox";
-import { getAverageIndirectProbability } from "../../functions/Probability";
 
-export function CauseSection({
-  riskFile,
+export function CascadeSection({
+  cause,
+  effect,
   cascade,
+  subtitle = null,
 }: {
-  riskFile: DVRiskSnapshot;
-  cascade: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>;
+  cause: DVRiskSnapshot;
+  effect: DVRiskSnapshot;
+  cascade: DVCascadeSnapshot<unknown, unknown, unknown>;
+  subtitle?: ReactNode;
 }) {
   const { user } = useOutletContext<BasePageContext>();
 
   const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali || "");
+
+  // const [quali, setQuali] = useState<string | null>(
+  //   cascade.cr4de_quali_cause || ""
+  // );
 
   return (
     <RiskDataAccordion
@@ -26,37 +33,25 @@ export function CauseSection({
         <Stack direction="row">
           <Typography sx={{ flex: 1 }}>
             <Link
-              href={`/risks/${cascade.cr4de_cause_risk._cr4de_risk_file_value}/description`}
+              href={`/risks/${cause._cr4de_risk_file_value}/description`}
               target="_blank"
             >
-              {cascade.cr4de_cause_risk.cr4de_title}
+              {cause.cr4de_title}
             </Link>{" "}
             causes{" "}
             <Link
-              href={`/risks/${riskFile._cr4de_risk_file_value}/description`}
+              href={`/risks/${effect._cr4de_risk_file_value}/description`}
               target="_blank"
             >
-              {riskFile.cr4de_title}
+              {effect.cr4de_title}
             </Link>
           </Typography>
-          <Typography variant="body1" color="warning">
-            <b>
-              {Math.round(
-                10000 * getAverageIndirectProbability(cascade, riskFile)
-              ) / 100}
-              %
-            </b>{" "}
-            of total probabitity
-          </Typography>
+          {subtitle}
         </Stack>
       }
     >
       <Stack direction="column" sx={{ width: "100%" }}>
-        <CascadeSankey
-          cause={cascade.cr4de_cause_risk}
-          effect={riskFile}
-          cascade={cascade}
-        />
+        <CascadeSankey cause={cause} effect={effect} cascade={cascade} />
 
         <Box sx={{ p: 4 }}>
           <Typography variant="subtitle2" sx={{ mb: 2 }}>

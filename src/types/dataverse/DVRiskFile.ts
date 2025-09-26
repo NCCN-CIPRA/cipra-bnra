@@ -1,6 +1,40 @@
 import { SCENARIOS } from "../../functions/scenarios";
 import { DiscussionRequired } from "../DiscussionRequired";
 
+export type DP_FIELD = "dp";
+export type DI_FIELD =
+  | "ha"
+  | "hb"
+  | "hc"
+  | "sa"
+  | "sb"
+  | "sc"
+  | "sd"
+  | "ea"
+  | "fa"
+  | "fb";
+
+export function getQuantiLabel(field: DP_FIELD | DI_FIELD, isAttack?: boolean) {
+  if (field === "dp") {
+    if (isAttack) return "Motivation";
+
+    return "Other causes";
+  }
+
+  return {
+    ha: "Fatalities",
+    hb: "Injured / sick people",
+    hc: "People in need of assistance",
+    sa: "Supply shortfalls and unmet human needs",
+    sb: "Diminished public order and domestic security",
+    sc: "Damage to the reputation of Belgium",
+    sd: "Loss of confidence in or functioning of the state and/or its values",
+    ea: "Damaged ecosystems",
+    fa: "Financial asset damages",
+    fb: "Reduction of economic performance",
+  }[field];
+}
+
 export enum RISK_TYPE {
   STANDARD = "Standard Risk",
   MANMADE = "Malicious Man-made Risk",

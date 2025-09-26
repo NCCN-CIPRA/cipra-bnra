@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { CascadeSnapshots } from "../../../functions/cascades";
 import { JSXElementConstructor } from "react";
 import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
-import { parseCPMatrix } from "../../../types/dataverse/DVCascadeSnapshot";
 
 const baseY = 50;
 
@@ -189,7 +188,7 @@ export default function ActionsSankeyChart({
       id: e.cr4de_effect_risk._cr4de_risk_file_value,
       name: `risk.${e.cr4de_effect_risk.cr4de_hazard_id}.name`,
       cascade: e,
-      cp: parseCPMatrix(e.cr4de_quanti_cp)[scenario].avg,
+      cp: e.cr4de_quanti_cp[scenario].avg,
     }))
     .sort((a, b) => b.cp - a.cp);
 

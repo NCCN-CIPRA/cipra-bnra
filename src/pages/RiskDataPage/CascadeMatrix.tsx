@@ -17,10 +17,7 @@ import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { Trans, useTranslation } from "react-i18next";
 import { useState } from "react";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
-import {
-  CPMatrix,
-  DVCascadeSnapshot,
-} from "../../types/dataverse/DVCascadeSnapshot";
+import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 
 const COLORS = {
   CP0: "#e0ffcc",
@@ -388,8 +385,6 @@ export function CascadeSnapshotMatrix({
   const causeScenarios: Scenarios = JSON.parse(cause.cr4de_scenarios || "");
   const effectScenarios: Scenarios = JSON.parse(effect.cr4de_scenarios || "");
 
-  const cpMatrix: CPMatrix = JSON.parse(cascade.cr4de_quanti_cp);
-
   return (
     <Grid container spacing={1}>
       <Grid size={{ xs: 4.5 }}></Grid>
@@ -464,7 +459,9 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={`CP${
-            cpMatrix[SCENARIOS.CONSIDERABLE][SCENARIOS.CONSIDERABLE].scale3
+            cascade.cr4de_quanti_cp[SCENARIOS.CONSIDERABLE][
+              SCENARIOS.CONSIDERABLE
+            ].scale5
           }`}
           onChange={(newValue) =>
             onChange(
@@ -481,7 +478,8 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={`CP${
-            cpMatrix[SCENARIOS.CONSIDERABLE][SCENARIOS.MAJOR].scale3
+            cascade.cr4de_quanti_cp[SCENARIOS.CONSIDERABLE][SCENARIOS.MAJOR]
+              .scale5
           }`}
           onChange={(newValue) =>
             onChange(
@@ -494,7 +492,8 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={`CP${
-            cpMatrix[SCENARIOS.CONSIDERABLE][SCENARIOS.EXTREME].scale3
+            cascade.cr4de_quanti_cp[SCENARIOS.CONSIDERABLE][SCENARIOS.EXTREME]
+              .scale5
           }`}
           onChange={(newValue) =>
             onChange(
@@ -524,7 +523,8 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={`CP${
-            cpMatrix[SCENARIOS.MAJOR][SCENARIOS.CONSIDERABLE].scale3
+            cascade.cr4de_quanti_cp[SCENARIOS.MAJOR][SCENARIOS.CONSIDERABLE]
+              .scale5
           }`}
           onChange={(newValue) =>
             onChange(
@@ -536,7 +536,9 @@ export function CascadeSnapshotMatrix({
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={`CP${cpMatrix[SCENARIOS.MAJOR][SCENARIOS.MAJOR].scale3}`}
+          value={`CP${
+            cascade.cr4de_quanti_cp[SCENARIOS.MAJOR][SCENARIOS.MAJOR].scale5
+          }`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(SCENARIOS.MAJOR, SCENARIOS.MAJOR, isCause),
@@ -547,7 +549,9 @@ export function CascadeSnapshotMatrix({
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={`CP${cpMatrix[SCENARIOS.MAJOR][SCENARIOS.EXTREME].scale3}`}
+          value={`CP${
+            cascade.cr4de_quanti_cp[SCENARIOS.MAJOR][SCENARIOS.EXTREME].scale5
+          }`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(SCENARIOS.MAJOR, SCENARIOS.EXTREME, isCause),
@@ -574,7 +578,8 @@ export function CascadeSnapshotMatrix({
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
           value={`CP${
-            cpMatrix[SCENARIOS.EXTREME][SCENARIOS.CONSIDERABLE].scale3
+            cascade.cr4de_quanti_cp[SCENARIOS.EXTREME][SCENARIOS.CONSIDERABLE]
+              .scale5
           }`}
           onChange={(newValue) =>
             onChange(
@@ -590,7 +595,9 @@ export function CascadeSnapshotMatrix({
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={`CP${cpMatrix[SCENARIOS.EXTREME][SCENARIOS.MAJOR].scale3}`}
+          value={`CP${
+            cascade.cr4de_quanti_cp[SCENARIOS.EXTREME][SCENARIOS.MAJOR].scale5
+          }`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(SCENARIOS.EXTREME, SCENARIOS.MAJOR, isCause),
@@ -601,7 +608,9 @@ export function CascadeSnapshotMatrix({
       </Grid>
       <Grid size={{ xs: 2.5 }} sx={{ cursor: "pointer" }}>
         <CPX
-          value={`CP${cpMatrix[SCENARIOS.EXTREME][SCENARIOS.EXTREME].scale3}`}
+          value={`CP${
+            cascade.cr4de_quanti_cp[SCENARIOS.EXTREME][SCENARIOS.EXTREME].scale5
+          }`}
           onChange={(newValue) =>
             onChange(
               getCascadeField(SCENARIOS.EXTREME, SCENARIOS.EXTREME, isCause),

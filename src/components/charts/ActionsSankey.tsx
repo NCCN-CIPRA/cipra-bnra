@@ -18,7 +18,6 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Typography } from "@mui/material";
-import { parseCPMatrix } from "../../types/dataverse/DVCascadeSnapshot";
 
 export type ActionRisksSummary = {
   id: string;
@@ -88,7 +87,7 @@ export default function ActionsSankey({
   onClick: (id: string) => void;
 }) {
   const totCP = cascades.effects.reduce(
-    (p, e) => p + parseCPMatrix(e.cr4de_quanti_cp)[scenario].avg,
+    (p, e) => p + e.cr4de_quanti_cp[scenario].avg,
     0.00000001
   );
 
@@ -96,7 +95,7 @@ export default function ActionsSankey({
     .map((e) => ({
       id: e.cr4de_effect_risk._cr4de_risk_file_value,
       name: `risk.${e.cr4de_effect_risk.cr4de_hazard_id}.name`,
-      p: parseCPMatrix(e.cr4de_quanti_cp)[scenario].avg / totCP,
+      p: e.cr4de_quanti_cp[scenario].avg / totCP,
     }))
     .sort((a, b) => b.p - a.p);
 

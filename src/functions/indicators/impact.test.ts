@@ -53,14 +53,26 @@ describe("I7-Scale Conversion Functions", () => {
 
   describe("iScale7 sanity checks", () => {
     test("round trips should return identity", () => {
-      expect(iScale7FromEuros(eurosFromIScale7(0))).toBeCloseTo(0);
-      expect(iScale7FromEuros(eurosFromIScale7(0.4))).toBeCloseTo(0.4);
-      expect(iScale7FromEuros(eurosFromIScale7(1))).toBeCloseTo(1);
-      expect(iScale7FromEuros(eurosFromIScale7(4, 6), 6)).toBeCloseTo(4);
-      expect(iScale7FromEuros(eurosFromIScale7(2.5))).toBeCloseTo(2.5);
-      expect(iScale7FromEuros(eurosFromIScale7(6.33))).toBeCloseTo(6.33);
-      expect(iScale7FromEuros(eurosFromIScale7(7.3))).toBeCloseTo(7.3);
-      expect(iScale7FromEuros(eurosFromIScale7(5.4, 2), 2)).toBeCloseTo(5.4);
+      expect(iScale7FromEuros(eurosFromIScale7(0), 1, 100000)).toBeCloseTo(0);
+      expect(iScale7FromEuros(eurosFromIScale7(0.4), 1, 100000)).toBeCloseTo(
+        0.4
+      );
+      expect(iScale7FromEuros(eurosFromIScale7(1), 1, 100000)).toBeCloseTo(1);
+      expect(iScale7FromEuros(eurosFromIScale7(4, 6), 6, 100000)).toBeCloseTo(
+        4
+      );
+      expect(iScale7FromEuros(eurosFromIScale7(2.5), 1, 100000)).toBeCloseTo(
+        2.5
+      );
+      expect(iScale7FromEuros(eurosFromIScale7(6.33), 1, 100000)).toBeCloseTo(
+        6.33
+      );
+      expect(iScale7FromEuros(eurosFromIScale7(7.3), 1, 100000)).toBeCloseTo(
+        7.3
+      );
+      expect(iScale7FromEuros(eurosFromIScale7(5.4, 2), 2, 100000)).toBeCloseTo(
+        5.4
+      );
     });
   });
 });
@@ -68,12 +80,20 @@ describe("I7-Scale Conversion Functions", () => {
 describe("TI5-Scale Conversion Functions", () => {
   describe("tiScale5 sanity checks", () => {
     test("round trips should return identity", () => {
-      expect(tiScale5FromEuros(eurosFromTIScale5(0))).toBeCloseTo(0);
-      expect(tiScale5FromEuros(eurosFromTIScale5(0.4))).toBeCloseTo(0.4);
-      expect(tiScale5FromEuros(eurosFromTIScale5(1))).toBeCloseTo(1);
-      expect(tiScale5FromEuros(eurosFromTIScale5(2.5))).toBeCloseTo(2.5);
-      expect(tiScale5FromEuros(eurosFromTIScale5(6.33))).toBeCloseTo(6.33);
-      expect(tiScale5FromEuros(eurosFromTIScale5(7.3))).toBeCloseTo(7.3);
+      expect(tiScale5FromEuros(eurosFromTIScale5(0), 100000)).toBeCloseTo(0);
+      expect(tiScale5FromEuros(eurosFromTIScale5(0.4), 100000)).toBeCloseTo(
+        0.4
+      );
+      expect(tiScale5FromEuros(eurosFromTIScale5(1), 100000)).toBeCloseTo(1);
+      expect(tiScale5FromEuros(eurosFromTIScale5(2.5), 100000)).toBeCloseTo(
+        2.5
+      );
+      expect(tiScale5FromEuros(eurosFromTIScale5(6.33), 100000)).toBeCloseTo(
+        6.33
+      );
+      expect(tiScale5FromEuros(eurosFromTIScale5(7.3), 100000)).toBeCloseTo(
+        7.3
+      );
     });
   });
 });
@@ -105,19 +125,27 @@ describe("DI5-Scale Conversion Functions", () => {
 
   describe("diScale5 sanity checks", () => {
     test("round trips should return identity", () => {
-      expect(diScale5FromEuros(eurosFromDIScale5(0))).toBeCloseTo(0);
-      expect(diScale5FromEuros(eurosFromDIScale5(0.4))).toBeCloseTo(0.4);
-      expect(diScale5FromEuros(eurosFromDIScale5(1))).toBeCloseTo(1);
-      expect(diScale5FromEuros(eurosFromDIScale5(2.5))).toBeCloseTo(2.5);
-      expect(diScale5FromEuros(eurosFromDIScale5(6.33))).toBeCloseTo(6.33);
-      expect(diScale5FromEuros(eurosFromDIScale5(7.3))).toBeCloseTo(7.3);
+      expect(diScale5FromEuros(eurosFromDIScale5(0), 10000000)).toBeCloseTo(0);
+      expect(diScale5FromEuros(eurosFromDIScale5(0.4), 10000000)).toBeCloseTo(
+        0.4
+      );
+      expect(diScale5FromEuros(eurosFromDIScale5(1), 10000000)).toBeCloseTo(1);
+      expect(diScale5FromEuros(eurosFromDIScale5(2.5), 10000000)).toBeCloseTo(
+        2.5
+      );
+      expect(diScale5FromEuros(eurosFromDIScale5(6.33), 10000000)).toBeCloseTo(
+        6.33
+      );
+      expect(diScale5FromEuros(eurosFromDIScale5(7.3), 10000000)).toBeCloseTo(
+        7.3
+      );
     });
   });
 });
 
 describe("5 <-> 7 Conversion Functions", () => {
   test("round trips should return identity", () => {
-    expect(tiScale5to7(tiScale7to5(2.5))).toBeCloseTo(2.5);
-    expect(diScale5to7(diScale7to5(2.5))).toBeCloseTo(2.5);
+    expect(tiScale5to7(tiScale7to5(2.5, 10000000), 10000000)).toBeCloseTo(2.5);
+    expect(diScale5to7(diScale7to5(2.5, 10000000), 10000000)).toBeCloseTo(2.5);
   });
 });

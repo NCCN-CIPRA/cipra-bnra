@@ -14,6 +14,7 @@ import { updateSnapshots } from "../../functions/snapshot";
 import {
   DVCascadeSnapshot,
   SerializedCauseSnapshotResults,
+  SerializedCPMatrix,
   SerializedEffectSnapshotResults,
 } from "../../types/dataverse/DVCascadeSnapshot";
 
@@ -43,8 +44,8 @@ export default function SnapshotTab() {
     setAction("Saving snapshots: 0%");
 
     const doSummaries = false;
-    const doRisks = false;
-    const doCascades = true;
+    const doRisks = true;
+    const doCascades = false;
 
     let maxProgress = 0;
     if (doSummaries) maxProgress += res.updatedSummaries.length;
@@ -111,7 +112,8 @@ export default function SnapshotTab() {
               unknown,
               unknown,
               SerializedCauseSnapshotResults,
-              SerializedEffectSnapshotResults
+              SerializedEffectSnapshotResults,
+              SerializedCPMatrix
             >
           );
         }

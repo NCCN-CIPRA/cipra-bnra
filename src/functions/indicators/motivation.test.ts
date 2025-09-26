@@ -18,7 +18,7 @@ describe("Motivation Scale Conversion Functions", () => {
     });
 
     test("should return correct values for any M-Scale 3 inputs", () => {
-      expect(pAbsFromMScale3(0)).toBeCloseTo(0.5 / 100);
+      expect(pAbsFromMScale3(0)).toBeCloseTo(0);
       expect(pAbsFromMScale3(1)).toBeCloseTo(25.5 / 100);
       expect(pAbsFromMScale3(2)).toBeCloseTo(70 / 100);
       expect(pAbsFromMScale3(3)).toBeCloseTo(95 / 100);
@@ -27,14 +27,15 @@ describe("Motivation Scale Conversion Functions", () => {
 
   describe("mScale3FromPAbs", () => {
     test("should return correct values for integer M-Scale 3 outputs", () => {
-      expect(mScale3FromPAbs(0.01)).toBeCloseTo(0.5);
-      expect(mScale3FromPAbs(0.5)).toBeCloseTo(1.5);
-      expect(mScale3FromPAbs(0.9)).toBeCloseTo(2.5);
-      expect(mScale3FromPAbs(1)).toBeCloseTo(3.5);
+      expect(mScale3FromPAbs(0)).toBeCloseTo(0, 3);
+      expect(mScale3FromPAbs(0.01)).toBeCloseTo(0.5, 3);
+      expect(mScale3FromPAbs(0.5)).toBeCloseTo(1.5, 3);
+      expect(mScale3FromPAbs(0.9)).toBeCloseTo(2.5, 3);
+      expect(mScale3FromPAbs(1)).toBeCloseTo(3.5, 3);
     });
 
     test("should return correct values for any M-Scale 3 outputs", () => {
-      expect(mScale3FromPAbs(0.5 / 100)).toBeCloseTo(0);
+      expect(mScale3FromPAbs(0.5 / 100)).toBeCloseTo(0.25);
       expect(mScale3FromPAbs(25.5 / 100)).toBeCloseTo(1);
       expect(mScale3FromPAbs(70 / 100)).toBeCloseTo(2);
       expect(mScale3FromPAbs(95 / 100)).toBeCloseTo(3);
@@ -85,7 +86,7 @@ describe("Motivation Scale Conversion Functions", () => {
     });
 
     test("should return correct values for any M-Scale 7 outputs", () => {
-      expect(mScale7FromPAbs(0.005 / 100)).toBeCloseTo(0);
+      expect(mScale7FromPAbs(0.005 / 100)).toBeCloseTo(0.25);
       expect(mScale7FromPAbs((10 - 0.1) / 2 / 100)).toBeCloseTo(1, 1);
       expect(mScale7FromPAbs(0.175)).toBeCloseTo(2);
       expect(mScale7FromPAbs(0.325)).toBeCloseTo(3);
@@ -96,10 +97,8 @@ describe("Motivation Scale Conversion Functions", () => {
     });
 
     test("other inputs", () => {
-      expect(pAbsFromMScale3(0)).toBeCloseTo(0.005, 5);
-      expect(mScale7FromPAbs(0.005)).toBeCloseTo(0.549049049, 5);
-      expect(pAbsFromMScale7(0.549049049)).toBeCloseTo(0.005, 5);
-      expect(mScale3FromPAbs(0.005)).toBeCloseTo(0);
+      expect(mScale7FromPAbs(pAbsFromMScale3(0))).toBeCloseTo(0, 5);
+      expect(mScale3FromPAbs(pAbsFromMScale7(0))).toBeCloseTo(0, 5);
     });
   });
 

@@ -29,6 +29,7 @@ import {
 import {
   DVCascadeSnapshot,
   SerializedCauseSnapshotResults,
+  SerializedCPMatrix,
   SerializedEffectSnapshotResults,
 } from "../types/dataverse/DVCascadeSnapshot";
 import {
@@ -119,7 +120,8 @@ export interface API {
       unknown,
       unknown,
       SerializedCauseSnapshotResults,
-      SerializedEffectSnapshotResults
+      SerializedEffectSnapshotResults,
+      SerializedCPMatrix
     >
   >(
     query?: string
@@ -130,7 +132,8 @@ export interface API {
       unknown,
       unknown,
       SerializedCauseSnapshotResults,
-      SerializedEffectSnapshotResults
+      SerializedEffectSnapshotResults,
+      SerializedCPMatrix
     >
   >(
     id: string,
@@ -143,7 +146,8 @@ export interface API {
         unknown,
         unknown,
         SerializedCauseSnapshotResults,
-        SerializedEffectSnapshotResults
+        SerializedEffectSnapshotResults,
+        SerializedCPMatrix
       >
     >
   ): Promise<CreateResponse>;
@@ -155,7 +159,8 @@ export interface API {
         unknown,
         unknown,
         SerializedCauseSnapshotResults,
-        SerializedEffectSnapshotResults
+        SerializedEffectSnapshotResults,
+        SerializedCPMatrix
       >
     >
   ): Promise<void>;

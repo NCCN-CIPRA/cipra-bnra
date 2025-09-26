@@ -2,9 +2,11 @@ import { CascadeCalculation } from "../types/dataverse/DVAnalysisRun";
 import { DVCascadeAnalysis } from "../types/dataverse/DVCascadeAnalysis";
 import {
   CauseSnapshotResults,
+  CPMatrix,
   DVCascadeSnapshot,
   EffectSnapshotResults,
   SerializedCauseSnapshotResults,
+  SerializedCPMatrix,
   SerializedEffectSnapshotResults,
 } from "../types/dataverse/DVCascadeSnapshot";
 import {
@@ -67,13 +69,14 @@ export type CascadeSnapshots<
   Tc = unknown,
   Te = unknown,
   Rc = CauseSnapshotResults,
-  Re = EffectSnapshotResults
+  Re = EffectSnapshotResults,
+  Cp = CPMatrix
 > = {
-  all: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re>[];
-  causes: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re>[];
-  effects: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re>[];
-  catalyzingEffects: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re>[];
-  climateChange: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re> | null;
+  all: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re, Cp>[];
+  causes: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re, Cp>[];
+  effects: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re, Cp>[];
+  catalyzingEffects: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re, Cp>[];
+  climateChange: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re, Cp> | null;
 };
 
 export type CascadeCatalogue = { [key: string]: Cascades };
@@ -139,14 +142,17 @@ export function getCausesNew(
               RISK_TYPE.MANMADE)
       )
       .map((c) =>
-        snapshotFromRiskCascade(hazardCatalogue[c._cr4de_cause_hazard_value], c)
+        parseCascadeSnapshot(
+          snapshotFromRiskCascade(
+            hazardCatalogue[c._cr4de_cause_hazard_value],
+            c
+          )
+        )
       )
       .map((c) => ({
         ...c,
         cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
         cr4de_effect_risk: hazardCatalogue[c._cr4de_effect_risk_value],
-        cr4de_quanti_cause: JSON.parse(c.cr4de_quanti_cause),
-        cr4de_quanti_effect: JSON.parse(c.cr4de_quanti_effect),
       }));
   }
 
@@ -307,14 +313,17 @@ export function getEffectsNew(
     return cascades
       .filter((c) => c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid)
       .map((c) =>
-        snapshotFromRiskCascade(hazardCatalogue[c._cr4de_cause_hazard_value], c)
+        parseCascadeSnapshot(
+          snapshotFromRiskCascade(
+            hazardCatalogue[c._cr4de_cause_hazard_value],
+            c
+          )
+        )
       )
       .map((c) => ({
         ...c,
         cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
         cr4de_effect_risk: hazardCatalogue[c._cr4de_effect_risk_value],
-        cr4de_quanti_cause: JSON.parse(c.cr4de_quanti_cause),
-        cr4de_quanti_effect: JSON.parse(c.cr4de_quanti_effect),
       }));
   }
 
@@ -540,14 +549,17 @@ export function getCatalyzingEffectsNew(
             ) < 0)
       )
       .map((c) =>
-        snapshotFromRiskCascade(hazardCatalogue[c._cr4de_cause_hazard_value], c)
+        parseCascadeSnapshot(
+          snapshotFromRiskCascade(
+            hazardCatalogue[c._cr4de_cause_hazard_value],
+            c
+          )
+        )
       )
       .map((c) => ({
         ...c,
         cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
         cr4de_effect_risk: hazardCatalogue[c._cr4de_effect_risk_value],
-        cr4de_quanti_cause: JSON.parse(c.cr4de_quanti_cause),
-        cr4de_quanti_effect: JSON.parse(c.cr4de_quanti_effect),
       }));
   }
 
@@ -631,16 +643,16 @@ export function getClimateChangeNew(
         ) >= 0
     );
     if (cc) {
-      const ss = snapshotFromRiskCascade(
-        hazardCatalogue[cc._cr4de_cause_hazard_value],
-        cc
+      const ss = parseCascadeSnapshot(
+        snapshotFromRiskCascade(
+          hazardCatalogue[cc._cr4de_cause_hazard_value],
+          cc
+        )
       );
       return {
         ...ss,
         cr4de_cause_risk: hazardCatalogue[cc._cr4de_cause_hazard_value],
         cr4de_effect_risk: hazardCatalogue[cc._cr4de_effect_hazard_value],
-        cr4de_quanti_cause: JSON.parse(ss.cr4de_quanti_cause),
-        cr4de_quanti_effect: JSON.parse(ss.cr4de_quanti_effect),
       };
     }
   } else {
@@ -773,7 +785,8 @@ export const getCascadesSnapshotCatalogue = (
     unknown,
     unknown,
     SerializedCauseSnapshotResults,
-    SerializedEffectSnapshotResults
+    SerializedEffectSnapshotResults,
+    SerializedCPMatrix
   >[]
 ): CascadeSnapshotCatalogue<
   DVRiskSnapshot<unknown, RiskSnapshotResults>,

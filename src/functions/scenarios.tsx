@@ -6,7 +6,6 @@ import {
 import { RISKFILE_RESULT_FIELD } from "../types/dataverse/DVRiskFile";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { IntensityParameter } from "./intensityParameters";
-import tableToJson from "./tableToJson";
 
 export enum SCENARIOS {
   CONSIDERABLE = "considerable",
@@ -55,40 +54,19 @@ export const unwrapScenario = (
   scenarioJSON: string,
   parameters: IntensityParameter[]
 ): IntensityParameter<string>[] => {
-  try {
-    const scenario = JSON.parse(scenarioJSON) as IntensityParameter<string>[];
+  const scenario = JSON.parse(scenarioJSON) as IntensityParameter<string>[];
 
-    return scenario.map((p) => {
-      const realParam = parameters.find((p2) => p.name === p2.name);
+  return scenario.map((p) => {
+    const realParam = parameters.find((p2) => p.name === p2.name);
 
-      if (realParam)
-        return {
-          ...p,
-          description: realParam.description,
-        };
+    if (realParam)
+      return {
+        ...p,
+        description: realParam.description,
+      };
 
-      return p;
-    });
-  } catch {
-    // Old HTML format
-    const json = tableToJson(scenarioJSON);
-
-    if (!json) return [];
-
-    if (parameters.length <= 0)
-      return [
-        {
-          name: "Capacity",
-          description: "Actor capacity",
-          value: json[0][0],
-        },
-      ];
-
-    return parameters.map((p, i) => ({
-      ...p,
-      value: json[i] as unknown as string,
-    }));
-  }
+    return p;
+  });
 };
 
 export function unwrap(
@@ -109,11 +87,6 @@ export function unwrap(
 export function wrap(scenario: IntensityParameter<string>[]): string {
   return JSON.stringify(scenario);
 }
-
-// export function scenariosEquals(a?: Scenarios, b?: Scenarios) {
-//   // TODO
-//   return false;
-// }
 
 export const getScenarioSuffix = (scenario: SCENARIOS): SCENARIO_SUFFIX => {
   if (scenario === SCENARIOS.CONSIDERABLE) return "_c";

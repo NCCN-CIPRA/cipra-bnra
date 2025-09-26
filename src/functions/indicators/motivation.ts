@@ -32,7 +32,7 @@ export const motivationUpperBoundScale7 = [
 export function pAbsFromMScale3(mScale3: number) {
   const index = Math.floor(mScale3 + 0.5);
 
-  if (index < 0) return 0;
+  if (index < 0.5) return (mScale3 / 0.5) * motivationUpperBoundScale3[0];
   if (index >= 3.5) return 1;
 
   const lower = motivationLowerBoundScale3[index];
@@ -46,7 +46,7 @@ export function pAbsFromMScale3(mScale3: number) {
 export function pAbsFromMScale7(mScale7: number) {
   const index = Math.floor(mScale7 + 0.5);
 
-  if (index < 0) return 0;
+  if (index < 0.5) return (mScale7 / 0.5) * motivationUpperBoundScale7[0];
   if (index >= 7.5) return 1;
 
   const lower = motivationLowerBoundScale7[index];
@@ -59,7 +59,8 @@ export function pAbsFromMScale7(mScale7: number) {
 
 export function mScale3FromPAbs(pAbs: number) {
   // Handle edge cases
-  if (pAbs < 0) return 0;
+  if (pAbs < motivationUpperBoundScale3[0])
+    return 0.5 * (pAbs / motivationUpperBoundScale3[0]);
   if (pAbs >= 1) return motivationLowerBoundScale3.length - 0.5;
 
   // Find which interval the pAbs value falls into
@@ -81,7 +82,8 @@ export function mScale3FromPAbs(pAbs: number) {
 
 export function mScale7FromPAbs(pAbs: number) {
   // Handle edge cases
-  if (pAbs < 0) return 0;
+  if (pAbs < motivationUpperBoundScale7[0])
+    return 0.5 * (pAbs / motivationUpperBoundScale7[0]);
   if (pAbs >= 1) return motivationLowerBoundScale7.length - 0.5;
 
   // Find which interval the pAbs value falls into

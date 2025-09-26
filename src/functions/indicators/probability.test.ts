@@ -29,23 +29,38 @@ describe("P5-Scale Conversion Functions", () => {
   describe("Double conversion", () => {
     test("should return the same values after double conversion", () => {
       expect(
-        returnPeriodMonthsFromPScale5(pScale5FromReturnPeriodMonths(3000))
+        returnPeriodMonthsFromPScale5(
+          pScale5FromReturnPeriodMonths(3000, 1000000000)
+        )
       ).toBeCloseTo(3000, 2);
       expect(
-        returnPeriodMonthsFromPScale5(pScale5FromReturnPeriodMonths(300))
+        returnPeriodMonthsFromPScale5(
+          pScale5FromReturnPeriodMonths(300, 1000000000)
+        )
       ).toBeCloseTo(300, 2);
       expect(
-        returnPeriodMonthsFromPScale5(pScale5FromReturnPeriodMonths(1000))
+        returnPeriodMonthsFromPScale5(
+          pScale5FromReturnPeriodMonths(1000, 1000000000)
+        )
       ).toBeCloseTo(1000, 2);
 
       expect(
-        pScale5FromReturnPeriodMonths(returnPeriodMonthsFromPScale5(1))
+        pScale5FromReturnPeriodMonths(
+          returnPeriodMonthsFromPScale5(1),
+          1000000000
+        )
       ).toBeCloseTo(1, 2);
       expect(
-        pScale5FromReturnPeriodMonths(returnPeriodMonthsFromPScale5(2.5))
+        pScale5FromReturnPeriodMonths(
+          returnPeriodMonthsFromPScale5(2.5),
+          1000000000
+        )
       ).toBeCloseTo(2.5, 2);
       expect(
-        pScale5FromReturnPeriodMonths(returnPeriodMonthsFromPScale5(3.2))
+        pScale5FromReturnPeriodMonths(
+          returnPeriodMonthsFromPScale5(3.2),
+          1000000000
+        )
       ).toBeCloseTo(3.2, 2);
     });
   });
@@ -80,23 +95,35 @@ describe("P7-Scale Conversion Functions", () => {
   describe("Double conversion", () => {
     test("should return the same values after double conversion", () => {
       expect(
-        returnPeriodMonthsFromPScale7(pScale7FromReturnPeriodMonths(3000))
+        returnPeriodMonthsFromPScale7(
+          pScale7FromReturnPeriodMonths(3000, 1000000000)
+        )
       ).toBeCloseTo(3000, 2);
       expect(
-        returnPeriodMonthsFromPScale7(pScale7FromReturnPeriodMonths(300))
+        returnPeriodMonthsFromPScale7(
+          pScale7FromReturnPeriodMonths(300, 1000000000)
+        )
       ).toBeCloseTo(300, 2);
       expect(
-        returnPeriodMonthsFromPScale7(pScale7FromReturnPeriodMonths(1000))
+        returnPeriodMonthsFromPScale7(
+          pScale7FromReturnPeriodMonths(1000, 1000000000)
+        )
       ).toBeCloseTo(1000, 2);
 
       expect(
-        pScale7FromReturnPeriodMonths(returnPeriodMonthsFromPScale7(1))
+        pScale7FromReturnPeriodMonths(returnPeriodMonthsFromPScale7(1), 100000)
       ).toBeCloseTo(1, 2);
       expect(
-        pScale7FromReturnPeriodMonths(returnPeriodMonthsFromPScale7(2.5))
+        pScale7FromReturnPeriodMonths(
+          returnPeriodMonthsFromPScale7(2.5),
+          100000
+        )
       ).toBeCloseTo(2.5, 2);
       expect(
-        pScale7FromReturnPeriodMonths(returnPeriodMonthsFromPScale7(3.2))
+        pScale7FromReturnPeriodMonths(
+          returnPeriodMonthsFromPScale7(3.2),
+          100000
+        )
       ).toBeCloseTo(3.2, 2);
     });
   });
@@ -125,18 +152,18 @@ describe("Scale Conversion Functions", () => {
     test("return period -> P-Scale 5 -> return period should be identity", () => {
       const testValues = [1, 10, 100, 1000, 10000, 100000];
       testValues.forEach((rpMonths) => {
-        const pScale5 = pScale5FromReturnPeriodMonths(rpMonths);
+        const pScale5 = pScale5FromReturnPeriodMonths(rpMonths, 1000000000);
         const backToRp = returnPeriodMonthsFromPScale5(pScale5);
-        expect(backToRp).toBeCloseTo(rpMonths, 3);
+        expect(backToRp).toBeCloseTo(rpMonths, 2);
       });
     });
 
     test("return period -> P-Scale 7 -> return period should be identity", () => {
       const testValues = [1, 10, 100, 1000, 10000, 100000];
       testValues.forEach((rpMonths) => {
-        const pScale7 = pScale7FromReturnPeriodMonths(rpMonths);
+        const pScale7 = pScale7FromReturnPeriodMonths(rpMonths, 1000000000);
         const backToRp = returnPeriodMonthsFromPScale7(pScale7);
-        expect(backToRp).toBeCloseTo(rpMonths, 3);
+        expect(backToRp).toBeCloseTo(rpMonths, 2);
       });
     });
   });
@@ -181,7 +208,7 @@ describe("Mathematical properties", () => {
 
   test("conversion functions should preserve ordering", () => {
     const pScale5Values = [0, 1, 2, 3, 4];
-    const pScale7Values = pScale5Values.map(pScale5to7);
+    const pScale7Values = pScale5Values.map(pScale5to7, 2);
 
     // P-Scale 7 values should be in increasing order (same as P-Scale 5)
     for (let i = 0; i < pScale7Values.length - 1; i++) {

@@ -1,16 +1,15 @@
-import { useState } from "react";
 import { Box, Slider as MuiSlider, Tooltip, Typography } from "@mui/material";
 
 export function Slider({
-  initialValue,
+  value,
   prefix,
   maxScale = 5,
 }: {
-  initialValue: number;
+  value: number;
   prefix: string;
   maxScale: number;
 }) {
-  const [value] = useState(initialValue);
+  // const [value] = useState(initialValue);
 
   //   const handleChangeValue = (_event: Event, newValue: number | number[]) => {
   //     setValue(newValue as number);
@@ -51,7 +50,7 @@ export function Slider({
         valueLabelDisplay="auto"
         step={0.5}
         min={0}
-        max={5.5}
+        max={maxScale + 0.5}
         valueLabelFormat={(value: number) => (
           <Typography variant="body2">
             {prefix}

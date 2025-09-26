@@ -13,20 +13,31 @@ export function eurosFromIScale7(iScale7: number, aggregation: number = 1) {
   return aggregation * Math.exp(1.92 * (iScale7 - 0.5) + 13.2);
 }
 
-export function iScale7FromEuros(euros: number, aggregation: number = 1) {
+export function iScale7FromEuros(
+  euros: number,
+  aggregation: number = 1,
+  round = 10
+) {
   if (euros <= 500000) {
-    return (euros / 500000) * 0.5;
+    return Math.round(round * (euros / 500000) * 0.5) / round;
   }
 
-  return (Math.log(euros / aggregation) - 13.2) / 1.92 + 0.5;
+  return (
+    Math.round(round * ((Math.log(euros / aggregation) - 13.2) / 1.92 + 0.5)) /
+    round
+  );
 }
 
 const BASE_TI_SCALE_5_IMPACT = 8 * 10 ** 8;
 
-export function tiScale5FromEuros(euros: number) {
+export function tiScale5FromEuros(euros: number, round = 10) {
   if (euros < BASE_TI_SCALE_5_IMPACT) return euros / BASE_TI_SCALE_5_IMPACT;
 
-  return 1 + Math.log10(euros / BASE_TI_SCALE_5_IMPACT) / Math.log10(5);
+  return (
+    Math.round(
+      round * (1 + Math.log10(euros / BASE_TI_SCALE_5_IMPACT) / Math.log10(5))
+    ) / round
+  );
 }
 
 export function eurosFromTIScale5(tiScale5: number) {
@@ -35,12 +46,12 @@ export function eurosFromTIScale5(tiScale5: number) {
   return BASE_TI_SCALE_5_IMPACT * Math.pow(5, tiScale5 - 1);
 }
 
-export function tiScale5to7(tiScale5: number) {
-  return iScale7FromEuros(eurosFromTIScale5(tiScale5), 10);
+export function tiScale5to7(tiScale5: number, round = 10) {
+  return iScale7FromEuros(eurosFromTIScale5(tiScale5), 10, round);
 }
 
-export function tiScale7to5(iScale7: number) {
-  return tiScale5FromEuros(eurosFromIScale7(iScale7, 10));
+export function tiScale7to5(iScale7: number, round = 10) {
+  return tiScale5FromEuros(eurosFromIScale7(iScale7, 10), round);
 }
 
 const BASE_DI_SCALE_5_IMPACT = 5000000;
@@ -51,19 +62,19 @@ export function eurosFromDIScale5(diScale5: number) {
   return 1600000 * Math.pow(10, diScale5);
 }
 
-export function diScale5FromEuros(euros: number) {
+export function diScale5FromEuros(euros: number, round = 2) {
   if (euros <= BASE_DI_SCALE_5_IMPACT)
-    return (euros / BASE_DI_SCALE_5_IMPACT) * 0.5;
+    return Math.round(round * (euros / BASE_DI_SCALE_5_IMPACT) * 0.5) / round;
 
-  return Math.log10(euros / 1600000);
+  return Math.round(round * Math.log10(euros / 1600000)) / round;
 }
 
-export function diScale5to7(diScale5: number) {
-  return iScale7FromEuros(eurosFromDIScale5(diScale5));
+export function diScale5to7(diScale5: number, round = 10) {
+  return iScale7FromEuros(eurosFromDIScale5(diScale5), 1, round);
 }
 
-export function diScale7to5(iScale7: number) {
-  return diScale5FromEuros(eurosFromIScale7(iScale7));
+export function diScale7to5(iScale7: number, round = 10) {
+  return diScale5FromEuros(eurosFromIScale7(iScale7), round);
 }
 
 export function categoryImpactScale5to7(iScale5: number) {
