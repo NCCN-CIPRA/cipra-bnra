@@ -7,6 +7,7 @@ import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import SnapshotTab from "./SnapshotTab";
 import MigrationTab from "./MigrationTab";
+// import MoveDownSharpIcon from "@mui/icons-material/MoveDownSharp";
 
 type UserManagementParams = {
   tabName: string;

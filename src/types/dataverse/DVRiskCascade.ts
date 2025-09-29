@@ -84,6 +84,7 @@ export interface DVRiskCascade<CauseType = unknown, EffectType = unknown> {
   cr4de_description: string | null;
 
   cr4de_quanti_input: SerializedCPMatrix | null;
+  cr4de_removed: boolean | null;
 }
 
 export type SerializedCPMatrix = string & {

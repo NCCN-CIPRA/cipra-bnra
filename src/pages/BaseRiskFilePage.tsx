@@ -107,6 +107,7 @@ export default function BaseRiskFilePage() {
   const { data: cascadeSnapshotList } = useQuery({
     queryKey: [DataTable.CASCADE_SNAPSHOT],
     queryFn: () => api.getCascadeSnapshots(),
+    select: (d) => d.map((d) => ({ ...d, cr4de_removed: false })),
     enabled: Boolean(
       user && user.roles.verified && environment === Environment.PUBLIC
     ),
@@ -143,12 +144,9 @@ export default function BaseRiskFilePage() {
     if (!rc) return null;
 
     let ccTemp = null;
-    if (environment === Environment.DYNAMIC && cascadeList && riskFiles)
-      ccTemp = getCascadesCatalogueNew(
-        riskFiles,
-        rc as RiskCatalogue<DVRiskFile, RiskSnapshotResults>,
-        cascadeList
-      );
+    if (environment === Environment.DYNAMIC && cascadeList && riskFiles) {
+      ccTemp = getCascadesCatalogueNew(riskFiles, rc, cascadeList);
+    }
 
     if (
       environment === Environment.PUBLIC &&

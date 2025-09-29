@@ -7,7 +7,6 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { CascadeSnapshots } from "../../../functions/cascades";
 import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
-import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
 import { ActionsSankeyBox } from "../../../components/charts/ActionsSankey";
 import { ImpactSankeyBox } from "../../../components/charts/ImpactSankey";
 
@@ -20,7 +19,6 @@ export default function MMSankeyDiagram({
 }: // debug = false,
 // manmade = false,
 {
-  riskSummary: DVRiskSummary | null;
   riskFile: DVRiskSnapshot;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;

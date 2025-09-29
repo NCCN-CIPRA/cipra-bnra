@@ -7,8 +7,12 @@ import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { BasePageContext } from "../BasePage";
 import RiskDataAccordion from "./RiskDataAccordion";
-import { getAverageIndirectImpact } from "../../functions/Impact";
+import {
+  getAverageIndirectImpact,
+  getAverageIndirectImpactDynamic,
+} from "../../functions/Impact";
 import { CascadeSection } from "./CascadeSection";
+import { Environment } from "../../types/global";
 
 export default function ManMade({
   riskFile,
@@ -20,6 +24,21 @@ export default function ManMade({
   catalyzingEffects: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
 }) {
+  const { environment } = useOutletContext<BasePageContext>();
+
+  const dynamicAttacks = effects.map((e) => ({
+    cascade: e,
+    i:
+      environment === Environment.PUBLIC
+        ? getAverageIndirectImpact(e, riskFile)
+        : getAverageIndirectImpactDynamic(
+            e,
+            riskFile,
+            e.cr4de_effect_risk,
+            effects
+          ),
+  }));
+
   return (
     <>
       <Box sx={{ mx: 4 }}>
@@ -28,27 +47,17 @@ export default function ManMade({
         </Typography>
 
         <Box sx={{ mb: 8 }}>
-          {effects
-            .sort(
-              (a, b) =>
-                getAverageIndirectImpact(b, riskFile) -
-                getAverageIndirectImpact(a, riskFile)
-            )
-            .map((ca) => (
+          {dynamicAttacks
+            .sort((a, b) => b.i - a.i)
+            .map((e) => (
               <CascadeSection
-                key={ca._cr4de_risk_cascade_value}
+                key={e.cascade._cr4de_risk_cascade_value}
                 cause={riskFile}
-                effect={ca.cr4de_effect_risk}
-                cascade={ca}
+                effect={e.cascade.cr4de_effect_risk}
+                cascade={e.cascade}
                 subtitle={
                   <Typography variant="body1" color="warning">
-                    <b>
-                      {Math.round(
-                        10000 * getAverageIndirectImpact(ca, riskFile)
-                      ) / 100}
-                      %
-                    </b>{" "}
-                    of expected impact
+                    <b>{Math.round(10000 * e.i) / 100}%</b> of expected impact
                   </Typography>
                 }
               />

@@ -34,7 +34,7 @@ import {
 } from "../types/dataverse/DVRiskSnapshot";
 import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
 import { RISK_TYPE, UnparsedRiskFields } from "../types/dataverse/Riskfile";
-import { Indicators } from "../types/global";
+import { getCPMatrixFromOldFormat } from "./analysis/cp";
 import {
   Cascades,
   getCascades,
@@ -45,20 +45,11 @@ import {
   getCategoryImpactRescaled,
   getDamageIndicatorToCategoryImpactRatio,
 } from "./CategoryImpact";
-import { getAbsoluteImpact, getAbsoluteImpactFromFloat } from "./Impact";
-import {
-  cpScale5FromPAbs,
-  cpScale7FromPAbs,
-  pAbsFromCPScale5,
-} from "./indicators/cp";
-import {
-  mScale3FromPAbs,
-  mScale7FromPAbs,
-  pAbsFromMScale3,
-} from "./indicators/motivation";
+import { getAbsoluteImpact } from "./Impact";
+import { eurosFromTIScale5 } from "./indicators/impact";
+import { pAbsFromMScale3 } from "./indicators/motivation";
 import { returnPeriodMonthsFromPScale5 } from "./indicators/probability";
 import {
-  getScenarioLetter,
   getScenarioParameter,
   getScenarioSuffix,
   SCENARIOS,
@@ -95,7 +86,8 @@ export function updateSnapshots(
     SerializedCPMatrix
   >[],
   riskFiles: DVRiskFile[],
-  cascades: DVRiskCascade[]
+  cascades: DVRiskCascade[],
+  realSnapshot: boolean
 ): {
   updatedSummaries: Partial<DVRiskSummary<unknown, UnparsedRiskFields>>[];
   updatedRiskSnapshots: Partial<
@@ -187,7 +179,8 @@ export function updateSnapshots(
         riskSnapshots,
         cascadeSnapshotDict,
         rf,
-        cascadeDict[rf.cr4de_riskfilesid]
+        cascadeDict[rf.cr4de_riskfilesid],
+        realSnapshot
       );
     if (newSummary) newSummaries.push(newSummary);
     if (newRiskSnapshot) newRiskSnapshots.push(newRiskSnapshot);
@@ -222,7 +215,8 @@ function updateSnapshot(
     >;
   },
   riskFile: DVRiskFile,
-  cascades: Cascades
+  cascades: Cascades,
+  realSnapshot: boolean
 ) {
   const existingSummary: Partial<DVRiskSummary<unknown, UnparsedRiskFields>> =
     summaries.find(
@@ -266,7 +260,8 @@ function updateSnapshot(
   for (const effect of cascades.effects) {
     const updatedEffectSnapshot = snapshotFromRiskCascade(
       parseRiskSnapshot(updatedSnapshot),
-      effect
+      effect,
+      realSnapshot
     );
 
     if (cascadesSnapshots[effect.cr4de_bnrariskcascadeid]) {
@@ -356,7 +351,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.CONSIDERABLE].TI_Ha_abs || 0
             )
           ),
@@ -371,7 +366,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hb_abs || 0
             )
           ),
@@ -386,7 +381,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hc_abs || 0
             )
           ),
@@ -407,7 +402,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sa_abs || 0
             )
           ),
@@ -422,7 +417,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sb_abs || 0
             )
           ),
@@ -437,7 +432,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sc_abs || 0
             )
           ),
@@ -452,7 +447,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sd_abs || 0
             )
           ),
@@ -473,7 +468,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Ea_abs || 0
             )
           ),
@@ -494,7 +489,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Fa_abs || 0
             )
           ),
@@ -509,7 +504,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Fb_abs || 0
             )
           ),
@@ -638,7 +633,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.MAJOR]?.TI_Ha_abs || 0
             )
           ),
@@ -653,7 +648,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hb_abs || 0
             )
           ),
@@ -668,7 +663,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hc_abs || 0
             )
           ),
@@ -689,7 +684,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sa_abs || 0
             )
           ),
@@ -704,7 +699,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sb_abs || 0
             )
           ),
@@ -719,7 +714,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sc_abs || 0
             )
           ),
@@ -734,7 +729,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sd_abs || 0
             )
           ),
@@ -755,7 +750,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.MAJOR]?.TI_Ea_abs || 0
             )
           ),
@@ -776,7 +771,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.MAJOR]?.TI_Fa_abs || 0
             )
           ),
@@ -791,7 +786,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.MAJOR]?.TI_Fb_abs || 0
             )
           ),
@@ -910,7 +905,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.EXTREME]?.TI_Ha_abs || 0
             )
           ),
@@ -925,7 +920,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hb_abs || 0
             )
           ),
@@ -940,7 +935,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hc_abs || 0
             )
           ),
@@ -961,7 +956,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sa_abs || 0
             )
           ),
@@ -976,7 +971,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sb_abs || 0
             )
           ),
@@ -991,7 +986,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sc_abs || 0
             )
           ),
@@ -1006,7 +1001,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sd_abs || 0
             )
           ),
@@ -1027,7 +1022,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.EXTREME]?.TI_Ea_abs || 0
             )
           ),
@@ -1048,7 +1043,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.EXTREME]?.TI_Fa_abs || 0
             )
           ),
@@ -1063,7 +1058,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             )
           ),
           abs: Math.round(
-            getAbsoluteImpactFromFloat(
+            eurosFromTIScale5(
               riskFile.results?.[SCENARIOS.EXTREME]?.TI_Fb_abs || 0
             )
           ),
@@ -1364,128 +1359,50 @@ export function snapshotFromRiskfile(
   };
 }
 
-export const getNewCPFromOldMAndCP = (
-  cause: DVRiskSnapshot,
-  cascade: DVRiskCascade,
-  causeScenario: SCENARIOS,
-  effectScenario: SCENARIOS,
-  indicators: Indicators | null
-) => {
-  const cpString =
-    cascade[
-      `cr4de_${getScenarioLetter(causeScenario)}2${getScenarioLetter(
-        effectScenario
-      )}`
-    ] || "CP0";
-  const cpVal = parseFloat(cpString.replace("CP", ""));
-  const cpAbs = pAbsFromCPScale5(cpVal);
-
-  if (cause.cr4de_risk_type === RISK_TYPE.MANMADE) {
-    /**
-     * During the previous BNRA iteration, the total probability of an attack by an actor was given by:
-     *
-     * Motivation of actor group (scenario) * CP of attack cascade
-     *
-     * In the new method, only the CP of the attack cascade is taken into account, and this value is renamed to "Motivation" of the actor
-     * for this type of attack.
-     */
-    const mVal = cause.cr4de_quanti[causeScenario].m.scale;
-    const mAbs = pAbsFromMScale3(mVal);
-
-    const totP = mAbs * cpAbs;
-
-    if (!indicators) return Math.round(100 * totP) / 100;
-
-    if (indicators === Indicators.V1) {
-      return Math.round(10 * mScale3FromPAbs(totP)) / 10;
-    }
-
-    return Math.round(10 * mScale7FromPAbs(totP)) / 10;
-  }
-
-  if (!indicators) return Math.round(100 * cpAbs) / 100;
-
-  if (indicators === Indicators.V1) {
-    // console.log(
-    //   // cascade,
-    //   cause.cr4de_title,
-    //   cascade.cr4de_effect_hazard.cr4de_title,
-    //   causeScenario,
-    //   effectScenario,
-    //   `cr4de_${getScenarioLetter(causeScenario)}2${getScenarioLetter(
-    //     effectScenario
-    //   )}`,
-    //   cpString,
-    //   cpVal,
-    //   cpAbs,
-    //   Math.round(10 * cpScale5FromPAbs(cpAbs)) / 10
-    // );
-    return Math.round(10 * cpScale5FromPAbs(cpAbs)) / 10;
-  }
-
-  return Math.round(10 * cpScale7FromPAbs(cpAbs)) / 10;
-};
-
 const oldToNewCPMatrix = (
   cause: DVRiskSnapshot,
-  cascade: DVRiskCascade
+  cascade: DVRiskCascade,
+  realSnapshot: boolean
 ): CPMatrixCauseRow => {
-  if (cascade.cr4de_quanti_input !== null)
-    return JSON.parse(cascade.cr4de_quanti_input);
-
   const scenarios = [
     SCENARIOS.CONSIDERABLE,
     SCENARIOS.MAJOR,
     SCENARIOS.EXTREME,
   ];
 
-  return scenarios.reduce(
-    (accCause, causeScenario) => ({
-      ...accCause,
-      [causeScenario]: scenarios.reduce(
-        (accEffect, effectScenario) => ({
-          ...accEffect,
-          [effectScenario]: {
-            abs: getNewCPFromOldMAndCP(
-              cause,
-              cascade,
-              causeScenario,
-              effectScenario,
-              null
-            ),
-            scale3: getNewCPFromOldMAndCP(
-              cause,
-              cascade,
-              causeScenario,
-              effectScenario,
-              Indicators.V1
-            ),
-            scale5: getNewCPFromOldMAndCP(
-              cause,
-              cascade,
-              causeScenario,
-              effectScenario,
-              Indicators.V1
-            ),
-            scale7: getNewCPFromOldMAndCP(
-              cause,
-              cascade,
-              causeScenario,
-              effectScenario,
-              Indicators.V2
-            ),
-          },
+  if (realSnapshot) {
+    if (cascade.cr4de_removed) {
+      return scenarios.reduce(
+        (accCause, causeScenario) => ({
+          ...accCause,
+          [causeScenario]: scenarios.reduce(
+            (accEffect, effectScenario) => ({
+              ...accEffect,
+              [effectScenario]: {
+                abs: 0,
+                scale5: 0,
+                scale7: 0,
+              },
+            }),
+            {} as CPMatrixEffectRow
+          ),
         }),
-        {} as CPMatrixEffectRow
-      ),
-    }),
-    {} as CPMatrixCauseRow
-  );
+        {} as CPMatrixCauseRow
+      );
+    }
+
+    if (cascade.cr4de_quanti_input !== null) {
+      return JSON.parse(cascade.cr4de_quanti_input);
+    }
+  }
+
+  return getCPMatrixFromOldFormat(cause, cascade);
 };
 
 export function snapshotFromRiskCascade(
   cause: DVRiskSnapshot,
-  cascade: DVRiskCascade
+  cascade: DVRiskCascade,
+  realSnapshot: boolean = true
 ): DVCascadeSnapshot<
   DVRiskCascade,
   unknown,
@@ -1494,7 +1411,7 @@ export function snapshotFromRiskCascade(
   SerializedEffectSnapshotResults,
   SerializedCPMatrix
 > {
-  const newCPMatrixSnapshot = oldToNewCPMatrix(cause, cascade);
+  const newCPMatrixSnapshot = oldToNewCPMatrix(cause, cascade, realSnapshot);
   const newCPMatrix: CPMatrix = {
     [SCENARIOS.CONSIDERABLE]: {
       ...newCPMatrixSnapshot[SCENARIOS.CONSIDERABLE],
@@ -1528,6 +1445,8 @@ export function snapshotFromRiskCascade(
     cr4de_quali: cascade.cr4de_quali,
     cr4de_quali_cause: cascade.cr4de_quali_cause,
     cr4de_description: cascade.cr4de_description,
+
+    cr4de_removed: cascade.cr4de_removed,
 
     cr4de_quanti_cp: serializeCPMatrix(newCPMatrix),
     cr4de_quanti_cause: serializeCauseSnapshotResults({

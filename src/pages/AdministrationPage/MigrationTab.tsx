@@ -11,9 +11,15 @@ import {
 import useAPI from "../../hooks/useAPI";
 import { useState } from "react";
 import {
+  parseRiskFields,
+  stringifyRiskFields,
+} from "../../functions/parseDataverseFields";
+import {
   DVRiskSnapshot,
   SerializedRiskSnapshotResults,
 } from "../../types/dataverse/DVRiskSnapshot";
+import { SCENARIOS } from "../../functions/scenarios";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 
 export default function MigrationTab() {
   const api = useAPI();
@@ -23,9 +29,19 @@ export default function MigrationTab() {
   const handleMigrateScenarios = async () => {
     setAction("Loading data...");
     setProgress(-1);
+    const riskSummaries = await api.getRiskSummaries();
     const riskSnapshots = await api.getRiskSnapshots();
     const riskFiles = await api.getRiskFiles();
 
+    const sumDict = riskSummaries.reduce(
+      (acc, ss) => ({
+        ...acc,
+        [ss._cr4de_risk_file_value]: ss,
+      }),
+      {} as {
+        [key: string]: DVRiskSummary;
+      }
+    );
     const ssDict = riskSnapshots.reduce(
       (acc, ss) => ({
         ...acc,
@@ -41,17 +57,35 @@ export default function MigrationTab() {
     const maxProgress = riskFiles.length;
 
     for (const rf of riskFiles) {
+      const parsedFields = parseRiskFields(rf);
+      const migratedFields = stringifyRiskFields(parsedFields);
+
+      const sum = sumDict[rf.cr4de_riskfilesid];
       const ss = ssDict[rf.cr4de_riskfilesid];
 
-      JSON.parse(rf.cr4de_historical_events || "{}");
-      JSON.parse(rf.cr4de_intensity_parameters || "{}");
-      JSON.parse(rf.cr4de_scenario_considerable || "{}");
-      JSON.parse(rf.cr4de_scenario_major || "{}");
-      JSON.parse(rf.cr4de_scenario_extreme || "{}");
-
-      JSON.parse(ss.cr4de_historical_events || "{}");
-      JSON.parse(ss.cr4de_intensity_parameters || "{}");
-      JSON.parse(ss.cr4de_scenarios || "{}");
+      await api.updateRiskFile(rf.cr4de_riskfilesid, {
+        cr4de_historical_events: migratedFields.cr4de_historical_events,
+        cr4de_intensity_parameters: migratedFields.cr4de_intensity_parameters,
+        cr4de_scenario_considerable: migratedFields.cr4de_scenario_considerable,
+        cr4de_scenario_major: migratedFields.cr4de_scenario_major,
+        cr4de_scenario_extreme: migratedFields.cr4de_scenario_extreme,
+      });
+      await api.updateRiskSummary(sum.cr4de_bnrariskfilesummaryid, {
+        cr4de_historical_events: migratedFields.cr4de_historical_events,
+        cr4de_intensity_parameters: migratedFields.cr4de_intensity_parameters,
+        cr4de_scenario_considerable: migratedFields.cr4de_scenario_considerable,
+        cr4de_scenario_major: migratedFields.cr4de_scenario_major,
+        cr4de_scenario_extreme: migratedFields.cr4de_scenario_extreme,
+      });
+      await api.updateRiskSnapshot(ss.cr4de_bnrariskfilesnapshotid, {
+        cr4de_historical_events: migratedFields.cr4de_historical_events,
+        cr4de_intensity_parameters: migratedFields.cr4de_intensity_parameters,
+        cr4de_scenarios: JSON.stringify({
+          [SCENARIOS.CONSIDERABLE]: migratedFields.cr4de_scenario_considerable,
+          [SCENARIOS.MAJOR]: migratedFields.cr4de_scenario_major,
+          [SCENARIOS.EXTREME]: migratedFields.cr4de_scenario_extreme,
+        }),
+      });
 
       counter += 1;
       const p = (100 * counter) / maxProgress;

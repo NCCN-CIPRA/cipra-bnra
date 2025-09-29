@@ -50,7 +50,6 @@ export default function Standard({
         </Typography>
 
         <SankeyDiagram
-          riskSummary={riskSummary}
           riskFile={riskFile}
           cascades={cascades}
           scenario={scenario}

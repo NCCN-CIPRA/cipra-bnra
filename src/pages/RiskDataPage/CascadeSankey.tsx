@@ -28,6 +28,10 @@ import {
 } from "../../types/dataverse/DVRiskCascade";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
+import {
+  getIntervalStringCPScale5,
+  getIntervalStringCPScale7,
+} from "../../functions/indicators/cp";
 
 const scenarioHeight = 1000;
 
@@ -114,7 +118,7 @@ export default function CascadeSankey({
       });
     },
   });
-
+  console.log(cascade);
   const causeScenarios = JSON.parse(cause.cr4de_scenarios || "");
   const effectScenarios = JSON.parse(effect.cr4de_scenarios || "");
 
@@ -130,12 +134,6 @@ export default function CascadeSankey({
     const updatedCPMatrix = { ...cascade.cr4de_quanti_cp };
     updatedCPMatrix[causeScenario][effectScenario] = {
       abs: Math.round(100 * pAbs) / 100,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      scale3:
-        indicators === Indicators.V1
-          ? newValue
-          : Math.round(10 * mScale3FromPAbs(pAbs)) / 10,
       scale5:
         indicators === Indicators.V1
           ? newValue
@@ -571,6 +569,15 @@ function PSankeyLink(
 
   const linkWidth = Math.max(10, rawLinkWidth);
 
+  let intervalScaleString = "";
+  if (indicators === Indicators.V1)
+    if (isMotivation)
+      intervalScaleString = getIntervalStringMScale3(payload.cpValue);
+    else intervalScaleString = getIntervalStringCPScale5(payload.cpValue);
+  else if (isMotivation)
+    intervalScaleString = getIntervalStringMScale7(payload.cpValue);
+  else intervalScaleString = getIntervalStringCPScale7(payload.cpValue);
+
   return (
     <Layer
       style={{
@@ -614,6 +621,20 @@ function PSankeyLink(
             {isMotivation ? "M" : "CP"}
             {payload.cpValue}
           </text>
+          {!shouldBeOpaque && (
+            <text
+              pointerEvents="none"
+              opacity={1}
+              x={targetX - 40}
+              y={targetY + 3}
+              textAnchor={"right"}
+              fontWeight="bold"
+              fontSize={13}
+            >
+              {isMotivation ? "M" : "CP"}
+              {payload.cpValue}
+            </text>
+          )}
           <text
             pointerEvents="none"
             opacity={shouldBeOpaque ? 1 : 0}
@@ -621,9 +642,7 @@ function PSankeyLink(
             y={(sourceY + targetY) / 2 + 15}
             textAnchor="middle"
           >
-            {indicators === Indicators.V1
-              ? getIntervalStringMScale3(payload.cpValue)
-              : getIntervalStringMScale7(payload.cpValue)}
+            {intervalScaleString}
           </text>
         </>
       )}

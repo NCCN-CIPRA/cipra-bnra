@@ -19,7 +19,9 @@ import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { Slider } from "./Slider";
 import {
   getAverageDirectImpact,
+  getAverageDirectImpactDynamic,
   getAverageIndirectImpact,
+  getAverageIndirectImpactDynamic,
 } from "../../functions/Impact";
 import {
   getAverageDirectProbability,
@@ -28,6 +30,9 @@ import {
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 import { CascadeSection } from "./CascadeSection";
 import { DirectSection } from "./DirectSection";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../BasePage";
+import { Environment } from "../../types/global";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion elevation={0} square {...props} />
@@ -78,7 +83,27 @@ export default function Attack({
   catalyzingEffects: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
 }) {
+  const { environment } = useOutletContext<BasePageContext>();
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
+
+  // const ti = getTotalImpactEuros(riskFile, SCENARIOS.CONSIDERABLE);
+  // const tiD = getTotalImpactEurosDynamic(
+  //   riskFile,
+  //   effects,
+  //   SCENARIOS.CONSIDERABLE
+  // );
+  // console.log(ti, tiD, ti / tiD);
+  // console.log(
+  //   "H",
+  //   getAverageDirectImpact(riskFile, ["hc"]),
+  //   getAverageDirectImpactDynamic(riskFile, effects, ["hc"])
+  // );
+  // console.log(
+  //   "F",
+  //   getAverageDirectImpact(riskFile, ["fa", "fb"]),
+  //   getAverageDirectImpactDynamic(riskFile, effects, ["fa", "fb"]),
+  //   riskFile.cr4de_quanti
+  // );
 
   const actors = [
     ...causes
@@ -127,6 +152,19 @@ export default function Attack({
       ),
     },
   ];
+
+  const dynamicEffects = effects.map((e) => ({
+    cascade: e,
+    i:
+      environment === Environment.PUBLIC
+        ? getAverageIndirectImpact(e, riskFile)
+        : getAverageIndirectImpactDynamic(
+            e,
+            riskFile,
+            e.cr4de_effect_risk,
+            effects
+          ),
+  }));
 
   return (
     <>
@@ -179,27 +217,17 @@ export default function Attack({
         </Typography>
 
         <Box sx={{ mb: 8 }}>
-          {effects
-            .sort(
-              (a, b) =>
-                getAverageIndirectImpact(b, riskFile) -
-                getAverageIndirectImpact(a, riskFile)
-            )
-            .map((ca) => (
+          {dynamicEffects
+            .sort((a, b) => b.i - a.i)
+            .map((e) => (
               <CascadeSection
-                key={ca._cr4de_risk_cascade_value}
+                key={e.cascade._cr4de_risk_cascade_value}
                 cause={riskFile}
-                effect={ca.cr4de_effect_risk}
-                cascade={ca}
+                effect={e.cascade.cr4de_effect_risk}
+                cascade={e.cascade}
                 subtitle={
                   <Typography variant="body1" color="warning">
-                    <b>
-                      {Math.round(
-                        10000 * getAverageIndirectImpact(ca, riskFile)
-                      ) / 100}
-                      %
-                    </b>{" "}
-                    of expected impact
+                    <b>{Math.round(10000 * e.i) / 100}%</b> of expected impact
                   </Typography>
                 }
               />
@@ -220,7 +248,14 @@ export default function Attack({
               <Typography variant="body1" color="warning">
                 <b>
                   {Math.round(
-                    10000 * getAverageDirectImpact(riskFile, ["ha", "hb", "hc"])
+                    10000 *
+                      (environment === Environment.PUBLIC
+                        ? getAverageDirectImpact(riskFile, ["ha", "hb", "hc"])
+                        : getAverageDirectImpactDynamic(riskFile, effects, [
+                            "ha",
+                            "hb",
+                            "hc",
+                          ]))
                   ) / 100}
                   %
                 </b>{" "}
@@ -238,7 +273,19 @@ export default function Attack({
                 <b>
                   {Math.round(
                     10000 *
-                      getAverageDirectImpact(riskFile, ["sa", "sb", "sc", "sd"])
+                      (environment === Environment.PUBLIC
+                        ? getAverageDirectImpact(riskFile, [
+                            "sa",
+                            "sb",
+                            "sc",
+                            "sd",
+                          ])
+                        : getAverageDirectImpactDynamic(riskFile, effects, [
+                            "sa",
+                            "sb",
+                            "sc",
+                            "sd",
+                          ]))
                   ) / 100}
                   %
                 </b>{" "}
@@ -255,7 +302,12 @@ export default function Attack({
               <Typography variant="body1" color="warning">
                 <b>
                   {Math.round(
-                    10000 * getAverageDirectImpact(riskFile, ["ea"])
+                    10000 *
+                      (environment === Environment.PUBLIC
+                        ? getAverageDirectImpact(riskFile, ["ea"])
+                        : getAverageDirectImpactDynamic(riskFile, effects, [
+                            "ea",
+                          ]))
                   ) / 100}
                   %
                 </b>{" "}
@@ -272,7 +324,13 @@ export default function Attack({
               <Typography variant="body1" color="warning">
                 <b>
                   {Math.round(
-                    10000 * getAverageDirectImpact(riskFile, ["fa", "fb"])
+                    10000 *
+                      (environment === Environment.PUBLIC
+                        ? getAverageDirectImpact(riskFile, ["fa", "fb"])
+                        : getAverageDirectImpactDynamic(riskFile, effects, [
+                            "fa",
+                            "fb",
+                          ]))
                   ) / 100}
                   %
                 </b>{" "}

@@ -49,7 +49,6 @@ export default function ManMade({
           </Typography>
 
           <MMSankeyDiagram
-            riskSummary={riskSummary}
             riskFile={riskFile}
             cascades={cascades}
             manmade

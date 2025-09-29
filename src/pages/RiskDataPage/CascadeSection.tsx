@@ -31,7 +31,12 @@ export function CascadeSection({
     <RiskDataAccordion
       title={
         <Stack direction="row">
-          <Typography sx={{ flex: 1 }}>
+          <Typography
+            sx={{
+              flex: 1,
+              textDecoration: cascade.cr4de_removed ? "line-through" : "none",
+            }}
+          >
             <Link
               href={`/risks/${cause._cr4de_risk_file_value}/description`}
               target="_blank"

@@ -11,7 +11,6 @@ import {
   DVRiskSnapshot,
   RiskSnapshotResults,
 } from "../../../types/dataverse/DVRiskSnapshot";
-import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
 import { CascadeSnapshots } from "../../../functions/cascades";
 import { ScenarioButtons } from "../../../components/ScenarioButtons";
 
@@ -21,7 +20,6 @@ export default function SankeyDiagram({
   scenario,
   setScenario,
 }: {
-  riskSummary: DVRiskSummary;
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;

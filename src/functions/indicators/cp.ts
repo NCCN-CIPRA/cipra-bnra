@@ -1,3 +1,5 @@
+import round from "../roundNumberString";
+
 const cpLowerBoundScale5 = [
   0,
   0.1 / 100,
@@ -49,6 +51,20 @@ export function pAbsFromCPScale5(cpScale5: number) {
   return lower + diff * ((cpScale5 + 0.5) % 1);
 }
 
+export function pAbsFromCPScale7(cpScale7: number) {
+  const index = Math.floor(cpScale7 + 0.5);
+
+  if (index < 0.5) return (cpScale7 / 0.5) * cpUpperBoundScale7[0];
+  if (index >= 7.5) return 1;
+
+  const lower = cpLowerBoundScale7[index];
+  const upper = cpUpperBoundScale7[index];
+
+  const diff = upper - lower;
+
+  return lower + diff * ((cpScale7 + 0.5) % 1);
+}
+
 export function cpScale5FromPAbs(pAbs: number) {
   // Handle edge cases
   if (pAbs < cpUpperBoundScale5[0]) return 0.5 * (pAbs / cpUpperBoundScale5[0]);
@@ -62,6 +78,7 @@ export function cpScale5FromPAbs(pAbs: number) {
     if (pAbs >= lower && pAbs <= upper) {
       // Interpolate within the interval
       const fraction = (pAbs - lower) / (upper - lower);
+
       // Convert back from the +0.5 offset used in pAbsFromMScale3
       return i + (fraction - 0.5);
     }
@@ -91,4 +108,25 @@ export function cpScale7FromPAbs(pAbs: number) {
 
   // If not found in any interval, return the last scale value
   return cpLowerBoundScale7.length - 0.5;
+}
+
+export function getIntervalStringCPScale5(cpScale5: number) {
+  if (cpScale5 < 0.5)
+    return `< ${round(2 * cpScale5 * pAbsFromCPScale5(0.5), 2)}%`;
+
+  return `${round(100 * pAbsFromCPScale5(cpScale5 - 0.5), 1)}% - ${round(
+    100 * pAbsFromCPScale5(cpScale5 + 0.5),
+    2
+  )}%`;
+}
+
+export function getIntervalStringCPScale7(cpScale7: number) {
+  if (cpScale7 <= 0) return "0%";
+  if (cpScale7 < 0.5)
+    return `< ${round(2 * cpScale7 * pAbsFromCPScale7(0.5), 2)}%`;
+
+  return `${round(100 * pAbsFromCPScale7(cpScale7 - 0.5), 1)}% - ${round(
+    100 * pAbsFromCPScale7(cpScale7 + 0.5),
+    2
+  )}%`;
 }

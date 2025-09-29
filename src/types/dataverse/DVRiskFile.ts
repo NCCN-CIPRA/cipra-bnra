@@ -13,6 +13,18 @@ export type DI_FIELD =
   | "ea"
   | "fa"
   | "fb";
+export const DI_FIELDS: DI_FIELD[] = [
+  "ha",
+  "hb",
+  "hc",
+  "sa",
+  "sb",
+  "sc",
+  "sd",
+  "ea",
+  "fa",
+  "fb",
+];
 
 export function getQuantiLabel(field: DP_FIELD | DI_FIELD, isAttack?: boolean) {
   if (field === "dp") {

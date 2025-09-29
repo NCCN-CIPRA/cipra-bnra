@@ -38,14 +38,15 @@ export default function SnapshotTab() {
       riskSnapshots,
       cascadesSnapshots,
       riskFiles.filter((rf) => !rf.cr4de_hazard_id.startsWith("X")),
-      cascades
+      cascades,
+      false
     );
 
     setAction("Saving snapshots: 0%");
 
     const doSummaries = false;
-    const doRisks = true;
-    const doCascades = false;
+    const doRisks = false;
+    const doCascades = true;
 
     let maxProgress = 0;
     if (doSummaries) maxProgress += res.updatedSummaries.length;
@@ -86,7 +87,14 @@ export default function SnapshotTab() {
     }
 
     if (doCascades) {
+      console.log(res.updatedCascadesSnapshots);
       for (const cs of res.updatedCascadesSnapshots) {
+        if (
+          cs.cr4de_bnrariskcascadesnapshotid !==
+          "c07069ef-da87-f011-b4cb-000d3ab805fb"
+        )
+          continue;
+        console.log(cs);
         if (cs.cr4de_bnrariskcascadesnapshotid) {
           delete cs.cr4de_risk_cascade;
           delete cs._cr4de_risk_cascade_value;

@@ -78,6 +78,8 @@ export interface DVCascadeSnapshot<
   cr4de_quali: string | null;
   // Consolidated description of the catalyzing effect for the BE Report
   cr4de_description: string | null;
+
+  cr4de_removed: boolean | null;
 }
 
 export type CPMatrix = {
