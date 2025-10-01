@@ -9,6 +9,7 @@ import HTMLEditor from "../../components/HTMLEditor";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import useAPI, { DataTable } from "../../hooks/useAPI";
+import LeftBorderSection from "../../components/LeftBorderSection";
 
 export type VISUALS = "SANKEY" | "MATRIX";
 
@@ -87,17 +88,19 @@ export function CascadeSection({
           <Typography variant="subtitle2" sx={{ mb: 2, ml: 2 }}>
             Consolidated Qualitative Input:
           </Typography>
-          <HTMLEditor
-            initialHTML={quali || ""}
-            editableRole="analist"
-            onSave={async (newQuali: string | null) => {
-              setQuali(newQuali);
-              mutation.mutate({
-                cr4de_bnrariskcascadeid: cascade._cr4de_risk_cascade_value,
-                cr4de_quali: newQuali,
-              });
-            }}
-          />
+          <LeftBorderSection sx={{ py: 1, mb: 2 }}>
+            <HTMLEditor
+              initialHTML={quali || ""}
+              editableRole="analist"
+              onSave={async (newQuali: string | null) => {
+                setQuali(newQuali);
+                mutation.mutate({
+                  cr4de_bnrariskcascadeid: cascade._cr4de_risk_cascade_value,
+                  cr4de_quali: newQuali,
+                });
+              }}
+            />
+          </LeftBorderSection>
         </Box>
       </Stack>
     </RiskDataAccordion>

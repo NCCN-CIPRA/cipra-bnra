@@ -64,6 +64,7 @@ export default function RiskDataAccordion({
       expanded={open}
       // disabled={disabled}
       sx={{ pageBreakInside: "avoid" }}
+      slotProps={{ transition: { unmountOnExit: true } }}
     >
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}

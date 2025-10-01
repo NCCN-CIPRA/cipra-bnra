@@ -20,8 +20,6 @@ import { Slider } from "./Slider";
 import {
   getAverageDirectImpact,
   getAverageIndirectImpact,
-  getTotalImpactEuros,
-  getTotalImpactEurosDynamic,
 } from "../../functions/Impact";
 import {
   getAverageDirectProbability,
@@ -83,13 +81,6 @@ export default function Standard({
 }) {
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
 
-  const ti = getTotalImpactEuros(riskFile, SCENARIOS.CONSIDERABLE);
-  const tiD = getTotalImpactEurosDynamic(
-    riskFile,
-    effects,
-    SCENARIOS.CONSIDERABLE
-  );
-  console.log(ti, tiD, ti / tiD);
   const causesWithDP = [
     ...causes.map((ca) => ({
       p: getAverageIndirectProbability(ca, riskFile),

@@ -12,6 +12,10 @@
 
 - Actor -> Attack cascade values (motivations) are no longer editable in the _Raw Data_ page of attack risk files, use the actor risk files instead to edit these values
 
+### Fixed
+
+- Dynamic view showed inaccurate CP values in _Risk Data_ page
+
 ### Technical
 
 - Added reusable useSavedState hook for storing state values in localStorage
