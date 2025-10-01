@@ -15,6 +15,8 @@
 ### Fixed
 
 - Dynamic view showed inaccurate CP values in _Risk Data_ page
+- Repair _Building structural failure_ scenario display and other scenario storage issues
+- Sankeys in _Raw Data_ show CP values instead of M values for non-actor cascades
 
 ### Technical
 

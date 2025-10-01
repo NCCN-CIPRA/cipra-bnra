@@ -636,6 +636,7 @@ function PSankeyLink(
           <EditMBox
             indicators={indicators}
             editValue={editValue}
+            isMotivation={isMotivation}
             setEditValue={setEditValue}
             setHoverIndex={setHoverIndex}
             onChange={(newVal) =>
@@ -651,16 +652,53 @@ function PSankeyLink(
 function EditMBox({
   indicators,
   editValue,
+  isMotivation,
   setEditValue,
   setHoverIndex,
   onChange,
 }: {
   indicators: Indicators;
   editValue: number;
+  isMotivation: boolean;
   setEditValue: (n: number | null) => void;
   setHoverIndex: (n: number | null) => void;
   onChange: (n: number) => Promise<void>;
 }) {
+  let description = null;
+
+  if (isMotivation) {
+    description = (
+      <Typography variant="body1" sx={{ mt: 2 }}>
+        This value represents an estimated probability of{" "}
+        <b>
+          {indicators === Indicators.V1
+            ? getIntervalStringMScale3(editValue)
+            : getIntervalStringMScale7(editValue)}
+        </b>{" "}
+        for actors of this group to succesfully execute an attack of this
+        magnitude in the next 5 years
+      </Typography>
+    );
+  } else {
+    description = (
+      <Typography variant="body1" sx={{ mt: 2 }}>
+        This value represents an estimated probability of{" "}
+        <b>
+          {indicators === Indicators.V1
+            ? getIntervalStringCPScale5(editValue)
+            : getIntervalStringCPScale7(editValue)}
+        </b>{" "}
+        for the causing risk scenario to have the effect scenario as a
+        consequence
+      </Typography>
+    );
+  }
+
+  let maxValue = 0;
+  if (indicators === Indicators.V2) maxValue = 7;
+  else if (isMotivation) maxValue = 3;
+  else maxValue = 5;
+
   return (
     <Box
       sx={{
@@ -676,27 +714,15 @@ function EditMBox({
         value={editValue}
         valueLabelDisplay="off"
         step={0.5}
-        marks={(indicators === Indicators.V1
-          ? [0, 1, 2, 3]
-          : [0, 1, 2, 3, 4, 5, 6, 7]
-        ).map((m) => ({
-          value: m,
-          label: `M${m}`,
+        marks={Array.from({ length: maxValue + 1 }, (_, i) => ({
+          value: i,
+          label: `${isMotivation ? "M" : "CP"}${i}`,
         }))}
         min={0}
-        max={indicators === Indicators.V1 ? 3.5 : 7.5}
+        max={maxValue + 0.5}
         onChange={(_, v) => setEditValue(v)}
       />
-      <Typography variant="body1" sx={{ mt: 2 }}>
-        This value represents an estimated probability of{" "}
-        <b>
-          {indicators === Indicators.V1
-            ? getIntervalStringMScale3(editValue)
-            : getIntervalStringMScale7(editValue)}
-        </b>{" "}
-        for actors of this group to succesfully execute an attack of this
-        magnitude in the next 5 years
-      </Typography>
+      {description}
       <Button
         variant="contained"
         color="warning"
