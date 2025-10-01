@@ -54,6 +54,7 @@ const ATTACK_RISKS = [
   "9f58db5b-aa6c-ed11-9561-000d3adf7089", //  "M20",
 ];
 const IAC = "9958db5b-aa6c-ed11-9561-000d3adf7089";
+const INFO_OPS = "9458db5b-aa6c-ed11-9561-000d3adf7089";
 const IGNORE_RISKS = [
   "H09", // Mass rejection of modern medicine
   "H10", // Processes of a social psychological nature
@@ -117,7 +118,7 @@ const getAveragesForScenarios = (
   };
 };
 
-const getConsensusRiskFile = (
+export const getConsensusRiskFile = (
   riskFile: DVRiskFile,
   participations: DVParticipation[],
   directAnalyses: DVDirectAnalysis<unknown, DVContact>[] | undefined
@@ -433,10 +434,8 @@ export const getConsensusCascade = (
 
   let cpScaleFactor = 1;
   if (
-    cascade._cr4de_cause_hazard_value ===
-      "9458db5b-aa6c-ed11-9561-000d3adf7089" ||
-    (cascade._cr4de_effect_hazard_value ===
-      "9458db5b-aa6c-ed11-9561-000d3adf7089" &&
+    cascade._cr4de_cause_hazard_value === INFO_OPS ||
+    (cascade._cr4de_effect_hazard_value === INFO_OPS &&
       ACTOR_RISKS.indexOf(cascade._cr4de_cause_hazard_value) >= 0)
   ) {
     cpScaleFactor *= INFO_OPS_CP_FACTOR;

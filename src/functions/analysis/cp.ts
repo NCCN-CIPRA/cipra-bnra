@@ -1,3 +1,4 @@
+import { CPMatrix } from "../../types/dataverse/DVCascadeSnapshot";
 import {
   CPMatrixCauseRow,
   DVRiskCascade,
@@ -272,4 +273,18 @@ export const getNewCPFromOldMAndCP = (
   }
 
   return Math.round(10 * cpScale7FromPAbs(cpAbsOld)) / 10;
+};
+
+export const getTotalCP = (cpMatrix: CPMatrix) => {
+  return (
+    cpMatrix.considerable.considerable.abs +
+    cpMatrix.considerable.major.abs +
+    cpMatrix.considerable.extreme.abs +
+    cpMatrix.major.considerable.abs +
+    cpMatrix.major.major.abs +
+    cpMatrix.major.extreme.abs +
+    cpMatrix.extreme.considerable.abs +
+    cpMatrix.extreme.major.abs +
+    cpMatrix.extreme.extreme.abs
+  );
 };

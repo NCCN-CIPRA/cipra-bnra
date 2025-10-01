@@ -30,7 +30,7 @@ export function CascadeSection({
 }) {
   const api = useAPI();
   const queryClient = useQueryClient();
-
+  console.log(cascade);
   const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali || "");
   const mutation = useMutation({
     mutationFn: async (

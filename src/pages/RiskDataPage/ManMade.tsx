@@ -13,6 +13,7 @@ import {
 } from "../../functions/Impact";
 import { CascadeSection, VISUALS } from "./CascadeSection";
 import { Environment } from "../../types/global";
+import { getTotalCP } from "../../functions/analysis/cp";
 
 export default function ManMade({
   riskFile,
@@ -28,8 +29,14 @@ export default function ManMade({
 }) {
   const { environment } = useOutletContext<BasePageContext>();
 
+  const totalCP = effects.reduce(
+    (t, e) => t + getTotalCP(e.cr4de_quanti_cp),
+    0
+  );
+
   const dynamicAttacks = effects.map((e) => ({
     cascade: e,
+    p: getTotalCP(e.cr4de_quanti_cp) / totalCP,
     i:
       environment === Environment.PUBLIC
         ? getAverageIndirectImpact(e, riskFile)
@@ -50,7 +57,7 @@ export default function ManMade({
 
         <Box sx={{ mb: 8 }}>
           {dynamicAttacks
-            .sort((a, b) => b.i - a.i)
+            .sort((a, b) => b.p - a.p)
             .map((e) => (
               <CascadeSection
                 key={e.cascade._cr4de_risk_cascade_value}
@@ -60,7 +67,8 @@ export default function ManMade({
                 visuals={visuals}
                 subtitle={
                   <Typography variant="body1" color="warning">
-                    <b>{Math.round(10000 * e.i) / 100}%</b> of expected impact
+                    <b>{Math.round(10000 * e.p) / 100}%</b> preference for this
+                    type of action
                   </Typography>
                 }
               />
