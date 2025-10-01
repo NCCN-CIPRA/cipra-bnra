@@ -15,11 +15,12 @@ import { IntensityParameter } from "../functions/intensityParameters";
 import { Trans } from "react-i18next";
 import useDebounce from "../hooks/useDebounce";
 import { RiskFileEditableFields } from "../types/dataverse/DVRiskFile";
+import { SerializedScenario } from "../types/dataverse/Riskfile";
 
 interface RawScenarios {
-  considerable: string | null;
-  major: string | null;
-  extreme: string | null;
+  considerable: SerializedScenario | null;
+  major: SerializedScenario | null;
+  extreme: SerializedScenario | null;
 }
 
 const getChangedScenarios = (old: RawScenarios, new_: RawScenarios) => {

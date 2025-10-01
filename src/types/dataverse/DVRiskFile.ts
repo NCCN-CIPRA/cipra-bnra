@@ -1,5 +1,6 @@
 import { SCENARIOS } from "../../functions/scenarios";
 import { DiscussionRequired } from "../DiscussionRequired";
+import { SerializedScenario } from "./Riskfile";
 
 export type DP_FIELD = "dp";
 export type DI_FIELD =
@@ -90,9 +91,9 @@ export interface RiskFileEditableFields {
   cr4de_definition: string | null;
   cr4de_historical_events: string | null;
   cr4de_intensity_parameters: string | null;
-  cr4de_scenario_considerable: string | null;
-  cr4de_scenario_major: string | null;
-  cr4de_scenario_extreme: string | null;
+  cr4de_scenario_considerable: SerializedScenario | null;
+  cr4de_scenario_major: SerializedScenario | null;
+  cr4de_scenario_extreme: SerializedScenario | null;
   cr4de_horizon_analysis: string | null;
   cr4de_legal_bases: string | null;
   cr4de_roles_responsibilities: string | null;

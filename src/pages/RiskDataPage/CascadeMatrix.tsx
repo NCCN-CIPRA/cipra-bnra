@@ -418,13 +418,13 @@ export default function CascadeMatrix({
               <TableCell sx={{ verticalAlign: "top" }}>
                 <ScenarioDescriptionBox
                   scenario={SCENARIOS.CONSIDERABLE}
-                  parameters={JSON.parse(causeScenarios.considerable)}
+                  parameters={causeScenarios.considerable}
                 />
               </TableCell>
               <TableCell sx={{ verticalAlign: "top" }}>
                 <ScenarioDescriptionBox
                   scenario={SCENARIOS.CONSIDERABLE}
-                  parameters={JSON.parse(effectScenarios.considerable)}
+                  parameters={effectScenarios.considerable}
                 />
               </TableCell>
             </TableRow>
@@ -432,13 +432,13 @@ export default function CascadeMatrix({
               <TableCell sx={{ verticalAlign: "top" }}>
                 <ScenarioDescriptionBox
                   scenario={SCENARIOS.MAJOR}
-                  parameters={JSON.parse(causeScenarios.major)}
+                  parameters={causeScenarios.major}
                 />
               </TableCell>
               <TableCell sx={{ verticalAlign: "top" }}>
                 <ScenarioDescriptionBox
                   scenario={SCENARIOS.MAJOR}
-                  parameters={JSON.parse(effectScenarios.major)}
+                  parameters={effectScenarios.major}
                 />
               </TableCell>
             </TableRow>
@@ -446,13 +446,13 @@ export default function CascadeMatrix({
               <TableCell sx={{ verticalAlign: "top" }}>
                 <ScenarioDescriptionBox
                   scenario={SCENARIOS.EXTREME}
-                  parameters={JSON.parse(causeScenarios.extreme)}
+                  parameters={causeScenarios.extreme}
                 />
               </TableCell>
               <TableCell sx={{ verticalAlign: "top" }}>
                 <ScenarioDescriptionBox
                   scenario={SCENARIOS.EXTREME}
-                  parameters={JSON.parse(effectScenarios.extreme)}
+                  parameters={effectScenarios.extreme}
                 />
               </TableCell>
             </TableRow>

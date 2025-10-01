@@ -31,6 +31,7 @@ import {
   SerializedRiskSnapshotResults,
   serializeRiskSnapshotQualis,
   serializeRiskSnapshotResults,
+  serializeRiskSnapshotScenarios,
 } from "../types/dataverse/DVRiskSnapshot";
 import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
 import { RISK_TYPE, UnparsedRiskFields } from "../types/dataverse/Riskfile";
@@ -1330,10 +1331,12 @@ export function snapshotFromRiskfile(
     cr4de_horizon_analysis: riskFile.cr4de_horizon_analysis,
     cr4de_historical_events: riskFile.cr4de_historical_events,
     cr4de_intensity_parameters: riskFile.cr4de_intensity_parameters,
-    cr4de_scenarios: JSON.stringify({
-      [SCENARIOS.CONSIDERABLE]: riskFile.cr4de_scenario_considerable,
-      [SCENARIOS.MAJOR]: riskFile.cr4de_scenario_major,
-      [SCENARIOS.EXTREME]: riskFile.cr4de_scenario_extreme,
+    cr4de_scenarios: serializeRiskSnapshotScenarios({
+      [SCENARIOS.CONSIDERABLE]: JSON.parse(
+        riskFile.cr4de_scenario_considerable || ""
+      ),
+      [SCENARIOS.MAJOR]: JSON.parse(riskFile.cr4de_scenario_major || ""),
+      [SCENARIOS.EXTREME]: JSON.parse(riskFile.cr4de_scenario_extreme || ""),
     }),
     cr4de_mrs: riskFile.cr4de_mrs!,
 

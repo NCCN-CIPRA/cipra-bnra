@@ -7,7 +7,7 @@ import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import SnapshotTab from "./SnapshotTab";
 import MigrationTab from "./MigrationTab";
-// import MoveDownSharpIcon from "@mui/icons-material/MoveDownSharp";
+import MoveDownSharpIcon from "@mui/icons-material/MoveDownSharp";
 
 type UserManagementParams = {
   tabName: string;
@@ -54,11 +54,11 @@ export default function AdministrationPage() {
             icon={<AcUnitIcon />}
             onClick={() => navigate(`/admin/functions/snapshots`)}
           />
-          {/* <BottomNavigationAction
+          <BottomNavigationAction
             label="Migrate Risk Files"
             icon={<MoveDownSharpIcon />}
             onClick={() => navigate(`/admin/functions/migrate`)}
-          /> */}
+          />
         </BottomNavigation>
       </Paper>
     </>

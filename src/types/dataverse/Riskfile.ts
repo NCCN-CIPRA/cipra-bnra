@@ -49,7 +49,11 @@ export type ParsedRiskFields = {
 export type UnparsedRiskFields = {
   cr4de_historical_events: string | null;
   cr4de_intensity_parameters: string | null;
-  cr4de_scenario_considerable: string | null;
-  cr4de_scenario_major: string | null;
-  cr4de_scenario_extreme: string | null;
+  cr4de_scenario_considerable: SerializedScenario | null;
+  cr4de_scenario_major: SerializedScenario | null;
+  cr4de_scenario_extreme: SerializedScenario | null;
+};
+
+export type SerializedScenario = string & {
+  __json_seralized: IntensityParameter<string>[];
 };

@@ -17,8 +17,9 @@ import {
 import {
   DVRiskSnapshot,
   SerializedRiskSnapshotResults,
+  serializeRiskSnapshotScenarios,
 } from "../../types/dataverse/DVRiskSnapshot";
-import { SCENARIOS } from "../../functions/scenarios";
+import { Scenarios } from "../../functions/scenarios";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 
 export default function MigrationTab() {
@@ -57,8 +58,9 @@ export default function MigrationTab() {
     const maxProgress = riskFiles.length;
 
     for (const rf of riskFiles) {
-      const parsedFields = parseRiskFields(rf);
+      let parsedFields = parseRiskFields(rf);
       const migratedFields = stringifyRiskFields(parsedFields);
+      parsedFields = parseRiskFields(migratedFields);
 
       const sum = sumDict[rf.cr4de_riskfilesid];
       const ss = ssDict[rf.cr4de_riskfilesid];
@@ -80,11 +82,9 @@ export default function MigrationTab() {
       await api.updateRiskSnapshot(ss.cr4de_bnrariskfilesnapshotid, {
         cr4de_historical_events: migratedFields.cr4de_historical_events,
         cr4de_intensity_parameters: migratedFields.cr4de_intensity_parameters,
-        cr4de_scenarios: JSON.stringify({
-          [SCENARIOS.CONSIDERABLE]: migratedFields.cr4de_scenario_considerable,
-          [SCENARIOS.MAJOR]: migratedFields.cr4de_scenario_major,
-          [SCENARIOS.EXTREME]: migratedFields.cr4de_scenario_extreme,
-        }),
+        cr4de_scenarios: serializeRiskSnapshotScenarios(
+          parsedFields.cr4de_scenarios as Scenarios
+        ),
       });
 
       counter += 1;

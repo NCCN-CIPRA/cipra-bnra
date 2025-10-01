@@ -1,4 +1,5 @@
-import { SCENARIOS } from "../../functions/scenarios";
+import { IntensityParameter } from "../../functions/intensityParameters";
+import { Scenarios, SCENARIOS } from "../../functions/scenarios";
 import { RISK_CATEGORY, RISK_TYPE } from "./Riskfile";
 
 export type SerializedRiskSnapshotResults = string & {
@@ -7,6 +8,10 @@ export type SerializedRiskSnapshotResults = string & {
 
 export type SerializedRiskSnapshotQualis = string & {
   __json_seralized: RiskSnapshotQualis;
+};
+
+export type SerializedRiskSnapshotScenarios = string & {
+  __json_seralized: Scenarios;
 };
 
 export function serializeRiskSnapshotResults(
@@ -19,6 +24,12 @@ export function serializeRiskSnapshotQualis(
   quali: RiskSnapshotQualis
 ): SerializedRiskSnapshotQualis {
   return JSON.stringify(quali) as SerializedRiskSnapshotQualis;
+}
+
+export function serializeRiskSnapshotScenarios(
+  scenarios: Scenarios
+): SerializedRiskSnapshotScenarios {
+  return JSON.stringify(scenarios) as SerializedRiskSnapshotScenarios;
 }
 
 export function parseRiskSnapshot<T>(
@@ -71,7 +82,7 @@ export type DVRiskSnapshot<
   cr4de_horizon_analysis: string | null;
   cr4de_historical_events: string | null;
   cr4de_intensity_parameters: string | null;
-  cr4de_scenarios: string | null;
+  cr4de_scenarios: SerializedRiskSnapshotScenarios | null;
   cr4de_mrs: SCENARIOS | null;
 
   cr4de_quali_scenario_mrs: string | null;
@@ -88,6 +99,12 @@ export type DVRiskSnapshot<
 
   cr4de_quanti: QuantiType;
   cr4de_quali: QualiType;
+};
+
+export type RiskSnapshotScenarios = {
+  [SCENARIOS.CONSIDERABLE]: IntensityParameter[];
+  [SCENARIOS.MAJOR]: IntensityParameter[];
+  [SCENARIOS.EXTREME]: IntensityParameter[];
 };
 
 export type RiskSnapshotResults = {

@@ -164,9 +164,7 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
           align: "left",
           description: (
-            <ScenarioDescription
-              parameters={JSON.parse(causeScenarios.considerable)}
-            />
+            <ScenarioDescription parameters={causeScenarios.considerable} />
           ),
         },
         {
@@ -175,9 +173,7 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
           align: "left",
           description: (
-            <ScenarioDescription
-              parameters={JSON.parse(causeScenarios.major)}
-            />
+            <ScenarioDescription parameters={causeScenarios.major} />
           ),
         },
         {
@@ -186,9 +182,7 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
           align: "left",
           description: (
-            <ScenarioDescription
-              parameters={JSON.parse(causeScenarios.extreme)}
-            />
+            <ScenarioDescription parameters={causeScenarios.extreme} />
           ),
           bottom: true,
         },
@@ -198,9 +192,7 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
           align: "right",
           description: (
-            <ScenarioDescription
-              parameters={JSON.parse(effectScenarios.considerable)}
-            />
+            <ScenarioDescription parameters={effectScenarios.considerable} />
           ),
         },
         {
@@ -209,9 +201,7 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
           align: "right",
           description: (
-            <ScenarioDescription
-              parameters={JSON.parse(effectScenarios.major)}
-            />
+            <ScenarioDescription parameters={effectScenarios.major} />
           ),
         },
         {
@@ -220,9 +210,7 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
           align: "right",
           description: (
-            <ScenarioDescription
-              parameters={JSON.parse(effectScenarios.extreme)}
-            />
+            <ScenarioDescription parameters={effectScenarios.extreme} />
           ),
           bottom: true,
         },

@@ -5,6 +5,7 @@ import {
 } from "../types/dataverse/DVRiskCascade";
 import { RISKFILE_RESULT_FIELD } from "../types/dataverse/DVRiskFile";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
+import { SerializedScenario } from "../types/dataverse/Riskfile";
 import { IntensityParameter } from "./intensityParameters";
 
 export enum SCENARIOS {
@@ -52,21 +53,11 @@ const noScenarios = {
 
 export const unwrapScenario = (
   scenarioJSON: string,
-  parameters: IntensityParameter[]
+  // Deprecated - no longer necessary as description is in the scenario JSONs
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _parameters?: IntensityParameter[]
 ): IntensityParameter<string>[] => {
-  const scenario = JSON.parse(scenarioJSON) as IntensityParameter<string>[];
-
-  return scenario.map((p) => {
-    const realParam = parameters.find((p2) => p.name === p2.name);
-
-    if (realParam)
-      return {
-        ...p,
-        description: realParam.description,
-      };
-
-    return p;
-  });
+  return JSON.parse(scenarioJSON) as IntensityParameter<string>[];
 };
 
 export function unwrap(
@@ -84,8 +75,10 @@ export function unwrap(
   };
 }
 
-export function wrap(scenario: IntensityParameter<string>[]): string {
-  return JSON.stringify(scenario);
+export function wrap(
+  scenario: IntensityParameter<string>[]
+): SerializedScenario {
+  return JSON.stringify(scenario) as SerializedScenario;
 }
 
 export const getScenarioSuffix = (scenario: SCENARIOS): SCENARIO_SUFFIX => {
