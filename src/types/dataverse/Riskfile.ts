@@ -1,6 +1,6 @@
 import { HistoricalEvent } from "../../functions/historicalEvents";
 import { IntensityParameter } from "../../functions/intensityParameters";
-import { Scenarios } from "../../functions/scenarios";
+import { SCENARIOS, Scenarios } from "../../functions/scenarios";
 
 export enum RISK_TYPE {
   STANDARD = "Standard Risk",
@@ -57,3 +57,32 @@ export type UnparsedRiskFields = {
 export type SerializedScenario = string & {
   __json_seralized: IntensityParameter<string>[];
 };
+
+export type RiskQualiType = never | unknown | SerializedRiskQualis | RiskQualis;
+
+export type SerializedRiskQualis = string & {
+  __json_seralized: RiskQualis;
+};
+
+export type RiskQualis = {
+  [SCENARIOS.CONSIDERABLE]: RiskScenarioQualis;
+  [SCENARIOS.MAJOR]: RiskScenarioQualis;
+  [SCENARIOS.EXTREME]: RiskScenarioQualis;
+};
+
+export type RiskScenarioQualis = {
+  dp: string;
+  h: string;
+  s: string;
+  e: string;
+  f: string;
+  cb: string;
+};
+
+export function serializeRiskQualis(quali: RiskQualis): SerializedRiskQualis {
+  return JSON.stringify(quali) as SerializedRiskQualis;
+}
+
+export function parseRiskQualis(quali: SerializedRiskQualis): RiskQualis {
+  return JSON.parse(quali);
+}

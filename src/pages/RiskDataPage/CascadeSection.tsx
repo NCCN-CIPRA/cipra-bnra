@@ -37,16 +37,11 @@ export function CascadeSection({
       newC: Partial<DVRiskCascade> & { cr4de_bnrariskcascadeid: string }
     ) => api.updateCascade(newC.cr4de_bnrariskcascadeid, newC),
     onSuccess: async () => {
-      // If you're invalidating a single query
       await queryClient.invalidateQueries({
         queryKey: [DataTable.RISK_CASCADE],
       });
     },
   });
-
-  // const [quali, setQuali] = useState<string | null>(
-  //   cascade.cr4de_quali_cause || ""
-  // );
 
   return (
     <RiskDataAccordion

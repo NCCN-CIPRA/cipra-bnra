@@ -1,15 +1,14 @@
 import { ReactNode } from "react";
 import {
   DVRiskSnapshot,
-  RiskSnapshotQualis,
   RiskSnapshotResults,
-  RiskSnapshotScenarioQualis,
 } from "../../types/dataverse/DVRiskSnapshot";
 import RiskDataAccordion from "./RiskDataAccordion";
 import { Stack, Typography } from "@mui/material";
 import { SCENARIOS } from "../../functions/scenarios";
 import { ScenarioSection } from "./ScenarioSection";
 import { DI_FIELD, DP_FIELD } from "../../types/dataverse/DVRiskFile";
+import { RiskQualis, RiskScenarioQualis } from "../../types/dataverse/Riskfile";
 
 export function DirectSection({
   riskFile,
@@ -18,9 +17,9 @@ export function DirectSection({
   title,
   subtitle = null,
 }: {
-  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, RiskSnapshotQualis>;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, RiskQualis>;
   quantiFields: (DP_FIELD | DI_FIELD)[];
-  qualiField: keyof RiskSnapshotScenarioQualis;
+  qualiField: keyof RiskScenarioQualis;
   title: string;
   subtitle?: ReactNode;
 }) {

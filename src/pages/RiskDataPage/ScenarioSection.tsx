@@ -2,9 +2,8 @@ import { useState } from "react";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import {
   DVRiskSnapshot,
-  RiskSnapshotQualis,
+  parseRiskSnapshotScenarios,
   RiskSnapshotResults,
-  RiskSnapshotScenarioQualis,
 } from "../../types/dataverse/DVRiskSnapshot";
 import { Box, Paper, Stack, Typography } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -14,6 +13,7 @@ import {
   DP_FIELD,
   DI_FIELD,
   getQuantiLabel,
+  DVRiskFile,
 } from "../../types/dataverse/DVRiskFile";
 import {
   diScale5FromEuros,
@@ -23,6 +23,15 @@ import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../BasePage";
 import { Indicators } from "../../types/global";
 import { pScale5to7 } from "../../functions/indicators/probability";
+import ScenarioDescription from "../../components/ScenarioDescription";
+import HTMLEditor from "../../components/HTMLEditor";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import useAPI, { DataTable } from "../../hooks/useAPI";
+import {
+  RiskQualis,
+  RiskScenarioQualis,
+  serializeRiskQualis,
+} from "../../types/dataverse/Riskfile";
 
 export function ScenarioSection({
   riskFile,
@@ -31,20 +40,33 @@ export function ScenarioSection({
   scenario,
   isAttack,
 }: {
-  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, RiskSnapshotQualis>;
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, RiskQualis>;
   quantiFields: (DP_FIELD | DI_FIELD)[];
-  qualiField: keyof RiskSnapshotScenarioQualis;
+  qualiField: keyof RiskScenarioQualis;
   scenario: SCENARIOS;
   isAttack?: boolean;
 }) {
-  // const api = useAPI();
+  const api = useAPI();
+  const queryClient = useQueryClient();
   const { indicators } = useOutletContext<BasePageContext>();
 
   const [open, setOpen] = useState(false);
 
-  const [quali] = useState<string | null>(
-    (riskFile.cr4de_quali[scenario][qualiField] as string | null) || ""
+  const [quali, setQuali] = useState(
+    riskFile.cr4de_quali[scenario][qualiField] || ""
   );
+  const mutation = useMutation({
+    mutationFn: async (
+      newC: Partial<DVRiskFile> & { cr4de_riskfilesid: string }
+    ) => api.updateRiskFile(newC.cr4de_riskfilesid, newC),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [DataTable.RISK_FILE],
+      });
+    },
+  });
+
+  const scenarios = parseRiskSnapshotScenarios(riskFile.cr4de_scenarios);
 
   return (
     <Stack
@@ -73,18 +95,26 @@ export function ScenarioSection({
 
       {open && (
         <Box sx={{ p: 2 }}>
+          <Typography variant="subtitle2">Scenario Description:</Typography>
+          <Box sx={{ pb: 2, pl: 3, mb: 2, borderBottom: "1px solid #eee" }}>
+            <ScenarioDescription parameters={scenarios[scenario]} />
+          </Box>
           <Typography variant="subtitle2">Final Consensus Results:</Typography>
-          <Box sx={{ mt: 2, mb: 4 }}>
-            <Box
-              dangerouslySetInnerHTML={{
-                __html: quali || "",
-              }}
-              sx={{
-                mt: 1,
-                mb: 2,
-                ml: 1,
-                pl: 1,
-                borderLeft: "4px solid #eee",
+          <Box sx={{ pb: 2, pl: 3, mb: 2, mt: 2 }}>
+            <HTMLEditor
+              initialHTML={quali}
+              onSave={async (newQuali: string | null) => {
+                setQuali(newQuali || "");
+                mutation.mutate({
+                  cr4de_riskfilesid: riskFile._cr4de_risk_file_value,
+                  cr4de_quali: serializeRiskQualis({
+                    ...riskFile.cr4de_quali,
+                    [scenario]: {
+                      ...riskFile.cr4de_quali[scenario],
+                      dp: newQuali,
+                    },
+                  }),
+                });
               }}
             />
 

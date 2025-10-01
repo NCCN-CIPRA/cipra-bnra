@@ -1,13 +1,16 @@
 import { IntensityParameter } from "../../functions/intensityParameters";
 import { Scenarios, SCENARIOS } from "../../functions/scenarios";
-import { RISK_CATEGORY, RISK_TYPE } from "./Riskfile";
+import {
+  parseRiskQualis,
+  RISK_CATEGORY,
+  RISK_TYPE,
+  RiskQualis,
+  RiskQualiType,
+  SerializedRiskQualis,
+} from "./Riskfile";
 
 export type SerializedRiskSnapshotResults = string & {
   __json_seralized: RiskSnapshotResults;
-};
-
-export type SerializedRiskSnapshotQualis = string & {
-  __json_seralized: RiskSnapshotQualis;
 };
 
 export type SerializedRiskSnapshotScenarios = string & {
@@ -18,12 +21,6 @@ export function serializeRiskSnapshotResults(
   quanti: RiskSnapshotResults
 ): SerializedRiskSnapshotResults {
   return JSON.stringify(quanti) as SerializedRiskSnapshotResults;
-}
-
-export function serializeRiskSnapshotQualis(
-  quali: RiskSnapshotQualis
-): SerializedRiskSnapshotQualis {
-  return JSON.stringify(quali) as SerializedRiskSnapshotQualis;
 }
 
 export function serializeRiskSnapshotScenarios(
@@ -42,12 +39,18 @@ export function parseRiskSnapshot<T>(
 }
 
 export function parseRiskSnapshotQuali<T, S>(
-  snapshot: DVRiskSnapshot<T, S, SerializedRiskSnapshotQualis>
-): DVRiskSnapshot<T, S, RiskSnapshotQualis> {
+  snapshot: DVRiskSnapshot<T, S, SerializedRiskQualis>
+): DVRiskSnapshot<T, S, RiskQualis> {
   return {
     ...snapshot,
-    cr4de_quali: JSON.parse(snapshot.cr4de_quali),
+    cr4de_quali: parseRiskQualis(snapshot.cr4de_quali),
   };
+}
+
+export function parseRiskSnapshotScenarios(
+  scenarios: SerializedRiskSnapshotScenarios | null
+): Scenarios {
+  return JSON.parse(scenarios || "") as Scenarios;
 }
 
 export type DVRiskSnapshotQuantiType =
@@ -55,16 +58,10 @@ export type DVRiskSnapshotQuantiType =
   | SerializedRiskSnapshotResults
   | RiskSnapshotResults;
 
-export type DVRiskSnapshotQualiType =
-  | never
-  | unknown
-  | SerializedRiskSnapshotQualis
-  | RiskSnapshotQualis;
-
 export type DVRiskSnapshot<
   RiskFileType = unknown,
   QuantiType extends DVRiskSnapshotQuantiType = RiskSnapshotResults,
-  QualiType extends DVRiskSnapshotQualiType = SerializedRiskSnapshotQualis
+  QualiType extends RiskQualiType = SerializedRiskQualis
 > = {
   cr4de_bnrariskfilesnapshotid: string;
 
@@ -259,19 +256,4 @@ export type RiskSnapshotScenarioResults = {
       abs: number; // Absolute impact in €
     };
   };
-};
-
-export type RiskSnapshotQualis = {
-  [SCENARIOS.CONSIDERABLE]: RiskSnapshotScenarioQualis;
-  [SCENARIOS.MAJOR]: RiskSnapshotScenarioQualis;
-  [SCENARIOS.EXTREME]: RiskSnapshotScenarioQualis;
-};
-
-export type RiskSnapshotScenarioQualis = {
-  dp: string;
-  h: string;
-  s: string;
-  e: string;
-  f: string;
-  cb: string;
 };

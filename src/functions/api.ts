@@ -11,6 +11,7 @@ import { DVValidation } from "../types/dataverse/DVValidation";
 import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
 import {
   ParsedRiskFields,
+  SerializedRiskQualis,
   UnparsedRiskFields,
 } from "../types/dataverse/Riskfile";
 import { unwrap as unwrapHE } from "./historicalEvents";
@@ -23,7 +24,6 @@ import { DVAnalysisRun } from "../types/dataverse/DVAnalysisRun";
 import { getCascadeResultSnapshot } from "./snapshot";
 import {
   DVRiskSnapshot,
-  SerializedRiskSnapshotQualis,
   SerializedRiskSnapshotResults,
 } from "../types/dataverse/DVRiskSnapshot";
 import {
@@ -98,7 +98,7 @@ export interface API {
       DVRiskSnapshot<
         unknown,
         SerializedRiskSnapshotResults,
-        SerializedRiskSnapshotQualis
+        SerializedRiskQualis
       >
     >
   ): Promise<CreateResponse>;
@@ -108,7 +108,7 @@ export interface API {
       DVRiskSnapshot<
         unknown,
         SerializedRiskSnapshotResults,
-        SerializedRiskSnapshotQualis
+        SerializedRiskQualis
       >
     >
   ): Promise<void>;

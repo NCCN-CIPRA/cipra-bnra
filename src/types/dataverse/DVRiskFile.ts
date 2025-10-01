@@ -1,6 +1,10 @@
 import { SCENARIOS } from "../../functions/scenarios";
 import { DiscussionRequired } from "../DiscussionRequired";
-import { SerializedScenario } from "./Riskfile";
+import {
+  RiskQualiType,
+  SerializedRiskQualis,
+  SerializedScenario,
+} from "./Riskfile";
 
 export type DP_FIELD = "dp";
 export type DI_FIELD =
@@ -124,8 +128,10 @@ export interface DiscussionsRequired {
   cb: DiscussionRequired;
 }
 
-export interface DVRiskFile<CalculationType = unknown>
-  extends RiskFileEditableFields {
+export interface DVRiskFile<
+  CalculationType = unknown,
+  QualiType extends RiskQualiType = SerializedRiskQualis
+> extends RiskFileEditableFields {
   cr4de_riskfilesid: string;
   cr4de_hazard_id: string;
 
@@ -248,6 +254,8 @@ export interface DVRiskFile<CalculationType = unknown>
 
   cr4de_result_snapshot: string | null;
   results?: RESULT_SNAPSHOT | null;
+
+  cr4de_quali: QualiType;
 
   createdon: string;
   modifiedon: string;

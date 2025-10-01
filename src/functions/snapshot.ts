@@ -27,14 +27,17 @@ import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import {
   DVRiskSnapshot,
   parseRiskSnapshot,
-  SerializedRiskSnapshotQualis,
   SerializedRiskSnapshotResults,
-  serializeRiskSnapshotQualis,
   serializeRiskSnapshotResults,
   serializeRiskSnapshotScenarios,
 } from "../types/dataverse/DVRiskSnapshot";
 import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
-import { RISK_TYPE, UnparsedRiskFields } from "../types/dataverse/Riskfile";
+import {
+  RISK_TYPE,
+  SerializedRiskQualis,
+  serializeRiskQualis,
+  UnparsedRiskFields,
+} from "../types/dataverse/Riskfile";
 import { getCPMatrixFromOldFormat } from "./analysis/cp";
 import {
   Cascades,
@@ -76,7 +79,7 @@ export function updateSnapshots(
   riskSnapshots: DVRiskSnapshot<
     unknown,
     SerializedRiskSnapshotResults,
-    SerializedRiskSnapshotQualis
+    SerializedRiskQualis
   >[],
   cascadesSnapshots: DVCascadeSnapshot<
     unknown,
@@ -92,11 +95,7 @@ export function updateSnapshots(
 ): {
   updatedSummaries: Partial<DVRiskSummary<unknown, UnparsedRiskFields>>[];
   updatedRiskSnapshots: Partial<
-    DVRiskSnapshot<
-      unknown,
-      SerializedRiskSnapshotResults,
-      SerializedRiskSnapshotQualis
-    >
+    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
   >[];
   updatedCascadesSnapshots: Partial<
     DVCascadeSnapshot<
@@ -112,21 +111,13 @@ export function updateSnapshots(
   const newSummaries: Partial<DVRiskSummary<unknown, UnparsedRiskFields>>[] =
     [];
   const newRiskSnapshots: Partial<
-    DVRiskSnapshot<
-      unknown,
-      SerializedRiskSnapshotResults,
-      SerializedRiskSnapshotQualis
-    >
+    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
   >[] = [];
   const updatedSummaries: Partial<
     DVRiskSummary<unknown, UnparsedRiskFields>
   >[] = [];
   const updatedRiskSnapshots: Partial<
-    DVRiskSnapshot<
-      unknown,
-      SerializedRiskSnapshotResults,
-      SerializedRiskSnapshotQualis
-    >
+    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
   >[] = [];
   const cascadeSnapshotDict: {
     [cascadeId: string]: Partial<
@@ -201,7 +192,7 @@ function updateSnapshot(
   riskSnapshots: DVRiskSnapshot<
     unknown,
     SerializedRiskSnapshotResults,
-    SerializedRiskSnapshotQualis
+    SerializedRiskQualis
   >[],
   cascadesSnapshots: {
     [cascadeId: string]: Partial<
@@ -224,11 +215,7 @@ function updateSnapshot(
       (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid
     ) || {};
   const existingSnapshot: Partial<
-    DVRiskSnapshot<
-      unknown,
-      SerializedRiskSnapshotResults,
-      SerializedRiskSnapshotQualis
-    >
+    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
   > =
     riskSnapshots.find(
       (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid
@@ -1126,7 +1113,11 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
 }
 
 function getSerializedQualiResults(riskFile: DVRiskFile) {
-  return serializeRiskSnapshotQualis({
+  if (riskFile.cr4de_quali !== null || riskFile.cr4de_quali !== "") {
+    return riskFile.cr4de_quali;
+  }
+
+  return serializeRiskQualis({
     considerable: {
       dp: riskFile.cr4de_dp_quali_c || "",
       h: riskFile.cr4de_di_quali_h_c || "",
@@ -1313,7 +1304,7 @@ export function snapshotFromRiskfile(
 ): DVRiskSnapshot<
   DVRiskFile,
   SerializedRiskSnapshotResults,
-  SerializedRiskSnapshotQualis
+  SerializedRiskQualis
 > {
   return {
     cr4de_bnrariskfilesnapshotid: "",
