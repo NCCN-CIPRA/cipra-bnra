@@ -33,6 +33,9 @@ import { TableHeader } from "@tiptap/extension-table-header";
 import { TableRow } from "@tiptap/extension-table-row";
 import { RefObject, useRef, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
+import { UserRoles } from "../functions/authRoles";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../pages/BasePage";
 
 function EditorMenuControls() {
   return (
@@ -121,13 +124,14 @@ function Editor({
 
 export default function HTMLEditor({
   initialHTML,
-  canEdit = false,
+  editableRole = "analist",
   onSave,
 }: {
   initialHTML: string;
-  canEdit?: boolean;
-  onSave: (newHTML: string | null) => Promise<unknown>;
+  editableRole?: keyof UserRoles;
+  onSave: (newHTML: string | null) => unknown;
 }) {
+  const { user } = useOutletContext<BasePageContext>();
   const [isEditing, setIsEditing] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
   const editorRef = useRef<RichTextEditorRef>(null);
@@ -171,7 +175,7 @@ export default function HTMLEditor({
       onMouseEnter={handlePopoverOpen}
       onMouseLeave={handlePopoverClose}
     >
-      {canEdit && (
+      {user?.roles[editableRole] && (
         <Box
           sx={{
             position: "absolute",

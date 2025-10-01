@@ -49,41 +49,36 @@ const AccordionDetails = styled(MuiAccordionDetails)(() => ({
 export default function RiskDataAccordion({
   title,
   initialOpen = false,
+  disabled = false,
   children,
 }: {
   title: ReactNode;
   initialOpen?: boolean;
+  disabled?: boolean;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(initialOpen);
 
   return (
-    <Accordion expanded={open} TransitionProps={{ unmountOnExit: true }}>
+    <Accordion
+      expanded={open}
+      // disabled={disabled}
+      sx={{ pageBreakInside: "avoid" }}
+    >
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         onClick={() => setOpen(!open)}
       >
-        <Box sx={{ flex: 1 }}>{title}</Box>
-        {/* {user.roles.analist &&
-          discussionRequired === DiscussionRequired.REQUIRED && (
-            <Tooltip title="The input received for this section was divergent and may require further discussion">
-              <ErrorIcon color="warning" />
-            </Tooltip>
-          )}
-        {user.roles.analist &&
-          discussionRequired === DiscussionRequired.PREFERRED && (
-            <Tooltip title="The input received for this section was divergent and may require further discussion">
-              <ErrorIcon color="info" />
-            </Tooltip>
-          )}
-        {user.roles.analist &&
-          discussionRequired === DiscussionRequired.RESOLVED && (
-            <Tooltip title="The input received for this section was divergent and may require further discussion">
-              <CheckCircleIcon color="success" />
-            </Tooltip>
-          )} */}
+        <Box sx={{ flex: 1, opacity: disabled ? 0.4 : 1 }}>{title}</Box>
       </AccordionSummary>
-      <AccordionDetails>{children}</AccordionDetails>
+      <AccordionDetails
+        sx={{
+          opacity: disabled ? 0.4 : 1,
+          pointerEvents: disabled ? "none" : "auto",
+        }}
+      >
+        {children}
+      </AccordionDetails>
     </Accordion>
   );
 }

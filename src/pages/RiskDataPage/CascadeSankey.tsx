@@ -7,8 +7,7 @@ import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { LinkProps, NodeProps } from "recharts/types/chart/Sankey";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
-import { Box, Button, Slider, Stack, Typography } from "@mui/material";
-import { IntensityParameter } from "../../functions/intensityParameters";
+import { Box, Button, Slider, Typography } from "@mui/material";
 import { SankeyLink, SankeyNode } from "recharts/types/util/types";
 import {
   getIntervalStringMScale3,
@@ -32,6 +31,7 @@ import {
   getIntervalStringCPScale5,
   getIntervalStringCPScale7,
 } from "../../functions/indicators/cp";
+import ScenarioDescription from "../../components/ScenarioDescription";
 
 const scenarioHeight = 1000;
 
@@ -51,27 +51,6 @@ interface ScenarioSankeyLink extends SankeyLink {
   effectScenario: SCENARIOS;
   cpValue: number;
 }
-
-const ScenarioText = ({
-  scenario,
-}: {
-  scenario: IntensityParameter<string>[];
-}) => {
-  return (
-    <Stack direction="column" sx={{ bgcolor: "white" }}>
-      {scenario.map((p) => (
-        <>
-          {p.name && (
-            <Typography variant="body1" sx={{ mt: 2 }}>
-              <b>{p.name}:</b>
-            </Typography>
-          )}
-          <Box dangerouslySetInnerHTML={{ __html: p.value || "" }} />
-        </>
-      ))}
-    </Stack>
-  );
-};
 
 const getLinkProps = (
   cpMatrix: CPMatrix,
@@ -118,7 +97,7 @@ export default function CascadeSankey({
       });
     },
   });
-  console.log(cascade);
+
   const causeScenarios = JSON.parse(cause.cr4de_scenarios || "");
   const effectScenarios = JSON.parse(effect.cr4de_scenarios || "");
 
@@ -185,7 +164,9 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
           align: "left",
           description: (
-            <ScenarioText scenario={JSON.parse(causeScenarios.considerable)} />
+            <ScenarioDescription
+              parameters={JSON.parse(causeScenarios.considerable)}
+            />
           ),
         },
         {
@@ -194,7 +175,9 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
           align: "left",
           description: (
-            <ScenarioText scenario={JSON.parse(causeScenarios.major)} />
+            <ScenarioDescription
+              parameters={JSON.parse(causeScenarios.major)}
+            />
           ),
         },
         {
@@ -203,7 +186,9 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
           align: "left",
           description: (
-            <ScenarioText scenario={JSON.parse(causeScenarios.extreme)} />
+            <ScenarioDescription
+              parameters={JSON.parse(causeScenarios.extreme)}
+            />
           ),
           bottom: true,
         },
@@ -213,7 +198,9 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.CONSIDERABLE].color,
           align: "right",
           description: (
-            <ScenarioText scenario={JSON.parse(effectScenarios.considerable)} />
+            <ScenarioDescription
+              parameters={JSON.parse(effectScenarios.considerable)}
+            />
           ),
         },
         {
@@ -222,7 +209,9 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.MAJOR].color,
           align: "right",
           description: (
-            <ScenarioText scenario={JSON.parse(effectScenarios.major)} />
+            <ScenarioDescription
+              parameters={JSON.parse(effectScenarios.major)}
+            />
           ),
         },
         {
@@ -231,7 +220,9 @@ export default function CascadeSankey({
           color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color,
           align: "right",
           description: (
-            <ScenarioText scenario={JSON.parse(effectScenarios.extreme)} />
+            <ScenarioDescription
+              parameters={JSON.parse(effectScenarios.extreme)}
+            />
           ),
           bottom: true,
         },

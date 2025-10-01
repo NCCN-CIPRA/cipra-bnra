@@ -28,7 +28,7 @@ import {
   getAverageIndirectProbability,
 } from "../../functions/Probability";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
-import { CascadeSection } from "./CascadeSection";
+import { CascadeSection, VISUALS } from "./CascadeSection";
 import { DirectSection } from "./DirectSection";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../BasePage";
@@ -76,12 +76,14 @@ export default function Attack({
   effects,
   catalyzingEffects,
   climateChange,
+  visuals,
 }: {
   riskFile: DVRiskSnapshot;
   causes: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   effects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[];
   catalyzingEffects: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
+  visuals: VISUALS;
 }) {
   const { environment } = useOutletContext<BasePageContext>();
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
@@ -116,6 +118,8 @@ export default function Attack({
             cause={ca.cr4de_cause_risk}
             effect={riskFile}
             cascade={ca}
+            visuals={visuals}
+            disabled={true}
             subtitle={
               <Typography variant="body1" color="warning">
                 <b>
@@ -197,6 +201,7 @@ export default function Attack({
                 cause={ca.cr4de_cause_risk}
                 effect={riskFile}
                 cascade={ca}
+                visuals={visuals}
                 subtitle={
                   <Typography variant="body1" color="warning">
                     <b>
@@ -225,6 +230,7 @@ export default function Attack({
                 cause={riskFile}
                 effect={e.cascade.cr4de_effect_risk}
                 cascade={e.cascade}
+                visuals={visuals}
                 subtitle={
                   <Typography variant="body1" color="warning">
                     <b>{Math.round(10000 * e.i) / 100}%</b> of expected impact

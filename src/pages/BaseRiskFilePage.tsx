@@ -277,6 +277,7 @@ export default function BaseRiskFilePage() {
           left: 0,
           right: 0,
           zIndex: 1201,
+          displayPrint: "none",
         }}
         elevation={3}
       >

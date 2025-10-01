@@ -27,7 +27,7 @@ import {
   getAverageDirectProbability,
   getAverageIndirectProbability,
 } from "../../functions/Probability";
-import { CascadeSection } from "./CascadeSection";
+import { CascadeSection, VISUALS } from "./CascadeSection";
 import { DirectSection } from "./DirectSection";
 
 const Accordion = styled((props: AccordionProps) => (
@@ -72,12 +72,14 @@ export default function Standard({
   effects,
   catalyzingEffects,
   climateChange,
+  visuals,
 }: {
   riskFile: DVRiskSnapshot;
   causes: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   effects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[];
   catalyzingEffects: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
+  visuals: VISUALS;
 }) {
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
 
@@ -97,6 +99,7 @@ export default function Standard({
           cause={ca.cr4de_cause_risk}
           effect={riskFile}
           cascade={ca}
+          visuals={visuals}
           subtitle={
             <Typography variant="body1" color="warning">
               <b>
@@ -162,6 +165,7 @@ export default function Standard({
                 cause={riskFile}
                 effect={ca.cr4de_effect_risk}
                 cascade={ca}
+                visuals={visuals}
                 subtitle={
                   <Typography variant="body1" color="warning">
                     <b>

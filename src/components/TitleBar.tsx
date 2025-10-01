@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
+import { IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Trans, useTranslation } from "react-i18next";
@@ -131,233 +131,253 @@ export default function TitleBar({
               </Typography>
             )}
             {user?.realRoles?.analist && (
-              <Box sx={{ flexGrow: 0, mr: 1 }}>
-                <Tooltip title="Settings">
-                  <IconButton color="inherit" onClick={handleOpenSettingsMenu}>
-                    <SettingsIcon />
-                  </IconButton>
-                </Tooltip>
-                <Menu
-                  sx={{ mt: "45px" }}
-                  id="menu-settings"
-                  anchorEl={anchorElSettings}
-                  anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
+              <>
+                <Box sx={{ flexGrow: 0, mr: 0 }}>
+                  <Tooltip title="Settings">
+                    <IconButton
+                      color="inherit"
+                      onClick={handleOpenSettingsMenu}
+                    >
+                      <SettingsIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Menu
+                    sx={{ mt: "45px" }}
+                    id="menu-settings"
+                    anchorEl={anchorElSettings}
+                    anchorOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    open={Boolean(anchorElSettings)}
+                    onClose={handleCloseMenus}
+                  >
+                    <MenuItem onMouseEnter={handleOpenRoleMenu}>
+                      <Typography sx={{ textAlign: "left", flex: 1 }}>
+                        User Role:
+                      </Typography>
+                      <Typography variant="body2" sx={{ pl: 2 }}>
+                        {getRoleDisplay()}
+                      </Typography>
+                      <Menu
+                        id="menu-role"
+                        sx={{ top: -8, left: -10 }}
+                        anchorEl={anchorElRole}
+                        anchorOrigin={{
+                          vertical: "top",
+                          horizontal: "left",
+                        }}
+                        keepMounted
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "right",
+                        }}
+                        open={Boolean(anchorElRole)}
+                        onClose={handleCloseMenus}
+                        slotProps={{
+                          root: { sx: { pointerEvents: "none" } },
+                          paper: { sx: { pointerEvents: "auto" } },
+                        }}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            setRole("Beheerders");
+                            setFakeRole("Beheerders");
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            Admin
+                          </Typography>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setRole("Analisten");
+                            setFakeRole("Analisten");
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            Analist
+                          </Typography>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setRole("Intern NCCN");
+                            setFakeRole("Intern NCCN");
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            Intern NCCN
+                          </Typography>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setRole("Experten");
+                            setFakeRole("Experten");
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            Expert
+                          </Typography>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setRole("Geverifieerde gebruikers");
+                            setFakeRole("Geverifieerde gebruikers");
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            Rapport Lezer
+                          </Typography>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setRole("Anonymous");
+                            setFakeRole("Anonymous");
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            Anoniem
+                          </Typography>
+                        </MenuItem>
+                      </Menu>
+                    </MenuItem>
+                    <MenuItem onMouseEnter={handleOpenEnvMenu}>
+                      <Typography sx={{ textAlign: "left", flex: 1 }}>
+                        Environment:
+                      </Typography>
+                      <Typography variant="body2" sx={{ pl: 2 }}>
+                        {environment}
+                      </Typography>
+
+                      <Menu
+                        id="menu-env"
+                        sx={{ top: -8, left: -10 }}
+                        anchorEl={anchorElEnv}
+                        anchorOrigin={{
+                          vertical: "top",
+                          horizontal: "left",
+                        }}
+                        keepMounted
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "right",
+                        }}
+                        open={Boolean(anchorElEnv)}
+                        onClose={handleCloseMenus}
+                        slotProps={{
+                          root: { sx: { pointerEvents: "none" } },
+                          paper: { sx: { pointerEvents: "auto" } },
+                        }}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            setEnvironment(Environment.PUBLIC);
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            Public - Static data
+                          </Typography>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setEnvironment(Environment.DYNAMIC);
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            CIPRA Only - Dynamic data
+                          </Typography>
+                        </MenuItem>
+                      </Menu>
+                    </MenuItem>
+                    <MenuItem onMouseEnter={handleOpenIndMenu}>
+                      <Typography sx={{ textAlign: "left", flex: 1 }}>
+                        Indicators:
+                      </Typography>
+                      <Typography variant="body2" sx={{ pl: 2 }}>
+                        {indicators}
+                      </Typography>
+
+                      <Menu
+                        id="menu-ind"
+                        sx={{ top: -8, left: -10 }}
+                        anchorEl={anchorElInd}
+                        anchorOrigin={{
+                          vertical: "top",
+                          horizontal: "left",
+                        }}
+                        keepMounted
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "right",
+                        }}
+                        open={Boolean(anchorElInd)}
+                        onClose={handleCloseMenus}
+                        slotProps={{
+                          root: { sx: { pointerEvents: "none" } },
+                          paper: { sx: { pointerEvents: "auto" } },
+                        }}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            setIndicators(Indicators.V1);
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            V1 - 5 point scales
+                          </Typography>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setIndicators(Indicators.V2);
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            V2 - 7 point scales
+                          </Typography>
+                        </MenuItem>
+                      </Menu>
+                    </MenuItem>
+                    <MenuItem disabled>
+                      <Typography sx={{ textAlign: "left", flex: 1 }}>
+                        Data Diff:
+                      </Typography>
+                      <Typography variant="body2" sx={{ pl: 2 }}>
+                        disabled
+                      </Typography>
+                    </MenuItem>
+                  </Menu>
+                </Box>
+                <Stack
+                  direction="column"
+                  sx={{
+                    mr: 1,
+                    height: "100%",
+                    justifyContent: "center",
                   }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  open={Boolean(anchorElSettings)}
-                  onClose={handleCloseMenus}
                 >
-                  <MenuItem onMouseEnter={handleOpenRoleMenu}>
-                    <Typography sx={{ textAlign: "left", flex: 1 }}>
-                      User Role:
-                    </Typography>
-                    <Typography variant="body2" sx={{ pl: 2 }}>
-                      {getRoleDisplay()}
-                    </Typography>
-                    <Menu
-                      id="menu-role"
-                      sx={{ top: -8, left: -10 }}
-                      anchorEl={anchorElRole}
-                      anchorOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
-                      }}
-                      keepMounted
-                      transformOrigin={{
-                        vertical: "top",
-                        horizontal: "right",
-                      }}
-                      open={Boolean(anchorElRole)}
-                      onClose={handleCloseMenus}
-                      slotProps={{
-                        root: { sx: { pointerEvents: "none" } },
-                        paper: { sx: { pointerEvents: "auto" } },
-                      }}
-                    >
-                      <MenuItem
-                        onClick={() => {
-                          setRole("Beheerders");
-                          setFakeRole("Beheerders");
-                          handleCloseMenus();
-                        }}
-                      >
-                        <Typography sx={{ textAlign: "center" }}>
-                          Admin
-                        </Typography>
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          setRole("Analisten");
-                          setFakeRole("Analisten");
-                          handleCloseMenus();
-                        }}
-                      >
-                        <Typography sx={{ textAlign: "center" }}>
-                          Analist
-                        </Typography>
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          setRole("Intern NCCN");
-                          setFakeRole("Intern NCCN");
-                          handleCloseMenus();
-                        }}
-                      >
-                        <Typography sx={{ textAlign: "center" }}>
-                          Intern NCCN
-                        </Typography>
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          setRole("Experten");
-                          setFakeRole("Experten");
-                          handleCloseMenus();
-                        }}
-                      >
-                        <Typography sx={{ textAlign: "center" }}>
-                          Expert
-                        </Typography>
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          setRole("Geverifieerde gebruikers");
-                          setFakeRole("Geverifieerde gebruikers");
-                          handleCloseMenus();
-                        }}
-                      >
-                        <Typography sx={{ textAlign: "center" }}>
-                          Rapport Lezer
-                        </Typography>
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          setRole("Anonymous");
-                          setFakeRole("Anonymous");
-                          handleCloseMenus();
-                        }}
-                      >
-                        <Typography sx={{ textAlign: "center" }}>
-                          Anoniem
-                        </Typography>
-                      </MenuItem>
-                    </Menu>
-                  </MenuItem>
-                  <MenuItem onMouseEnter={handleOpenEnvMenu}>
-                    <Typography sx={{ textAlign: "left", flex: 1 }}>
-                      Environment:
-                    </Typography>
-                    <Typography variant="body2" sx={{ pl: 2 }}>
-                      {environment}
-                    </Typography>
-
-                    <Menu
-                      id="menu-env"
-                      sx={{ top: -8, left: -10 }}
-                      anchorEl={anchorElEnv}
-                      anchorOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
-                      }}
-                      keepMounted
-                      transformOrigin={{
-                        vertical: "top",
-                        horizontal: "right",
-                      }}
-                      open={Boolean(anchorElEnv)}
-                      onClose={handleCloseMenus}
-                      slotProps={{
-                        root: { sx: { pointerEvents: "none" } },
-                        paper: { sx: { pointerEvents: "auto" } },
-                      }}
-                    >
-                      <MenuItem
-                        onClick={() => {
-                          setEnvironment(Environment.PUBLIC);
-                          handleCloseMenus();
-                        }}
-                      >
-                        <Typography sx={{ textAlign: "center" }}>
-                          Public - Static data
-                        </Typography>
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          setEnvironment(Environment.DYNAMIC);
-                          handleCloseMenus();
-                        }}
-                      >
-                        <Typography sx={{ textAlign: "center" }}>
-                          CIPRA Only - Dynamic data
-                        </Typography>
-                      </MenuItem>
-                    </Menu>
-                  </MenuItem>
-                  <MenuItem onMouseEnter={handleOpenIndMenu}>
-                    <Typography sx={{ textAlign: "left", flex: 1 }}>
-                      Indicators:
-                    </Typography>
-                    <Typography variant="body2" sx={{ pl: 2 }}>
-                      {indicators}
-                    </Typography>
-
-                    <Menu
-                      id="menu-ind"
-                      sx={{ top: -8, left: -10 }}
-                      anchorEl={anchorElInd}
-                      anchorOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
-                      }}
-                      keepMounted
-                      transformOrigin={{
-                        vertical: "top",
-                        horizontal: "right",
-                      }}
-                      open={Boolean(anchorElInd)}
-                      onClose={handleCloseMenus}
-                      slotProps={{
-                        root: { sx: { pointerEvents: "none" } },
-                        paper: { sx: { pointerEvents: "auto" } },
-                      }}
-                    >
-                      <MenuItem
-                        onClick={() => {
-                          setIndicators(Indicators.V1);
-                          handleCloseMenus();
-                        }}
-                      >
-                        <Typography sx={{ textAlign: "center" }}>
-                          V1 - 5 point scales
-                        </Typography>
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          setIndicators(Indicators.V2);
-                          handleCloseMenus();
-                        }}
-                      >
-                        <Typography sx={{ textAlign: "center" }}>
-                          V2 - 7 point scales
-                        </Typography>
-                      </MenuItem>
-                    </Menu>
-                  </MenuItem>
-                  <MenuItem disabled>
-                    <Typography sx={{ textAlign: "left", flex: 1 }}>
-                      Data Diff:
-                    </Typography>
-                    <Typography variant="body2" sx={{ pl: 2 }}>
-                      disabled
-                    </Typography>
-                  </MenuItem>
-                </Menu>
-              </Box>
+                  <Typography variant="subtitle2" fontSize={10}>
+                    {environment === Environment.PUBLIC ? "P" : "D"}
+                  </Typography>
+                  <Typography variant="subtitle2" fontSize={10}>
+                    {indicators === Indicators.V1 ? "1" : "2"}
+                  </Typography>
+                </Stack>
+              </>
             )}
             <Box sx={{ flexGrow: 0, mr: 4 }}>
               <Tooltip title="Language">

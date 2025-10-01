@@ -11,18 +11,20 @@ import {
   getAverageIndirectImpact,
   getAverageIndirectImpactDynamic,
 } from "../../functions/Impact";
-import { CascadeSection } from "./CascadeSection";
+import { CascadeSection, VISUALS } from "./CascadeSection";
 import { Environment } from "../../types/global";
 
 export default function ManMade({
   riskFile,
   effects,
   catalyzingEffects,
+  visuals,
 }: {
   riskFile: DVRiskSnapshot;
   effects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[];
   catalyzingEffects: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
+  visuals: VISUALS;
 }) {
   const { environment } = useOutletContext<BasePageContext>();
 
@@ -55,6 +57,7 @@ export default function ManMade({
                 cause={riskFile}
                 effect={e.cascade.cr4de_effect_risk}
                 cascade={e.cascade}
+                visuals={visuals}
                 subtitle={
                   <Typography variant="body1" color="warning">
                     <b>{Math.round(10000 * e.i) / 100}%</b> of expected impact

@@ -20,6 +20,9 @@ const fontValues = [
 ];
 const headerValues = [false, 1, 2, 3, 4, 5];
 */
+/**
+ * @deprecated No longer supporting any functionality. Use HTMLEditor instead
+ */
 function TextInputBox({
   initialValue,
 }: {
