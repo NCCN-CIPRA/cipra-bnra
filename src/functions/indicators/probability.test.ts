@@ -5,6 +5,8 @@ import {
   pScale5FromReturnPeriodMonths,
   pScale7FromReturnPeriodMonths,
   pScale5to7,
+  pDailyFromReturnPeriodMonths,
+  returnPeriodMonthsFromPDaily,
 } from "./probability"; // Adjust import path as needed
 
 describe("P5-Scale Conversion Functions", () => {
@@ -125,6 +127,29 @@ describe("P7-Scale Conversion Functions", () => {
           100000
         )
       ).toBeCloseTo(3.2, 2);
+    });
+  });
+});
+
+describe("Return Period to Daily Probability Functions", () => {
+  describe("pDaily calculations", () => {
+    test("pDaily should return expected values", () => {
+      expect(pDailyFromReturnPeriodMonths(1)).toBeCloseTo(0.03278, 3);
+      expect(pDailyFromReturnPeriodMonths(12)).toBeCloseTo(0.00277, 4);
+      expect(pDailyFromReturnPeriodMonths(1000)).toBeCloseTo(3.3 * 10 ** -5, 6);
+    });
+  });
+
+  describe("Round-trip conversions", () => {
+    test("RP -> pDaily -> RP should be identity", () => {
+      expect(
+        returnPeriodMonthsFromPDaily(pDailyFromReturnPeriodMonths(10))
+      ).toBeCloseTo(10);
+    });
+    test("pDaily -> RP -> pDaily should be identity", () => {
+      expect(
+        pDailyFromReturnPeriodMonths(returnPeriodMonthsFromPDaily(0.00005))
+      ).toBeCloseTo(0.00005, 5);
     });
   });
 });

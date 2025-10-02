@@ -112,99 +112,172 @@ export type RiskSnapshotResults = {
 
 export type RiskSnapshotScenarioResults = {
   tp: {
+    // Deprecated
     yearly: {
       scale: number; // Total probability of the scenario on the tp scale (0 - 5)
     };
+
+    scale5TP: number; // Total probability of the scenario on the tp scale (0 - 5.5)
+    rpMonths: number; // Return period in months
   };
   tp50: {
+    // Depreacted
     yearly: {
       scale: number; // Total probability of the scenario on the tp scale (0 - 5)
     };
+
+    scale5TP: number; // Total probability of the scenario on the tp scale (0 - 5.5)
+    rpMonths: number; // Return period in months
   };
+  // Depreacted
   m: {
     p: number; // Absolute probability
     scale: number; // Motivation of the actor on the m scale (0 - 3)
     scaleTot: number; // Direct probability of the scenario on the tp scale (0 - 5)
   };
   dp: {
-    rp: number; // Return period
+    // Deprecated
     scale: number; // Direct probability of the scenario on the dp scale (0 - 5)
+    // Deprecated
     scaleTot: number; // Direct probability of the scenario on the tp scale (0 - 5)
+
+    rpMonths: number; // Return period
+    scale5TP: number; // Direct probability of the scenario on the old tp scale (0 - 5.5)
+    scale5: number; // // Direct probability of the scenario on the old dp scale (0 - 5.5)
   };
   dp50: {
-    rp: number; // Return period
+    // Deprecated
     scale: number; // Direct probability of the scenario on the dp scale (0 - 5)
+    // Deprecated
     scaleTot: number; // Direct probability of the scenario on the tp scale (0 - 5)
+
+    rpMonths: number; // Return period
+    scale5TP: number; // Direct probability of the scenario on the old tp scale (0 - 5.5)
+    scale5: number; // // Direct probability of the scenario on the old dp scale (0 - 5.5)
   };
   ti: {
     all: {
+      // Deprecated
       scaleTot: number; // Total impact of the scenario on the ti scale (0 - 5)
+      scale5TI: number; // Total impact of the scenario on the ti scale (0 - 5.5)
+      euros: number; // Total impact on an absolute scale (€)
     };
     h: {
+      // Deprecated
       scaleTot: number; // Total human impact of the scenario on the ti scale (0 - 5)
       scaleCat: number; // Total human impact of the scenario on the human impact category scale (0 - 5)
+
+      scale5TI: number; // Total human impact of the scenario on the old ti scale (0 - 5.5)
+      scale5Cat: number; // Total human impact of the scenario on the old human impact category scale (0 - 5.5)
+      euros: number; // Total absolute human impact of the scenario in euros
     };
     ha: {
+      // Deprecated
       scaleTot: number; // Total Ha impact of the scenario on the ti scale (0 - 5)
+      // Deprecated
       scaleCatRel: number; // Percentage of H impact that is due to Ha (0 - 1)
+      // Deprecated
       abs: number; // Total Ha impact on an absolute scale (€)
+
+      scale5TI: number; // Total Ha impact of the scenario on the ti scale (0 - 5.5)
+      scale5CatRel: number; // Percentage of H impact that is due to Ha (0 - 1)
+      euros: number; // Total Ha impact on an absolute scale (€)
     };
     hb: {
       scaleTot: number;
       scaleCatRel: number;
       abs: number;
+      scale5TI: number;
+      scale5CatRel: number;
+      euros: number;
     };
     hc: {
       scaleTot: number;
       scaleCatRel: number;
       abs: number;
+      scale5TI: number;
+      scale5CatRel: number;
+      euros: number;
     };
     s: {
       scaleTot: number;
       scaleCat: number;
+
+      scale5TI: number;
+      scale5Cat: number;
+      euros: number;
     };
     sa: {
       scaleTot: number;
       scaleCatRel: number;
       abs: number;
+      scale5TI: number;
+      scale5CatRel: number;
+      euros: number;
     };
     sb: {
       scaleTot: number;
       scaleCatRel: number;
       abs: number;
+      scale5TI: number;
+      scale5CatRel: number;
+      euros: number;
     };
     sc: {
       scaleTot: number;
       scaleCatRel: number;
       abs: number;
+      scale5TI: number;
+      scale5CatRel: number;
+      euros: number;
     };
     sd: {
       scaleTot: number;
       scaleCatRel: number;
       abs: number;
+      scale5TI: number;
+      scale5CatRel: number;
+      euros: number;
     };
     e: {
       scaleTot: number;
       scaleCat: number;
+
+      scale5TI: number;
+      scale5Cat: number;
+      euros: number;
     };
     ea: {
       scaleTot: number;
       scaleCatRel: number;
       abs: number;
+      scale5TI: number;
+      scale5CatRel: number;
+      euros: number;
     };
     f: {
       scaleTot: number;
       scaleCat: number;
+
+      scale5TI: number;
+      scale5Cat: number;
+      euros: number;
     };
     fa: {
       scaleTot: number;
       scaleCatRel: number;
       abs: number;
+      scale5TI: number;
+      scale5CatRel: number;
+      euros: number;
     };
     fb: {
       scaleTot: number;
       scaleCatRel: number;
       abs: number;
+      scale5TI: number;
+      scale5CatRel: number;
+      euros: number;
     };
   };
   di: {
@@ -216,44 +289,85 @@ export type RiskSnapshotScenarioResults = {
       // Calculate using diScale5|7FromEuros
       // scale: number;
 
+      // Deprecated
       scaleTot: number; // Number from 0 - 5.5 on the total impact scale
       abs: number; // Absolute impact in €
+
+      scale5TI: number; // Number from 0 - 5.5 on the old total impact scale
+      scale5: number; // Number from 0 - 5.5 on the old Ha impact scale
+      euros: number; // Direct Ha impact on an absolute scale (€)
     };
     hb: {
       scaleTot: number;
       abs: number; // Absolute impact in €
+
+      scale5TI: number;
+      scale5: number;
+      euros: number;
     };
     hc: {
       scaleTot: number;
       abs: number; // Absolute impact in €
+
+      scale5TI: number;
+      scale5: number;
+      euros: number;
     };
     sa: {
       scaleTot: number;
       abs: number; // Absolute impact in €
+
+      scale5TI: number;
+      scale5: number;
+      euros: number;
     };
     sb: {
       scaleTot: number;
       abs: number; // Absolute impact in €
+
+      scale5TI: number;
+      scale5: number;
+      euros: number;
     };
     sc: {
       scaleTot: number;
       abs: number; // Absolute impact in €
+
+      scale5TI: number;
+      scale5: number;
+      euros: number;
     };
     sd: {
       scaleTot: number;
       abs: number; // Absolute impact in €
+
+      scale5TI: number;
+      scale5: number;
+      euros: number;
     };
     ea: {
       scaleTot: number;
       abs: number; // Absolute impact in €
+
+      scale5TI: number;
+      scale5: number;
+      euros: number;
     };
     fa: {
       scaleTot: number;
       abs: number; // Absolute impact in €
+
+      scale5TI: number;
+      scale5: number;
+      euros: number;
     };
     fb: {
       scaleTot: number;
       abs: number; // Absolute impact in €
+
+      scale5TI: number;
+      scale5: number;
+      euros: number;
     };
   };
 };

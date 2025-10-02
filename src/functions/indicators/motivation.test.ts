@@ -4,8 +4,8 @@ import {
   pAbsFromMScale7,
   mScale3FromPAbs,
   mScale7FromPAbs,
-  MScale3to7,
-  MScale7to3,
+  mScale3to7,
+  mScale7to3,
 } from "./motivation"; // Adjust import path as needed
 
 describe("Motivation Scale Conversion Functions", () => {
@@ -106,13 +106,13 @@ describe("Motivation Scale Conversion Functions", () => {
     test("3 -> 7 -> 3 should be identity", () => {
       const testValues = [0, 1, 2, 3, 2.5, 1.43];
       testValues.forEach((mScale3) => {
-        expect(MScale7to3(MScale3to7(mScale3))).toBeCloseTo(mScale3, 3);
+        expect(mScale7to3(mScale3to7(mScale3))).toBeCloseTo(mScale3, 3);
       });
     });
     test("7 -> 3 -> 7 should be identity", () => {
       const testValues = [0, 1, 2, 3, 4, 5, 6, 2.5, 1.2, 0.8, 3.33];
       testValues.forEach((mScale7) => {
-        expect(MScale3to7(MScale7to3(mScale7))).toBeCloseTo(mScale7, 3);
+        expect(mScale3to7(mScale7to3(mScale7))).toBeCloseTo(mScale7, 3);
       });
     });
   });

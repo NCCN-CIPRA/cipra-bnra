@@ -152,6 +152,10 @@ export const getYearlyProbability = (dailyP: number) => {
   return 1 - Math.pow(1 - dailyP, 365);
 };
 
+export const getDailyProbability = (yearlyP: number) => {
+  return 1 - Math.pow(1 - yearlyP, 1 / 365);
+};
+
 const rescaleProbability = (p: number) => {
   return 5 + Math.log(p + 0.0103) / Math.log(2.5);
 };

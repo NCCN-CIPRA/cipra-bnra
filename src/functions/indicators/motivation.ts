@@ -103,11 +103,11 @@ export function mScale7FromPAbs(pAbs: number) {
   return motivationLowerBoundScale7.length - 0.5;
 }
 
-export function MScale3to7(pScale5: number) {
+export function mScale3to7(pScale5: number) {
   return mScale7FromPAbs(pAbsFromMScale3(pScale5));
 }
 
-export function MScale7to3(pScale5: number) {
+export function mScale7to3(pScale5: number) {
   return mScale3FromPAbs(pAbsFromMScale7(pScale5));
 }
 

@@ -27,6 +27,8 @@ import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import {
   DVRiskSnapshot,
   parseRiskSnapshot,
+  RiskSnapshotResults,
+  RiskSnapshotScenarioResults,
   SerializedRiskSnapshotResults,
   serializeRiskSnapshotResults,
   serializeRiskSnapshotScenarios,
@@ -50,14 +52,23 @@ import {
   getDamageIndicatorToCategoryImpactRatio,
 } from "./CategoryImpact";
 import { getAbsoluteImpact } from "./Impact";
-import { eurosFromTIScale5 } from "./indicators/impact";
-import { pAbsFromMScale3 } from "./indicators/motivation";
-import { returnPeriodMonthsFromPScale5 } from "./indicators/probability";
+import { diScale5FromEuros } from "./indicators/impact";
+import {
+  pScale5FromReturnPeriodMonths,
+  returnPeriodMonthsFromPDaily,
+} from "./indicators/probability";
+import {
+  getDailyProbability,
+  getYearlyProbabilityFromRelative,
+} from "./Probability";
 import {
   getScenarioParameter,
   getScenarioSuffix,
   SCENARIOS,
 } from "./scenarios";
+import { getTotalImpactAbsolute } from "./TotalImpact";
+
+const scenarios = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME];
 
 export function getCascadeResultSnapshot(
   cascade: DVRiskCascade
@@ -282,838 +293,438 @@ function updateSnapshot(
 }
 
 function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
-  return serializeRiskSnapshotResults({
-    considerable: {
-      m: {
-        p: pAbsFromMScale3(
-          parseInt(riskFile.cr4de_dp_quanti_c?.replace("M", "") || "0")
-        ),
-        scale: parseInt(riskFile.cr4de_dp_quanti_c?.replace("M", "") || "0"),
-        scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.DP),
-      },
-      dp: {
-        scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.DP),
-        rp: returnPeriodMonthsFromPScale5(
-          parseInt(riskFile.cr4de_dp_quanti_c?.replace("DP", "") || "0")
-        ),
-        scale: parseInt(riskFile.cr4de_dp_quanti_c?.replace("DP", "") || "0"),
-      },
-      dp50: {
-        scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.DP),
-        rp: returnPeriodMonthsFromPScale5(
-          parseInt(
-            riskFile.cr4de_climate_change_quanti_c?.replace("DP", "") || "0"
-          )
-        ),
-        scale: parseInt(
-          riskFile.cr4de_climate_change_quanti_c?.replace("DP", "") || "0"
-        ),
-      },
-      tp: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TP),
-        },
-      },
-      tp50: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TP50),
-        },
-      },
-      ti: {
-        all: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI),
-        },
-        h: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_H),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "H", SCENARIOS.CONSIDERABLE)
-          ),
-        },
-        ha: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Ha),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Ha",
-              SCENARIOS.CONSIDERABLE
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.CONSIDERABLE].TI_Ha_abs || 0
-            )
-          ),
-        },
-        hb: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hb),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Hb",
-              SCENARIOS.CONSIDERABLE
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hb_abs || 0
-            )
-          ),
-        },
-        hc: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hc),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Hc",
-              SCENARIOS.CONSIDERABLE
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Hc_abs || 0
-            )
-          ),
-        },
-        s: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_S),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "S", SCENARIOS.CONSIDERABLE)
-          ),
-        },
-        sa: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sa),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sa",
-              SCENARIOS.CONSIDERABLE
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sa_abs || 0
-            )
-          ),
-        },
-        sb: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sb),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sb",
-              SCENARIOS.CONSIDERABLE
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sb_abs || 0
-            )
-          ),
-        },
-        sc: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sc),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sc",
-              SCENARIOS.CONSIDERABLE
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sc_abs || 0
-            )
-          ),
-        },
-        sd: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sd),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sd",
-              SCENARIOS.CONSIDERABLE
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Sd_abs || 0
-            )
-          ),
-        },
-        e: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_E),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "E", SCENARIOS.CONSIDERABLE)
-          ),
-        },
-        ea: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Ea),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Ea",
-              SCENARIOS.CONSIDERABLE
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Ea_abs || 0
-            )
-          ),
-        },
-        f: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_F),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "F", SCENARIOS.CONSIDERABLE)
-          ),
-        },
-        fa: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Fa),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Fa",
-              SCENARIOS.CONSIDERABLE
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Fa_abs || 0
-            )
-          ),
-        },
-        fb: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Fb),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Fb",
-              SCENARIOS.CONSIDERABLE
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.CONSIDERABLE]?.TI_Fb_abs || 0
-            )
-          ),
-        },
-      },
-      di: {
-        all: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI", SCENARIOS.CONSIDERABLE) || 0,
-        },
-        ha: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Ha", SCENARIOS.CONSIDERABLE) ||
-            0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_c),
-        },
-        hb: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Hb", SCENARIOS.CONSIDERABLE) ||
-            0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_c),
-        },
-        hc: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Hc", SCENARIOS.CONSIDERABLE) ||
-            0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_c),
-        },
-        sa: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sa", SCENARIOS.CONSIDERABLE) ||
-            0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_c),
-        },
-        sb: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sb", SCENARIOS.CONSIDERABLE) ||
-            0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_c),
-        },
-        sc: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sc", SCENARIOS.CONSIDERABLE) ||
-            0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_c),
-        },
-        sd: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sd", SCENARIOS.CONSIDERABLE) ||
-            0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_c),
-        },
-        ea: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Ea", SCENARIOS.CONSIDERABLE) ||
-            0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_c),
-        },
-        fa: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Fa", SCENARIOS.CONSIDERABLE) ||
-            0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_c),
-        },
-        fb: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Fb", SCENARIOS.CONSIDERABLE) ||
-            0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_c),
-        },
-      },
-    },
-    major: {
-      tp: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.MAJOR]?.TP),
-        },
-      },
-      tp50: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.MAJOR]?.TP50),
-        },
-      },
-      m: {
-        p: pAbsFromMScale3(
-          parseInt(riskFile.cr4de_dp_quanti_m?.replace("M", "") || "0")
-        ),
-        scale: parseInt(riskFile.cr4de_dp_quanti_m?.replace("M", "") || "0"),
-        scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.DP),
-      },
-      dp: {
-        scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.DP),
-        rp: returnPeriodMonthsFromPScale5(
-          parseInt(riskFile.cr4de_dp_quanti_m?.replace("DP", "") || "0")
-        ),
-        scale: parseInt(riskFile.cr4de_dp_quanti_m?.replace("DP", "") || "0"),
-      },
-      dp50: {
-        scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.DP),
-        rp: returnPeriodMonthsFromPScale5(
-          parseInt(
-            riskFile.cr4de_climate_change_quanti_m?.replace("DP", "") || "0"
-          )
-        ),
-        scale: parseInt(
-          riskFile.cr4de_climate_change_quanti_m?.replace("DP", "") || "0"
-        ),
-      },
-      ti: {
-        all: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI),
-        },
-        h: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_H),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "H", SCENARIOS.MAJOR)
-          ),
-        },
-        ha: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Ha),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Ha",
-              SCENARIOS.MAJOR
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Ha_abs || 0
-            )
-          ),
-        },
-        hb: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hb),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Hb",
-              SCENARIOS.MAJOR
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hb_abs || 0
-            )
-          ),
-        },
-        hc: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hc),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Hc",
-              SCENARIOS.MAJOR
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Hc_abs || 0
-            )
-          ),
-        },
-        s: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_S),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "S", SCENARIOS.MAJOR)
-          ),
-        },
-        sa: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sa),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sa",
-              SCENARIOS.MAJOR
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sa_abs || 0
-            )
-          ),
-        },
-        sb: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sb),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sb",
-              SCENARIOS.MAJOR
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sb_abs || 0
-            )
-          ),
-        },
-        sc: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sc),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sc",
-              SCENARIOS.MAJOR
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sc_abs || 0
-            )
-          ),
-        },
-        sd: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sd),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sd",
-              SCENARIOS.MAJOR
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Sd_abs || 0
-            )
-          ),
-        },
-        e: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_E),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "E", SCENARIOS.MAJOR)
-          ),
-        },
-        ea: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Ea),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Ea",
-              SCENARIOS.MAJOR
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Ea_abs || 0
-            )
-          ),
-        },
-        f: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_F),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "F", SCENARIOS.MAJOR)
-          ),
-        },
-        fa: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Fa),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Fa",
-              SCENARIOS.MAJOR
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Fa_abs || 0
-            )
-          ),
-        },
-        fb: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.MAJOR]?.TI_Fb),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Fb",
-              SCENARIOS.MAJOR
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.MAJOR]?.TI_Fb_abs || 0
-            )
-          ),
-        },
-      },
-      di: {
-        all: {
-          scaleTot: getScenarioParameter(riskFile, "DI", SCENARIOS.MAJOR) || 0,
-        },
-        ha: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Ha", SCENARIOS.MAJOR) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_m),
-        },
-        hb: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Hb", SCENARIOS.MAJOR) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_m),
-        },
-        hc: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Hc", SCENARIOS.MAJOR) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_m),
-        },
-        sa: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sa", SCENARIOS.MAJOR) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_m),
-        },
-        sb: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sb", SCENARIOS.MAJOR) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_m),
-        },
-        sc: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sc", SCENARIOS.MAJOR) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_m),
-        },
-        sd: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sd", SCENARIOS.MAJOR) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_m),
-        },
-        ea: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Ea", SCENARIOS.MAJOR) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_m),
-        },
-        fa: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Fa", SCENARIOS.MAJOR) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_m),
-        },
-        fb: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Fb", SCENARIOS.MAJOR) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_m),
-        },
-      },
-    },
+  return serializeRiskSnapshotResults(
+    scenarios.reduce((res, s) => {
+      const suff = getScenarioSuffix(s);
 
-    extreme: {
-      tp: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.EXTREME]?.TP),
+      const tp_rel = riskFile.results?.[s]?.TP || 0;
+      const tp = getDailyProbability(getYearlyProbabilityFromRelative(tp_rel));
+
+      const tp50_rel = riskFile.results?.[s]?.TP50 || 0;
+      const tp50 = getDailyProbability(
+        getYearlyProbabilityFromRelative(tp50_rel)
+      );
+
+      const ti_rel = riskFile.results?.[s].TI || 0;
+      const ti = getTotalImpactAbsolute(ti_rel);
+
+      const scenarioResult: RiskSnapshotScenarioResults = {
+        tp: {
+          yearly: {
+            scale: tp_rel,
+          },
+          scale5TP: tp_rel,
+          rpMonths: r(returnPeriodMonthsFromPDaily(tp)),
         },
-      },
-      tp50: {
-        yearly: {
-          scale: r(riskFile.results?.[SCENARIOS.EXTREME]?.TP50),
+        tp50: {
+          yearly: {
+            scale: tp50_rel,
+          },
+          scale5TP: tp50_rel,
+          rpMonths: r(returnPeriodMonthsFromPDaily(tp50)),
         },
-      },
-      m: {
-        p: pAbsFromMScale3(
-          parseInt(riskFile.cr4de_dp_quanti_e?.replace("M", "") || "0")
-        ),
-        scale: parseInt(riskFile.cr4de_dp_quanti_e?.replace("M", "") || "0"),
-        scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.DP),
-      },
-      dp: {
-        scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.DP),
-        rp: returnPeriodMonthsFromPScale5(
-          parseInt(riskFile.cr4de_dp_quanti_e?.replace("DP", "") || "0")
-        ),
-        scale: parseInt(riskFile.cr4de_dp_quanti_e?.replace("DP", "") || "0"),
-      },
-      dp50: {
-        scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.DP),
-        rp: returnPeriodMonthsFromPScale5(
-          parseInt(
-            riskFile.cr4de_climate_change_quanti_e?.replace("DP", "") || "0"
-          )
-        ),
-        scale: parseInt(
-          riskFile.cr4de_climate_change_quanti_e?.replace("DP", "") || "0"
-        ),
-      },
-      ti: {
-        all: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI),
-        },
-        h: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_H),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "H", SCENARIOS.EXTREME)
-          ),
-        },
-        ha: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Ha),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Ha",
-              SCENARIOS.EXTREME
+
+        dp: {
+          scaleTot: r(riskFile.results?.[s]?.DP),
+          scale: pScale5FromReturnPeriodMonths(
+            returnPeriodMonthsFromPDaily(
+              ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
             )
           ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Ha_abs || 0
+          scale5TP: r(riskFile.results?.[s]?.DP),
+          scale5: pScale5FromReturnPeriodMonths(
+            returnPeriodMonthsFromPDaily(
+              ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
+            )
+          ),
+          rpMonths: r(
+            returnPeriodMonthsFromPDaily(
+              ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
             )
           ),
         },
-        hb: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hb),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Hb",
-              SCENARIOS.EXTREME
+        // TODO: Something with DP50_offset
+        dp50: {
+          scaleTot: r(riskFile.results?.[s]?.DP50),
+          scale: pScale5FromReturnPeriodMonths(
+            returnPeriodMonthsFromPDaily(
+              ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
             )
           ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hb_abs || 0
+          scale5TP: r(riskFile.results?.[s]?.DP50),
+          scale5: pScale5FromReturnPeriodMonths(
+            returnPeriodMonthsFromPDaily(
+              ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
             )
           ),
-        },
-        hc: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hc),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Hc",
-              SCENARIOS.EXTREME
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Hc_abs || 0
+          rpMonths: r(
+            returnPeriodMonthsFromPDaily(
+              ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
             )
           ),
         },
-        s: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_S),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "S", SCENARIOS.EXTREME)
-          ),
+
+        // Motivation is set to 0 because in the new way of calculating
+        // the motivation of an actor is included in the CP estimations.
+        m: {
+          p: 0,
+          scale: 0,
+          scaleTot: 0,
         },
-        sa: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sa),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sa",
-              SCENARIOS.EXTREME
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sa_abs || 0
-            )
-          ),
+
+        ti: {
+          all: {
+            scaleTot: r(ti_rel),
+            scale5TI: r(ti_rel),
+            euros: Math.round(ti),
+          },
+          // TODO: all category scales
+          h: {
+            scaleTot: r(riskFile.results?.[s]?.TI_H),
+            scaleCat: r(getCategoryImpactRescaled(riskFile, "H", s)),
+
+            scale5TI: r(riskFile.results?.[s]?.TI_H),
+            scale5Cat: r(getCategoryImpactRescaled(riskFile, "H", s)),
+            euros: Math.round(
+              ((riskFile.results?.[s]?.TI_H || 0) * ti) / ti_rel
+            ),
+          },
+          ha: {
+            scaleTot: r(riskFile.results?.[s]?.TI_Ha),
+            scaleCatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ha", s)
+            ),
+            abs: Math.round(
+              ((riskFile.results?.[s].TI_Ha_abs || 0) * ti) / ti_rel
+            ),
+            scale5TI: r(riskFile.results?.[s]?.TI_Ha),
+            scale5CatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ha", s)
+            ),
+            euros: Math.round(
+              ((riskFile.results?.[s].TI_Ha_abs || 0) * ti) / ti_rel
+            ),
+          },
+          hb: {
+            scaleTot: r(riskFile.results?.[s]?.TI_Hb),
+            scaleCatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hb", s)
+            ),
+            abs: Math.round(
+              ((riskFile.results?.[s].TI_Hb_abs || 0) * ti) / ti_rel
+            ),
+            scale5TI: r(riskFile.results?.[s]?.TI_Hb),
+            scale5CatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hb", s)
+            ),
+            euros: Math.round(
+              ((riskFile.results?.[s].TI_Hb_abs || 0) * ti) / ti_rel
+            ),
+          },
+          hc: {
+            scaleTot: r(riskFile.results?.[s]?.TI_Hc),
+            scaleCatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hc", s)
+            ),
+            abs: Math.round(
+              ((riskFile.results?.[s].TI_Hc_abs || 0) * ti) / ti_rel
+            ),
+            scale5TI: r(riskFile.results?.[s]?.TI_Hc),
+            scale5CatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hc", s)
+            ),
+            euros: Math.round(
+              ((riskFile.results?.[s].TI_Hc_abs || 0) * ti) / ti_rel
+            ),
+          },
+          s: {
+            scaleTot: r(riskFile.results?.[s]?.TI_S),
+            scaleCat: r(getCategoryImpactRescaled(riskFile, "S", s)),
+
+            scale5TI: r(riskFile.results?.[s]?.TI_S),
+            scale5Cat: r(getCategoryImpactRescaled(riskFile, "S", s)),
+            euros: Math.round((riskFile.results?.[s]?.TI_S || 0) * ti) / ti_rel,
+          },
+          sa: {
+            scaleTot: r(riskFile.results?.[s]?.TI_Sa),
+            scaleCatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sa", s)
+            ),
+            abs: Math.round(
+              ((riskFile.results?.[s].TI_Sa_abs || 0) * ti) / ti_rel
+            ),
+            scale5TI: r(riskFile.results?.[s]?.TI_Sa),
+            scale5CatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sa", s)
+            ),
+            euros: Math.round(
+              ((riskFile.results?.[s].TI_Sa_abs || 0) * ti) / ti_rel
+            ),
+          },
+          sb: {
+            scaleTot: r(riskFile.results?.[s]?.TI_Sb),
+            scaleCatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sb", s)
+            ),
+            abs: Math.round(
+              ((riskFile.results?.[s].TI_Sb_abs || 0) * ti) / ti_rel
+            ),
+            scale5TI: r(riskFile.results?.[s]?.TI_Sb),
+            scale5CatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sb", s)
+            ),
+            euros: Math.round(
+              ((riskFile.results?.[s].TI_Sb_abs || 0) * ti) / ti_rel
+            ),
+          },
+          sc: {
+            scaleTot: r(riskFile.results?.[s]?.TI_Sc),
+            scaleCatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sc", s)
+            ),
+            abs: Math.round(
+              ((riskFile.results?.[s].TI_Sc_abs || 0) * ti) / ti_rel
+            ),
+            scale5TI: r(riskFile.results?.[s]?.TI_Sc),
+            scale5CatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sc", s)
+            ),
+            euros: Math.round(
+              ((riskFile.results?.[s].TI_Sc_abs || 0) * ti) / ti_rel
+            ),
+          },
+          sd: {
+            scaleTot: r(riskFile.results?.[s]?.TI_Sd),
+            scaleCatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sd", s)
+            ),
+            abs: Math.round(
+              ((riskFile.results?.[s].TI_Sd_abs || 0) * ti) / ti_rel
+            ),
+            scale5TI: r(riskFile.results?.[s]?.TI_Sd),
+            scale5CatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sd", s)
+            ),
+            euros: Math.round(
+              ((riskFile.results?.[s].TI_Sd_abs || 0) * ti) / ti_rel
+            ),
+          },
+          e: {
+            scaleTot: r(riskFile.results?.[s]?.TI_E),
+            scaleCat: r(getCategoryImpactRescaled(riskFile, "E", s)),
+
+            scale5TI: r(riskFile.results?.[s]?.TI_E),
+            scale5Cat: r(getCategoryImpactRescaled(riskFile, "E", s)),
+            euros: Math.round(
+              ((riskFile.results?.[s]?.TI_E || 0) * ti) / ti_rel
+            ),
+          },
+          ea: {
+            scaleTot: r(riskFile.results?.[s]?.TI_Ea),
+            scaleCatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ea", s)
+            ),
+            abs: Math.round(
+              ((riskFile.results?.[s].TI_Ea_abs || 0) * ti) / ti_rel
+            ),
+            scale5TI: r(riskFile.results?.[s]?.TI_Ea),
+            scale5CatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ea", s)
+            ),
+            euros: Math.round(
+              ((riskFile.results?.[s].TI_Ea_abs || 0) * ti) / ti_rel
+            ),
+          },
+          f: {
+            scaleTot: r(riskFile.results?.[s]?.TI_F),
+            scaleCat: r(getCategoryImpactRescaled(riskFile, "F", s)),
+
+            scale5TI: r(riskFile.results?.[s]?.TI_F),
+            scale5Cat: r(getCategoryImpactRescaled(riskFile, "F", s)),
+            euros: Math.round(
+              ((riskFile.results?.[s]?.TI_F || 0) * ti) / ti_rel
+            ),
+          },
+          fa: {
+            scaleTot: r(riskFile.results?.[s]?.TI_Fa),
+            scaleCatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fa", s)
+            ),
+            abs: Math.round(
+              ((riskFile.results?.[s].TI_Fa_abs || 0) * ti) / ti_rel
+            ),
+            scale5TI: r(riskFile.results?.[s]?.TI_Fa),
+            scale5CatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fa", s)
+            ),
+            euros: Math.round(
+              ((riskFile.results?.[s].TI_Fa_abs || 0) * ti) / ti_rel
+            ),
+          },
+          fb: {
+            scaleTot: r(riskFile.results?.[s]?.TI_Fb),
+            scaleCatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fb", s)
+            ),
+            abs: Math.round(
+              ((riskFile.results?.[s].TI_Fb_abs || 0) * ti) / ti_rel
+            ),
+            scale5TI: r(riskFile.results?.[s]?.TI_Fb),
+            scale5CatRel: r(
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fb", s)
+            ),
+            euros: Math.round(
+              ((riskFile.results?.[s].TI_Fb_abs || 0) * ti) / ti_rel
+            ),
+          },
         },
-        sb: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sb),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sb",
-              SCENARIOS.EXTREME
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sb_abs || 0
-            )
-          ),
+        di: {
+          all: {
+            scaleTot: getScenarioParameter(riskFile, "DI", s) || 0,
+          },
+          ha: {
+            scaleTot: getScenarioParameter(riskFile, "DI_Ha", s) || 0,
+            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_ha${suff}`]),
+
+            scale5TI: getScenarioParameter(riskFile, "DI_Ha", s) || 0,
+            scale5: diScale5FromEuros(
+              ((getScenarioParameter(riskFile, "DI_Ha", s) || 0) * ti) / ti_rel
+            ),
+            euros: r(
+              ((getScenarioParameter(riskFile, "DI_Ha", s) || 0) * ti) / ti_rel,
+              1
+            ),
+          },
+          hb: {
+            scaleTot: getScenarioParameter(riskFile, "DI_Hb", s) || 0,
+            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_hb${suff}`]),
+
+            scale5TI: getScenarioParameter(riskFile, "DI_Hb", s) || 0,
+            scale5: diScale5FromEuros(
+              ((getScenarioParameter(riskFile, "DI_Hb", s) || 0) * ti) / ti_rel
+            ),
+            euros: r(
+              ((getScenarioParameter(riskFile, "DI_Hb", s) || 0) * ti) / ti_rel,
+              1
+            ),
+          },
+          hc: {
+            scaleTot: getScenarioParameter(riskFile, "DI_Hc", s) || 0,
+            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_hc${suff}`]),
+
+            scale5TI: getScenarioParameter(riskFile, "DI_Hc", s) || 0,
+            scale5: diScale5FromEuros(
+              ((getScenarioParameter(riskFile, "DI_Hc", s) || 0) * ti) / ti_rel
+            ),
+            euros: r(
+              ((getScenarioParameter(riskFile, "DI_Hc", s) || 0) * ti) / ti_rel,
+              1
+            ),
+          },
+          sa: {
+            scaleTot: getScenarioParameter(riskFile, "DI_Sa", s) || 0,
+            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_sa${suff}`]),
+
+            scale5TI: getScenarioParameter(riskFile, "DI_Sa", s) || 0,
+            scale5: diScale5FromEuros(
+              ((getScenarioParameter(riskFile, "DI_Sa", s) || 0) * ti) / ti_rel
+            ),
+            euros: r(
+              ((getScenarioParameter(riskFile, "DI_Sa", s) || 0) * ti) / ti_rel,
+              1
+            ),
+          },
+          sb: {
+            scaleTot: getScenarioParameter(riskFile, "DI_Sb", s) || 0,
+            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_sb${suff}`]),
+
+            scale5TI: getScenarioParameter(riskFile, "DI_Sb", s) || 0,
+            scale5: diScale5FromEuros(
+              ((getScenarioParameter(riskFile, "DI_Sb", s) || 0) * ti) / ti_rel
+            ),
+            euros: r(
+              ((getScenarioParameter(riskFile, "DI_Sb", s) || 0) * ti) / ti_rel,
+              1
+            ),
+          },
+          sc: {
+            scaleTot: getScenarioParameter(riskFile, "DI_Sc", s) || 0,
+            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_sc${suff}`]),
+
+            scale5TI: getScenarioParameter(riskFile, "DI_Sc", s) || 0,
+            scale5: diScale5FromEuros(
+              ((getScenarioParameter(riskFile, "DI_Sc", s) || 0) * ti) / ti_rel
+            ),
+            euros: r(
+              ((getScenarioParameter(riskFile, "DI_Sc", s) || 0) * ti) / ti_rel,
+              1
+            ),
+          },
+          sd: {
+            scaleTot: getScenarioParameter(riskFile, "DI_Sd", s) || 0,
+            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_sd${suff}`]),
+
+            scale5TI: getScenarioParameter(riskFile, "DI_Sd", s) || 0,
+            scale5: diScale5FromEuros(
+              ((getScenarioParameter(riskFile, "DI_Sd", s) || 0) * ti) / ti_rel
+            ),
+            euros: r(
+              ((getScenarioParameter(riskFile, "DI_Sd", s) || 0) * ti) / ti_rel,
+              1
+            ),
+          },
+          ea: {
+            scaleTot: getScenarioParameter(riskFile, "DI_Ea", s) || 0,
+            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_ea${suff}`]),
+
+            scale5TI: getScenarioParameter(riskFile, "DI_Ea", s) || 0,
+            scale5: diScale5FromEuros(
+              ((getScenarioParameter(riskFile, "DI_Ea", s) || 0) * ti) / ti_rel
+            ),
+            euros: r(
+              ((getScenarioParameter(riskFile, "DI_Ea", s) || 0) * ti) / ti_rel,
+              1
+            ),
+          },
+          fa: {
+            scaleTot: getScenarioParameter(riskFile, "DI_Fa", s) || 0,
+            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_fa${suff}`]),
+
+            scale5TI: getScenarioParameter(riskFile, "DI_Fa", s) || 0,
+            scale5: diScale5FromEuros(
+              ((getScenarioParameter(riskFile, "DI_Fa", s) || 0) * ti) / ti_rel
+            ),
+            euros: r(
+              ((getScenarioParameter(riskFile, "DI_Fa", s) || 0) * ti) / ti_rel,
+              1
+            ),
+          },
+          fb: {
+            scaleTot: getScenarioParameter(riskFile, "DI_Fb", s) || 0,
+            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_fb${suff}`]),
+
+            scale5TI: getScenarioParameter(riskFile, "DI_Fb", s) || 0,
+            scale5: diScale5FromEuros(
+              ((getScenarioParameter(riskFile, "DI_Fb", s) || 0) * ti) / ti_rel
+            ),
+            euros: r(
+              ((getScenarioParameter(riskFile, "DI_Fb", s) || 0) * ti) / ti_rel,
+              1
+            ),
+          },
         },
-        sc: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sc),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sc",
-              SCENARIOS.EXTREME
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sc_abs || 0
-            )
-          ),
-        },
-        sd: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sd),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Sd",
-              SCENARIOS.EXTREME
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Sd_abs || 0
-            )
-          ),
-        },
-        e: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_E),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "E", SCENARIOS.EXTREME)
-          ),
-        },
-        ea: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Ea),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Ea",
-              SCENARIOS.EXTREME
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Ea_abs || 0
-            )
-          ),
-        },
-        f: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_F),
-          scaleCat: r(
-            getCategoryImpactRescaled(riskFile, "F", SCENARIOS.EXTREME)
-          ),
-        },
-        fa: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Fa),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Fa",
-              SCENARIOS.EXTREME
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Fa_abs || 0
-            )
-          ),
-        },
-        fb: {
-          scaleTot: r(riskFile.results?.[SCENARIOS.EXTREME]?.TI_Fb),
-          scaleCatRel: r(
-            getDamageIndicatorToCategoryImpactRatio(
-              riskFile,
-              "Fb",
-              SCENARIOS.EXTREME
-            )
-          ),
-          abs: Math.round(
-            eurosFromTIScale5(
-              riskFile.results?.[SCENARIOS.EXTREME]?.TI_Fb_abs || 0
-            )
-          ),
-        },
-      },
-      di: {
-        all: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI", SCENARIOS.EXTREME) || 0,
-        },
-        ha: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Ha", SCENARIOS.EXTREME) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ha_e),
-        },
-        hb: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Hb", SCENARIOS.EXTREME) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hb_e),
-        },
-        hc: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Hc", SCENARIOS.EXTREME) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_hc_e),
-        },
-        sa: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sa", SCENARIOS.EXTREME) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sa_e),
-        },
-        sb: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sb", SCENARIOS.EXTREME) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sb_e),
-        },
-        sc: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sc", SCENARIOS.EXTREME) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sc_e),
-        },
-        sd: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Sd", SCENARIOS.EXTREME) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_sd_e),
-        },
-        ea: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Ea", SCENARIOS.EXTREME) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_ea_e),
-        },
-        fa: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Fa", SCENARIOS.EXTREME) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fa_e),
-        },
-        fb: {
-          scaleTot:
-            getScenarioParameter(riskFile, "DI_Fb", SCENARIOS.EXTREME) || 0,
-          abs: getAbsoluteImpact(riskFile.cr4de_di_quanti_fb_e),
-        },
-      },
-    },
-  });
+      };
+
+      return {
+        ...res,
+        [s]: scenarioResult,
+      };
+    }, {} as RiskSnapshotResults)
+  );
 }
 
-function getSerializedQualiResults(riskFile: DVRiskFile) {
-  if (riskFile.cr4de_quali !== null || riskFile.cr4de_quali !== "") {
+export function getSerializedQualiResults(riskFile: DVRiskFile) {
+  if (riskFile.cr4de_quali !== null && riskFile.cr4de_quali !== "") {
     return riskFile.cr4de_quali;
   }
 

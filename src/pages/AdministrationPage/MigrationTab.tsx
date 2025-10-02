@@ -10,17 +10,34 @@ import {
 } from "@mui/material";
 import useAPI from "../../hooks/useAPI";
 import { useState } from "react";
+import { parseRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { SCENARIOS } from "../../functions/scenarios";
 import {
-  parseRiskFields,
-  stringifyRiskFields,
-} from "../../functions/parseDataverseFields";
+  getSerializedQualiResults,
+  snapshotFromRiskfile,
+} from "../../functions/snapshot";
 import {
-  DVRiskSnapshot,
-  SerializedRiskSnapshotResults,
-  serializeRiskSnapshotScenarios,
-} from "../../types/dataverse/DVRiskSnapshot";
-import { Scenarios } from "../../functions/scenarios";
-import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+  RiskFileQuantiInput,
+  RiskFileScenarioQuantiInput,
+  serializeRiskFileQuantiInput,
+} from "../../types/dataverse/DVRiskFile";
+import { pScale7FromReturnPeriodMonths } from "../../functions/indicators/probability";
+import { iScale7FromEuros } from "../../functions/indicators/impact";
+
+const scenarios = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME];
+
+const iFields = [
+  "ha",
+  "hb",
+  "hc",
+  "sa",
+  "sb",
+  "sc",
+  "sd",
+  "ea",
+  "fa",
+  "fb",
+] as (keyof RiskFileScenarioQuantiInput["di"])[];
 
 export default function MigrationTab() {
   const api = useAPI();
@@ -30,66 +47,67 @@ export default function MigrationTab() {
   const handleMigrateScenarios = async () => {
     setAction("Loading data...");
     setProgress(-1);
-    const riskSummaries = await api.getRiskSummaries();
-    const riskSnapshots = await api.getRiskSnapshots();
     const riskFiles = await api.getRiskFiles();
 
-    const sumDict = riskSummaries.reduce(
-      (acc, ss) => ({
-        ...acc,
-        [ss._cr4de_risk_file_value]: ss,
-      }),
-      {} as {
-        [key: string]: DVRiskSummary;
-      }
-    );
-    const ssDict = riskSnapshots.reduce(
-      (acc, ss) => ({
-        ...acc,
-        [ss._cr4de_risk_file_value]: ss,
-      }),
-      {} as {
-        [key: string]: DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>;
-      }
-    );
-
-    setAction("Migrating risk files and snapshots...");
+    setAction("Migrating risk files quanti input...");
     let counter = 0;
     const maxProgress = riskFiles.length;
 
     for (const rf of riskFiles) {
-      let parsedFields = parseRiskFields(rf);
-      const migratedFields = stringifyRiskFields(parsedFields);
-      parsedFields = parseRiskFields(migratedFields);
+      const snapshot = parseRiskSnapshot(snapshotFromRiskfile(rf));
 
-      const sum = sumDict[rf.cr4de_riskfilesid];
-      const ss = ssDict[rf.cr4de_riskfilesid];
+      const quanti: RiskFileQuantiInput = scenarios.reduce((res, s) => {
+        const scenarioResult: RiskFileScenarioQuantiInput = {
+          dp: {
+            rpMonths: snapshot.cr4de_quanti[s].dp.rpMonths,
+            scale5: snapshot.cr4de_quanti[s].dp.scale5,
+            scale7: pScale7FromReturnPeriodMonths(
+              snapshot.cr4de_quanti[s].dp.rpMonths
+            ),
+          },
+          dp50: {
+            rpMonths: snapshot.cr4de_quanti[s].dp50.rpMonths,
+            scale5: snapshot.cr4de_quanti[s].dp50.scale5,
+            scale7: pScale7FromReturnPeriodMonths(
+              snapshot.cr4de_quanti[s].dp50.rpMonths
+            ),
+          },
+          di: iFields.reduce(
+            (acc, field) => ({
+              ...acc,
+              [field]: {
+                abs: snapshot.cr4de_quanti[s].di[field].euros,
+                scale5: snapshot.cr4de_quanti[s].di[field].scale5,
+                scale7: iScale7FromEuros(
+                  snapshot.cr4de_quanti[s].di[field].euros
+                ),
+              },
+            }),
+            {} as RiskFileScenarioQuantiInput["di"]
+          ),
+        };
+
+        return {
+          ...res,
+          [s]: scenarioResult,
+        };
+      }, {} as RiskFileQuantiInput);
+      // if (rf.cr4de_title.indexOf("rail transport") < 0) continue;
+
+      // console.log(snapshot.cr4de_title);
+      // console.log("SNAPSHOT: ", snapshot.cr4de_quanti);
+      // console.log("RISK FILE: ", quanti);
+      // console.log(rf);
+      // break;
 
       await api.updateRiskFile(rf.cr4de_riskfilesid, {
-        cr4de_historical_events: migratedFields.cr4de_historical_events,
-        cr4de_intensity_parameters: migratedFields.cr4de_intensity_parameters,
-        cr4de_scenario_considerable: migratedFields.cr4de_scenario_considerable,
-        cr4de_scenario_major: migratedFields.cr4de_scenario_major,
-        cr4de_scenario_extreme: migratedFields.cr4de_scenario_extreme,
-      });
-      await api.updateRiskSummary(sum.cr4de_bnrariskfilesummaryid, {
-        cr4de_historical_events: migratedFields.cr4de_historical_events,
-        cr4de_intensity_parameters: migratedFields.cr4de_intensity_parameters,
-        cr4de_scenario_considerable: migratedFields.cr4de_scenario_considerable,
-        cr4de_scenario_major: migratedFields.cr4de_scenario_major,
-        cr4de_scenario_extreme: migratedFields.cr4de_scenario_extreme,
-      });
-      await api.updateRiskSnapshot(ss.cr4de_bnrariskfilesnapshotid, {
-        cr4de_historical_events: migratedFields.cr4de_historical_events,
-        cr4de_intensity_parameters: migratedFields.cr4de_intensity_parameters,
-        cr4de_scenarios: serializeRiskSnapshotScenarios(
-          parsedFields.cr4de_scenarios as Scenarios
-        ),
+        cr4de_quanti: serializeRiskFileQuantiInput(quanti),
+        cr4de_quali: getSerializedQualiResults(rf),
       });
 
       counter += 1;
       const p = (100 * counter) / maxProgress;
-      setAction(`Saving snapshots: ${Math.round(p)}%`);
+      setAction(`Saving riskfiles: ${Math.round(p)}%`);
       setProgress(p);
     }
 
@@ -111,7 +129,7 @@ export default function MigrationTab() {
         </CardContent>
         <CardActions>
           <Button color="warning" onClick={handleMigrateScenarios}>
-            Migrate Scenarios
+            Migrate Risk File Inputs
           </Button>
         </CardActions>
       </Card>

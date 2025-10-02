@@ -130,6 +130,7 @@ export interface DiscussionsRequired {
 
 export interface DVRiskFile<
   CalculationType = unknown,
+  QuantiType extends DVRiskFileQuantiType = SerializedRiskFileQuantiInput,
   QualiType extends RiskQualiType = SerializedRiskQualis
 > extends RiskFileEditableFields {
   cr4de_riskfilesid: string;
@@ -255,6 +256,7 @@ export interface DVRiskFile<
   cr4de_result_snapshot: string | null;
   results?: RESULT_SNAPSHOT | null;
 
+  cr4de_quanti: QuantiType;
   cr4de_quali: QualiType;
 
   createdon: string;
@@ -352,4 +354,96 @@ export type RISKFILE_RESULT_FIELD =
 
 export type RESULT_SNAPSHOT = {
   [key in SCENARIOS]: { [key in RISKFILE_RESULT_FIELD]: number };
+};
+
+export function serializeRiskFileQuantiInput(
+  quanti: RiskFileQuantiInput
+): SerializedRiskFileQuantiInput {
+  return JSON.stringify(quanti) as SerializedRiskFileQuantiInput;
+}
+
+export function parseRiskFileQuantiInput(
+  quanti: SerializedRiskFileQuantiInput | null
+): RiskFileQuantiInput {
+  return JSON.parse(quanti || "") as RiskFileQuantiInput;
+}
+
+export type SerializedRiskFileQuantiInput = string & {
+  __json_seralized: RiskFileQuantiInput;
+};
+
+export type DVRiskFileQuantiType =
+  | unknown
+  | SerializedRiskFileQuantiInput
+  | RiskFileQuantiInput;
+
+export type RiskFileQuantiInput = {
+  [SCENARIOS.CONSIDERABLE]: RiskFileScenarioQuantiInput;
+  [SCENARIOS.MAJOR]: RiskFileScenarioQuantiInput;
+  [SCENARIOS.EXTREME]: RiskFileScenarioQuantiInput;
+};
+
+export type RiskFileScenarioQuantiInput = {
+  dp: {
+    rpMonths: number; // Return period in months
+    scale5: number; // Direct probability of the scenario on the old dp scale (0 - 5)
+    scale7: number; // Direct probability of the scenario on the new dp scale (0 - 7)
+  };
+  dp50: {
+    rpMonths: number; // Return period in months
+    scale5: number; // Direct probability in 2050 of the scenario on the old dp scale (0 - 5)
+    scale7: number; // Direct probability in 2050 of the scenario on the new dp scale (0 - 7)
+  };
+  di: {
+    ha: {
+      abs: number; // Absolute impact in €
+      scale5: number; // Number from 0 - 5.5 on the old ha impact scale
+      scale7: number; // Number from 0 - 7.5 on the new ha impact scale
+    };
+    hb: {
+      abs: number;
+      scale5: number;
+      scale7: number;
+    };
+    hc: {
+      abs: number;
+      scale5: number;
+      scale7: number;
+    };
+    sa: {
+      abs: number;
+      scale5: number;
+      scale7: number;
+    };
+    sb: {
+      abs: number;
+      scale5: number;
+      scale7: number;
+    };
+    sc: {
+      abs: number;
+      scale5: number;
+      scale7: number;
+    };
+    sd: {
+      abs: number;
+      scale5: number;
+      scale7: number;
+    };
+    ea: {
+      abs: number;
+      scale5: number;
+      scale7: number;
+    };
+    fa: {
+      abs: number;
+      scale5: number;
+      scale7: number;
+    };
+    fb: {
+      abs: number;
+      scale5: number;
+      scale7: number;
+    };
+  };
 };
