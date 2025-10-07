@@ -7,11 +7,8 @@ import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { Indicators } from "../../types/global";
 import { cpScale5FromPAbs, cpScale7FromPAbs } from "../indicators/cp";
-import {
-  mScale3FromPAbs,
-  mScale7FromPAbs,
-  pAbsFromMScale3,
-} from "../indicators/motivation";
+import { mScale3FromPDaily, mScale7FromPDaily } from "../indicators/motivation";
+import { pDailyFromReturnPeriodMonths } from "../indicators/probability";
 import { SCENARIOS } from "../scenarios";
 import { getConsensusCascade } from "./prepareRiskFiles";
 
@@ -252,21 +249,21 @@ export const getNewCPFromOldMAndCP = (
   indicators: Indicators | null = null
 ) => {
   if (cause.cr4de_risk_type === RISK_TYPE.MANMADE) {
-    const mVal = cause.cr4de_quanti[causeScenario].m.scale;
-    const mAbs = pAbsFromMScale3(mVal);
+    const rpMonths = cause.cr4de_quanti[causeScenario].dp.rpMonths;
+    const pDaily = pDailyFromReturnPeriodMonths(rpMonths);
 
-    const totP = mAbs * cpAbsOld;
+    const newPDaily = pDaily * cpAbsOld;
 
-    if (!indicators) return Math.round(10000 * totP) / 10000;
+    if (!indicators) return newPDaily;
 
     if (indicators === Indicators.V1) {
-      return Math.round(10 * mScale3FromPAbs(totP)) / 10;
+      return Math.round(10 * mScale3FromPDaily(newPDaily)) / 10;
     }
 
-    return Math.round(10 * mScale7FromPAbs(totP)) / 10;
+    return Math.round(10 * mScale7FromPDaily(newPDaily)) / 10;
   }
 
-  if (!indicators) return Math.round(10000 * cpAbsOld) / 10000;
+  if (!indicators) return cpAbsOld;
 
   if (indicators === Indicators.V1) {
     return Math.round(10 * cpScale5FromPAbs(cpAbsOld)) / 10;

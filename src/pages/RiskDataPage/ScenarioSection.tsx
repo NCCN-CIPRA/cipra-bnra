@@ -17,7 +17,6 @@ import {
 } from "../../types/dataverse/DVRiskFile";
 import {
   diScale5FromEuros,
-  eurosFromTIScale5,
   iScale7FromEuros,
 } from "../../functions/indicators/impact";
 import { useOutletContext } from "react-router-dom";
@@ -33,8 +32,6 @@ import {
   RiskScenarioQualis,
   serializeRiskQualis,
 } from "../../types/dataverse/Riskfile";
-import { getConsensusRiskFile } from "../../functions/analysis/prepareRiskFiles";
-import { getTotalImpactAbsolute } from "../../functions/TotalImpact";
 
 export function ScenarioSection({
   riskFile,
@@ -50,7 +47,7 @@ export function ScenarioSection({
 }) {
   const api = useAPI();
   const queryClient = useQueryClient();
-  const { indicators } = useOutletContext<BasePageContext>();
+  const { user, indicators } = useOutletContext<BasePageContext>();
 
   const [open, setOpen] = useState(false);
 
@@ -69,36 +66,22 @@ export function ScenarioSection({
     },
   });
 
-  const rf = riskFile.cr4de_risk_file as DVRiskFile;
-
   const scenarios = parseRiskSnapshotScenarios(riskFile.cr4de_scenarios);
-  const crf = getConsensusRiskFile(rf, [], []);
 
-  const ha_rel = rf.results!.extreme.DI_Sc;
-
-  const ti_rel = rf.results!.extreme.TI;
-  const ti = getTotalImpactAbsolute(ti_rel);
-
-  const ha_abs = (ha_rel * ti) / ti_rel;
-
-  console.log("CONSENSUS VALUE: ", rf.cr4de_di_quanti_sc_e);
-  console.log("VALUE USED IN CALCULATIONS: Ha", diScale5FromEuros(crf.di_Sc_e));
-  console.log("RECALCULATION: Ha", diScale5FromEuros(ha_abs));
-  console.log(ti / eurosFromTIScale5(ti_rel));
-
-  // const handleChangeQuanti =
-  //   (field: DP_FIELD | DI_FIELD) => (newValue: number) => {
-  //     // const quantis = mutation.mutate({
-  //     //   cr4de_riskfilesid: riskFile._cr4de_risk_file_value,
-  //     //   cr4de_quanti: ser({
-  //     //     ...riskFile.cr4de_quali,
-  //     //     [scenario]: {
-  //     //       ...riskFile.cr4de_quali[scenario],
-  //     //       dp: newQuali,
-  //     //     },
-  //     //   }),
-  //     // });
-  //   };
+  const handleChangeQuanti =
+    (field: DP_FIELD | DI_FIELD) => (newValue: number) => {
+      console.log(field, newValue);
+      // const quantis = mutation.mutate({
+      //   cr4de_riskfilesid: riskFile._cr4de_risk_file_value,
+      //   cr4de_quanti: ser({
+      //     ...riskFile.cr4de_quali,
+      //     [scenario]: {
+      //       ...riskFile.cr4de_quali[scenario],
+      //       dp: newQuali,
+      //     },
+      //   }),
+      // });
+    };
 
   return (
     <Stack
@@ -193,7 +176,7 @@ export function ScenarioSection({
                       >
                         {/* {riskFile.cr4de_consensus_type !== null ? ( */}
                         <Slider
-                          value={initialValue}
+                          initialValue={initialValue}
                           prefix={
                             quantiField === "dp"
                               ? quantiField.toUpperCase()
@@ -209,11 +192,11 @@ export function ScenarioSection({
                           //   //   : null
                           //   null
                           // }
-                          // onChange={
-                          //   user?.roles.analist
-                          //     ? handleChangeQuanti(quantiField)
-                          //     : null
-                          // }
+                          onChange={
+                            user?.roles.analist
+                              ? handleChangeQuanti(quantiField)
+                              : null
+                          }
                         />
                         {/* ) : (
                         <Typography variant="subtitle2">N/A</Typography>

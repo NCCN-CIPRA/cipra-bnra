@@ -47,7 +47,9 @@ export default function runAnalysis(
   const calculations = prepareRiskFiles(
     riskFiles,
     riskFilesDict,
-    cascades,
+    cascades.filter(
+      (c) => c.cr4de_cause_hazard !== null && c.cr4de_effect_hazard !== null
+    ),
     participations,
     directAnalyses,
     cascadeAnalyses

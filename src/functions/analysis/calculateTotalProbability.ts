@@ -2,7 +2,7 @@ import {
   CascadeCalculation,
   RiskCalculation,
 } from "../../types/dataverse/DVAnalysisRun";
-import { SCENARIOS } from "../scenarios";
+import { getScenarioSuffix, SCENARIOS } from "../scenarios";
 
 const getDP = (risk: RiskCalculation, scenario: SCENARIOS) => {
   if (scenario === SCENARIOS.CONSIDERABLE) return risk.dp_c;
@@ -163,6 +163,9 @@ function calculateTotalProbabilityScenario(
           cascade.cause.tp_e * getCP(cascade, SCENARIOS.EXTREME, scenario)
       );
 
+      cascade[`tp${getScenarioSuffix(scenario)}`] =
+        cascade.cause[`tp${getScenarioSuffix(scenario)}`];
+
       cascade.ip = -1;
 
       return ipTot + getIP(cascade, scenario);
@@ -189,6 +192,9 @@ function calculateTotalProbability2050Scenario(
           cascade.cause.tp50_m * getCP(cascade, SCENARIOS.MAJOR, scenario) +
           cascade.cause.tp50_e * getCP(cascade, SCENARIOS.EXTREME, scenario)
       );
+
+      cascade[`tp50${getScenarioSuffix(scenario)}`] =
+        cascade.cause[`tp50${getScenarioSuffix(scenario)}`];
 
       cascade.ip50 = -1;
 

@@ -44,13 +44,8 @@ import { DVParticipation } from "../../types/dataverse/DVParticipation";
 import { DVContact } from "../../types/dataverse/DVContact";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import RiskFilesDataGrid from "./RiskFilesDataGrid";
-import RiskMatrix from "./RiskMatrix";
-import RiskNetworkGraph from "./RiskNetworkGraph";
 import CascadeDataGrid from "./CascadeDataGrid";
 import SankeyGraph from "./SankeyGraph";
-import RiskProfileGraph from "./RiskProfileGraph";
-import ClimateChangeGraph from "./ClimateChangeGraph";
-import ExecutiveSummaryGraph from "./ExecutiveSummaryGraphs";
 import CalculationsDelta from "./CalculationsDelta";
 import {
   // getDamageIndicatorAbsoluteScale,
@@ -70,7 +65,9 @@ import { getDamageIndicatorAbsoluteScale } from "../../functions/Impact";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 // import { useTranslation } from "react-i18next";
 
-const round = (v: number, dig: number) =>
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const round = (v: number, _dig: number) => v;
+const roundDi = (v: number, dig: number) =>
   parseFloat(roundString(v, dig).replace(",", "."));
 
 const getScenarioResult = (
@@ -115,51 +112,63 @@ const getScenarioResult = (
   // }
 
   return {
-    TP: round(tp_rel, 5),
-    TP50: round(tp50_rel, 5),
+    TP: roundDi(tp_rel, 5),
+    TP50: roundDi(tp50_rel, 5),
 
-    TI: round(ti_rel, 5),
-    TI_H: round(getCategoryImpactRelative(calculation, "H", scenarioSuffix), 5),
-    TI_Ha: round(
+    TI: roundDi(ti_rel, 5),
+    TI_H: roundDi(
+      getCategoryImpactRelative(calculation, "H", scenarioSuffix),
+      5
+    ),
+    TI_Ha: roundDi(
       getDamageIndicatorImpactRelative(calculation, "Ha", scenarioSuffix),
       5
     ),
-    TI_Hb: round(
+    TI_Hb: roundDi(
       getDamageIndicatorImpactRelative(calculation, "Hb", scenarioSuffix),
       5
     ),
-    TI_Hc: round(
+    TI_Hc: roundDi(
       getDamageIndicatorImpactRelative(calculation, "Hc", scenarioSuffix),
       5
     ),
-    TI_S: round(getCategoryImpactRelative(calculation, "S", scenarioSuffix), 5),
-    TI_Sa: round(
+    TI_S: roundDi(
+      getCategoryImpactRelative(calculation, "S", scenarioSuffix),
+      5
+    ),
+    TI_Sa: roundDi(
       getDamageIndicatorImpactRelative(calculation, "Sa", scenarioSuffix),
       5
     ),
-    TI_Sb: round(
+    TI_Sb: roundDi(
       getDamageIndicatorImpactRelative(calculation, "Sb", scenarioSuffix),
       5
     ),
-    TI_Sc: round(
+    TI_Sc: roundDi(
       getDamageIndicatorImpactRelative(calculation, "Sc", scenarioSuffix),
       5
     ),
-    TI_Sd: round(
+    TI_Sd: roundDi(
       getDamageIndicatorImpactRelative(calculation, "Sd", scenarioSuffix),
       5
     ),
-    TI_E: round(getCategoryImpactRelative(calculation, "E", scenarioSuffix), 5),
-    TI_Ea: round(
+    TI_E: roundDi(
+      getCategoryImpactRelative(calculation, "E", scenarioSuffix),
+      5
+    ),
+    TI_Ea: roundDi(
       getDamageIndicatorImpactRelative(calculation, "Ea", scenarioSuffix),
       5
     ),
-    TI_F: round(getCategoryImpactRelative(calculation, "F", scenarioSuffix), 5),
-    TI_Fa: round(
+    TI_F: roundDi(
+      getCategoryImpactRelative(calculation, "F", scenarioSuffix),
+      5
+    ),
+    TI_Fa: roundDi(
       getDamageIndicatorImpactRelative(calculation, "Fa", scenarioSuffix),
       5
     ),
-    TI_Fb: round(
+    TI_Fb: roundDi(
       getDamageIndicatorImpactRelative(calculation, "Fb", scenarioSuffix),
       5
     ),
@@ -215,14 +224,14 @@ const getScenarioResult = (
       scenarioSuffix
     ),
 
-    DP: round((calculation[`dp${scenarioSuffix}`] / tp) * tp_rel, 5),
-    DP50: round(
+    DP: roundDi((calculation[`dp${scenarioSuffix}`] / tp) * tp_rel, 5),
+    DP50: roundDi(
       (calculation[`dp${scenarioSuffix}`] / tp) * tp_rel + DP50_offset,
       5
     ),
 
-    DI: round((calculation[`di${scenarioSuffix}`] / ti) * ti_rel, 5),
-    DI_H: round(
+    DI: roundDi((calculation[`di${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_H: roundDi(
       ((calculation[`di_Ha${scenarioSuffix}`] +
         calculation[`di_Hb${scenarioSuffix}`] +
         calculation[`di_Hc${scenarioSuffix}`]) /
@@ -230,10 +239,10 @@ const getScenarioResult = (
         ti_rel,
       5
     ),
-    DI_Ha: round((calculation[`di_Ha${scenarioSuffix}`] / ti) * ti_rel, 5),
-    DI_Hb: round((calculation[`di_Hb${scenarioSuffix}`] / ti) * ti_rel, 5),
-    DI_Hc: round((calculation[`di_Hc${scenarioSuffix}`] / ti) * ti_rel, 5),
-    DI_S: round(
+    DI_Ha: roundDi((calculation[`di_Ha${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Hb: roundDi((calculation[`di_Hb${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Hc: roundDi((calculation[`di_Hc${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_S: roundDi(
       ((calculation[`di_Sa${scenarioSuffix}`] +
         calculation[`di_Sb${scenarioSuffix}`] +
         calculation[`di_Sc${scenarioSuffix}`] +
@@ -242,21 +251,21 @@ const getScenarioResult = (
         ti_rel,
       5
     ),
-    DI_Sa: round((calculation[`di_Sa${scenarioSuffix}`] / ti) * ti_rel, 5),
-    DI_Sb: round((calculation[`di_Sb${scenarioSuffix}`] / ti) * ti_rel, 5),
-    DI_Sc: round((calculation[`di_Sc${scenarioSuffix}`] / ti) * ti_rel, 5),
-    DI_Sd: round((calculation[`di_Sd${scenarioSuffix}`] / ti) * ti_rel, 5),
-    DI_E: round((calculation[`di_Ea${scenarioSuffix}`] / ti) * ti_rel, 5),
-    DI_Ea: round((calculation[`di_Ea${scenarioSuffix}`] / ti) * ti_rel, 5),
-    DI_F: round(
+    DI_Sa: roundDi((calculation[`di_Sa${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Sb: roundDi((calculation[`di_Sb${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Sc: roundDi((calculation[`di_Sc${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Sd: roundDi((calculation[`di_Sd${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_E: roundDi((calculation[`di_Ea${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Ea: roundDi((calculation[`di_Ea${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_F: roundDi(
       ((calculation[`di_Fa${scenarioSuffix}`] +
         calculation[`di_Fb${scenarioSuffix}`]) /
         ti) *
         ti_rel,
       5
     ),
-    DI_Fa: round((calculation[`di_Fa${scenarioSuffix}`] / ti) * ti_rel, 5),
-    DI_Fb: round((calculation[`di_Fb${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Fa: roundDi((calculation[`di_Fa${scenarioSuffix}`] / ti) * ti_rel, 5),
+    DI_Fb: roundDi((calculation[`di_Fb${scenarioSuffix}`] / ti) * ti_rel, 5),
   };
 };
 
@@ -284,10 +293,12 @@ export default function CalculationPage() {
   const [calculations, setCalculations] = useState<RiskCalculation[] | null>(
     null
   );
-  const [results, setResults] = useState<DVRiskFile[] | null>(null);
-  const [resultsRC, setResultsRC] = useState<DVRiskCascade<SmallRisk>[] | null>(
-    null
-  );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_results, setResults] = useState<DVRiskFile[] | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_resultsRC, setResultsRC] = useState<
+    DVRiskCascade<SmallRisk>[] | null
+  >(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   const logger = (line: string, slice: number = 0) => {
@@ -412,6 +423,17 @@ export default function CalculationPage() {
         return calc;
       });
   }, [riskFiles]);
+
+  // const lastCascadeCalculations: CascadeCalculation[] = useMemo(() => {
+  //   if (!cascades || !calculations) return [];
+
+  //   return cascades
+  //     .filter((c) => c.cr4de_result_snapshot)
+  //     .map((c) => ({
+  //       ...c,
+  //       results: JSON.parse(c.cr4de_result_snapshot || "{}"),
+  //     }));
+  // }, [cascades]);
 
   useEffect(() => {
     if (window.Worker) {
@@ -875,6 +897,9 @@ export default function CalculationPage() {
 
             const ip = (c[`ip${scenarioSuffix}`] / tp) * tp_rel;
 
+            cResult[`TP${scenarioSuffix}`] = c[`tp${scenarioSuffix}`];
+            cResult[`TP50${scenarioSuffix}`] = c[`tp50${scenarioSuffix}`];
+
             cResult[`IP_All2${s[0].toUpperCase() as "C" | "M" | "E"}`] = ip;
 
             cResult[`IP50_All2${s[0].toUpperCase() as "C" | "M" | "E"}`] =
@@ -892,6 +917,17 @@ export default function CalculationPage() {
           (s) => {
             const scenarioSuffix = getScenarioSuffix(s);
             const scenarioLetter = getScenarioLetter(s);
+            cResult[`TI${scenarioSuffix}`] = e[`ti${scenarioSuffix}`];
+            cResult[`TI_Ha${scenarioSuffix}`] = e[`ti_Ha${scenarioSuffix}`];
+            cResult[`TI_Hb${scenarioSuffix}`] = e[`ti_Hb${scenarioSuffix}`];
+            cResult[`TI_Hc${scenarioSuffix}`] = e[`ti_Hc${scenarioSuffix}`];
+            cResult[`TI_Sa${scenarioSuffix}`] = e[`ti_Sa${scenarioSuffix}`];
+            cResult[`TI_Sb${scenarioSuffix}`] = e[`ti_Sb${scenarioSuffix}`];
+            cResult[`TI_Sc${scenarioSuffix}`] = e[`ti_Sc${scenarioSuffix}`];
+            cResult[`TI_Sd${scenarioSuffix}`] = e[`ti_Sd${scenarioSuffix}`];
+            cResult[`TI_Ea${scenarioSuffix}`] = e[`ti_Ea${scenarioSuffix}`];
+            cResult[`TI_Fa${scenarioSuffix}`] = e[`ti_Fa${scenarioSuffix}`];
+            cResult[`TI_Fb${scenarioSuffix}`] = e[`ti_Fb${scenarioSuffix}`];
 
             const ti = calculation[`ti${scenarioSuffix}`];
             // const tp_yearly = getYearlyProbability(tp);
@@ -968,14 +1004,14 @@ export default function CalculationPage() {
 
     let i = calculations.length;
 
-    for (const [, cR] of Object.entries(cRDict)) {
+    for (const [cId, cR] of Object.entries(cRDict)) {
       if (Object.keys(cR).length <= 0) {
         continue;
       }
 
-      // await api.updateCascade(cId, {
-      //   cr4de_result_snapshot: JSON.stringify(cR),
-      // });
+      await api.updateCascade(cId, {
+        cr4de_result_snapshot: JSON.stringify(cR),
+      });
 
       setCalculationProgress(
         (100 * (i + 1)) / (calculations.length + Object.keys(cRDict).length)
@@ -1199,10 +1235,10 @@ export default function CalculationPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedNode]);
 
-  const riskFile =
-    (results
-      ? results.find((r) => r.cr4de_riskfilesid === selectedNode)
-      : null) || null;
+  // const riskFile =
+  //   (results
+  //     ? results.find((r) => r.cr4de_riskfilesid === selectedNode)
+  //     : null) || null;
   //console.log(calculations);
   return (
     <>
@@ -1355,7 +1391,7 @@ export default function CalculationPage() {
             setSelectedNodeId={setSelectedNode}
           />
 
-          <RiskNetworkGraph
+          {/* <RiskNetworkGraph
             calculations={calculations}
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}
@@ -1365,7 +1401,7 @@ export default function CalculationPage() {
             calculations={calculations}
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}
-          />
+          /> */}
 
           <RiskFilesDataGrid
             data={calculations}
@@ -1379,7 +1415,7 @@ export default function CalculationPage() {
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}
           />
-          <RiskProfileGraph
+          {/* <RiskProfileGraph
             calculations={calculations}
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}
@@ -1393,7 +1429,7 @@ export default function CalculationPage() {
             calculations={calculations}
             selectedNodeId={selectedNode}
             setSelectedNodeId={setSelectedNode}
-          />
+          /> */}
         </Box>
       </Container>
     </>

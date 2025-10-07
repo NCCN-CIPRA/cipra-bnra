@@ -53,25 +53,37 @@ export function returnPeriodMonthsFromPTimeframe(
   pTimeframe: number,
   timeframeMonths: number
 ) {
-  return -timeframeMonths / Math.log(1 - pTimeframe);
+  return Math.abs(-timeframeMonths / Math.log(1 - pTimeframe));
 }
 
-export function pDailyFromReturnPeriodMonths(rpMonths: number) {
+export function pDailyFromReturnPeriodMonths(rpMonths: number | null) {
   return pTimeframeFromReturnPeriodMonths(rpMonths, 1 / 30.437);
 }
 
 export function pTimeframeFromReturnPeriodMonths(
-  rpMonths: number,
+  rpMonths: number | null,
   timeframeMonths: number
 ) {
+  if (rpMonths === null) return 0;
+
   return 1 - Math.exp(-timeframeMonths / rpMonths);
 }
 
-export function pScale5FromReturnPeriodMonths(rpMonths: number, round = 10) {
+export function pScale5FromReturnPeriodMonths(
+  rpMonths: number | null,
+  round = 10
+) {
+  if (rpMonths === null) return 0;
+
   return Math.round(round * (4.5 - Math.log10(rpMonths / (12 * 3)))) / round;
 }
 
-export function pScale7FromReturnPeriodMonths(rpMonths: number, round = 10) {
+export function pScale7FromReturnPeriodMonths(
+  rpMonths: number | null,
+  round = 10
+) {
+  if (rpMonths === null) return 0;
+
   return Math.round((round * (12 - Math.log(rpMonths / 12))) / 2.3) / round;
 }
 

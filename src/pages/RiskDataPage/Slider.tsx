@@ -1,26 +1,26 @@
 import { Box, Slider as MuiSlider, Tooltip, Typography } from "@mui/material";
+import { useState } from "react";
 
 export function Slider({
-  value,
+  initialValue,
   prefix,
   maxScale = 5,
+  onChange = null,
 }: {
-  value: number;
+  initialValue: number;
   prefix: string;
   maxScale: number;
+  onChange?: ((newValue: number) => unknown) | null;
 }) {
-  // const [value] = useState(initialValue);
+  const [value, setValue] = useState(initialValue);
 
-  //   const handleChangeValue = (_event: Event, newValue: number | number[]) => {
-  //     setValue(newValue as number);
-  //   };
+  const handleChangeValue = (_event: Event, newValue: number | number[]) => {
+    setValue(newValue as number);
+  };
 
-  //   const handleChangeCommitted = (
-  //     _event: unknown,
-  //     newValue: number | number[]
-  //   ) => {
-  //     if (onChange) onChange(`${prefix}${newValue}`);
-  //   };
+  const handleChangeCommitted = (_event: unknown, newValue: number) => {
+    if (onChange) onChange(newValue);
+  };
 
   //   const max = 5.5;
   //   const spreadMin = spread ? (100 * spread[0]) / max : 0;
@@ -43,10 +43,10 @@ export function Slider({
     >
       <MuiSlider
         value={value}
-        // onChange={onChange !== null ? handleChangeValue : undefined}
-        // onChangeCommitted={
-        //   onChange !== null ? handleChangeCommitted : undefined
-        // }
+        onChange={onChange !== null ? handleChangeValue : undefined}
+        onChangeCommitted={
+          onChange !== null ? handleChangeCommitted : undefined
+        }
         valueLabelDisplay="auto"
         step={0.5}
         min={0}

@@ -11,7 +11,7 @@ import {
 import { getWorstCaseScenario } from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
 
-const filteredAttributes = ["timestamp", "reliability"];
+const filteredAttributes = ["timestamp", "reliability", "dp", "dp50"];
 
 const columns: GridColDef[] = [
   {
@@ -103,12 +103,8 @@ export default function CalculationsDelta({
             (o[attr as keyof RiskCalculation] as number);
         }
       }
-
-      // if (diff.riskId === undefined) {
-      //   console.log(diff);
-      // } else {
-      //   console.log(diff.riskId);
-      // }
+      diff.tp = (diff.tp_c + diff.tp_m + diff.tp_e) / 3;
+      diff.ti = (diff.ti_c + diff.ti_m + diff.ti_e) / 3;
 
       return diff as DiffRiskCalculation;
     });

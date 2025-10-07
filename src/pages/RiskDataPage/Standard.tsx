@@ -19,14 +19,21 @@ import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { Slider } from "./Slider";
 import {
   getAverageDirectImpact,
+  getAverageDirectImpactDynamic,
   getAverageIndirectImpact,
+  getAverageIndirectImpactDynamic,
 } from "../../functions/Impact";
 import {
   getAverageDirectProbability,
+  getAverageDirectProbabilityDynamic,
   getAverageIndirectProbability,
+  getAverageIndirectProbabilityDynamic,
 } from "../../functions/Probability";
 import { CascadeSection, VISUALS } from "./CascadeSection";
 import { DirectSection } from "./DirectSection";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../BasePage";
+import { Environment } from "../../types/global";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion elevation={0} square {...props} />
@@ -79,10 +86,22 @@ export default function Standard({
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
   visuals: VISUALS;
 }) {
+  const { environment } = useOutletContext<BasePageContext>();
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
 
-  const causesWithDP = [
-    ...causes.map((ca) => ({
+  const dp = getAverageDirectProbability(riskFile);
+  const dpDynamic =
+    environment === Environment.DYNAMIC
+      ? getAverageDirectProbabilityDynamic(riskFile, causes)
+      : null;
+  const causesWithP = causes.map((c) => ({
+    ...c,
+    ip: getAverageIndirectProbability(c, riskFile),
+    ipDynamic: getAverageIndirectProbabilityDynamic(c, riskFile, causes),
+  }));
+
+  const causeElements = [
+    ...causesWithP.map((ca) => ({
       p: getAverageIndirectProbability(ca, riskFile),
       el: (
         <CascadeSection
@@ -92,15 +111,24 @@ export default function Standard({
           cascade={ca}
           visuals={visuals}
           subtitle={
-            <Typography variant="body1" color="warning">
-              <b>
-                {Math.round(
-                  10000 * getAverageIndirectProbability(ca, riskFile)
-                ) / 100}
-                %
-              </b>{" "}
-              of total probabitity
-            </Typography>
+            <Stack direction="column" sx={{ textAlign: "right" }}>
+              <Typography variant="body1" color="warning">
+                <b>
+                  {Math.round(
+                    10000 * (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
+                  ) / 100}
+                  %
+                </b>{" "}
+                of total probability
+              </Typography>
+              {ca.ipDynamic !== null && (
+                <Typography variant="caption">
+                  {ca.ipDynamic >= ca.ip ? "+" : ""}
+                  {Math.round(10000 * (ca.ipDynamic - ca.ip)) / 100}% compared
+                  to public environment
+                </Typography>
+              )}
+            </Stack>
           }
         />
       ),
@@ -114,19 +142,63 @@ export default function Standard({
           quantiFields={["dp"]}
           title="Other causes"
           subtitle={
-            <Typography variant="body1" color="warning">
-              <b>
-                {Math.round(10000 * getAverageDirectProbability(riskFile)) /
-                  100}
-                %
-              </b>{" "}
-              of total probabitity
-            </Typography>
+            <Stack direction="column" sx={{ textAlign: "right" }}>
+              <Typography variant="body1" color="warning">
+                <b>
+                  {Math.round(10000 * (dpDynamic !== null ? dpDynamic : dp)) /
+                    100}
+                  %
+                </b>{" "}
+                of total probability
+              </Typography>
+              {dpDynamic !== null && (
+                <Typography variant="caption">
+                  {dpDynamic >= dp ? "+" : ""}
+                  {Math.round(10000 * (dpDynamic - dp)) / 100}% compared to
+                  public environment
+                </Typography>
+              )}
+            </Stack>
           }
         />
       ),
     },
   ];
+
+  const effectsWithI = effects.map((e) => ({
+    cascade: e,
+    i: getAverageIndirectImpact(e, riskFile),
+    iDynamic:
+      environment === Environment.DYNAMIC
+        ? getAverageIndirectImpactDynamic(e, riskFile, effects)
+        : null,
+  }));
+
+  const iDirectH = getAverageDirectImpact(riskFile, ["ha", "hb", "hc"]);
+  const iDirectHDynamic =
+    environment === Environment.DYNAMIC
+      ? getAverageDirectImpactDynamic(riskFile, effects, ["ha", "hb", "hc"])
+      : null;
+  const iDirectS = getAverageDirectImpact(riskFile, ["sa", "sb", "sc", "sd"]);
+  const iDirectSDynamic =
+    environment === Environment.DYNAMIC
+      ? getAverageDirectImpactDynamic(riskFile, effects, [
+          "sa",
+          "sb",
+          "sc",
+          "sd",
+        ])
+      : null;
+  const iDirectE = getAverageDirectImpact(riskFile, ["ea"]);
+  const iDirectEDynamic =
+    environment === Environment.DYNAMIC
+      ? getAverageDirectImpactDynamic(riskFile, effects, ["ea"])
+      : null;
+  const iDirectF = getAverageDirectImpact(riskFile, ["fa", "fb"]);
+  const iDirectFDynamic =
+    environment === Environment.DYNAMIC
+      ? getAverageDirectImpactDynamic(riskFile, effects, ["fa", "fb"])
+      : null;
 
   return (
     <>
@@ -136,7 +208,7 @@ export default function Standard({
         </Typography>
 
         <Box sx={{ mb: 8 }}>
-          {causesWithDP.sort((a, b) => b.p - a.p).map((ca) => ca.el)}
+          {causeElements.sort((a, b) => b.p - a.p).map((ca) => ca.el)}
         </Box>
 
         <Typography variant="h4" sx={{ mx: 0, mb: 2 }}>
@@ -144,29 +216,34 @@ export default function Standard({
         </Typography>
 
         <Box sx={{ mb: 8 }}>
-          {effects
-            .sort(
-              (a, b) =>
-                getAverageIndirectImpact(b, riskFile) -
-                getAverageIndirectImpact(a, riskFile)
-            )
-            .map((ca) => (
+          {effectsWithI
+            .sort((a, b) => b.i - a.i)
+            .map((e) => (
               <CascadeSection
-                key={ca._cr4de_risk_cascade_value}
+                key={e.cascade._cr4de_risk_cascade_value}
                 cause={riskFile}
-                effect={ca.cr4de_effect_risk}
-                cascade={ca}
+                effect={e.cascade.cr4de_effect_risk}
+                cascade={e.cascade}
                 visuals={visuals}
                 subtitle={
-                  <Typography variant="body1" color="warning">
-                    <b>
-                      {Math.round(
-                        10000 * getAverageIndirectImpact(ca, riskFile)
-                      ) / 100}
-                      %
-                    </b>{" "}
-                    of total impact
-                  </Typography>
+                  <Stack direction="column" sx={{ textAlign: "right" }}>
+                    <Typography variant="body1" color="warning">
+                      <b>
+                        {Math.round(
+                          10000 * (e.iDynamic !== null ? e.iDynamic : e.i)
+                        ) / 100}
+                        %
+                      </b>{" "}
+                      of expected impact
+                    </Typography>
+                    {e.iDynamic !== null && (
+                      <Typography variant="caption">
+                        {e.iDynamic >= e.i ? "+" : ""}
+                        {Math.round(10000 * (e.iDynamic - e.i)) / 100}% compared
+                        to public environment
+                      </Typography>
+                    )}
+                  </Stack>
                 }
               />
             ))}
@@ -183,15 +260,25 @@ export default function Standard({
             quantiFields={["ha", "hb", "hc"]}
             qualiField="h"
             subtitle={
-              <Typography variant="body1" color="warning">
-                <b>
-                  {Math.round(
-                    10000 * getAverageDirectImpact(riskFile, ["ha", "hb", "hc"])
-                  ) / 100}
-                  %
-                </b>{" "}
-                of expected impact
-              </Typography>
+              <Stack direction="column" sx={{ textAlign: "right" }}>
+                <Typography variant="body1" color="warning">
+                  <b>
+                    {Math.round(
+                      10000 *
+                        (iDirectHDynamic !== null ? iDirectHDynamic : iDirectH)
+                    ) / 100}
+                    %
+                  </b>{" "}
+                  of expected impact
+                </Typography>
+                {iDirectHDynamic !== null && (
+                  <Typography variant="caption">
+                    {iDirectHDynamic >= iDirectH ? "+" : ""}
+                    {Math.round(10000 * (iDirectHDynamic - iDirectH)) / 100}%
+                    compared to public environment
+                  </Typography>
+                )}
+              </Stack>
             }
           />
           <DirectSection
@@ -200,16 +287,25 @@ export default function Standard({
             quantiFields={["sa", "sb", "sc", "sd"]}
             qualiField="s"
             subtitle={
-              <Typography variant="body1" color="warning">
-                <b>
-                  {Math.round(
-                    10000 *
-                      getAverageDirectImpact(riskFile, ["sa", "sb", "sc", "sd"])
-                  ) / 100}
-                  %
-                </b>{" "}
-                of total impact
-              </Typography>
+              <Stack direction="column" sx={{ textAlign: "right" }}>
+                <Typography variant="body1" color="warning">
+                  <b>
+                    {Math.round(
+                      10000 *
+                        (iDirectSDynamic !== null ? iDirectSDynamic : iDirectS)
+                    ) / 100}
+                    %
+                  </b>{" "}
+                  of expected impact
+                </Typography>
+                {iDirectSDynamic !== null && (
+                  <Typography variant="caption">
+                    {iDirectSDynamic >= iDirectS ? "+" : ""}
+                    {Math.round(10000 * (iDirectSDynamic - iDirectS)) / 100}%
+                    compared to public environment
+                  </Typography>
+                )}
+              </Stack>
             }
           />
           <DirectSection
@@ -218,15 +314,25 @@ export default function Standard({
             quantiFields={["ea"]}
             qualiField="e"
             subtitle={
-              <Typography variant="body1" color="warning">
-                <b>
-                  {Math.round(
-                    10000 * getAverageDirectImpact(riskFile, ["ea"])
-                  ) / 100}
-                  %
-                </b>{" "}
-                of total impact
-              </Typography>
+              <Stack direction="column" sx={{ textAlign: "right" }}>
+                <Typography variant="body1" color="warning">
+                  <b>
+                    {Math.round(
+                      10000 *
+                        (iDirectEDynamic !== null ? iDirectEDynamic : iDirectE)
+                    ) / 100}
+                    %
+                  </b>{" "}
+                  of expected impact
+                </Typography>
+                {iDirectEDynamic !== null && (
+                  <Typography variant="caption">
+                    {iDirectEDynamic >= iDirectE ? "+" : ""}
+                    {Math.round(10000 * (iDirectEDynamic - iDirectE)) / 100}%
+                    compared to public environment
+                  </Typography>
+                )}
+              </Stack>
             }
           />
           <DirectSection
@@ -235,15 +341,25 @@ export default function Standard({
             quantiFields={["fa", "fb"]}
             qualiField="f"
             subtitle={
-              <Typography variant="body1" color="warning">
-                <b>
-                  {Math.round(
-                    10000 * getAverageDirectImpact(riskFile, ["fa", "fb"])
-                  ) / 100}
-                  %
-                </b>{" "}
-                of total impact
-              </Typography>
+              <Stack direction="column" sx={{ textAlign: "right" }}>
+                <Typography variant="body1" color="warning">
+                  <b>
+                    {Math.round(
+                      10000 *
+                        (iDirectFDynamic !== null ? iDirectFDynamic : iDirectF)
+                    ) / 100}
+                    %
+                  </b>{" "}
+                  of expected impact
+                </Typography>
+                {iDirectFDynamic !== null && (
+                  <Typography variant="caption">
+                    {iDirectFDynamic >= iDirectF ? "+" : ""}
+                    {Math.round(10000 * (iDirectFDynamic - iDirectF)) / 100}%
+                    compared to public environment
+                  </Typography>
+                )}
+              </Stack>
             }
           />
         </Box>
@@ -521,7 +637,7 @@ function CCSection({
                         </Tooltip>
                         <Slider
                           // mx={0}
-                          value={riskFile.cr4de_quanti[n].dp50.scale}
+                          initialValue={riskFile.cr4de_quanti[n].dp50.scale}
                           prefix={"DP"}
                           maxScale={5}
                           // name={`cr4de_climate_change_quanti${getScenarioSuffix(

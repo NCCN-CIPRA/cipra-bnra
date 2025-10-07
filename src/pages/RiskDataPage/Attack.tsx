@@ -22,10 +22,13 @@ import {
   getAverageDirectImpactDynamic,
   getAverageIndirectImpact,
   getAverageIndirectImpactDynamic,
+  // getAverageIndirectImpactDynamic,
 } from "../../functions/Impact";
 import {
   getAverageDirectProbability,
+  getAverageDirectProbabilityDynamic,
   getAverageIndirectProbability,
+  getAverageIndirectProbabilityDynamic,
 } from "../../functions/Probability";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 import { CascadeSection, VISUALS } from "./CascadeSection";
@@ -88,30 +91,22 @@ export default function Attack({
   const { environment } = useOutletContext<BasePageContext>();
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
 
-  // const ti = getTotalImpactEuros(riskFile, SCENARIOS.CONSIDERABLE);
-  // const tiD = getTotalImpactEurosDynamic(
-  //   riskFile,
-  //   effects,
-  //   SCENARIOS.CONSIDERABLE
-  // );
-  // console.log(ti, tiD, ti / tiD);
-  // console.log(
-  //   "H",
-  //   getAverageDirectImpact(riskFile, ["hc"]),
-  //   getAverageDirectImpactDynamic(riskFile, effects, ["hc"])
-  // );
-  // console.log(
-  //   "F",
-  //   getAverageDirectImpact(riskFile, ["fa", "fb"]),
-  //   getAverageDirectImpactDynamic(riskFile, effects, ["fa", "fb"]),
-  //   riskFile.cr4de_quanti
-  // );
+  const dp = getAverageDirectProbability(riskFile);
+  const dpDynamic =
+    environment === Environment.DYNAMIC
+      ? getAverageDirectProbabilityDynamic(riskFile, causes)
+      : null;
+  const causesWithP = causes.map((c) => ({
+    ...c,
+    ip: getAverageIndirectProbability(c, riskFile),
+    ipDynamic: getAverageIndirectProbabilityDynamic(c, riskFile, causes),
+  }));
 
   const actors = [
-    ...causes
+    ...causesWithP
       .filter((c) => c.cr4de_cause_risk.cr4de_risk_type === RISK_TYPE.MANMADE)
       .map((ca) => ({
-        p: getAverageIndirectProbability(ca, riskFile),
+        p: ca.ip,
         el: (
           <CascadeSection
             key={ca._cr4de_risk_cascade_value}
@@ -121,21 +116,30 @@ export default function Attack({
             visuals={visuals}
             disabled={true}
             subtitle={
-              <Typography variant="body1" color="warning">
-                <b>
-                  {Math.round(
-                    10000 * getAverageIndirectProbability(ca, riskFile)
-                  ) / 100}
-                  %
-                </b>{" "}
-                of total probabitity
-              </Typography>
+              <Stack direction="column" sx={{ textAlign: "right" }}>
+                <Typography variant="body1" color="warning">
+                  <b>
+                    {Math.round(
+                      10000 * (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
+                    ) / 100}
+                    %
+                  </b>{" "}
+                  of total probability
+                </Typography>
+                {ca.ipDynamic !== null && (
+                  <Typography variant="caption">
+                    {ca.ipDynamic >= ca.ip ? "+" : ""}
+                    {Math.round(10000 * (ca.ipDynamic - ca.ip)) / 100}% compared
+                    to public environment
+                  </Typography>
+                )}
+              </Stack>
             }
           />
         ),
       })),
     {
-      p: getAverageDirectProbability(riskFile),
+      p: dp,
       el: (
         <DirectSection
           riskFile={parsedRiskFile}
@@ -143,14 +147,23 @@ export default function Attack({
           quantiFields={["dp"]}
           title="Other actors"
           subtitle={
-            <Typography variant="body1" color="warning">
-              <b>
-                {Math.round(10000 * getAverageDirectProbability(riskFile)) /
-                  100}
-                %
-              </b>{" "}
-              of total probabitity
-            </Typography>
+            <Stack direction="column" sx={{ textAlign: "right" }}>
+              <Typography variant="body1" color="warning">
+                <b>
+                  {Math.round(10000 * (dpDynamic !== null ? dpDynamic : dp)) /
+                    100}
+                  %
+                </b>{" "}
+                of total probability
+              </Typography>
+              {dpDynamic !== null && (
+                <Typography variant="caption">
+                  {dpDynamic >= dp ? "+" : ""}
+                  {Math.round(10000 * (dpDynamic - dp)) / 100}% compared to
+                  public environment
+                </Typography>
+              )}
+            </Stack>
           }
         />
       ),
@@ -159,16 +172,38 @@ export default function Attack({
 
   const dynamicEffects = effects.map((e) => ({
     cascade: e,
-    i:
-      environment === Environment.PUBLIC
-        ? getAverageIndirectImpact(e, riskFile)
-        : getAverageIndirectImpactDynamic(
-            e,
-            riskFile,
-            e.cr4de_effect_risk,
-            effects
-          ),
+    i: getAverageIndirectImpact(e, riskFile),
+    iDynamic:
+      environment === Environment.DYNAMIC
+        ? getAverageIndirectImpactDynamic(e, riskFile, effects)
+        : null,
   }));
+
+  const iDirectH = getAverageDirectImpact(riskFile, ["ha", "hb", "hc"]);
+  const iDirectHDynamic =
+    environment === Environment.DYNAMIC
+      ? getAverageDirectImpactDynamic(riskFile, effects, ["ha", "hb", "hc"])
+      : null;
+  const iDirectS = getAverageDirectImpact(riskFile, ["sa", "sb", "sc", "sd"]);
+  const iDirectSDynamic =
+    environment === Environment.DYNAMIC
+      ? getAverageDirectImpactDynamic(riskFile, effects, [
+          "sa",
+          "sb",
+          "sc",
+          "sd",
+        ])
+      : null;
+  const iDirectE = getAverageDirectImpact(riskFile, ["ea"]);
+  const iDirectEDynamic =
+    environment === Environment.DYNAMIC
+      ? getAverageDirectImpactDynamic(riskFile, effects, ["ea"])
+      : null;
+  const iDirectF = getAverageDirectImpact(riskFile, ["fa", "fb"]);
+  const iDirectFDynamic =
+    environment === Environment.DYNAMIC
+      ? getAverageDirectImpactDynamic(riskFile, effects, ["fa", "fb"])
+      : null;
 
   return (
     <>
@@ -186,15 +221,11 @@ export default function Attack({
         </Typography>
 
         <Box sx={{ mb: 8 }}>
-          {causes
+          {causesWithP
             .filter(
               (c) => c.cr4de_cause_risk.cr4de_risk_type !== RISK_TYPE.MANMADE
             )
-            .sort(
-              (a, b) =>
-                getAverageIndirectProbability(b, riskFile) -
-                getAverageIndirectProbability(a, riskFile)
-            )
+            .sort((a, b) => b.ip - a.ip)
             .map((ca) => (
               <CascadeSection
                 key={ca._cr4de_risk_cascade_value}
@@ -203,15 +234,24 @@ export default function Attack({
                 cascade={ca}
                 visuals={visuals}
                 subtitle={
-                  <Typography variant="body1" color="warning">
-                    <b>
-                      {Math.round(
-                        10000 * getAverageIndirectProbability(ca, riskFile)
-                      ) / 100}
-                      %
-                    </b>{" "}
-                    of total probability
-                  </Typography>
+                  <Stack direction="column" sx={{ textAlign: "right" }}>
+                    <Typography variant="body1" color="warning">
+                      <b>
+                        {Math.round(
+                          10000 * (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
+                        ) / 100}
+                        %
+                      </b>{" "}
+                      of total probability
+                    </Typography>
+                    {ca.ipDynamic !== null && (
+                      <Typography variant="caption">
+                        {ca.ipDynamic >= ca.ip ? "+" : ""}
+                        {Math.round(10000 * (ca.ipDynamic - ca.ip)) / 100}%
+                        compared to public environment
+                      </Typography>
+                    )}
+                  </Stack>
                 }
               />
             ))}
@@ -232,9 +272,24 @@ export default function Attack({
                 cascade={e.cascade}
                 visuals={visuals}
                 subtitle={
-                  <Typography variant="body1" color="warning">
-                    <b>{Math.round(10000 * e.i) / 100}%</b> of expected impact
-                  </Typography>
+                  <Stack direction="column" sx={{ textAlign: "right" }}>
+                    <Typography variant="body1" color="warning">
+                      <b>
+                        {Math.round(
+                          10000 * (e.iDynamic !== null ? e.iDynamic : e.i)
+                        ) / 100}
+                        %
+                      </b>{" "}
+                      of expected impact
+                    </Typography>
+                    {e.iDynamic !== null && (
+                      <Typography variant="caption">
+                        {e.iDynamic >= e.i ? "+" : ""}
+                        {Math.round(10000 * (e.iDynamic - e.i)) / 100}% compared
+                        to public environment
+                      </Typography>
+                    )}
+                  </Stack>
                 }
               />
             ))}
@@ -251,22 +306,25 @@ export default function Attack({
             quantiFields={["ha", "hb", "hc"]}
             qualiField="h"
             subtitle={
-              <Typography variant="body1" color="warning">
-                <b>
-                  {Math.round(
-                    10000 *
-                      (environment === Environment.PUBLIC
-                        ? getAverageDirectImpact(riskFile, ["ha", "hb", "hc"])
-                        : getAverageDirectImpactDynamic(riskFile, effects, [
-                            "ha",
-                            "hb",
-                            "hc",
-                          ]))
-                  ) / 100}
-                  %
-                </b>{" "}
-                of expected impact
-              </Typography>
+              <Stack direction="column" sx={{ textAlign: "right" }}>
+                <Typography variant="body1" color="warning">
+                  <b>
+                    {Math.round(
+                      10000 *
+                        (iDirectHDynamic !== null ? iDirectHDynamic : iDirectH)
+                    ) / 100}
+                    %
+                  </b>{" "}
+                  of expected impact
+                </Typography>
+                {iDirectHDynamic !== null && (
+                  <Typography variant="caption">
+                    {iDirectHDynamic >= iDirectH ? "+" : ""}
+                    {Math.round(10000 * (iDirectHDynamic - iDirectH)) / 100}%
+                    compared to public environment
+                  </Typography>
+                )}
+              </Stack>
             }
           />
           <DirectSection
@@ -275,28 +333,25 @@ export default function Attack({
             quantiFields={["sa", "sb", "sc", "sd"]}
             qualiField="s"
             subtitle={
-              <Typography variant="body1" color="warning">
-                <b>
-                  {Math.round(
-                    10000 *
-                      (environment === Environment.PUBLIC
-                        ? getAverageDirectImpact(riskFile, [
-                            "sa",
-                            "sb",
-                            "sc",
-                            "sd",
-                          ])
-                        : getAverageDirectImpactDynamic(riskFile, effects, [
-                            "sa",
-                            "sb",
-                            "sc",
-                            "sd",
-                          ]))
-                  ) / 100}
-                  %
-                </b>{" "}
-                of total impact
-              </Typography>
+              <Stack direction="column" sx={{ textAlign: "right" }}>
+                <Typography variant="body1" color="warning">
+                  <b>
+                    {Math.round(
+                      10000 *
+                        (iDirectSDynamic !== null ? iDirectSDynamic : iDirectS)
+                    ) / 100}
+                    %
+                  </b>{" "}
+                  of expected impact
+                </Typography>
+                {iDirectSDynamic !== null && (
+                  <Typography variant="caption">
+                    {iDirectSDynamic >= iDirectS ? "+" : ""}
+                    {Math.round(10000 * (iDirectSDynamic - iDirectS)) / 100}%
+                    compared to public environment
+                  </Typography>
+                )}
+              </Stack>
             }
           />
           <DirectSection
@@ -305,20 +360,25 @@ export default function Attack({
             quantiFields={["ea"]}
             qualiField="e"
             subtitle={
-              <Typography variant="body1" color="warning">
-                <b>
-                  {Math.round(
-                    10000 *
-                      (environment === Environment.PUBLIC
-                        ? getAverageDirectImpact(riskFile, ["ea"])
-                        : getAverageDirectImpactDynamic(riskFile, effects, [
-                            "ea",
-                          ]))
-                  ) / 100}
-                  %
-                </b>{" "}
-                of total impact
-              </Typography>
+              <Stack direction="column" sx={{ textAlign: "right" }}>
+                <Typography variant="body1" color="warning">
+                  <b>
+                    {Math.round(
+                      10000 *
+                        (iDirectEDynamic !== null ? iDirectEDynamic : iDirectE)
+                    ) / 100}
+                    %
+                  </b>{" "}
+                  of expected impact
+                </Typography>
+                {iDirectEDynamic !== null && (
+                  <Typography variant="caption">
+                    {iDirectEDynamic >= iDirectE ? "+" : ""}
+                    {Math.round(10000 * (iDirectEDynamic - iDirectE)) / 100}%
+                    compared to public environment
+                  </Typography>
+                )}
+              </Stack>
             }
           />
           <DirectSection
@@ -327,21 +387,25 @@ export default function Attack({
             quantiFields={["fa", "fb"]}
             qualiField="f"
             subtitle={
-              <Typography variant="body1" color="warning">
-                <b>
-                  {Math.round(
-                    10000 *
-                      (environment === Environment.PUBLIC
-                        ? getAverageDirectImpact(riskFile, ["fa", "fb"])
-                        : getAverageDirectImpactDynamic(riskFile, effects, [
-                            "fa",
-                            "fb",
-                          ]))
-                  ) / 100}
-                  %
-                </b>{" "}
-                of total impact
-              </Typography>
+              <Stack direction="column" sx={{ textAlign: "right" }}>
+                <Typography variant="body1" color="warning">
+                  <b>
+                    {Math.round(
+                      10000 *
+                        (iDirectFDynamic !== null ? iDirectFDynamic : iDirectF)
+                    ) / 100}
+                    %
+                  </b>{" "}
+                  of expected impact
+                </Typography>
+                {iDirectFDynamic !== null && (
+                  <Typography variant="caption">
+                    {iDirectFDynamic >= iDirectF ? "+" : ""}
+                    {Math.round(10000 * (iDirectFDynamic - iDirectF)) / 100}%
+                    compared to public environment
+                  </Typography>
+                )}
+              </Stack>
             }
           />
         </Box>
@@ -619,7 +683,7 @@ function CCSection({
                         </Tooltip>
                         <Slider
                           // mx={0}
-                          value={riskFile.cr4de_quanti[n].dp50.scale}
+                          initialValue={riskFile.cr4de_quanti[n].dp50.scale}
                           prefix={"DP"}
                           maxScale={5}
                           // name={`cr4de_climate_change_quanti${getScenarioSuffix(

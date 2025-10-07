@@ -26,7 +26,7 @@ export function DirectSection({
   return (
     <RiskDataAccordion
       title={
-        <Stack direction="row">
+        <Stack direction="row" alignItems="center">
           <Typography sx={{ flex: 1 }}>{title}</Typography>
           {subtitle}
         </Stack>

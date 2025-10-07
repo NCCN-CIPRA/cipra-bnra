@@ -102,15 +102,22 @@ export type CauseSnapshotResults = {
 };
 
 export type CauseSnapshotScenarioResults = {
+  tp: {
+    rpMonths: number | null; // Return period in months of the cause scenario as used in the calculations
+  };
   ip: {
     yearly: {
       scale: number; // Indirect probability of the cascade causing the scenario on the tp scale (0 - 5)
     };
+
+    scale5TP: number; // Total probability of the cause scenario on the tp scale used in the calculations (0 - 5.5)
   };
   ip50: {
     yearly: {
       scale: number; // Indirect probability of the cascade causing the scenario in 2050 on the tp scale (0 - 5)
     };
+
+    scale5TP: number; // Total probability in 2050 of the cause scenario on the tp scale used in the calculations (0 - 5.5)
   };
 };
 
@@ -121,51 +128,117 @@ export type EffectSnapshotResults = {
 };
 
 export type EffectSnapshotScenarioResults = {
+  ti: {
+    all: {
+      euros: number; // The total impact of the effect used in the calculations
+    };
+    ha: {
+      euros: number;
+    };
+    hb: {
+      euros: number;
+    };
+    hc: {
+      euros: number;
+    };
+    sa: {
+      euros: number;
+    };
+    sb: {
+      euros: number;
+    };
+    sc: {
+      euros: number;
+    };
+    sd: {
+      euros: number;
+    };
+    ea: {
+      euros: number;
+    };
+    fa: {
+      euros: number;
+    };
+    fb: {
+      euros: number;
+    };
+  };
   ii: {
     all: {
+      // Deprecated
       scale: number; // Indirect impact of the cascade cause by the scenario on the ti scale (0 - 5)
+
+      scale5TI: number; // Total impact of the scenario on the old ti scale (0 - 5.5)
     };
     h: {
       scale: number;
+
+      scale5TI: number;
     };
     ha: {
       scale: number;
+
+      scale5TI: number;
     };
     hb: {
       scale: number;
+
+      scale5TI: number;
     };
     hc: {
       scale: number;
+
+      scale5TI: number;
     };
     s: {
       scale: number;
+
+      scale5TI: number;
     };
     sa: {
       scale: number;
+
+      scale5TI: number;
     };
     sb: {
       scale: number;
+
+      scale5TI: number;
     };
     sc: {
       scale: number;
+
+      scale5TI: number;
     };
     sd: {
       scale: number;
+
+      scale5TI: number;
     };
     e: {
       scale: number;
+
+      scale5TI: number;
     };
     ea: {
       scale: number;
+
+      scale5TI: number;
     };
     f: {
       scale: number;
+
+      scale5TI: number;
     };
     fa: {
       scale: number;
+
+      scale5TI: number;
     };
     fb: {
       scale: number;
+
+      scale5TI: number;
     };
   };
 };

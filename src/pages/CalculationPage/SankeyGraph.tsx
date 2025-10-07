@@ -20,6 +20,7 @@ import {
   getWorstCaseScenario,
 } from "../../functions/scenarios";
 import { capFirst } from "../../functions/capFirst";
+import ProbabilitySankey from "./ProbabilitySankey";
 
 export default function SankeyGraph({
   calculations,
@@ -53,20 +54,20 @@ export default function SankeyGraph({
       : selectedScenario;
 
   return (
-    <Accordion disabled={!calculations || !selectedNodeId}>
+    <Accordion>
       <AccordionSummary>
         <Typography variant="subtitle2">Risk sankey diagram</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{}}>
         <Stack direction="row" sx={{ mb: 8 }}>
           <Box sx={{ width: "calc(50% - 150px)", height: 600 }}>
-            {/* <ProbabilitySankey
+            <ProbabilitySankey
               calculation={calculation}
               maxCauses={causes}
               scenario={scenario}
               debug={true}
-              onClick={(id: string) => setSelectedNodeId(id)}
-            /> */}
+              // onClick={(id: string) => setSelectedNodeId(id)}
+            />
           </Box>
           <Stack
             direction="column"
@@ -90,7 +91,7 @@ export default function SankeyGraph({
         <ImpactOriginPieChart riskFile={riskFile} />
       </Box> */}
             <Box sx={{ width: "100%", textAlign: "center", mb: 2 }}>
-              <Typography variant="h6">{calculation.riskTitle}</Typography>
+              {/* <Typography variant="h6">{calculation.riskTitle}</Typography> */}
               <Typography
                 variant="subtitle1"
                 color={SCENARIO_PARAMS[scenario].color}

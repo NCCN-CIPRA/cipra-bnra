@@ -47,7 +47,7 @@ export function CascadeSection({
     <RiskDataAccordion
       disabled={disabled}
       title={
-        <Stack direction="row">
+        <Stack direction="row" alignItems="center">
           <Typography
             sx={{
               flex: 1,

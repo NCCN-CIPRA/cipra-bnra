@@ -964,7 +964,7 @@ export function snapshotFromRiskfile(
   };
 }
 
-const oldToNewCPMatrix = (
+export const oldToNewCPMatrix = (
   cause: DVRiskSnapshot,
   cascade: DVRiskCascade,
   realSnapshot: boolean
@@ -1056,188 +1056,353 @@ export function snapshotFromRiskCascade(
     cr4de_quanti_cp: serializeCPMatrix(newCPMatrix),
     cr4de_quanti_cause: serializeCauseSnapshotResults({
       [SCENARIOS.CONSIDERABLE]: {
+        tp: {
+          rpMonths: returnPeriodMonthsFromPDaily(cascade.results?.TP_c || 0),
+        },
         ip: {
           yearly: {
             scale: r(cascade.results?.IP_All2C),
           },
+          scale5TP: r(cascade.results?.IP_All2C),
         },
         ip50: {
           yearly: {
             scale: r(cascade.results?.IP50_All2C),
           },
+          scale5TP: r(cascade.results?.IP50_All2C),
         },
       },
       [SCENARIOS.MAJOR]: {
+        tp: {
+          rpMonths: returnPeriodMonthsFromPDaily(cascade.results?.TP_m || 0),
+        },
         ip: {
           yearly: {
             scale: r(cascade.results?.IP_All2M),
           },
+          scale5TP: r(cascade.results?.IP_All2M),
         },
         ip50: {
           yearly: {
             scale: r(cascade.results?.IP50_All2M),
           },
+          scale5TP: r(cascade.results?.IP50_All2M),
         },
       },
       [SCENARIOS.EXTREME]: {
+        tp: {
+          rpMonths: returnPeriodMonthsFromPDaily(cascade.results?.TP_e || 0),
+        },
         ip: {
           yearly: {
             scale: r(cascade.results?.IP_All2E),
           },
+          scale5TP: r(cascade.results?.IP_All2E),
         },
         ip50: {
           yearly: {
             scale: r(cascade.results?.IP50_All2E),
           },
+          scale5TP: r(cascade.results?.IP50_All2E),
         },
       },
     }),
 
     cr4de_quanti_effect: serializeEffectSnapshotResults({
       [SCENARIOS.CONSIDERABLE]: {
+        ti: {
+          all: {
+            euros: r(cascade.results?.TI_c),
+          },
+          ha: {
+            euros: r(cascade.results?.TI_Ha_c),
+          },
+          hb: {
+            euros: r(cascade.results?.TI_Hb_c),
+          },
+          hc: {
+            euros: r(cascade.results?.TI_Hc_c),
+          },
+          sa: {
+            euros: r(cascade.results?.TI_Sa_c),
+          },
+          sb: {
+            euros: r(cascade.results?.TI_Sb_c),
+          },
+          sc: {
+            euros: r(cascade.results?.TI_Sc_c),
+          },
+          sd: {
+            euros: r(cascade.results?.TI_Sd_c),
+          },
+          ea: {
+            euros: r(cascade.results?.TI_Ea_c),
+          },
+          fa: {
+            euros: r(cascade.results?.TI_Fa_c),
+          },
+          fb: {
+            euros: r(cascade.results?.TI_Fb_c),
+          },
+        },
         ii: {
           all: {
             scale: r(cascade.results?.II_C2All),
+            scale5TI: r(cascade.results?.II_C2All),
           },
           h: {
             scale: r(cascade.results?.II_C2All_H),
+            scale5TI: r(cascade.results?.II_C2All_H),
           },
           ha: {
             scale: r(cascade.results?.II_C2All_Ha),
+            scale5TI: r(cascade.results?.II_C2All_Ha),
           },
           hb: {
             scale: r(cascade.results?.II_C2All_Hb),
+            scale5TI: r(cascade.results?.II_C2All_Hb),
           },
           hc: {
             scale: r(cascade.results?.II_C2All_Hc),
+            scale5TI: r(cascade.results?.II_C2All_Hc),
           },
           s: {
             scale: r(cascade.results?.II_C2All_S),
+            scale5TI: r(cascade.results?.II_C2All_S),
           },
           sa: {
             scale: r(cascade.results?.II_C2All_Sa),
+            scale5TI: r(cascade.results?.II_C2All_Sa),
           },
           sb: {
             scale: r(cascade.results?.II_C2All_Sb),
+            scale5TI: r(cascade.results?.II_C2All_Sb),
           },
           sc: {
             scale: r(cascade.results?.II_C2All_Sc),
+            scale5TI: r(cascade.results?.II_C2All_Sc),
           },
           sd: {
             scale: r(cascade.results?.II_C2All_Sd),
+            scale5TI: r(cascade.results?.II_C2All_Sd),
           },
           e: {
             scale: r(cascade.results?.II_C2All_E),
+            scale5TI: r(cascade.results?.II_C2All_E),
           },
           ea: {
             scale: r(cascade.results?.II_C2All_Ea),
+            scale5TI: r(cascade.results?.II_C2All_Ea),
           },
           f: {
             scale: r(cascade.results?.II_C2All_F),
+            scale5TI: r(cascade.results?.II_C2All_F),
           },
           fa: {
             scale: r(cascade.results?.II_C2All_Fa),
+            scale5TI: r(cascade.results?.II_C2All_Fa),
           },
           fb: {
             scale: r(cascade.results?.II_C2All_Fb),
+            scale5TI: r(cascade.results?.II_C2All_Fb),
           },
         },
       },
       [SCENARIOS.MAJOR]: {
+        ti: {
+          all: {
+            euros: r(cascade.results?.TI_m),
+          },
+          ha: {
+            euros: r(cascade.results?.TI_Ha_m),
+          },
+          hb: {
+            euros: r(cascade.results?.TI_Hb_m),
+          },
+          hc: {
+            euros: r(cascade.results?.TI_Hc_m),
+          },
+          sa: {
+            euros: r(cascade.results?.TI_Sa_m),
+          },
+          sb: {
+            euros: r(cascade.results?.TI_Sb_m),
+          },
+          sc: {
+            euros: r(cascade.results?.TI_Sc_m),
+          },
+          sd: {
+            euros: r(cascade.results?.TI_Sd_m),
+          },
+          ea: {
+            euros: r(cascade.results?.TI_Ea_m),
+          },
+          fa: {
+            euros: r(cascade.results?.TI_Fa_m),
+          },
+          fb: {
+            euros: r(cascade.results?.TI_Fb_m),
+          },
+        },
         ii: {
           all: {
             scale: r(cascade.results?.II_M2All),
+            scale5TI: r(cascade.results?.II_M2All),
           },
           h: {
             scale: r(cascade.results?.II_M2All_H),
+            scale5TI: r(cascade.results?.II_M2All_H),
           },
           ha: {
             scale: r(cascade.results?.II_M2All_Ha),
+            scale5TI: r(cascade.results?.II_M2All_Ha),
           },
           hb: {
             scale: r(cascade.results?.II_M2All_Hb),
+            scale5TI: r(cascade.results?.II_M2All_Hb),
           },
           hc: {
             scale: r(cascade.results?.II_M2All_Hc),
+            scale5TI: r(cascade.results?.II_M2All_Hc),
           },
           s: {
             scale: r(cascade.results?.II_M2All_S),
+            scale5TI: r(cascade.results?.II_M2All_S),
           },
           sa: {
             scale: r(cascade.results?.II_M2All_Sa),
+            scale5TI: r(cascade.results?.II_M2All_Sa),
           },
           sb: {
             scale: r(cascade.results?.II_M2All_Sb),
+            scale5TI: r(cascade.results?.II_M2All_Sb),
           },
           sc: {
             scale: r(cascade.results?.II_M2All_Sc),
+            scale5TI: r(cascade.results?.II_M2All_Sc),
           },
           sd: {
             scale: r(cascade.results?.II_M2All_Sd),
+            scale5TI: r(cascade.results?.II_M2All_Sd),
           },
           e: {
             scale: r(cascade.results?.II_M2All_E),
+            scale5TI: r(cascade.results?.II_M2All_E),
           },
           ea: {
             scale: r(cascade.results?.II_M2All_Ea),
+            scale5TI: r(cascade.results?.II_M2All_Ea),
           },
           f: {
             scale: r(cascade.results?.II_M2All_F),
+            scale5TI: r(cascade.results?.II_M2All_F),
           },
           fa: {
             scale: r(cascade.results?.II_M2All_Fa),
+            scale5TI: r(cascade.results?.II_M2All_Fa),
           },
           fb: {
             scale: r(cascade.results?.II_M2All_Fb),
+            scale5TI: r(cascade.results?.II_M2All_Fb),
           },
         },
       },
       [SCENARIOS.EXTREME]: {
+        ti: {
+          all: {
+            euros: r(cascade.results?.TI_e),
+          },
+          ha: {
+            euros: r(cascade.results?.TI_Ha_e),
+          },
+          hb: {
+            euros: r(cascade.results?.TI_Hb_e),
+          },
+          hc: {
+            euros: r(cascade.results?.TI_Hc_e),
+          },
+          sa: {
+            euros: r(cascade.results?.TI_Sa_e),
+          },
+          sb: {
+            euros: r(cascade.results?.TI_Sb_e),
+          },
+          sc: {
+            euros: r(cascade.results?.TI_Sc_e),
+          },
+          sd: {
+            euros: r(cascade.results?.TI_Sd_e),
+          },
+          ea: {
+            euros: r(cascade.results?.TI_Ea_e),
+          },
+          fa: {
+            euros: r(cascade.results?.TI_Fa_e),
+          },
+          fb: {
+            euros: r(cascade.results?.TI_Fb_e),
+          },
+        },
         ii: {
           all: {
             scale: r(cascade.results?.II_E2All),
+            scale5TI: r(cascade.results?.II_E2All),
           },
           h: {
             scale: r(cascade.results?.II_E2All_H),
+            scale5TI: r(cascade.results?.II_E2All_H),
           },
           ha: {
             scale: r(cascade.results?.II_E2All_Ha),
+            scale5TI: r(cascade.results?.II_E2All_Ha),
           },
           hb: {
             scale: r(cascade.results?.II_E2All_Hb),
+            scale5TI: r(cascade.results?.II_E2All_Hb),
           },
           hc: {
             scale: r(cascade.results?.II_E2All_Hc),
+            scale5TI: r(cascade.results?.II_E2All_Hc),
           },
           s: {
             scale: r(cascade.results?.II_E2All_S),
+            scale5TI: r(cascade.results?.II_E2All_S),
           },
           sa: {
             scale: r(cascade.results?.II_E2All_Sa),
+            scale5TI: r(cascade.results?.II_E2All_Sa),
           },
           sb: {
             scale: r(cascade.results?.II_E2All_Sb),
+            scale5TI: r(cascade.results?.II_E2All_Sb),
           },
           sc: {
             scale: r(cascade.results?.II_E2All_Sc),
+            scale5TI: r(cascade.results?.II_E2All_Sc),
           },
           sd: {
             scale: r(cascade.results?.II_E2All_Sd),
+            scale5TI: r(cascade.results?.II_E2All_Sd),
           },
           e: {
             scale: r(cascade.results?.II_E2All_E),
+            scale5TI: r(cascade.results?.II_E2All_E),
           },
           ea: {
             scale: r(cascade.results?.II_E2All_Ea),
+            scale5TI: r(cascade.results?.II_E2All_Ea),
           },
           f: {
             scale: r(cascade.results?.II_E2All_F),
+            scale5TI: r(cascade.results?.II_E2All_F),
           },
           fa: {
             scale: r(cascade.results?.II_E2All_Fa),
+            scale5TI: r(cascade.results?.II_E2All_Fa),
           },
           fb: {
             scale: r(cascade.results?.II_E2All_Fb),
+            scale5TI: r(cascade.results?.II_E2All_Fb),
           },
         },
       },

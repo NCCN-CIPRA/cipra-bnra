@@ -4,7 +4,9 @@ import {
   DVRiskSnapshot,
   RiskSnapshotResults,
 } from "../types/dataverse/DVRiskSnapshot";
-import { SCENARIO_SUFFIX } from "./scenarios";
+import { RISK_TYPE } from "../types/dataverse/Riskfile";
+import { pDailyFromReturnPeriodMonths } from "./indicators/probability";
+import { SCENARIO_SUFFIX, SCENARIOS } from "./scenarios";
 
 export type Cause = {
   id: string | null;
@@ -32,12 +34,15 @@ const MScales: { [key: string]: number } = {
   "2": 0.0,
   "3": 1,
 };
+// ERROR; Does not behave according to predefind logarithmic function
+// CP1 should be 0.0055
+// CP2 should be 0.055
 const CPScales: { [key: string]: number } = {
   "0": 0,
   "0.5": 0.001,
-  "1": 0.0055,
+  "1": 0.004,
   "1.5": 0.01,
-  "2": 0.055,
+  "2": 0.04,
   "2.5": 0.1,
   "3": 0.3,
   "3.5": 0.5,
@@ -156,7 +161,7 @@ export const getDailyProbability = (yearlyP: number) => {
   return 1 - Math.pow(1 - yearlyP, 1 / 365);
 };
 
-const rescaleProbability = (p: number) => {
+export const rescaleProbability = (p: number) => {
   return 5 + Math.log(p + 0.0103) / Math.log(2.5);
 };
 
@@ -165,13 +170,21 @@ export function getTotalProbabilityRelativeScale(
   scenarioSuffix: SCENARIO_SUFFIX,
   tp50: boolean = false
 ) {
-  return rescaleProbability(
-    getYearlyProbability(calculation[`tp${tp50 ? "50" : ""}${scenarioSuffix}`])
+  return getTP5FromDailyP(
+    calculation[`tp${tp50 ? "50" : ""}${scenarioSuffix}`]
   );
 }
 
-export function getYearlyProbabilityFromRelative(p: number) {
-  return Math.pow(Math.E, (p - 5) * Math.log(2.5)) - 0.0103;
+export function getTP5FromDailyP(dailyP: number) {
+  return rescaleProbability(getYearlyProbability(dailyP));
+}
+
+export function getDailyPFromTP5(tp5: number) {
+  return getDailyProbability(getYearlyProbabilityFromRelative(tp5));
+}
+
+export function getYearlyProbabilityFromRelative(tp5: number) {
+  return Math.pow(Math.E, (tp5 - 5) * Math.log(2.5)) - 0.0103;
 }
 
 export function getPartialProbabilityRelativeScale(p_daily: number) {
@@ -181,6 +194,50 @@ export function getPartialProbabilityRelativeScale(p_daily: number) {
   // return ratio * rescaleProbability(tp);
   return rescaleProbability(getYearlyProbability(p_daily));
 }
+
+export const getIndirectProbabilityDynamic = (
+  c: DVCascadeSnapshot<unknown, DVRiskSnapshot>,
+  effectScenario: SCENARIOS
+) => {
+  const isAttack = c.cr4de_cause_risk.cr4de_risk_type === RISK_TYPE.MANMADE;
+
+  const tpC = !isAttack
+    ? pDailyFromReturnPeriodMonths(
+        c.cr4de_quanti_cause.considerable.tp.rpMonths
+      )
+    : 1;
+
+  const tpM = !isAttack
+    ? pDailyFromReturnPeriodMonths(c.cr4de_quanti_cause.major.tp.rpMonths)
+    : 1;
+  const tpE = !isAttack
+    ? pDailyFromReturnPeriodMonths(c.cr4de_quanti_cause.extreme.tp.rpMonths)
+    : 1;
+
+  const considerableP =
+    c.cr4de_quanti_cp[SCENARIOS.CONSIDERABLE][effectScenario].abs * tpC;
+  const majorP = c.cr4de_quanti_cp[SCENARIOS.MAJOR][effectScenario].abs * tpM;
+  const extremeP =
+    c.cr4de_quanti_cp[SCENARIOS.EXTREME][effectScenario].abs * tpE;
+
+  return considerableP + majorP + extremeP;
+};
+
+export const getTotalProbabilityDynamic = (
+  riskFile: DVRiskSnapshot,
+  causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[],
+  effectScenario: SCENARIOS
+) => {
+  const dp = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti[effectScenario].dp.rpMonths
+  );
+  const ip = causes.reduce(
+    (t, c) => t + getIndirectProbabilityDynamic(c, effectScenario),
+    0
+  );
+
+  return dp + ip;
+};
 
 export const getAverageIndirectProbability = (
   c: DVCascadeSnapshot<unknown, DVRiskSnapshot>,
@@ -197,6 +254,27 @@ export const getAverageIndirectProbability = (
   );
 };
 
+export const getAverageIndirectProbabilityDynamic = (
+  c: DVCascadeSnapshot<unknown, DVRiskSnapshot>,
+  riskFile: DVRiskSnapshot,
+  causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[]
+) => {
+  const pC = getIndirectProbabilityDynamic(c, SCENARIOS.CONSIDERABLE);
+  const tpC = getTotalProbabilityDynamic(
+    riskFile,
+    causes,
+    SCENARIOS.CONSIDERABLE
+  );
+
+  const pM = getIndirectProbabilityDynamic(c, SCENARIOS.MAJOR);
+  const tpM = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.MAJOR);
+
+  const pE = getIndirectProbabilityDynamic(c, SCENARIOS.EXTREME);
+  const tpE = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.EXTREME);
+
+  return (pC / tpC + pM / tpM + pE / tpE) / 3;
+};
+
 export const getAverageDirectProbability = (
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, unknown>
 ) => {
@@ -207,6 +285,30 @@ export const getAverageDirectProbability = (
         riskFile.cr4de_quanti.major.tp.yearly.scale +
       riskFile.cr4de_quanti.extreme.dp.scaleTot /
         riskFile.cr4de_quanti.extreme.tp.yearly.scale) /
+    3
+  );
+};
+
+export const getAverageDirectProbabilityDynamic = (
+  riskFile: DVRiskSnapshot,
+  causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[]
+) => {
+  const tpC = getTP5FromDailyP(
+    getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.CONSIDERABLE)
+  );
+
+  const tpM = getTP5FromDailyP(
+    getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.MAJOR)
+  );
+
+  const tpE = getTP5FromDailyP(
+    getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.EXTREME)
+  );
+
+  return (
+    (riskFile.cr4de_quanti.considerable.dp.scaleTot / tpC +
+      riskFile.cr4de_quanti.major.dp.scaleTot / tpM +
+      riskFile.cr4de_quanti.extreme.dp.scaleTot / tpE) /
     3
   );
 };

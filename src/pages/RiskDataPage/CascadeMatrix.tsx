@@ -31,18 +31,18 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { Indicators } from "../../types/global";
 import {
-  mScale3FromPAbs,
-  mScale7FromPAbs,
-  pAbsFromMScale3,
-  pAbsFromMScale7,
-} from "../../functions/indicators/motivation";
-import {
   cpScale5FromPAbs,
   cpScale7FromPAbs,
   pAbsFromCPScale5,
   pAbsFromCPScale7,
 } from "../../functions/indicators/cp";
 import { ScenarioDescriptionBox } from "../../components/ScenarioDescription";
+import {
+  mScale3FromPDaily,
+  mScale7FromPDaily,
+  pDailyFromMScale3,
+  pDailyFromMScale7,
+} from "../../functions/indicators/motivation";
 
 const COLORS = {
   CP0: "#e0ffcc",
@@ -161,6 +161,8 @@ export default function CascadeMatrix({
     },
   });
 
+  const isActorCause = cause.cr4de_risk_type === RISK_TYPE.MANMADE;
+
   const causeScenarios = JSON.parse(cause.cr4de_scenarios || "");
   const effectScenarios = JSON.parse(effect.cr4de_scenarios || "");
 
@@ -170,31 +172,28 @@ export default function CascadeMatrix({
     newCPVal: number
   ) => {
     let pAbs = 0;
-    if (indicators === Indicators.V1) {
-      if (cause.cr4de_risk_type === RISK_TYPE.MANMADE) {
-        pAbs = pAbsFromMScale3(newCPVal);
-      } else {
-        pAbs = pAbsFromCPScale5(newCPVal);
-      }
+
+    if (isActorCause) {
+      pAbs =
+        indicators === Indicators.V1
+          ? pDailyFromMScale3(newCPVal)
+          : pDailyFromMScale7(newCPVal);
     } else {
-      if (cause.cr4de_risk_type === RISK_TYPE.MANMADE) {
-        pAbs = pAbsFromMScale7(newCPVal);
-      } else {
-        pAbs = pAbsFromCPScale7(newCPVal);
-      }
+      pAbs =
+        indicators === Indicators.V1
+          ? pAbsFromCPScale5(newCPVal)
+          : pAbsFromCPScale7(newCPVal);
     }
 
     const updatedCPMatrix = { ...cascade.cr4de_quanti_cp };
     updatedCPMatrix[causeScenario][effectScenario] = {
       abs: pAbs,
-      scale5:
-        cause.cr4de_risk_type === RISK_TYPE.MANMADE
-          ? mScale3FromPAbs(pAbs)
-          : cpScale5FromPAbs(pAbs),
-      scale7:
-        cause.cr4de_risk_type === RISK_TYPE.MANMADE
-          ? mScale7FromPAbs(pAbs)
-          : cpScale7FromPAbs(pAbs),
+      scale5: isActorCause
+        ? Math.round(10 * mScale3FromPDaily(pAbs)) / 10
+        : Math.round(10 * cpScale5FromPAbs(pAbs)) / 10,
+      scale7: isActorCause
+        ? Math.round(10 * mScale7FromPDaily(pAbs)) / 10
+        : Math.round(10 * cpScale7FromPAbs(pAbs)) / 10,
     };
 
     mutation.mutate({

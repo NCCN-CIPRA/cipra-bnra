@@ -385,12 +385,12 @@ export type RiskFileQuantiInput = {
 
 export type RiskFileScenarioQuantiInput = {
   dp: {
-    rpMonths: number; // Return period in months
+    rpMonths: number | null; // Return period in months
     scale5: number; // Direct probability of the scenario on the old dp scale (0 - 5)
     scale7: number; // Direct probability of the scenario on the new dp scale (0 - 7)
   };
   dp50: {
-    rpMonths: number; // Return period in months
+    rpMonths: number | null; // Return period in months
     scale5: number; // Direct probability in 2050 of the scenario on the old dp scale (0 - 5)
     scale7: number; // Direct probability in 2050 of the scenario on the new dp scale (0 - 7)
   };

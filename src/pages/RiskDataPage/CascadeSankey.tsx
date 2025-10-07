@@ -12,10 +12,10 @@ import { SankeyLink, SankeyNode } from "recharts/types/util/types";
 import {
   getIntervalStringMScale3,
   getIntervalStringMScale7,
-  mScale3FromPAbs,
-  mScale7FromPAbs,
-  pAbsFromMScale3,
-  pAbsFromMScale7,
+  mScale3FromPDaily,
+  mScale7FromPDaily,
+  pDailyFromMScale3,
+  pDailyFromMScale7,
 } from "../../functions/indicators/motivation";
 import { Indicators } from "../../types/global";
 import { useOutletContext } from "react-router-dom";
@@ -28,8 +28,12 @@ import {
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 import {
+  cpScale5FromPAbs,
+  cpScale7FromPAbs,
   getIntervalStringCPScale5,
   getIntervalStringCPScale7,
+  pAbsFromCPScale5,
+  pAbsFromCPScale7,
 } from "../../functions/indicators/cp";
 import ScenarioDescription from "../../components/ScenarioDescription";
 
@@ -98,29 +102,39 @@ export default function CascadeSankey({
     },
   });
 
+  const isActorCause = cause.cr4de_risk_type === RISK_TYPE.MANMADE;
+
   const causeScenarios = JSON.parse(cause.cr4de_scenarios || "");
   const effectScenarios = JSON.parse(effect.cr4de_scenarios || "");
 
   const handleChangeCP = async (
     causeScenario: SCENARIOS,
     effectScenario: SCENARIOS,
-    newValue: number
+    newCPVal: number
   ) => {
-    const pAbs =
-      indicators === Indicators.V1
-        ? pAbsFromMScale3(newValue)
-        : pAbsFromMScale7(newValue);
+    let pAbs = 0;
+
+    if (isActorCause) {
+      pAbs =
+        indicators === Indicators.V1
+          ? pDailyFromMScale3(newCPVal)
+          : pDailyFromMScale7(newCPVal);
+    } else {
+      pAbs =
+        indicators === Indicators.V1
+          ? pAbsFromCPScale5(newCPVal)
+          : pAbsFromCPScale7(newCPVal);
+    }
+
     const updatedCPMatrix = { ...cascade.cr4de_quanti_cp };
     updatedCPMatrix[causeScenario][effectScenario] = {
-      abs: Math.round(100 * pAbs) / 100,
-      scale5:
-        indicators === Indicators.V1
-          ? newValue
-          : Math.round(10 * mScale3FromPAbs(pAbs)) / 10,
-      scale7:
-        indicators === Indicators.V1
-          ? Math.round(10 * mScale7FromPAbs(pAbs)) / 10
-          : newValue,
+      abs: pAbs,
+      scale5: isActorCause
+        ? Math.round(10 * mScale3FromPDaily(pAbs)) / 10
+        : Math.round(10 * cpScale5FromPAbs(pAbs)) / 10,
+      scale7: isActorCause
+        ? Math.round(10 * mScale7FromPDaily(pAbs)) / 10
+        : Math.round(10 * cpScale7FromPAbs(pAbs)) / 10,
     };
 
     const cpMatrix = updatedCPMatrix;
@@ -147,10 +161,8 @@ export default function CascadeSankey({
     setInnerCascade(cascade);
   }, [setInnerCascade, cascade]);
 
-  const causeName =
-    cause.cr4de_risk_type === RISK_TYPE.MANMADE ? "Actors" : "Scenario";
-  const effectName =
-    cause.cr4de_risk_type === RISK_TYPE.MANMADE ? "Attack" : "Scenario";
+  const causeName = isActorCause ? "Actors" : "Scenario";
+  const effectName = isActorCause ? "Attack" : "Scenario";
 
   const data: {
     nodes: ScenarioSankeyNode[];
@@ -372,7 +384,7 @@ export default function CascadeSankey({
                 hoverLinkIndex === null ? null : data.links[hoverLinkIndex]
               }
               setHoverIndex={setHoverLinkIndex}
-              isMotivation={cause.cr4de_risk_type === RISK_TYPE.MANMADE}
+              isMotivation={isActorCause}
               onChangeCP={handleChangeCP}
             />
           )}

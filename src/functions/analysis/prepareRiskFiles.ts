@@ -28,15 +28,26 @@ const ATTACK_FACTOR = 1 / 10;
 
 const ACTOR_RISKS = [
   "8a58db5b-aa6c-ed11-9561-000d3adf7089", // "M01",
+  // Error? M02 was not included in actor risks originally...
+  // Due to MO2 instead of M02
+  // "8d58db5b-aa6c-ed11-9561-000d3adf7089", // "MO2",
+  "8e58db5b-aa6c-ed11-9561-000d3adf7089", // "M03",
+  "8c58db5b-aa6c-ed11-9561-000d3adf7089", // "M04",
+  "8f58db5b-aa6c-ed11-9561-000d3adf7089", //  "M05"
+];
+const TRUE_ACTOR_RISKS = [
+  "8a58db5b-aa6c-ed11-9561-000d3adf7089", // "M01",
   "8d58db5b-aa6c-ed11-9561-000d3adf7089", // "MO2",
   "8e58db5b-aa6c-ed11-9561-000d3adf7089", // "M03",
   "8c58db5b-aa6c-ed11-9561-000d3adf7089", // "M04",
   "8f58db5b-aa6c-ed11-9561-000d3adf7089", //  "M05"
 ];
 const ATTACK_RISKS = [
+  // Error? C03 was not included in attack risks originally...
+  // Due to CO3 instead of C03
   // "6596cd55-aa6c-ed11-9561-000d3adf7089", // "CO3",
-  // "6496cd55-aa6c-ed11-9561-000d3adf7089", // "C04",
-  // "7458db5b-aa6c-ed11-9561-000d3adf7089", // "C05",
+  "6496cd55-aa6c-ed11-9561-000d3adf7089", // "C04",
+  "7458db5b-aa6c-ed11-9561-000d3adf7089", // "C05",
   "9258db5b-aa6c-ed11-9561-000d3adf7089", // "M06",
   "9358db5b-aa6c-ed11-9561-000d3adf7089", // "M07",
   "9158db5b-aa6c-ed11-9561-000d3adf7089", // "M08",
@@ -55,6 +66,14 @@ const ATTACK_RISKS = [
 ];
 const IAC = "9958db5b-aa6c-ed11-9561-000d3adf7089";
 const INFO_OPS = "9458db5b-aa6c-ed11-9561-000d3adf7089";
+const FOOD_SUPPLY = "cf58db5b-aa6c-ed11-9561-000d3adf7089";
+const FOOD_CAUSES = [
+  "b958db5b-aa6c-ed11-9561-000d3adf7089", // Failure of electricity supply
+  "c358db5b-aa6c-ed11-9561-000d3adf7089", // Failure of road transport",
+  // Typo caused this cascade to be ignored
+  // "8058db5b-aa6c-ed11-9561-000d3adf7089", // Agricultural Plant Diseases & Pests",
+  "e358db5b-aa6c-ed11-9561-000d3adf7089", // Commodities shortage",
+];
 const IGNORE_RISKS = [
   "H09", // Mass rejection of modern medicine
   "H10", // Processes of a social psychological nature
@@ -142,7 +161,7 @@ export const getConsensusRiskFile = (
   const ExtremeFactor =
     riskFile.cr4de_title.indexOf("food supply") >= 0 ? FOOD_SUPPLY_FACTOR : 1;
 
-  if (ATTACK_RISKS.indexOf(riskFile.cr4de_hazard_id) >= 0) {
+  if (ATTACK_RISKS.indexOf(riskFile.cr4de_riskfilesid) >= 0) {
     DPScaleFactor *= ATTACK_FACTOR;
   }
 
@@ -393,50 +412,50 @@ export const getConsensusCascade = (
   _cause: unknown,
   _effect: unknown,
   cascade: DVRiskCascade,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _participations?: unknown,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _cascadeAnalyses?: unknown
+  participations?: DVParticipation[],
+  cascadeAnalyses?: DVCascadeAnalysis<unknown, unknown, DVContact>[]
   // cause: SmallRisk,
   // effect: SmallRisk,
   // cascade: DVRiskCascade,
   // participations: DVParticipation[],
   // cascadeAnalyses: DVCascadeAnalysis<unknown, unknown, DVContact>[] | undefined
 ) => {
-  // const goodCAs = cascadeAnalyses
-  //   ? cascadeAnalyses
-  //       .filter((ca) =>
-  //         participations.some(
-  //           (p) =>
-  //             p._cr4de_contact_value === ca.cr4de_expert.contactid &&
-  //             p.cr4de_role === "expert" &&
-  //             p.cr4de_direct_analysis_finished
-  //         )
-  //       )
-  //       .map((ca) => {
-  //         if (
-  //           effect.cr4de_title.indexOf("food supply") >= 0 &&
-  //           ca.cr4de_expert.emailaddress1 === "laurie.phillips@economie.fgov.be"
-  //         ) {
-  //           return {
-  //             ...ca,
-  //             cr4de_c2c: ca.cr4de_c2e,
-  //             cr4de_c2e: ca.cr4de_c2c,
-  //             cr4de_m2c: ca.cr4de_m2e,
-  //             cr4de_m2e: ca.cr4de_m2c,
-  //             cr4de_e2c: ca.cr4de_e2e,
-  //             cr4de_e2e: ca.cr4de_e2c,
-  //           };
-  //         }
-  //         return ca;
-  //       })
-  //   : [];
+  const goodCAs =
+    cascadeAnalyses && participations
+      ? cascadeAnalyses
+          .filter((ca) =>
+            participations.some(
+              (p) =>
+                p._cr4de_contact_value === ca.cr4de_expert.contactid &&
+                p.cr4de_role === "expert" &&
+                p.cr4de_direct_analysis_finished
+            )
+          )
+          .map((ca) => {
+            if (
+              cascade._cr4de_effect_hazard_value === FOOD_SUPPLY &&
+              ca.cr4de_expert.emailaddress1 ===
+                "laurie.phillips@economie.fgov.be"
+            ) {
+              return {
+                ...ca,
+                cr4de_c2c: ca.cr4de_c2e,
+                cr4de_c2e: ca.cr4de_c2c,
+                cr4de_m2c: ca.cr4de_m2e,
+                cr4de_m2e: ca.cr4de_m2c,
+                cr4de_e2c: ca.cr4de_e2e,
+                cr4de_e2e: ca.cr4de_e2c,
+              };
+            }
+            return ca;
+          })
+      : [];
 
   let cpScaleFactor = 1;
   if (
     cascade._cr4de_cause_hazard_value === INFO_OPS ||
     (cascade._cr4de_effect_hazard_value === INFO_OPS &&
-      ACTOR_RISKS.indexOf(cascade._cr4de_cause_hazard_value) >= 0)
+      TRUE_ACTOR_RISKS.indexOf(cascade._cr4de_cause_hazard_value) < 0)
   ) {
     cpScaleFactor *= INFO_OPS_CP_FACTOR;
   }
@@ -451,22 +470,104 @@ export const getConsensusCascade = (
   const extremeScaleFactor =
     cascade._cr4de_effect_hazard_value === IAC ? IAC_FACTOR : 1;
 
-  // if (
-  //   ((effect.cr4de_consensus_date &&
-  //     new Date(effect.cr4de_consensus_date) <= new Date()) ||
-  //     effect.cr4de_risk_type === RISK_TYPE.EMERGING) &&
-  //   (effect.cr4de_title.indexOf("food supply") < 0 ||
-  //     [
-  //       "Failure of electricity supply",
-  //       "Failure of road transport",
-  //       "Agricultural Plant Diseases & Pests",
-  //       "Commodities shortage",
-  //     ].indexOf(cause.cr4de_title) < 0)
-  // ) {
+  // Attack against vital infrastructure -> Failure of natural gas supply was not yet filled in
+  // during the final calculation for some reason
+  if (
+    cascade.cr4de_bnrariskcascadeid === "edbd49de-c16c-ed11-9561-000d3adf7089"
+  )
+    return {
+      quality: Quality.MISSING,
+      reliabilty: 0,
+      c2c: 0,
+      c2m: 0,
+      c2e: 0,
+      m2c: 0,
+      m2m: 0,
+      m2e: 0,
+      e2c: 0,
+      e2m: 0,
+      e2e: 0,
+    };
+
+  if (
+    cascade._cr4de_effect_hazard_value === FOOD_SUPPLY &&
+    FOOD_CAUSES.indexOf(cascade._cr4de_cause_hazard_value) >= 0
+  ) {
+    if (goodCAs.length > 0) {
+      return {
+        quality: Quality.AVERAGE,
+        reliabilty: goodCAs.length,
+        c2c:
+          getAbsoluteProbability(
+            getAverage(
+              goodCAs.map((ca) => ca.cr4de_c2c),
+              goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+            )
+          ) * cpScaleFactor,
+        c2m:
+          getAbsoluteProbability(
+            getAverage(
+              goodCAs.map((ca) => ca.cr4de_c2m),
+              goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+            )
+          ) * cpScaleFactor,
+        c2e:
+          getAbsoluteProbability(
+            getAverage(
+              goodCAs.map((ca) => ca.cr4de_c2e),
+              goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+            )
+          ) * cpScaleFactor,
+        m2c:
+          getAbsoluteProbability(
+            getAverage(
+              goodCAs.map((ca) => ca.cr4de_m2c),
+              goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+            )
+          ) * cpScaleFactor,
+        m2m:
+          getAbsoluteProbability(
+            getAverage(
+              goodCAs.map((ca) => ca.cr4de_m2m),
+              goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+            )
+          ) * cpScaleFactor,
+        m2e:
+          getAbsoluteProbability(
+            getAverage(
+              goodCAs.map((ca) => ca.cr4de_m2e),
+              goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+            )
+          ) * cpScaleFactor,
+        e2c:
+          getAbsoluteProbability(
+            getAverage(
+              goodCAs.map((ca) => ca.cr4de_e2c),
+              goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+            )
+          ) * cpScaleFactor,
+        e2m:
+          getAbsoluteProbability(
+            getAverage(
+              goodCAs.map((ca) => ca.cr4de_e2m),
+              goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+            )
+          ) * cpScaleFactor,
+        e2e:
+          getAbsoluteProbability(
+            getAverage(
+              goodCAs.map((ca) => ca.cr4de_e2e),
+              goodCAs.map((ca) => ca.cr4de_quality || 2.5)
+            )
+          ) * cpScaleFactor,
+      };
+    }
+  }
+
   if (cascade.cr4de_c2c_cause !== null) {
     return {
       quality: Quality.CONSENSUS,
-      // reliabilty: goodCAs.length,
+      reliabilty: 10,
       c2c:
         ((getAbsoluteProbability(cascade.cr4de_c2c) +
           getAbsoluteProbability(cascade.cr4de_c2c_cause)) /
@@ -520,7 +621,7 @@ export const getConsensusCascade = (
 
   return {
     quality: Quality.CONSENSUS,
-    // reliabilty: goodCAs.length,
+    reliabilty: 100,
     c2c: getAbsoluteProbability(cascade.cr4de_c2c) * cpScaleFactor,
     c2m: getAbsoluteProbability(cascade.cr4de_c2m) * cpScaleFactor,
     c2e:
@@ -539,91 +640,6 @@ export const getConsensusCascade = (
       getAbsoluteProbability(cascade.cr4de_e2e) *
       cpScaleFactor *
       extremeScaleFactor,
-  };
-  // }
-
-  // if (goodCAs.length > 0) {
-  //   return {
-  //     quality: Quality.AVERAGE,
-  //     reliabilty: goodCAs.length,
-  //     c2c:
-  //       getAbsoluteProbability(
-  //         getAverage(
-  //           goodCAs.map((ca) => ca.cr4de_c2c),
-  //           goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-  //         )
-  //       ) * cpScaleFactor,
-  //     c2m:
-  //       getAbsoluteProbability(
-  //         getAverage(
-  //           goodCAs.map((ca) => ca.cr4de_c2m),
-  //           goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-  //         )
-  //       ) * cpScaleFactor,
-  //     c2e:
-  //       getAbsoluteProbability(
-  //         getAverage(
-  //           goodCAs.map((ca) => ca.cr4de_c2e),
-  //           goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-  //         )
-  //       ) * cpScaleFactor,
-  //     m2c:
-  //       getAbsoluteProbability(
-  //         getAverage(
-  //           goodCAs.map((ca) => ca.cr4de_m2c),
-  //           goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-  //         )
-  //       ) * cpScaleFactor,
-  //     m2m:
-  //       getAbsoluteProbability(
-  //         getAverage(
-  //           goodCAs.map((ca) => ca.cr4de_m2m),
-  //           goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-  //         )
-  //       ) * cpScaleFactor,
-  //     m2e:
-  //       getAbsoluteProbability(
-  //         getAverage(
-  //           goodCAs.map((ca) => ca.cr4de_m2e),
-  //           goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-  //         )
-  //       ) * cpScaleFactor,
-  //     e2c:
-  //       getAbsoluteProbability(
-  //         getAverage(
-  //           goodCAs.map((ca) => ca.cr4de_e2c),
-  //           goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-  //         )
-  //       ) * cpScaleFactor,
-  //     e2m:
-  //       getAbsoluteProbability(
-  //         getAverage(
-  //           goodCAs.map((ca) => ca.cr4de_e2m),
-  //           goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-  //         )
-  //       ) * cpScaleFactor,
-  //     e2e:
-  //       getAbsoluteProbability(
-  //         getAverage(
-  //           goodCAs.map((ca) => ca.cr4de_e2e),
-  //           goodCAs.map((ca) => ca.cr4de_quality || 2.5)
-  //         )
-  //       ) * cpScaleFactor,
-  //   };
-  // }
-
-  return {
-    quality: Quality.MISSING,
-    reliabilty: 0,
-    c2c: 0,
-    c2m: 0,
-    c2e: 0,
-    m2c: 0,
-    m2m: 0,
-    m2e: 0,
-    e2c: 0,
-    e2m: 0,
-    e2e: 0,
   };
 };
 
@@ -963,6 +979,16 @@ export default function prepareRiskFiles(
         )
       ),
 
+      // Total probability of the causing risk per scenario
+      tp_c: 0,
+      tp_m: 0,
+      tp_e: 0,
+
+      // Total probability in 2050 of the causing risk per scenario
+      tp50_c: 0,
+      tp50_m: 0,
+      tp50_e: 0,
+
       ip_c: 0,
       ip_m: 0,
       ip_e: 0,
@@ -974,6 +1000,45 @@ export default function prepareRiskFiles(
       ip50_e: 0,
 
       ip50: 0,
+
+      // Total impact of the effect risk per scenario
+      ti_c: 0,
+      ti_m: 0,
+      ti_e: 0,
+
+      // Total impact of the effect risk per damage indicator per scenario
+      ti_Ha_c: 0,
+      ti_Hb_c: 0,
+      ti_Hc_c: 0,
+      ti_Sa_c: 0,
+      ti_Sb_c: 0,
+      ti_Sc_c: 0,
+      ti_Sd_c: 0,
+      ti_Ea_c: 0,
+      ti_Fa_c: 0,
+      ti_Fb_c: 0,
+
+      ti_Ha_m: 0,
+      ti_Hb_m: 0,
+      ti_Hc_m: 0,
+      ti_Sa_m: 0,
+      ti_Sb_m: 0,
+      ti_Sc_m: 0,
+      ti_Sd_m: 0,
+      ti_Ea_m: 0,
+      ti_Fa_m: 0,
+      ti_Fb_m: 0,
+
+      ti_Ha_e: 0,
+      ti_Hb_e: 0,
+      ti_Hc_e: 0,
+      ti_Sa_e: 0,
+      ti_Sb_e: 0,
+      ti_Sc_e: 0,
+      ti_Sd_e: 0,
+      ti_Ea_e: 0,
+      ti_Fa_e: 0,
+      ti_Fb_e: 0,
 
       ii_Ha_c: 0,
       ii_Hb_c: 0,

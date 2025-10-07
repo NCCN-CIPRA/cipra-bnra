@@ -118,7 +118,7 @@ export type RiskSnapshotScenarioResults = {
     };
 
     scale5TP: number; // Total probability of the scenario on the tp scale (0 - 5.5)
-    rpMonths: number; // Return period in months
+    rpMonths: number | null; // Return period in months
   };
   tp50: {
     // Depreacted
@@ -127,7 +127,7 @@ export type RiskSnapshotScenarioResults = {
     };
 
     scale5TP: number; // Total probability of the scenario on the tp scale (0 - 5.5)
-    rpMonths: number; // Return period in months
+    rpMonths: number | null; // Return period in months
   };
   // Depreacted
   m: {
@@ -141,7 +141,7 @@ export type RiskSnapshotScenarioResults = {
     // Deprecated
     scaleTot: number; // Direct probability of the scenario on the tp scale (0 - 5)
 
-    rpMonths: number; // Return period
+    rpMonths: number | null; // Return period
     scale5TP: number; // Direct probability of the scenario on the old tp scale (0 - 5.5)
     scale5: number; // // Direct probability of the scenario on the old dp scale (0 - 5.5)
   };
@@ -151,7 +151,7 @@ export type RiskSnapshotScenarioResults = {
     // Deprecated
     scaleTot: number; // Direct probability of the scenario on the tp scale (0 - 5)
 
-    rpMonths: number; // Return period
+    rpMonths: number | null; // Return period
     scale5TP: number; // Direct probability of the scenario on the old tp scale (0 - 5.5)
     scale5: number; // // Direct probability of the scenario on the old dp scale (0 - 5.5)
   };

@@ -19,6 +19,7 @@ import { DVCascadeSnapshot } from "../types/dataverse/DVCascadeSnapshot";
 import { DVRiskSnapshot } from "../types/dataverse/DVRiskSnapshot";
 import { eurosFromTIScale5 } from "./indicators/impact";
 import { getNormalizedCPMatrix } from "./analysis/cp";
+import { pDailyFromReturnPeriodMonths } from "./indicators/probability";
 
 export type Effect = {
   id: string | null;
@@ -262,65 +263,68 @@ export const getAverageIndirectImpact = (
   c: DVCascadeSnapshot<unknown, unknown, unknown>,
   riskFile: DVRiskSnapshot
 ) => {
-  const totalTP =
-    riskFile.cr4de_quanti.considerable.tp.yearly.scale +
-    riskFile.cr4de_quanti.major.tp.yearly.scale +
-    riskFile.cr4de_quanti.extreme.tp.yearly.scale;
+  const pC = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.considerable.tp.rpMonths
+  );
+  const pM = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.major.tp.rpMonths
+  );
+  const pE = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.extreme.tp.rpMonths
+  );
+  const totalTP = pC + pM + pE;
+
+  const iiPercentC =
+    c.cr4de_quanti_effect.considerable.ii.all.scale /
+    riskFile.cr4de_quanti.considerable.ti.all.scaleTot;
+  const iiPercentM =
+    c.cr4de_quanti_effect.major.ii.all.scale /
+    riskFile.cr4de_quanti.major.ti.all.scaleTot;
+  const iiPercentE =
+    c.cr4de_quanti_effect.extreme.ii.all.scale /
+    riskFile.cr4de_quanti.extreme.ti.all.scaleTot;
 
   return (
-    (riskFile.cr4de_quanti.considerable.tp.yearly.scale / totalTP) *
-      (c.cr4de_quanti_effect.considerable.ii.all.scale /
-        riskFile.cr4de_quanti.considerable.ti.all.scaleTot) +
-    (riskFile.cr4de_quanti.major.tp.yearly.scale / totalTP) *
-      (c.cr4de_quanti_effect.major.ii.all.scale /
-        riskFile.cr4de_quanti.major.ti.all.scaleTot) +
-    (riskFile.cr4de_quanti.extreme.tp.yearly.scale / totalTP) *
-      (c.cr4de_quanti_effect.extreme.ii.all.scale /
-        riskFile.cr4de_quanti.extreme.ti.all.scaleTot)
+    (pC / totalTP) * iiPercentC +
+    (pM / totalTP) * iiPercentM +
+    (pE / totalTP) * iiPercentE
   );
 };
 
 export const getAverageIndirectImpactDynamic = (
   c: DVCascadeSnapshot<unknown, unknown, unknown>,
   riskFile: DVRiskSnapshot,
-  effect: DVRiskSnapshot,
-  allEffects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[]
+  effects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[]
 ) => {
-  const totalTP =
-    riskFile.cr4de_quanti[SCENARIOS.CONSIDERABLE].tp.yearly.scale +
-    riskFile.cr4de_quanti[SCENARIOS.MAJOR].tp.yearly.scale +
-    riskFile.cr4de_quanti[SCENARIOS.EXTREME].tp.yearly.scale;
+  const pC = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.considerable.tp.rpMonths
+  );
+  const tiC = getTotalImpactEurosDynamic(
+    riskFile,
+    effects,
+    SCENARIOS.CONSIDERABLE
+  );
+  const pM = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.major.tp.rpMonths
+  );
+  const tiM = getTotalImpactEurosDynamic(riskFile, effects, SCENARIOS.MAJOR);
+  const pE = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.extreme.tp.rpMonths
+  );
+  const tiE = getTotalImpactEurosDynamic(riskFile, effects, SCENARIOS.EXTREME);
+  const totalTP = pC + pM + pE;
 
   const iiConsiderable = getIndirectImpactEurosDynamic(
     c,
-    effect,
     SCENARIOS.CONSIDERABLE
   );
-  const tiConsiderable = getTotalImpactEurosDynamic(
-    riskFile,
-    allEffects,
-    SCENARIOS.CONSIDERABLE
-  );
-  const iiMajor = getIndirectImpactEurosDynamic(c, effect, SCENARIOS.MAJOR);
-  const tiMajor = getTotalImpactEurosDynamic(
-    riskFile,
-    allEffects,
-    SCENARIOS.MAJOR
-  );
-  const iiExtreme = getIndirectImpactEurosDynamic(c, effect, SCENARIOS.EXTREME);
-  const tiExtreme = getTotalImpactEurosDynamic(
-    riskFile,
-    allEffects,
-    SCENARIOS.EXTREME
-  );
+  const iiMajor = getIndirectImpactEurosDynamic(c, SCENARIOS.MAJOR);
+  const iiExtreme = getIndirectImpactEurosDynamic(c, SCENARIOS.EXTREME);
 
   return (
-    (riskFile.cr4de_quanti[SCENARIOS.CONSIDERABLE].tp.yearly.scale / totalTP) *
-      (iiConsiderable / tiConsiderable) +
-    (riskFile.cr4de_quanti[SCENARIOS.MAJOR].tp.yearly.scale / totalTP) *
-      (iiMajor / tiMajor) +
-    (riskFile.cr4de_quanti[SCENARIOS.EXTREME].tp.yearly.scale / totalTP) *
-      (iiExtreme / tiExtreme)
+    (pC / totalTP) * (iiConsiderable / tiC) +
+    (pM / totalTP) * (iiMajor / tiM) +
+    (pE / totalTP) * (iiExtreme / tiE)
   );
 };
 
@@ -345,14 +349,7 @@ export const getTotalImpactEurosDynamic = (
 ) => {
   const di = getDirectImpactEurosDynamic(riskFile, scenario, fields);
   const ii = effects.reduce(
-    (tii, effect) =>
-      tii +
-      getIndirectImpactEurosDynamic(
-        effect,
-        effect.cr4de_effect_risk,
-        scenario,
-        fields
-      ),
+    (tii, effect) => tii + getIndirectImpactEurosDynamic(effect, scenario),
     0
   );
 
@@ -372,69 +369,55 @@ export const getDirectImpactEurosDynamic = (
 
 export const getIndirectImpactEurosDynamic = (
   c: DVCascadeSnapshot<unknown, unknown, unknown>,
-  effect: DVRiskSnapshot,
-  causeScenario: SCENARIOS,
-  fields: DI_FIELD[] = DI_FIELDS
+  causeScenario: SCENARIOS
 ) => {
   const normCP = getNormalizedCPMatrix(c.cr4de_quanti_cp);
   const considerableEffect =
     normCP[causeScenario][SCENARIOS.CONSIDERABLE] *
-    getTotalImpactEuros(effect, SCENARIOS.CONSIDERABLE, fields);
+    c.cr4de_quanti_effect.considerable.ti.all.euros;
   const majorEffect =
     normCP[causeScenario][SCENARIOS.MAJOR] *
-    getTotalImpactEuros(effect, SCENARIOS.MAJOR, fields);
+    c.cr4de_quanti_effect.major.ti.all.euros;
   const extremeEffect =
     normCP[causeScenario][SCENARIOS.EXTREME] *
-    getTotalImpactEuros(effect, SCENARIOS.EXTREME, fields);
+    c.cr4de_quanti_effect.extreme.ti.all.euros;
 
   return considerableEffect + majorEffect + extremeEffect;
-  // return fields.reduce(
-  //   (tiiField, field) =>
-  //     tiiField +
-  //     eurosFromTIScale5(c.cr4de_quanti_effect[causeScenario].ii[field].scale),
-  //   0
-  // );
-  // const totCP =
-  //   c.cr4de_quanti_cp[causeScenario][SCENARIOS.CONSIDERABLE].abs +
-  //   c.cr4de_quanti_cp[causeScenario][SCENARIOS.MAJOR].abs +
-  //   c.cr4de_quanti_cp[causeScenario][SCENARIOS.EXTREME].abs;
-
-  // return (
-  //   c.cr4de_quanti_cp[causeScenario][SCENARIOS.CONSIDERABLE].abs *
-  //     effect.cr4de_quanti[SCENARIOS.CONSIDERABLE].ti.all.scaleTot +
-  //   c.cr4de_quanti_cp[causeScenario][SCENARIOS.MAJOR].abs *
-  //     getTotalImpactEuros(effect, SCENARIOS.MAJOR) +
-  //   c.cr4de_quanti_cp[causeScenario][SCENARIOS.EXTREME].abs *
-  //     getTotalImpactEuros(effect, SCENARIOS.EXTREME)
-  // );
 };
 
 export const getAverageDirectImpact = (
   riskFile: DVRiskSnapshot,
   fields: DI_FIELD[]
 ) => {
-  const totalTP =
-    riskFile.cr4de_quanti.considerable.tp.yearly.scale +
-    riskFile.cr4de_quanti.major.tp.yearly.scale +
-    riskFile.cr4de_quanti.extreme.tp.yearly.scale;
+  const pC = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.considerable.tp.rpMonths
+  );
+  const pM = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.major.tp.rpMonths
+  );
+  const pE = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.extreme.tp.rpMonths
+  );
+  const totalTP = pC + pM + pE;
 
   const considerableImpact =
     fields.reduce(
-      (t, f) => t + riskFile.cr4de_quanti.considerable.di[f].abs,
+      (t, f) => t + riskFile.cr4de_quanti.considerable.di[f].scale5TI,
       0
-    ) / eurosFromTIScale5(riskFile.cr4de_quanti.considerable.ti.all.scaleTot);
+    ) / riskFile.cr4de_quanti.considerable.ti.all.scaleTot;
   const majorImpact =
-    fields.reduce((t, f) => t + riskFile.cr4de_quanti.major.di[f].abs, 0) /
-    eurosFromTIScale5(riskFile.cr4de_quanti.major.ti.all.scaleTot);
+    fields.reduce((t, f) => t + riskFile.cr4de_quanti.major.di[f].scale5TI, 0) /
+    riskFile.cr4de_quanti.major.ti.all.scaleTot;
   const extremeImpact =
-    fields.reduce((t, f) => t + riskFile.cr4de_quanti.extreme.di[f].abs, 0) /
-    eurosFromTIScale5(riskFile.cr4de_quanti.extreme.ti.all.scaleTot);
+    fields.reduce(
+      (t, f) => t + riskFile.cr4de_quanti.extreme.di[f].scale5TI,
+      0
+    ) / riskFile.cr4de_quanti.extreme.ti.all.scaleTot;
 
   return (
-    (riskFile.cr4de_quanti.considerable.tp.yearly.scale / totalTP) *
-      considerableImpact +
-    (riskFile.cr4de_quanti.major.tp.yearly.scale / totalTP) * majorImpact +
-    (riskFile.cr4de_quanti.extreme.tp.yearly.scale / totalTP) * extremeImpact
+    (pC / totalTP) * considerableImpact +
+    (pM / totalTP) * majorImpact +
+    (pE / totalTP) * extremeImpact
   );
 };
 
@@ -443,10 +426,16 @@ export const getAverageDirectImpactDynamic = (
   allEffects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[],
   fields: DI_FIELD[]
 ) => {
-  const totalTP =
-    riskFile.cr4de_quanti.considerable.tp.yearly.scale +
-    riskFile.cr4de_quanti.major.tp.yearly.scale +
-    riskFile.cr4de_quanti.extreme.tp.yearly.scale;
+  const pC = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.considerable.tp.rpMonths
+  );
+  const pM = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.major.tp.rpMonths
+  );
+  const pE = pDailyFromReturnPeriodMonths(
+    riskFile.cr4de_quanti.extreme.tp.rpMonths
+  );
+  const totalTP = pC + pM + pE;
 
   const considerableImpact =
     getDirectImpactEurosDynamic(riskFile, SCENARIOS.CONSIDERABLE, fields) /
@@ -459,9 +448,8 @@ export const getAverageDirectImpactDynamic = (
     getTotalImpactEurosDynamic(riskFile, allEffects, SCENARIOS.EXTREME);
 
   return (
-    (riskFile.cr4de_quanti.considerable.tp.yearly.scale / totalTP) *
-      considerableImpact +
-    (riskFile.cr4de_quanti.major.tp.yearly.scale / totalTP) * majorImpact +
-    (riskFile.cr4de_quanti.extreme.tp.yearly.scale / totalTP) * extremeImpact
+    (pC / totalTP) * considerableImpact +
+    (pM / totalTP) * majorImpact +
+    (pE / totalTP) * extremeImpact
   );
 };

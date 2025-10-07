@@ -114,6 +114,8 @@ export type CPMatrixEffectRow = {
 };
 
 export type CPMatrixValue = {
+  // Absolute probability of cause -> effect relation for normal cascades
+  // Daily probability of exceedence for actor -> attack cascades
   abs: number;
   scale7: number;
   scale5: number;
@@ -146,6 +148,16 @@ export const RISK_CASCADE_QUANTI_FIELDS: (keyof DVRiskCascade)[] = [
 ];
 
 export type CASCADE_RESULT_SNAPSHOT = {
+  TP_c: number | null; // Total probability of the considerable cause risk as used in the calculations
+  // which is different dueto incomplete/incorrect risk network construction
+  TP_m: number | null;
+  TP_e: number | null;
+
+  TP50_c: number | null; // Total probability of the considerable cause risk as used in the calculations
+  // which is different dueto incomplete/incorrect risk network construction
+  TP50_m: number | null;
+  TP50_e: number | null;
+
   IP_All2C: number | null;
   IP_All2M: number | null;
   IP_All2E: number | null;
@@ -157,6 +169,42 @@ export type CASCADE_RESULT_SNAPSHOT = {
   CP_AVG_C2All: number | null;
   CP_AVG_M2All: number | null;
   CP_AVG_E2All: number | null;
+
+  TI_c: number | null; // Total impact of the considerable effect risk as used in the calculations
+  // which is different due to incomplete/incorrect risk network construction
+  TI_m: number | null;
+  TI_e: number | null;
+
+  TI_Ha_c: number | null;
+  TI_Hb_c: number | null;
+  TI_Hc_c: number | null;
+  TI_Sa_c: number | null;
+  TI_Sb_c: number | null;
+  TI_Sc_c: number | null;
+  TI_Sd_c: number | null;
+  TI_Ea_c: number | null;
+  TI_Fa_c: number | null;
+  TI_Fb_c: number | null;
+  TI_Ha_m: number | null;
+  TI_Hb_m: number | null;
+  TI_Hc_m: number | null;
+  TI_Sa_m: number | null;
+  TI_Sb_m: number | null;
+  TI_Sc_m: number | null;
+  TI_Sd_m: number | null;
+  TI_Ea_m: number | null;
+  TI_Fa_m: number | null;
+  TI_Fb_m: number | null;
+  TI_Ha_e: number | null;
+  TI_Hb_e: number | null;
+  TI_Hc_e: number | null;
+  TI_Sa_e: number | null;
+  TI_Sb_e: number | null;
+  TI_Sc_e: number | null;
+  TI_Sd_e: number | null;
+  TI_Ea_e: number | null;
+  TI_Fa_e: number | null;
+  TI_Fb_e: number | null;
 
   II_C2All: number | null; // Total impact of the cascade as a ratio to TI of the risk (0 - 1)
   II_M2All: number | null;

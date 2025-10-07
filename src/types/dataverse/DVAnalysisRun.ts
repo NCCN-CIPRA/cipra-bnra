@@ -4,7 +4,10 @@ export enum Quality {
   MISSING = "no input",
 }
 
-export interface DVAnalysisRun<RiskFileType = unknown, RiskCalculationType = RiskCalculation> {
+export interface DVAnalysisRun<
+  RiskFileType = unknown,
+  RiskCalculationType = RiskCalculation
+> {
   cr4de_bnraanalysisrunid: string;
 
   cr4de_risk_file: RiskFileType;
@@ -22,7 +25,8 @@ export interface DVAnalysisRun<RiskFileType = unknown, RiskCalculationType = Ris
   createdon: Date;
 }
 
-export interface RiskAnalysisResults<RiskFileType = unknown> extends DVAnalysisRun<RiskFileType> {
+export interface RiskAnalysisResults<RiskFileType = unknown>
+  extends DVAnalysisRun<RiskFileType> {
   cr4de_metrics: null;
   cr4de_results: RiskCalculation;
   cr4de_risk_file_metrics: RiskFileMetrics;
@@ -80,6 +84,16 @@ export interface CascadeCalculation {
   e2m: number;
   e2e: number;
 
+  // Total probability of the causing risk per scenario
+  tp_c: number;
+  tp_m: number;
+  tp_e: number;
+
+  // Total probability in 2050 of the causing risk per scenario
+  tp50_c: number;
+  tp50_m: number;
+  tp50_e: number;
+
   // Indirect probability of this cascade per scenario
   ip_c: number;
   ip_m: number;
@@ -93,6 +107,45 @@ export interface CascadeCalculation {
   ip50_e: number;
 
   ip50: number;
+
+  // Total impact of the effect risk per scenario
+  ti_c: number;
+  ti_m: number;
+  ti_e: number;
+
+  // Total impact of the effect risk per damage indicator per scenario
+  ti_Ha_c: number;
+  ti_Hb_c: number;
+  ti_Hc_c: number;
+  ti_Sa_c: number;
+  ti_Sb_c: number;
+  ti_Sc_c: number;
+  ti_Sd_c: number;
+  ti_Ea_c: number;
+  ti_Fa_c: number;
+  ti_Fb_c: number;
+
+  ti_Ha_m: number;
+  ti_Hb_m: number;
+  ti_Hc_m: number;
+  ti_Sa_m: number;
+  ti_Sb_m: number;
+  ti_Sc_m: number;
+  ti_Sd_m: number;
+  ti_Ea_m: number;
+  ti_Fa_m: number;
+  ti_Fb_m: number;
+
+  ti_Ha_e: number;
+  ti_Hb_e: number;
+  ti_Hc_e: number;
+  ti_Sa_e: number;
+  ti_Sb_e: number;
+  ti_Sc_e: number;
+  ti_Sd_e: number;
+  ti_Ea_e: number;
+  ti_Fa_e: number;
+  ti_Fb_e: number;
 
   // Indirect impact of this cascade damage indicator per scenario
   ii_Ha_c: number;

@@ -1,8 +1,21 @@
-import { CascadeCalculation, RiskCalculation } from "../../types/dataverse/DVAnalysisRun";
+import {
+  CascadeCalculation,
+  RiskCalculation,
+} from "../../types/dataverse/DVAnalysisRun";
 import { SCENARIOS } from "../scenarios";
 
-const DAMAGE_INDICATORS = ["Ha", "Hb", "Hc", "Sa", "Sb", "Sc", "Sd", "Ea", "Fa", "Fb"];
-
+const DAMAGE_INDICATORS = [
+  "Ha",
+  "Hb",
+  "Hc",
+  "Sa",
+  "Sb",
+  "Sc",
+  "Sd",
+  "Ea",
+  "Fa",
+  "Fb",
+];
 
 const getScenarioSuffix = (scenario: SCENARIOS) => {
   if (scenario === SCENARIOS.CONSIDERABLE) return "_c";
@@ -37,24 +50,63 @@ const setIndirectImpacts = (
       s2c * (cascade.effect[`ti_${d}_c` as keyof RiskCalculation] as number) +
       s2m * (cascade.effect[`ti_${d}_m` as keyof RiskCalculation] as number) +
       s2e * (cascade.effect[`ti_${d}_e` as keyof RiskCalculation] as number);
+    //@ts-expect-error never
+    cascade[`ti_${d}_c` as keyof CascadeCalculation] =
+      cascade.effect[`ti_${d}_c` as keyof RiskCalculation];
+    //@ts-expect-error never
+    cascade[`ti_${d}_m` as keyof CascadeCalculation] =
+      cascade.effect[`ti_${d}_m` as keyof RiskCalculation];
+    //@ts-expect-error never
+    cascade[`ti_${d}_e` as keyof CascadeCalculation] =
+      cascade.effect[`ti_${d}_e` as keyof RiskCalculation];
   });
 
-    //@ts-expect-error never
+  //@ts-expect-error never
   cascade[`ii${suffix}` as keyof CascadeCalculation] =
     s2c * (cascade.effect[`ti_c` as keyof RiskCalculation] as number) +
     s2m * (cascade.effect[`ti_m` as keyof RiskCalculation] as number) +
     s2e * (cascade.effect[`ti_e` as keyof RiskCalculation] as number);
+  //@ts-expect-error never
+  cascade[`ti_c` as keyof CascadeCalculation] =
+    cascade.effect[`ti_c` as keyof RiskCalculation];
+  //@ts-expect-error never
+  cascade[`ti_m` as keyof CascadeCalculation] =
+    cascade.effect[`ti_m` as keyof RiskCalculation];
+  //@ts-expect-error never
+  cascade[`ti_e` as keyof CascadeCalculation] =
+    cascade.effect[`ti_e` as keyof RiskCalculation];
 };
 
-const getCP = (cascade: CascadeCalculation, fromScenario: SCENARIOS, toScenario: SCENARIOS) => {
-  if (fromScenario === SCENARIOS.CONSIDERABLE && toScenario === SCENARIOS.CONSIDERABLE) return cascade.c2c;
-  if (fromScenario === SCENARIOS.CONSIDERABLE && toScenario === SCENARIOS.MAJOR) return cascade.c2m;
-  if (fromScenario === SCENARIOS.CONSIDERABLE && toScenario === SCENARIOS.EXTREME) return cascade.c2e;
-  if (fromScenario === SCENARIOS.MAJOR && toScenario === SCENARIOS.CONSIDERABLE) return cascade.m2c;
-  if (fromScenario === SCENARIOS.MAJOR && toScenario === SCENARIOS.MAJOR) return cascade.m2m;
-  if (fromScenario === SCENARIOS.MAJOR && toScenario === SCENARIOS.EXTREME) return cascade.m2e;
-  if (fromScenario === SCENARIOS.EXTREME && toScenario === SCENARIOS.CONSIDERABLE) return cascade.e2c;
-  if (fromScenario === SCENARIOS.EXTREME && toScenario === SCENARIOS.MAJOR) return cascade.e2m;
+const getCP = (
+  cascade: CascadeCalculation,
+  fromScenario: SCENARIOS,
+  toScenario: SCENARIOS
+) => {
+  if (
+    fromScenario === SCENARIOS.CONSIDERABLE &&
+    toScenario === SCENARIOS.CONSIDERABLE
+  )
+    return cascade.c2c;
+  if (fromScenario === SCENARIOS.CONSIDERABLE && toScenario === SCENARIOS.MAJOR)
+    return cascade.c2m;
+  if (
+    fromScenario === SCENARIOS.CONSIDERABLE &&
+    toScenario === SCENARIOS.EXTREME
+  )
+    return cascade.c2e;
+  if (fromScenario === SCENARIOS.MAJOR && toScenario === SCENARIOS.CONSIDERABLE)
+    return cascade.m2c;
+  if (fromScenario === SCENARIOS.MAJOR && toScenario === SCENARIOS.MAJOR)
+    return cascade.m2m;
+  if (fromScenario === SCENARIOS.MAJOR && toScenario === SCENARIOS.EXTREME)
+    return cascade.m2e;
+  if (
+    fromScenario === SCENARIOS.EXTREME &&
+    toScenario === SCENARIOS.CONSIDERABLE
+  )
+    return cascade.e2c;
+  if (fromScenario === SCENARIOS.EXTREME && toScenario === SCENARIOS.MAJOR)
+    return cascade.e2m;
   return cascade.e2e;
 };
 
@@ -72,7 +124,10 @@ export const getEffectGraphRecurse = (
   if (cascades.length <= 0) return [];
 
   const nextLevel: CascadeCalculation[] = [];
-  const nextVisitedIds = [...visitedRiskIds, ...cascades.map((c) => c.effect.riskId)];
+  const nextVisitedIds = [
+    ...visitedRiskIds,
+    ...cascades.map((c) => c.effect.riskId),
+  ];
 
   cascades.forEach((c1) => {
     c1.effect.effects.forEach((c2) => {
@@ -89,7 +144,9 @@ export const getEffectGraphRecurse = (
     effect: {
       ...c1.effect,
       effects: c1.effect.effects.reduce((filteredEffects, c2) => {
-        const nextLevelEffect = nextLevelEffects.find((c3) => c2.effect.riskId === c3.effect.riskId);
+        const nextLevelEffect = nextLevelEffects.find(
+          (c3) => c2.effect.riskId === c3.effect.riskId
+        );
 
         if (!nextLevelEffect) return filteredEffects;
 
@@ -105,10 +162,13 @@ export default function calculateTotalImpact(risk: RiskCalculation): void {
   calculateTotalImpactScenario(risk, SCENARIOS.EXTREME);
 }
 
-function calculateTotalImpactScenario(risk: RiskCalculation, scenario: SCENARIOS) {
+function calculateTotalImpactScenario(
+  risk: RiskCalculation,
+  scenario: SCENARIOS
+) {
   const suffix = getScenarioSuffix(scenario);
 
-    //@ts-expect-error never
+  //@ts-expect-error never
   risk[`ti${suffix}` as keyof RiskCalculation] =
     getDI(risk, scenario) +
     risk.effects.reduce((iiTot, cascade) => {
@@ -145,7 +205,10 @@ function calculateTotalImpactScenario(risk: RiskCalculation, scenario: SCENARIOS
     risk[`ti_${d}${suffix}` as keyof RiskCalculation] =
       (risk[`di_${d}${suffix}` as keyof RiskCalculation] as number) +
       risk.effects.reduce((tot, cascade) => {
-        return tot + (cascade[`ii_${d}${suffix}` as keyof CascadeCalculation] as number);
+        return (
+          tot +
+          (cascade[`ii_${d}${suffix}` as keyof CascadeCalculation] as number)
+        );
       }, 0);
   });
 

@@ -140,6 +140,12 @@ describe("Return Period to Daily Probability Functions", () => {
     });
   });
 
+  describe("Return period calculations", () => {
+    test("should return infinity when pDaily is 0", () => {
+      expect(returnPeriodMonthsFromPDaily(0)).toBeCloseTo(Infinity);
+    });
+  });
+
   describe("Round-trip conversions", () => {
     test("RP -> pDaily -> RP should be identity", () => {
       expect(
