@@ -122,10 +122,10 @@ const CPX = ({
       }}
     >
       {onChange ? (
-        <Select
-          value={innerVal}
+        <Select<string>
+          value={innerVal.toString()}
           onChange={(e) => {
-            handleChange(e.target.value as string);
+            handleChange(e.target.value);
           }}
           sx={{
             border: "none",
