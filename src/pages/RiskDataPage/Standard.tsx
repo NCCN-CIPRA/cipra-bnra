@@ -97,7 +97,9 @@ export default function Standard({
   const causesWithP = causes.map((c) => ({
     ...c,
     ip: getAverageIndirectProbability(c, riskFile),
-    ipDynamic: getAverageIndirectProbabilityDynamic(c, riskFile, causes),
+    ipDynamic: Environment.DYNAMIC
+      ? getAverageIndirectProbabilityDynamic(c, riskFile, causes)
+      : null,
   }));
 
   const causeElements = [
