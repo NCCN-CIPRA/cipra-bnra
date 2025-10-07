@@ -1,20 +1,33 @@
-export type SerializedChangeDiff<T = unknown> = string & {
-  __json_seralized: ChangeDiff<T>;
+export type SerializedChangeDiff = string & {
+  __json_seralized: ChangeDiff[];
 };
 
-export type ChangeDiff<T = unknown> = {
-  original_fields: T;
-  new_fields: T;
+export type ChangeDiff = {
+  property: string;
+  originalValue: string | number | null;
+  newValue: string | number | null;
 };
+
+export function serializeChangeLogDiff(
+  quanti: ChangeDiff[]
+): SerializedChangeDiff {
+  return JSON.stringify(quanti) as SerializedChangeDiff;
+}
+
+export function parseChangeLogDiff(quanti: SerializedChangeDiff): ChangeDiff[] {
+  return JSON.parse(quanti) as ChangeDiff[];
+}
 
 export type DVChangeLogDiffType = unknown | SerializedChangeDiff | ChangeDiff;
 
 export interface DVChangeLog<
-  ChangeDiffType extends DVChangeLogDiffType = ChangeDiff,
+  ChangeDiffType extends DVChangeLogDiffType = SerializedChangeDiff,
   ContactType = unknown
 > {
   cr4de_bnravalidationid: string;
 
+  // Bind value for update only
+  "cr4de_changed_by@odata.bind": string | null | undefined;
   cr4de_changed_by: ContactType;
   _cr4de_changed_by_value: string;
 

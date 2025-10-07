@@ -218,8 +218,8 @@ export interface API {
   updateFeedback(id: string, fields: object): Promise<void>;
   deleteFeedback(id: string): Promise<void>;
 
-  getChangeLogs<T = DVFeedback>(query?: string): Promise<T[]>;
-  createChangeLog(fields: object): Promise<CreateResponse>;
+  getChangeLogs<T = DVChangeLog>(query?: string): Promise<T[]>;
+  createChangeLog(fields: Partial<DVChangeLog>): Promise<CreateResponse>;
 
   getTranslations<T = DVTranslation>(query?: string): Promise<T[]>;
   createTranslation(fields: Partial<DVTranslation>): Promise<CreateResponse>;

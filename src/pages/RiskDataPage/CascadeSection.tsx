@@ -1,4 +1,7 @@
-import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
+import {
+  DVCascadeSnapshot,
+  serializeCPMatrix,
+} from "../../types/dataverse/DVCascadeSnapshot";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { ReactNode, useState } from "react";
 import RiskDataAccordion from "./RiskDataAccordion";
@@ -10,6 +13,20 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import LeftBorderSection from "../../components/LeftBorderSection";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../BasePage";
+import { Environment } from "../../types/global";
+import { SCENARIOS } from "../../functions/scenarios";
+import { RISK_TYPE } from "../../types/dataverse/Riskfile";
+import {
+  mScale3FromPDaily,
+  mScale7FromPDaily,
+} from "../../functions/indicators/motivation";
+import {
+  cpScale5FromPAbs,
+  cpScale7FromPAbs,
+} from "../../functions/indicators/cp";
+import { serializeChangeLogDiff } from "../../types/dataverse/DVChangeLog";
 
 export type VISUALS = "SANKEY" | "MATRIX";
 
@@ -30,6 +47,7 @@ export function CascadeSection({
 }) {
   const api = useAPI();
   const queryClient = useQueryClient();
+  const { user, environment } = useOutletContext<BasePageContext>();
 
   const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali || "");
   const mutation = useMutation({
@@ -42,6 +60,57 @@ export function CascadeSection({
       });
     },
   });
+
+  const handleChange = async (
+    causeScenario: SCENARIOS,
+    effectScenario: SCENARIOS,
+    newCPAbs: number
+  ) => {
+    if (!user?.roles.analist) return;
+
+    const isActorCause = cause.cr4de_risk_type === RISK_TYPE.MANMADE;
+
+    const updatedCPMatrix = { ...cascade.cr4de_quanti_cp };
+    updatedCPMatrix[causeScenario][effectScenario] = {
+      abs: newCPAbs,
+      scale5: isActorCause
+        ? Math.round(10 * mScale3FromPDaily(newCPAbs)) / 10
+        : Math.round(10 * cpScale5FromPAbs(newCPAbs)) / 10,
+      scale7: isActorCause
+        ? Math.round(10 * mScale7FromPDaily(newCPAbs)) / 10
+        : Math.round(10 * cpScale7FromPAbs(newCPAbs)) / 10,
+    };
+
+    api.createChangeLog({
+      "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+      cr4de_changed_object_type: "CASCADE",
+      cr4de_changed_object_id: cascade._cr4de_risk_cascade_value,
+      cr4de_diff: serializeChangeLogDiff([
+        {
+          property: `cr4de_quanti_input.${causeScenario}.${effectScenario}.abs`,
+          originalValue:
+            cascade.cr4de_quanti_cp[causeScenario][effectScenario].abs,
+          newValue: updatedCPMatrix[causeScenario][effectScenario].abs,
+        },
+        {
+          property: `cr4de_quanti_input.${causeScenario}.${effectScenario}.scale5`,
+          originalValue:
+            cascade.cr4de_quanti_cp[causeScenario][effectScenario].scale5,
+          newValue: updatedCPMatrix[causeScenario][effectScenario].scale5,
+        },
+        {
+          property: `cr4de_quanti_input.${causeScenario}.${effectScenario}.scale7`,
+          originalValue:
+            cascade.cr4de_quanti_cp[causeScenario][effectScenario].scale7,
+          newValue: updatedCPMatrix[causeScenario][effectScenario].scale7,
+        },
+      ]),
+    });
+    mutation.mutate({
+      cr4de_bnrariskcascadeid: cascade._cr4de_risk_cascade_value,
+      cr4de_quanti_input: serializeCPMatrix(updatedCPMatrix),
+    });
+  };
 
   return (
     <RiskDataAccordion
@@ -74,9 +143,23 @@ export function CascadeSection({
     >
       <Stack direction="column" sx={{ width: "100%" }}>
         {visuals === "SANKEY" ? (
-          <CascadeSankey cause={cause} effect={effect} cascade={cascade} />
+          <CascadeSankey
+            cause={cause}
+            effect={effect}
+            cascade={cascade}
+            onChange={
+              environment === Environment.DYNAMIC ? handleChange : undefined
+            }
+          />
         ) : (
-          <CascadeMatrix cause={cause} effect={effect} cascade={cascade} />
+          <CascadeMatrix
+            cause={cause}
+            effect={effect}
+            cascade={cascade}
+            onChange={
+              environment === Environment.DYNAMIC ? handleChange : undefined
+            }
+          />
         )}
 
         <Box sx={{ pt: 4 }}>
@@ -89,6 +172,20 @@ export function CascadeSection({
               editableRole="analist"
               onSave={async (newQuali: string | null) => {
                 setQuali(newQuali);
+
+                api.createChangeLog({
+                  "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+                  cr4de_changed_object_type: "CASCADE",
+                  cr4de_changed_object_id: cascade._cr4de_risk_cascade_value,
+                  cr4de_diff: serializeChangeLogDiff([
+                    {
+                      property: `cr4de_quali`,
+                      originalValue: cascade.cr4de_quali,
+                      newValue: newQuali,
+                    },
+                  ]),
+                });
+
                 mutation.mutate({
                   cr4de_bnrariskcascadeid: cascade._cr4de_risk_cascade_value,
                   cr4de_quali: newQuali,

@@ -8,7 +8,8 @@
 - Consolidated qualitative input for risk matrices is editable in the _Raw Data_ page
 - Small letter indicators in the title bar show current environment and indicator versions
 - Show scenario descriptions in the direct probability and impact sections of the _Raw Data_ page
-- Allow editing qualitative input by analists in the direct probability and impact sections of the _Raw Data_ page
+- Allow editing qualitative and quantitative input by analists in the direct probability and impact sections of the _Raw Data_ page
+- Allow editing qualitative and quantitative input by analists in the indirect probability and impact sections of the _Raw Data_ page
 
 ### Changed
 

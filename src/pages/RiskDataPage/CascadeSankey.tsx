@@ -12,24 +12,14 @@ import { SankeyLink, SankeyNode } from "recharts/types/util/types";
 import {
   getIntervalStringMScale3,
   getIntervalStringMScale7,
-  mScale3FromPDaily,
-  mScale7FromPDaily,
   pDailyFromMScale3,
   pDailyFromMScale7,
 } from "../../functions/indicators/motivation";
 import { Indicators } from "../../types/global";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../BasePage";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  DVRiskCascade,
-  serializeCPMatrix,
-} from "../../types/dataverse/DVRiskCascade";
-import useAPI, { DataTable } from "../../hooks/useAPI";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 import {
-  cpScale5FromPAbs,
-  cpScale7FromPAbs,
   getIntervalStringCPScale5,
   getIntervalStringCPScale7,
   pAbsFromCPScale5,
@@ -79,28 +69,21 @@ export default function CascadeSankey({
   cause,
   effect,
   cascade,
+  onChange,
 }: {
   cause: DVRiskSnapshot;
   effect: DVRiskSnapshot;
   cascade: DVCascadeSnapshot;
+  onChange?: (
+    causeScenario: SCENARIOS,
+    effectScenario: SCENARIOS,
+    newCPAbs: number
+  ) => unknown;
 }) {
-  const api = useAPI();
-  const queryClient = useQueryClient();
   const { indicators } = useOutletContext<BasePageContext>();
   const [hoverNodeIndex, setHoverNodeIndex] = useState<number | null>(null);
   const [hoverLinkIndex, setHoverLinkIndex] = useState<number | null>(null);
   const [innerCascade, setInnerCascade] = useState<DVCascadeSnapshot>(cascade);
-  const mutation = useMutation({
-    mutationFn: async (
-      newC: Partial<DVRiskCascade> & { cr4de_bnrariskcascadeid: string }
-    ) => api.updateCascade(newC.cr4de_bnrariskcascadeid, newC),
-    onSuccess: async () => {
-      // If you're invalidating a single query
-      await queryClient.invalidateQueries({
-        queryKey: [DataTable.RISK_CASCADE],
-      });
-    },
-  });
 
   const isActorCause = cause.cr4de_risk_type === RISK_TYPE.MANMADE;
 
@@ -126,23 +109,10 @@ export default function CascadeSankey({
           : pAbsFromCPScale7(newCPVal);
     }
 
+    if (onChange) onChange(causeScenario, effectScenario, pAbs);
+
     const updatedCPMatrix = { ...cascade.cr4de_quanti_cp };
-    updatedCPMatrix[causeScenario][effectScenario] = {
-      abs: pAbs,
-      scale5: isActorCause
-        ? Math.round(10 * mScale3FromPDaily(pAbs)) / 10
-        : Math.round(10 * cpScale5FromPAbs(pAbs)) / 10,
-      scale7: isActorCause
-        ? Math.round(10 * mScale7FromPDaily(pAbs)) / 10
-        : Math.round(10 * cpScale7FromPAbs(pAbs)) / 10,
-    };
-
     const cpMatrix = updatedCPMatrix;
-
-    mutation.mutate({
-      cr4de_bnrariskcascadeid: cascade._cr4de_risk_cascade_value,
-      cr4de_quanti_input: serializeCPMatrix(cpMatrix),
-    });
 
     setInnerCascade({
       ...innerCascade,

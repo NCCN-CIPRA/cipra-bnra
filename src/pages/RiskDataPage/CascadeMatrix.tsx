@@ -14,32 +14,22 @@ import {
   IconButton,
 } from "@mui/material";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
-import {
-  DVRiskCascade,
-  serializeCPMatrix,
-} from "../../types/dataverse/DVRiskCascade";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { Trans, useTranslation } from "react-i18next";
 import { useState } from "react";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
-import useAPI, { DataTable } from "../../hooks/useAPI";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../BasePage";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { Indicators } from "../../types/global";
 import {
-  cpScale5FromPAbs,
-  cpScale7FromPAbs,
   pAbsFromCPScale5,
   pAbsFromCPScale7,
 } from "../../functions/indicators/cp";
 import { ScenarioDescriptionBox } from "../../components/ScenarioDescription";
 import {
-  mScale3FromPDaily,
-  mScale7FromPDaily,
   pDailyFromMScale3,
   pDailyFromMScale7,
 } from "../../functions/indicators/motivation";
@@ -84,17 +74,43 @@ const ScenarioBox = ({ scenario }: { scenario: SCENARIOS }) => {
 
 const CPX = ({
   value,
+  isActorCause,
   onChange,
 }: {
   value: number;
-  onChange: (newValue: number) => Promise<void>;
+  isActorCause: boolean;
+  onChange?: (newCPAbs: number) => unknown;
 }) => {
   const theme = useTheme();
-  const [innerVal, setValue] = useState(value);
+  const { indicators } = useOutletContext<BasePageContext>();
+
+  const [innerVal, setValue] = useState(Math.round(2 * value) / 2);
+
+  const prefix = isActorCause ? "M" : "CP";
 
   // const stringVal = `CP${innerVal}`;
-  const colorVal = `CP${Math.round(2 * innerVal) / 2}` as keyof typeof COLORS;
-  const getVal = (str: string) => parseFloat(str.replace("CP", ""));
+  const colorVal = `CP${innerVal}` as keyof typeof COLORS;
+  const getVal = (str: string) => parseFloat(str);
+
+  const handleChange = (newVal: string) => {
+    setValue(getVal(newVal));
+
+    if (!onChange) return;
+
+    if (indicators === Indicators.V1) {
+      if (isActorCause) {
+        onChange(pDailyFromMScale3(getVal(newVal)));
+      } else {
+        onChange(pAbsFromCPScale5(getVal(newVal)));
+      }
+    } else {
+      if (isActorCause) {
+        onChange(pDailyFromMScale7(getVal(newVal)));
+      } else {
+        onChange(pAbsFromCPScale7(getVal(newVal)));
+      }
+    }
+  };
 
   return (
     <Box
@@ -105,30 +121,49 @@ const CPX = ({
         color: theme.palette.text.secondary,
       }}
     >
-      <Select
-        value={colorVal}
-        onChange={(e) => {
-          onChange(getVal(e.target.value as string));
-          setValue(getVal(e.target.value as string));
-        }}
-        sx={{
-          border: "none",
-          "& .MuiInputBase-input": { padding: 0 },
-          "& fieldset": { border: "none" },
-        }}
-      >
-        <MenuItem value="CP0">CP0</MenuItem>
-        <MenuItem value="CP0.5">CP0.5</MenuItem>
-        <MenuItem value="CP1">CP1</MenuItem>
-        <MenuItem value="CP1.5">CP1.5</MenuItem>
-        <MenuItem value="CP2">CP2</MenuItem>
-        <MenuItem value="CP2.5">CP2.5</MenuItem>
-        <MenuItem value="CP3">CP3</MenuItem>
-        <MenuItem value="CP3.5">CP3.5</MenuItem>
-        <MenuItem value="CP4">CP4</MenuItem>
-        <MenuItem value="CP4.5">CP4.5</MenuItem>
-        <MenuItem value="CP5">CP5</MenuItem>
-      </Select>
+      {onChange ? (
+        <Select
+          value={innerVal}
+          onChange={(e) => {
+            handleChange(e.target.value as string);
+          }}
+          sx={{
+            border: "none",
+            "& .MuiInputBase-input": { padding: 0 },
+            "& fieldset": { border: "none" },
+          }}
+        >
+          <MenuItem value="0">{prefix}0</MenuItem>
+          <MenuItem value="0.5">{prefix}0.5</MenuItem>
+          <MenuItem value="1">{prefix}1</MenuItem>
+          <MenuItem value="1.5">{prefix}1.5</MenuItem>
+          <MenuItem value="2">{prefix}2</MenuItem>
+          <MenuItem value="2.5">{prefix}2.5</MenuItem>
+          <MenuItem value="3">{prefix}3</MenuItem>
+          <MenuItem value="3.5">{prefix}3.5</MenuItem>
+          {(!isActorCause || indicators === Indicators.V2) && (
+            <>
+              <MenuItem value="4">{prefix}4</MenuItem>
+              <MenuItem value="4.5">{prefix}4.5</MenuItem>
+              <MenuItem value="5">{prefix}5</MenuItem>
+              <MenuItem value="5.5">{prefix}5.5</MenuItem>
+            </>
+          )}
+          {indicators === Indicators.V2 && (
+            <>
+              <MenuItem value="6">{prefix}6</MenuItem>
+              <MenuItem value="6.5">{prefix}6.5</MenuItem>
+              <MenuItem value="7">{prefix}7</MenuItem>
+              <MenuItem value="7.5">{prefix}7.5</MenuItem>
+            </>
+          )}
+        </Select>
+      ) : (
+        <Typography variant="body1" color="black">
+          {prefix}
+          {innerVal}
+        </Typography>
+      )}
     </Box>
   );
 };
@@ -137,70 +172,25 @@ export default function CascadeMatrix({
   cause,
   effect,
   cascade,
+  onChange,
 }: {
   cause: DVRiskSnapshot;
   effect: DVRiskSnapshot;
   cascade: DVCascadeSnapshot;
+  onChange?: (
+    causeScenario: SCENARIOS,
+    effectScenario: SCENARIOS,
+    newCPAbs: number
+  ) => unknown;
 }) {
   const theme = useTheme();
 
-  const api = useAPI();
-  const queryClient = useQueryClient();
-  const { indicators } = useOutletContext<BasePageContext>();
-
   const [showScenarios, setShowScenarios] = useState(false);
-  const mutation = useMutation({
-    mutationFn: async (
-      newC: Partial<DVRiskCascade> & { cr4de_bnrariskcascadeid: string }
-    ) => api.updateCascade(newC.cr4de_bnrariskcascadeid, newC),
-    onSuccess: async () => {
-      // If you're invalidating a single query
-      await queryClient.invalidateQueries({
-        queryKey: [DataTable.RISK_CASCADE],
-      });
-    },
-  });
 
   const isActorCause = cause.cr4de_risk_type === RISK_TYPE.MANMADE;
 
   const causeScenarios = JSON.parse(cause.cr4de_scenarios || "");
   const effectScenarios = JSON.parse(effect.cr4de_scenarios || "");
-
-  const handleChange = async (
-    causeScenario: SCENARIOS,
-    effectScenario: SCENARIOS,
-    newCPVal: number
-  ) => {
-    let pAbs = 0;
-
-    if (isActorCause) {
-      pAbs =
-        indicators === Indicators.V1
-          ? pDailyFromMScale3(newCPVal)
-          : pDailyFromMScale7(newCPVal);
-    } else {
-      pAbs =
-        indicators === Indicators.V1
-          ? pAbsFromCPScale5(newCPVal)
-          : pAbsFromCPScale7(newCPVal);
-    }
-
-    const updatedCPMatrix = { ...cascade.cr4de_quanti_cp };
-    updatedCPMatrix[causeScenario][effectScenario] = {
-      abs: pAbs,
-      scale5: isActorCause
-        ? Math.round(10 * mScale3FromPDaily(pAbs)) / 10
-        : Math.round(10 * cpScale5FromPAbs(pAbs)) / 10,
-      scale7: isActorCause
-        ? Math.round(10 * mScale7FromPDaily(pAbs)) / 10
-        : Math.round(10 * cpScale7FromPAbs(pAbs)) / 10,
-    };
-
-    mutation.mutate({
-      cr4de_bnrariskcascadeid: cascade._cr4de_risk_cascade_value,
-      cr4de_quanti_input: serializeCPMatrix(updatedCPMatrix),
-    });
-  };
 
   return (
     <Box>
@@ -260,12 +250,15 @@ export default function CascadeMatrix({
                   SCENARIOS.CONSIDERABLE
                 ].scale5
               }
-              onChange={(newValue) =>
-                handleChange(
-                  SCENARIOS.CONSIDERABLE,
-                  SCENARIOS.CONSIDERABLE,
-                  newValue
-                )
+              isActorCause={isActorCause}
+              onChange={
+                onChange &&
+                ((newValue) =>
+                  onChange(
+                    SCENARIOS.CONSIDERABLE,
+                    SCENARIOS.CONSIDERABLE,
+                    newValue
+                  ))
               }
             />
           </Grid>
@@ -275,8 +268,11 @@ export default function CascadeMatrix({
                 cascade.cr4de_quanti_cp[SCENARIOS.CONSIDERABLE][SCENARIOS.MAJOR]
                   .scale5
               }
-              onChange={(newValue) =>
-                handleChange(SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, newValue)
+              isActorCause={isActorCause}
+              onChange={
+                onChange &&
+                ((newValue) =>
+                  onChange(SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, newValue))
               }
             />
           </Grid>
@@ -287,12 +283,11 @@ export default function CascadeMatrix({
                   SCENARIOS.EXTREME
                 ].scale5
               }
-              onChange={(newValue) =>
-                handleChange(
-                  SCENARIOS.CONSIDERABLE,
-                  SCENARIOS.EXTREME,
-                  newValue
-                )
+              isActorCause={isActorCause}
+              onChange={
+                onChange &&
+                ((newValue) =>
+                  onChange(SCENARIOS.CONSIDERABLE, SCENARIOS.EXTREME, newValue))
               }
             />
           </Grid>
@@ -306,8 +301,11 @@ export default function CascadeMatrix({
                 cascade.cr4de_quanti_cp[SCENARIOS.MAJOR][SCENARIOS.CONSIDERABLE]
                   .scale5
               }
-              onChange={(newValue) =>
-                handleChange(SCENARIOS.MAJOR, SCENARIOS.CONSIDERABLE, newValue)
+              isActorCause={isActorCause}
+              onChange={
+                onChange &&
+                ((newValue) =>
+                  onChange(SCENARIOS.MAJOR, SCENARIOS.CONSIDERABLE, newValue))
               }
             />
           </Grid>
@@ -316,8 +314,11 @@ export default function CascadeMatrix({
               value={
                 cascade.cr4de_quanti_cp[SCENARIOS.MAJOR][SCENARIOS.MAJOR].scale5
               }
-              onChange={(newValue) =>
-                handleChange(SCENARIOS.MAJOR, SCENARIOS.MAJOR, newValue)
+              isActorCause={isActorCause}
+              onChange={
+                onChange &&
+                ((newValue) =>
+                  onChange(SCENARIOS.MAJOR, SCENARIOS.MAJOR, newValue))
               }
             />
           </Grid>
@@ -327,8 +328,11 @@ export default function CascadeMatrix({
                 cascade.cr4de_quanti_cp[SCENARIOS.MAJOR][SCENARIOS.EXTREME]
                   .scale5
               }
-              onChange={(newValue) =>
-                handleChange(SCENARIOS.MAJOR, SCENARIOS.EXTREME, newValue)
+              isActorCause={isActorCause}
+              onChange={
+                onChange &&
+                ((newValue) =>
+                  onChange(SCENARIOS.MAJOR, SCENARIOS.EXTREME, newValue))
               }
             />
           </Grid>
@@ -343,12 +347,11 @@ export default function CascadeMatrix({
                   SCENARIOS.CONSIDERABLE
                 ].scale5
               }
-              onChange={(newValue) =>
-                handleChange(
-                  SCENARIOS.EXTREME,
-                  SCENARIOS.CONSIDERABLE,
-                  newValue
-                )
+              isActorCause={isActorCause}
+              onChange={
+                onChange &&
+                ((newValue) =>
+                  onChange(SCENARIOS.EXTREME, SCENARIOS.CONSIDERABLE, newValue))
               }
             />
           </Grid>
@@ -358,8 +361,11 @@ export default function CascadeMatrix({
                 cascade.cr4de_quanti_cp[SCENARIOS.EXTREME][SCENARIOS.MAJOR]
                   .scale5
               }
-              onChange={(newValue) =>
-                handleChange(SCENARIOS.EXTREME, SCENARIOS.MAJOR, newValue)
+              isActorCause={isActorCause}
+              onChange={
+                onChange &&
+                ((newValue) =>
+                  onChange(SCENARIOS.EXTREME, SCENARIOS.MAJOR, newValue))
               }
             />
           </Grid>
@@ -369,8 +375,11 @@ export default function CascadeMatrix({
                 cascade.cr4de_quanti_cp[SCENARIOS.EXTREME][SCENARIOS.EXTREME]
                   .scale5
               }
-              onChange={(newValue) =>
-                handleChange(SCENARIOS.EXTREME, SCENARIOS.EXTREME, newValue)
+              isActorCause={isActorCause}
+              onChange={
+                onChange &&
+                ((newValue) =>
+                  onChange(SCENARIOS.EXTREME, SCENARIOS.EXTREME, newValue))
               }
             />
           </Grid>

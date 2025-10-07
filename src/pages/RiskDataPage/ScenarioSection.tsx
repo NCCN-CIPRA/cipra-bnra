@@ -14,6 +14,8 @@ import {
   DI_FIELD,
   getQuantiLabel,
   DVRiskFile,
+  serializeRiskFileQuantiInput,
+  parseRiskFileQuantiInput,
 } from "../../types/dataverse/DVRiskFile";
 import {
   diScale5FromEuros,
@@ -22,7 +24,11 @@ import {
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../BasePage";
 import { Indicators } from "../../types/global";
-import { pScale5to7 } from "../../functions/indicators/probability";
+import {
+  pScale5FromReturnPeriodMonths,
+  pScale5to7,
+  pScale7FromReturnPeriodMonths,
+} from "../../functions/indicators/probability";
 import ScenarioDescription from "../../components/ScenarioDescription";
 import HTMLEditor from "../../components/HTMLEditor";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -32,9 +38,11 @@ import {
   RiskScenarioQualis,
   serializeRiskQualis,
 } from "../../types/dataverse/Riskfile";
+import { serializeChangeLogDiff } from "../../types/dataverse/DVChangeLog";
 
 export function ScenarioSection({
   riskFile,
+  qualiField,
   quantiFields,
   scenario,
   isAttack,
@@ -52,9 +60,9 @@ export function ScenarioSection({
   const [open, setOpen] = useState(false);
 
   const [quali, setQuali] = useState(
-    ""
-    // riskFile.cr4de_quali[scenario][qualiField] || ""
+    riskFile.cr4de_quali[scenario][qualiField] || ""
   );
+
   const mutation = useMutation({
     mutationFn: async (
       newC: Partial<DVRiskFile> & { cr4de_riskfilesid: string }
@@ -69,18 +77,80 @@ export function ScenarioSection({
   const scenarios = parseRiskSnapshotScenarios(riskFile.cr4de_scenarios);
 
   const handleChangeQuanti =
-    (field: DP_FIELD | DI_FIELD) => (newValue: number) => {
-      console.log(field, newValue);
-      // const quantis = mutation.mutate({
-      //   cr4de_riskfilesid: riskFile._cr4de_risk_file_value,
-      //   cr4de_quanti: ser({
-      //     ...riskFile.cr4de_quali,
-      //     [scenario]: {
-      //       ...riskFile.cr4de_quali[scenario],
-      //       dp: newQuali,
-      //     },
-      //   }),
-      // });
+    (field: DP_FIELD | DI_FIELD) => (rpMonthsOrEuros: number) => {
+      if (riskFile.cr4de_risk_file === undefined) return;
+
+      const rf = riskFile.cr4de_risk_file as DVRiskFile;
+      const quantiInput = parseRiskFileQuantiInput(rf.cr4de_quanti);
+
+      const newQuantiInput = {
+        ...quantiInput,
+      };
+
+      if (field === "dp") {
+        newQuantiInput[scenario].dp = {
+          rpMonths: rpMonthsOrEuros,
+          scale5: pScale5FromReturnPeriodMonths(rpMonthsOrEuros),
+          scale7: pScale7FromReturnPeriodMonths(rpMonthsOrEuros),
+        };
+
+        api.createChangeLog({
+          "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+          cr4de_changed_object_type: "RISK_FILE",
+          cr4de_changed_object_id: riskFile._cr4de_risk_file_value,
+          cr4de_diff: serializeChangeLogDiff([
+            {
+              property: `cr4de_quanti.${scenario}.dp.rpMonths`,
+              originalValue: quantiInput[scenario].dp.rpMonths,
+              newValue: newQuantiInput[scenario].dp.rpMonths,
+            },
+            {
+              property: `cr4de_quanti.${scenario}.dp.scale5`,
+              originalValue: quantiInput[scenario].dp.scale5,
+              newValue: newQuantiInput[scenario].dp.scale5,
+            },
+            {
+              property: `cr4de_quanti.${scenario}.dp.scale7`,
+              originalValue: quantiInput[scenario].dp.scale7,
+              newValue: newQuantiInput[scenario].dp.scale7,
+            },
+          ]),
+        });
+      } else {
+        newQuantiInput[scenario].di[field] = {
+          abs: rpMonthsOrEuros,
+          scale5: diScale5FromEuros(rpMonthsOrEuros),
+          scale7: iScale7FromEuros(rpMonthsOrEuros),
+        };
+
+        api.createChangeLog({
+          "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+          cr4de_changed_object_type: "RISK_FILE",
+          cr4de_changed_object_id: riskFile._cr4de_risk_file_value,
+          cr4de_diff: serializeChangeLogDiff([
+            {
+              property: `cr4de_quanti.${scenario}.di.${field}.abs`,
+              originalValue: quantiInput[scenario].di[field].abs,
+              newValue: newQuantiInput[scenario].di[field].abs,
+            },
+            {
+              property: `cr4de_quanti.${scenario}.di.${field}.scale5`,
+              originalValue: quantiInput[scenario].di[field].scale5,
+              newValue: newQuantiInput[scenario].di[field].scale5,
+            },
+            {
+              property: `cr4de_quanti.${scenario}.di.${field}.scale7`,
+              originalValue: quantiInput[scenario].di[field].scale7,
+              newValue: newQuantiInput[scenario].di[field].scale7,
+            },
+          ]),
+        });
+      }
+
+      mutation.mutate({
+        cr4de_riskfilesid: riskFile._cr4de_risk_file_value,
+        cr4de_quanti: serializeRiskFileQuantiInput(newQuantiInput),
+      });
     };
 
   return (
@@ -120,13 +190,27 @@ export function ScenarioSection({
               initialHTML={quali}
               onSave={async (newQuali: string | null) => {
                 setQuali(newQuali || "");
+
+                api.createChangeLog({
+                  "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+                  cr4de_changed_object_type: "RISK_FILE",
+                  cr4de_changed_object_id: riskFile._cr4de_risk_file_value,
+                  cr4de_diff: serializeChangeLogDiff([
+                    {
+                      property: `cr4de_quali.${scenario}.${qualiField}`,
+                      originalValue: riskFile.cr4de_quali[scenario][qualiField],
+                      newValue: newQuali,
+                    },
+                  ]),
+                });
+
                 mutation.mutate({
                   cr4de_riskfilesid: riskFile._cr4de_risk_file_value,
                   cr4de_quali: serializeRiskQualis({
                     ...riskFile.cr4de_quali,
                     [scenario]: {
                       ...riskFile.cr4de_quali[scenario],
-                      dp: newQuali,
+                      [qualiField]: newQuali,
                     },
                   }),
                 });
