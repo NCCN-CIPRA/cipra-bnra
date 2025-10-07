@@ -99,9 +99,10 @@ export default function Attack({
   const causesWithP = causes.map((c) => ({
     ...c,
     ip: getAverageIndirectProbability(c, riskFile),
-    ipDynamic: Environment.DYNAMIC
-      ? getAverageIndirectProbabilityDynamic(c, riskFile, causes)
-      : null,
+    ipDynamic:
+      environment === Environment.DYNAMIC
+        ? getAverageIndirectProbabilityDynamic(c, riskFile, causes)
+        : null,
   }));
 
   const actors = [

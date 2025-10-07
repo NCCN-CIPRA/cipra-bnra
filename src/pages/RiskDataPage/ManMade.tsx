@@ -61,7 +61,7 @@ export default function ManMade({
         ? getAverageIndirectImpactDynamic(e, riskFile, effects)
         : null,
   }));
-  console.log(dynamicAttacks);
+
   return (
     <>
       <Box sx={{ mx: 4 }}>
