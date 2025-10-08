@@ -1,41 +1,21 @@
-import { useOutletContext, useParams } from "react-router-dom";
-import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import { useOutletContext } from "react-router-dom";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Box,
   Container,
-  ListItem,
-  ListItemButton,
-  ListItemText,
   Stack,
-  Switch,
   Typography,
 } from "@mui/material";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
-import NCCNLoader from "../../components/NCCNLoader";
-import RiskFileTitle from "../../components/RiskFileTitle";
-import useSavedState from "../../hooks/useSavedState";
 import { useQuery } from "@tanstack/react-query";
 import useAPI, { DataTable } from "../../hooks/useAPI";
-import { DVChangeLog } from "../../types/dataverse/DVChangeLog";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
-type RouteParams = {
-  risk_file_id: string;
-};
 
 export default function RiskLogPage() {
   const api = useAPI();
-
-  const params = useParams() as RouteParams;
-  const {
-    user,
-    riskSnapshot: riskFile,
-    riskSummary,
-    cascades,
-  } = useOutletContext<RiskFilePageContext>();
+  const { riskSnapshot: riskFile, cascades } =
+    useOutletContext<RiskFilePageContext>();
 
   const { data: changeLogs } = useQuery({
     queryKey: [DataTable.CHANGE_LOG],
