@@ -90,8 +90,10 @@ export function CascadeSection({
 
     api.createChangeLog({
       "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+      cr4de_changed_by_email: user?.emailaddress1,
       cr4de_changed_object_type: "CASCADE",
       cr4de_changed_object_id: cascade._cr4de_risk_cascade_value,
+      cr4de_change_short: `CP Matrix of ${cause.cr4de_title} -> ${effect.cr4de_title}`,
       cr4de_diff: serializeChangeLogDiff([
         {
           property: `cr4de_quanti_input.${causeScenario}.${effectScenario}.abs`,
@@ -202,8 +204,10 @@ export function CascadeSection({
 
                 api.createChangeLog({
                   "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+                  cr4de_changed_by_email: user?.emailaddress1,
                   cr4de_changed_object_type: "CASCADE",
                   cr4de_changed_object_id: cascade._cr4de_risk_cascade_value,
+                  cr4de_change_short: `Quali description of ${cause.cr4de_title} -> ${effect.cr4de_title}`,
                   cr4de_diff: serializeChangeLogDiff([
                     {
                       property: `cr4de_quali`,

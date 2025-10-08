@@ -47,6 +47,7 @@ import {
   RiskSnapshotResults,
 } from "../types/dataverse/DVRiskSnapshot";
 import { summaryFromRiskfile } from "../functions/snapshot";
+import DifferenceIcon from "@mui/icons-material/Difference";
 
 type RouteParams = {
   risk_file_id: string;
@@ -309,6 +310,13 @@ export default function BaseRiskFilePage() {
               label={t("risk.bottombar.expertInput", "Expert Input")}
               icon={<GroupsIcon />}
               onClick={() => navigate(`/risks/${params.risk_file_id}/input`)}
+            />
+          )}
+          {user && user.roles.analist && (
+            <BottomNavigationAction
+              label={"Change Log"}
+              icon={<DifferenceIcon />}
+              onClick={() => navigate(`/risks/${params.risk_file_id}/log`)}
             />
           )}
         </BottomNavigation>

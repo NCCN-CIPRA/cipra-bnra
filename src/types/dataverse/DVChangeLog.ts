@@ -30,12 +30,14 @@ export interface DVChangeLog<
   "cr4de_changed_by@odata.bind": string | null | undefined;
   cr4de_changed_by: ContactType;
   _cr4de_changed_by_value: string;
+  cr4de_changed_by_email: string;
 
   cr4de_changed_object_type: "RISK_FILE" | "CASCADE" | "ATTACHMENT";
   cr4de_changed_object_id: string;
 
+  cr4de_change_short: string;
   cr4de_diff: ChangeDiffType;
 
-  createdon: Date;
-  modifiedon: Date;
+  createdon: string;
+  modifiedon: string;
 }

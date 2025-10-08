@@ -35,6 +35,7 @@ import RiskDescriptionPage from "./pages/RiskDescriptionPage/RiskDescriptionPage
 import { getAntiForgeryToken } from "./functions/api";
 import AdministrationPage from "./pages/AdministrationPage/AdministrationPage";
 import ProtectedRoute from "./pages/ProtectedRoute";
+import RiskLogPage from "./pages/RiskLogPage/RiskLogPage";
 
 export default function App() {
   useEffect(() => {
@@ -125,6 +126,14 @@ export default function App() {
                   element: (
                     <ProtectedRoute allowedRole="analist">
                       <RiskInputPage />
+                    </ProtectedRoute>
+                  ),
+                },
+                {
+                  path: "/risks/:risk_file_id/log",
+                  element: (
+                    <ProtectedRoute allowedRole="analist">
+                      <RiskLogPage />
                     </ProtectedRoute>
                   ),
                 },

@@ -13,6 +13,7 @@
 - Keep logs for changes to risk files and risk cascades
 - Show differences between public and dynamic environment in raw data page
 - Show differences between qualitative inputs in raw data page
+- Added risk change log page for analists
 
 ### Changed
 

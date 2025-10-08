@@ -109,8 +109,10 @@ export function ScenarioSection({
 
         api.createChangeLog({
           "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+          cr4de_changed_by_email: user?.emailaddress1,
           cr4de_changed_object_type: "RISK_FILE",
           cr4de_changed_object_id: riskFile._cr4de_risk_file_value,
+          cr4de_change_short: `DP value of ${scenario} scenario of ${riskFile.cr4de_title}`,
           cr4de_diff: serializeChangeLogDiff([
             {
               property: `cr4de_quanti.${scenario}.dp.rpMonths`,
@@ -143,8 +145,10 @@ export function ScenarioSection({
 
         api.createChangeLog({
           "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+          cr4de_changed_by_email: user?.emailaddress1,
           cr4de_changed_object_type: "RISK_FILE",
           cr4de_changed_object_id: riskFile._cr4de_risk_file_value,
+          cr4de_change_short: `DI value of ${field} of ${scenario} of ${riskFile.cr4de_title}`,
           cr4de_diff: serializeChangeLogDiff([
             {
               property: `cr4de_quanti.${scenario}.di.${field}.abs`,
@@ -217,8 +221,10 @@ export function ScenarioSection({
 
                 api.createChangeLog({
                   "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+                  cr4de_changed_by_email: user?.emailaddress1,
                   cr4de_changed_object_type: "RISK_FILE",
                   cr4de_changed_object_id: riskFile._cr4de_risk_file_value,
+                  cr4de_change_short: `Quali description of ${qualiField} of ${scenario} of ${riskFile.cr4de_title}`,
                   cr4de_diff: serializeChangeLogDiff([
                     {
                       property: `cr4de_quali.${scenario}.${qualiField}`,
