@@ -10,7 +10,6 @@ import Typography from "@mui/material/Typography";
 import { useOutletContext } from "react-router-dom";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
-import { BasePageContext } from "../BasePage";
 import {
   getAverageIndirectImpact,
   getAverageIndirectImpactDynamic,
@@ -20,6 +19,7 @@ import { Environment } from "../../types/global";
 import { getTotalCP } from "../../functions/analysis/cp";
 import useSavedState from "../../hooks/useSavedState";
 import { CatalyzingSection } from "./CatalyzingSection";
+import { RiskFilePageContext } from "../BaseRiskFilePage";
 
 enum SORT {
   PREFERENCE = "preference",
@@ -38,7 +38,8 @@ export default function ManMade({
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
   visuals: VISUALS;
 }) {
-  const { environment } = useOutletContext<BasePageContext>();
+  const { environment, publicRiskSnapshot, publicCascades } =
+    useOutletContext<RiskFilePageContext>();
   const [sortAttacks, setSortAttacks] = useSavedState(
     "attack-sort",
     SORT.PREFERENCE
@@ -52,7 +53,12 @@ export default function ManMade({
   const dynamicAttacks = effects.map((e) => ({
     cascade: e,
     p: getTotalCP(e.cr4de_quanti_cp) / totalCP,
-    i: getAverageIndirectImpact(e, riskFile),
+    i: getAverageIndirectImpact(
+      publicCascades?.effects.find(
+        (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
+      ) || e,
+      publicRiskSnapshot || riskFile
+    ),
     iDynamic:
       environment === Environment.DYNAMIC
         ? getAverageIndirectImpactDynamic(e, riskFile, effects)

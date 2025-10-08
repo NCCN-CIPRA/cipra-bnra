@@ -293,22 +293,25 @@ export const getAverageDirectProbabilityDynamic = (
   riskFile: DVRiskSnapshot,
   causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[]
 ) => {
-  const tpC = getTP5FromDailyP(
-    getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.CONSIDERABLE)
+  const tpC = getTotalProbabilityDynamic(
+    riskFile,
+    causes,
+    SCENARIOS.CONSIDERABLE
   );
 
-  const tpM = getTP5FromDailyP(
-    getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.MAJOR)
-  );
+  const tpM = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.MAJOR);
 
-  const tpE = getTP5FromDailyP(
-    getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.EXTREME)
-  );
+  const tpE = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.EXTREME);
 
   return (
-    (riskFile.cr4de_quanti.considerable.dp.scaleTot / tpC +
-      riskFile.cr4de_quanti.major.dp.scaleTot / tpM +
-      riskFile.cr4de_quanti.extreme.dp.scaleTot / tpE) /
+    (pDailyFromReturnPeriodMonths(
+      riskFile.cr4de_quanti.considerable.dp.rpMonths
+    ) /
+      tpC +
+      pDailyFromReturnPeriodMonths(riskFile.cr4de_quanti.major.dp.rpMonths) /
+        tpM +
+      pDailyFromReturnPeriodMonths(riskFile.cr4de_quanti.extreme.dp.rpMonths) /
+        tpE) /
     3
   );
 };

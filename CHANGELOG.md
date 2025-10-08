@@ -11,6 +11,7 @@
 - Allow editing qualitative and quantitative input by analists in the direct probability and impact sections of the _Raw Data_ page
 - Allow editing qualitative and quantitative input by analists in the indirect probability and impact sections of the _Raw Data_ page
 - Keep logs for changes to risk files and risk cascades
+- Show differences between public and dynamic environment in risk data page
 
 ### Changed
 

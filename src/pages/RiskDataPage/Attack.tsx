@@ -22,10 +22,10 @@ import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 import { CascadeSection, VISUALS } from "./CascadeSection";
 import { DirectSection } from "./DirectSection";
 import { useOutletContext } from "react-router-dom";
-import { BasePageContext } from "../BasePage";
 import { Environment } from "../../types/global";
 import { CatalyzingSection } from "./CatalyzingSection";
 import { ClimateChangeSection } from "./ClimateChangeSection";
+import { RiskFilePageContext } from "../BaseRiskFilePage";
 
 export default function Attack({
   riskFile,
@@ -42,17 +42,23 @@ export default function Attack({
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
   visuals: VISUALS;
 }) {
-  const { environment } = useOutletContext<BasePageContext>();
+  const { environment, publicRiskSnapshot, publicCascades } =
+    useOutletContext<RiskFilePageContext>();
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
 
-  const dp = getAverageDirectProbability(riskFile);
+  const dp = getAverageDirectProbability(publicRiskSnapshot || riskFile);
   const dpDynamic =
     environment === Environment.DYNAMIC
       ? getAverageDirectProbabilityDynamic(riskFile, causes)
       : null;
   const causesWithP = causes.map((c) => ({
     ...c,
-    ip: getAverageIndirectProbability(c, riskFile),
+    ip: getAverageIndirectProbability(
+      publicCascades?.causes.find(
+        (pC) => pC._cr4de_risk_cascade_value === c._cr4de_risk_cascade_value
+      ) || c,
+      publicRiskSnapshot || riskFile
+    ),
     ipDynamic:
       environment === Environment.DYNAMIC
         ? getAverageIndirectProbabilityDynamic(c, riskFile, causes)
@@ -130,19 +136,33 @@ export default function Attack({
 
   const dynamicEffects = effects.map((e) => ({
     cascade: e,
-    i: getAverageIndirectImpact(e, riskFile),
+    i: getAverageIndirectImpact(
+      publicCascades?.effects.find(
+        (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
+      ) || e,
+      publicRiskSnapshot || riskFile
+    ),
     iDynamic:
       environment === Environment.DYNAMIC
         ? getAverageIndirectImpactDynamic(e, riskFile, effects)
         : null,
   }));
 
-  const iDirectH = getAverageDirectImpact(riskFile, ["ha", "hb", "hc"]);
+  const iDirectH = getAverageDirectImpact(publicRiskSnapshot || riskFile, [
+    "ha",
+    "hb",
+    "hc",
+  ]);
   const iDirectHDynamic =
     environment === Environment.DYNAMIC
       ? getAverageDirectImpactDynamic(riskFile, effects, ["ha", "hb", "hc"])
       : null;
-  const iDirectS = getAverageDirectImpact(riskFile, ["sa", "sb", "sc", "sd"]);
+  const iDirectS = getAverageDirectImpact(publicRiskSnapshot || riskFile, [
+    "sa",
+    "sb",
+    "sc",
+    "sd",
+  ]);
   const iDirectSDynamic =
     environment === Environment.DYNAMIC
       ? getAverageDirectImpactDynamic(riskFile, effects, [
@@ -152,12 +172,17 @@ export default function Attack({
           "sd",
         ])
       : null;
-  const iDirectE = getAverageDirectImpact(riskFile, ["ea"]);
+  const iDirectE = getAverageDirectImpact(publicRiskSnapshot || riskFile, [
+    "ea",
+  ]);
   const iDirectEDynamic =
     environment === Environment.DYNAMIC
       ? getAverageDirectImpactDynamic(riskFile, effects, ["ea"])
       : null;
-  const iDirectF = getAverageDirectImpact(riskFile, ["fa", "fb"]);
+  const iDirectF = getAverageDirectImpact(publicRiskSnapshot || riskFile, [
+    "fa",
+    "fb",
+  ]);
   const iDirectFDynamic =
     environment === Environment.DYNAMIC
       ? getAverageDirectImpactDynamic(riskFile, effects, ["fa", "fb"])

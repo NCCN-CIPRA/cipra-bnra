@@ -43,6 +43,7 @@ import {
 import { Environment } from "../types/global";
 import {
   DVRiskSnapshot,
+  parseRiskSnapshot,
   RiskSnapshotResults,
 } from "../types/dataverse/DVRiskSnapshot";
 import { summaryFromRiskfile } from "../functions/snapshot";
@@ -54,8 +55,10 @@ type RouteParams = {
 export interface RiskFilePageContext extends BasePageContext {
   riskSummary: DVRiskSummary;
   riskSnapshot: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
+  publicRiskSnapshot: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   riskFile: DVRiskFile | null;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot> | null;
+  publicCascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot> | null;
 }
 
 export default function BaseRiskFilePage() {
@@ -91,9 +94,7 @@ export default function BaseRiskFilePage() {
     queryKey: [DataTable.RISK_SNAPSHOT],
     queryFn: () => api.getRiskSnapshots(),
     select: (data) => data.filter((rf) => !rf.cr4de_hazard_id.startsWith("X")),
-    enabled: Boolean(
-      user && user.roles.verified && environment === Environment.PUBLIC
-    ),
+    enabled: Boolean(user && user.roles.verified),
   });
 
   const { data: cascadeList } = useQuery({
@@ -108,23 +109,23 @@ export default function BaseRiskFilePage() {
     queryKey: [DataTable.CASCADE_SNAPSHOT],
     queryFn: () => api.getCascadeSnapshots(),
     select: (d) => d.map((d) => ({ ...d, cr4de_removed: false })),
-    enabled: Boolean(
-      user && user.roles.verified && environment === Environment.PUBLIC
-    ),
+    enabled: Boolean(user && user.roles.verified),
   });
 
-  const rc: RiskCatalogue<unknown, RiskSnapshotResults> | null = useMemo(() => {
-    let rcTemp = null;
+  const riskSnapshotCatalogue = useMemo(() => {
+    if (!riskSnapshots) return null;
 
-    if (!riskFiles && !riskSnapshots) return null;
+    return getRiskCatalogueFromSnapshots(
+      riskSnapshots.map((rs) => parseRiskSnapshot(rs))
+    );
+  }, [riskSnapshots]);
 
-    if (environment === Environment.DYNAMIC && riskFiles)
-      rcTemp = getRiskCatalogue(riskFiles);
+  const riskFileCatalogue: RiskCatalogue<unknown, RiskSnapshotResults> | null =
+    useMemo(() => {
+      if (!riskFiles) return null;
 
-    if (environment === Environment.PUBLIC && riskSnapshots)
-      rcTemp = getRiskCatalogueFromSnapshots(riskSnapshots);
+      const rcTemp = getRiskCatalogue(riskFiles);
 
-    if (rcTemp) {
       return Object.keys(rcTemp).reduce(
         (acc, rs) => ({
           ...acc,
@@ -135,42 +136,26 @@ export default function BaseRiskFilePage() {
         }),
         {} as RiskCatalogue<unknown, RiskSnapshotResults>
       );
-    }
+    }, [riskFiles]);
 
-    return null;
-  }, [riskFiles, riskSnapshots, environment]);
+  const cascadeSnapshotsCatalogue = useMemo(() => {
+    if (!riskSnapshotCatalogue || !cascadeSnapshotList) return null;
 
-  const cascades = useMemo(() => {
-    if (!rc) return null;
+    return getCascadesSnapshotCatalogue(
+      Object.values(riskSnapshotCatalogue),
+      riskSnapshotCatalogue,
+      cascadeSnapshotList
+    );
+  }, [riskSnapshotCatalogue, cascadeSnapshotList]);
 
-    let ccTemp = null;
-    if (environment === Environment.DYNAMIC && cascadeList && riskFiles) {
-      ccTemp = getCascadesCatalogueNew(riskFiles, rc, cascadeList);
-    }
+  const riskCascadesCatalogue = useMemo(() => {
+    if (!riskFiles || !riskFileCatalogue || !cascadeList) return null;
 
-    if (
-      environment === Environment.PUBLIC &&
-      cascadeSnapshotList &&
-      riskSnapshots
-    )
-      ccTemp = getCascadesSnapshotCatalogue(
-        Object.values(rc),
-        rc,
-        cascadeSnapshotList
-      );
-
-    return ccTemp;
-  }, [
-    environment,
-    riskFiles,
-    cascadeList,
-    riskSnapshots,
-    cascadeSnapshotList,
-    rc,
-  ]);
+    return getCascadesCatalogueNew(riskFiles, riskFileCatalogue, cascadeList);
+  }, [cascadeList, riskFileCatalogue, riskFiles]);
 
   const riskSummary = useMemo(() => {
-    if (environment === Environment.PUBLIC || !riskFiles || !rc || !cascadeList)
+    if (environment === Environment.PUBLIC || !riskFiles || !cascadeList)
       return publicRiskSummary;
 
     if (!riskFiles) return null;
@@ -188,7 +173,7 @@ export default function BaseRiskFilePage() {
       realCascades[innerRiskFile.cr4de_riskfilesid],
       true
     );
-  }, [publicRiskSummary, riskFiles, cascadeList, rc, params, environment]);
+  }, [publicRiskSummary, riskFiles, cascadeList, params, environment]);
 
   const riskFile = useMemo(() => {
     if (!riskFiles) return null;
@@ -199,34 +184,17 @@ export default function BaseRiskFilePage() {
     );
   }, [riskFiles, params]);
 
-  // const { data: participants, getData: loadParticipants } = useLazyRecords<
-  //   DVParticipation<DVContact>
-  // >({
-  //   table: DataTable.PARTICIPATION,
-  //   query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_contact`,
-  // });
-
-  // const { data: directAnalyses, getData: loadDirectAnalyses } = useLazyRecords<
-  //   DVDirectAnalysis<unknown, DVContact>
-  // >({
-  //   table: DataTable.DIRECT_ANALYSIS,
-  //   query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_expert($select=emailaddress1)`,
-  // });
-
-  // const { data: cascadeAnalyses, getData: loadCascadeAnalyses } =
-  //   useLazyRecords<DVCascadeAnalysis<unknown, unknown, DVContact>>({
-  //     table: DataTable.CASCADE_ANALYSIS,
-  //     query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_expert($select=emailaddress1)`,
-  //   });
-
-  // const { data: attachments, getData: loadAttachments } = useLazyRecords<
-  //   DVAttachment<unknown, DVAttachment>
-  // >({
-  //   table: DataTable.ATTACHMENT,
-  //   query: `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}&$expand=cr4de_referencedSource`,
-  // });
-
   const isEmerging = riskSummary?.cr4de_risk_type === RISK_TYPE.EMERGING;
+
+  const riskCatalogue =
+    environment === Environment.PUBLIC
+      ? riskSnapshotCatalogue
+      : riskFileCatalogue;
+
+  const cascadesCatalogue =
+    environment === Environment.PUBLIC
+      ? cascadeSnapshotsCatalogue
+      : riskCascadesCatalogue;
 
   let tab = 0;
   const extraTab = isEmerging ? 0 : 1;
@@ -261,8 +229,16 @@ export default function BaseRiskFilePage() {
             ...baseContext,
             riskFile,
             riskSummary,
-            riskSnapshot: rc?.[riskSummary._cr4de_risk_file_value] || null,
-            cascades: cascades?.[riskSummary._cr4de_risk_file_value] || null,
+            riskSnapshot:
+              riskCatalogue?.[riskSummary._cr4de_risk_file_value] || null,
+            publicRiskSnapshot:
+              riskSnapshotCatalogue?.[riskSummary._cr4de_risk_file_value] ||
+              null,
+            cascades:
+              cascadesCatalogue?.[riskSummary._cr4de_risk_file_value] || null,
+            publicCascades:
+              cascadeSnapshotsCatalogue?.[riskSummary._cr4de_risk_file_value] ||
+              null,
           })}
         />
       ) : (
