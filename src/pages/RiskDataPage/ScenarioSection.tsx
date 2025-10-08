@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import {
   DVRiskSnapshot,
+  parseRiskSnapshotQuali,
   parseRiskSnapshotScenarios,
   RiskSnapshotResults,
 } from "../../types/dataverse/DVRiskSnapshot";
@@ -24,7 +25,6 @@ import {
   iScale7FromEuros,
 } from "../../functions/indicators/impact";
 import { useOutletContext } from "react-router-dom";
-import { BasePageContext } from "../BasePage";
 import { Environment, Indicators } from "../../types/global";
 import {
   pScale5FromReturnPeriodMonths,
@@ -43,6 +43,7 @@ import {
   serializeRiskQualis,
 } from "../../types/dataverse/Riskfile";
 import { serializeChangeLogDiff } from "../../types/dataverse/DVChangeLog";
+import { RiskFilePageContext } from "../BaseRiskFilePage";
 
 export function ScenarioSection({
   riskFile,
@@ -59,13 +60,16 @@ export function ScenarioSection({
 }) {
   const api = useAPI();
   const queryClient = useQueryClient();
-  const { user, indicators, environment } = useOutletContext<BasePageContext>();
+  const { user, indicators, environment, publicRiskSnapshot } =
+    useOutletContext<RiskFilePageContext>();
 
   const [open, setOpen] = useState(false);
 
   const [quali, setQuali] = useState(
     riskFile.cr4de_quali[scenario][qualiField] || ""
   );
+  const publicQuali =
+    publicRiskSnapshot && parseRiskSnapshotQuali(publicRiskSnapshot);
 
   const mutation = useMutation({
     mutationFn: async (
@@ -202,6 +206,11 @@ export function ScenarioSection({
           <Box sx={{ pb: 2, pl: 3, mb: 2, mt: 2 }}>
             <HTMLEditor
               initialHTML={quali}
+              originalHTML={
+                publicQuali
+                  ? publicQuali.cr4de_quali[scenario][qualiField] || ""
+                  : undefined
+              }
               isEditable={environment === Environment.DYNAMIC}
               onSave={async (newQuali: string | null) => {
                 setQuali(newQuali || "");

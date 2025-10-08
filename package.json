@@ -15,6 +15,7 @@
     "push": "tsc -b && git pull && git add . && git commit && git push"
   },
   "dependencies": {
+    "@ali-tas/htmldiff-js": "^2.0.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fontsource/roboto": "^5.2.5",

@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Stack } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
 import StarterKit from "@tiptap/starter-kit";
 import {
   LinkBubbleMenu,
@@ -31,11 +31,11 @@ import { Link } from "@tiptap/extension-link";
 import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { TableRow } from "@tiptap/extension-table-row";
-import { RefObject, useRef, useState } from "react";
-import EditIcon from "@mui/icons-material/Edit";
+import { RefObject, useMemo, useRef, useState } from "react";
 import { UserRoles } from "../functions/authRoles";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../pages/BasePage";
+import { Diff } from "@ali-tas/htmldiff-js";
 
 function EditorMenuControls() {
   return (
@@ -124,17 +124,20 @@ function Editor({
 
 export default function HTMLEditor({
   initialHTML,
+  originalHTML,
   editableRole = "analist",
   isEditable = true,
   onSave,
 }: {
   initialHTML: string;
+  originalHTML?: string;
   editableRole?: keyof UserRoles;
   isEditable?: boolean;
   onSave: (newHTML: string) => unknown;
 }) {
   const { user } = useOutletContext<BasePageContext>();
   const [isEditing, setIsEditing] = useState(false);
+  const [showDiff, setShowDiff] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
   const editorRef = useRef<RichTextEditorRef>(null);
 
@@ -151,9 +154,15 @@ export default function HTMLEditor({
     setIsEditing(false);
   };
 
+  const diffHTML = useMemo(() => {
+    if (originalHTML !== undefined && originalHTML !== initialHTML)
+      return Diff.execute(originalHTML, initialHTML);
+    return null;
+  }, [originalHTML, initialHTML]);
+
   if (isEditing)
     return (
-      <>
+      <Box sx={{ mr: 2 }}>
         <Editor initialHTML={initialHTML} ref={editorRef} />
         <Stack direction="row" sx={{ mt: 1 }}>
           <Button
@@ -168,12 +177,12 @@ export default function HTMLEditor({
             Save
           </Button>
         </Stack>
-      </>
+      </Box>
     );
 
   return (
     <Box
-      sx={{ position: "relative" }}
+      sx={{ position: "relative", mr: 2 }}
       onMouseEnter={handlePopoverOpen}
       onMouseLeave={handlePopoverClose}
     >
@@ -181,24 +190,55 @@ export default function HTMLEditor({
         <Box
           sx={{
             position: "absolute",
-            top: 0,
             right: 0,
+            bottom: 0,
             opacity: showButtons ? 1 : 0,
             transition: "all .2s ease",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <IconButton aria-label="edit" onClick={() => setIsEditing(true)}>
-            <EditIcon />
-          </IconButton>
+          {diffHTML !== null && !showDiff && (
+            <Button
+              variant="contained"
+              color="info"
+              aria-label="showDiff"
+              sx={{ mr: 2 }}
+              onClick={() => setShowDiff(true)}
+            >
+              Show Edits
+            </Button>
+          )}
+          {showDiff && (
+            <Button
+              variant="contained"
+              color="info"
+              aria-label="showDiff"
+              sx={{ mr: 2 }}
+              onClick={() => setShowDiff(false)}
+            >
+              Hide Edits
+            </Button>
+          )}
+          <Button
+            variant="contained"
+            color="warning"
+            aria-label="edit"
+            onClick={() => setIsEditing(true)}
+          >
+            Edit
+          </Button>
         </Box>
       )}
       <Box
         className="htmleditor"
         sx={{
-          mb: 4,
           fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
         }}
-        dangerouslySetInnerHTML={{ __html: initialHTML }}
+        dangerouslySetInnerHTML={{
+          __html: showDiff && diffHTML !== null ? diffHTML : initialHTML,
+        }}
       />
     </Box>
   );

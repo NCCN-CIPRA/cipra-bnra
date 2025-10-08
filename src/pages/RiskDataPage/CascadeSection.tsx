@@ -14,7 +14,6 @@ import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import LeftBorderSection from "../../components/LeftBorderSection";
 import { useOutletContext } from "react-router-dom";
-import { BasePageContext } from "../BasePage";
 import { Environment } from "../../types/global";
 import { SCENARIOS } from "../../functions/scenarios";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
@@ -27,6 +26,7 @@ import {
   cpScale7FromPAbs,
 } from "../../functions/indicators/cp";
 import { serializeChangeLogDiff } from "../../types/dataverse/DVChangeLog";
+import { RiskFilePageContext } from "../BaseRiskFilePage";
 
 export type VISUALS = "SANKEY" | "MATRIX";
 
@@ -49,7 +49,8 @@ export function CascadeSection({
 }) {
   const api = useAPI();
   const queryClient = useQueryClient();
-  const { user, environment } = useOutletContext<BasePageContext>();
+  const { user, environment, publicCascades } =
+    useOutletContext<RiskFilePageContext>();
 
   const [quali, setQuali] = useState<string>(cascade.cr4de_quali || "");
   const mutation = useMutation({
@@ -62,6 +63,10 @@ export function CascadeSection({
       });
     },
   });
+
+  const publicCascade = publicCascades?.all.find(
+    (c) => c._cr4de_risk_cascade_value === cascade._cr4de_risk_cascade_value
+  );
 
   const handleChange = async (
     causeScenario: SCENARIOS,
@@ -187,6 +192,9 @@ export function CascadeSection({
           <LeftBorderSection sx={{ py: 1, mb: 2 }}>
             <HTMLEditor
               initialHTML={quali}
+              originalHTML={
+                publicCascade ? publicCascade.cr4de_quali || "" : undefined
+              }
               editableRole="analist"
               isEditable={environment === Environment.DYNAMIC}
               onSave={async (newQuali: string) => {
