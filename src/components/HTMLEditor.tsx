@@ -125,11 +125,13 @@ function Editor({
 export default function HTMLEditor({
   initialHTML,
   editableRole = "analist",
+  isEditable = true,
   onSave,
 }: {
   initialHTML: string;
   editableRole?: keyof UserRoles;
-  onSave: (newHTML: string | null) => unknown;
+  isEditable?: boolean;
+  onSave: (newHTML: string) => unknown;
 }) {
   const { user } = useOutletContext<BasePageContext>();
   const [isEditing, setIsEditing] = useState(false);
@@ -145,7 +147,7 @@ export default function HTMLEditor({
   };
 
   const handleSave = async () => {
-    await onSave(editorRef.current?.editor?.getHTML() || null);
+    await onSave(editorRef.current?.editor?.getHTML() || "");
     setIsEditing(false);
   };
 
@@ -175,7 +177,7 @@ export default function HTMLEditor({
       onMouseEnter={handlePopoverOpen}
       onMouseLeave={handlePopoverClose}
     >
-      {user?.roles[editableRole] && (
+      {user?.roles[editableRole] && isEditable && (
         <Box
           sx={{
             position: "absolute",

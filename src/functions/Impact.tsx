@@ -337,7 +337,7 @@ export const getTotalImpactEuros = (
     (totI, field) =>
       totI +
       eurosFromTIScale5(riskFile.cr4de_quanti[scenario].ti[field].scaleTot),
-    0
+    1
   );
 };
 
@@ -353,7 +353,7 @@ export const getTotalImpactEurosDynamic = (
     0
   );
 
-  return di + ii;
+  return di + ii + 1;
 };
 
 export const getDirectImpactEurosDynamic = (

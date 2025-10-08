@@ -5,7 +5,7 @@ import {
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { ReactNode, useState } from "react";
 import RiskDataAccordion from "./RiskDataAccordion";
-import { Box, Link, Stack, Typography } from "@mui/material";
+import { Alert, Box, Link, Stack, Typography } from "@mui/material";
 import CascadeSankey from "./CascadeSankey";
 import CascadeMatrix from "./CascadeMatrix";
 import HTMLEditor from "../../components/HTMLEditor";
@@ -37,6 +37,7 @@ export function CascadeSection({
   subtitle = null,
   visuals,
   disabled = false,
+  disabledMessage,
 }: {
   cause: DVRiskSnapshot;
   effect: DVRiskSnapshot;
@@ -44,12 +45,13 @@ export function CascadeSection({
   subtitle?: ReactNode;
   visuals: VISUALS;
   disabled?: boolean;
+  disabledMessage?: string;
 }) {
   const api = useAPI();
   const queryClient = useQueryClient();
   const { user, environment } = useOutletContext<BasePageContext>();
 
-  const [quali, setQuali] = useState<string | null>(cascade.cr4de_quali || "");
+  const [quali, setQuali] = useState<string>(cascade.cr4de_quali || "");
   const mutation = useMutation({
     mutationFn: async (
       newC: Partial<DVRiskCascade> & { cr4de_bnrariskcascadeid: string }
@@ -114,7 +116,6 @@ export function CascadeSection({
 
   return (
     <RiskDataAccordion
-      disabled={disabled}
       title={
         <Stack direction="row" alignItems="center">
           <Typography
@@ -142,13 +143,28 @@ export function CascadeSection({
       }
     >
       <Stack direction="column" sx={{ width: "100%" }}>
+        {disabledMessage && (
+          <Alert
+            severity="info"
+            sx={{
+              my: 2,
+              width: 1000,
+              maxWidth: "calc(100% - 32px)",
+              mx: "auto",
+            }}
+          >
+            {disabledMessage}
+          </Alert>
+        )}
         {visuals === "SANKEY" ? (
           <CascadeSankey
             cause={cause}
             effect={effect}
             cascade={cascade}
             onChange={
-              environment === Environment.DYNAMIC ? handleChange : undefined
+              environment === Environment.DYNAMIC && !disabled
+                ? handleChange
+                : undefined
             }
           />
         ) : (
@@ -157,7 +173,9 @@ export function CascadeSection({
             effect={effect}
             cascade={cascade}
             onChange={
-              environment === Environment.DYNAMIC ? handleChange : undefined
+              environment === Environment.DYNAMIC && !disabled
+                ? handleChange
+                : undefined
             }
           />
         )}
@@ -168,9 +186,10 @@ export function CascadeSection({
           </Typography>
           <LeftBorderSection sx={{ py: 1, mb: 2 }}>
             <HTMLEditor
-              initialHTML={quali || ""}
+              initialHTML={quali}
               editableRole="analist"
-              onSave={async (newQuali: string | null) => {
+              isEditable={environment === Environment.DYNAMIC}
+              onSave={async (newQuali: string) => {
                 setQuali(newQuali);
 
                 api.createChangeLog({

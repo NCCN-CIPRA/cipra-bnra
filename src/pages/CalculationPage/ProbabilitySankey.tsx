@@ -320,6 +320,7 @@ export default function ProbabilitySankey({
   ];
 
   let minP = 0;
+  const Ptot = causes.reduce((tot, c) => tot + c.p, 0.000000001);
 
   if (manmade) {
     minP = -1;
@@ -331,11 +332,8 @@ export default function ProbabilitySankey({
             Math.min(maxCauses - 1, causes.length - 1)
           ].p;
   } else if (minCausePortion !== null) {
-    const Ptot = causes.reduce((tot, c) => tot + c.p, 0.000000001);
     minP = minCausePortion * Ptot;
   } else if (shownCausePortion !== null) {
-    const Ptot = causes.reduce((tot, c) => tot + c.p, 0.000000001);
-
     let cumulP = 0;
     for (const c of causes.sort((a, b) => b.p - a.p)) {
       cumulP += c.p / Ptot;
@@ -368,7 +366,7 @@ export default function ProbabilitySankey({
     .map((e, i: number) => ({
       source: i + 1,
       target: 0,
-      value: Math.max(0.000000001, e.p),
+      value: Math.max(0.000000001, e.p) / Ptot,
     }));
   if (minP > 0 && otherCauses.length > 0)
     links.push({

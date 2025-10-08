@@ -19,15 +19,19 @@ import {
 } from "../../types/dataverse/DVRiskFile";
 import {
   diScale5FromEuros,
+  eurosFromDIScale5,
+  eurosFromIScale7,
   iScale7FromEuros,
 } from "../../functions/indicators/impact";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../BasePage";
-import { Indicators } from "../../types/global";
+import { Environment, Indicators } from "../../types/global";
 import {
   pScale5FromReturnPeriodMonths,
   pScale5to7,
   pScale7FromReturnPeriodMonths,
+  returnPeriodMonthsFromPScale5,
+  returnPeriodMonthsFromPScale7,
 } from "../../functions/indicators/probability";
 import ScenarioDescription from "../../components/ScenarioDescription";
 import HTMLEditor from "../../components/HTMLEditor";
@@ -55,7 +59,7 @@ export function ScenarioSection({
 }) {
   const api = useAPI();
   const queryClient = useQueryClient();
-  const { user, indicators } = useOutletContext<BasePageContext>();
+  const { user, indicators, environment } = useOutletContext<BasePageContext>();
 
   const [open, setOpen] = useState(false);
 
@@ -77,7 +81,7 @@ export function ScenarioSection({
   const scenarios = parseRiskSnapshotScenarios(riskFile.cr4de_scenarios);
 
   const handleChangeQuanti =
-    (field: DP_FIELD | DI_FIELD) => (rpMonthsOrEuros: number) => {
+    (field: DP_FIELD | DI_FIELD) => (scaleValue: number) => {
       if (riskFile.cr4de_risk_file === undefined) return;
 
       const rf = riskFile.cr4de_risk_file as DVRiskFile;
@@ -88,10 +92,15 @@ export function ScenarioSection({
       };
 
       if (field === "dp") {
+        const rpMonths =
+          indicators === Indicators.V1
+            ? returnPeriodMonthsFromPScale5(scaleValue)
+            : returnPeriodMonthsFromPScale7(scaleValue);
+
         newQuantiInput[scenario].dp = {
-          rpMonths: rpMonthsOrEuros,
-          scale5: pScale5FromReturnPeriodMonths(rpMonthsOrEuros),
-          scale7: pScale7FromReturnPeriodMonths(rpMonthsOrEuros),
+          rpMonths: rpMonths,
+          scale5: pScale5FromReturnPeriodMonths(rpMonths),
+          scale7: pScale7FromReturnPeriodMonths(rpMonths),
         };
 
         api.createChangeLog({
@@ -117,10 +126,15 @@ export function ScenarioSection({
           ]),
         });
       } else {
+        const euros =
+          indicators === Indicators.V1
+            ? eurosFromDIScale5(scaleValue)
+            : eurosFromIScale7(scaleValue);
+
         newQuantiInput[scenario].di[field] = {
-          abs: rpMonthsOrEuros,
-          scale5: diScale5FromEuros(rpMonthsOrEuros),
-          scale7: iScale7FromEuros(rpMonthsOrEuros),
+          abs: euros,
+          scale5: diScale5FromEuros(euros),
+          scale7: iScale7FromEuros(euros),
         };
 
         api.createChangeLog({
@@ -188,6 +202,7 @@ export function ScenarioSection({
           <Box sx={{ pb: 2, pl: 3, mb: 2, mt: 2 }}>
             <HTMLEditor
               initialHTML={quali}
+              isEditable={environment === Environment.DYNAMIC}
               onSave={async (newQuali: string | null) => {
                 setQuali(newQuali || "");
 
@@ -221,7 +236,7 @@ export function ScenarioSection({
               <Stack direction="column" sx={{ mt: 2 }}>
                 {quantiFields.map((quantiField) => {
                   let initialValue = 0;
-
+                  console.log(riskFile.cr4de_quanti);
                   if (quantiField === "dp") {
                     if (indicators === Indicators.V1)
                       initialValue = riskFile.cr4de_quanti[scenario].dp.scale;
@@ -258,7 +273,6 @@ export function ScenarioSection({
                           fontWeight: "bold",
                         }}
                       >
-                        {/* {riskFile.cr4de_consensus_type !== null ? ( */}
                         <Slider
                           initialValue={initialValue}
                           prefix={
@@ -267,24 +281,13 @@ export function ScenarioSection({
                               : capFirst(quantiField)
                           }
                           maxScale={indicators === Indicators.V1 ? 5 : 7}
-                          // spread={
-                          //   // user.roles.analist
-                          //   //   ? getDASpread(
-                          //   //       directAnalyses,
-                          //   //       n as keyof DVDirectAnalysis
-                          //   //     )
-                          //   //   : null
-                          //   null
-                          // }
                           onChange={
-                            user?.roles.analist
+                            user?.roles.analist &&
+                            environment === Environment.DYNAMIC
                               ? handleChangeQuanti(quantiField)
                               : null
                           }
                         />
-                        {/* ) : (
-                        <Typography variant="subtitle2">N/A</Typography>
-                      )} */}
                       </Box>
                     </Stack>
                   );

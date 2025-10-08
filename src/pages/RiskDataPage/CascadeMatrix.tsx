@@ -142,20 +142,28 @@ const CPX = ({
           <MenuItem value="3">{prefix}3</MenuItem>
           <MenuItem value="3.5">{prefix}3.5</MenuItem>
           {(!isActorCause || indicators === Indicators.V2) && (
-            <>
-              <MenuItem value="4">{prefix}4</MenuItem>
-              <MenuItem value="4.5">{prefix}4.5</MenuItem>
-              <MenuItem value="5">{prefix}5</MenuItem>
-              <MenuItem value="5.5">{prefix}5.5</MenuItem>
-            </>
+            <MenuItem value="4">{prefix}4</MenuItem>
+          )}
+          {(!isActorCause || indicators === Indicators.V2) && (
+            <MenuItem value="4.5">{prefix}4.5</MenuItem>
+          )}
+          {(!isActorCause || indicators === Indicators.V2) && (
+            <MenuItem value="5">{prefix}5</MenuItem>
+          )}
+          {(!isActorCause || indicators === Indicators.V2) && (
+            <MenuItem value="5.5">{prefix}5.5</MenuItem>
           )}
           {indicators === Indicators.V2 && (
-            <>
-              <MenuItem value="6">{prefix}6</MenuItem>
-              <MenuItem value="6.5">{prefix}6.5</MenuItem>
-              <MenuItem value="7">{prefix}7</MenuItem>
-              <MenuItem value="7.5">{prefix}7.5</MenuItem>
-            </>
+            <MenuItem value="6">{prefix}6</MenuItem>
+          )}
+          {indicators === Indicators.V2 && (
+            <MenuItem value="6.5">{prefix}6.5</MenuItem>
+          )}
+          {indicators === Indicators.V2 && (
+            <MenuItem value="7">{prefix}7</MenuItem>
+          )}
+          {indicators === Indicators.V2 && (
+            <MenuItem value="7.5">{prefix}7.5</MenuItem>
           )}
         </Select>
       ) : (

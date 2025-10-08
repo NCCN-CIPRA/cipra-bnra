@@ -23,7 +23,10 @@ import {
   CPMatrixEffectRow,
   DVRiskCascade,
 } from "../types/dataverse/DVRiskCascade";
-import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import {
+  DVRiskFile,
+  parseRiskFileQuantiInput,
+} from "../types/dataverse/DVRiskFile";
 import {
   DVRiskSnapshot,
   parseRiskSnapshot,
@@ -51,9 +54,9 @@ import {
   getCategoryImpactRescaled,
   getDamageIndicatorToCategoryImpactRatio,
 } from "./CategoryImpact";
-import { getAbsoluteImpact } from "./Impact";
 import { diScale5FromEuros } from "./indicators/impact";
 import {
+  pDailyFromReturnPeriodMonths,
   pScale5FromReturnPeriodMonths,
   returnPeriodMonthsFromPDaily,
 } from "./indicators/probability";
@@ -293,10 +296,10 @@ function updateSnapshot(
 }
 
 function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
+  const q = parseRiskFileQuantiInput(riskFile.cr4de_quanti);
+
   return serializeRiskSnapshotResults(
     scenarios.reduce((res, s) => {
-      const suff = getScenarioSuffix(s);
-
       const tp_rel = riskFile.results?.[s]?.TP || 0;
       const tp = getDailyProbability(getYearlyProbabilityFromRelative(tp_rel));
 
@@ -325,43 +328,65 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
         },
 
         dp: {
-          scaleTot: r(riskFile.results?.[s]?.DP),
-          scale: pScale5FromReturnPeriodMonths(
-            returnPeriodMonthsFromPDaily(
-              ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
-            )
-          ),
-          scale5TP: r(riskFile.results?.[s]?.DP),
-          scale5: pScale5FromReturnPeriodMonths(
-            returnPeriodMonthsFromPDaily(
-              ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
-            )
-          ),
-          rpMonths: r(
-            returnPeriodMonthsFromPDaily(
-              ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
-            )
-          ),
+          scaleTot: q
+            ? (pDailyFromReturnPeriodMonths(q[s].dp.rpMonths) / tp) * tp_rel
+            : r(riskFile.results?.[s]?.DP),
+          scale: q
+            ? q[s].dp.scale5
+            : pScale5FromReturnPeriodMonths(
+                returnPeriodMonthsFromPDaily(
+                  ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
+                )
+              ),
+          scale5TP: q
+            ? (pDailyFromReturnPeriodMonths(q[s].dp.rpMonths) / tp) * tp_rel
+            : r(riskFile.results?.[s]?.DP),
+          scale5: q
+            ? q[s].dp.scale5
+            : pScale5FromReturnPeriodMonths(
+                returnPeriodMonthsFromPDaily(
+                  ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
+                )
+              ),
+          rpMonths: q
+            ? q[s].dp.rpMonths
+            : r(
+                returnPeriodMonthsFromPDaily(
+                  ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
+                )
+              ),
         },
         // TODO: Something with DP50_offset
         dp50: {
-          scaleTot: r(riskFile.results?.[s]?.DP50),
-          scale: pScale5FromReturnPeriodMonths(
-            returnPeriodMonthsFromPDaily(
-              ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
-            )
-          ),
-          scale5TP: r(riskFile.results?.[s]?.DP50),
-          scale5: pScale5FromReturnPeriodMonths(
-            returnPeriodMonthsFromPDaily(
-              ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
-            )
-          ),
-          rpMonths: r(
-            returnPeriodMonthsFromPDaily(
-              ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
-            )
-          ),
+          scaleTot: q
+            ? (pDailyFromReturnPeriodMonths(q[s].dp50.rpMonths) / tp50) *
+              tp50_rel
+            : r(riskFile.results?.[s]?.DP50),
+          scale: q
+            ? q[s].dp50.scale5
+            : pScale5FromReturnPeriodMonths(
+                returnPeriodMonthsFromPDaily(
+                  ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
+                )
+              ),
+          scale5TP: q
+            ? (pDailyFromReturnPeriodMonths(q[s].dp50.rpMonths) / tp50) *
+              tp50_rel
+            : r(riskFile.results?.[s]?.DP50),
+          scale5: q
+            ? q[s].dp50.scale5
+            : pScale5FromReturnPeriodMonths(
+                returnPeriodMonthsFromPDaily(
+                  ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
+                )
+              ),
+          rpMonths: q
+            ? q[s].dp50.rpMonths
+            : r(
+                returnPeriodMonthsFromPDaily(
+                  ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
+                )
+              ),
         },
 
         // Motivation is set to 0 because in the new way of calculating
@@ -583,134 +608,294 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             scaleTot: getScenarioParameter(riskFile, "DI", s) || 0,
           },
           ha: {
-            scaleTot: getScenarioParameter(riskFile, "DI_Ha", s) || 0,
-            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_ha${suff}`]),
+            scaleTot: q
+              ? (q[s].di.ha.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Ha", s) || 0,
+            abs: q
+              ? q[s].di.ha.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Ha", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
 
-            scale5TI: getScenarioParameter(riskFile, "DI_Ha", s) || 0,
-            scale5: diScale5FromEuros(
-              ((getScenarioParameter(riskFile, "DI_Ha", s) || 0) * ti) / ti_rel
-            ),
-            euros: r(
-              ((getScenarioParameter(riskFile, "DI_Ha", s) || 0) * ti) / ti_rel,
-              1
-            ),
+            scale5TI: q
+              ? (q[s].di.ha.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Ha", s) || 0,
+            scale5: q
+              ? q[s].di.ha.scale5
+              : diScale5FromEuros(
+                  ((getScenarioParameter(riskFile, "DI_Ha", s) || 0) * ti) /
+                    ti_rel
+                ),
+            euros: q
+              ? q[s].di.ha.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Ha", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
           },
           hb: {
-            scaleTot: getScenarioParameter(riskFile, "DI_Hb", s) || 0,
-            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_hb${suff}`]),
+            scaleTot: q
+              ? (q[s].di.hb.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Hb", s) || 0,
+            abs: q
+              ? q[s].di.hb.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Hb", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
 
-            scale5TI: getScenarioParameter(riskFile, "DI_Hb", s) || 0,
-            scale5: diScale5FromEuros(
-              ((getScenarioParameter(riskFile, "DI_Hb", s) || 0) * ti) / ti_rel
-            ),
-            euros: r(
-              ((getScenarioParameter(riskFile, "DI_Hb", s) || 0) * ti) / ti_rel,
-              1
-            ),
+            scale5TI: q
+              ? (q[s].di.hb.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Hb", s) || 0,
+            scale5: q
+              ? q[s].di.hb.scale5
+              : diScale5FromEuros(
+                  ((getScenarioParameter(riskFile, "DI_Hb", s) || 0) * ti) /
+                    ti_rel
+                ),
+            euros: q
+              ? q[s].di.hb.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Hb", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
           },
           hc: {
-            scaleTot: getScenarioParameter(riskFile, "DI_Hc", s) || 0,
-            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_hc${suff}`]),
+            scaleTot: q
+              ? (q[s].di.hc.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Hc", s) || 0,
+            abs: q
+              ? q[s].di.hc.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Hc", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
 
-            scale5TI: getScenarioParameter(riskFile, "DI_Hc", s) || 0,
-            scale5: diScale5FromEuros(
-              ((getScenarioParameter(riskFile, "DI_Hc", s) || 0) * ti) / ti_rel
-            ),
-            euros: r(
-              ((getScenarioParameter(riskFile, "DI_Hc", s) || 0) * ti) / ti_rel,
-              1
-            ),
+            scale5TI: q
+              ? (q[s].di.hc.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Hc", s) || 0,
+            scale5: q
+              ? q[s].di.hc.scale5
+              : diScale5FromEuros(
+                  ((getScenarioParameter(riskFile, "DI_Hc", s) || 0) * ti) /
+                    ti_rel
+                ),
+            euros: q
+              ? q[s].di.hc.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Hc", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
           },
           sa: {
-            scaleTot: getScenarioParameter(riskFile, "DI_Sa", s) || 0,
-            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_sa${suff}`]),
+            scaleTot: q
+              ? (q[s].di.sa.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Sa", s) || 0,
+            abs: q
+              ? q[s].di.sa.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Sa", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
 
-            scale5TI: getScenarioParameter(riskFile, "DI_Sa", s) || 0,
-            scale5: diScale5FromEuros(
-              ((getScenarioParameter(riskFile, "DI_Sa", s) || 0) * ti) / ti_rel
-            ),
-            euros: r(
-              ((getScenarioParameter(riskFile, "DI_Sa", s) || 0) * ti) / ti_rel,
-              1
-            ),
+            scale5TI: q
+              ? (q[s].di.sa.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Sa", s) || 0,
+            scale5: q
+              ? q[s].di.sa.scale5
+              : diScale5FromEuros(
+                  ((getScenarioParameter(riskFile, "DI_Sa", s) || 0) * ti) /
+                    ti_rel
+                ),
+            euros: q
+              ? q[s].di.sa.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Sa", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
           },
           sb: {
-            scaleTot: getScenarioParameter(riskFile, "DI_Sb", s) || 0,
-            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_sb${suff}`]),
+            scaleTot: q
+              ? (q[s].di.sb.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Sb", s) || 0,
+            abs: q
+              ? q[s].di.sb.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Sb", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
 
-            scale5TI: getScenarioParameter(riskFile, "DI_Sb", s) || 0,
-            scale5: diScale5FromEuros(
-              ((getScenarioParameter(riskFile, "DI_Sb", s) || 0) * ti) / ti_rel
-            ),
-            euros: r(
-              ((getScenarioParameter(riskFile, "DI_Sb", s) || 0) * ti) / ti_rel,
-              1
-            ),
+            scale5TI: q
+              ? (q[s].di.sb.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Sb", s) || 0,
+            scale5: q
+              ? q[s].di.sb.scale5
+              : diScale5FromEuros(
+                  ((getScenarioParameter(riskFile, "DI_Sb", s) || 0) * ti) /
+                    ti_rel
+                ),
+            euros: q
+              ? q[s].di.sb.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Sb", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
           },
           sc: {
-            scaleTot: getScenarioParameter(riskFile, "DI_Sc", s) || 0,
-            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_sc${suff}`]),
+            scaleTot: q
+              ? (q[s].di.sc.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Sc", s) || 0,
+            abs: q
+              ? q[s].di.sc.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Sc", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
 
-            scale5TI: getScenarioParameter(riskFile, "DI_Sc", s) || 0,
-            scale5: diScale5FromEuros(
-              ((getScenarioParameter(riskFile, "DI_Sc", s) || 0) * ti) / ti_rel
-            ),
-            euros: r(
-              ((getScenarioParameter(riskFile, "DI_Sc", s) || 0) * ti) / ti_rel,
-              1
-            ),
+            scale5TI: q
+              ? (q[s].di.sc.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Sc", s) || 0,
+            scale5: q
+              ? q[s].di.sc.scale5
+              : diScale5FromEuros(
+                  ((getScenarioParameter(riskFile, "DI_Sc", s) || 0) * ti) /
+                    ti_rel
+                ),
+            euros: q
+              ? q[s].di.sc.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Sc", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
           },
           sd: {
-            scaleTot: getScenarioParameter(riskFile, "DI_Sd", s) || 0,
-            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_sd${suff}`]),
+            scaleTot: q
+              ? (q[s].di.sd.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Sd", s) || 0,
+            abs: q
+              ? q[s].di.sd.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Sd", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
 
-            scale5TI: getScenarioParameter(riskFile, "DI_Sd", s) || 0,
-            scale5: diScale5FromEuros(
-              ((getScenarioParameter(riskFile, "DI_Sd", s) || 0) * ti) / ti_rel
-            ),
-            euros: r(
-              ((getScenarioParameter(riskFile, "DI_Sd", s) || 0) * ti) / ti_rel,
-              1
-            ),
+            scale5TI: q
+              ? (q[s].di.sd.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Sd", s) || 0,
+            scale5: q
+              ? q[s].di.sd.scale5
+              : diScale5FromEuros(
+                  ((getScenarioParameter(riskFile, "DI_Sd", s) || 0) * ti) /
+                    ti_rel
+                ),
+            euros: q
+              ? q[s].di.sd.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Sd", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
           },
           ea: {
-            scaleTot: getScenarioParameter(riskFile, "DI_Ea", s) || 0,
-            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_ea${suff}`]),
+            scaleTot: q
+              ? (q[s].di.ea.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Ea", s) || 0,
+            abs: q
+              ? q[s].di.ea.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Ea", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
 
-            scale5TI: getScenarioParameter(riskFile, "DI_Ea", s) || 0,
-            scale5: diScale5FromEuros(
-              ((getScenarioParameter(riskFile, "DI_Ea", s) || 0) * ti) / ti_rel
-            ),
-            euros: r(
-              ((getScenarioParameter(riskFile, "DI_Ea", s) || 0) * ti) / ti_rel,
-              1
-            ),
+            scale5TI: q
+              ? (q[s].di.ea.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Ea", s) || 0,
+            scale5: q
+              ? q[s].di.ea.scale5
+              : diScale5FromEuros(
+                  ((getScenarioParameter(riskFile, "DI_Ea", s) || 0) * ti) /
+                    ti_rel
+                ),
+            euros: q
+              ? q[s].di.ea.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Ea", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
           },
           fa: {
-            scaleTot: getScenarioParameter(riskFile, "DI_Fa", s) || 0,
-            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_fa${suff}`]),
+            scaleTot: q
+              ? (q[s].di.fa.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Fa", s) || 0,
+            abs: q
+              ? q[s].di.fa.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Fa", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
 
-            scale5TI: getScenarioParameter(riskFile, "DI_Fa", s) || 0,
-            scale5: diScale5FromEuros(
-              ((getScenarioParameter(riskFile, "DI_Fa", s) || 0) * ti) / ti_rel
-            ),
-            euros: r(
-              ((getScenarioParameter(riskFile, "DI_Fa", s) || 0) * ti) / ti_rel,
-              1
-            ),
+            scale5TI: q
+              ? (q[s].di.fa.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Fa", s) || 0,
+            scale5: q
+              ? q[s].di.fa.scale5
+              : diScale5FromEuros(
+                  ((getScenarioParameter(riskFile, "DI_Fa", s) || 0) * ti) /
+                    ti_rel
+                ),
+            euros: q
+              ? q[s].di.fa.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Fa", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
           },
           fb: {
-            scaleTot: getScenarioParameter(riskFile, "DI_Fb", s) || 0,
-            abs: getAbsoluteImpact(riskFile[`cr4de_di_quanti_fb${suff}`]),
+            scaleTot: q
+              ? (q[s].di.fb.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Fb", s) || 0,
+            abs: q
+              ? q[s].di.fb.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Fb", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
 
-            scale5TI: getScenarioParameter(riskFile, "DI_Fb", s) || 0,
-            scale5: diScale5FromEuros(
-              ((getScenarioParameter(riskFile, "DI_Fb", s) || 0) * ti) / ti_rel
-            ),
-            euros: r(
-              ((getScenarioParameter(riskFile, "DI_Fb", s) || 0) * ti) / ti_rel,
-              1
-            ),
+            scale5TI: q
+              ? (q[s].di.fb.abs / ti) * ti_rel
+              : getScenarioParameter(riskFile, "DI_Fb", s) || 0,
+            scale5: q
+              ? q[s].di.fb.scale5
+              : diScale5FromEuros(
+                  ((getScenarioParameter(riskFile, "DI_Fb", s) || 0) * ti) /
+                    ti_rel
+                ),
+            euros: q
+              ? q[s].di.fb.abs
+              : r(
+                  ((getScenarioParameter(riskFile, "DI_Fb", s) || 0) * ti) /
+                    ti_rel,
+                  1
+                ),
           },
         },
       };

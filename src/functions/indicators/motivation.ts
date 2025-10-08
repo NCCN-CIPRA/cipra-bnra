@@ -93,6 +93,10 @@ export function mScale3FromPDaily(pDaily: number) {
   const rpMonths = returnPeriodMonthsFromPDaily(pDaily);
   const p3Years = pTimeframeFromReturnPeriodMonths(rpMonths, 3 * 12);
 
+  return mScale3FromP3Years(p3Years);
+}
+
+export function mScale3FromP3Years(p3Years: number) {
   // Handle edge cases
   if (p3Years < motivationUpperBoundScale3[0])
     return 0.5 * (p3Years / motivationUpperBoundScale3[0]);
@@ -119,6 +123,10 @@ export function mScale7FromPDaily(pDaily: number) {
   const rpMonths = returnPeriodMonthsFromPDaily(pDaily);
   const p3Years = pTimeframeFromReturnPeriodMonths(rpMonths, 3 * 12);
 
+  return mScale7FromP3Years(p3Years);
+}
+
+export function mScale7FromP3Years(p3Years: number) {
   // Handle edge cases
   if (p3Years < motivationUpperBoundScale7[0])
     return 0.5 * (p3Years / motivationUpperBoundScale7[0]);
