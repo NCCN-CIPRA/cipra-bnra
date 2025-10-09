@@ -51,7 +51,7 @@ export default function RiskInputPage() {
   });
 
   const { data: directAnalyses } = useQuery({
-    queryKey: [DataTable.DIRECT_ANALYSIS],
+    queryKey: [DataTable.DIRECT_ANALYSIS, riskSummary._cr4de_risk_file_value],
     queryFn: () =>
       api.getDirectAnalyses<DVDirectAnalysis<unknown, DVContact>>(
         `$filter=_cr4de_risk_file_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_expert($select=emailaddress1)`
@@ -59,7 +59,7 @@ export default function RiskInputPage() {
   });
 
   const { data: cascadeAnalyses } = useQuery({
-    queryKey: [DataTable.CASCADE_ANALYSIS],
+    queryKey: [DataTable.CASCADE_ANALYSIS, riskSummary._cr4de_risk_file_value],
     queryFn: () =>
       api.getCascadeAnalyses<DVCascadeAnalysis<unknown, unknown, DVContact>>(
         `$filter=_cr4de_risk_file_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_expert($select=emailaddress1)`

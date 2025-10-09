@@ -31,7 +31,7 @@ import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import useAPI from "../../hooks/useAPI";
 import { DVCascadeAnalysis } from "../../types/dataverse/DVCascadeAnalysis";
 import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
-import CascadeMatrix from "./CascadeMatrix";
+import ExpertCascadeMatrix from "./CascadeMatrix";
 import { SmallRisk } from "../../types/dataverse/DVSmallRisk";
 import ScenarioTable from "./ScenarioTable";
 import { ScenarioInput, ScenarioInputs } from "./fields";
@@ -54,6 +54,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import ConsensusCascadeMatrix from "./ConsensusCascadeMatrix";
 
 const getQuantiLabel = (
   fieldName: keyof DVDirectAnalysis,
@@ -544,15 +545,12 @@ export default function Step2BTab({
                   {cascades[cascadeIndex].cr4de_cause_hazard.cr4de_risk_type !==
                     RISK_TYPE.EMERGING && (
                     <Box sx={{ mb: 8 }}>
-                      <CascadeMatrix
-                        cascadeAnalysis={consensus as DVCascadeAnalysis}
-                        cause={
-                          cascades[cascadeIndex]
-                            .cr4de_cause_hazard as DVRiskFile
-                        }
-                        effect={riskFile}
-                        onChangeScenario={() => {}}
-                      />
+                      {riskFile && consensus && (
+                        <ConsensusCascadeMatrix
+                          cause={cascades[cascadeIndex].cr4de_cause_hazard}
+                          cascade={consensus}
+                        />
+                      )}
                     </Box>
                   )}
 
@@ -944,7 +942,7 @@ function ExpertInput({
 
         {cascade.cr4de_cause_hazard.cr4de_risk_type !== RISK_TYPE.EMERGING && (
           <Box sx={{ mb: 8 }}>
-            <CascadeMatrix
+            <ExpertCascadeMatrix
               cascadeAnalysis={cascadeAnalysis}
               cause={riskFile}
               effect={cascade.cr4de_effect_hazard as DVRiskFile}
