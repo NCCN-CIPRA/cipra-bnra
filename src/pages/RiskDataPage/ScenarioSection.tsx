@@ -91,9 +91,7 @@ export function ScenarioSection({
       const rf = riskFile.cr4de_risk_file as DVRiskFile;
       const quantiInput = parseRiskFileQuantiInput(rf.cr4de_quanti);
 
-      const newQuantiInput = {
-        ...quantiInput,
-      };
+      const newQuantiInput = JSON.parse(JSON.stringify(quantiInput));
 
       if (field === "dp") {
         const rpMonths =

@@ -77,7 +77,7 @@ export function CascadeSection({
 
     const isActorCause = cause.cr4de_risk_type === RISK_TYPE.MANMADE;
 
-    const updatedCPMatrix = { ...cascade.cr4de_quanti_cp };
+    const updatedCPMatrix = JSON.parse(JSON.stringify(cascade.cr4de_quanti_cp));
     updatedCPMatrix[causeScenario][effectScenario] = {
       abs: newCPAbs,
       scale5: isActorCause

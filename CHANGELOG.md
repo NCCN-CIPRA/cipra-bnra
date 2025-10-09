@@ -2,6 +2,8 @@
 
 ## 2.2.0 - 2025-10-xx
 
+This update improves the _Raw Data_ pages and add a bunch of functionality in preparation for coming iterations of the BNRA.
+
 ### Added
 
 - Analists can now choose between matrix and sankey view in the _Raw Data_ risk page
@@ -10,15 +12,15 @@
 - Show scenario descriptions in the direct probability and impact sections of the _Raw Data_ page
 - Allow editing qualitative and quantitative input by analists in the direct probability and impact sections of the _Raw Data_ page
 - Allow editing qualitative and quantitative input by analists in the indirect probability and impact sections of the _Raw Data_ page
-- Keep logs for changes to risk files and risk cascades
-- Show differences between public and dynamic environment in raw data page
-- Show differences between qualitative inputs in raw data page
-- Added risk change log page for analists
+- Show differences between public and dynamic environment in _Raw Data_ page
+- Show differences between qualitative inputs in _Raw Data_ page
+- Added _Change Log_ page for analists
+- Dynamically update CP matrix values on _Raw Data_ and _Expert Input_ pages according to selected indicator versions
 
 ### Changed
 
 - Actor -> Attack cascade values (motivations) are no longer editable in the _Raw Data_ page of attack risk files, use the actor risk files instead to edit these values
-- Reordered potential attacks for actors according to relative preference
+- Reordered potential attacks for actors according to relative preference in _Raw Data_
 
 ### Fixed
 
@@ -30,3 +32,5 @@
 
 - Added reusable useSavedState hook for storing state values in localStorage
 - Deprecated TextInputBox as it longer has any functionality, use HTMLEditor instead
+- Keep logs for changes to risk files and risk cascades
+- Added CHANGELOG file

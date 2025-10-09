@@ -204,6 +204,7 @@ export default function BaseRiskFilePage() {
   if (pathname.indexOf("evolution") >= 0) tab = 3;
   if (pathname.indexOf("data") >= 0) tab = 3 + extraTab;
   if (pathname.indexOf("input") >= 0) tab = 4 + extraTab;
+  if (pathname.indexOf("log") >= 0) tab = 5 + extraTab;
 
   usePageTitle(riskSummary ? riskSummary.cr4de_title : "...");
   useBreadcrumbs([

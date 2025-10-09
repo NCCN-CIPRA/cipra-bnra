@@ -22,25 +22,8 @@ export function Slider({
     if (onChange) onChange(newValue);
   };
 
-  //   const max = 5.5;
-  //   const spreadMin = spread ? (100 * spread[0]) / max : 0;
-  //   const spreadMax = spread ? (100 * spread[1]) / max : 0;
-
   return (
-    <Box
-      sx={
-        {
-          // mx,
-          // mt: 2,
-          // "& .MuiSlider-track": {
-          //   // display: "none"
-          //   left: `${spreadMin}% !important`,
-          //   width: `${spreadMax - spreadMin}% !important`,
-          //   opacity: 0.6,
-          // },
-        }
-      }
-    >
+    <Box sx={{}}>
       <MuiSlider
         value={value}
         onChange={onChange !== null ? handleChangeValue : undefined}

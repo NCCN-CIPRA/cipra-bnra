@@ -16,6 +16,7 @@ import {
   quantiScenariosMock,
 } from "../../test/mocks";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { Environment } from "../../types/global";
 
 const ResizeObserverMock = vi.fn(() => ({
   observe: vi.fn(),
@@ -170,4 +171,40 @@ describe("RiskFileSummaryPage", () => {
       expect(StandardSpy).not.toHaveBeenCalled();
     });
   });
+
+  // describe("Environment", () => {
+  //   test("Should render correctly in each environment values when environment changes", () => {
+  //     renderWithContext(<RiskAnalysisPage />, {
+  //       outletContext: {
+  //         user: null,
+  //         riskSummary: { ...mockRiskSummary, cr4de_environment: "Development" },
+  //         riskSnapshot: mockSnapshot,
+  //         cascades: cascadesMock,
+  //         environment: Environment.PUBLIC,
+  //       },
+  //       client: queryClient,
+  //     });
+
+  //     expect(screen.getByTestId("risk-file-title")).toBeInTheDocument();
+  //     expect(
+  //       screen.getByText(/Risk File Title: Earthquake Risk/i)
+  //     ).toBeInTheDocument();
+
+  //     renderWithContext(<RiskAnalysisPage />, {
+  //       outletContext: {
+  //         user: null,
+  //         riskSummary: { ...mockRiskSummary, cr4de_environment: "Development" },
+  //         riskSnapshot: mockSnapshot,
+  //         cascades: cascadesMock,
+  //         environment: Environment.DYNAMIC,
+  //       },
+  //       client: queryClient,
+  //     });
+
+  //     expect(screen.getByTestId("risk-file-title")).toBeInTheDocument();
+  //     expect(
+  //       screen.getByText(/Risk File Title: Earthquake Risk/i)
+  //     ).toBeInTheDocument();
+  //   });
+  // });
 });

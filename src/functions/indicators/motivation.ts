@@ -159,10 +159,10 @@ export function mScale7to3(pScale5: number) {
 
 export function getIntervalStringMScale3(mScale3: number) {
   if (mScale3 < 0.5)
-    return `< ${round(2 * mScale3 * pDailyFromMScale3(0.5), 2)}%`;
+    return `< ${round(2 * mScale3 * p3YearsFromMScale3(0.5), 2)}%`;
 
-  return `${round(100 * pDailyFromMScale3(mScale3 - 0.5), 1)}% - ${round(
-    100 * pDailyFromMScale3(mScale3 + 0.5),
+  return `${round(100 * p3YearsFromMScale3(mScale3 - 0.5), 1)}% - ${round(
+    100 * p3YearsFromMScale3(mScale3 + 0.5),
     2
   )}%`;
 }
@@ -170,10 +170,10 @@ export function getIntervalStringMScale3(mScale3: number) {
 export function getIntervalStringMScale7(mScale7: number) {
   if (mScale7 <= 0) return "0%";
   if (mScale7 < 0.5)
-    return `< ${round(2 * mScale7 * pDailyFromMScale7(0.5), 2)}%`;
+    return `< ${round(2 * mScale7 * p3YearsFromMScale7(0.5), 2)}%`;
 
-  return `${round(100 * pDailyFromMScale7(mScale7 - 0.5), 1)}% - ${round(
-    100 * pDailyFromMScale7(mScale7 + 0.5),
+  return `${round(100 * p3YearsFromMScale7(mScale7 - 0.5), 1)}% - ${round(
+    100 * p3YearsFromMScale7(mScale7 + 0.5),
     2
   )}%`;
 }
