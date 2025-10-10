@@ -1,4 +1,7 @@
-import { CPMatrix } from "../../types/dataverse/DVCascadeSnapshot";
+import {
+  CPMatrix,
+  DVCascadeSnapshot,
+} from "../../types/dataverse/DVCascadeSnapshot";
 import {
   CPMatrixCauseRow,
   DVRiskCascade,
@@ -272,16 +275,90 @@ export const getNewCPFromOldMAndCP = (
   return Math.round(10 * cpScale7FromPAbs(cpAbsOld)) / 10;
 };
 
-export const getTotalCP = (cpMatrix: CPMatrix) => {
+// export const getTotalCP = (cpMatrix: CPMatrix) => {
+//   return (
+//     cpMatrix.considerable.considerable.abs +
+//     cpMatrix.considerable.major.abs +
+//     cpMatrix.considerable.extreme.abs +
+//     cpMatrix.major.considerable.abs +
+//     cpMatrix.major.major.abs +
+//     cpMatrix.major.extreme.abs +
+//     cpMatrix.extreme.considerable.abs +
+//     cpMatrix.extreme.major.abs +
+//     cpMatrix.extreme.extreme.abs
+//   );
+// };
+
+export const getAverageCP = (
+  cpMatrix: CPMatrix,
+  totalCPs: Record<SCENARIOS, number>
+) => {
   return (
-    cpMatrix.considerable.considerable.abs +
-    cpMatrix.considerable.major.abs +
-    cpMatrix.considerable.extreme.abs +
-    cpMatrix.major.considerable.abs +
-    cpMatrix.major.major.abs +
-    cpMatrix.major.extreme.abs +
-    cpMatrix.extreme.considerable.abs +
-    cpMatrix.extreme.major.abs +
-    cpMatrix.extreme.extreme.abs
+    (cpMatrix[SCENARIOS.CONSIDERABLE].avg / totalCPs.considerable +
+      cpMatrix[SCENARIOS.MAJOR].avg / totalCPs.major +
+      cpMatrix[SCENARIOS.EXTREME].avg / totalCPs.extreme) /
+    3
+  );
+};
+
+export const getTotalCP = (
+  causeScenario: SCENARIOS,
+  effects: DVCascadeSnapshot[]
+) => {
+  return effects.reduce(
+    (t, e) => t + e.cr4de_quanti_cp[causeScenario].avg,
+    0.00001
+  );
+};
+
+export const getTotalCPDynamic = (effects: DVCascadeSnapshot[]) => {
+  return effects.reduce((t, e) => t + getCPDynamic(e), 0.00001);
+};
+
+const getCPDynamic = (c: DVCascadeSnapshot) => {
+  return (
+    getCPCauseDynamic(c, SCENARIOS.CONSIDERABLE) +
+    getCPCauseDynamic(c, SCENARIOS.MAJOR) +
+    getCPCauseDynamic(c, SCENARIOS.EXTREME)
+  );
+};
+
+const getCPCauseDynamic = (c: DVCascadeSnapshot, causeScenario: SCENARIOS) => {
+  return (
+    c.cr4de_quanti_cp[causeScenario].considerable.abs +
+    c.cr4de_quanti_cp[causeScenario].considerable.abs +
+    c.cr4de_quanti_cp[causeScenario].considerable.abs
+  );
+};
+
+export const getAverageCPDynamic = (
+  c: DVCascadeSnapshot,
+  effects: DVCascadeSnapshot[]
+) => {
+  return getCPDynamic(c) / getTotalCPDynamic(effects);
+};
+
+export const getAverageCauseCPDynamic = (
+  cpMatrix: CPMatrix,
+  causeScenario: SCENARIOS,
+  effect: DVCascadeSnapshot
+) => {
+  const ii_s2c =
+    cpMatrix[causeScenario].considerable.abs *
+    effect.cr4de_quanti_effect.considerable.ti.all.euros;
+  const ii_s2m =
+    cpMatrix[causeScenario].major.abs *
+    effect.cr4de_quanti_effect.major.ti.all.euros;
+  const ii_s2e =
+    cpMatrix[causeScenario].extreme.abs *
+    effect.cr4de_quanti_effect.extreme.ti.all.euros;
+
+  const ii_tot = 1 + ii_s2c + ii_s2m + ii_s2e;
+
+  return (
+    (cpMatrix[causeScenario].considerable.abs * ii_s2c +
+      cpMatrix[causeScenario].major.abs * ii_s2m +
+      cpMatrix[causeScenario].extreme.abs * ii_s2e) /
+    ii_tot
   );
 };

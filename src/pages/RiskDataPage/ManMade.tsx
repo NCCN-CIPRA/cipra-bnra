@@ -16,10 +16,16 @@ import {
 } from "../../functions/Impact";
 import { CascadeSection, VISUALS } from "./CascadeSection";
 import { Environment } from "../../types/global";
-import { getTotalCP } from "../../functions/analysis/cp";
+import {
+  getAverageCP,
+  getAverageCPDynamic,
+  getTotalCP,
+} from "../../functions/analysis/cp";
 import useSavedState from "../../hooks/useSavedState";
 import { CatalyzingSection } from "./CatalyzingSection";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
+import { SCENARIOS } from "../../functions/scenarios";
+import { useMemo } from "react";
 
 enum SORT {
   PREFERENCE = "preference",
@@ -45,25 +51,45 @@ export default function ManMade({
     SORT.PREFERENCE
   );
 
-  const totalCP = effects.reduce(
-    (t, e) => t + getTotalCP(e.cr4de_quanti_cp),
-    0
+  const totalCPs = useMemo(
+    () =>
+      effects && {
+        [SCENARIOS.CONSIDERABLE]: getTotalCP(SCENARIOS.CONSIDERABLE, effects),
+        [SCENARIOS.MAJOR]: getTotalCP(SCENARIOS.MAJOR, effects),
+        [SCENARIOS.EXTREME]: getTotalCP(SCENARIOS.EXTREME, effects),
+      },
+    [effects]
   );
 
-  const dynamicAttacks = effects.map((e) => ({
-    cascade: e,
-    p: getTotalCP(e.cr4de_quanti_cp) / totalCP,
-    i: getAverageIndirectImpact(
-      publicCascades?.effects.find(
-        (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
-      ) || e,
-      publicRiskSnapshot || riskFile
-    ),
-    iDynamic:
-      environment === Environment.DYNAMIC
-        ? getAverageIndirectImpactDynamic(e, riskFile, effects)
-        : null,
-  }));
+  const dynamicAttacks = useMemo(() => {
+    if (!totalCPs || !effects) return [];
+
+    return effects.map((e) => ({
+      cascade: e,
+      p: getAverageCP(e.cr4de_quanti_cp, totalCPs),
+      pDynamic:
+        environment === Environment.DYNAMIC
+          ? getAverageCPDynamic(e, effects)
+          : null,
+      i: getAverageIndirectImpact(
+        publicCascades?.effects.find(
+          (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
+        ) || e,
+        publicRiskSnapshot || riskFile
+      ),
+      iDynamic:
+        environment === Environment.DYNAMIC
+          ? getAverageIndirectImpactDynamic(e, riskFile, effects)
+          : null,
+    }));
+  }, [
+    effects,
+    environment,
+    publicCascades?.effects,
+    publicRiskSnapshot,
+    riskFile,
+    totalCPs,
+  ]);
 
   return (
     <>
@@ -102,10 +128,24 @@ export default function ManMade({
                 visuals={visuals}
                 subtitle={
                   sortAttacks === SORT.PREFERENCE ? (
-                    <Typography variant="body1" color="warning">
-                      <b>{Math.round(10000 * e.p) / 100}%</b> preference for
-                      this type of action
-                    </Typography>
+                    <Stack direction="column" sx={{ textAlign: "right" }}>
+                      <Typography variant="body1" color="warning">
+                        <b>
+                          {Math.round(
+                            10000 * (e.pDynamic !== null ? e.pDynamic : e.p)
+                          ) / 100}
+                          %
+                        </b>{" "}
+                        preference for this type of action
+                      </Typography>
+                      {e.iDynamic !== null && (
+                        <Typography variant="caption">
+                          {e.iDynamic >= e.i ? "+" : ""}
+                          {Math.round(10000 * (e.iDynamic - e.i)) / 100}%
+                          compared to public environment
+                        </Typography>
+                      )}
+                    </Stack>
                   ) : (
                     <Stack direction="column" sx={{ textAlign: "right" }}>
                       <Typography variant="body1" color="warning">
