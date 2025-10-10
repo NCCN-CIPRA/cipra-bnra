@@ -44,7 +44,7 @@ export default function ManMade({
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
   visuals: VISUALS;
 }) {
-  const { environment, publicRiskSnapshot, publicCascades } =
+  const { environment, showDiff, publicRiskSnapshot, publicCascades } =
     useOutletContext<RiskFilePageContext>();
   const [sortAttacks, setSortAttacks] = useSavedState(
     "attack-sort",
@@ -138,7 +138,7 @@ export default function ManMade({
                         </b>{" "}
                         preference for this type of action
                       </Typography>
-                      {e.iDynamic !== null && (
+                      {e.iDynamic !== null && showDiff && (
                         <Typography variant="caption">
                           {e.iDynamic >= e.i ? "+" : ""}
                           {Math.round(10000 * (e.iDynamic - e.i)) / 100}%

@@ -40,7 +40,7 @@ export default function Standard({
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
   visuals: VISUALS;
 }) {
-  const { environment, publicRiskSnapshot, publicCascades } =
+  const { environment, showDiff, publicRiskSnapshot, publicCascades } =
     useOutletContext<RiskFilePageContext>();
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
 
@@ -84,7 +84,7 @@ export default function Standard({
                 </b>{" "}
                 of total probability
               </Typography>
-              {ca.ipDynamic !== null && (
+              {ca.ipDynamic !== null && showDiff && (
                 <Typography variant="caption">
                   {ca.ipDynamic >= ca.ip ? "+" : ""}
                   {Math.round(10000 * (ca.ipDynamic - ca.ip)) / 100}% compared
@@ -114,7 +114,7 @@ export default function Standard({
                 </b>{" "}
                 of total probability
               </Typography>
-              {dpDynamic !== null && (
+              {dpDynamic !== null && showDiff && (
                 <Typography variant="caption">
                   {dpDynamic >= dp ? "+" : ""}
                   {Math.round(10000 * (dpDynamic - dp)) / 100}% compared to
@@ -218,7 +218,7 @@ export default function Standard({
                       </b>{" "}
                       of expected impact
                     </Typography>
-                    {e.iDynamic !== null && (
+                    {e.iDynamic !== null && showDiff && (
                       <Typography variant="caption">
                         {e.iDynamic >= e.i ? "+" : ""}
                         {Math.round(10000 * (e.iDynamic - e.i)) / 100}% compared
@@ -253,7 +253,7 @@ export default function Standard({
                   </b>{" "}
                   of expected impact
                 </Typography>
-                {iDirectHDynamic !== null && (
+                {iDirectHDynamic !== null && showDiff && (
                   <Typography variant="caption">
                     {iDirectHDynamic >= iDirectH ? "+" : ""}
                     {Math.round(10000 * (iDirectHDynamic - iDirectH)) / 100}%
@@ -280,7 +280,7 @@ export default function Standard({
                   </b>{" "}
                   of expected impact
                 </Typography>
-                {iDirectSDynamic !== null && (
+                {iDirectSDynamic !== null && showDiff && (
                   <Typography variant="caption">
                     {iDirectSDynamic >= iDirectS ? "+" : ""}
                     {Math.round(10000 * (iDirectSDynamic - iDirectS)) / 100}%
@@ -307,7 +307,7 @@ export default function Standard({
                   </b>{" "}
                   of expected impact
                 </Typography>
-                {iDirectEDynamic !== null && (
+                {iDirectEDynamic !== null && showDiff && (
                   <Typography variant="caption">
                     {iDirectEDynamic >= iDirectE ? "+" : ""}
                     {Math.round(10000 * (iDirectEDynamic - iDirectE)) / 100}%
@@ -334,7 +334,7 @@ export default function Standard({
                   </b>{" "}
                   of expected impact
                 </Typography>
-                {iDirectFDynamic !== null && (
+                {iDirectFDynamic !== null && showDiff && (
                   <Typography variant="caption">
                     {iDirectFDynamic >= iDirectF ? "+" : ""}
                     {Math.round(10000 * (iDirectFDynamic - iDirectF)) / 100}%

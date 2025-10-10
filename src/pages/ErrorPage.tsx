@@ -18,6 +18,8 @@ export default function ErrorPage() {
         setEnvironment={() => {}}
         indicators={Indicators.V1}
         setIndicators={() => {}}
+        showDiff={false}
+        setShowDiff={() => {}}
       />
       <Box
         sx={{

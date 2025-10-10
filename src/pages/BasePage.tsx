@@ -10,41 +10,39 @@ import satisfies from "../types/satisfies";
 import { Environment, Indicators } from "../types/global";
 import { useQueryClient } from "@tanstack/react-query";
 import useAPI, { DataTable } from "../hooks/useAPI";
+import useSavedState from "../hooks/useSavedState";
 
 export interface BasePageContext {
   user: LoggedInUser | null | undefined;
   environment: Environment;
   indicators: Indicators;
+  showDiff: boolean;
   refreshUser: () => void;
   setFakeRole: (role: string) => void;
   setEnvironment: (newEnv: Environment) => void;
   setIndicators: (newInd: Indicators) => void;
+  setShowDiff: (newDiff: boolean) => void;
 }
 
 const drawerWidth = 320;
 
 export default function BasePage() {
   const { user, refreshUser, setFakeRole } = useLoggedInUser();
-  const [environment, setEnvironment] = useState<Environment>(
-    (localStorage.getItem("bnraEnv") as Environment) || Environment.PUBLIC
+  const [environment, setEnvironment] = useSavedState<Environment>(
+    "bnraEnvironment",
+    Environment.PUBLIC,
+    false
   );
-  const [indicators, setIndicators] = useState<Indicators>(
-    (localStorage.getItem("bnraIndicators") as Indicators) || Indicators.V1
+  const [indicators, setIndicators] = useSavedState<Indicators>(
+    "bnraIndicatorVersion",
+    Indicators.V1,
+    false
   );
+  const [diff, setDiff] = useSavedState<boolean>("bnraShowDiff", true, false);
   const queryClient = useQueryClient();
   const api = useAPI();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const setAndSaveEnvironment = (newEnv: Environment) => {
-    setEnvironment(newEnv);
-    localStorage.setItem("bnraEnv", newEnv);
-  };
-
-  const setAndSaveIndicators = (newInd: Indicators) => {
-    setIndicators(newInd);
-    localStorage.setItem("bnraIndicators", newInd);
-  };
 
   if (user && user.roles.analist && environment === Environment.DYNAMIC) {
     queryClient.prefetchQuery({
@@ -73,9 +71,11 @@ export default function BasePage() {
         user={user}
         environment={environment}
         indicators={indicators}
+        showDiff={diff}
         setFakeRole={setFakeRole}
-        setEnvironment={setAndSaveEnvironment}
-        setIndicators={setAndSaveIndicators}
+        setEnvironment={setEnvironment}
+        setIndicators={setIndicators}
+        setShowDiff={setDiff}
         onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
       />
       <SideDrawer
@@ -93,10 +93,12 @@ export default function BasePage() {
             user,
             environment,
             indicators,
+            showDiff: diff,
             refreshUser,
             setFakeRole,
-            setEnvironment: setAndSaveEnvironment,
-            setIndicators: setAndSaveIndicators,
+            setEnvironment,
+            setIndicators,
+            setShowDiff: setDiff,
           })}
         />
       </Box>

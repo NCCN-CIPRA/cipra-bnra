@@ -21,9 +21,11 @@ export default function TitleBar({
   user,
   environment,
   indicators,
+  showDiff,
   setFakeRole,
   setEnvironment,
   setIndicators,
+  setShowDiff,
   defaultTitle,
 }: {
   showUser?: boolean;
@@ -31,9 +33,11 @@ export default function TitleBar({
   user: LoggedInUser | null | undefined;
   environment: Environment;
   indicators: Indicators;
+  showDiff: boolean;
   setFakeRole: (role: string) => void;
   setEnvironment: (newEnv: Environment) => void;
   setIndicators: (newInd: Indicators) => void;
+  setShowDiff: (newDiff: boolean) => void;
   defaultTitle?: string;
 }) {
   const { i18n } = useTranslation();
@@ -50,7 +54,7 @@ export default function TitleBar({
   const [anchorElRole, setAnchorElRole] = useState<null | HTMLElement>(null);
   const [anchorElEnv, setAnchorElEnv] = useState<null | HTMLElement>(null);
   const [anchorElInd, setAnchorElInd] = useState<null | HTMLElement>(null);
-  // const [anchorElDiff, setAnchorElDiff] = useState<null | HTMLElement>(null);
+  const [anchorElDiff, setAnchorElDiff] = useState<null | HTMLElement>(null);
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
@@ -73,6 +77,10 @@ export default function TitleBar({
     handleCloseSubMenus();
     setAnchorElInd(event.currentTarget);
   };
+  const handleOpenDiffMenu = (event: React.MouseEvent<HTMLElement>) => {
+    handleCloseSubMenus();
+    setAnchorElDiff(event.currentTarget);
+  };
   const handleCloseMenus = () => {
     setAnchorElUser(null);
     setAnchorElLanguage(null);
@@ -80,6 +88,7 @@ export default function TitleBar({
     setAnchorElRole(null);
     setAnchorElEnv(null);
     setAnchorElInd(null);
+    setAnchorElDiff(null);
   };
 
   const handleCloseSubMenus = () => {
@@ -352,13 +361,61 @@ export default function TitleBar({
                         </MenuItem>
                       </Menu>
                     </MenuItem>
-                    <MenuItem disabled>
+                    <MenuItem onMouseEnter={handleOpenDiffMenu}>
                       <Typography sx={{ textAlign: "left", flex: 1 }}>
                         Data Diff:
                       </Typography>
                       <Typography variant="body2" sx={{ pl: 2 }}>
-                        disabled
+                        {showDiff && environment !== Environment.PUBLIC
+                          ? "Enabled"
+                          : "Disabled"}
                       </Typography>
+
+                      <Menu
+                        id="menu-diff"
+                        sx={{ top: -8, left: -10 }}
+                        anchorEl={anchorElDiff}
+                        anchorOrigin={{
+                          vertical: "top",
+                          horizontal: "left",
+                        }}
+                        keepMounted
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "right",
+                        }}
+                        open={Boolean(anchorElDiff)}
+                        onClose={handleCloseMenus}
+                        slotProps={{
+                          root: { sx: { pointerEvents: "none" } },
+                          paper: { sx: { pointerEvents: "auto" } },
+                        }}
+                      >
+                        <MenuItem
+                          disabled={environment !== Environment.DYNAMIC}
+                          onClick={() => {
+                            setShowDiff(true);
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            Enabled{" "}
+                            {environment === Environment.PUBLIC
+                              ? "(Only in dynamic environment)"
+                              : ""}
+                          </Typography>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setShowDiff(false);
+                            handleCloseMenus();
+                          }}
+                        >
+                          <Typography sx={{ textAlign: "center" }}>
+                            Disabled
+                          </Typography>
+                        </MenuItem>
+                      </Menu>
                     </MenuItem>
                   </Menu>
                 </Box>
