@@ -1,3 +1,5 @@
+import { prettyRound } from "../roundNumberString";
+
 /**
  *
  * @param iScale7 The number on the 0-7 point scale
@@ -83,4 +85,100 @@ export function categoryImpactScale5to7(iScale5: number) {
 
 export function categoryImpactScale7to5(iScale7: number) {
   return (iScale7 / 7) * 5;
+}
+
+const eurosFactor = {
+  ha: 10 / 50000000,
+  hb: 100 / 50000000,
+  hc: 200000 / 50000000,
+  sa: 10000 / 50000000,
+  sb: 100000 / 50000000,
+  ea: 1000 / 50000000,
+  fa: 1,
+  fb: 1,
+};
+
+const units = {
+  ha: "human casualties",
+  hb: "weighted sick or injured people",
+  hc: "person days of people in need of assistance",
+  sa: "person days of people with weighted unmet needs",
+  sb: "person days of people experiencing diminished public order or sense of security",
+  ea: "km² years of affected area",
+  fa: "€ of financial asset damages",
+  fb: "€-equivalent of macro-economic losses",
+};
+
+export function getIntervalStringQuantiScale5(
+  scale5: number,
+  prefix: keyof typeof eurosFactor
+) {
+  const factor = eurosFactor[prefix];
+
+  return getIntervalStringQuantiScale(
+    scale5,
+    units[prefix],
+    factor,
+    eurosFromDIScale5,
+    5
+  );
+}
+
+export function getIntervalStringQuantiScale7(
+  scale7: number,
+  prefix: keyof typeof eurosFactor
+) {
+  const factor = eurosFactor[prefix];
+
+  return getIntervalStringQuantiScale(
+    scale7,
+    units[prefix],
+    factor,
+    eurosFromIScale7,
+    7
+  );
+}
+
+function getIntervalStringQuantiScale(
+  scale: number,
+  unit: string,
+  factor: number,
+  eurosGetter: (n: number) => number,
+  maxScale: number
+) {
+  if (scale <= 0) return `0 ${unit}`;
+
+  if (scale <= 1)
+    return `< ${prettyRound(eurosGetter(scale + 0.5) * factor)} ${unit}`;
+
+  if (scale >= maxScale)
+    return `> ${prettyRound(eurosGetter(scale - 0.5) * factor)} ${unit}`;
+
+  return `${prettyRound(eurosGetter(scale - 0.5) * factor)} - ${prettyRound(
+    eurosGetter(scale + 0.5) * factor
+  )} ${unit}`;
+}
+
+export function getImpactStringDIScale5(diScale5: number, prefix: string) {
+  const p = prefix.toLowerCase();
+
+  if (p in eurosFactor)
+    return getIntervalStringQuantiScale5(
+      diScale5,
+      p as keyof typeof eurosFactor
+    );
+
+  return "";
+}
+
+export function getImpactStringIScale7(iScale7: number, prefix: string) {
+  const p = prefix.toLowerCase();
+
+  if (p in eurosFactor)
+    return getIntervalStringQuantiScale7(
+      iScale7,
+      p as keyof typeof eurosFactor
+    );
+
+  return "";
 }

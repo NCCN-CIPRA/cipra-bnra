@@ -31,6 +31,8 @@
  * Source: https://en.wikipedia.org/wiki/Return_period
  */
 
+import round, { roundMax } from "../roundNumberString";
+
 export function returnPeriodMonthsFromPScale5(pScale5: number) {
   return 12 * 3 * Math.pow(10, 4.5 - pScale5);
 }
@@ -99,4 +101,56 @@ export function tpScale5to7(tpScale5: number) {
 
 export function pScale7to5(pScale5: number) {
   return pScale5FromReturnPeriodMonths(returnPeriodMonthsFromPScale7(pScale5));
+}
+
+export function getReturnPeriodYearsIntervalStringDPScale5(pScale5: number) {
+  if (pScale5 <= 0) return null;
+
+  if (pScale5 < 0.5)
+    return `> ${round(
+      (20 * (0.5 - pScale5) * returnPeriodMonthsFromPScale5(0.5)) / 12,
+      2,
+      ",",
+      " "
+    )}`;
+
+  return `${round(
+    returnPeriodMonthsFromPScale5(pScale5 - 0.5) / 12,
+    2,
+    ",",
+    " "
+  )} - ${round(
+    returnPeriodMonthsFromPScale5(pScale5 + 0.5) / 12,
+    2,
+    ",",
+    " "
+  )}`;
+}
+
+export function getReturnPeriodYearsIntervalStringPScale7(pScale7: number) {
+  if (pScale7 <= 0) return null;
+
+  if (pScale7 <= 1)
+    return `> ${roundMax(
+      returnPeriodMonthsFromPScale7(pScale7 + 0.5) / 12
+    )} years`;
+
+  const rpMax = returnPeriodMonthsFromPScale7(pScale7 - 0.5);
+  const rpMin = returnPeriodMonthsFromPScale7(pScale7 + 0.5);
+
+  if (rpMin < 12 || rpMax < 12) {
+    return `around ${round(roundMax(rpMin), 0, ",", " ")} - ${round(
+      roundMax(rpMax),
+      0,
+      ",",
+      " "
+    )} months`;
+  }
+
+  return `around ${round(roundMax(rpMin / 12), 2, ",", " ")} - ${round(
+    roundMax(rpMax / 12),
+    2,
+    ",",
+    " "
+  )} years`;
 }
