@@ -8,6 +8,8 @@ import AcUnitIcon from "@mui/icons-material/AcUnit";
 import SnapshotTab from "./SnapshotTab";
 import MigrationTab from "./MigrationTab";
 import MoveDownSharpIcon from "@mui/icons-material/MoveDownSharp";
+import CalculateIcon from "@mui/icons-material/Calculate";
+import SimulationTab from "./SimulationTab";
 
 type UserManagementParams = {
   tabName: string;
@@ -32,12 +34,16 @@ export default function AdministrationPage() {
     case "migrate":
       tab = 1;
       break;
+    case "simulate":
+      tab = 2;
+      break;
   }
 
   return (
     <>
       {tab === 0 && <SnapshotTab />}
       {tab === 1 && <MigrationTab />}
+      {tab === 2 && <SimulationTab />}
       <Paper
         sx={{
           position: "fixed",
@@ -58,6 +64,11 @@ export default function AdministrationPage() {
             label="Migrate Risk Files"
             icon={<MoveDownSharpIcon />}
             onClick={() => navigate(`/admin/functions/migrate`)}
+          />
+          <BottomNavigationAction
+            label="Risk Simulator"
+            icon={<CalculateIcon />}
+            onClick={() => navigate(`/admin/functions/simulate`)}
           />
         </BottomNavigation>
       </Paper>

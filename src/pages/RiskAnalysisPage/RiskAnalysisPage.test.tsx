@@ -16,7 +16,6 @@ import {
   quantiScenariosMock,
 } from "../../test/mocks";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
-import { Environment } from "../../types/global";
 
 const ResizeObserverMock = vi.fn(() => ({
   observe: vi.fn(),
