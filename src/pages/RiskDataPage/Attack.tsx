@@ -1,4 +1,4 @@
-import { Box, Stack } from "@mui/material";
+import { Box, IconButton, Stack } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {
   DVRiskSnapshot,
@@ -26,6 +26,9 @@ import { Environment } from "../../types/global";
 import { CatalyzingSection } from "./CatalyzingSection";
 import { ClimateChangeSection } from "./ClimateChangeSection";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import useSavedState from "../../hooks/useSavedState";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 export default function Attack({
   riskFile,
@@ -44,6 +47,10 @@ export default function Attack({
 }) {
   const { environment, publicRiskSnapshot, publicCascades } =
     useOutletContext<RiskFilePageContext>();
+  const [consequencesVisible, setConsequencesVisible] = useSavedState(
+    `consequences-${riskFile._cr4de_risk_file_value}`,
+    true
+  );
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
 
   const dp = getAverageDirectProbability(publicRiskSnapshot || riskFile);
@@ -240,43 +247,55 @@ export default function Attack({
             ))}
         </Box>
 
-        <Typography variant="h4" sx={{ mx: 0, mb: 2 }}>
-          Potential consequences
-        </Typography>
+        <Stack direction="row" alignItems="center" sx={{ mb: 2 }}>
+          <Typography
+            variant="h4"
+            sx={{ mx: 0, mb: 0, mr: 1, opacity: consequencesVisible ? 1 : 0.3 }}
+          >
+            Potential consequences
+          </Typography>
+          <IconButton
+            onClick={() => setConsequencesVisible(!consequencesVisible)}
+          >
+            {consequencesVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
+          </IconButton>
+        </Stack>
 
-        <Box sx={{ mb: 8 }}>
-          {dynamicEffects
-            .sort((a, b) => b.i - a.i)
-            .map((e) => (
-              <CascadeSection
-                key={e.cascade._cr4de_risk_cascade_value}
-                cause={riskFile}
-                effect={e.cascade.cr4de_effect_risk}
-                cascade={e.cascade}
-                visuals={visuals}
-                subtitle={
-                  <Stack direction="column" sx={{ textAlign: "right" }}>
-                    <Typography variant="body1" color="warning">
-                      <b>
-                        {Math.round(
-                          10000 * (e.iDynamic !== null ? e.iDynamic : e.i)
-                        ) / 100}
-                        %
-                      </b>{" "}
-                      of expected impact
-                    </Typography>
-                    {e.iDynamic !== null && (
-                      <Typography variant="caption">
-                        {e.iDynamic >= e.i ? "+" : ""}
-                        {Math.round(10000 * (e.iDynamic - e.i)) / 100}% compared
-                        to public environment
+        {consequencesVisible && (
+          <Box sx={{ mb: 8 }}>
+            {dynamicEffects
+              .sort((a, b) => b.i - a.i)
+              .map((e) => (
+                <CascadeSection
+                  key={e.cascade._cr4de_risk_cascade_value}
+                  cause={riskFile}
+                  effect={e.cascade.cr4de_effect_risk}
+                  cascade={e.cascade}
+                  visuals={visuals}
+                  subtitle={
+                    <Stack direction="column" sx={{ textAlign: "right" }}>
+                      <Typography variant="body1" color="warning">
+                        <b>
+                          {Math.round(
+                            10000 * (e.iDynamic !== null ? e.iDynamic : e.i)
+                          ) / 100}
+                          %
+                        </b>{" "}
+                        of expected impact
                       </Typography>
-                    )}
-                  </Stack>
-                }
-              />
-            ))}
-        </Box>
+                      {e.iDynamic !== null && (
+                        <Typography variant="caption">
+                          {e.iDynamic >= e.i ? "+" : ""}
+                          {Math.round(10000 * (e.iDynamic - e.i)) / 100}%
+                          compared to public environment
+                        </Typography>
+                      )}
+                    </Stack>
+                  }
+                />
+              ))}
+          </Box>
+        )}
 
         <Typography variant="h4" sx={{ mx: 0, mb: 2 }}>
           Remaining impact

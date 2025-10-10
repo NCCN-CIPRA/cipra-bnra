@@ -17,6 +17,7 @@ This update improves the _Raw Data_ pages and add a bunch of functionality in pr
 - Added _Change Log_ page for analists
 - Dynamically update CP matrix values on _Raw Data_ and _Expert Input_ pages according to selected indicator versions
 - Added tooltips with intervals in when providing estimates in the _Raw Data_ pages
+- Toggle button to hide the potential consequences of an attack scenario in the _Raw Data_ pages
 
 ### Changed
 
