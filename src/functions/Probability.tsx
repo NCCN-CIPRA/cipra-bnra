@@ -239,79 +239,127 @@ export const getTotalProbabilityDynamic = (
   return dp + ip;
 };
 
-export const getAverageIndirectProbability = (
+export const getIndirectProbability = (
   c: DVCascadeSnapshot<unknown, DVRiskSnapshot>,
-  riskFile: DVRiskSnapshot
+  riskFile: DVRiskSnapshot,
+  effectScenario: SCENARIOS
 ) => {
   return (
-    (c.cr4de_quanti_cause.considerable.ip.yearly.scale /
-      riskFile.cr4de_quanti.considerable.tp.yearly.scale +
-      c.cr4de_quanti_cause.major.ip.yearly.scale /
-        riskFile.cr4de_quanti.major.tp.yearly.scale +
-      c.cr4de_quanti_cause.extreme.ip.yearly.scale /
-        riskFile.cr4de_quanti.extreme.tp.yearly.scale) /
-    3
+    c.cr4de_quanti_cause[effectScenario].ip.yearly.scale /
+    riskFile.cr4de_quanti[effectScenario].tp.yearly.scale
   );
+};
+
+export const getAverageIndirectProbability = (
+  c: DVCascadeSnapshot<unknown, DVRiskSnapshot>,
+  riskFile: DVRiskSnapshot,
+  effectScenario: SCENARIOS | null
+) => {
+  if (effectScenario === null)
+    return (
+      (getIndirectProbability(c, riskFile, SCENARIOS.CONSIDERABLE) +
+        getIndirectProbability(c, riskFile, SCENARIOS.MAJOR) +
+        getIndirectProbability(c, riskFile, SCENARIOS.EXTREME)) /
+      3
+    );
+
+  return getIndirectProbability(c, riskFile, effectScenario);
 };
 
 export const getAverageIndirectProbabilityDynamic = (
   c: DVCascadeSnapshot<unknown, DVRiskSnapshot>,
   riskFile: DVRiskSnapshot,
-  causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[]
+  causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[],
+  effectScenario: SCENARIOS | null
 ) => {
-  const pC = getIndirectProbabilityDynamic(c, SCENARIOS.CONSIDERABLE);
-  const tpC = getTotalProbabilityDynamic(
-    riskFile,
-    causes,
-    SCENARIOS.CONSIDERABLE
+  if (effectScenario === null) {
+    const pC = getIndirectProbabilityDynamic(c, SCENARIOS.CONSIDERABLE);
+    const tpC = getTotalProbabilityDynamic(
+      riskFile,
+      causes,
+      SCENARIOS.CONSIDERABLE
+    );
+
+    const pM = getIndirectProbabilityDynamic(c, SCENARIOS.MAJOR);
+    const tpM = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.MAJOR);
+
+    const pE = getIndirectProbabilityDynamic(c, SCENARIOS.EXTREME);
+    const tpE = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.EXTREME);
+
+    return (pC / tpC + pM / tpM + pE / tpE) / 3;
+  }
+
+  return (
+    getIndirectProbabilityDynamic(c, effectScenario) /
+    getTotalProbabilityDynamic(riskFile, causes, effectScenario)
   );
+};
 
-  const pM = getIndirectProbabilityDynamic(c, SCENARIOS.MAJOR);
-  const tpM = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.MAJOR);
-
-  const pE = getIndirectProbabilityDynamic(c, SCENARIOS.EXTREME);
-  const tpE = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.EXTREME);
-
-  return (pC / tpC + pM / tpM + pE / tpE) / 3;
+export const getDirectProbability = (
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, unknown>,
+  scenario: SCENARIOS
+) => {
+  return (
+    riskFile.cr4de_quanti[scenario].dp.scaleTot /
+    riskFile.cr4de_quanti[scenario].tp.yearly.scale
+  );
 };
 
 export const getAverageDirectProbability = (
-  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, unknown>
+  riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults, unknown>,
+  scenario: SCENARIOS | null
 ) => {
+  if (scenario !== null) return getDirectProbability(riskFile, scenario);
+
   return (
-    (riskFile.cr4de_quanti.considerable.dp.scaleTot /
-      riskFile.cr4de_quanti.considerable.tp.yearly.scale +
-      riskFile.cr4de_quanti.major.dp.scaleTot /
-        riskFile.cr4de_quanti.major.tp.yearly.scale +
-      riskFile.cr4de_quanti.extreme.dp.scaleTot /
-        riskFile.cr4de_quanti.extreme.tp.yearly.scale) /
+    (getDirectProbability(riskFile, SCENARIOS.CONSIDERABLE) +
+      getDirectProbability(riskFile, SCENARIOS.MAJOR) +
+      getDirectProbability(riskFile, SCENARIOS.EXTREME)) /
     3
   );
 };
 
 export const getAverageDirectProbabilityDynamic = (
   riskFile: DVRiskSnapshot,
-  causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[]
+  causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[],
+  scenario: SCENARIOS | null
 ) => {
-  const tpC = getTotalProbabilityDynamic(
-    riskFile,
-    causes,
-    SCENARIOS.CONSIDERABLE
-  );
+  if (scenario === null) {
+    const tpC = getTotalProbabilityDynamic(
+      riskFile,
+      causes,
+      SCENARIOS.CONSIDERABLE
+    );
 
-  const tpM = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.MAJOR);
+    const tpM = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.MAJOR);
 
-  const tpE = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.EXTREME);
+    const tpE = getTotalProbabilityDynamic(riskFile, causes, SCENARIOS.EXTREME);
 
+    return (
+      (pDailyFromReturnPeriodMonths(
+        riskFile.cr4de_quanti.considerable.dp.rpMonths
+      ) /
+        tpC +
+        pDailyFromReturnPeriodMonths(riskFile.cr4de_quanti.major.dp.rpMonths) /
+          tpM +
+        pDailyFromReturnPeriodMonths(
+          riskFile.cr4de_quanti.extreme.dp.rpMonths
+        ) /
+          tpE) /
+      3
+    );
+  }
+
+  return getDirectProbabilityDynamic(riskFile, causes, scenario);
+};
+
+export const getDirectProbabilityDynamic = (
+  riskFile: DVRiskSnapshot,
+  causes: DVCascadeSnapshot<unknown, DVRiskSnapshot>[],
+  scenario: SCENARIOS
+) => {
   return (
-    (pDailyFromReturnPeriodMonths(
-      riskFile.cr4de_quanti.considerable.dp.rpMonths
-    ) /
-      tpC +
-      pDailyFromReturnPeriodMonths(riskFile.cr4de_quanti.major.dp.rpMonths) /
-        tpM +
-      pDailyFromReturnPeriodMonths(riskFile.cr4de_quanti.extreme.dp.rpMonths) /
-        tpE) /
-    3
+    pDailyFromReturnPeriodMonths(riskFile.cr4de_quanti[scenario].dp.rpMonths) /
+    getTotalProbabilityDynamic(riskFile, causes, scenario)
   );
 };

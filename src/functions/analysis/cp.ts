@@ -297,14 +297,18 @@ export const getNewCPFromOldMAndCP = (
 
 export const getAverageCP = (
   cpMatrix: CPMatrix,
-  totalCPs: Record<SCENARIOS, number>
+  totalCPs: Record<SCENARIOS, number>,
+  causeScenario: SCENARIOS | null
 ) => {
-  return (
-    (cpMatrix[SCENARIOS.CONSIDERABLE].avg / totalCPs.considerable +
-      cpMatrix[SCENARIOS.MAJOR].avg / totalCPs.major +
-      cpMatrix[SCENARIOS.EXTREME].avg / totalCPs.extreme) /
-    3
-  );
+  if (causeScenario === null)
+    return (
+      (cpMatrix[SCENARIOS.CONSIDERABLE].avg / totalCPs.considerable +
+        cpMatrix[SCENARIOS.MAJOR].avg / totalCPs.major +
+        cpMatrix[SCENARIOS.EXTREME].avg / totalCPs.extreme) /
+      3
+    );
+
+  return cpMatrix[causeScenario].avg / totalCPs.considerable;
 };
 
 export const getTotalCP = (
@@ -321,6 +325,16 @@ export const getTotalCPDynamic = (effects: DVCascadeSnapshot[]) => {
   return effects.reduce((t, e) => t + getCPDynamic(e), 0.00001);
 };
 
+export const getTotalCPCauseDynamic = (
+  effects: DVCascadeSnapshot[],
+  causeScenario: SCENARIOS
+) => {
+  return effects.reduce(
+    (t, e) => t + getCPCauseDynamic(e, causeScenario),
+    0.00001
+  );
+};
+
 const getCPDynamic = (c: DVCascadeSnapshot) => {
   return (
     getCPCauseDynamic(c, SCENARIOS.CONSIDERABLE) +
@@ -329,7 +343,10 @@ const getCPDynamic = (c: DVCascadeSnapshot) => {
   );
 };
 
-const getCPCauseDynamic = (c: DVCascadeSnapshot, causeScenario: SCENARIOS) => {
+export const getCPCauseDynamic = (
+  c: DVCascadeSnapshot,
+  causeScenario: SCENARIOS
+) => {
   return (
     c.cr4de_quanti_cp[causeScenario].considerable.abs +
     c.cr4de_quanti_cp[causeScenario].considerable.abs +
@@ -339,9 +356,16 @@ const getCPCauseDynamic = (c: DVCascadeSnapshot, causeScenario: SCENARIOS) => {
 
 export const getAverageCPDynamic = (
   c: DVCascadeSnapshot,
-  effects: DVCascadeSnapshot[]
+  effects: DVCascadeSnapshot[],
+  causeScenario: SCENARIOS | null
 ) => {
-  return getCPDynamic(c) / getTotalCPDynamic(effects);
+  if (causeScenario === null)
+    return getCPDynamic(c) / getTotalCPDynamic(effects);
+
+  return (
+    getCPCauseDynamic(c, causeScenario) /
+    getTotalCPCauseDynamic(effects, causeScenario)
+  );
 };
 
 export const getAverageCauseCPDynamic = (

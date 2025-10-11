@@ -1,4 +1,4 @@
-import { Box, IconButton, Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {
   DVRiskSnapshot,
@@ -26,9 +26,8 @@ import { Environment } from "../../types/global";
 import { CatalyzingSection } from "./CatalyzingSection";
 import { ClimateChangeSection } from "./ClimateChangeSection";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import useSavedState from "../../hooks/useSavedState";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { PERC_CONTRIB } from "./RiskDataPage";
+import { SCENARIOS } from "../../functions/scenarios";
 
 export default function Attack({
   riskFile,
@@ -36,27 +35,36 @@ export default function Attack({
   effects,
   catalyzingEffects,
   climateChange,
-  visuals,
+  viewType,
+  percentages,
+  showConsequences,
 }: {
   riskFile: DVRiskSnapshot;
   causes: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   effects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[];
   catalyzingEffects: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
-  visuals: VISUALS;
+  viewType: VISUALS;
+  percentages: PERC_CONTRIB;
+  showConsequences: boolean;
 }) {
   const { environment, showDiff, publicRiskSnapshot, publicCascades } =
     useOutletContext<RiskFilePageContext>();
-  const [consequencesVisible, setConsequencesVisible] = useSavedState(
-    `consequences-${riskFile._cr4de_risk_file_value}`,
-    true
-  );
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
 
-  const dp = getAverageDirectProbability(publicRiskSnapshot || riskFile);
+  let scenario: SCENARIOS | null = null;
+  if (percentages === "mrs")
+    scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
+  else if (percentages !== "none" && percentages !== "average")
+    scenario = percentages as SCENARIOS;
+
+  const dp = getAverageDirectProbability(
+    publicRiskSnapshot || riskFile,
+    scenario
+  );
   const dpDynamic =
     environment === Environment.DYNAMIC
-      ? getAverageDirectProbabilityDynamic(riskFile, causes)
+      ? getAverageDirectProbabilityDynamic(riskFile, causes, scenario)
       : null;
   const causesWithP = causes.map((c) => ({
     ...c,
@@ -64,11 +72,12 @@ export default function Attack({
       publicCascades?.causes.find(
         (pC) => pC._cr4de_risk_cascade_value === c._cr4de_risk_cascade_value
       ) || c,
-      publicRiskSnapshot || riskFile
+      publicRiskSnapshot || riskFile,
+      scenario
     ),
     ipDynamic:
       environment === Environment.DYNAMIC
-        ? getAverageIndirectProbabilityDynamic(c, riskFile, causes)
+        ? getAverageIndirectProbabilityDynamic(c, riskFile, causes, scenario)
         : null,
   }));
 
@@ -83,26 +92,30 @@ export default function Attack({
             cause={ca.cr4de_cause_risk}
             effect={riskFile}
             cascade={ca}
-            visuals={visuals}
+            visuals={viewType}
             disabled={true}
             disabledMessage="To edit these values, please use the actor risk file"
             subtitle={
               <Stack direction="column" sx={{ textAlign: "right" }}>
-                <Typography variant="body1" color="warning">
-                  <b>
-                    {Math.round(
-                      10000 * (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
-                    ) / 100}
-                    %
-                  </b>{" "}
-                  of total probability
-                </Typography>
-                {ca.ipDynamic !== null && showDiff && (
-                  <Typography variant="caption">
-                    {ca.ipDynamic >= ca.ip ? "+" : ""}
-                    {Math.round(10000 * (ca.ipDynamic - ca.ip)) / 100}% compared
-                    to public environment
-                  </Typography>
+                {percentages !== "none" && (
+                  <>
+                    <Typography variant="body1" color="warning">
+                      <b>
+                        {Math.round(
+                          10000 * (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
+                        ) / 100}
+                        %
+                      </b>{" "}
+                      of total probability
+                    </Typography>
+                    {ca.ipDynamic !== null && showDiff && (
+                      <Typography variant="caption">
+                        {ca.ipDynamic >= ca.ip ? "+" : ""}
+                        {Math.round(10000 * (ca.ipDynamic - ca.ip)) / 100}%
+                        compared to public environment
+                      </Typography>
+                    )}
+                  </>
                 )}
               </Stack>
             }
@@ -119,20 +132,25 @@ export default function Attack({
           title="Other actors"
           subtitle={
             <Stack direction="column" sx={{ textAlign: "right" }}>
-              <Typography variant="body1" color="warning">
-                <b>
-                  {Math.round(10000 * (dpDynamic !== null ? dpDynamic : dp)) /
-                    100}
-                  %
-                </b>{" "}
-                of total probability
-              </Typography>
-              {dpDynamic !== null && showDiff && (
-                <Typography variant="caption">
-                  {dpDynamic >= dp ? "+" : ""}
-                  {Math.round(10000 * (dpDynamic - dp)) / 100}% compared to
-                  public environment
-                </Typography>
+              {percentages !== "none" && (
+                <>
+                  <Typography variant="body1" color="warning">
+                    <b>
+                      {Math.round(
+                        10000 * (dpDynamic !== null ? dpDynamic : dp)
+                      ) / 100}
+                      %
+                    </b>{" "}
+                    of total probability
+                  </Typography>
+                  {dpDynamic !== null && showDiff && (
+                    <Typography variant="caption">
+                      {dpDynamic >= dp ? "+" : ""}
+                      {Math.round(10000 * (dpDynamic - dp)) / 100}% compared to
+                      public environment
+                    </Typography>
+                  )}
+                </>
               )}
             </Stack>
           }
@@ -147,52 +165,59 @@ export default function Attack({
       publicCascades?.effects.find(
         (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
       ) || e,
-      publicRiskSnapshot || riskFile
+      publicRiskSnapshot || riskFile,
+      scenario
     ),
     iDynamic:
       environment === Environment.DYNAMIC
-        ? getAverageIndirectImpactDynamic(e, riskFile, effects)
+        ? getAverageIndirectImpactDynamic(e, riskFile, effects, scenario)
         : null,
   }));
 
-  const iDirectH = getAverageDirectImpact(publicRiskSnapshot || riskFile, [
-    "ha",
-    "hb",
-    "hc",
-  ]);
+  const iDirectH = getAverageDirectImpact(
+    publicRiskSnapshot || riskFile,
+    scenario,
+    ["ha", "hb", "hc"]
+  );
   const iDirectHDynamic =
     environment === Environment.DYNAMIC
-      ? getAverageDirectImpactDynamic(riskFile, effects, ["ha", "hb", "hc"])
+      ? getAverageDirectImpactDynamic(riskFile, effects, scenario, [
+          "ha",
+          "hb",
+          "hc",
+        ])
       : null;
-  const iDirectS = getAverageDirectImpact(publicRiskSnapshot || riskFile, [
-    "sa",
-    "sb",
-    "sc",
-    "sd",
-  ]);
+  const iDirectS = getAverageDirectImpact(
+    publicRiskSnapshot || riskFile,
+    scenario,
+    ["sa", "sb", "sc", "sd"]
+  );
   const iDirectSDynamic =
     environment === Environment.DYNAMIC
-      ? getAverageDirectImpactDynamic(riskFile, effects, [
+      ? getAverageDirectImpactDynamic(riskFile, effects, scenario, [
           "sa",
           "sb",
           "sc",
           "sd",
         ])
       : null;
-  const iDirectE = getAverageDirectImpact(publicRiskSnapshot || riskFile, [
-    "ea",
-  ]);
+  const iDirectE = getAverageDirectImpact(
+    publicRiskSnapshot || riskFile,
+    scenario,
+    ["ea"]
+  );
   const iDirectEDynamic =
     environment === Environment.DYNAMIC
-      ? getAverageDirectImpactDynamic(riskFile, effects, ["ea"])
+      ? getAverageDirectImpactDynamic(riskFile, effects, scenario, ["ea"])
       : null;
-  const iDirectF = getAverageDirectImpact(publicRiskSnapshot || riskFile, [
-    "fa",
-    "fb",
-  ]);
+  const iDirectF = getAverageDirectImpact(
+    publicRiskSnapshot || riskFile,
+    scenario,
+    ["fa", "fb"]
+  );
   const iDirectFDynamic =
     environment === Environment.DYNAMIC
-      ? getAverageDirectImpactDynamic(riskFile, effects, ["fa", "fb"])
+      ? getAverageDirectImpactDynamic(riskFile, effects, scenario, ["fa", "fb"])
       : null;
 
   return (
@@ -222,24 +247,29 @@ export default function Attack({
                 cause={ca.cr4de_cause_risk}
                 effect={riskFile}
                 cascade={ca}
-                visuals={visuals}
+                visuals={viewType}
                 subtitle={
                   <Stack direction="column" sx={{ textAlign: "right" }}>
-                    <Typography variant="body1" color="warning">
-                      <b>
-                        {Math.round(
-                          10000 * (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
-                        ) / 100}
-                        %
-                      </b>{" "}
-                      of total probability
-                    </Typography>
-                    {ca.ipDynamic !== null && showDiff && (
-                      <Typography variant="caption">
-                        {ca.ipDynamic >= ca.ip ? "+" : ""}
-                        {Math.round(10000 * (ca.ipDynamic - ca.ip)) / 100}%
-                        compared to public environment
-                      </Typography>
+                    {percentages !== "none" && (
+                      <>
+                        <Typography variant="body1" color="warning">
+                          <b>
+                            {Math.round(
+                              10000 *
+                                (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
+                            ) / 100}
+                            %
+                          </b>{" "}
+                          of total probability
+                        </Typography>
+                        {ca.ipDynamic !== null && showDiff && (
+                          <Typography variant="caption">
+                            {ca.ipDynamic >= ca.ip ? "+" : ""}
+                            {Math.round(10000 * (ca.ipDynamic - ca.ip)) / 100}%
+                            compared to public environment
+                          </Typography>
+                        )}
+                      </>
                     )}
                   </Stack>
                 }
@@ -247,58 +277,54 @@ export default function Attack({
             ))}
         </Box>
 
-        <Stack direction="row" alignItems="center" sx={{ mb: 2 }}>
-          <Typography
-            variant="h4"
-            sx={{ mx: 0, mb: 0, mr: 1, opacity: consequencesVisible ? 1 : 0.3 }}
-          >
-            Potential consequences
-          </Typography>
-          <IconButton
-            onClick={() => setConsequencesVisible(!consequencesVisible)}
-          >
-            {consequencesVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
-          </IconButton>
-        </Stack>
-
-        {consequencesVisible && (
-          <Box sx={{ mb: 8 }}>
-            {dynamicEffects
-              .sort((a, b) => b.i - a.i)
-              .map((e) => (
-                <CascadeSection
-                  key={e.cascade._cr4de_risk_cascade_value}
-                  cause={riskFile}
-                  effect={e.cascade.cr4de_effect_risk}
-                  cascade={e.cascade}
-                  visuals={visuals}
-                  subtitle={
-                    <Stack direction="column" sx={{ textAlign: "right" }}>
-                      <Typography variant="body1" color="warning">
-                        <b>
-                          {Math.round(
-                            10000 * (e.iDynamic !== null ? e.iDynamic : e.i)
-                          ) / 100}
-                          %
-                        </b>{" "}
-                        of expected impact
-                      </Typography>
-                      {e.iDynamic !== null && showDiff && (
-                        <Typography variant="caption">
-                          {e.iDynamic >= e.i ? "+" : ""}
-                          {Math.round(10000 * (e.iDynamic - e.i)) / 100}%
-                          compared to public environment
-                        </Typography>
-                      )}
-                    </Stack>
-                  }
-                />
-              ))}
-          </Box>
+        {showConsequences && (
+          <>
+            <Typography variant="h4" sx={{ mx: 0, mb: 2 }}>
+              Potential consequences
+            </Typography>
+            <Box sx={{ mb: 8 }}>
+              {dynamicEffects
+                .sort((a, b) => b.i - a.i)
+                .map((e) => (
+                  <CascadeSection
+                    key={e.cascade._cr4de_risk_cascade_value}
+                    cause={riskFile}
+                    effect={e.cascade.cr4de_effect_risk}
+                    cascade={e.cascade}
+                    visuals={viewType}
+                    subtitle={
+                      <Stack direction="column" sx={{ textAlign: "right" }}>
+                        {percentages !== "none" && (
+                          <>
+                            <Typography variant="body1" color="warning">
+                              <b>
+                                {Math.round(
+                                  10000 *
+                                    (e.iDynamic !== null ? e.iDynamic : e.i)
+                                ) / 100}
+                                %
+                              </b>{" "}
+                              of expected impact
+                            </Typography>
+                            {e.iDynamic !== null && showDiff && (
+                              <Typography variant="caption">
+                                {e.iDynamic >= e.i ? "+" : ""}
+                                {Math.round(10000 * (e.iDynamic - e.i)) / 100}%
+                                compared to public environment
+                              </Typography>
+                            )}
+                          </>
+                        )}
+                      </Stack>
+                    }
+                  />
+                ))}
+            </Box>
+          </>
         )}
 
         <Typography variant="h4" sx={{ mx: 0, mb: 2 }}>
-          Remaining impact
+          Remaining impact not due to cascade effects
         </Typography>
 
         <Box sx={{ mb: 8 }}>
@@ -309,22 +335,28 @@ export default function Attack({
             qualiField="h"
             subtitle={
               <Stack direction="column" sx={{ textAlign: "right" }}>
-                <Typography variant="body1" color="warning">
-                  <b>
-                    {Math.round(
-                      10000 *
-                        (iDirectHDynamic !== null ? iDirectHDynamic : iDirectH)
-                    ) / 100}
-                    %
-                  </b>{" "}
-                  of expected impact
-                </Typography>
-                {iDirectHDynamic !== null && showDiff && (
-                  <Typography variant="caption">
-                    {iDirectHDynamic >= iDirectH ? "+" : ""}
-                    {Math.round(10000 * (iDirectHDynamic - iDirectH)) / 100}%
-                    compared to public environment
-                  </Typography>
+                {percentages !== "none" && (
+                  <>
+                    <Typography variant="body1" color="warning">
+                      <b>
+                        {Math.round(
+                          10000 *
+                            (iDirectHDynamic !== null
+                              ? iDirectHDynamic
+                              : iDirectH)
+                        ) / 100}
+                        %
+                      </b>{" "}
+                      of expected impact
+                    </Typography>
+                    {iDirectHDynamic !== null && showDiff && (
+                      <Typography variant="caption">
+                        {iDirectHDynamic >= iDirectH ? "+" : ""}
+                        {Math.round(10000 * (iDirectHDynamic - iDirectH)) / 100}
+                        % compared to public environment
+                      </Typography>
+                    )}
+                  </>
                 )}
               </Stack>
             }
@@ -336,22 +368,28 @@ export default function Attack({
             qualiField="s"
             subtitle={
               <Stack direction="column" sx={{ textAlign: "right" }}>
-                <Typography variant="body1" color="warning">
-                  <b>
-                    {Math.round(
-                      10000 *
-                        (iDirectSDynamic !== null ? iDirectSDynamic : iDirectS)
-                    ) / 100}
-                    %
-                  </b>{" "}
-                  of expected impact
-                </Typography>
-                {iDirectSDynamic !== null && showDiff && (
-                  <Typography variant="caption">
-                    {iDirectSDynamic >= iDirectS ? "+" : ""}
-                    {Math.round(10000 * (iDirectSDynamic - iDirectS)) / 100}%
-                    compared to public environment
-                  </Typography>
+                {percentages !== "none" && (
+                  <>
+                    <Typography variant="body1" color="warning">
+                      <b>
+                        {Math.round(
+                          10000 *
+                            (iDirectSDynamic !== null
+                              ? iDirectSDynamic
+                              : iDirectS)
+                        ) / 100}
+                        %
+                      </b>{" "}
+                      of expected impact
+                    </Typography>
+                    {iDirectSDynamic !== null && showDiff && (
+                      <Typography variant="caption">
+                        {iDirectSDynamic >= iDirectS ? "+" : ""}
+                        {Math.round(10000 * (iDirectSDynamic - iDirectS)) / 100}
+                        % compared to public environment
+                      </Typography>
+                    )}
+                  </>
                 )}
               </Stack>
             }
@@ -363,22 +401,28 @@ export default function Attack({
             qualiField="e"
             subtitle={
               <Stack direction="column" sx={{ textAlign: "right" }}>
-                <Typography variant="body1" color="warning">
-                  <b>
-                    {Math.round(
-                      10000 *
-                        (iDirectEDynamic !== null ? iDirectEDynamic : iDirectE)
-                    ) / 100}
-                    %
-                  </b>{" "}
-                  of expected impact
-                </Typography>
-                {iDirectEDynamic !== null && showDiff && (
-                  <Typography variant="caption">
-                    {iDirectEDynamic >= iDirectE ? "+" : ""}
-                    {Math.round(10000 * (iDirectEDynamic - iDirectE)) / 100}%
-                    compared to public environment
-                  </Typography>
+                {percentages !== "none" && (
+                  <>
+                    <Typography variant="body1" color="warning">
+                      <b>
+                        {Math.round(
+                          10000 *
+                            (iDirectEDynamic !== null
+                              ? iDirectEDynamic
+                              : iDirectE)
+                        ) / 100}
+                        %
+                      </b>{" "}
+                      of expected impact
+                    </Typography>
+                    {iDirectEDynamic !== null && showDiff && (
+                      <Typography variant="caption">
+                        {iDirectEDynamic >= iDirectE ? "+" : ""}
+                        {Math.round(10000 * (iDirectEDynamic - iDirectE)) / 100}
+                        % compared to public environment
+                      </Typography>
+                    )}
+                  </>
                 )}
               </Stack>
             }
@@ -390,22 +434,28 @@ export default function Attack({
             qualiField="f"
             subtitle={
               <Stack direction="column" sx={{ textAlign: "right" }}>
-                <Typography variant="body1" color="warning">
-                  <b>
-                    {Math.round(
-                      10000 *
-                        (iDirectFDynamic !== null ? iDirectFDynamic : iDirectF)
-                    ) / 100}
-                    %
-                  </b>{" "}
-                  of expected impact
-                </Typography>
-                {iDirectFDynamic !== null && showDiff && (
-                  <Typography variant="caption">
-                    {iDirectFDynamic >= iDirectF ? "+" : ""}
-                    {Math.round(10000 * (iDirectFDynamic - iDirectF)) / 100}%
-                    compared to public environment
-                  </Typography>
+                {percentages !== "none" && (
+                  <>
+                    <Typography variant="body1" color="warning">
+                      <b>
+                        {Math.round(
+                          10000 *
+                            (iDirectFDynamic !== null
+                              ? iDirectFDynamic
+                              : iDirectF)
+                        ) / 100}
+                        %
+                      </b>{" "}
+                      of expected impact
+                    </Typography>
+                    {iDirectFDynamic !== null && showDiff && (
+                      <Typography variant="caption">
+                        {iDirectFDynamic >= iDirectF ? "+" : ""}
+                        {Math.round(10000 * (iDirectFDynamic - iDirectF)) / 100}
+                        % compared to public environment
+                      </Typography>
+                    )}
+                  </>
                 )}
               </Stack>
             }

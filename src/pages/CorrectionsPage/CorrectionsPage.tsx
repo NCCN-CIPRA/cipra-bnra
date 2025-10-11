@@ -37,7 +37,7 @@ import round from "../../functions/roundNumberString";
 import {
   Effect,
   getDirectImpact,
-  getIndirectImpact,
+  getIndirectImpactEffect as getIndirectImpact,
 } from "../../functions/Impact";
 import { getCascadeResultSnapshot } from "../../functions/snapshot";
 
