@@ -157,7 +157,7 @@ export default function ManMade({
                         </b>{" "}
                         of expected impact
                       </Typography>
-                      {e.iDynamic !== null && (
+                      {e.iDynamic !== null && showDiff && (
                         <Typography variant="caption">
                           {e.iDynamic >= e.i ? "+" : ""}
                           {Math.round(10000 * (e.iDynamic - e.i)) / 100}%

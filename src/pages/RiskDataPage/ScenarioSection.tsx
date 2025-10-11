@@ -60,7 +60,7 @@ export function ScenarioSection({
 }) {
   const api = useAPI();
   const queryClient = useQueryClient();
-  const { user, indicators, environment, publicRiskSnapshot } =
+  const { user, indicators, environment, showDiff, publicRiskSnapshot } =
     useOutletContext<RiskFilePageContext>();
 
   const [open, setOpen] = useState(false);
@@ -249,23 +249,48 @@ export function ScenarioSection({
               <Stack direction="column" sx={{ mt: 2 }}>
                 {quantiFields.map((quantiField) => {
                   let initialValue = 0;
-                  console.log(riskFile.cr4de_quanti);
+                  let compareValue = null;
+
                   if (quantiField === "dp") {
-                    if (indicators === Indicators.V1)
-                      initialValue = riskFile.cr4de_quanti[scenario].dp.scale;
-                    else
+                    if (indicators === Indicators.V1) {
+                      initialValue = riskFile.cr4de_quanti[scenario].dp.scale5;
+                      compareValue =
+                        publicRiskSnapshot &&
+                        publicRiskSnapshot.cr4de_quanti[scenario].dp.scale5;
+                    } else {
                       initialValue = pScale5to7(
-                        riskFile.cr4de_quanti[scenario].dp.scale
+                        riskFile.cr4de_quanti[scenario].dp.scale5
                       );
+                      compareValue =
+                        publicRiskSnapshot &&
+                        pScale5to7(
+                          publicRiskSnapshot.cr4de_quanti[scenario].dp.scale5
+                        );
+                    }
                   } else {
-                    if (indicators === Indicators.V1)
+                    if (indicators === Indicators.V1) {
                       initialValue = diScale5FromEuros(
-                        riskFile.cr4de_quanti[scenario].di[quantiField].abs
+                        riskFile.cr4de_quanti[scenario].di[quantiField].euros
                       );
-                    else
+                      compareValue =
+                        publicRiskSnapshot &&
+                        diScale5FromEuros(
+                          publicRiskSnapshot.cr4de_quanti[scenario].di[
+                            quantiField
+                          ].euros
+                        );
+                    } else {
                       initialValue = iScale7FromEuros(
-                        riskFile.cr4de_quanti[scenario].di[quantiField].abs
+                        riskFile.cr4de_quanti[scenario].di[quantiField].euros
                       );
+                      compareValue =
+                        publicRiskSnapshot &&
+                        iScale7FromEuros(
+                          publicRiskSnapshot.cr4de_quanti[scenario].di[
+                            quantiField
+                          ].euros
+                        );
+                    }
                   }
 
                   return (
@@ -294,6 +319,7 @@ export function ScenarioSection({
                               : capFirst(quantiField)
                           }
                           maxScale={indicators === Indicators.V1 ? 5 : 7}
+                          compareValue={showDiff ? compareValue : null}
                           onChange={
                             user?.roles.analist &&
                             environment === Environment.DYNAMIC

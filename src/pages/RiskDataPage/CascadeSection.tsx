@@ -49,7 +49,7 @@ export function CascadeSection({
 }) {
   const api = useAPI();
   const queryClient = useQueryClient();
-  const { user, environment, publicCascades } =
+  const { user, environment, showDiff, publicCascades } =
     useOutletContext<RiskFilePageContext>();
 
   const [quali, setQuali] = useState<string>(cascade.cr4de_quali || "");
@@ -179,6 +179,11 @@ export function CascadeSection({
             cause={cause}
             effect={effect}
             cascade={cascade}
+            compareCascade={
+              environment === Environment.DYNAMIC && showDiff
+                ? publicCascade
+                : undefined
+            }
             onChange={
               environment === Environment.DYNAMIC && !disabled
                 ? handleChange

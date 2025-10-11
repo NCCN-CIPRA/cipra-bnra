@@ -1,6 +1,7 @@
 import {
   Box,
   Slider as MuiSlider,
+  SliderThumb,
   Stack,
   Tooltip,
   Typography,
@@ -47,11 +48,13 @@ export function Slider({
   initialValue,
   prefix,
   maxScale = 5,
+  compareValue = null,
   onChange = null,
 }: {
   initialValue: number;
   prefix: string;
   maxScale: number;
+  compareValue?: number | null;
   onChange?: ((newValue: number) => unknown) | null;
 }) {
   const { indicators } = useOutletContext<BasePageContext>();
@@ -65,8 +68,12 @@ export function Slider({
     if (onChange) onChange(newValue);
   };
 
+  const comparePos = (compareVal: number) => {
+    return Math.round((100 * compareVal) / (maxScale + 0.5));
+  };
+
   return (
-    <Box sx={{}}>
+    <Box sx={{ position: "relative" }}>
       <MuiSlider
         value={value}
         onChange={onChange !== null ? handleChangeValue : undefined}
@@ -103,6 +110,19 @@ export function Slider({
             ),
           }))}
       />
+      {compareValue !== null && compareValue !== value && (
+        <Tooltip
+          title={`This value was changed. The original value (compared to the public environment) was ${prefix}${compareValue}`}
+        >
+          <SliderThumb
+            style={{
+              opacity: 0.3,
+              top: 5,
+              left: `calc(${comparePos(compareValue)}% - 9px)`,
+            }}
+          />
+        </Tooltip>
+      )}
     </Box>
   );
 }

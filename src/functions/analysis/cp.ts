@@ -10,7 +10,11 @@ import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { Indicators } from "../../types/global";
 import { cpScale5FromPAbs, cpScale7FromPAbs } from "../indicators/cp";
-import { mScale3FromPDaily, mScale7FromPDaily } from "../indicators/motivation";
+import {
+  mScale3FromPDaily,
+  mScale7FromPDaily,
+  pDailyFromMScale3,
+} from "../indicators/motivation";
 import { pDailyFromReturnPeriodMonths } from "../indicators/probability";
 import { SCENARIOS } from "../scenarios";
 import { getConsensusCascade } from "./prepareRiskFiles";
@@ -256,14 +260,16 @@ export const getNewCPFromOldMAndCP = (
     const pDaily = pDailyFromReturnPeriodMonths(rpMonths);
 
     const newPDaily = pDaily * cpAbsOld;
+    const m3Val = Math.round(2 * mScale3FromPDaily(newPDaily)) / 2;
+    const roundPDaily = pDailyFromMScale3(m3Val);
 
-    if (!indicators) return newPDaily;
+    if (!indicators) return roundPDaily;
 
     if (indicators === Indicators.V1) {
-      return Math.round(10 * mScale3FromPDaily(newPDaily)) / 10;
+      return m3Val;
     }
 
-    return Math.round(10 * mScale7FromPDaily(newPDaily)) / 10;
+    return Math.round(10 * mScale7FromPDaily(roundPDaily)) / 10;
   }
 
   if (!indicators) return cpAbsOld;

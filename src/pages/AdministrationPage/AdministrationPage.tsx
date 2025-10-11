@@ -10,6 +10,8 @@ import MigrationTab from "./MigrationTab";
 import MoveDownSharpIcon from "@mui/icons-material/MoveDownSharp";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import SimulationTab from "./SimulationTab";
+import RestoreIcon from "@mui/icons-material/Restore";
+import RestoreTab from "./RestoreTab";
 
 type UserManagementParams = {
   tabName: string;
@@ -37,6 +39,9 @@ export default function AdministrationPage() {
     case "simulate":
       tab = 2;
       break;
+    case "restore":
+      tab = 3;
+      break;
   }
 
   return (
@@ -44,6 +49,7 @@ export default function AdministrationPage() {
       {tab === 0 && <SnapshotTab />}
       {tab === 1 && <MigrationTab />}
       {tab === 2 && <SimulationTab />}
+      {tab === 3 && <RestoreTab />}
       <Paper
         sx={{
           position: "fixed",
@@ -69,6 +75,11 @@ export default function AdministrationPage() {
             label="Risk Simulator"
             icon={<CalculateIcon />}
             onClick={() => navigate(`/admin/functions/simulate`)}
+          />
+          <BottomNavigationAction
+            label="Restore Backup"
+            icon={<RestoreIcon />}
+            onClick={() => navigate(`/admin/functions/restore`)}
           />
         </BottomNavigation>
       </Paper>

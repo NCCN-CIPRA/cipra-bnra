@@ -12,6 +12,7 @@ import {
   TableBody,
   IconButton,
   Menu,
+  Stack,
 } from "@mui/material";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../functions/scenarios";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
@@ -121,12 +122,28 @@ const getCPValueTooltip = (
   }
 };
 
+const getCPVal = (
+  cpAbs: number,
+  isActorCause: boolean,
+  indicators: Indicators
+) => {
+  let cpVal = 0;
+  if (indicators === Indicators.V1) {
+    cpVal = isActorCause ? mScale3FromPDaily(cpAbs) : cpScale5FromPAbs(cpAbs);
+  } else {
+    cpVal = isActorCause ? mScale7FromPDaily(cpAbs) : cpScale7FromPAbs(cpAbs);
+  }
+  return Math.round(2 * cpVal) / 2;
+};
+
 const CPX = ({
   cpAbs,
+  compareCPAbs,
   isActorCause,
   onChange,
 }: {
   cpAbs: number;
+  compareCPAbs?: number;
   isActorCause: boolean;
   onChange?: (newCPAbs: number) => unknown;
 }) => {
@@ -139,13 +156,7 @@ const CPX = ({
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    let cpVal = 0;
-    if (indicators === Indicators.V1) {
-      cpVal = isActorCause ? mScale3FromPDaily(cpAbs) : cpScale5FromPAbs(cpAbs);
-    } else {
-      cpVal = isActorCause ? mScale7FromPDaily(cpAbs) : cpScale7FromPAbs(cpAbs);
-    }
-    setValue(Math.round(2 * cpVal) / 2);
+    setValue(getCPVal(cpAbs, isActorCause, indicators));
   }, [cpAbs, isActorCause, indicators]);
 
   const prefix = isActorCause ? "M" : "CP";
@@ -199,9 +210,9 @@ const CPX = ({
         menuOpen ? null : getCPValueTooltip(innerVal, isActorCause, indicators)
       }
     >
-      <Box
+      <Stack
+        direction="column"
         sx={{
-          display: "flex",
           backgroundColor: colors[innerVal.toString() as keyof typeof colors],
           padding: 1,
           justifyContent: "center",
@@ -209,11 +220,19 @@ const CPX = ({
         }}
         onClick={menuOpen ? undefined : handleClick}
       >
-        <Typography variant="body1" color="black" component={"span"}>
-          {prefix}
-          {innerVal}
-        </Typography>
-        {onChange && <ArrowDropDownIcon />}
+        <Stack direction="row" alignItems="center">
+          <Typography variant="body1" color="black" component={"span"}>
+            {prefix}
+            {innerVal}
+          </Typography>
+          {onChange && <ArrowDropDownIcon />}
+        </Stack>
+        {compareCPAbs !== undefined && cpAbs !== compareCPAbs && (
+          <Typography variant="caption" sx={{ display: "block" }}>
+            (original: {prefix}
+            {getCPVal(compareCPAbs, isActorCause, indicators)})
+          </Typography>
+        )}
         {onChange && (
           <Menu
             anchorEl={anchorEl}
@@ -242,7 +261,7 @@ const CPX = ({
             ))}
           </Menu>
         )}
-      </Box>
+      </Stack>
     </Tooltip>
   );
 };
@@ -251,11 +270,13 @@ export default function CascadeMatrix({
   cause,
   effect,
   cascade,
+  compareCascade,
   onChange,
 }: {
   cause: DVRiskSnapshot;
   effect: DVRiskSnapshot;
   cascade: DVCascadeSnapshot;
+  compareCascade?: DVCascadeSnapshot;
   onChange?: (
     causeScenario: SCENARIOS,
     effectScenario: SCENARIOS,
@@ -329,6 +350,11 @@ export default function CascadeMatrix({
                   SCENARIOS.CONSIDERABLE
                 ].abs
               }
+              compareCPAbs={
+                compareCascade?.cr4de_quanti_cp[SCENARIOS.CONSIDERABLE][
+                  SCENARIOS.CONSIDERABLE
+                ].abs
+              }
               isActorCause={isActorCause}
               onChange={
                 onChange &&
@@ -347,6 +373,11 @@ export default function CascadeMatrix({
                 cascade.cr4de_quanti_cp[SCENARIOS.CONSIDERABLE][SCENARIOS.MAJOR]
                   .abs
               }
+              compareCPAbs={
+                compareCascade?.cr4de_quanti_cp[SCENARIOS.CONSIDERABLE][
+                  SCENARIOS.MAJOR
+                ].abs
+              }
               isActorCause={isActorCause}
               onChange={
                 onChange &&
@@ -359,6 +390,11 @@ export default function CascadeMatrix({
             <CPX
               cpAbs={
                 cascade.cr4de_quanti_cp[SCENARIOS.CONSIDERABLE][
+                  SCENARIOS.EXTREME
+                ].abs
+              }
+              compareCPAbs={
+                compareCascade?.cr4de_quanti_cp[SCENARIOS.CONSIDERABLE][
                   SCENARIOS.EXTREME
                 ].abs
               }
@@ -380,6 +416,11 @@ export default function CascadeMatrix({
                 cascade.cr4de_quanti_cp[SCENARIOS.MAJOR][SCENARIOS.CONSIDERABLE]
                   .abs
               }
+              compareCPAbs={
+                compareCascade?.cr4de_quanti_cp[SCENARIOS.MAJOR][
+                  SCENARIOS.CONSIDERABLE
+                ].abs
+              }
               isActorCause={isActorCause}
               onChange={
                 onChange &&
@@ -393,6 +434,11 @@ export default function CascadeMatrix({
               cpAbs={
                 cascade.cr4de_quanti_cp[SCENARIOS.MAJOR][SCENARIOS.MAJOR].abs
               }
+              compareCPAbs={
+                compareCascade?.cr4de_quanti_cp[SCENARIOS.MAJOR][
+                  SCENARIOS.MAJOR
+                ].abs
+              }
               isActorCause={isActorCause}
               onChange={
                 onChange &&
@@ -405,6 +451,11 @@ export default function CascadeMatrix({
             <CPX
               cpAbs={
                 cascade.cr4de_quanti_cp[SCENARIOS.MAJOR][SCENARIOS.EXTREME].abs
+              }
+              compareCPAbs={
+                compareCascade?.cr4de_quanti_cp[SCENARIOS.MAJOR][
+                  SCENARIOS.EXTREME
+                ].abs
               }
               isActorCause={isActorCause}
               onChange={
@@ -425,6 +476,11 @@ export default function CascadeMatrix({
                   SCENARIOS.CONSIDERABLE
                 ].abs
               }
+              compareCPAbs={
+                compareCascade?.cr4de_quanti_cp[SCENARIOS.EXTREME][
+                  SCENARIOS.CONSIDERABLE
+                ].abs
+              }
               isActorCause={isActorCause}
               onChange={
                 onChange &&
@@ -437,6 +493,11 @@ export default function CascadeMatrix({
             <CPX
               cpAbs={
                 cascade.cr4de_quanti_cp[SCENARIOS.EXTREME][SCENARIOS.MAJOR].abs
+              }
+              compareCPAbs={
+                compareCascade?.cr4de_quanti_cp[SCENARIOS.EXTREME][
+                  SCENARIOS.MAJOR
+                ].abs
               }
               isActorCause={isActorCause}
               onChange={
@@ -451,6 +512,11 @@ export default function CascadeMatrix({
               cpAbs={
                 cascade.cr4de_quanti_cp[SCENARIOS.EXTREME][SCENARIOS.EXTREME]
                   .abs
+              }
+              compareCPAbs={
+                compareCascade?.cr4de_quanti_cp[SCENARIOS.EXTREME][
+                  SCENARIOS.EXTREME
+                ].abs
               }
               isActorCause={isActorCause}
               onChange={

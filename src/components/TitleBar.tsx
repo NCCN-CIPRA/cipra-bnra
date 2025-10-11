@@ -95,6 +95,7 @@ export default function TitleBar({
     setAnchorElRole(null);
     setAnchorElEnv(null);
     setAnchorElInd(null);
+    setAnchorElDiff(null);
   };
 
   const getRoleDisplay = () => {
@@ -363,12 +364,12 @@ export default function TitleBar({
                     </MenuItem>
                     <MenuItem onMouseEnter={handleOpenDiffMenu}>
                       <Typography sx={{ textAlign: "left", flex: 1 }}>
-                        Data Diff:
+                        Show Data Updates:
                       </Typography>
                       <Typography variant="body2" sx={{ pl: 2 }}>
                         {showDiff && environment !== Environment.PUBLIC
-                          ? "Enabled"
-                          : "Disabled"}
+                          ? "enabled"
+                          : "disabled"}
                       </Typography>
 
                       <Menu
@@ -399,7 +400,7 @@ export default function TitleBar({
                           }}
                         >
                           <Typography sx={{ textAlign: "center" }}>
-                            Enabled{" "}
+                            Show{" "}
                             {environment === Environment.PUBLIC
                               ? "(Only in dynamic environment)"
                               : ""}
@@ -412,7 +413,7 @@ export default function TitleBar({
                           }}
                         >
                           <Typography sx={{ textAlign: "center" }}>
-                            Disabled
+                            Hide
                           </Typography>
                         </MenuItem>
                       </Menu>
