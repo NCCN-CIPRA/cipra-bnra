@@ -49,13 +49,18 @@ export default function RiskLogPage() {
                   id="panel1-header"
                 >
                   <Typography component="span" variant="subtitle1">
-                    [{l.modifiedon.toLocaleDateString()} -{" "}
-                    {l.modifiedon.toLocaleTimeString()}]{" "}
-                    <b>{l.cr4de_changed_by_email}</b> changed:{" "}
                     {l.cr4de_change_short}
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
+                  <Typography component="span" variant="caption" sx={{ mr: 1 }}>
+                    [{l.modifiedon.toLocaleDateString()} -{" "}
+                    {l.modifiedon.toLocaleTimeString()}]
+                  </Typography>
+                  <Typography component="span" variant="subtitle1">
+                    <b>{l.cr4de_changed_by_email}</b> changed:{" "}
+                  </Typography>
+
                   <pre>{JSON.stringify(JSON.parse(l.cr4de_diff), null, 2)}</pre>
                 </AccordionDetails>
               </Accordion>

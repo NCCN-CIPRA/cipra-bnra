@@ -146,7 +146,11 @@ export function ScenarioSection({
           cr4de_changed_by_email: user?.emailaddress1,
           cr4de_changed_object_type: "RISK_FILE",
           cr4de_changed_object_id: riskFile._cr4de_risk_file_value,
-          cr4de_change_short: `DI value of ${field} of ${scenario} of ${riskFile.cr4de_title}`,
+          cr4de_change_short: `${field} of ${scenario} of ${
+            riskFile.cr4de_title
+          }: ${capFirst(field)}${
+            quantiInput[scenario].di[field].scale7
+          } -> ${capFirst(field)}${newQuantiInput[scenario].di[field].scale7}`,
           cr4de_diff: serializeChangeLogDiff([
             {
               property: `cr4de_quanti.${scenario}.di.${field}.abs`,

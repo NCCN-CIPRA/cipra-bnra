@@ -93,7 +93,7 @@ export function CascadeSection({
       cr4de_changed_by_email: user?.emailaddress1,
       cr4de_changed_object_type: "CASCADE",
       cr4de_changed_object_id: cascade._cr4de_risk_cascade_value,
-      cr4de_change_short: `CP Matrix of ${cause.cr4de_title} -> ${effect.cr4de_title}`,
+      cr4de_change_short: `${causeScenario} ${cause.cr4de_title} causes ${effectScenario} ${effect.cr4de_title}: CP${cascade.cr4de_quanti_cp[causeScenario][effectScenario].scale7} -> CP${updatedCPMatrix[causeScenario][effectScenario].scale7}`,
       cr4de_diff: serializeChangeLogDiff([
         {
           property: `cr4de_quanti_input.${causeScenario}.${effectScenario}.abs`,
