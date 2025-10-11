@@ -1,6 +1,6 @@
 import { prettyRound } from "./roundNumberString";
 
-describe.only("Pretty Round", () => {
+describe("Pretty Round", () => {
   test("Should give nice numbers", () => {
     expect(prettyRound(1)).toBe("1");
     expect(prettyRound(3)).toBe("3");
