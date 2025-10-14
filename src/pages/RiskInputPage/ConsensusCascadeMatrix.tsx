@@ -59,7 +59,7 @@ const CPX = ({ value, cause }: { value: string; cause: SmallRisk }) => {
     realCP =
       cause.cr4de_risk_type === RISK_TYPE.MANMADE ? `M${cp7}` : `CP${cp7}`;
   }
-  console.log(cause);
+
   return (
     <Box
       sx={{

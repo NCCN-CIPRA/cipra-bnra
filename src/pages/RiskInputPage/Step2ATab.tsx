@@ -43,6 +43,11 @@ import { DiscussionRequired } from "../../types/DiscussionRequired";
 import Attachments from "./Attachments";
 import { DVAttachment } from "../../types/dataverse/DVAttachment";
 import { STATS, avg, getStats } from "../../functions/inputProcessing";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../BasePage";
+import { Indicators } from "../../types/global";
+import { pScale5to7 } from "../../functions/indicators/probability";
+import { diScale5to7 } from "../../functions/indicators/impact";
 
 const scenarioLetter = {
   [SCENARIOS.CONSIDERABLE]: "c",
@@ -158,6 +163,7 @@ function ScenarioSection({
   // reloadDirectAnalyses: () => void;
 }) {
   const api = useAPI();
+  const { indicators } = useOutletContext<BasePageContext>();
   const [open, setOpen] = useState(initialOpen);
   // const [isSaving, setIsSaving] = useState(false);
   const [lastParam, setLastParam] = useState(parameter);
@@ -195,6 +201,15 @@ function ScenarioSection({
 
   const qualiInput = useRef<null | string>(null);
 
+  let mapFn = (n: number) => n;
+  if (indicators === Indicators.V1) {
+    if (qualiName.indexOf("dp") >= 0) {
+      mapFn = pScale5to7;
+    } else {
+      mapFn = diScale5to7;
+    }
+  }
+
   // const handleSave = async (field: string, value: string | null) => {
   //   setIsSaving(true);
 
@@ -209,7 +224,7 @@ function ScenarioSection({
 
   const distribution = useMemo(() => {
     const d = quantiNames.reduce((dist, field) => {
-      return {
+      const stats: { [key in keyof Partial<DVDirectAnalysis>]: STATS } = {
         ...dist,
         [field]: getStats(
           directAnalyses.map((da) => da[field]) as string[],
@@ -223,6 +238,14 @@ function ScenarioSection({
           )
         ),
       };
+
+      if (riskFile[field as keyof DVRiskFile] && stats[field]) {
+        stats[field].avg = parseFloat(
+          (riskFile[field as keyof DVRiskFile] as string).slice(2)
+        ) as number;
+      }
+
+      return stats;
     }, {}) as { [key in keyof DVDirectAnalysis]: STATS };
 
     return {
@@ -290,10 +313,14 @@ function ScenarioSection({
                               n,
                               riskFile.cr4de_risk_type
                             )} Input Distribution`,
-                            distFloat: distribution[n].min - 0.05,
-                            distBot: distribution[n].avg - distribution[n].min,
+                            distFloat: mapFn(distribution[n].min) - 0.05,
+                            distBot:
+                              mapFn(distribution[n].avg) -
+                              mapFn(distribution[n].min),
                             distAvg: 0.1,
-                            distTop: distribution[n].max - distribution[n].avg,
+                            distTop:
+                              mapFn(distribution[n].max) -
+                              mapFn(distribution[n].avg),
                           };
                         })}
                         margin={{
@@ -305,7 +332,14 @@ function ScenarioSection({
                       >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
-                        <YAxis domain={[-1, 6]} ticks={[0, 1, 2, 3, 4, 5]} />
+                        <YAxis
+                          domain={[-1, indicators === Indicators.V1 ? 6 : 8]}
+                          ticks={
+                            indicators === Indicators.V1
+                              ? [0, 1, 2, 3, 4, 5]
+                              : [0, 1, 2, 3, 4, 5, 6, 7]
+                          }
+                        />
                         <Tooltip
                           formatter={(value, name, props) => {
                             if (name === "Minimum")
@@ -366,7 +400,11 @@ function ScenarioSection({
                           Estimate:
                         </Typography>
                         <Chip
-                          label={distribution[n].avgLabel}
+                          label={`${getPrefix(
+                            parameter,
+                            n,
+                            riskFile.cr4de_risk_type
+                          )}${mapFn(distribution[n].avg)}`}
                           sx={{ fontWeight: "bold" }}
                         ></Chip>
                       </Stack>
