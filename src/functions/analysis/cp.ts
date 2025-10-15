@@ -349,8 +349,8 @@ export const getCPCauseDynamic = (
 ) => {
   return (
     c.cr4de_quanti_cp[causeScenario].considerable.abs +
-    c.cr4de_quanti_cp[causeScenario].considerable.abs +
-    c.cr4de_quanti_cp[causeScenario].considerable.abs
+    c.cr4de_quanti_cp[causeScenario].major.abs +
+    c.cr4de_quanti_cp[causeScenario].extreme.abs
   );
 };
 
