@@ -17,7 +17,7 @@ import {
 import { CatalyzingSection } from "./CatalyzingSection";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { SCENARIOS } from "../../functions/scenarios";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PERC_CONTRIB, SORT_ATTACKS } from "./RiskDataPage";
 
 export default function ManMade({
@@ -133,6 +133,10 @@ export default function ManMade({
     publicRiskSnapshot,
     sortAttacks,
   ]);
+
+  useEffect(() => {
+    setAttackSortOrder(null);
+  }, [percentages, sortAttacks]);
 
   return (
     <>

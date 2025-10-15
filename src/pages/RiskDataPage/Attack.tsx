@@ -28,7 +28,7 @@ import { ClimateChangeSection } from "./ClimateChangeSection";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { PERC_CONTRIB } from "./RiskDataPage";
 import { SCENARIOS } from "../../functions/scenarios";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function Attack({
   riskFile,
@@ -229,6 +229,11 @@ export default function Attack({
     riskFile,
     scenario,
   ]);
+
+  useEffect(() => {
+    setActorSortOrder(null);
+    setEffectSortOrder(null);
+  }, [percentages]);
 
   const iDirectH = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
