@@ -48,6 +48,7 @@ export function CascadeSection({
   visuals,
   disabled = false,
   disabledMessage,
+  isAttackOtherCause,
 }: {
   cause: DVRiskSnapshot;
   effect: DVRiskSnapshot;
@@ -56,6 +57,7 @@ export function CascadeSection({
   visuals: VISUALS;
   disabled?: boolean;
   disabledMessage?: string;
+  isAttackOtherCause?: boolean;
 }) {
   const api = useAPI();
   const queryClient = useQueryClient();
@@ -158,7 +160,7 @@ export function CascadeSection({
             >
               {cause.cr4de_title}
             </Link>{" "}
-            causes{" "}
+            {isAttackOtherCause ? "increases the probability of" : "causes"}{" "}
             <Link
               href={`/risks/${effect._cr4de_risk_file_value}/description`}
               target="_blank"

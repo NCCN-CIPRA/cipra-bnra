@@ -312,6 +312,7 @@ export default function Attack({
                 effect={riskFile}
                 cascade={ca}
                 visuals={viewType}
+                isAttackOtherCause={true}
                 subtitle={
                   <Stack direction="column" sx={{ textAlign: "right" }}>
                     {percentages !== "none" && (
