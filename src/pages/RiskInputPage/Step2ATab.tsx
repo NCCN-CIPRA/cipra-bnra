@@ -202,7 +202,7 @@ function ScenarioSection({
   const qualiInput = useRef<null | string>(null);
 
   let mapFn = (n: number) => n;
-  if (indicators === Indicators.V1) {
+  if (indicators === Indicators.V2) {
     if (qualiName.indexOf("dp") >= 0) {
       mapFn = pScale5to7;
     } else {

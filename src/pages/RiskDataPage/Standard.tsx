@@ -26,6 +26,7 @@ import { ClimateChangeSection } from "./ClimateChangeSection";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { PERC_CONTRIB } from "./RiskDataPage";
 import { SCENARIOS } from "../../functions/scenarios";
+import { useMemo, useState } from "react";
 
 export default function Standard({
   riskFile,
@@ -49,6 +50,14 @@ export default function Standard({
   const { environment, showDiff, publicRiskSnapshot, publicCascades } =
     useOutletContext<RiskFilePageContext>();
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
+  const [causeSortOrder, setCauseSortOrder] = useState<Record<
+    string,
+    number
+  > | null>(null);
+  const [effectSortOrder, setEffectSortOrder] = useState<Record<
+    string,
+    number
+  > | null>(null);
 
   let scenario: SCENARIOS | null = null;
   if (percentages === "mrs")
@@ -88,99 +97,145 @@ export default function Standard({
     };
   });
 
-  const causeElements = [
-    ...causesWithP.map((ca) => ({
-      p: ca.ipDynamic !== null ? ca.ipDynamic : ca.ip,
-      el: (
-        <CascadeSection
-          key={ca._cr4de_risk_cascade_value}
-          cause={ca.cr4de_cause_risk}
-          effect={riskFile}
-          cascade={ca}
-          visuals={viewType}
-          subtitle={
-            <Stack direction="column" sx={{ textAlign: "right" }}>
-              {percentages !== "none" && (
-                <>
-                  <Typography variant="body1" color="warning">
-                    <b>
-                      {Math.round(
-                        10000 * (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
-                      ) / 100}
-                      %
-                    </b>{" "}
-                    of total probability
-                  </Typography>
-                  {ca.ipDynamic !== null && showDiff && (
-                    <Typography variant="caption">
-                      {ca.ipDynamic >= ca.ip ? "+" : ""}
-                      {Math.round(10000 * (ca.ipDynamic - ca.ip)) / 100}%
-                      compared to public environment
+  const causeElements = useMemo(() => {
+    const els = [
+      ...causesWithP.map((ca) => ({
+        id: ca._cr4de_risk_cascade_value,
+        p: ca.ipDynamic !== null ? ca.ipDynamic : ca.ip,
+        el: (
+          <CascadeSection
+            key={ca._cr4de_risk_cascade_value}
+            cause={ca.cr4de_cause_risk}
+            effect={riskFile}
+            cascade={ca}
+            visuals={viewType}
+            subtitle={
+              <Stack direction="column" sx={{ textAlign: "right" }}>
+                {percentages !== "none" && (
+                  <>
+                    <Typography variant="body1" color="warning">
+                      <b>
+                        {Math.round(
+                          10000 * (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
+                        ) / 100}
+                        %
+                      </b>{" "}
+                      of total probability
                     </Typography>
-                  )}
-                </>
-              )}
-            </Stack>
-          }
-        />
-      ),
-    })),
-    {
-      p: dpDynamic !== null ? dpDynamic : dp,
-      el: (
-        <DirectSection
-          riskFile={parsedRiskFile}
-          qualiField="dp"
-          quantiFields={["dp"]}
-          title="Other causes"
-          subtitle={
-            <Stack direction="column" sx={{ textAlign: "right" }}>
-              {percentages !== "none" && (
-                <>
-                  <Typography variant="body1" color="warning">
-                    <b>
-                      {Math.round(
-                        10000 * (dpDynamic !== null ? dpDynamic : dp)
-                      ) / 100}
-                      %
-                    </b>{" "}
-                    of total probability
-                  </Typography>
-                  {dpDynamic !== null && showDiff && (
-                    <Typography variant="caption">
-                      {dpDynamic >= dp ? "+" : ""}
-                      {Math.round(10000 * (dpDynamic - dp)) / 100}% compared to
-                      public environment
+                    {ca.ipDynamic !== null && showDiff && (
+                      <Typography variant="caption">
+                        {ca.ipDynamic >= ca.ip ? "+" : ""}
+                        {Math.round(10000 * (ca.ipDynamic - ca.ip)) / 100}%
+                        compared to public environment
+                      </Typography>
+                    )}
+                  </>
+                )}
+              </Stack>
+            }
+          />
+        ),
+      })),
+      {
+        id: riskFile._cr4de_risk_file_value,
+        p: dpDynamic !== null ? dpDynamic : dp,
+        el: (
+          <DirectSection
+            riskFile={parsedRiskFile}
+            qualiField="dp"
+            quantiFields={["dp"]}
+            title="Other causes"
+            subtitle={
+              <Stack direction="column" sx={{ textAlign: "right" }}>
+                {percentages !== "none" && (
+                  <>
+                    <Typography variant="body1" color="warning">
+                      <b>
+                        {Math.round(
+                          10000 * (dpDynamic !== null ? dpDynamic : dp)
+                        ) / 100}
+                        %
+                      </b>{" "}
+                      of total probability
                     </Typography>
-                  )}
-                </>
-              )}
-            </Stack>
-          }
-        />
-      ),
-    },
-  ];
+                    {dpDynamic !== null && showDiff && (
+                      <Typography variant="caption">
+                        {dpDynamic >= dp ? "+" : ""}
+                        {Math.round(10000 * (dpDynamic - dp)) / 100}% compared
+                        to public environment
+                      </Typography>
+                    )}
+                  </>
+                )}
+              </Stack>
+            }
+          />
+        ),
+      },
+    ].sort((a, b) => b.p - a.p);
 
-  const effectsWithI = effects.map((e) => {
-    const publicE =
-      publicCascades?.effects.find(
-        (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
-      ) || e;
+    if (!causeSortOrder) {
+      const sortOrder = {} as Record<string, number>;
+      for (let i = 0; i < els.length; i++) {
+        sortOrder[els[i].id] = i;
+      }
+      setCauseSortOrder(sortOrder);
+    }
 
-    return {
-      cascade: e,
-      i: getAverageIndirectImpact(
-        publicE,
-        publicRiskSnapshot || riskFile,
-        scenario
-      ),
-      iDynamic:
-        environment === Environment.DYNAMIC
-          ? getAverageIndirectImpactDynamic(e, riskFile, effects, scenario)
-          : null,
-    };
-  });
+    return els;
+  }, [
+    causeSortOrder,
+    causesWithP,
+    dp,
+    dpDynamic,
+    parsedRiskFile,
+    percentages,
+    riskFile,
+    showDiff,
+    viewType,
+  ]);
+
+  const effectsWithI = useMemo(() => {
+    const els = effects
+      .map((e) => {
+        const publicE =
+          publicCascades?.effects.find(
+            (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
+          ) || e;
+
+        return {
+          cascade: e,
+          i: getAverageIndirectImpact(
+            publicE,
+            publicRiskSnapshot || riskFile,
+            scenario
+          ),
+          iDynamic:
+            environment === Environment.DYNAMIC
+              ? getAverageIndirectImpactDynamic(e, riskFile, effects, scenario)
+              : null,
+        };
+      })
+      .sort((a, b) => b.i - a.i);
+
+    if (!effectSortOrder) {
+      const sortOrder = {} as Record<string, number>;
+      for (let i = 0; i < els.length; i++) {
+        sortOrder[els[i].cascade._cr4de_risk_cascade_value] = i;
+      }
+      setEffectSortOrder(sortOrder);
+    }
+
+    return els;
+  }, [
+    effectSortOrder,
+    effects,
+    environment,
+    publicCascades?.effects,
+    publicRiskSnapshot,
+    riskFile,
+    scenario,
+  ]);
 
   const iDirectH = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
@@ -236,7 +291,13 @@ export default function Standard({
         </Typography>
 
         <Box sx={{ mb: 8 }}>
-          {causeElements.sort((a, b) => b.p - a.p).map((ca) => ca.el)}
+          {causeElements
+            .sort((a, b) =>
+              causeSortOrder
+                ? causeSortOrder[a.id] - causeSortOrder[b.id]
+                : b.p - a.p
+            )
+            .map((ca) => ca.el)}
         </Box>
 
         {showConsequences && (
@@ -247,7 +308,12 @@ export default function Standard({
 
             <Box sx={{ mb: 8 }}>
               {effectsWithI
-                .sort((a, b) => b.i - a.i)
+                .sort((a, b) =>
+                  effectSortOrder
+                    ? effectSortOrder[a.cascade._cr4de_risk_cascade_value] -
+                      effectSortOrder[b.cascade._cr4de_risk_cascade_value]
+                    : b.i - a.i
+                )
                 .map((e) => (
                   <CascadeSection
                     key={e.cascade._cr4de_risk_cascade_value}

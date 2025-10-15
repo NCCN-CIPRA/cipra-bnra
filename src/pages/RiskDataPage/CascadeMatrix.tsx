@@ -173,12 +173,15 @@ const CPX = ({
   const handleChange = (newVal: number) => {
     let cpAbs = 0;
     if (indicators === Indicators.V1) {
-      cpAbs = isActorCause ? pDailyFromMScale3(cpAbs) : pAbsFromCPScale5(cpAbs);
+      cpAbs = isActorCause
+        ? pDailyFromMScale3(newVal)
+        : pAbsFromCPScale5(newVal);
     } else {
-      cpAbs = isActorCause ? pDailyFromMScale7(cpAbs) : pAbsFromCPScale7(cpAbs);
+      cpAbs = isActorCause
+        ? pDailyFromMScale7(newVal)
+        : pAbsFromCPScale7(newVal);
     }
-    setValue(Math.round(2 * cpAbs) / 2);
-
+    setValue(getCPVal(cpAbs, isActorCause, indicators));
     if (!onChange) return;
 
     if (indicators === Indicators.V1) {

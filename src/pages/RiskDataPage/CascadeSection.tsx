@@ -1,16 +1,26 @@
-import {
-  DVCascadeSnapshot,
-  serializeCPMatrix,
-} from "../../types/dataverse/DVCascadeSnapshot";
+import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { ReactNode, useState } from "react";
 import RiskDataAccordion from "./RiskDataAccordion";
-import { Alert, Box, Link, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  CircularProgress,
+  Link,
+  SnackbarContent,
+  Stack,
+  Typography,
+} from "@mui/material";
 import CascadeSankey from "./CascadeSankey";
 import CascadeMatrix from "./CascadeMatrix";
 import HTMLEditor from "../../components/HTMLEditor";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { DVRiskCascade } from "../../types/dataverse/DVRiskCascade";
+import {
+  CPMatrixCauseRow,
+  DVRiskCascade,
+  parseCPMatrix,
+  serializeCPMatrix,
+} from "../../types/dataverse/DVRiskCascade";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import LeftBorderSection from "../../components/LeftBorderSection";
 import { useOutletContext } from "react-router-dom";
@@ -53,10 +63,17 @@ export function CascadeSection({
     useOutletContext<RiskFilePageContext>();
 
   const [quali, setQuali] = useState<string>(cascade.cr4de_quali || "");
+  const [cpMatrix, setCPMatrix] = useState<CPMatrixCauseRow>(
+    parseCPMatrix(serializeCPMatrix(cascade.cr4de_quanti_cp))
+  );
+  const [runningUpdateCount, setRunningUpdateCount] = useState(0);
+
   const mutation = useMutation({
     mutationFn: async (
       newC: Partial<DVRiskCascade> & { cr4de_bnrariskcascadeid: string }
     ) => api.updateCascade(newC.cr4de_bnrariskcascadeid, newC),
+    onMutate: () => setRunningUpdateCount((c) => c + 1),
+    onSettled: () => setRunningUpdateCount((c) => Math.max(0, c - 1)),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: [DataTable.RISK_CASCADE],
@@ -77,7 +94,9 @@ export function CascadeSection({
 
     const isActorCause = cause.cr4de_risk_type === RISK_TYPE.MANMADE;
 
-    const updatedCPMatrix = JSON.parse(JSON.stringify(cascade.cr4de_quanti_cp));
+    const updatedCPMatrix = parseCPMatrix(
+      serializeCPMatrix(cpMatrix || cascade.cr4de_quanti_cp)
+    );
     updatedCPMatrix[causeScenario][effectScenario] = {
       abs: newCPAbs,
       scale5: isActorCause
@@ -87,6 +106,7 @@ export function CascadeSection({
         ? Math.round(10 * mScale7FromPDaily(newCPAbs)) / 10
         : Math.round(10 * cpScale7FromPAbs(newCPAbs)) / 10,
     };
+    setCPMatrix(updatedCPMatrix);
 
     api.createChangeLog({
       "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
@@ -115,6 +135,7 @@ export function CascadeSection({
         },
       ]),
     });
+
     mutation.mutate({
       cr4de_bnrariskcascadeid: cascade._cr4de_risk_cascade_value,
       cr4de_quanti_input: serializeCPMatrix(updatedCPMatrix),
@@ -231,6 +252,20 @@ export function CascadeSection({
           </LeftBorderSection>
         </Box>
       </Stack>
+      {runningUpdateCount > 0 && (
+        <SnackbarContent
+          message="Updating CP values"
+          action={<CircularProgress size={18} sx={{ mr: 2 }} />}
+          sx={{
+            maxWidth: 200,
+            position: "fixed",
+            left: "auto",
+            right: 20,
+            bottom: 80,
+            zIndex: 10000,
+          }}
+        />
+      )}
     </RiskDataAccordion>
   );
 }

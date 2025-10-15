@@ -17,7 +17,7 @@ import {
 import { CatalyzingSection } from "./CatalyzingSection";
 import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { SCENARIOS } from "../../functions/scenarios";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { PERC_CONTRIB, SORT_ATTACKS } from "./RiskDataPage";
 
 export default function ManMade({
@@ -38,6 +38,10 @@ export default function ManMade({
 }) {
   const { environment, showDiff, publicRiskSnapshot, publicCascades } =
     useOutletContext<RiskFilePageContext>();
+  const [attackSortOrder, setAttackSortOrder] = useState<Record<
+    string,
+    number
+  > | null>(null);
 
   const totalCPs = useMemo(
     () =>
@@ -67,43 +71,67 @@ export default function ManMade({
     else if (percentages !== "none" && percentages !== "average")
       scenario = percentages as SCENARIOS;
 
-    return effects.map((e) => {
-      const publicE =
-        publicCascades?.effects.find(
-          (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
-        ) || e;
+    const attacks = effects
+      .map((e) => {
+        const publicE =
+          publicCascades?.effects.find(
+            (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
+          ) || e;
 
-      const p = getAverageCP(publicE.cr4de_quanti_cp, totalCPs, scenario);
-      const pDynamic =
-        environment === Environment.DYNAMIC
-          ? getAverageCPDynamic(e, effects, scenario)
-          : null;
-      const i = getAverageIndirectImpact(
-        publicE,
-        publicRiskSnapshot || riskFile,
-        scenario
-      );
-      const iDynamic =
-        environment === Environment.DYNAMIC
-          ? getAverageIndirectImpactDynamic(e, riskFile, effects, scenario)
-          : null;
+        const p = getAverageCP(publicE.cr4de_quanti_cp, totalCPs, scenario);
+        const pDynamic =
+          environment === Environment.DYNAMIC
+            ? getAverageCPDynamic(e, effects, scenario)
+            : null;
+        const i = getAverageIndirectImpact(
+          publicE,
+          publicRiskSnapshot || riskFile,
+          scenario
+        );
+        const iDynamic =
+          environment === Environment.DYNAMIC
+            ? getAverageIndirectImpactDynamic(e, riskFile, effects, scenario)
+            : null;
 
-      return {
-        cascade: e,
-        p,
-        pDynamic,
-        i,
-        iDynamic,
-      };
-    });
+        return {
+          cascade: e,
+          p,
+          pDynamic,
+          i,
+          iDynamic,
+        };
+      })
+      .sort((a, b) => {
+        if (sortAttacks === "preference") {
+          if (b.pDynamic !== null && a.pDynamic !== null)
+            return b.pDynamic - a.pDynamic;
+          return b.p - a.p;
+        }
+
+        if (b.iDynamic !== null && a.iDynamic !== null)
+          return b.iDynamic - a.iDynamic;
+        return b.i - a.i;
+      });
+
+    if (!attackSortOrder) {
+      const sortOrder = {} as Record<string, number>;
+      for (let i = 0; i < attacks.length; i++) {
+        sortOrder[attacks[i].cascade._cr4de_risk_cascade_value] = i;
+      }
+      setAttackSortOrder(sortOrder);
+    }
+
+    return attacks;
   }, [
-    effects,
-    environment,
-    publicCascades?.effects,
-    publicRiskSnapshot,
-    riskFile,
     totalCPs,
+    effects,
     percentages,
+    riskFile,
+    attackSortOrder,
+    publicCascades?.effects,
+    environment,
+    publicRiskSnapshot,
+    sortAttacks,
   ]);
 
   return (
@@ -116,7 +144,10 @@ export default function ManMade({
         <Box sx={{ mb: 8 }}>
           {dynamicAttacks
             .sort((a, b) =>
-              sortAttacks === "preference" ? b.p - a.p : b.i - a.i
+              attackSortOrder
+                ? attackSortOrder[a.cascade._cr4de_risk_cascade_value] -
+                  attackSortOrder[b.cascade._cr4de_risk_cascade_value]
+                : b.p - a.p
             )
             .map((e) => (
               <CascadeSection
