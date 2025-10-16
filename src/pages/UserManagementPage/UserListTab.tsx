@@ -218,7 +218,7 @@ function createCustomToolbar(
         await api.updateContact(selectedId[0] as string, {
           "ownerid@odata.bind":
             "/systemusers(412a1781-de11-ea11-a816-000d3aba9502)",
-          cr4de_permissions: ROLE_RECORDS[permissions],
+          cr4de_permissions: ROLE_RECORDS[permissions] || undefined,
         });
         updateUsers();
       }

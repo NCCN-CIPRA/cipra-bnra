@@ -75,7 +75,7 @@ export interface API {
   getContacts<T = DVContact>(query?: string): Promise<T[]>;
   createContact(fields: Partial<DVContact>): Promise<CreateResponse>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  updateContact(id: string, fields: Partial<any>): Promise<void>;
+  updateContact(id: string, fields: Partial<DVContact>): Promise<void>;
   deleteContact(id: string): Promise<void>;
 
   getInvitations<T = DVInvitation>(query?: string): Promise<T[]>;

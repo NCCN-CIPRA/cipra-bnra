@@ -116,7 +116,7 @@ export default function App() {
                 {
                   path: "/risks/:risk_file_id/data",
                   element: (
-                    <ProtectedRoute allowedRole="analist">
+                    <ProtectedRoute allowedRole="expert">
                       <RiskDataPage />
                     </ProtectedRoute>
                   ),

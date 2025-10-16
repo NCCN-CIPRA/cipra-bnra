@@ -91,7 +91,7 @@ export default function BasePage() {
         <Outlet
           context={satisfies<BasePageContext>({
             user,
-            environment,
+            environment: user?.roles.analist ? environment : Environment.PUBLIC,
             indicators,
             showDiff: diff,
             refreshUser,

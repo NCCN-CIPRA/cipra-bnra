@@ -15,6 +15,7 @@ export interface DVContact<
   firstname?: string;
   lastname?: string;
   adx_organizationname?: string;
+  "ownerid@odata.bind"?: string;
   _ownerid_value?: string;
   adx_preferredlanguageid?: string;
 

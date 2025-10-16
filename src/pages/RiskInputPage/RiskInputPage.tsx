@@ -18,6 +18,7 @@ import Step2BTab from "./Step2BTab";
 import { useMemo } from "react";
 import { getCascades } from "../../functions/cascades";
 import { getRiskFileCatalogue } from "../../functions/riskfiles";
+import ExpertsTab from "./ExpertsTab";
 
 export default function RiskInputPage() {
   const api = useAPI();
@@ -43,7 +44,7 @@ export default function RiskInputPage() {
   });
 
   const { data: participants } = useQuery({
-    queryKey: [DataTable.PARTICIPATION],
+    queryKey: [DataTable.PARTICIPATION, riskSummary._cr4de_risk_file_value],
     queryFn: () =>
       api.getParticipants<DVParticipation<DVContact>>(
         `$filter=_cr4de_risk_file_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_contact`
@@ -100,14 +101,15 @@ export default function RiskInputPage() {
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <TabList onChange={handleChange} centered>
             <Tab label="Overview" value="0" />
-            <Tab label="Validation" value="1" />
+            <Tab label="Experts" value="1" />
+            <Tab label="Validation" value="2" />
             <Tab
               label="Step 2A"
-              value="2"
+              value="3"
               disabled={riskFile?.cr4de_risk_type === RISK_TYPE.EMERGING}
             />
-            <Tab label="Step 2B" value="3" />
-            <Tab label="Feedback" value="4" />
+            <Tab label="Step 2B" value="4" />
+            <Tab label="Feedback" value="5" />
           </TabList>
         </Box>
         <TabPanel value="0">
@@ -119,11 +121,14 @@ export default function RiskInputPage() {
             cascadeAnalyses={cascadeAnalyses}
           />
         </TabPanel>
-        <TabPanel value="1">Validation</TabPanel>
-        <TabPanel value="2">
+        <TabPanel value="1">
+          <ExpertsTab />
+        </TabPanel>
+        <TabPanel value="2">Validation</TabPanel>
+        <TabPanel value="3">
           <Step2APage riskFile={riskFile} directAnalyses={directAnalyses} />
         </TabPanel>
-        <TabPanel value="3">
+        <TabPanel value="4">
           <Step2BTab
             riskFile={riskFile}
             cascades={cascades.all}
@@ -131,7 +136,7 @@ export default function RiskInputPage() {
             cascadeAnalyses={cascadeAnalyses}
           />
         </TabPanel>
-        <TabPanel value="4">Feedback</TabPanel>
+        <TabPanel value="5">Feedback</TabPanel>
       </Box>
     </TabContext>
   );
