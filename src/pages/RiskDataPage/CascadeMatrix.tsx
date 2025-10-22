@@ -545,6 +545,7 @@ export default function CascadeMatrix({
               >
                 <Typography variant="subtitle2">Show scenarios</Typography>
                 <IconButton
+                  title="Show scenarios"
                   size="small"
                   onClick={() => setShowScenarios(!showScenarios)}
                 >

@@ -5,37 +5,38 @@ import { expose } from "comlink";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { prepareData } from "./prepareData";
-import runSimulation from "./monteCarlo";
-import { SimulationOutput } from "./types";
+import { runPerRiskSimulations } from "./monteCarlo";
+import { SimulationOptions, SimulationOutput } from "./types";
 
 const simulate = async (
   data: {
     riskFiles: DVRiskSnapshot[];
     cascades: DVCascadeSnapshot[];
-    numberOfSimulations: number;
+    options: SimulationOptions;
   },
   onProgress: (message: string, runIndex?: number) => void
 ): Promise<SimulationOutput | null> => {
   try {
-    const { riskFiles, cascades, numberOfSimulations } = data;
+    const { riskFiles, cascades, options } = data;
 
     onProgress("Preparing data for monte carlo simulation.");
 
     const input = prepareData(riskFiles, cascades);
-    input.numberOfSimulations = numberOfSimulations;
+    input.options = options;
 
-    const onFinishRun = (runIndex: number) => {
-      onProgress(
-        `Simulating monte carlo run ${runIndex + 1} / ${
-          input.numberOfSimulations
-        }`,
-        runIndex
-      );
-    };
+    // const onFinishRun = (runIndex: number) => {
+    //   onProgress(
+    //     `Simulating monte carlo run ${runIndex + 1} / ${
+    //       input.numberOfSimulations
+    //     }`,
+    //     runIndex
+    //   );
+    // };
 
     const start = Date.now();
 
-    const output = runSimulation(input, onFinishRun);
+    // const output = runSimulation(input, onFinishRun);
+    const output = runPerRiskSimulations(input, onProgress);
 
     onProgress(`Done - Simulation took ${(Date.now() - start) / 1000} seconds`);
 

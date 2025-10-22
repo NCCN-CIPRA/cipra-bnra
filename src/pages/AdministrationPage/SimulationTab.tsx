@@ -4,9 +4,17 @@ import {
   Card,
   CardActions,
   CardContent,
+  CardHeader,
   Container,
+  FormControl,
+  FormGroup,
+  IconButton,
+  InputLabel,
   LinearProgress,
+  MenuItem,
+  Select,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 import useAPI, { DataTable } from "../../hooks/useAPI";
@@ -17,17 +25,36 @@ import {
   snapshotFromRiskfile,
 } from "../../functions/snapshot";
 import { parseCascadeSnapshot } from "../../types/dataverse/DVRiskCascade";
-import {
-  getRiskCatalogue,
-  getRiskCatalogueFromSnapshots,
-} from "../../functions/riskfiles";
+import { getRiskCatalogueFromSnapshots } from "../../functions/riskfiles";
 import { useQuery } from "@tanstack/react-query";
 import workerUrl from "../../functions/simulation/simulation.worker?worker&url";
 import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { SimulationWorker } from "../../functions/simulation/simulation.worker";
-import { SimulationOutput } from "../../functions/simulation/types";
-import { processSimulation } from "../../functions/simulation/processSimulation";
-import round from "../../functions/roundNumberString";
+import {
+  AverageRiskEvent,
+  Impact,
+  noImpact,
+} from "../../functions/simulation/types";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ErrorBar,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  eurosFromIScale7,
+  iScale7FromEuros,
+} from "../../functions/indicators/impact";
+import { RISK_TYPE } from "../../types/dataverse/Riskfile";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import useSavedState from "../../hooks/useSavedState";
+import { GridDeleteIcon } from "@mui/x-data-grid";
+import { SCENARIOS } from "../../functions/scenarios";
 
 function getSimulationWorker() {
   const jsWorker = `import ${JSON.stringify(
@@ -44,9 +71,22 @@ const RUNS = 10000;
 
 export default function SimulationTab() {
   const api = useAPI();
-  const [action, setAction] = useState("Idle");
+  const [selectedRF, setSelectedRF] = useSavedState<DVRiskFile | null>(
+    "simulationRiskFile",
+    null
+  );
+  const [selectedScenario, setSelectedScenario] =
+    useSavedState<SCENARIOS | null>("simulationScenario", null);
+  const [numberOfSimulations, setNumberOfSimulations] = useSavedState(
+    "numberOfSimulations",
+    2000
+  );
+  const [actions, setActions] = useState(["Idle"]);
   const [progress, setProgress] = useState(0);
-  const [output, setOutput] = useState<SimulationOutput | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [output, setOutput] = useState<any | null>(null);
+  // const [impacts, setImpacts] = useState<number[]>([]);
+  // const [cvs, setCVs] = useState<number[]>([]);
 
   const { data: rfs } = useQuery({
     queryKey: [DataTable.RISK_FILE],
@@ -63,13 +103,9 @@ export default function SimulationTab() {
     queryFn: () => api.getRiskCascades(),
   });
 
-  const rc = useMemo(() => {
-    if (rfs) return getRiskCatalogue(rfs);
-  }, [rfs]);
-
-  const simulationData = useMemo(() => {
-    if (output && rc) return processSimulation(output, rc);
-  }, [output, rc]);
+  const setAction = (newAction: string) => {
+    setActions((actions) => [newAction, ...actions]);
+  };
 
   const runSimulation = async () => {
     if (!rfs || !cs) return;
@@ -87,40 +123,264 @@ export default function SimulationTab() {
 
     const simulator = getSimulationWorker();
 
-    const output = await simulator.simulate(
+    const result = await simulator.simulate(
       {
         riskFiles: riskSnapshots,
         cascades: cascadeSnapshots,
-        numberOfSimulations: RUNS,
+        options: {
+          filterRiskFileIds: selectedRF
+            ? [selectedRF.cr4de_riskfilesid]
+            : undefined,
+          filterScenarios: selectedScenario ? [selectedScenario] : undefined,
+          minRuns: numberOfSimulations,
+          maxRuns: numberOfSimulations + 1,
+          relStd: 0.2,
+        },
       },
       proxy((message, runIndex) => {
         setAction(message);
+        console.log(message);
         if (runIndex !== undefined) {
+          // innerImpacts.push(runIndex);
           setProgress(((runIndex + 1) / RUNS) * 100);
         }
       })
     );
 
-    console.log(output);
-    setOutput(output);
+    // setImpacts(output?.other.map((i) => i.all));
+    setOutput(result?.other);
+    // setOutput(output);
 
     setAction("Done");
     setProgress(0);
   };
 
+  const impactData = useMemo(() => {
+    const maxScale = 8;
+    const binWidth = 0.5;
+    const bins = Math.ceil(maxScale / binWidth);
+
+    const data = new Array(bins).fill(null).map((_, i) => ({
+      name: `TI${i / 2}`,
+      count: 0,
+      p: 0,
+      error: 0,
+      min: i <= 0 ? 0 : eurosFromIScale7(i / 2 - binWidth),
+      max: eurosFromIScale7(i + binWidth),
+    }));
+
+    if (output?.averageRisks) {
+      const averageEvent: AverageRiskEvent =
+        output.averageRisks[selectedRF?.cr4de_riskfilesid || ""]?.[
+          selectedScenario || SCENARIOS.CONSIDERABLE
+        ];
+
+      if (!averageEvent) return;
+
+      averageEvent.allImpacts.forEach((impact) => {
+        for (const bin of data) {
+          if (impact.all >= bin.min && impact.all < bin.max) {
+            bin.count += 1;
+            bin.p += 1 / averageEvent.allImpacts.length;
+            break;
+          }
+        }
+      });
+
+      return data.map((d) => ({
+        ...d,
+        p: Math.round(1000 * d.p) / 1000,
+        error: Math.sqrt(d.count) / (averageEvent.allImpacts.length * binWidth),
+      }));
+    }
+
+    return data;
+  }, [output, selectedRF, selectedScenario]);
+
+  const indicatorData = useMemo(() => {
+    const data = Object.keys(noImpact).map((i) => ({
+      name: i,
+      impact: 0,
+      error: 0,
+    }));
+
+    const averageEvent: AverageRiskEvent =
+      output?.averageRisks[selectedRF?.cr4de_riskfilesid || ""]?.[
+        selectedScenario || SCENARIOS.CONSIDERABLE
+      ];
+
+    if (averageEvent) {
+      Object.keys(noImpact).forEach((i) => {
+        const d = data.find((el) => el.name === i);
+
+        if (!d) return;
+
+        d.impact =
+          Math.round(
+            (100 *
+              averageEvent.allImpacts.reduce(
+                (sum, val) => sum + iScale7FromEuros(val[i as keyof Impact]),
+                0
+              )) /
+              averageEvent.allImpacts.length
+          ) / 100;
+        d.error = Math.sqrt(
+          averageEvent.allImpacts.reduce(
+            (sqrDiff, val) =>
+              sqrDiff +
+              Math.pow(iScale7FromEuros(val[i as keyof Impact]) - d.impact, 2),
+            0
+          ) /
+            (averageEvent.allImpacts.length - 1)
+        );
+      });
+    }
+
+    return data;
+  }, [output, selectedRF, selectedScenario]);
+
+  const cascadeData = useMemo(() => {
+    const averageEvent: AverageRiskEvent =
+      output?.averageRisks[selectedRF?.cr4de_riskfilesid || ""]?.[
+        selectedScenario || SCENARIOS.CONSIDERABLE
+      ];
+
+    if (!averageEvent) return [];
+
+    const data = averageEvent.triggeredEvents
+      .map((e) => {
+        const average =
+          e.allImpacts.reduce(
+            (sum, val) => sum + val.all / averageEvent.allImpacts.length,
+            0
+          ) / e.allImpacts.length;
+
+        return {
+          name: e.risk.name,
+          count: e.allImpacts.length,
+          all: e.allImpacts.map((i) =>
+            iScale7FromEuros(i.all / averageEvent.allImpacts.length)
+          ),
+          impact: Math.round(100 * average) / 100,
+          error: Math.sqrt(
+            e.allImpacts.reduce(
+              (sqrDiff, val) =>
+                sqrDiff +
+                Math.pow(
+                  iScale7FromEuros(val.all / averageEvent.allImpacts.length) -
+                    average,
+                  2
+                ),
+              0
+            ) / e.allImpacts.length
+          ),
+        };
+      })
+      .filter((c) => c.impact > 0)
+      .sort((a, b) => b.impact - a.impact);
+
+    return data;
+  }, [output, selectedRF, selectedScenario]);
+
   return (
     <Container sx={{ mb: 18 }}>
       <Card sx={{ mb: 4 }}>
         <CardContent sx={{}}>
-          <Box sx={{ my: 2 }}>
-            <Typography variant="body1">{action}</Typography>
-          </Box>
-          <LinearProgress
-            variant={progress >= 0 ? "determinate" : "indeterminate"}
-            value={progress}
-          />
+          <FormGroup>
+            <FormControl>
+              <InputLabel id="rf-label">Riskfile to simulate</InputLabel>
+              <Select
+                labelId="rf-label"
+                variant="outlined"
+                label="Riskfile to simulate"
+                value={selectedRF?.cr4de_riskfilesid || ""}
+                onChange={(e) =>
+                  setSelectedRF(
+                    rfs?.find(
+                      (rf) => rf.cr4de_riskfilesid === e.target.value
+                    ) || null
+                  )
+                }
+              >
+                <MenuItem value={""}>All</MenuItem>
+                {rfs
+                  ?.filter((rf) => rf.cr4de_risk_type !== RISK_TYPE.EMERGING)
+                  .sort((a, b) =>
+                    a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id)
+                  )
+                  .map((rf) => (
+                    <MenuItem value={rf.cr4de_riskfilesid}>
+                      {rf.cr4de_hazard_id} {rf.cr4de_title}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+            <FormControl sx={{ mt: 2 }}>
+              <InputLabel id="scenario-label">Scenario to simulate</InputLabel>
+              <Select<SCENARIOS | "">
+                labelId="scenario-label"
+                variant="outlined"
+                value={selectedScenario || ""}
+                onChange={(e) =>
+                  setSelectedScenario(
+                    e.target.value !== "" ? e.target.value : null
+                  )
+                }
+                label="Scenario to simulate"
+              >
+                <MenuItem value={""}>All</MenuItem>
+                <MenuItem value={SCENARIOS.CONSIDERABLE}>
+                  {SCENARIOS.CONSIDERABLE}
+                </MenuItem>
+                <MenuItem value={SCENARIOS.MAJOR}>{SCENARIOS.MAJOR}</MenuItem>
+                <MenuItem value={SCENARIOS.EXTREME}>
+                  {SCENARIOS.EXTREME}
+                </MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl sx={{ mt: 2 }}>
+              <TextField
+                label="Number of events to simulate"
+                value={numberOfSimulations}
+                onChange={(e) =>
+                  setNumberOfSimulations(parseInt(e.target.value))
+                }
+                variant="outlined"
+                type="number"
+              ></TextField>
+            </FormControl>
+          </FormGroup>
+          <Stack direction="column" sx={{ p: 1, my: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: -1 }}>
+              Status
+            </Typography>
+            <pre
+              style={{
+                backgroundColor: "#eee",
+                padding: 12,
+                height: 200,
+                overflowY: "scroll",
+                position: "relative",
+              }}
+            >
+              {actions.join("\n")}
+              <IconButton
+                sx={{ position: "absolute", top: 10, right: 10 }}
+                onClick={() => setActions([])}
+              >
+                <GridDeleteIcon />
+              </IconButton>
+            </pre>
+            <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
+              Progress
+            </Typography>
+            <LinearProgress
+              variant={progress >= 0 ? "determinate" : "indeterminate"}
+              value={progress}
+            />
+          </Stack>
         </CardContent>
-        <CardActions>
+        <CardActions sx={{ justifyContent: "flex-end" }}>
           <Button
             disabled={!rfs || !cs}
             color="warning"
@@ -130,135 +390,147 @@ export default function SimulationTab() {
           </Button>
         </CardActions>
       </Card>
-      {simulationData && (
-        <Card sx={{ mb: 4 }}>
-          <CardContent sx={{}}>
-            <Stack direction="column" sx={{ my: 2 }}>
-              {simulationData.map((s, i) => (
-                <Stack
-                  direction={"row"}
-                  key={s.risk._cr4de_risk_file_value}
-                  spacing={2}
-                  sx={{
-                    alignItems: "top",
-                    mb: 4,
-                    pb: 2,
-                    borderBottom: "1px solid #eee",
-                  }}
+
+      <Card>
+        <CardHeader title="Statistical results" />
+        <CardContent>
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Total impact histogram
+            </Typography>
+            <ResponsiveContainer width={"100%"} height={400}>
+              <BarChart
+                data={impactData}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis min={0} />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="p"
+                  fill="#8884d8"
+                  // activeBar={<Rectangle fill="pink" stroke="blue" />}
                 >
-                  <Stack
-                    direction={"column"}
-                    spacing={2}
-                    sx={{ mb: 1, flex: 1 }}
-                  >
-                    <Stack
-                      direction={"row"}
-                      spacing={2}
-                      sx={{ alignItems: "top", mb: 1 }}
-                    >
-                      <Typography variant="body1" sx={{ flex: 1 }}>
-                        {i + 1}. {s.risk.cr4de_title}
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        sx={{ whiteSpace: "nowrap" }}
-                      >
-                        {s.occurrences.length / RUNS} occurences per year
-                      </Typography>
-                    </Stack>
-                    <Stack
-                      direction={"column"}
-                      sx={{
-                        mb: 2,
-                        pl: 4,
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle2"
-                        sx={{ borderBottom: "1px solid #eee", mb: 1 }}
-                      >
-                        Top Causes
-                      </Typography>
-                      {s.causes.slice(0, 5).map((c) => (
-                        <Stack
-                          direction={"row"}
-                          key={c.risk?._cr4de_risk_file_value || "None"}
-                          spacing={2}
-                          sx={{ alignItems: "center", mb: 1 }}
-                        >
-                          <Typography sx={{ flex: 1 }} variant="subtitle1">
-                            {c.risk?.cr4de_title || "No identified cause"}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{ whiteSpace: "nowrap" }}
-                          >
-                            {c.occurrences.length / RUNS} occurences per year
-                          </Typography>
-                        </Stack>
-                      ))}
-                    </Stack>
-                  </Stack>
-                  <Stack
-                    direction={"column"}
-                    spacing={2}
-                    sx={{ mb: 1, flex: 1 }}
-                    justifyContent="flex-start"
-                  >
-                    <Stack
-                      direction={"row"}
-                      spacing={2}
-                      sx={{ alignItems: "top", mb: 1 }}
-                    >
-                      <Typography variant="body1" sx={{ flex: 1 }}></Typography>
-                      <Typography
-                        variant="caption"
-                        sx={{ whiteSpace: "nowrap" }}
-                      >
-                        {round(s.averageImpact.all / 100, 0, ",", " ")} k€
-                        expected annualized impact
-                      </Typography>
-                    </Stack>
-                    <Stack
-                      direction={"column"}
-                      sx={{
-                        mb: 2,
-                        pl: 4,
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle2"
-                        sx={{ borderBottom: "1px solid #eee", mb: 1 }}
-                      >
-                        Top Consequences
-                      </Typography>
-                      {s.effects.slice(0, 5).map((e) => (
-                        <Stack
-                          direction={"row"}
-                          key={e.risk._cr4de_risk_file_value}
-                          spacing={2}
-                          sx={{ alignItems: "center", mb: 1 }}
-                        >
-                          <Typography sx={{ flex: 1 }} variant="subtitle1">
-                            {e.risk.cr4de_title}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{ whiteSpace: "nowrap" }}
-                          >
-                            {round(e.averageImpact.all / 100, 0, ",", " ")} k€
-                            expected annualized impact
-                          </Typography>
-                        </Stack>
-                      ))}
-                    </Stack>
-                  </Stack>
-                </Stack>
-              ))}
-            </Stack>
+                  <ErrorBar
+                    dataKey="error"
+                    width={4}
+                    strokeWidth={2}
+                    stroke="green"
+                    direction="y"
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Expected impact per damage indicator
+            </Typography>
+            <ResponsiveContainer width={"100%"} height={600}>
+              <BarChart
+                data={indicatorData}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis ticks={[0, 1, 2, 3, 4, 5, 6, 7]} />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="impact"
+                  fill="#8884d8"
+                  // activeBar={<Rectangle fill="pink" stroke="blue" />}
+                >
+                  <ErrorBar
+                    dataKey="error"
+                    width={4}
+                    strokeWidth={2}
+                    stroke="green"
+                    direction="y"
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Expected impact per cascade
+            </Typography>
+            <ResponsiveContainer width={"100%"} height={2000}>
+              <BarChart
+                data={cascadeData}
+                layout="vertical"
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis ticks={[0, 1, 2, 3, 4, 5, 6, 7]} type="number" />
+                <YAxis dataKey="name" type="category" />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="impact"
+                  fill="#8884d8"
+                  // activeBar={<Rectangle fill="pink" stroke="blue" />}
+                >
+                  <ErrorBar
+                    dataKey="error"
+                    width={4}
+                    strokeWidth={2}
+                    stroke="green"
+                    direction="x"
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* {cvData && (
+        <Card>
+          <CardContent>
+            <BarChart
+              width={500}
+              height={300}
+              data={cvData}
+              margin={{
+                top: 5,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar
+                dataKey="count"
+                fill="#8884d8"
+                // activeBar={<Rectangle fill="pink" stroke="blue" />}
+              />
+            </BarChart>
           </CardContent>
         </Card>
-      )}
+      )} */}
     </Container>
   );
 }

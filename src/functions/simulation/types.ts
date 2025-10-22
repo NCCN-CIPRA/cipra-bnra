@@ -1,4 +1,5 @@
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { SCENARIOS } from "../scenarios";
 
 export type Scenario = "considerable" | "major" | "extreme";
 
@@ -60,10 +61,18 @@ export type RiskCascade = {
   probabilities: Record<Scenario, number>;
 };
 
+export type SimulationOptions = {
+  filterRiskFileIds?: string[];
+  filterScenarios?: SCENARIOS[];
+  minRuns: number;
+  maxRuns: number;
+  relStd: number;
+};
+
 export type SimulationInput = {
   rootNode: RootNode;
 
-  numberOfSimulations: number;
+  options: SimulationOptions;
 };
 
 export type RiskEvent = {
@@ -76,6 +85,17 @@ export type RiskEvent = {
   totalImpact: Impact;
 };
 
+export type AverageRiskEvent = {
+  risk: { id: string; name: string };
+  scenario: Scenario;
+
+  triggeredEvents: AverageRiskEvent[];
+
+  probability: number;
+  totalImpact: Impact;
+  allImpacts: AggregatedImpacts[];
+};
+
 export type SimulationRun = {
   events: RiskEvent[];
   totalImpact: Impact;
@@ -83,6 +103,7 @@ export type SimulationRun = {
 
 export type SimulationOutput = {
   runs: SimulationRun[];
+  other: any;
 };
 
 export type RiskData = {

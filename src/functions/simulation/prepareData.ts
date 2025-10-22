@@ -21,7 +21,13 @@ export function prepareData(
       risks: [],
       actors: [],
     },
-    numberOfSimulations: 1,
+    options: {
+      filterRiskFileIds: undefined,
+      filterScenarios: undefined,
+      minRuns: 0,
+      maxRuns: 0,
+      relStd: 0,
+    },
   };
 
   const riskCatalog: Record<string, Risk> = standardRisks.reduce(
