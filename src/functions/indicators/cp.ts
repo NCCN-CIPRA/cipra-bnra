@@ -121,12 +121,12 @@ export function getIntervalStringCPScale5(cpScale5: number) {
 }
 
 export function getIntervalStringCPScale7(cpScale7: number) {
-  if (cpScale7 <= 0) return "0%";
-  if (cpScale7 < 0.5)
-    return `< ${round(2 * cpScale7 * pAbsFromCPScale7(0.5), 2)}%`;
+  if (cpScale7 <= 0) return "of 0%";
+  if (cpScale7 < 1)
+    return `of less than ${round(100 * pAbsFromCPScale7(1), 0)}%`;
 
-  return `${round(100 * pAbsFromCPScale7(cpScale7 - 0.5), 1)}% - ${round(
-    100 * pAbsFromCPScale7(cpScale7 + 0.5),
-    2
-  )}%`;
+  return `between ${round(
+    100 * pAbsFromCPScale7(cpScale7 - 0.5),
+    1
+  )}% and ${round(100 * pAbsFromCPScale7(cpScale7 + 0.5), 0)}%`;
 }

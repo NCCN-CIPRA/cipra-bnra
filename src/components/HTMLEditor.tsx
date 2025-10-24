@@ -182,7 +182,7 @@ export default function HTMLEditor({
 
   return (
     <Box
-      sx={{ position: "relative", mr: 2 }}
+      sx={{ position: "relative", mr: 2, minHeight: 50 }}
       onMouseEnter={handlePopoverOpen}
       onMouseLeave={handlePopoverClose}
     >

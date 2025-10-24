@@ -19,7 +19,10 @@ import indicatorsSVG from "../../assets/icons/indicators.svg";
 import scenariosSVG from "../../assets/icons/scenarios.svg";
 import cascadesSVG from "../../assets/icons/cascades.svg";
 import catalogueSVG from "../../assets/icons/catalogue.svg";
+import consensusSVG from "../../assets/icons/consensus.svg";
 import TTypography from "../../components/TransEdit";
+import { ReactElement, useState } from "react";
+import "./MethodologyPage.css";
 
 // const getCleanLanguage = (language: string) => {
 //   if (language.indexOf("en") >= 0) return "en";
@@ -35,9 +38,87 @@ import TTypography from "../../components/TransEdit";
 //   link.click();
 // };
 
+function ExpandingCard({
+  image,
+  title,
+  content,
+  link,
+}: {
+  image: string;
+  title: ReactElement;
+  content: ReactElement;
+  link: string;
+}) {
+  const navigate = useNavigate();
+
+  const [active, setActive] = useState(false);
+
+  return (
+    <Box
+      sx={{
+        display: "inline-block",
+        mx: 2,
+        width: 300,
+        height: 350,
+        position: "relative",
+      }}
+    >
+      <Card
+        className="methodology-card"
+        onMouseEnter={() => setActive(true)}
+        onMouseLeave={() => setActive(false)}
+        onFocus={() => setActive(true)}
+        onBlur={() => setActive(false)}
+        sx={{
+          position: "absolute",
+          display: "flex",
+          flexDirection: "column",
+          flexShrink: 0,
+          width: 300,
+          height: active ? 550 : 350,
+          top: active ? -75 : 0,
+          transition: `all 400ms cubic-bezier(.2,.8,.2,1)`,
+          textAlign: "left",
+          cursor: "pointer",
+        }}
+        elevation={4}
+      >
+        <CardMedia
+          component="img"
+          sx={{
+            aspectRatio: 1,
+            maxWidth: 250,
+            objectFit: "contain",
+            p: 3,
+            mx: "auto",
+          }}
+          image={image}
+          title={link}
+        />
+        <CardContent sx={{ flex: 1, mb: 0 }}>
+          {title}
+          <Box
+            sx={{
+              opacity: active ? 1 : 0,
+              transition: `opacity 200ms ease 100ms`, // starts after most of the height expansion
+              willChange: "transform",
+            }}
+          >
+            {content}
+          </Box>
+        </CardContent>
+        <CardActions>
+          <Button size="small" onClick={() => navigate(link)}>
+            Learn More
+          </Button>
+        </CardActions>
+      </Card>
+    </Box>
+  );
+}
+
 export default function MethodologyPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   usePageTitle(
     t("methodology.framework.title", "National Risk Assessment Framework")
@@ -139,15 +220,10 @@ export default function MethodologyPage() {
       <Box>
         <Container>
           <Box sx={{ my: 8, position: "relative" }}>
-            <Stack direction="row" gap={2}>
-              <Card sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                <CardMedia
-                  component="img"
-                  sx={{ aspectRatio: 1.2, objectFit: "contain", p: 3 }}
-                  image={indicatorsSVG}
-                  title="Standardized scales of probability and impact"
-                />
-                <CardContent sx={{ flex: 1 }}>
+            <Box sx={{ textAlign: "center", mb: 2 }}>
+              <ExpandingCard
+                image={indicatorsSVG}
+                title={
                   <TTypography
                     i18nKey="methodology.framework.scale.title"
                     gutterBottom
@@ -157,6 +233,8 @@ export default function MethodologyPage() {
                   >
                     Standardized scales of probability and impact
                   </TTypography>
+                }
+                content={
                   <TTypography
                     i18nKey="methodology.framework.scale.1"
                     variant="body2"
@@ -167,24 +245,12 @@ export default function MethodologyPage() {
                     across different domains. This standardized approach allows
                     for meaningful comparison between diverse types of risks.
                   </TTypography>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    size="small"
-                    onClick={() => navigate("/methodology/scales")}
-                  >
-                    Learn More
-                  </Button>
-                </CardActions>
-              </Card>
-              <Card sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                <CardMedia
-                  component="img"
-                  sx={{ aspectRatio: 1.2, objectFit: "contain", p: 3 }}
-                  image={scenariosSVG}
-                  title="Multi-scenario approach"
-                />
-                <CardContent sx={{ flex: 1 }}>
+                }
+                link="/methodology/scales"
+              />
+              <ExpandingCard
+                image={scenariosSVG}
+                title={
                   <TTypography
                     i18nKey="methodology.framework.scenarios.title"
                     gutterBottom
@@ -194,6 +260,8 @@ export default function MethodologyPage() {
                   >
                     Multi-scenario approach
                   </TTypography>
+                }
+                content={
                   <TTypography
                     i18nKey="methodology.framework.scenarios.1"
                     variant="body2"
@@ -204,19 +272,12 @@ export default function MethodologyPage() {
                     should be described concretely using risk-specific
                     parameters.
                   </TTypography>
-                </CardContent>
-                <CardActions>
-                  <Button size="small">Learn More</Button>
-                </CardActions>
-              </Card>
-              <Card sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                <CardMedia
-                  component="img"
-                  sx={{ aspectRatio: 1.2, objectFit: "contain", p: 3 }}
-                  image={cascadesSVG}
-                  title="Causes and consequenses"
-                />
-                <CardContent sx={{ flex: 1 }}>
+                }
+                link=""
+              />
+              <ExpandingCard
+                image={cascadesSVG}
+                title={
                   <TTypography
                     i18nKey="methodology.framework.cascades.title"
                     gutterBottom
@@ -226,6 +287,8 @@ export default function MethodologyPage() {
                   >
                     Investigating causes and consequences
                   </TTypography>
+                }
+                content={
                   <TTypography
                     i18nKey="methodology.framework.cascades.1"
                     variant="body2"
@@ -236,12 +299,19 @@ export default function MethodologyPage() {
                     view supports more relevant insights and informed
                     decision-making.
                   </TTypography>
-                </CardContent>
-                <CardActions>
-                  <Button size="small">Learn More</Button>
-                </CardActions>
-              </Card>
-              <Card sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                }
+                link=""
+              />
+            </Box>
+            <Stack direction="row" gap={2} justifyContent="center">
+              <Card
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  maxWidth: 300,
+                  flexDirection: "column",
+                }}
+              >
                 <CardMedia
                   component="img"
                   sx={{ aspectRatio: 1.2, objectFit: "contain", p: 3 }}
@@ -261,12 +331,51 @@ export default function MethodologyPage() {
                   <TTypography
                     i18nKey="methodology.framework.catalogue.1"
                     variant="body2"
-                    sx={{ color: "text.secondary" }}
+                    sx={{ color: "text.secondary", display: "none" }}
                   >
                     Assessments should be based on a validated and coherent
                     catalogue of national risks, which can be further elaborated
                     if necessary. This common reference point improves clarity,
                     fosters alignment and facilitates communication.
+                  </TTypography>
+                </CardContent>
+                <CardActions>
+                  <Button size="small">Learn More</Button>
+                </CardActions>
+              </Card>
+              <Card
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  maxWidth: 300,
+                  flexDirection: "column",
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  sx={{ aspectRatio: 1.2, objectFit: "contain", p: 3 }}
+                  image={consensusSVG}
+                  title="Expert consensus"
+                />
+                <CardContent sx={{ flex: 1 }}>
+                  <TTypography
+                    i18nKey="methodology.framework.consensus.title"
+                    gutterBottom
+                    variant="subtitle2"
+                    component="div"
+                    sx={{ height: 50 }}
+                  >
+                    Expert consensus through the Delphi method
+                  </TTypography>
+                  <TTypography
+                    i18nKey="methodology.framework.consensus.1"
+                    variant="body2"
+                    sx={{ color: "text.secondary" }}
+                  >
+                    The descriptions, quantitative estimations en qualitative
+                    explanations of different risk parameters should be left to
+                    a panel of well-chosen domain expert who reach consensus
+                    throug an iterative consulation process.
                   </TTypography>
                 </CardContent>
                 <CardActions>

@@ -168,12 +168,12 @@ export function getIntervalStringMScale3(mScale3: number) {
 }
 
 export function getIntervalStringMScale7(mScale7: number) {
-  if (mScale7 <= 0) return "0%";
-  if (mScale7 < 0.5)
-    return `< ${round(2 * mScale7 * p3YearsFromMScale7(0.5), 2)}%`;
+  if (mScale7 <= 0) return "of 0%";
+  if (mScale7 < 1)
+    return `of less than ${round(100 * mScale7 * p3YearsFromMScale7(1), 0)}%`;
 
-  return `${round(100 * p3YearsFromMScale7(mScale7 - 0.5), 1)}% - ${round(
-    100 * p3YearsFromMScale7(mScale7 + 0.5),
-    2
-  )}%`;
+  return `between ${round(
+    100 * p3YearsFromMScale7(mScale7 - 0.5),
+    1
+  )}% and ${round(100 * p3YearsFromMScale7(mScale7 + 0.5), 0)}%`;
 }

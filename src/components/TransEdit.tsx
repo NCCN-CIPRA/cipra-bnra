@@ -1,7 +1,7 @@
 import { Trans, useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../pages/BasePage";
-import { ReactElement, useState } from "react";
+import { MouseEvent, ReactElement, useState } from "react";
 import { Box, IconButton, Typography, TypographyProps } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import TranslationDialog from "./TranslationDialog";
@@ -49,7 +49,10 @@ function TransEditUser({
     useState<Partial<DVTranslation> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleEditTranslation = () => {
+  const handleEditTranslation = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
     i18n.loadLanguages(["id", "en", "fr", "nl", "de"], () => {
       setEditTranslation({
         cr4de_bnratranslationid: i18n.getResource("id", "translation", i18nKey),

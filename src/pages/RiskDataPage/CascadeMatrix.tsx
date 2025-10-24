@@ -108,13 +108,13 @@ const getCPValueTooltip = (
   indicators: Indicators
 ) => {
   if (isActorCause) {
-    return `This estimation represents a probability between ${
+    return `This estimation represents a probability ${
       indicators === Indicators.V1
         ? getIntervalStringMScale3(cp)
         : getIntervalStringMScale7(cp)
     } that the actor group will attempt and successfully execute the attack scenario in the coming 3 years`;
   } else {
-    return `This estimation represents a probability between ${
+    return `This estimation represents a probability ${
       indicators === Indicators.V1
         ? getIntervalStringCPScale5(cp)
         : getIntervalStringCPScale7(cp)

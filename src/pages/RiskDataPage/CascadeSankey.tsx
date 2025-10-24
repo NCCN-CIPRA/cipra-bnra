@@ -651,7 +651,7 @@ function EditMBox({
   if (isMotivation) {
     description = (
       <Typography variant="body1" sx={{ mt: 2 }}>
-        This value represents an estimated probability of{" "}
+        This value represents an estimated probability
         <b>
           {indicators === Indicators.V1
             ? getIntervalStringMScale3(editValue)
@@ -664,7 +664,7 @@ function EditMBox({
   } else {
     description = (
       <Typography variant="body1" sx={{ mt: 2 }}>
-        This value represents an estimated probability of{" "}
+        This value represents an estimated probability
         <b>
           {indicators === Indicators.V1
             ? getIntervalStringCPScale5(editValue)
