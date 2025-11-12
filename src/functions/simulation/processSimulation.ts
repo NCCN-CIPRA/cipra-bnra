@@ -9,40 +9,40 @@ import {
   UnknownRiskSnapshot,
 } from "./types";
 
-function walkEventTree(
-  event: RiskEvent,
-  data: SimulationData,
-  runIndex: number,
-  rc: ReturnType<typeof getRiskCatalogue>
-) {
-  if (!data[event.risk.id]) {
-    data[event.risk.id] = {
-      risk: rc[event.risk.id],
-      occurrences: [],
-      causes: [],
-      averageImpact: { ...noAggregatedImpacts },
-      effects: [],
-    };
-  }
+// function walkEventTree(
+//   event: RiskEvent,
+//   data: SimulationData,
+//   runIndex: number,
+//   rc: ReturnType<typeof getRiskCatalogue>
+// ) {
+//   if (!data[event.risk.id]) {
+//     data[event.risk.id] = {
+//       risk: rc[event.risk.id],
+//       occurrences: [],
+//       causes: [],
+//       averageImpact: { ...noAggregatedImpacts },
+//       effects: [],
+//     };
+//   }
 
-  data[event.risk.id].occurrences.push({ event, runIndex });
+//   data[event.risk.id].occurrences.push({ event, runIndex });
 
-  for (const triggeredEvent of event.triggeredEvents) {
-    walkEventTree(triggeredEvent, data, runIndex, rc);
-  }
-}
+//   for (const triggeredEvent of event.triggeredEvents) {
+//     walkEventTree(triggeredEvent, data, runIndex, rc);
+//   }
+// }
 
 export function processSimulation(
   simulation: SimulationOutput,
   rc: ReturnType<typeof getRiskCatalogue>
 ) {
   const simulationData: SimulationData = {};
-
-  simulation.runs.forEach((run, runIndex) => {
-    for (const event of run.events) {
-      walkEventTree(event, simulationData, runIndex, rc);
-    }
-  });
+  simulation.risks.forEach(() => {});
+  // simulation.runs.forEach((run, runIndex) => {
+  //   for (const event of run.events) {
+  //     walkEventTree(event, simulationData, runIndex, rc);
+  //   }
+  // });
 
   const datas = Object.values(simulationData);
 

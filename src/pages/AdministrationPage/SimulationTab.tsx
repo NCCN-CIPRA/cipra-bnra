@@ -46,7 +46,7 @@ import {
   YAxis,
 } from "recharts";
 import { iScale7FromEuros } from "../../functions/indicators/impact";
-import { RISK_CATEGORY, RISK_TYPE } from "../../types/dataverse/Riskfile";
+import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import useSavedState from "../../hooks/useSavedState";
 import { GridDeleteIcon } from "@mui/x-data-grid";
