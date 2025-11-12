@@ -1,5 +1,11 @@
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
-import { SCENARIOS } from "../scenarios";
+import { RISK_CATEGORY } from "../../types/dataverse/Riskfile";
+import {
+  BoxPlotData,
+  CascadeContributionData,
+  CascadeCountData,
+  HistogramBinData,
+} from "./statistics";
 
 export type Scenario = "considerable" | "major" | "extreme";
 
@@ -14,6 +20,7 @@ export type RootNode = {
 export type Risk = {
   id: string;
   name: string;
+  category: RISK_CATEGORY;
 
   cascades: RiskCascade[];
 
@@ -23,6 +30,7 @@ export type Risk = {
 export type Actor = {
   id: string;
   name: string;
+  directImpact: undefined;
 
   attacks: RiskCascade[];
 };
@@ -63,7 +71,7 @@ export type RiskCascade = {
 
 export type SimulationOptions = {
   filterRiskFileIds?: string[];
-  filterScenarios?: SCENARIOS[];
+  filterScenarios?: Scenario[];
   minRuns: number;
   maxRuns: number;
   relStd: number;
@@ -85,8 +93,15 @@ export type RiskEvent = {
   totalImpact: Impact;
 };
 
+export type AggregatedRiskEvent = {
+  id: string;
+  name: string;
+  scenario: Scenario;
+  impacts: AggregatedImpacts[];
+};
+
 export type AverageRiskEvent = {
-  risk: { id: string; name: string };
+  risk: { id: string; name: string; directImpact: Impact };
   scenario: Scenario;
 
   triggeredEvents: AverageRiskEvent[];
@@ -94,6 +109,22 @@ export type AverageRiskEvent = {
   probability: number;
   totalImpact: Impact;
   allImpacts: AggregatedImpacts[];
+  allImpactContributions: AggregatedImpacts[];
+  directImpact: Impact[];
+  directImpactContributions: AggregatedImpacts[];
+};
+
+export type RiskScenarioSimulationOutput = {
+  id: string;
+  name: string;
+  category: RISK_CATEGORY;
+  scenario: Scenario;
+  medianImpact: number;
+  totalProbability: number;
+  impact: HistogramBinData[];
+  indicators: BoxPlotData[];
+  cascadeContributions: CascadeContributionData[];
+  cascadeCounts: CascadeCountData[];
 };
 
 export type SimulationRun = {
@@ -102,8 +133,7 @@ export type SimulationRun = {
 };
 
 export type SimulationOutput = {
-  runs: SimulationRun[];
-  other: any;
+  risks: RiskScenarioSimulationOutput[];
 };
 
 export type RiskData = {

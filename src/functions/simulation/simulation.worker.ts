@@ -5,7 +5,7 @@ import { expose } from "comlink";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { prepareData } from "./prepareData";
-import { runPerRiskSimulations } from "./monteCarlo";
+import { runSimulations } from "./monteCarlo";
 import { SimulationOptions, SimulationOutput } from "./types";
 
 const simulate = async (
@@ -36,7 +36,7 @@ const simulate = async (
     const start = Date.now();
 
     // const output = runSimulation(input, onFinishRun);
-    const output = runPerRiskSimulations(input, onProgress);
+    const output = runSimulations(input, onProgress);
 
     onProgress(`Done - Simulation took ${(Date.now() - start) / 1000} seconds`);
 

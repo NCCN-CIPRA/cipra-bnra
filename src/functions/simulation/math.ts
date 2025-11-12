@@ -1,14 +1,20 @@
 import { AggregatedImpacts, Impact } from "./types";
 
-export function addImpact<
-  T = Impact | AggregatedImpacts,
-  S = Impact | AggregatedImpacts
->(a: T, b: S): T & S {
-  const result = { ...a, ...b } as T & S;
+export function addImpact<T = Impact | AggregatedImpacts>(a: T, b: T): T {
+  const result = { ...a };
 
-  for (const key in b) {
-    (result[key] as number) =
-      ((result[key] as number) || 0) + (b[key] as number);
+  for (const key in a) {
+    (result[key] as number) = (a[key] as number) + (b[key] as number);
+  }
+
+  return result;
+}
+
+export function negImpact<T = Impact | AggregatedImpacts>(a: T): T {
+  const result = { ...a } as T;
+
+  for (const key in a) {
+    (result[key] as number) = -(result[key] as number);
   }
 
   return result;
@@ -23,7 +29,38 @@ export function divideImpact<T = Impact | AggregatedImpacts>(
   const result = { ...impact };
 
   for (const key in result) {
-    (result[key] as number) += (result[key] as number) / divisor;
+    (result[key] as number) = (result[key] as number) / divisor;
+  }
+
+  return result;
+}
+
+export function divideImpacts<T = Impact | AggregatedImpacts>(
+  impact: T,
+  divisor: T
+) {
+  const result = { ...impact };
+
+  for (const key in impact) {
+    if (divisor[key] === 0) {
+      (result[key] as number) = 0;
+    } else {
+      (result[key] as number) =
+        (impact[key] as number) / (divisor[key] as number);
+    }
+  }
+
+  return result;
+}
+
+export function powImpact<T = Impact | AggregatedImpacts>(
+  impact: T,
+  exponent: number
+) {
+  const result = { ...impact };
+
+  for (const key in result) {
+    (result[key] as number) = Math.pow(result[key] as number, exponent);
   }
 
   return result;

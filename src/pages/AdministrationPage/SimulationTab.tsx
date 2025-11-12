@@ -18,7 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import useAPI, { DataTable } from "../../hooks/useAPI";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { parseRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import {
   snapshotFromRiskCascade,
@@ -31,30 +31,63 @@ import workerUrl from "../../functions/simulation/simulation.worker?worker&url";
 import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { SimulationWorker } from "../../functions/simulation/simulation.worker";
 import {
-  AverageRiskEvent,
-  Impact,
-  noImpact,
+  RiskScenarioSimulationOutput,
+  Scenario,
 } from "../../functions/simulation/types";
 import {
   Bar,
   BarChart,
   CartesianGrid,
-  ErrorBar,
   Legend,
+  RectangleProps,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  eurosFromIScale7,
-  iScale7FromEuros,
-} from "../../functions/indicators/impact";
-import { RISK_TYPE } from "../../types/dataverse/Riskfile";
+import { iScale7FromEuros } from "../../functions/indicators/impact";
+import { RISK_CATEGORY, RISK_TYPE } from "../../types/dataverse/Riskfile";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import useSavedState from "../../hooks/useSavedState";
 import { GridDeleteIcon } from "@mui/x-data-grid";
 import { SCENARIOS } from "../../functions/scenarios";
+import {
+  pScale7FromReturnPeriodMonths,
+  returnPeriodMonthsFromPDaily,
+} from "../../functions/indicators/probability";
+import RiskMatrixChart from "../../components/charts/svg/RiskMatrixChart";
+
+const HorizonBar = (props: RectangleProps) => {
+  const { x, y, width, height } = props;
+
+  if (x == null || y == null || width == null || height == null) {
+    return null;
+  }
+
+  return (
+    <line x1={x} y1={y} x2={x + width} y2={y} stroke={"#000"} strokeWidth={2} />
+  );
+};
+
+const DotBar = (props: RectangleProps) => {
+  const { x, y, width, height } = props;
+
+  if (x == null || y == null || width == null || height == null) {
+    return null;
+  }
+
+  return (
+    <line
+      x1={x + width / 2}
+      y1={y + height}
+      x2={x + width / 2}
+      y2={y}
+      stroke={"#000"}
+      strokeWidth={2}
+      stroke-dasharray={"5"}
+    />
+  );
+};
 
 function getSimulationWorker() {
   const jsWorker = `import ${JSON.stringify(
@@ -76,7 +109,7 @@ export default function SimulationTab() {
     null
   );
   const [selectedScenario, setSelectedScenario] =
-    useSavedState<SCENARIOS | null>("simulationScenario", null);
+    useSavedState<Scenario | null>("simulationScenario", null);
   const [numberOfSimulations, setNumberOfSimulations] = useSavedState(
     "numberOfSimulations",
     2000
@@ -84,7 +117,11 @@ export default function SimulationTab() {
   const [actions, setActions] = useState(["Idle"]);
   const [progress, setProgress] = useState(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [output, setOutput] = useState<any | null>(null);
+  const [output, setOutput] = useState<RiskScenarioSimulationOutput[] | null>(
+    null
+  );
+  const [showRiskFile, setShowRiskFile] =
+    useState<RiskScenarioSimulationOutput | null>(null);
   // const [impacts, setImpacts] = useState<number[]>([]);
   // const [cvs, setCVs] = useState<number[]>([]);
 
@@ -148,138 +185,22 @@ export default function SimulationTab() {
     );
 
     // setImpacts(output?.other.map((i) => i.all));
-    setOutput(result?.other);
+    setOutput(result?.risks || null);
     // setOutput(output);
 
     setAction("Done");
     setProgress(0);
   };
 
-  const impactData = useMemo(() => {
-    const maxScale = 8;
-    const binWidth = 0.5;
-    const bins = Math.ceil(maxScale / binWidth);
-
-    const data = new Array(bins).fill(null).map((_, i) => ({
-      name: `TI${i / 2}`,
-      count: 0,
-      p: 0,
-      error: 0,
-      min: i <= 0 ? 0 : eurosFromIScale7(i / 2 - binWidth),
-      max: eurosFromIScale7(i + binWidth),
-    }));
-
-    if (output?.averageRisks) {
-      const averageEvent: AverageRiskEvent =
-        output.averageRisks[selectedRF?.cr4de_riskfilesid || ""]?.[
-          selectedScenario || SCENARIOS.CONSIDERABLE
-        ];
-
-      if (!averageEvent) return;
-
-      averageEvent.allImpacts.forEach((impact) => {
-        for (const bin of data) {
-          if (impact.all >= bin.min && impact.all < bin.max) {
-            bin.count += 1;
-            bin.p += 1 / averageEvent.allImpacts.length;
-            break;
-          }
-        }
-      });
-
-      return data.map((d) => ({
-        ...d,
-        p: Math.round(1000 * d.p) / 1000,
-        error: Math.sqrt(d.count) / (averageEvent.allImpacts.length * binWidth),
-      }));
-    }
-
-    return data;
-  }, [output, selectedRF, selectedScenario]);
-
-  const indicatorData = useMemo(() => {
-    const data = Object.keys(noImpact).map((i) => ({
-      name: i,
-      impact: 0,
-      error: 0,
-    }));
-
-    const averageEvent: AverageRiskEvent =
-      output?.averageRisks[selectedRF?.cr4de_riskfilesid || ""]?.[
-        selectedScenario || SCENARIOS.CONSIDERABLE
-      ];
-
-    if (averageEvent) {
-      Object.keys(noImpact).forEach((i) => {
-        const d = data.find((el) => el.name === i);
-
-        if (!d) return;
-
-        d.impact =
-          Math.round(
-            (100 *
-              averageEvent.allImpacts.reduce(
-                (sum, val) => sum + iScale7FromEuros(val[i as keyof Impact]),
-                0
-              )) /
-              averageEvent.allImpacts.length
-          ) / 100;
-        d.error = Math.sqrt(
-          averageEvent.allImpacts.reduce(
-            (sqrDiff, val) =>
-              sqrDiff +
-              Math.pow(iScale7FromEuros(val[i as keyof Impact]) - d.impact, 2),
-            0
-          ) /
-            (averageEvent.allImpacts.length - 1)
-        );
-      });
-    }
-
-    return data;
-  }, [output, selectedRF, selectedScenario]);
-
-  const cascadeData = useMemo(() => {
-    const averageEvent: AverageRiskEvent =
-      output?.averageRisks[selectedRF?.cr4de_riskfilesid || ""]?.[
-        selectedScenario || SCENARIOS.CONSIDERABLE
-      ];
-
-    if (!averageEvent) return [];
-
-    const data = averageEvent.triggeredEvents
-      .map((e) => {
-        const average =
-          e.allImpacts.reduce(
-            (sum, val) => sum + val.all / averageEvent.allImpacts.length,
-            0
-          ) / e.allImpacts.length;
-
-        return {
-          name: e.risk.name,
-          count: e.allImpacts.length,
-          all: e.allImpacts.map((i) =>
-            iScale7FromEuros(i.all / averageEvent.allImpacts.length)
-          ),
-          impact: Math.round(100 * average) / 100,
-          error: Math.sqrt(
-            e.allImpacts.reduce(
-              (sqrDiff, val) =>
-                sqrDiff +
-                Math.pow(
-                  iScale7FromEuros(val.all / averageEvent.allImpacts.length) -
-                    average,
-                  2
-                ),
-              0
-            ) / e.allImpacts.length
-          ),
-        };
-      })
-      .filter((c) => c.impact > 0)
-      .sort((a, b) => b.impact - a.impact);
-
-    return data;
+  useEffect(() => {
+    if (output && selectedRF && selectedScenario)
+      setShowRiskFile(
+        output.find(
+          (o) =>
+            o.id === selectedRF.cr4de_riskfilesid &&
+            o.scenario === selectedScenario
+        ) || null
+      );
   }, [output, selectedRF, selectedScenario]);
 
   return (
@@ -317,7 +238,7 @@ export default function SimulationTab() {
             </FormControl>
             <FormControl sx={{ mt: 2 }}>
               <InputLabel id="scenario-label">Scenario to simulate</InputLabel>
-              <Select<SCENARIOS | "">
+              <Select<Scenario | "">
                 labelId="scenario-label"
                 variant="outlined"
                 value={selectedScenario || ""}
@@ -396,11 +317,48 @@ export default function SimulationTab() {
         <CardContent>
           <Box>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Risk Matrix
+            </Typography>
+            <RiskMatrixChart
+              data={
+                output
+                  ? output
+                      .filter((o) => {
+                        if (selectedRF) {
+                          if (o.id !== selectedRF.cr4de_riskfilesid)
+                            return false;
+                        }
+                        if (selectedScenario) {
+                          if (o.scenario !== selectedScenario) return false;
+                        }
+                        return true;
+                      })
+                      .map((r) => ({
+                        id: r.id,
+                        name: `${r.name} (${r.scenario})`,
+                        scenario: r.scenario,
+                        category: r.category,
+                        totalImpact: iScale7FromEuros(
+                          r.medianImpact,
+                          undefined,
+                          100
+                        ),
+                        totalProbability: pScale7FromReturnPeriodMonths(
+                          returnPeriodMonthsFromPDaily(r.totalProbability),
+                          100
+                        ),
+                      }))
+                  : undefined
+              }
+            />
+          </Box>
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Total impact histogram
             </Typography>
             <ResponsiveContainer width={"100%"} height={400}>
               <BarChart
-                data={impactData}
+                data={showRiskFile ? showRiskFile.impact : undefined}
                 margin={{
                   top: 5,
                   right: 30,
@@ -410,7 +368,10 @@ export default function SimulationTab() {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis min={0} />
+                <YAxis
+                  domain={[0, "dataMax + 0.1"]}
+                  tickFormatter={(value) => Math.abs(value).toFixed(2)}
+                />
                 <Tooltip />
                 <Legend />
                 <Bar
@@ -418,13 +379,13 @@ export default function SimulationTab() {
                   fill="#8884d8"
                   // activeBar={<Rectangle fill="pink" stroke="blue" />}
                 >
-                  <ErrorBar
-                    dataKey="error"
+                  {/* <ErrorBar
+                    dataKey="stdError"
                     width={4}
                     strokeWidth={2}
                     stroke="green"
                     direction="y"
-                  />
+                  /> */}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -435,7 +396,7 @@ export default function SimulationTab() {
             </Typography>
             <ResponsiveContainer width={"100%"} height={600}>
               <BarChart
-                data={indicatorData}
+                data={showRiskFile ? showRiskFile.indicators : undefined}
                 margin={{
                   top: 5,
                   right: 30,
@@ -449,18 +410,53 @@ export default function SimulationTab() {
                 <Tooltip />
                 <Legend />
                 <Bar
-                  dataKey="impact"
-                  fill="#8884d8"
-                  // activeBar={<Rectangle fill="pink" stroke="blue" />}
-                >
-                  <ErrorBar
-                    dataKey="error"
-                    width={4}
-                    strokeWidth={2}
-                    stroke="green"
-                    direction="y"
-                  />
-                </Bar>
+                  stackId={"a"}
+                  dataKey={"min"}
+                  fill="none"
+                  legendType="none"
+                />
+                <Bar
+                  stackId={"a"}
+                  dataKey={"bar"}
+                  shape={<HorizonBar />}
+                  legendType="none"
+                />
+                <Bar
+                  stackId={"a"}
+                  dataKey={"bottomWhisker"}
+                  shape={<DotBar />}
+                  legendType="none"
+                />
+                <Bar
+                  stackId={"a"}
+                  dataKey={"bottomBox"}
+                  fill={"#8884d8"}
+                  legendType="none"
+                />
+                <Bar
+                  stackId={"a"}
+                  dataKey={"bar"}
+                  shape={<HorizonBar />}
+                  legendType="none"
+                />
+                <Bar
+                  stackId={"a"}
+                  dataKey={"topBox"}
+                  fill={"#8884d8"}
+                  legendType="none"
+                />
+                <Bar
+                  stackId={"a"}
+                  dataKey={"topWhisker"}
+                  shape={<DotBar />}
+                  legendType="none"
+                />
+                <Bar
+                  stackId={"a"}
+                  dataKey={"bar"}
+                  shape={<HorizonBar />}
+                  legendType="none"
+                />
               </BarChart>
             </ResponsiveContainer>
           </Box>
@@ -468,9 +464,11 @@ export default function SimulationTab() {
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Expected impact per cascade
             </Typography>
-            <ResponsiveContainer width={"100%"} height={2000}>
+            <ResponsiveContainer width={"100%"} height={800}>
               <BarChart
-                data={cascadeData}
+                data={
+                  showRiskFile ? showRiskFile.cascadeContributions : undefined
+                }
                 layout="vertical"
                 margin={{
                   top: 5,
@@ -480,22 +478,58 @@ export default function SimulationTab() {
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis ticks={[0, 1, 2, 3, 4, 5, 6, 7]} type="number" />
-                <YAxis dataKey="name" type="category" />
+                <XAxis type="number" domain={[0, 1]} />
+                <YAxis dataKey="name" type="category" width={200} />
                 <Tooltip />
                 <Legend />
                 <Bar
-                  dataKey="impact"
+                  dataKey="averageImpactContribution"
                   fill="#8884d8"
                   // activeBar={<Rectangle fill="pink" stroke="blue" />}
                 >
-                  <ErrorBar
-                    dataKey="error"
+                  {/* <ErrorBar
+                    dataKey="stdError"
                     width={4}
                     strokeWidth={2}
                     stroke="green"
                     direction="x"
-                  />
+                  /> */}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Probability of cascade effects
+            </Typography>
+            <ResponsiveContainer width={"100%"} height={800}>
+              <BarChart
+                data={showRiskFile ? showRiskFile.cascadeCounts : undefined}
+                layout="vertical"
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" domain={[0, 1]} />
+                <YAxis dataKey="name" type="category" width={200} />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="p"
+                  fill="#8884d8"
+                  // activeBar={<Rectangle fill="pink" stroke="blue" />}
+                >
+                  {/* <ErrorBar
+                    dataKey="stdError"
+                    width={4}
+                    strokeWidth={2}
+                    stroke="green"
+                    direction="x"
+                  /> */}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

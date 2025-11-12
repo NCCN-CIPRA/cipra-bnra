@@ -36,6 +36,7 @@ export function prepareData(
       [risk._cr4de_risk_file_value]: {
         id: risk._cr4de_risk_file_value,
         name: risk.cr4de_title,
+        category: risk.cr4de_category,
         cascades: [],
         directImpact: {
           considerable: {
@@ -75,7 +76,7 @@ export function prepareData(
             fb: risk.cr4de_quanti.extreme.di.fb.euros,
           },
         },
-      },
+      } as Risk,
     }),
     {}
   );
@@ -83,6 +84,8 @@ export function prepareData(
     const actor = {
       id: risk._cr4de_risk_file_value,
       name: risk.cr4de_title,
+      category: risk.cr4de_category,
+      directImpact: undefined,
       attacks: [],
     };
 
