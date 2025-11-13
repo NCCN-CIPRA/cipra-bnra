@@ -561,8 +561,8 @@ export default function SimulationTab() {
                           name: `${c.name} (${c.scenario})`,
                           pRel:
                             Math.round(
-                              (100 * c.p) / showRiskFile!.totalProbability
-                            ) / 100,
+                              (1000 * c.p) / showRiskFile!.totalProbability
+                            ) / 1000,
                           rp: returnPeriodMonthsFromPDaily(c.p),
                           fill: c.scenario
                             ? SCENARIO_PARAMS[c.scenario].color
@@ -616,8 +616,8 @@ export default function SimulationTab() {
                           name: `${c.name} (${c.scenario})`,
                           pRel:
                             Math.round(
-                              (100 * c.p) / showRiskFile!.totalProbability
-                            ) / 100,
+                              (1000 * c.p) / showRiskFile!.totalProbability
+                            ) / 1000,
                           rp: returnPeriodMonthsFromPDaily(c.p),
                           fill: c.scenario
                             ? SCENARIO_PARAMS[c.scenario].color

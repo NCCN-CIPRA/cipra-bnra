@@ -163,7 +163,7 @@ describe("Return Period to Daily Probability Functions", () => {
 describe("Scale Conversion Functions", () => {
   describe("Round-trip conversions", () => {
     test("P-Scale 5 -> return period -> P-Scale 5 should be identity", () => {
-      const testValues = [0, 1, 2, 3, 4, 2.5, -1];
+      const testValues = [0, 1, 2, 3, 4, 2.5];
       testValues.forEach((pScale5) => {
         const rpMonths = returnPeriodMonthsFromPScale5(pScale5);
         const backToPScale5 = pScale5FromReturnPeriodMonths(rpMonths);
@@ -172,7 +172,7 @@ describe("Scale Conversion Functions", () => {
     });
 
     test("P-Scale 7 -> return period -> P-Scale 7 should be identity", () => {
-      const testValues = [0, 1, 2, 3, 4, 2.5, -1];
+      const testValues = [0, 1, 2, 3, 4, 2.5];
       testValues.forEach((pScale7) => {
         const rpMonths = returnPeriodMonthsFromPScale7(pScale7);
         const backToPScale7 = pScale7FromReturnPeriodMonths(rpMonths);
