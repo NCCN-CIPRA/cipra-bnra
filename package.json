@@ -17,7 +17,7 @@
   "dependencies": {
     "@ali-tas/htmldiff-js": "^2.0.1",
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@fontsource/roboto": "^5.2.5",
     "@mui/icons-material": "^7.0.2",
     "@mui/lab": "^7.0.0-beta.17",
