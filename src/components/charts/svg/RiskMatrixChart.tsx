@@ -2,7 +2,6 @@ import { Stack, Typography } from "@mui/material";
 import {
   CartesianGrid,
   Cell,
-  LabelList,
   ResponsiveContainer,
   Scatter,
   ScatterChart,
@@ -23,6 +22,7 @@ import { hexToRGB } from "../../../functions/colors";
 
 export type MatrixRisk = {
   id: string;
+  hazardId: string;
   name: string;
   scenario: Scenario;
   category: RISK_CATEGORY;
@@ -104,8 +104,8 @@ export default function RiskMatrixChart({
   data,
   selectedNodeId = null,
   setSelectedNodeId = () => {},
-  labels = false,
-  labelSize = null,
+  // labels = false,
+  // labelSize = null,
   categoryDisplay = "shapes",
   scenarioDisplay = "colors",
 }: {
@@ -157,15 +157,37 @@ export default function RiskMatrixChart({
           name="impact"
           domain={[0, 8]}
         />
-        <Tooltip cursor={{ strokeDasharray: "3 3" }} content={CustomTooltip} />
+        <Tooltip
+          shared={false}
+          cursor={{ strokeDasharray: "3 3" }}
+          content={CustomTooltip}
+        />
+        {/* <Tooltip /> */}
+        {/* <Scatter
+          data={data}
+          // shape={(props: any) => {
+          //   const category = props.payload.category;
+          //   return <Circle />;
+          // }}
+        >
+          {data?.map((entry, i) => (
+            <Cell
+              key={i}
+              fill={getColor(entry)}
+              stroke={`rgba(150,150,150,0.4)`}
+              onClick={() => setSelectedNodeId(entry.id)}
+            />
+          ))}
+        </Scatter> */}
         {Object.entries(CATEGORIES).map(([CATEGORY, shape]) => {
           const catData = data?.filter((d) => d.category === CATEGORY) || [];
 
           return (
             <Scatter
-              key={CATEGORY}
+              // key={CATEGORY}
               name={`${CATEGORY} Risks`}
               data={catData}
+              dataKey={CATEGORY}
               fill="#8884d8"
               shape={
                 categoryDisplay === "shapes" || categoryDisplay === "both"
@@ -173,15 +195,15 @@ export default function RiskMatrixChart({
                   : "circle"
               }
             >
-              {labels && (
+              {/* {labels && (
                 <LabelList
-                  dataKey="code"
+                  dataKey="hazardId"
                   position="insideTop"
                   offset={15}
                   fontSize={labelSize || 20}
                 />
-              )}
-              {catData.map((entry) => {
+              )} */}
+              {catData.map((entry, index) => {
                 let opacity = 1;
                 const strokeOpacity = 0.4;
                 if (selectedNodeId !== null) {
@@ -202,8 +224,7 @@ export default function RiskMatrixChart({
 
                 return (
                   <Cell
-                    id={`cell-${entry.id}-${entry.scenario}`}
-                    key={`cell-${entry.id}-${entry.scenario}`}
+                    key={`cell-${categoryDisplay}-${index}`}
                     // fill={}
                     stroke={`rgba(150,150,150,${strokeOpacity})`}
                     strokeWidth={1}

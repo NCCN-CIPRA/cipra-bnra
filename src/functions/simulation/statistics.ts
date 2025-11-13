@@ -3,6 +3,7 @@ import {
   AggregatedImpacts,
   AggregatedRiskEvent,
   noImpact,
+  Risk,
   RiskCascade,
   RiskEvent,
   RiskScenarioSimulationOutput,
@@ -133,7 +134,7 @@ export function getCascadeContributions(
   directImpact: AggregatedImpacts,
   triggeredEvents: AggregatedRiskEvent[],
   indicator: keyof AggregatedImpacts,
-  paretoCutoff: number = 0.8
+  paretoCutoff: number = 1
 ): CascadeContributionData[] {
   const effectsWithDI = [
     {
@@ -198,15 +199,36 @@ export function getCascadeContributions(
   }, [] as typeof data);
 }
 
+export type CauseCountData = {
+  id: string;
+  name: string;
+  scenario: Scenario | null;
+  count: number;
+  p: number;
+};
+
 export type CascadeCountData = {
   id: string;
   name: string;
   scenario: Scenario;
   count: number;
   p: number;
+  firstOrderCauses: CauseCountData[];
 };
 
 export type CascadeEffectCount = Record<
+  string,
+  Partial<Record<Scenario, CascadeCountData>>
+>;
+
+export type CauseProbabilityData = {
+  id: string;
+  name: string;
+  scenario: Scenario | null;
+  p: number;
+};
+
+export type CauseCount = Record<
   string,
   Partial<Record<Scenario, CascadeCountData>>
 >;
@@ -230,6 +252,10 @@ export function getCascadeEffectCounts(
             {
               ...scenario,
               p: scenario.count / events.length,
+              firstOrderCauses: scenario.firstOrderCauses.map((foc) => ({
+                ...foc,
+                p: foc.count / events.length,
+              })),
             },
           ],
           [] as CascadeCountData[]
@@ -252,10 +278,32 @@ function walkEventTree(event: RiskEvent, counts: CascadeEffectCount) {
       scenario: event.scenario,
       count: 0,
       p: 0,
+      firstOrderCauses: [],
     };
   }
 
   counts[event.risk.id][event.scenario]!.count += 1;
+
+  let existingFOC = counts[event.risk.id][
+    event.scenario
+  ]!.firstOrderCauses.find(
+    (foc) =>
+      foc.id === (event.source?.risk.id || "None") &&
+      foc.scenario === event.source?.scenario
+  );
+
+  if (!existingFOC) {
+    existingFOC = {
+      id: event.source?.risk.id || "None",
+      name: event.source?.risk.name || "None",
+      scenario: event.source?.scenario || null,
+      p: 0,
+      count: 0,
+    };
+    counts[event.risk.id][event.scenario]!.firstOrderCauses.push(existingFOC);
+  }
+
+  existingFOC.count += 1;
 
   for (const triggeredEvent of event.triggeredEvents) {
     walkEventTree(triggeredEvent, counts);
@@ -279,4 +327,78 @@ export function getTotalProbability(
 
     return (totalP += cascade.p * rootCause.probabilities[output.scenario]);
   }, 0);
+}
+
+export function getRootCauses(
+  risk: Risk,
+  scenario: Scenario,
+  rootNode: RootNode,
+  outputs: RiskScenarioSimulationOutput[]
+): CauseProbabilityData[] {
+  const rootCauses = [] as CauseProbabilityData[];
+
+  outputs.forEach((output) => {
+    const cascades = output.cascadeCounts.find(
+      (c) => c.id === risk.id && c.scenario === scenario
+    );
+    const rootCause = rootNode.risks.find((c) => c.effect.id === output.id);
+
+    if (!cascades || !rootCause) return;
+
+    rootCauses.push({
+      id: rootCause.effect.id,
+      name: rootCause.effect.name,
+      p: cascades.p * rootCause.probabilities[output.scenario],
+      scenario: output.scenario,
+    });
+  });
+
+  return rootCauses;
+}
+
+export function getFirstOrderCauses(
+  risk: Risk,
+  scenario: Scenario,
+  rootNode: RootNode,
+  outputs: RiskScenarioSimulationOutput[]
+): CauseProbabilityData[] {
+  const firstOrderCauseCounts = [] as CauseProbabilityData[];
+
+  outputs.forEach((output) => {
+    const cascades = output.cascadeCounts.find(
+      (c) => c.id === risk.id && c.scenario === scenario
+    );
+
+    const rootCause = rootNode.risks.find((c) => c.effect.id === output.id);
+
+    if (!cascades || !rootCause) return;
+
+    cascades.firstOrderCauses.forEach((foc) => {
+      const firstOrderCause = rootNode.risks.find(
+        (c) => c.effect.id === foc.id
+      );
+
+      if (!firstOrderCause) return;
+
+      let existingCount: CauseProbabilityData | undefined =
+        firstOrderCauseCounts.find(
+          (c) =>
+            c.id === firstOrderCause.effect.id && c.scenario === foc.scenario
+        );
+
+      if (!existingCount) {
+        existingCount = {
+          id: firstOrderCause.effect.id,
+          name: firstOrderCause.effect.name,
+          scenario: foc.scenario,
+          p: 0,
+        };
+        firstOrderCauseCounts.push(existingCount);
+      }
+
+      existingCount.p += foc.p * rootCause.probabilities[output.scenario];
+    });
+  });
+
+  return firstOrderCauseCounts;
 }

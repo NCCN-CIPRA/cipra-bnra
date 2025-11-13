@@ -50,7 +50,7 @@ import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import useSavedState from "../../hooks/useSavedState";
 import { GridDeleteIcon } from "@mui/x-data-grid";
-import { SCENARIOS } from "../../functions/scenarios";
+import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import {
   pScale7FromReturnPeriodMonths,
   returnPeriodMonthsFromPDaily,
@@ -335,6 +335,7 @@ export default function SimulationTab() {
                       })
                       .map((r) => ({
                         id: r.id,
+                        hazardId: r.hazardId,
                         name: `${r.name} (${r.scenario})`,
                         scenario: r.scenario,
                         category: r.category,
@@ -504,7 +505,19 @@ export default function SimulationTab() {
             </Typography>
             <ResponsiveContainer width={"100%"} height={800}>
               <BarChart
-                data={showRiskFile ? showRiskFile.cascadeCounts : undefined}
+                data={
+                  showRiskFile
+                    ? showRiskFile.cascadeCounts
+                        .filter((c) => c.id !== showRiskFile.id && c.p > 0.01)
+                        .map((c) => ({
+                          ...c,
+                          name: `${c.name} (${c.scenario})`,
+                          fill: c.scenario
+                            ? SCENARIO_PARAMS[c.scenario].color
+                            : "#8884d8",
+                        }))
+                    : undefined
+                }
                 layout="vertical"
                 margin={{
                   top: 5,
@@ -520,6 +533,115 @@ export default function SimulationTab() {
                 <Legend />
                 <Bar
                   dataKey="p"
+                  fill="#8884d8"
+                  // activeBar={<Rectangle fill="pink" stroke="blue" />}
+                >
+                  {/* <ErrorBar
+                    dataKey="stdError"
+                    width={4}
+                    strokeWidth={2}
+                    stroke="green"
+                    direction="x"
+                  /> */}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Probability of root causes
+            </Typography>
+            <ResponsiveContainer width={"100%"} height={800}>
+              <BarChart
+                data={
+                  showRiskFile
+                    ? showRiskFile.rootCauses
+                        .map((c) => ({
+                          ...c,
+                          name: `${c.name} (${c.scenario})`,
+                          pRel:
+                            Math.round(
+                              (100 * c.p) / showRiskFile!.totalProbability
+                            ) / 100,
+                          rp: returnPeriodMonthsFromPDaily(c.p),
+                          fill: c.scenario
+                            ? SCENARIO_PARAMS[c.scenario].color
+                            : "#8884d8",
+                        }))
+                        .sort((a, b) => b.pRel - a.pRel)
+                        .filter((c) => c.pRel > 0.01)
+                    : undefined
+                }
+                layout="vertical"
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" domain={[0, "dataMax"]} />
+                <YAxis dataKey="name" type="category" width={200} />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="pRel"
+                  fill="#8884d8"
+                  // activeBar={<Rectangle fill="pink" stroke="blue" />}
+                >
+                  {/* <ErrorBar
+                    dataKey="stdError"
+                    width={4}
+                    strokeWidth={2}
+                    stroke="green"
+                    direction="x"
+                  /> */}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Probability of first order causes
+            </Typography>
+            <ResponsiveContainer width={"100%"} height={800}>
+              <BarChart
+                data={
+                  showRiskFile
+                    ? showRiskFile.firstOrderCauses
+                        .map((c) => ({
+                          ...c,
+                          name: `${c.name} (${c.scenario})`,
+                          pRel:
+                            Math.round(
+                              (100 * c.p) / showRiskFile!.totalProbability
+                            ) / 100,
+                          rp: returnPeriodMonthsFromPDaily(c.p),
+                          fill: c.scenario
+                            ? SCENARIO_PARAMS[c.scenario].color
+                            : "#8884d8",
+                        }))
+                        .sort((a, b) => b.pRel - a.pRel)
+                        .filter((c) => c.pRel > 0.01)
+                    : undefined
+                }
+                layout="vertical"
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" domain={[0, "dataMax"]} />
+                <YAxis dataKey="name" type="category" width={200} />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="pRel"
                   fill="#8884d8"
                   // activeBar={<Rectangle fill="pink" stroke="blue" />}
                 >

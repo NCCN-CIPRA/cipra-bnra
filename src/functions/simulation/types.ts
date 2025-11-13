@@ -4,6 +4,7 @@ import {
   BoxPlotData,
   CascadeContributionData,
   CascadeCountData,
+  CauseProbabilityData,
   HistogramBinData,
 } from "./statistics";
 
@@ -19,6 +20,7 @@ export type RootNode = {
 
 export type Risk = {
   id: string;
+  hazardId: string;
   name: string;
   category: RISK_CATEGORY;
 
@@ -116,6 +118,7 @@ export type AverageRiskEvent = {
 
 export type RiskScenarioSimulationOutput = {
   id: string;
+  hazardId: string;
   name: string;
   category: RISK_CATEGORY;
   scenario: Scenario;
@@ -125,6 +128,8 @@ export type RiskScenarioSimulationOutput = {
   indicators: BoxPlotData[];
   cascadeContributions: CascadeContributionData[];
   cascadeCounts: CascadeCountData[];
+  rootCauses: CauseProbabilityData[];
+  firstOrderCauses: CauseProbabilityData[];
 };
 
 export type SimulationRun = {

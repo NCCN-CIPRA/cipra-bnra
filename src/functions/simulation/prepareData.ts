@@ -35,6 +35,7 @@ export function prepareData(
       ...acc,
       [risk._cr4de_risk_file_value]: {
         id: risk._cr4de_risk_file_value,
+        hazardId: risk.cr4de_hazard_id,
         name: risk.cr4de_title,
         category: risk.cr4de_category,
         cascades: [],

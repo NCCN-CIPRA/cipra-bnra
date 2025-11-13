@@ -3,10 +3,12 @@ import { addImpact, aggregateImpacts } from "./math";
 import {
   getCascadeContributions,
   getCascadeEffectCounts,
+  getRootCauses,
   getImpactHistogram,
   getIndicatorBoxplots,
   getMedianImpact,
   getTotalProbability,
+  getFirstOrderCauses,
 } from "./statistics";
 import {
   AggregatedRiskEvent,
@@ -73,6 +75,7 @@ export function simulateRiskScenario(
 
   return {
     id: risk.id,
+    hazardId: risk.hazardId,
     name: risk.name,
     category: risk.category,
     scenario,
@@ -87,6 +90,8 @@ export function simulateRiskScenario(
       "all"
     ),
     cascadeCounts: getCascadeEffectCounts(events),
+    rootCauses: [],
+    firstOrderCauses: [],
   };
 }
 
@@ -118,6 +123,18 @@ export function runSimulations(
 
     risk.totalProbability = getTotalProbability(
       rootCascade,
+      risk.scenario,
+      input.rootNode,
+      risks
+    );
+    risk.rootCauses = getRootCauses(
+      rootCascade.effect,
+      risk.scenario,
+      input.rootNode,
+      risks
+    );
+    risk.firstOrderCauses = getFirstOrderCauses(
+      rootCascade.effect,
       risk.scenario,
       input.rootNode,
       risks

@@ -77,7 +77,10 @@ export function pScale5FromReturnPeriodMonths(
 ) {
   if (rpMonths === null) return 0;
 
-  return Math.round(round * (4.5 - Math.log10(rpMonths / (12 * 3)))) / round;
+  return Math.max(
+    0,
+    Math.round(round * (4.5 - Math.log10(rpMonths / (12 * 3)))) / round
+  );
 }
 
 export function pScale7FromReturnPeriodMonths(
@@ -86,7 +89,10 @@ export function pScale7FromReturnPeriodMonths(
 ) {
   if (rpMonths === null) return 0;
 
-  return Math.round((round * (12 - Math.log(rpMonths / 12))) / 2.3) / round;
+  return Math.max(
+    0,
+    Math.round((round * (12 - Math.log(rpMonths / 12))) / 2.3) / round
+  );
 }
 
 export function pScale5to7(pScale5: number) {
