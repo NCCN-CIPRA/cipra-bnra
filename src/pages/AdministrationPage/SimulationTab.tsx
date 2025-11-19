@@ -5,7 +5,6 @@ import {
   CardActions,
   CardContent,
   CardHeader,
-  Container,
   FormControl,
   FormGroup,
   IconButton,
@@ -14,11 +13,16 @@ import {
   MenuItem,
   Select,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
 import useAPI, { DataTable } from "../../hooks/useAPI";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { parseRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import {
   snapshotFromRiskCascade,
@@ -53,6 +57,7 @@ import { GridDeleteIcon } from "@mui/x-data-grid";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import {
   pScale7FromReturnPeriodMonths,
+  pTimeframeFromReturnPeriodMonths,
   returnPeriodMonthsFromPDaily,
 } from "../../functions/indicators/probability";
 import RiskMatrixChart from "../../components/charts/svg/RiskMatrixChart";
@@ -130,11 +135,19 @@ export default function SimulationTab() {
     queryFn: () => api.getRiskFiles(),
     select: (data) => data.filter((rf) => !rf.cr4de_hazard_id.startsWith("X")),
   });
-  // const { data: rss } = useQuery({
-  //   queryKey: [DataTable.RISK_SNAPSHOT],
-  //   queryFn: () => api.getRiskSnapshots(),
-  //   select: (data) => data.filter((rf) => !rf.cr4de_hazard_id.startsWith("X")),
-  // });
+  const { data: rss } = useQuery({
+    queryKey: [DataTable.RISK_SNAPSHOT],
+    queryFn: () => api.getRiskSnapshots(),
+    select: (data) => data.filter((rf) => !rf.cr4de_hazard_id.startsWith("X")),
+  });
+  const riskSnapshots = useMemo(
+    () =>
+      rss
+        ? getRiskCatalogueFromSnapshots(rss.map((r) => parseRiskSnapshot(r)))
+        : null,
+    [rss]
+  );
+
   const { data: cs } = useQuery({
     queryKey: [DataTable.RISK_CASCADE],
     queryFn: () => api.getRiskCascades(),
@@ -203,8 +216,64 @@ export default function SimulationTab() {
       );
   }, [output, selectedRF, selectedScenario]);
 
+  const diff = useMemo(() => {
+    if (!output || !riskSnapshots) return null;
+
+    return output
+      .map((risk) => ({
+        id: risk.id,
+        hazardId: risk.hazardId,
+        name: risk.name,
+        scenario: risk.scenario,
+        deltaTP:
+          Math.round(
+            100 *
+              (pScale7FromReturnPeriodMonths(
+                returnPeriodMonthsFromPDaily(risk.totalProbability),
+                100
+              ) -
+                pScale7FromReturnPeriodMonths(
+                  riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].dp
+                    .rpMonths || 0
+                ))
+          ) / 100,
+        deltaTI:
+          Math.round(
+            100 *
+              (iScale7FromEuros(risk.medianImpact, undefined, 100) -
+                iScale7FromEuros(
+                  riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].ti.all
+                    .euros || 0
+                ))
+          ) / 100,
+        delta:
+          Math.round(
+            100 *
+              (Math.abs(
+                pScale7FromReturnPeriodMonths(
+                  returnPeriodMonthsFromPDaily(risk.totalProbability),
+                  100
+                ) -
+                  pScale7FromReturnPeriodMonths(
+                    riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].dp
+                      .rpMonths || 0
+                  )
+              ) +
+                Math.abs(
+                  iScale7FromEuros(risk.medianImpact, undefined, 100) -
+                    iScale7FromEuros(
+                      riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].ti
+                        .all.euros || 0
+                    )
+                ))
+          ) / 100,
+      }))
+      .sort((a, b) => b.delta - a.delta);
+  }, [output, riskSnapshots]);
+
   return (
-    <Container sx={{ mb: 18 }}>
+    // <Container sx={{ mb: 18 }}>
+    <Box sx={{ m: 4 }}>
       <Card sx={{ mb: 4 }}>
         <CardContent sx={{}}>
           <FormGroup>
@@ -312,27 +381,71 @@ export default function SimulationTab() {
         </CardActions>
       </Card>
 
-      <Card>
-        <CardHeader title="Statistical results" />
+      <Card sx={{ my: 2 }}>
+        <CardHeader title="Change overview" />
         <CardContent>
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Risk Matrix
-            </Typography>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell align="left">Name</TableCell>
+                  <TableCell align="left">Scenario</TableCell>
+                  <TableCell align="right">ΔTP</TableCell>
+                  <TableCell align="right">ΔTI</TableCell>
+                  <TableCell align="right">Δ</TableCell>
+                  {/* <TableCell align="right">ΔH</TableCell>
+                  <TableCell align="right">ΔS</TableCell>
+                  <TableCell align="right">ΔE</TableCell>
+                  <TableCell align="right">ΔF</TableCell> */}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {diff
+                  ? diff.map((row) => (
+                      <TableRow
+                        key={`${row.id}-${row.scenario}`}
+                        sx={{
+                          "&:last-child td, &:last-child th": { border: 0 },
+                        }}
+                      >
+                        <TableCell component="th" scope="row">
+                          {row.hazardId}
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          {row.scenario}
+                        </TableCell>
+                        <TableCell align="left">{row.name}</TableCell>
+                        <TableCell align="right">{row.deltaTP}</TableCell>
+                        <TableCell align="right">{row.deltaTI}</TableCell>
+                        <TableCell align="right">{row.delta}</TableCell>
+                      </TableRow>
+                    ))
+                  : null}
+              </TableBody>
+            </Table>
+          </Box>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ my: 2 }}>
+        <CardHeader title="Risk Matrix" />
+        <CardContent>
+          <Box>
             <RiskMatrixChart
               data={
                 output
                   ? output
-                      .filter((o) => {
-                        if (selectedRF) {
-                          if (o.id !== selectedRF.cr4de_riskfilesid)
-                            return false;
-                        }
-                        if (selectedScenario) {
-                          if (o.scenario !== selectedScenario) return false;
-                        }
-                        return true;
-                      })
+                      // .filter((o) => {
+                      //   if (selectedRF) {
+                      //     if (o.id !== selectedRF.cr4de_riskfilesid)
+                      //       return false;
+                      //   }
+                      //   if (selectedScenario) {
+                      //     if (o.scenario !== selectedScenario) return false;
+                      //   }
+                      //   return true;
+                      // })
                       .map((r) => ({
                         id: r.id,
                         hazardId: r.hazardId,
@@ -348,15 +461,28 @@ export default function SimulationTab() {
                           returnPeriodMonthsFromPDaily(r.totalProbability),
                           100
                         ),
+                        expectedImpact: iScale7FromEuros(
+                          r.medianImpact *
+                            pTimeframeFromReturnPeriodMonths(
+                              returnPeriodMonthsFromPDaily(r.totalProbability),
+                              12
+                            ),
+                          undefined,
+                          100
+                        ),
                       }))
-                  : undefined
+                  : // .filter((r) => r.expectedImpact > 4)
+                    undefined
               }
             />
           </Box>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ my: 2 }}>
+        <CardHeader title="Total impact histogram" />
+        <CardContent>
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Total impact histogram
-            </Typography>
             <ResponsiveContainer width={"100%"} height={400}>
               <BarChart
                 data={showRiskFile ? showRiskFile.impact : undefined}
@@ -391,10 +517,13 @@ export default function SimulationTab() {
               </BarChart>
             </ResponsiveContainer>
           </Box>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ my: 2 }}>
+        <CardHeader title="Expected impact per damage indicator" />
+        <CardContent>
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Expected impact per damage indicator
-            </Typography>
             <ResponsiveContainer width={"100%"} height={600}>
               <BarChart
                 data={showRiskFile ? showRiskFile.indicators : undefined}
@@ -461,14 +590,27 @@ export default function SimulationTab() {
               </BarChart>
             </ResponsiveContainer>
           </Box>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ my: 2 }}>
+        <CardHeader title="Expected impact per cascade" />
+        <CardContent>
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Expected impact per cascade
-            </Typography>
             <ResponsiveContainer width={"100%"} height={800}>
               <BarChart
                 data={
-                  showRiskFile ? showRiskFile.cascadeContributions : undefined
+                  showRiskFile
+                    ? showRiskFile.cascadeContributions
+                        .filter((c) => c.averageImpactContribution > 0.01)
+                        .map((c) => ({
+                          ...c,
+                          name: `${c.name} (${c.scenario})`,
+                          fill: c.scenario
+                            ? SCENARIO_PARAMS[c.scenario].color
+                            : "#8884d8",
+                        }))
+                    : undefined
                 }
                 layout="vertical"
                 margin={{
@@ -499,10 +641,13 @@ export default function SimulationTab() {
               </BarChart>
             </ResponsiveContainer>
           </Box>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ my: 2 }}>
+        <CardHeader title="Probability of cascade effects" />
+        <CardContent>
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Probability of cascade effects
-            </Typography>
             <ResponsiveContainer width={"100%"} height={800}>
               <BarChart
                 data={
@@ -547,10 +692,13 @@ export default function SimulationTab() {
               </BarChart>
             </ResponsiveContainer>
           </Box>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ my: 2 }}>
+        <CardHeader title="Probability of root causes" />
+        <CardContent>
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Probability of root causes
-            </Typography>
             <ResponsiveContainer width={"100%"} height={800}>
               <BarChart
                 data={
@@ -601,11 +749,13 @@ export default function SimulationTab() {
               </BarChart>
             </ResponsiveContainer>
           </Box>
+        </CardContent>
+      </Card>
 
+      <Card sx={{ my: 2 }}>
+        <CardHeader title="Probability of first order causes" />
+        <CardContent>
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Probability of first order causes
-            </Typography>
             <ResponsiveContainer width={"100%"} height={800}>
               <BarChart
                 data={
@@ -687,6 +837,6 @@ export default function SimulationTab() {
           </CardContent>
         </Card>
       )} */}
-    </Container>
+    </Box>
   );
 }

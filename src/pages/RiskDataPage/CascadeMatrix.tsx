@@ -287,7 +287,7 @@ export default function CascadeMatrix({
   ) => unknown;
 }) {
   const theme = useTheme();
-
+  console.log(cause, effect, cascade, compareCascade);
   const [showScenarios, setShowScenarios] = useState(false);
 
   const isActorCause = cause.cr4de_risk_type === RISK_TYPE.MANMADE;

@@ -2,6 +2,8 @@ import { Stack, Typography } from "@mui/material";
 import {
   CartesianGrid,
   Cell,
+  LabelList,
+  ReferenceLine,
   ResponsiveContainer,
   Scatter,
   ScatterChart,
@@ -30,6 +32,7 @@ export type MatrixRisk = {
   probabilitError?: [number, number];
   totalImpact: number;
   impactError?: [number, number];
+  expectedImpact: number;
 };
 
 const CATEGORIES: Partial<{
@@ -84,14 +87,21 @@ const CustomTooltip = ({
           p: 1,
         }}
       >
-        <Typography variant="subtitle1">{payload?.[0].payload.name}</Typography>
+        <Typography variant="subtitle1">
+          {payload?.[0]?.payload.name}
+        </Typography>
         <Typography variant="subtitle2">
           {`Probability: P${
-            Math.round((payload?.[1].value as number) * 2) / 2
+            Math.round((payload?.[1]?.value as number) * 2) / 2
           }`}
         </Typography>
         <Typography variant="subtitle2">
-          {`Impact: I${Math.round((payload?.[0].value as number) * 2) / 2}`}
+          {`Impact: I${Math.round((payload?.[0]?.value as number) * 2) / 2}`}
+        </Typography>
+        <Typography variant="subtitle2">
+          {`Yearly Expected Impact: I${
+            payload?.[0]?.payload.expectedImpact as number
+          }`}
         </Typography>
       </Stack>
     );
@@ -104,8 +114,8 @@ export default function RiskMatrixChart({
   data,
   selectedNodeId = null,
   setSelectedNodeId = () => {},
-  // labels = false,
-  // labelSize = null,
+  labels = true,
+  labelSize = 12,
   categoryDisplay = "shapes",
   scenarioDisplay = "colors",
 }: {
@@ -113,7 +123,7 @@ export default function RiskMatrixChart({
   selectedNodeId?: string | null;
   setSelectedNodeId?: (id: string | null) => void;
   labels?: boolean;
-  labelSize?: number | null;
+  labelSize?: number;
   categoryDisplay?: "shapes" | "colors" | "both" | "none";
   scenarioDisplay?: "colors" | "shapes" | "none";
 }) {
@@ -132,7 +142,7 @@ export default function RiskMatrixChart({
   };
 
   return (
-    <ResponsiveContainer width={"100%"} height={400}>
+    <ResponsiveContainer width={"100%"} height={1000}>
       <ScatterChart>
         <defs>
           <linearGradient id="colorUv" x1="100%" y1="0%" x2="0%" y2="100%">
@@ -142,6 +152,17 @@ export default function RiskMatrixChart({
           </linearGradient>
         </defs>
         <CartesianGrid fill="url(#colorUv)" />
+
+        {[2, 4, 6, 8, 10, 12, 14, 16].map((i) => (
+          <ReferenceLine
+            stroke="rgba(0,0,0,0.2)"
+            strokeDasharray="3 3"
+            segment={[
+              { x: Math.min(8, i), y: Math.max(0, i - 8) },
+              { x: Math.max(0, i - 8), y: Math.min(8, i) },
+            ]}
+          />
+        ))}
 
         <YAxis
           type="number"
@@ -195,14 +216,14 @@ export default function RiskMatrixChart({
                   : "circle"
               }
             >
-              {/* {labels && (
+              {labels && (
                 <LabelList
                   dataKey="hazardId"
                   position="insideTop"
                   offset={15}
-                  fontSize={labelSize || 20}
+                  fontSize={labelSize}
                 />
-              )} */}
+              )}
               {catData.map((entry, index) => {
                 let opacity = 1;
                 const strokeOpacity = 0.4;
