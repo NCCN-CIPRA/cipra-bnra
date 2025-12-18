@@ -19,7 +19,7 @@ import {
 import { Scenario } from "../../../functions/simulation/types";
 import { RISK_CATEGORY } from "../../../types/dataverse/Riskfile";
 import getCategoryColor from "../../../functions/getCategoryColor";
-import { SCENARIO_PARAMS } from "../../../functions/scenarios";
+import { SCENARIO_PARAMS, SCENARIOS } from "../../../functions/scenarios";
 import { hexToRGB } from "../../../functions/colors";
 
 export type MatrixRisk = {
@@ -121,7 +121,7 @@ export default function RiskMatrixChart({
 }: {
   data?: MatrixRisk[];
   selectedNodeId?: string | null;
-  setSelectedNodeId?: (id: string | null) => void;
+  setSelectedNodeId?: (id: string | null, scenario: Scenario | null) => void;
   labels?: boolean;
   labelSize?: number;
   categoryDisplay?: "shapes" | "colors" | "both" | "none";
@@ -251,7 +251,7 @@ export default function RiskMatrixChart({
                     strokeWidth={1}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedNodeId(entry.id);
+                      setSelectedNodeId(entry.id, entry.scenario);
                     }}
                     style={{
                       // opacity: entry.visible ? opacity : 0,

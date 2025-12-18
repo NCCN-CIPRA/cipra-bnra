@@ -13,11 +13,6 @@ import {
   MenuItem,
   Select,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
@@ -46,6 +41,7 @@ import {
   RectangleProps,
   ResponsiveContainer,
   Tooltip,
+  TooltipContentProps,
   XAxis,
   YAxis,
 } from "recharts";
@@ -53,7 +49,7 @@ import { iScale7FromEuros } from "../../functions/indicators/impact";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import useSavedState from "../../hooks/useSavedState";
-import { GridDeleteIcon } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridDeleteIcon } from "@mui/x-data-grid";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import {
   pScale7FromReturnPeriodMonths,
@@ -61,6 +57,7 @@ import {
   returnPeriodMonthsFromPDaily,
 } from "../../functions/indicators/probability";
 import RiskMatrixChart from "../../components/charts/svg/RiskMatrixChart";
+import { CascadeContributionData } from "../../functions/simulation/statistics";
 
 const HorizonBar = (props: RectangleProps) => {
   const { x, y, width, height } = props;
@@ -93,6 +90,38 @@ const DotBar = (props: RectangleProps) => {
     />
   );
 };
+
+const diffColumns: GridColDef[] = [
+  // { field: "id" },
+  {
+    field: "hazardId",
+    minWidth: 50,
+  },
+  {
+    field: "scenario",
+    minWidth: 100,
+  },
+  { field: "name", flex: 1 },
+  { field: "deltaTP", width: 100 },
+  { field: "deltaTI", width: 100 },
+  { field: "delta", width: 100 },
+];
+
+const CPImportanceColumns: GridColDef[] = [
+  // { field: "id" },
+  {
+    field: "cause",
+    valueGetter: (c: RiskScenarioSimulationOutput) => `${c.scenario} ${c.name}`,
+    flex: 1,
+  },
+  {
+    field: "effect",
+    valueGetter: (c: CascadeContributionData) => `${c.scenario} ${c.name}`,
+    flex: 1,
+  },
+  { field: "cp", width: 200, type: "number" },
+  { field: "impactPerCP", width: 400, type: "number" },
+];
 
 function getSimulationWorker() {
   const jsWorker = `import ${JSON.stringify(
@@ -221,7 +250,7 @@ export default function SimulationTab() {
 
     return output
       .map((risk) => ({
-        id: risk.id,
+        id: `${risk.id} ${risk.scenario}`,
         hazardId: risk.hazardId,
         name: risk.name,
         scenario: risk.scenario,
@@ -233,7 +262,7 @@ export default function SimulationTab() {
                 100
               ) -
                 pScale7FromReturnPeriodMonths(
-                  riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].dp
+                  riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].tp
                     .rpMonths || 0
                 ))
           ) / 100,
@@ -255,7 +284,7 @@ export default function SimulationTab() {
                   100
                 ) -
                   pScale7FromReturnPeriodMonths(
-                    riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].dp
+                    riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].tp
                       .rpMonths || 0
                   )
               ) +
@@ -270,6 +299,57 @@ export default function SimulationTab() {
       }))
       .sort((a, b) => b.delta - a.delta);
   }, [output, riskSnapshots]);
+
+  const CPimportance:
+    | {
+        cause: RiskScenarioSimulationOutput;
+        effect: CascadeContributionData;
+        cp: number;
+        impactPerCP: number;
+      }[]
+    | null = useMemo(() => {
+    if (!output || !cs || !riskSnapshots) return null;
+
+    const cps = [];
+
+    for (const rf of output) {
+      for (const cc of rf.cascadeContributions) {
+        // Direct probability
+        if (!cc.scenario) continue;
+
+        const cascade = cs.find(
+          (c) =>
+            c._cr4de_cause_hazard_value === rf.id &&
+            c._cr4de_effect_hazard_value === cc.id
+        );
+
+        if (!cascade) continue;
+
+        const css = parseCascadeSnapshot(
+          snapshotFromRiskCascade(riskSnapshots[rf.id], cascade)
+        );
+
+        if (css.cr4de_quanti_cp[rf.scenario][cc.scenario].scale7 <= 0) continue;
+
+        cps.push({
+          id: `${rf.id} ${rf.scenario} - ${cc.id} ${cc.scenario}`,
+          cause: rf,
+          effect: cc,
+          cp: css.cr4de_quanti_cp[rf.scenario][cc.scenario].scale7,
+          impactPerCP: Math.round(
+            (rf.totalProbability *
+              rf.medianImpact *
+              cc.averageImpactContribution) /
+              css.cr4de_quanti_cp[rf.scenario][cc.scenario].scale7
+          ),
+        });
+      }
+    }
+
+    return cps.sort((a, b) => b.impactPerCP - a.impactPerCP);
+  }, [cs, output, riskSnapshots]);
+
+  console.log(CPimportance && CPimportance.slice(0, 20));
 
   return (
     // <Container sx={{ mb: 18 }}>
@@ -385,45 +465,44 @@ export default function SimulationTab() {
         <CardHeader title="Change overview" />
         <CardContent>
           <Box>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell align="left">Name</TableCell>
-                  <TableCell align="left">Scenario</TableCell>
-                  <TableCell align="right">ΔTP</TableCell>
-                  <TableCell align="right">ΔTI</TableCell>
-                  <TableCell align="right">Δ</TableCell>
-                  {/* <TableCell align="right">ΔH</TableCell>
-                  <TableCell align="right">ΔS</TableCell>
-                  <TableCell align="right">ΔE</TableCell>
-                  <TableCell align="right">ΔF</TableCell> */}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {diff
-                  ? diff.map((row) => (
-                      <TableRow
-                        key={`${row.id}-${row.scenario}`}
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell component="th" scope="row">
-                          {row.hazardId}
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {row.scenario}
-                        </TableCell>
-                        <TableCell align="left">{row.name}</TableCell>
-                        <TableCell align="right">{row.deltaTP}</TableCell>
-                        <TableCell align="right">{row.deltaTI}</TableCell>
-                        <TableCell align="right">{row.delta}</TableCell>
-                      </TableRow>
-                    ))
-                  : null}
-              </TableBody>
-            </Table>
+            <DataGrid
+              rows={diff || []}
+              columns={diffColumns}
+              initialState={{
+                pagination: { paginationModel: { page: 0, pageSize: 20 } },
+              }}
+              pageSizeOptions={[20, 100]}
+              checkboxSelection
+              sx={{ border: 0 }}
+              onRowClick={(r) =>
+                setSelectedRF(
+                  rfs?.find((rf) => rf.cr4de_hazard_id === r.row.hazardId) ||
+                    null
+                )
+              }
+              rowSelection={false}
+            />
+          </Box>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ my: 2 }}>
+        <CardHeader title="Cascade CP Importance" />
+        <CardContent>
+          <Box>
+            <DataGrid
+              rows={CPimportance || []}
+              columns={CPImportanceColumns}
+              initialState={{
+                pagination: { paginationModel: { page: 0, pageSize: 20 } },
+                sorting: {
+                  sortModel: [{ field: "impactPerCP", sort: "desc" }],
+                },
+              }}
+              pageSizeOptions={[5, 10, 20, 100]}
+              checkboxSelection
+              sx={{ border: 0 }}
+            />
           </Box>
         </CardContent>
       </Card>
@@ -474,6 +553,19 @@ export default function SimulationTab() {
                   : // .filter((r) => r.expectedImpact > 4)
                     undefined
               }
+              setSelectedNodeId={(
+                id: string | null,
+                scenario: Scenario | null
+              ) => {
+                if (id !== null) {
+                  setSelectedRF(
+                    rfs?.find((rf) => rf.cr4de_riskfilesid === id) || null
+                  );
+                }
+                if (scenario !== null) {
+                  setSelectedScenario(scenario);
+                }
+              }}
             />
           </Box>
         </CardContent>
@@ -537,11 +629,11 @@ export default function SimulationTab() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis ticks={[0, 1, 2, 3, 4, 5, 6, 7]} />
-                <Tooltip />
                 <Legend />
                 <Bar
                   stackId={"a"}
                   dataKey={"min"}
+                  name={"Minimum"}
                   fill="none"
                   legendType="none"
                 />
@@ -554,6 +646,7 @@ export default function SimulationTab() {
                 <Bar
                   stackId={"a"}
                   dataKey={"bottomWhisker"}
+                  name="Median"
                   shape={<DotBar />}
                   legendType="none"
                 />
@@ -586,6 +679,40 @@ export default function SimulationTab() {
                   dataKey={"bar"}
                   shape={<HorizonBar />}
                   legendType="none"
+                />
+                <Tooltip
+                  cursor={{ opacity: 0.5 }}
+                  content={({
+                    payload,
+                    label,
+                  }: TooltipContentProps<string | number, string>) => {
+                    if (!payload || payload.length <= 0) return null;
+
+                    return (
+                      <Card className="custom-tooltip" sx={{ p: 2 }}>
+                        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                          {label}
+                        </Typography>
+                        <Typography variant="body2">
+                          Minimum: <b>{payload[0].payload.raw.min}</b>
+                        </Typography>
+                        <Typography variant="body2">
+                          Lower Quartile:{" "}
+                          <b>{payload[0].payload.raw.lowerQuartile}</b>
+                        </Typography>
+                        <Typography variant="body2">
+                          Median: <b>{payload[0].payload.raw.median}</b>
+                        </Typography>
+                        <Typography variant="body2">
+                          Upper Quartile:{" "}
+                          <b>{payload[0].payload.raw.upperQuartile}</b>
+                        </Typography>
+                        <Typography variant="body2">
+                          Maximum: <b>{payload[0].payload.raw.max}</b>
+                        </Typography>
+                      </Card>
+                    );
+                  }}
                 />
               </BarChart>
             </ResponsiveContainer>

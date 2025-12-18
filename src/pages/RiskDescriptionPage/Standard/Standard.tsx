@@ -27,21 +27,10 @@ export default function Standard({
       <RiskFileTitle riskFile={riskSummary} />
 
       <Box>
-        <Typography variant="h5">
+        <Typography variant="h5" sx={{ mb: 2 }}>
           {t("riskFile.definition.title", "Definition")}
         </Typography>{" "}
-        <Box
-          id="definition"
-          sx={{
-            borderLeft: "solid 8px #eee",
-            px: 2,
-            py: 1,
-            mt: 2,
-            backgroundColor: "white",
-          }}
-        >
-          <DefinitionSection riskSummary={riskSummary} />
-        </Box>
+        <DefinitionSection riskSummary={riskSummary} />
       </Box>
 
       <Box id="scenarios" sx={{ mt: 8 }}>

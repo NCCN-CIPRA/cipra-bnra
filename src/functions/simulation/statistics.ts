@@ -91,17 +91,27 @@ export function getIndicatorBoxplots(
         .map((a) => a[indicator])
         .sort((a, b) => a - b);
 
-      const min = iScale7FromEuros(sortedImpacts[0]);
+      const min = iScale7FromEuros(sortedImpacts[0], undefined, 10);
       const lowerQuartile = iScale7FromEuros(
-        sortedImpacts[Math.round(0.25 * sortedImpacts.length)]
+        sortedImpacts[Math.round(0.25 * sortedImpacts.length)],
+        undefined,
+        10
       );
       const median = iScale7FromEuros(
-        sortedImpacts[Math.round(0.5 * sortedImpacts.length)]
+        sortedImpacts[Math.round(0.5 * sortedImpacts.length)],
+        undefined,
+        10
       );
       const upperQuartile = iScale7FromEuros(
-        sortedImpacts[Math.round(0.75 * sortedImpacts.length)]
+        sortedImpacts[Math.round(0.75 * sortedImpacts.length)],
+        undefined,
+        10
       );
-      const max = iScale7FromEuros(sortedImpacts[sortedImpacts.length - 1]);
+      const max = iScale7FromEuros(
+        sortedImpacts[sortedImpacts.length - 1],
+        undefined,
+        10
+      );
 
       return {
         name: indicator,
@@ -113,16 +123,17 @@ export function getIndicatorBoxplots(
           max,
         },
         min,
-        bottomWhisker: lowerQuartile - min,
-        bottomBox: median - lowerQuartile,
-        topBox: upperQuartile - median,
-        topWhisker: max - upperQuartile,
+        bottomWhisker: Math.round(10 * (lowerQuartile - min)) / 10,
+        bottomBox: Math.round(10 * (median - lowerQuartile)) / 10,
+        topBox: Math.round(10 * (upperQuartile - median)) / 10,
+        topWhisker: Math.round(10 * (max - upperQuartile)) / 10,
       };
     }
   );
 }
 
 export type CascadeContributionData = {
+  id: string | null;
   name: string;
   scenario: Scenario | null;
   averageImpactContribution: number;
@@ -138,6 +149,7 @@ export function getCascadeContributions(
 ): CascadeContributionData[] {
   const effectsWithDI = [
     {
+      id: null,
       name: "Direct Impact",
       scenario: null,
       expectedImpact: directImpact[indicator],
@@ -163,6 +175,7 @@ export function getCascadeContributions(
       );
 
       return {
+        id: event.id,
         name: event.name,
         scenario: event.scenario,
         expectedImpact,
@@ -178,6 +191,7 @@ export function getCascadeContributions(
 
   const data = effectsWithDI
     .map((i) => ({
+      id: i.id,
       name: i.name,
       scenario: i.scenario,
       averageImpactContribution: i.expectedImpact / totalExpectedImpact,
