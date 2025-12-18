@@ -19,7 +19,7 @@ import {
 import { Scenario } from "../../../functions/simulation/types";
 import { RISK_CATEGORY } from "../../../types/dataverse/Riskfile";
 import getCategoryColor from "../../../functions/getCategoryColor";
-import { SCENARIO_PARAMS, SCENARIOS } from "../../../functions/scenarios";
+import { SCENARIO_PARAMS } from "../../../functions/scenarios";
 import { hexToRGB } from "../../../functions/colors";
 
 export type MatrixRisk = {
