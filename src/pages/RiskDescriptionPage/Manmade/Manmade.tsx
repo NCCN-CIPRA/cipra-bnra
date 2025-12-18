@@ -28,19 +28,8 @@ export default function Manmade({
       <Box>
         <Typography variant="h5">
           {t("riskFile.definition.title", "Definition")}
-        </Typography>{" "}
-        <Box
-          id="definition"
-          sx={{
-            borderLeft: "solid 8px #eee",
-            px: 2,
-            py: 1,
-            mt: 2,
-            backgroundColor: "white",
-          }}
-        >
-          <DefinitionSection riskSummary={riskSummary} />
-        </Box>
+        </Typography>
+        <DefinitionSection riskSummary={riskSummary} />
       </Box>
 
       <Box id="intelligence" sx={{ mt: 8, clear: "both" }}>

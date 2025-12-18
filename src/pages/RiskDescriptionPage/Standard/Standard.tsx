@@ -29,7 +29,7 @@ export default function Standard({
       <Box>
         <Typography variant="h5" sx={{ mb: 2 }}>
           {t("riskFile.definition.title", "Definition")}
-        </Typography>{" "}
+        </Typography>
         <DefinitionSection riskSummary={riskSummary} />
       </Box>
 

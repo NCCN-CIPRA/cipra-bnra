@@ -1,21 +1,43 @@
 import { useState } from "react";
 import { Box, Typography, Tooltip, Stack, Button } from "@mui/material";
-import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
+import { SCENARIO_PARAMS, SCENARIOS, wrap } from "../../functions/scenarios";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { useTranslation } from "react-i18next";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 import { ParsedRiskFields, RISK_TYPE } from "../../types/dataverse/Riskfile";
 import { parseRiskFields } from "../../functions/parseDataverseFields";
+import HTMLEditor from "../../components/HTMLEditor";
+import { Environment } from "../../types/global";
+import { useOutletContext } from "react-router-dom";
+import { RiskFilePageContext } from "../BaseRiskFilePage";
+import useAPI, { DataTable } from "../../hooks/useAPI";
+import { serializeChangeLogDiff } from "../../types/dataverse/DVChangeLog";
+import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function ScenarioSection({
   riskSummary,
 }: {
   riskSummary: DVRiskSummary;
 }) {
+  const api = useAPI();
+  const queryClient = useQueryClient();
+  const { user, environment } = useOutletContext<RiskFilePageContext>();
   const { t } = useTranslation();
   const [selectedScenario, setSelectedScenario] = useState(
     riskSummary.cr4de_mrs || SCENARIOS.CONSIDERABLE
   );
+
+  const mutation = useMutation({
+    mutationFn: async (
+      newFields: Partial<DVRiskFile> & { cr4de_riskfilesid: string }
+    ) => api.updateRiskFile(newFields.cr4de_riskfilesid, newFields),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [DataTable.RISK_FILE],
+      });
+    },
+  });
 
   const parsedSummary: DVRiskSummary<unknown, ParsedRiskFields> = {
     ...riskSummary,
@@ -161,35 +183,94 @@ export default function ScenarioSection({
             </Box>
           </Button>
         </Stack>
-        <Stack>
-          {parsedSummary.cr4de_scenarios[selectedScenario].map((p) => {
-            return (
-              <Box
-                key={`${parsedSummary._cr4de_risk_file_value}-${p.name}`}
-                sx={{ mb: 4 }}
-              >
-                {p.description && (
-                  <Typography variant="subtitle2">
-                    {p.name}{" "}
-                    <Tooltip
-                      title={
-                        <Box
-                          dangerouslySetInnerHTML={{
-                            __html: p.description || "",
-                          }}
-                        />
-                      }
-                    >
-                      <HelpOutlineIcon fontSize="small" />
-                    </Tooltip>
-                  </Typography>
-                )}
-                {/* <Box dangerouslySetInnerHTML={{ __html: p.description || "" }} /> */}
-                <Box dangerouslySetInnerHTML={{ __html: p.value || "" }} />
-              </Box>
-            );
-          })}
-        </Stack>
+        {riskSummary.cr4de_risk_type === RISK_TYPE.MANMADE ? (
+          <Stack>
+            {parsedSummary.cr4de_scenarios[selectedScenario].map((p) => {
+              return (
+                <HTMLEditor
+                  initialHTML={Array.isArray(p.value) ? p.value[0] : p.value}
+                  editableRole="analist"
+                  isEditable={environment === Environment.DYNAMIC}
+                  onSave={async (newParameterValue: string) => {
+                    const scenarioField =
+                      `cr4de_scenario_${selectedScenario.toLowerCase()}` as keyof DVRiskFile;
+
+                    if (
+                      riskSummary.cr4de_risk_file instanceof Object &&
+                      "cr4de_riskfilesid" in riskSummary.cr4de_risk_file
+                    ) {
+                      const newScenario = parsedSummary.cr4de_scenarios![
+                        selectedScenario
+                      ].map((oldP) => {
+                        if (oldP.name === p.name) {
+                          return {
+                            ...oldP,
+                            value: newParameterValue,
+                          };
+                        }
+                        return oldP;
+                      });
+
+                      api.createChangeLog({
+                        "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+                        cr4de_changed_by_email: user?.emailaddress1,
+                        cr4de_changed_object_type: "RISK_FILE",
+                        cr4de_changed_object_id:
+                          riskSummary._cr4de_risk_file_value,
+                        cr4de_change_short: `Changed ${selectedScenario} scenario`,
+                        cr4de_diff: serializeChangeLogDiff([
+                          {
+                            property: scenarioField,
+                            originalValue: JSON.stringify(
+                              parsedSummary.cr4de_scenarios![selectedScenario]
+                            ),
+                            newValue: JSON.stringify(newScenario),
+                          },
+                        ]),
+                      });
+
+                      mutation.mutate({
+                        cr4de_riskfilesid: riskSummary.cr4de_risk_file
+                          .cr4de_riskfilesid as string,
+                        [scenarioField]: wrap(newScenario),
+                      });
+                    }
+                  }}
+                />
+              );
+            })}
+          </Stack>
+        ) : (
+          <Stack>
+            {parsedSummary.cr4de_scenarios[selectedScenario].map((p) => {
+              return (
+                <Box
+                  key={`${parsedSummary._cr4de_risk_file_value}-${p.name}`}
+                  sx={{ mb: 4 }}
+                >
+                  {p.description && (
+                    <Typography variant="subtitle2">
+                      {p.name}{" "}
+                      <Tooltip
+                        title={
+                          <Box
+                            dangerouslySetInnerHTML={{
+                              __html: p.description || "",
+                            }}
+                          />
+                        }
+                      >
+                        <HelpOutlineIcon fontSize="small" />
+                      </Tooltip>
+                    </Typography>
+                  )}
+                  {/* <Box dangerouslySetInnerHTML={{ __html: p.description || "" }} /> */}
+                  <Box dangerouslySetInnerHTML={{ __html: p.value || "" }} />
+                </Box>
+              );
+            })}
+          </Stack>
+        )}
       </Box>
     </>
   );
