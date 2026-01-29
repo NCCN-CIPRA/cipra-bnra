@@ -39,6 +39,7 @@ import { saveAs } from "file-saver";
 import { ROLE, ROLE_RECORDS, ROLES_REVERSE } from "../../types/Roles";
 import KeyIcon from "@mui/icons-material/Key";
 import { LoggedInUser } from "../../hooks/useLoggedInUser";
+import EmailIcon from "@mui/icons-material/Email";
 
 const dateFormatter = new Intl.DateTimeFormat("nl-BE", {
   year: "numeric",
@@ -137,7 +138,7 @@ const StyledToolbarButton = styled(ToolbarButton)<{ ownerState: OwnerState }>(
     opacity: ownerState.expanded ? 0 : 1,
     pointerEvents: ownerState.expanded ? "none" : "auto",
     transition: theme.transitions.create(["opacity"]),
-  })
+  }),
 );
 
 const StyledTextField = styled(TextField)<{
@@ -194,13 +195,15 @@ function ExportExcel() {
 
 function createCustomToolbar(
   loggedInUser: LoggedInUser,
-  updateUsers: () => Promise<unknown>
+  updateUsers: () => Promise<unknown>,
 ) {
   return function CustomToolbar() {
     const api = useAPI();
     const apiRef = useGridApiContext();
     const [permissionsMenuOpen, setPermissionsMenuOpen] = useState(false);
     const permissionsMenuTriggerRef = useRef<HTMLButtonElement>(null);
+    const [emailMenuOpen, setEmailMenuOpen] = useState(false);
+    const emailMenuTriggerRef = useRef<HTMLButtonElement>(null);
     const [isUpdating, setIsUpdating] = useState(false);
 
     const grantPermissions = async (permissions: ROLE) => {
@@ -238,7 +241,7 @@ function createCustomToolbar(
         <Tooltip title="Assign Permissions">
           <ToolbarButton
             ref={permissionsMenuTriggerRef}
-            id="export-menu-trigger"
+            id="permission-menu-trigger"
             aria-controls="export-menu"
             aria-haspopup="true"
             aria-expanded={permissionsMenuOpen ? "true" : undefined}
@@ -299,6 +302,42 @@ function createCustomToolbar(
           )}
         </Menu>
 
+        <Tooltip title="Send Email">
+          <ToolbarButton
+            ref={emailMenuTriggerRef}
+            id="email-menu-trigger"
+            aria-controls="email-menu"
+            aria-haspopup="true"
+            aria-expanded={emailMenuOpen ? "true" : undefined}
+            onClick={() => setEmailMenuOpen(true)}
+          >
+            {isUpdating ? <CircularProgress size={20} /> : <EmailIcon />}
+          </ToolbarButton>
+        </Tooltip>
+
+        <Menu
+          id="email-menu"
+          anchorEl={emailMenuTriggerRef.current}
+          open={emailMenuOpen}
+          onClose={() => setEmailMenuOpen(false)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
+          slotProps={{
+            list: {
+              "aria-labelledby": "export-menu-trigger",
+            },
+          }}
+        >
+          <MenuItem
+            onClick={() => {
+              grantPermissions(ROLE.APPROVED);
+              setPermissionsMenuOpen(false);
+            }}
+          >
+            (Re)send invitaion email
+          </MenuItem>
+        </Menu>
+
         <StyledQuickFilter>
           <QuickFilterTrigger
             render={(triggerProps, state) => (
@@ -357,7 +396,7 @@ function createCustomToolbar(
 
 export default function UserListTab({ user }: { user: LoggedInUser }) {
   const [users, setUsers] = useState<DVContact<DVParticipation[]>[] | null>(
-    null
+    null,
   );
 
   const { reloadData: updateUsers } = useRecords<DVContact>({
@@ -369,7 +408,7 @@ export default function UserListTab({ user }: { user: LoggedInUser }) {
         d.map((c) => ({
           ...c,
           participations: [] as DVParticipation[],
-        }))
+        })),
       );
       getParticipations();
     },
@@ -383,9 +422,9 @@ export default function UserListTab({ user }: { user: LoggedInUser }) {
         prevUsers!.map((u) => ({
           ...u,
           participations: d.filter(
-            (p) => p._cr4de_contact_value === u.contactid
+            (p) => p._cr4de_contact_value === u.contactid,
           ),
-        }))
+        })),
       ),
   });
 

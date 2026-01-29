@@ -262,8 +262,8 @@ export function ScenarioSection({
                         publicRiskSnapshot &&
                         publicRiskSnapshot.cr4de_quanti[scenario].dp.scale5;
                     } else {
-                      initialValue = pScale5to7(
-                        riskFile.cr4de_quanti[scenario].dp.scale5
+                      initialValue = pScale7FromReturnPeriodMonths(
+                        riskFile.cr4de_quanti[scenario].dp.rpMonths
                       );
                       compareValue =
                         publicRiskSnapshot &&

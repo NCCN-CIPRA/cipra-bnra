@@ -1,40 +1,27 @@
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { RISK_CATEGORY } from "../../types/dataverse/Riskfile";
-import {
-  BoxPlotData,
-  CascadeContributionData,
-  CascadeCountData,
-  CauseProbabilityData,
-  HistogramBinData,
-} from "./statistics";
+import { BoxPlotData, HistogramBinData } from "./impactStatistics";
+import { TotalProbabilityStatistics } from "./probabilityStatistics";
 
 export type Scenario = "considerable" | "major" | "extreme";
 
 export type UnknownRiskSnapshot = DVRiskSnapshot<unknown, unknown, unknown>;
 
-export type RootNode = {
-  id: null;
-  risks: RiskCascade[];
-  actors: Actor[];
-};
+export enum LogLevel {
+  DEBUG = 0,
+  INFO = 1,
+  WARN = 2,
+  ERROR = 3,
+}
 
 export type Risk = {
   id: string;
   hazardId: string;
   name: string;
   category: RISK_CATEGORY;
-
-  cascades: RiskCascade[];
+  actor: boolean;
 
   directImpact: Record<Scenario, Impact>;
-};
-
-export type Actor = {
-  id: string;
-  name: string;
-  directImpact: undefined;
-
-  attacks: RiskCascade[];
 };
 
 export type Impact = {
@@ -62,7 +49,7 @@ export type AggregatedImpacts = {
 } & Impact;
 
 export type RiskCascade = {
-  cause: RootNode | Risk | Actor;
+  cause: null | Risk;
   // If null, this is a root node
   causeScenario: Scenario | null;
 
@@ -74,25 +61,55 @@ export type RiskCascade = {
 export type SimulationOptions = {
   filterRiskFileIds?: string[];
   filterScenarios?: Scenario[];
-  minRuns: number;
-  maxRuns: number;
+  numYears: number;
+  numEvents: number;
   relStd: number;
 };
 
 export type SimulationInput = {
-  rootNode: RootNode;
+  riskCatalogue: Risk[];
+  cascadeCatalogue: Record<string, RiskCascade>;
 
   options: SimulationOptions;
 };
 
 export type RiskEvent = {
-  risk: Risk | Actor;
+  risk: Risk;
   scenario: Scenario;
 
   source: RiskEvent | null;
 
   triggeredEvents: RiskEvent[];
-  totalImpact: Impact;
+  directImpact: AggregatedImpacts;
+  totalImpact: AggregatedImpacts;
+  impactContributions: Record<string, AggregatedImpacts>;
+};
+
+export type ImpactContributionStatistics = {
+  id: string | null;
+  risk: string;
+  scenario: Scenario | null;
+  contributionMean: AggregatedImpacts;
+  contributionStd: AggregatedImpacts;
+  contribution95Error: AggregatedImpacts;
+};
+
+export type EffectStatistics = {
+  id: string | null;
+  risk: string;
+  scenario: Scenario | null;
+  probabilityMean: number;
+  probabilityStd: number;
+  probability95Error: number;
+};
+
+export type TotalImpactStatistics = {
+  sampleMedian: AggregatedImpacts;
+  sampleStd: AggregatedImpacts;
+  relativeContributions: ImpactContributionStatistics[];
+  effectProbabilities: EffectStatistics[];
+  histogram: HistogramBinData[];
+  boxplots: BoxPlotData[];
 };
 
 export type AggregatedRiskEvent = {
@@ -122,14 +139,8 @@ export type RiskScenarioSimulationOutput = {
   name: string;
   category: RISK_CATEGORY;
   scenario: Scenario;
-  medianImpact: number;
-  totalProbability: number;
-  impact: HistogramBinData[];
-  indicators: BoxPlotData[];
-  cascadeContributions: CascadeContributionData[];
-  cascadeCounts: CascadeCountData[];
-  rootCauses: CauseProbabilityData[];
-  firstOrderCauses: CauseProbabilityData[];
+  probabilityStatistics: TotalProbabilityStatistics;
+  impactStatistics: TotalImpactStatistics;
 };
 
 export type SimulationRun = {
@@ -137,7 +148,7 @@ export type SimulationRun = {
   totalImpact: Impact;
 };
 
-export type SimulationOutput = {
+export type SimulationOutput2 = {
   risks: RiskScenarioSimulationOutput[];
 };
 
@@ -187,4 +198,17 @@ export const noAggregatedImpacts = {
   s: 0,
   e: 0,
   f: 0,
+};
+
+export type Diagnostics = {
+  riskScenarios: number;
+  simulationTime: number;
+  probabilityStatistics: {
+    total: number;
+    yearSimulation: number;
+    counting: number;
+    averageEvents: number;
+    perRiskEvent: Record<string, number>;
+  };
+  impactStatisticsTime: number;
 };

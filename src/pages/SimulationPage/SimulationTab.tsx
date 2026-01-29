@@ -30,6 +30,7 @@ import workerUrl from "../../functions/simulation/simulation.worker?worker&url";
 import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { SimulationWorker } from "../../functions/simulation/simulation.worker";
 import {
+  LogLevel,
   RiskScenarioSimulationOutput,
   Scenario,
 } from "../../functions/simulation/types";
@@ -37,7 +38,10 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  ComposedChart,
+  ErrorBar,
   Legend,
+  Line,
   RectangleProps,
   ResponsiveContainer,
   Tooltip,
@@ -51,13 +55,16 @@ import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import useSavedState from "../../hooks/useSavedState";
 import { DataGrid, GridColDef, GridDeleteIcon } from "@mui/x-data-grid";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
+import { NCCN_GREEN } from "../../functions/colors";
+import RiskMatrixChart from "../../components/charts/svg/RiskMatrixChart";
 import {
+  pDailyFromReturnPeriodMonths,
   pScale7FromReturnPeriodMonths,
   pTimeframeFromReturnPeriodMonths,
-  returnPeriodMonthsFromPDaily,
+  returnPeriodMonthsFromYearlyEventRate,
 } from "../../functions/indicators/probability";
-import RiskMatrixChart from "../../components/charts/svg/RiskMatrixChart";
-import { CascadeContributionData } from "../../functions/simulation/statistics";
+import { ProbabilityContributionStatistics } from "../../functions/simulation/probabilityStatistics";
+import { normalPDF } from "../../functions/simulation/impactStatistics";
 
 const HorizonBar = (props: RectangleProps) => {
   const { x, y, width, height } = props;
@@ -116,7 +123,8 @@ const CPImportanceColumns: GridColDef[] = [
   },
   {
     field: "effect",
-    valueGetter: (c: CascadeContributionData) => `${c.scenario} ${c.name}`,
+    valueGetter: (c: ProbabilityContributionStatistics) =>
+      `${c.scenario} ${c.risk}`,
     flex: 1,
   },
   { field: "cp", width: 200, type: "number" },
@@ -125,7 +133,7 @@ const CPImportanceColumns: GridColDef[] = [
 
 function getSimulationWorker() {
   const jsWorker = `import ${JSON.stringify(
-    new URL(workerUrl, import.meta.url)
+    new URL(workerUrl, import.meta.url),
   )}`;
   const blobWorker = new Blob([jsWorker], { type: "application/javascript" });
   const ww = new Worker(URL.createObjectURL(blobWorker), { type: "module" });
@@ -134,25 +142,31 @@ function getSimulationWorker() {
   return worker;
 }
 
-const RUNS = 10000;
-
 export default function SimulationTab() {
   const api = useAPI();
+  const [logLevel, setLogLevel] = useSavedState<LogLevel>(
+    "simulationLogLevel",
+    LogLevel.DEBUG,
+  );
   const [selectedRF, setSelectedRF] = useSavedState<DVRiskFile | null>(
     "simulationRiskFile",
-    null
+    null,
   );
   const [selectedScenario, setSelectedScenario] =
     useSavedState<Scenario | null>("simulationScenario", null);
+  const [numberOfYears, setNumberOfYears] = useSavedState(
+    "numberOfYears",
+    2000,
+  );
   const [numberOfSimulations, setNumberOfSimulations] = useSavedState(
     "numberOfSimulations",
-    2000
+    2000,
   );
   const [actions, setActions] = useState(["Idle"]);
   const [progress, setProgress] = useState(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [output, setOutput] = useState<RiskScenarioSimulationOutput[] | null>(
-    null
+    null,
   );
   const [showRiskFile, setShowRiskFile] =
     useState<RiskScenarioSimulationOutput | null>(null);
@@ -174,7 +188,7 @@ export default function SimulationTab() {
       rss
         ? getRiskCatalogueFromSnapshots(rss.map((r) => parseRiskSnapshot(r)))
         : null,
-    [rss]
+    [rss],
   );
 
   const { data: cs } = useQuery({
@@ -196,7 +210,7 @@ export default function SimulationTab() {
     const cascadeSnapshots = cs
       .filter((cs) => rc[cs._cr4de_cause_hazard_value])
       .map((cs) =>
-        snapshotFromRiskCascade(rc[cs._cr4de_cause_hazard_value], cs, true)
+        snapshotFromRiskCascade(rc[cs._cr4de_cause_hazard_value], cs, true),
       )
       .map(parseCascadeSnapshot);
 
@@ -211,19 +225,20 @@ export default function SimulationTab() {
             ? [selectedRF.cr4de_riskfilesid]
             : undefined,
           filterScenarios: selectedScenario ? [selectedScenario] : undefined,
-          minRuns: numberOfSimulations,
-          maxRuns: numberOfSimulations + 1,
+          numYears: numberOfYears,
+          numEvents: numberOfSimulations,
           relStd: 0.2,
         },
       },
-      proxy((message, runIndex) => {
-        setAction(message);
-        console.log(message);
-        if (runIndex !== undefined) {
-          // innerImpacts.push(runIndex);
-          setProgress(((runIndex + 1) / RUNS) * 100);
+      proxy((level, message, progress) => {
+        if (level > logLevel && message !== "") {
+          setAction(message);
         }
-      })
+        if (progress !== undefined) {
+          // innerImpacts.push(runIndex);
+          setProgress(progress);
+        }
+      }),
     );
 
     // setImpacts(output?.other.map((i) => i.all));
@@ -240,8 +255,8 @@ export default function SimulationTab() {
         output.find(
           (o) =>
             o.id === selectedRF.cr4de_riskfilesid &&
-            o.scenario === selectedScenario
-        ) || null
+            o.scenario === selectedScenario,
+        ) || null,
       );
   }, [output, selectedRF, selectedScenario]);
 
@@ -258,44 +273,50 @@ export default function SimulationTab() {
           Math.round(
             100 *
               (pScale7FromReturnPeriodMonths(
-                returnPeriodMonthsFromPDaily(risk.totalProbability),
-                100
+                returnPeriodMonthsFromYearlyEventRate(
+                  risk.probabilityStatistics.sampleMean,
+                ),
+                100,
               ) -
                 pScale7FromReturnPeriodMonths(
                   riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].tp
-                    .rpMonths || 0
-                ))
+                    .rpMonths || 0,
+                )),
           ) / 100,
         deltaTI:
           Math.round(
             100 *
-              (iScale7FromEuros(risk.medianImpact, undefined, 100) -
+              (iScale7FromEuros(
+                risk.impactStatistics.sampleMedian.all,
+                undefined,
+                100,
+              ) -
                 iScale7FromEuros(
                   riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].ti.all
-                    .euros || 0
-                ))
+                    .euros || 0,
+                )),
           ) / 100,
-        delta:
-          Math.round(
-            100 *
-              (Math.abs(
-                pScale7FromReturnPeriodMonths(
-                  returnPeriodMonthsFromPDaily(risk.totalProbability),
-                  100
-                ) -
-                  pScale7FromReturnPeriodMonths(
-                    riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].tp
-                      .rpMonths || 0
-                  )
-              ) +
-                Math.abs(
-                  iScale7FromEuros(risk.medianImpact, undefined, 100) -
-                    iScale7FromEuros(
-                      riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].ti
-                        .all.euros || 0
-                    )
-                ))
-          ) / 100,
+        delta: 0,
+        // Math.round(
+        //   100 *
+        //     (Math.abs(
+        //       pScale7FromReturnPeriodMonths(
+        //         returnPeriodMonthsFromPDaily(risk.totalProbability),
+        //         100
+        //       ) -
+        //         pScale7FromReturnPeriodMonths(
+        //           riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].tp
+        //             .rpMonths || 0
+        //         )
+        //     ) +
+        //       Math.abs(
+        //         iScale7FromEuros(risk.medianImpact, undefined, 100) -
+        //           iScale7FromEuros(
+        //             riskSnapshots?.[risk.id].cr4de_quanti[risk.scenario].ti
+        //               .all.euros || 0
+        //           )
+        //       ))
+        // ) / 100,
       }))
       .sort((a, b) => b.delta - a.delta);
   }, [output, riskSnapshots]);
@@ -303,7 +324,7 @@ export default function SimulationTab() {
   const CPimportance:
     | {
         cause: RiskScenarioSimulationOutput;
-        effect: CascadeContributionData;
+        effect: ProbabilityContributionStatistics;
         cp: number;
         impactPerCP: number;
       }[]
@@ -313,20 +334,20 @@ export default function SimulationTab() {
     const cps = [];
 
     for (const rf of output) {
-      for (const cc of rf.cascadeContributions) {
+      for (const cc of rf.probabilityStatistics.relativeContributions) {
         // Direct probability
         if (!cc.scenario) continue;
 
         const cascade = cs.find(
           (c) =>
             c._cr4de_cause_hazard_value === rf.id &&
-            c._cr4de_effect_hazard_value === cc.id
+            c._cr4de_effect_hazard_value === cc.id,
         );
 
         if (!cascade) continue;
 
         const css = parseCascadeSnapshot(
-          snapshotFromRiskCascade(riskSnapshots[rf.id], cascade)
+          snapshotFromRiskCascade(riskSnapshots[rf.id], cascade),
         );
 
         if (css.cr4de_quanti_cp[rf.scenario][cc.scenario].scale7 <= 0) continue;
@@ -337,10 +358,14 @@ export default function SimulationTab() {
           effect: cc,
           cp: css.cr4de_quanti_cp[rf.scenario][cc.scenario].scale7,
           impactPerCP: Math.round(
-            (rf.totalProbability *
-              rf.medianImpact *
-              cc.averageImpactContribution) /
-              css.cr4de_quanti_cp[rf.scenario][cc.scenario].scale7
+            (pDailyFromReturnPeriodMonths(
+              returnPeriodMonthsFromYearlyEventRate(
+                rf.probabilityStatistics.sampleMean,
+              ),
+            ) *
+              rf.impactStatistics.sampleMedian.all *
+              cc.contributionMean) /
+              css.cr4de_quanti_cp[rf.scenario][cc.scenario].scale7,
           ),
         });
       }
@@ -349,75 +374,140 @@ export default function SimulationTab() {
     return cps.sort((a, b) => b.impactPerCP - a.impactPerCP);
   }, [cs, output, riskSnapshots]);
 
-  console.log(CPimportance && CPimportance.slice(0, 20));
+  const normalPlot = useMemo(() => {
+    if (!showRiskFile) return [];
+
+    return new Array(80).fill(0).map((_, i) => {
+      return {
+        x: i / 10,
+        y:
+          Math.round(
+            1000 *
+              normalPDF(
+                i / 10,
+                iScale7FromEuros(
+                  showRiskFile.impactStatistics.sampleMedian.all,
+                ),
+                Math.sqrt(
+                  Math.log(
+                    1 +
+                      Math.pow(showRiskFile.impactStatistics.sampleStd.all, 2) /
+                        Math.pow(
+                          showRiskFile.impactStatistics.sampleMedian.all,
+                          2,
+                        ),
+                  ),
+                ) / 1.92,
+              ) *
+              0.5,
+          ) / 1000,
+      }; // bin width of 0.5, so we scale the pdf to match,
+    });
+  }, [showRiskFile]);
 
   return (
     // <Container sx={{ mb: 18 }}>
     <Box sx={{ m: 4 }}>
       <Card sx={{ mb: 4 }}>
         <CardContent sx={{}}>
+          <Stack direction="row" columnGap={5}>
+            <FormGroup sx={{ flex: 1 }}>
+              <FormControl>
+                <InputLabel id="rf-label">Riskfile to simulate</InputLabel>
+                <Select
+                  labelId="rf-label"
+                  variant="outlined"
+                  label="Riskfile to simulate"
+                  value={selectedRF?.cr4de_riskfilesid || ""}
+                  onChange={(e) =>
+                    setSelectedRF(
+                      rfs?.find(
+                        (rf) => rf.cr4de_riskfilesid === e.target.value,
+                      ) || null,
+                    )
+                  }
+                >
+                  <MenuItem value={""}>All</MenuItem>
+                  {rfs
+                    ?.filter((rf) => rf.cr4de_risk_type !== RISK_TYPE.EMERGING)
+                    .sort((a, b) =>
+                      a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id),
+                    )
+                    .map((rf) => (
+                      <MenuItem value={rf.cr4de_riskfilesid}>
+                        {rf.cr4de_hazard_id} {rf.cr4de_title}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+              <FormControl sx={{ mt: 2 }}>
+                <InputLabel id="scenario-label">
+                  Scenario to simulate
+                </InputLabel>
+                <Select<Scenario | "">
+                  labelId="scenario-label"
+                  variant="outlined"
+                  value={selectedScenario || ""}
+                  onChange={(e) =>
+                    setSelectedScenario(
+                      e.target.value !== "" ? e.target.value : null,
+                    )
+                  }
+                  label="Scenario to simulate"
+                >
+                  <MenuItem value={""}>All</MenuItem>
+                  <MenuItem value={SCENARIOS.CONSIDERABLE}>
+                    {SCENARIOS.CONSIDERABLE}
+                  </MenuItem>
+                  <MenuItem value={SCENARIOS.MAJOR}>{SCENARIOS.MAJOR}</MenuItem>
+                  <MenuItem value={SCENARIOS.EXTREME}>
+                    {SCENARIOS.EXTREME}
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </FormGroup>
+            <FormGroup sx={{ minWidth: 200 }}>
+              <FormControl sx={{ mt: 0 }}>
+                <TextField
+                  label="Number of years to simulate"
+                  value={numberOfYears}
+                  onChange={(e) => setNumberOfYears(parseInt(e.target.value))}
+                  variant="outlined"
+                  type="number"
+                ></TextField>
+              </FormControl>
+              <FormControl sx={{ mt: 2 }}>
+                <TextField
+                  label="Number of events to simulate"
+                  value={numberOfSimulations}
+                  onChange={(e) =>
+                    setNumberOfSimulations(parseInt(e.target.value))
+                  }
+                  variant="outlined"
+                  type="number"
+                ></TextField>
+              </FormControl>
+            </FormGroup>
+          </Stack>
           <FormGroup>
-            <FormControl>
-              <InputLabel id="rf-label">Riskfile to simulate</InputLabel>
-              <Select
-                labelId="rf-label"
-                variant="outlined"
-                label="Riskfile to simulate"
-                value={selectedRF?.cr4de_riskfilesid || ""}
-                onChange={(e) =>
-                  setSelectedRF(
-                    rfs?.find(
-                      (rf) => rf.cr4de_riskfilesid === e.target.value
-                    ) || null
-                  )
-                }
-              >
-                <MenuItem value={""}>All</MenuItem>
-                {rfs
-                  ?.filter((rf) => rf.cr4de_risk_type !== RISK_TYPE.EMERGING)
-                  .sort((a, b) =>
-                    a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id)
-                  )
-                  .map((rf) => (
-                    <MenuItem value={rf.cr4de_riskfilesid}>
-                      {rf.cr4de_hazard_id} {rf.cr4de_title}
-                    </MenuItem>
-                  ))}
-              </Select>
-            </FormControl>
             <FormControl sx={{ mt: 2 }}>
-              <InputLabel id="scenario-label">Scenario to simulate</InputLabel>
-              <Select<Scenario | "">
-                labelId="scenario-label"
+              <InputLabel id="scenario-label">Log level</InputLabel>
+              <Select<LogLevel | "">
+                labelId="loglevel-label"
                 variant="outlined"
-                value={selectedScenario || ""}
+                value={logLevel}
                 onChange={(e) =>
-                  setSelectedScenario(
-                    e.target.value !== "" ? e.target.value : null
-                  )
+                  e.target.value === ""
+                    ? LogLevel.INFO
+                    : setLogLevel(e.target.value)
                 }
-                label="Scenario to simulate"
+                label="Log Level"
               >
-                <MenuItem value={""}>All</MenuItem>
-                <MenuItem value={SCENARIOS.CONSIDERABLE}>
-                  {SCENARIOS.CONSIDERABLE}
-                </MenuItem>
-                <MenuItem value={SCENARIOS.MAJOR}>{SCENARIOS.MAJOR}</MenuItem>
-                <MenuItem value={SCENARIOS.EXTREME}>
-                  {SCENARIOS.EXTREME}
-                </MenuItem>
+                <MenuItem value={LogLevel.DEBUG}>DEBUG</MenuItem>
+                <MenuItem value={LogLevel.INFO}>INFO</MenuItem>
+                <MenuItem value={LogLevel.WARN}>WARN</MenuItem>
+                <MenuItem value={LogLevel.ERROR}>ERROR</MenuItem>
               </Select>
-            </FormControl>
-            <FormControl sx={{ mt: 2 }}>
-              <TextField
-                label="Number of events to simulate"
-                value={numberOfSimulations}
-                onChange={(e) =>
-                  setNumberOfSimulations(parseInt(e.target.value))
-                }
-                variant="outlined"
-                type="number"
-              ></TextField>
             </FormControl>
           </FormGroup>
           <Stack direction="column" sx={{ p: 1, my: 2 }}>
@@ -477,7 +567,7 @@ export default function SimulationTab() {
               onRowClick={(r) =>
                 setSelectedRF(
                   rfs?.find((rf) => rf.cr4de_hazard_id === r.row.hazardId) ||
-                    null
+                    null,
                 )
               }
               rowSelection={false}
@@ -525,41 +615,62 @@ export default function SimulationTab() {
                       //   }
                       //   return true;
                       // })
+                      // .filter(
+                      //   (r) =>
+                      //     ["M01", "M02", "M03", "M04", "M05"].indexOf(
+                      //       r.hazardId
+                      //     ) >= 0
+                      // )
                       .map((r) => ({
                         id: r.id,
+                        node: r,
                         hazardId: r.hazardId,
                         name: `${r.name} (${r.scenario})`,
                         scenario: r.scenario,
                         category: r.category,
                         totalImpact: iScale7FromEuros(
-                          r.medianImpact,
+                          r.impactStatistics.sampleMedian.all,
                           undefined,
-                          100
+                          100,
                         ),
                         totalProbability: pScale7FromReturnPeriodMonths(
-                          returnPeriodMonthsFromPDaily(r.totalProbability),
-                          100
+                          returnPeriodMonthsFromYearlyEventRate(
+                            r.probabilityStatistics.sampleMean,
+                          ),
+                          100,
                         ),
                         expectedImpact: iScale7FromEuros(
-                          r.medianImpact *
+                          r.impactStatistics.sampleMedian.all *
                             pTimeframeFromReturnPeriodMonths(
-                              returnPeriodMonthsFromPDaily(r.totalProbability),
-                              12
+                              returnPeriodMonthsFromYearlyEventRate(
+                                r.probabilityStatistics.sampleMean,
+                              ),
+                              12,
                             ),
                           undefined,
-                          100
+                          100,
                         ),
                       }))
-                  : // .filter((r) => r.expectedImpact > 4)
+                  : // .filter((r) => {
+                    //   console.log(r);
+                    //   console.log(
+                    //     returnPeriodMonthsFromPTimeframe(
+                    //       r.node.probabilityStatistics.sampleMean,
+                    //       12
+                    //     )
+                    //   );
+                    //   return true;
+                    // })
+                    // .filter((r) => r.expectedImpact > 4)
                     undefined
               }
               setSelectedNodeId={(
                 id: string | null,
-                scenario: Scenario | null
+                scenario: Scenario | null,
               ) => {
                 if (id !== null) {
                   setSelectedRF(
-                    rfs?.find((rf) => rf.cr4de_riskfilesid === id) || null
+                    rfs?.find((rf) => rf.cr4de_riskfilesid === id) || null,
                   );
                 }
                 if (scenario !== null) {
@@ -576,8 +687,12 @@ export default function SimulationTab() {
         <CardContent>
           <Box>
             <ResponsiveContainer width={"100%"} height={400}>
-              <BarChart
-                data={showRiskFile ? showRiskFile.impact : undefined}
+              <ComposedChart
+                data={
+                  showRiskFile
+                    ? showRiskFile.impactStatistics.histogram
+                    : undefined
+                }
                 margin={{
                   top: 5,
                   right: 30,
@@ -586,7 +701,22 @@ export default function SimulationTab() {
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis
+                  xAxisId="bins"
+                  dataKey="name"
+                  type="category"
+                  // tickFormatter={(x) => `TI${x}`}
+                  // domain={[0, 8]}
+                  // ticks={Array.from({ length: 18 }, (_, i) => i * 0.5)}
+                />
+                <XAxis
+                  xAxisId="curve"
+                  type="number"
+                  dataKey="x"
+                  domain={[-0.25, 8.25]}
+                  ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
+                  hide
+                />
                 <YAxis
                   domain={[0, "dataMax + 0.1"]}
                   tickFormatter={(value) => Math.abs(value).toFixed(2)}
@@ -594,7 +724,9 @@ export default function SimulationTab() {
                 <Tooltip />
                 <Legend />
                 <Bar
+                  xAxisId="bins"
                   dataKey="p"
+                  barSize={50}
                   fill="#8884d8"
                   // activeBar={<Rectangle fill="pink" stroke="blue" />}
                 >
@@ -604,9 +736,21 @@ export default function SimulationTab() {
                     strokeWidth={2}
                     stroke="green"
                     direction="y"
-                  /> */}
+                  />  */}
                 </Bar>
-              </BarChart>
+                <Line
+                  xAxisId="curve"
+                  data={normalPlot}
+                  type="monotone"
+                  dataKey="y"
+                  stroke="#000"
+                  opacity={0.5}
+                  strokeDasharray="5 5"
+                  strokeWidth={3}
+                  name="Normal Distribution"
+                  dot={false}
+                />
+              </ComposedChart>
             </ResponsiveContainer>
           </Box>
         </CardContent>
@@ -618,7 +762,11 @@ export default function SimulationTab() {
           <Box>
             <ResponsiveContainer width={"100%"} height={600}>
               <BarChart
-                data={showRiskFile ? showRiskFile.indicators : undefined}
+                data={
+                  showRiskFile
+                    ? showRiskFile.impactStatistics.boxplots
+                    : undefined
+                }
                 margin={{
                   top: 5,
                   right: 30,
@@ -726,19 +874,19 @@ export default function SimulationTab() {
           <Box>
             <ResponsiveContainer width={"100%"} height={800}>
               <BarChart
-                data={
-                  showRiskFile
-                    ? showRiskFile.cascadeContributions
-                        .filter((c) => c.averageImpactContribution > 0.01)
-                        .map((c) => ({
-                          ...c,
-                          name: `${c.name} (${c.scenario})`,
-                          fill: c.scenario
-                            ? SCENARIO_PARAMS[c.scenario].color
-                            : "#8884d8",
-                        }))
-                    : undefined
-                }
+                data={showRiskFile?.impactStatistics.relativeContributions
+                  .map((rc) => ({
+                    name: rc.risk,
+                    contributionMean:
+                      Math.round(1000 * rc.contributionMean.all) / 1000,
+                    contributionError: rc.contribution95Error.all,
+                    fill: rc.scenario
+                      ? SCENARIO_PARAMS[rc.scenario].color
+                      : NCCN_GREEN,
+                    // stdError: rc.stdError,
+                  }))
+                  .filter((rc) => rc.contributionMean > 0.01)
+                  .sort((a, b) => b.contributionMean - a.contributionMean)}
                 layout="vertical"
                 margin={{
                   top: 5,
@@ -748,22 +896,26 @@ export default function SimulationTab() {
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" domain={[0, 1]} />
+                <XAxis
+                  type="number"
+                  domain={[0, 1]}
+                  tickFormatter={(t) => String(Math.round(100 * t) / 100)}
+                />
                 <YAxis dataKey="name" type="category" width={200} />
                 <Tooltip />
                 <Legend />
                 <Bar
-                  dataKey="averageImpactContribution"
+                  dataKey="contributionMean"
                   fill="#8884d8"
                   // activeBar={<Rectangle fill="pink" stroke="blue" />}
                 >
-                  {/* <ErrorBar
-                    dataKey="stdError"
+                  <ErrorBar
+                    dataKey="contributionError"
                     width={4}
                     strokeWidth={2}
                     stroke="green"
                     direction="x"
-                  /> */}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -775,19 +927,23 @@ export default function SimulationTab() {
         <CardHeader title="Probability of cascade effects" />
         <CardContent>
           <Box>
-            <ResponsiveContainer width={"100%"} height={800}>
+            {/* <ResponsiveContainer width={"100%"} height={800}>
               <BarChart
                 data={
                   showRiskFile
-                    ? showRiskFile.cascadeCounts
-                        .filter((c) => c.id !== showRiskFile.id && c.p > 0.01)
+                    ? showRiskFile.impactStatistics.relativeContributions
                         .map((c) => ({
                           ...c,
-                          name: `${c.name} (${c.scenario})`,
+                          name: `${c.risk} (${c.scenario})`,
+                          contributionMean:
+                            Math.round(1000 * c.contributionMean.all) / 1000,
+                          contributionError: c.contribution95Error.all,
                           fill: c.scenario
                             ? SCENARIO_PARAMS[c.scenario].color
                             : "#8884d8",
                         }))
+                        .sort((a, b) => b.contributionMean - a.contributionMean)
+                        .filter((c) => c.contributionMean > 0.01)
                     : undefined
                 }
                 layout="vertical"
@@ -804,20 +960,20 @@ export default function SimulationTab() {
                 <Tooltip />
                 <Legend />
                 <Bar
-                  dataKey="p"
+                  dataKey="contributionMean"
                   fill="#8884d8"
                   // activeBar={<Rectangle fill="pink" stroke="blue" />}
                 >
-                  {/* <ErrorBar
-                    dataKey="stdError"
+                  <ErrorBar
+                    dataKey="contributionError"
                     width={4}
                     strokeWidth={2}
                     stroke="green"
                     direction="x"
-                  /> */}
+                  />
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>
+            </ResponsiveContainer> */}
           </Box>
         </CardContent>
       </Card>
@@ -830,21 +986,19 @@ export default function SimulationTab() {
               <BarChart
                 data={
                   showRiskFile
-                    ? showRiskFile.rootCauses
+                    ? showRiskFile.probabilityStatistics.relativeRootCauseContributions
                         .map((c) => ({
                           ...c,
-                          name: `${c.name} (${c.scenario})`,
-                          pRel:
-                            Math.round(
-                              (1000 * c.p) / showRiskFile!.totalProbability
-                            ) / 1000,
-                          rp: returnPeriodMonthsFromPDaily(c.p),
+                          name: `${c.risk} (${c.scenario})`,
+                          contributionMean:
+                            Math.round(1000 * c.contributionMean) / 1000,
+                          contributionError: c.contribution95Error,
                           fill: c.scenario
                             ? SCENARIO_PARAMS[c.scenario].color
                             : "#8884d8",
                         }))
-                        .sort((a, b) => b.pRel - a.pRel)
-                        .filter((c) => c.pRel > 0.01)
+                        .sort((a, b) => b.contributionMean - a.contributionMean)
+                        .filter((c) => c.contributionMean > 0.01)
                     : undefined
                 }
                 layout="vertical"
@@ -861,17 +1015,17 @@ export default function SimulationTab() {
                 <Tooltip />
                 <Legend />
                 <Bar
-                  dataKey="pRel"
+                  dataKey="contributionMean"
                   fill="#8884d8"
                   // activeBar={<Rectangle fill="pink" stroke="blue" />}
                 >
-                  {/* <ErrorBar
-                    dataKey="stdError"
+                  <ErrorBar
+                    dataKey="contributionError"
                     width={4}
                     strokeWidth={2}
                     stroke="green"
                     direction="x"
-                  /> */}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -887,21 +1041,19 @@ export default function SimulationTab() {
               <BarChart
                 data={
                   showRiskFile
-                    ? showRiskFile.firstOrderCauses
+                    ? showRiskFile.probabilityStatistics.relativeContributions
                         .map((c) => ({
                           ...c,
-                          name: `${c.name} (${c.scenario})`,
-                          pRel:
-                            Math.round(
-                              (1000 * c.p) / showRiskFile!.totalProbability
-                            ) / 1000,
-                          rp: returnPeriodMonthsFromPDaily(c.p),
+                          name: `${c.risk} (${c.scenario})`,
+                          contributionMean:
+                            Math.round(1000 * c.contributionMean) / 1000,
+                          contributionError: c.contribution95Error,
                           fill: c.scenario
                             ? SCENARIO_PARAMS[c.scenario].color
                             : "#8884d8",
                         }))
-                        .sort((a, b) => b.pRel - a.pRel)
-                        .filter((c) => c.pRel > 0.01)
+                        .sort((a, b) => b.contributionMean - a.contributionMean)
+                        .filter((c) => c.contributionMean > 0.01)
                     : undefined
                 }
                 layout="vertical"
@@ -918,17 +1070,17 @@ export default function SimulationTab() {
                 <Tooltip />
                 <Legend />
                 <Bar
-                  dataKey="pRel"
+                  dataKey="contributionMean"
                   fill="#8884d8"
                   // activeBar={<Rectangle fill="pink" stroke="blue" />}
                 >
-                  {/* <ErrorBar
-                    dataKey="stdError"
+                  <ErrorBar
+                    dataKey="contributionError"
                     width={4}
                     strokeWidth={2}
                     stroke="green"
                     direction="x"
-                  /> */}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

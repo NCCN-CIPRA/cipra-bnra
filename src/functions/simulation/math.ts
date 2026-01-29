@@ -20,19 +20,30 @@ export function negImpact<T = Impact | AggregatedImpacts>(a: T): T {
   return result;
 }
 
+export function subtractImpacts<T = Impact | AggregatedImpacts>(a: T, b: T): T {
+  return addImpact(a, negImpact(b));
+}
+
+export function multiplyImpact<T = Impact | AggregatedImpacts>(
+  impact: T,
+  multiplicator: number
+) {
+  const result = { ...impact };
+
+  for (const key in result) {
+    (result[key] as number) = (result[key] as number) * multiplicator;
+  }
+
+  return result;
+}
+
 export function divideImpact<T = Impact | AggregatedImpacts>(
   impact: T,
   divisor: number
 ) {
   if (divisor === 0) throw new Error("Division by zero in divideImpact");
 
-  const result = { ...impact };
-
-  for (const key in result) {
-    (result[key] as number) = (result[key] as number) / divisor;
-  }
-
-  return result;
+  return multiplyImpact(impact, 1 / divisor);
 }
 
 export function divideImpacts<T = Impact | AggregatedImpacts>(

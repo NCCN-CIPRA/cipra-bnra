@@ -36,11 +36,12 @@ import { getAntiForgeryToken } from "./functions/api";
 import AdministrationPage from "./pages/AdministrationPage/AdministrationPage";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import RiskLogPage from "./pages/RiskLogPage/RiskLogPage";
+import SimulationPage from "./pages/SimulationPage/SimulationPage";
 
 export default function App() {
   useEffect(() => {
     getAntiForgeryToken().then((token) =>
-      localStorage.setItem("antiforgerytoken", token)
+      localStorage.setItem("antiforgerytoken", token),
     );
   }, []);
 
@@ -234,6 +235,14 @@ export default function App() {
               element: (
                 <ProtectedRoute allowedRole="admin">
                   <AdministrationPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: "/admin/simulation/:tabName?",
+              element: (
+                <ProtectedRoute allowedRole="admin">
+                  <SimulationPage />
                 </ProtectedRoute>
               ),
             },

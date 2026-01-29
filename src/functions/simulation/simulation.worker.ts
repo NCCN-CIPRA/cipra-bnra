@@ -6,7 +6,7 @@ import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { prepareData } from "./prepareData";
 import { runSimulations } from "./monteCarlo";
-import { SimulationOptions, SimulationOutput } from "./types";
+import { LogLevel, SimulationOptions, SimulationOutput2 } from "./types";
 
 const simulate = async (
   data: {
@@ -14,12 +14,12 @@ const simulate = async (
     cascades: DVCascadeSnapshot[];
     options: SimulationOptions;
   },
-  onProgress: (message: string, runIndex?: number) => void
-): Promise<SimulationOutput | null> => {
+  onProgress: (level: LogLevel, message: string, runIndex?: number) => void,
+): Promise<SimulationOutput2 | null> => {
   try {
     const { riskFiles, cascades, options } = data;
 
-    onProgress("Preparing data for monte carlo simulation.");
+    onProgress(LogLevel.INFO, "Preparing data for monte carlo simulation.");
 
     const input = prepareData(riskFiles, cascades);
     input.options = options;
@@ -38,12 +38,15 @@ const simulate = async (
     // const output = runSimulation(input, onFinishRun);
     const output = runSimulations(input, onProgress);
 
-    onProgress(`Done - Simulation took ${(Date.now() - start) / 1000} seconds`);
+    onProgress(
+      LogLevel.INFO,
+      `Done - Simulation took ${(Date.now() - start) / 1000} seconds`,
+    );
 
     return output;
     // return doc;
   } catch (e) {
-    console.log("Rendering error", e);
+    console.log(LogLevel.ERROR, "Rendering error", e);
 
     return null;
   }

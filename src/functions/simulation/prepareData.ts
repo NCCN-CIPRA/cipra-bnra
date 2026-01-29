@@ -1,36 +1,40 @@
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
-import { Actor, Risk, SimulationInput } from "./types";
+import {
+  noImpact,
+  Risk,
+  RiskCascade,
+  Scenario,
+  SimulationInput,
+} from "./types";
 import { pDailyFromReturnPeriodMonths } from "../indicators/probability";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
+import { pDailyFromMScale7 } from "../indicators/motivation";
 
 export function prepareData(
   risks: DVRiskSnapshot[],
-  cascades: DVCascadeSnapshot[]
+  cascades: DVCascadeSnapshot[],
 ): SimulationInput {
   const standardRisks = risks.filter(
-    (r) => r.cr4de_risk_type === RISK_TYPE.STANDARD
+    (r) => r.cr4de_risk_type === RISK_TYPE.STANDARD,
   );
   const actorRisks = risks.filter(
-    (r) => r.cr4de_risk_type === RISK_TYPE.MANMADE
+    (r) => r.cr4de_risk_type === RISK_TYPE.MANMADE,
   );
 
   const input: SimulationInput = {
-    rootNode: {
-      id: null,
-      risks: [],
-      actors: [],
-    },
+    riskCatalogue: [],
+    cascadeCatalogue: {},
     options: {
       filterRiskFileIds: undefined,
       filterScenarios: undefined,
-      minRuns: 0,
-      maxRuns: 0,
+      numEvents: 0,
+      numYears: 0,
       relStd: 0,
     },
   };
 
-  const riskCatalog: Record<string, Risk> = standardRisks.reduce(
+  const standardCatalogue: Record<string, Risk> = standardRisks.reduce(
     (acc, risk) => ({
       ...acc,
       [risk._cr4de_risk_file_value]: {
@@ -38,6 +42,7 @@ export function prepareData(
         hazardId: risk.cr4de_hazard_id,
         name: risk.cr4de_title,
         category: risk.cr4de_category,
+        actor: false,
         cascades: [],
         directImpact: {
           considerable: {
@@ -79,119 +84,182 @@ export function prepareData(
         },
       } as Risk,
     }),
-    {}
+    {},
   );
-  const actorCatalog: Record<string, Actor> = actorRisks.reduce((acc, risk) => {
-    const actor = {
-      id: risk._cr4de_risk_file_value,
-      name: risk.cr4de_title,
-      category: risk.cr4de_category,
-      directImpact: undefined,
-      attacks: [],
-    };
+  const actorCatalogue: Record<string, Risk> = actorRisks.reduce(
+    (acc, risk) => {
+      const actor: Risk = {
+        id: risk._cr4de_risk_file_value,
+        hazardId: risk.cr4de_hazard_id,
+        name: risk.cr4de_title,
+        category: risk.cr4de_category,
+        actor: true,
+        directImpact: {
+          considerable: { ...noImpact },
+          major: { ...noImpact },
+          extreme: { ...noImpact },
+        },
+      };
 
-    input.rootNode.actors.push(actor);
+      return {
+        ...acc,
+        [risk._cr4de_risk_file_value]: actor,
+      };
+    },
+    {},
+  );
 
-    return {
-      ...acc,
-      [risk._cr4de_risk_file_value]: actor,
-    };
-  }, {});
+  const riskCatalogue: Record<string, Risk> = {
+    ...standardCatalogue,
+    ...actorCatalogue,
+  };
+  const allCascades: RiskCascade[] = [];
 
   for (const risk of standardRisks) {
-    input.rootNode.risks.push({
-      cause: input.rootNode,
+    allCascades.push({
+      cause: null,
       causeScenario: null,
-      effect: riskCatalog[risk._cr4de_risk_file_value],
+      effect: riskCatalogue[risk._cr4de_risk_file_value],
       probabilities: {
         considerable: pDailyFromReturnPeriodMonths(
-          risk.cr4de_quanti.considerable.dp.rpMonths
+          risk.cr4de_quanti.considerable.dp.rpMonths,
         ),
         major: pDailyFromReturnPeriodMonths(
-          risk.cr4de_quanti.major.dp.rpMonths
+          risk.cr4de_quanti.major.dp.rpMonths,
         ),
         extreme: pDailyFromReturnPeriodMonths(
-          risk.cr4de_quanti.extreme.dp.rpMonths
+          risk.cr4de_quanti.extreme.dp.rpMonths,
         ),
       },
     });
   }
 
+  for (const risk of actorRisks) {
+    allCascades.push({
+      cause: null,
+      causeScenario: null,
+      effect: riskCatalogue[risk._cr4de_risk_file_value],
+      probabilities: {
+        considerable: 1,
+        major: 1,
+        extreme: 1,
+      },
+    });
+  }
+
   for (const cascade of cascades) {
-    const cause = riskCatalog[cascade._cr4de_cause_risk_value];
-    const effect = riskCatalog[cascade._cr4de_effect_risk_value];
+    const cause = riskCatalogue[cascade._cr4de_cause_risk_value];
+    const effect = riskCatalogue[cascade._cr4de_effect_risk_value];
 
-    if (!effect) continue;
+    if (!cause || !effect) {
+      // console.error("Coulnd't find cause/effect: ", cascade);
+      continue;
+    }
 
-    if (!cause) {
-      // Check if cause is an actor risk
-      const actorRisk = actorCatalog[cascade._cr4de_cause_risk_value];
-      if (actorRisk) {
-        actorRisk.attacks.push({
-          cause: actorRisk,
-          causeScenario: "considerable",
+    if (cause.actor) {
+      // The CP (or M) values for actor -> attack cascades, are given as
+      // probabilities for the actor to succesfully execute the given attack
+      // in the following 3 years.
+      // Thus we need to rescale the cascade probabilities to a daily probability
+      const riskCascades = [
+        {
+          cause,
+          causeScenario: "considerable" as Scenario,
+          effect,
+          probabilities: {
+            considerable: pDailyFromMScale7(
+              cascade.cr4de_quanti_cp.considerable.considerable.scale7,
+            ),
+            major: pDailyFromMScale7(
+              cascade.cr4de_quanti_cp.considerable.major.scale7,
+            ),
+            extreme: pDailyFromMScale7(
+              cascade.cr4de_quanti_cp.considerable.extreme.scale7,
+            ),
+          },
+        },
+        {
+          cause,
+          causeScenario: "major" as Scenario,
+          effect,
+          probabilities: {
+            considerable: pDailyFromMScale7(
+              cascade.cr4de_quanti_cp.major.considerable.scale7,
+            ),
+            major: pDailyFromMScale7(
+              cascade.cr4de_quanti_cp.major.major.scale7,
+            ),
+            extreme: pDailyFromMScale7(
+              cascade.cr4de_quanti_cp.major.extreme.scale7,
+            ),
+          },
+        },
+        {
+          cause,
+          causeScenario: "extreme" as Scenario,
+          effect,
+          probabilities: {
+            considerable: pDailyFromMScale7(
+              cascade.cr4de_quanti_cp.extreme.considerable.scale7,
+            ),
+            major: pDailyFromMScale7(
+              cascade.cr4de_quanti_cp.extreme.major.scale7,
+            ),
+            extreme: pDailyFromMScale7(
+              cascade.cr4de_quanti_cp.extreme.extreme.scale7,
+            ),
+          },
+        },
+      ];
+
+      allCascades.push(...riskCascades);
+    } else {
+      const riskCascades = [
+        {
+          cause,
+          causeScenario: "considerable" as Scenario,
           effect,
           probabilities: {
             considerable: cascade.cr4de_quanti_cp.considerable.considerable.abs,
             major: cascade.cr4de_quanti_cp.considerable.major.abs,
             extreme: cascade.cr4de_quanti_cp.considerable.extreme.abs,
           },
-        });
-        actorRisk.attacks.push({
-          cause: actorRisk,
-          causeScenario: "major",
+        },
+        {
+          cause,
+          causeScenario: "major" as Scenario,
           effect,
           probabilities: {
             considerable: cascade.cr4de_quanti_cp.major.considerable.abs,
             major: cascade.cr4de_quanti_cp.major.major.abs,
             extreme: cascade.cr4de_quanti_cp.major.extreme.abs,
           },
-        });
-        actorRisk.attacks.push({
-          cause: actorRisk,
-          causeScenario: "extreme",
+        },
+        {
+          cause,
+          causeScenario: "extreme" as Scenario,
           effect,
           probabilities: {
             considerable: cascade.cr4de_quanti_cp.extreme.considerable.abs,
             major: cascade.cr4de_quanti_cp.extreme.major.abs,
             extreme: cascade.cr4de_quanti_cp.extreme.extreme.abs,
           },
-        });
-      }
-      continue;
-    }
+        },
+      ];
 
-    cause.cascades.push({
-      cause,
-      causeScenario: "considerable",
-      effect,
-      probabilities: {
-        considerable: cascade.cr4de_quanti_cp.considerable.considerable.abs,
-        major: cascade.cr4de_quanti_cp.considerable.major.abs,
-        extreme: cascade.cr4de_quanti_cp.considerable.extreme.abs,
-      },
-    });
-    cause.cascades.push({
-      cause,
-      causeScenario: "major",
-      effect,
-      probabilities: {
-        considerable: cascade.cr4de_quanti_cp.major.considerable.abs,
-        major: cascade.cr4de_quanti_cp.major.major.abs,
-        extreme: cascade.cr4de_quanti_cp.major.extreme.abs,
-      },
-    });
-    cause.cascades.push({
-      cause,
-      causeScenario: "extreme",
-      effect,
-      probabilities: {
-        considerable: cascade.cr4de_quanti_cp.extreme.considerable.abs,
-        major: cascade.cr4de_quanti_cp.extreme.major.abs,
-        extreme: cascade.cr4de_quanti_cp.extreme.extreme.abs,
-      },
-    });
+      allCascades.push(...riskCascades);
+    }
   }
+
+  input.riskCatalogue = [...Object.values(riskCatalogue)].flat();
+  input.cascadeCatalogue = allCascades.reduce((acc, cascade) => {
+    acc[
+      `${cascade.cause?.id || null}__${cascade.causeScenario}__${
+        cascade.effect.id
+      }`
+    ] = cascade;
+    return acc;
+  }, {} as Record<string, RiskCascade>);
 
   return input;
 }

@@ -92,11 +92,11 @@ const CustomTooltip = ({
         </Typography>
         <Typography variant="subtitle2">
           {`Probability: P${
-            Math.round((payload?.[1]?.value as number) * 2) / 2
+            Math.round((payload?.[1]?.value as number) * 10) / 10
           }`}
         </Typography>
         <Typography variant="subtitle2">
-          {`Impact: I${Math.round((payload?.[0]?.value as number) * 2) / 2}`}
+          {`Impact: I${Math.round((payload?.[0]?.value as number) * 10) / 10}`}
         </Typography>
         <Typography variant="subtitle2">
           {`Yearly Expected Impact: I${
@@ -109,6 +109,63 @@ const CustomTooltip = ({
 
   return null;
 };
+
+type Point = { x: number; y: number };
+
+const X_MIN = 0;
+const X_MAX = 8;
+const Y_MIN = 0;
+const Y_MAX = 8;
+
+function clipLineToBox(m: number, b: number): Point[] | null {
+  const points: Point[] = [];
+
+  // x = 0
+  {
+    const x = X_MIN;
+    const y = m * x + b;
+    if (y >= Y_MIN && y <= Y_MAX) points.push({ x, y });
+  }
+
+  // x = 8
+  {
+    const x = X_MAX;
+    const y = m * x + b;
+    if (y >= Y_MIN && y <= Y_MAX) points.push({ x, y });
+  }
+
+  // y = 0
+  {
+    const y = Y_MIN;
+    const x = (y - b) / m;
+    if (x >= X_MIN && x <= X_MAX) points.push({ x, y });
+  }
+
+  // y = 8
+  {
+    const y = Y_MAX;
+    const x = (y - b) / m;
+    if (x >= X_MIN && x <= X_MAX) points.push({ x, y });
+  }
+
+  // Valid line must intersect the box in exactly 2 points
+  if (points.length < 2) return null;
+
+  // Remove duplicates (corner hits)
+  const unique = Array.from(
+    new Map(points.map((p) => [`${p.x},${p.y}`, p])).values()
+  );
+
+  return unique.length === 2 ? unique : null;
+}
+
+const slope = -7 / 8;
+const intercepts: Point[][] = [];
+
+for (let b = -7; b <= 20; b += 2) {
+  const segment = clipLineToBox(slope, b);
+  if (segment) intercepts.push(segment);
+}
 
 export default function RiskMatrixChart({
   data,
@@ -153,14 +210,14 @@ export default function RiskMatrixChart({
         </defs>
         <CartesianGrid fill="url(#colorUv)" />
 
-        {[2, 4, 6, 8, 10, 12, 14, 16].map((i) => (
+        {intercepts.map((segment, i) => (
           <ReferenceLine
-            stroke="rgba(0,0,0,0.2)"
-            strokeDasharray="3 3"
-            segment={[
-              { x: Math.min(8, i), y: Math.max(0, i - 8) },
-              { x: Math.max(0, i - 8), y: Math.min(8, i) },
-            ]}
+            key={i}
+            segment={segment}
+            stroke="#000"
+            strokeOpacity={0.1}
+            strokeDasharray="10 10"
+            strokeWidth={4}
           />
         ))}
 
@@ -182,6 +239,10 @@ export default function RiskMatrixChart({
           shared={false}
           cursor={{ strokeDasharray: "3 3" }}
           content={CustomTooltip}
+        />
+        <Scatter
+          data={[{ totalProbability: 0, totalImpact: 0 }]}
+          fillOpacity={0}
         />
         {/* <Tooltip /> */}
         {/* <Scatter

@@ -58,6 +58,16 @@ export function returnPeriodMonthsFromPTimeframe(
   return Math.abs(-timeframeMonths / Math.log(1 - pTimeframe));
 }
 
+export function returnPeriodMonthsFromYearlyEventRate(
+  averageYearlyEvents: number
+) {
+  const returnPeriodYears = 1 / averageYearlyEvents;
+
+  const returnPeriodMonths = 12 * returnPeriodYears;
+
+  return returnPeriodMonths;
+}
+
 export function pDailyFromReturnPeriodMonths(rpMonths: number | null) {
   return pTimeframeFromReturnPeriodMonths(rpMonths, 1 / 30.437);
 }

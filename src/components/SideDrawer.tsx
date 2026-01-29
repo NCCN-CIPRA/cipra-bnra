@@ -20,6 +20,7 @@ import SummarizeIcon from "@mui/icons-material/Summarize";
 import GroupIcon from "@mui/icons-material/Group";
 import TranslateIcon from "@mui/icons-material/Translate";
 import InfoIcon from "@mui/icons-material/Info";
+import CalculateIcon from "@mui/icons-material/Calculate";
 
 export default function SideDrawer({
   user,
@@ -124,8 +125,22 @@ export default function SideDrawer({
                       <ListItemText
                         primary={t(
                           "sideDrawer.administration",
-                          "Administration"
+                          "Administration",
                         )}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      component={Link}
+                      to="/admin/simulation"
+                      onClick={onClose}
+                    >
+                      <ListItemIcon sx={{ pl: "7px" }}>
+                        <CalculateIcon />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={t("sideDrawer.simulation", "Simulation")}
                       />
                     </ListItemButton>
                   </ListItem>
@@ -184,7 +199,7 @@ export default function SideDrawer({
                       <ListItemText
                         primary={t(
                           "sideDrawer.translations",
-                          "App Translation"
+                          "App Translation",
                         )}
                       />
                     </ListItemButton>
@@ -217,7 +232,7 @@ export default function SideDrawer({
                     <ListItemText
                       primary={t(
                         "sideDrawer.informationPortal",
-                        "Information Portal"
+                        "Information Portal",
                       )}
                     />
                   </ListItemButton>
