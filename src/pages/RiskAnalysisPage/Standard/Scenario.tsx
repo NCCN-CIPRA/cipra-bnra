@@ -1,6 +1,8 @@
 import { Box } from "@mui/material";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
+import HTMLEditor from "../../../components/HTMLEditor";
+import useAPI from "../../../hooks/useAPI";
 
 export default function Scenario({
   riskFile,
@@ -9,6 +11,8 @@ export default function Scenario({
   riskFile: DVRiskSnapshot<unknown, unknown>;
   scenario: SCENARIOS;
 }) {
+  const api = useAPI();
+
   return (
     <Box
       sx={{
@@ -20,11 +24,13 @@ export default function Scenario({
         background: "white",
       }}
     >
-      <Box
-        className="htmleditor"
-        dangerouslySetInnerHTML={{
-          __html: riskFile.cr4de_quali_scenario_mrs || "",
-        }}
+      <HTMLEditor
+        initialHTML={riskFile.cr4de_quali_scenario_mrs || ""}
+        onSave={(newHTML) =>
+          api.updateRiskFile(riskFile._cr4de_risk_file_value, {
+            cr4de_mrs_scenario: newHTML || undefined,
+          })
+        }
       />
     </Box>
   );
