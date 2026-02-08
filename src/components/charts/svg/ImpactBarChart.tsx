@@ -18,11 +18,16 @@ import {
   DVRiskSnapshot,
   RiskSnapshotResults,
 } from "../../../types/dataverse/DVRiskSnapshot";
-import { categoryImpactScale5to7 } from "../../../functions/indicators/impact";
+import {
+  categoryImpactScale5to7,
+  iScale7FromEuros,
+} from "../../../functions/indicators/impact";
+import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
 
 export default function ImpactBarChart({
   riskFile,
   scenario,
+  results,
   width,
   height,
   maxScales,
@@ -30,6 +35,7 @@ export default function ImpactBarChart({
 }: {
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   scenario: SCENARIOS;
+  results?: RiskFileQuantiResults | null;
   width?: number;
   height?: number;
   maxScales: number;
@@ -38,22 +44,37 @@ export default function ImpactBarChart({
   const { t } = useTranslation();
   if (!riskFile) return null;
 
-  const H =
+  let H =
     maxScales === 7
       ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.h.scaleCat)
       : riskFile.cr4de_quanti[scenario].ti.h.scaleCat;
-  const S =
+  let S =
     maxScales === 7
       ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.s.scaleCat)
       : riskFile.cr4de_quanti[scenario].ti.s.scaleCat;
-  const E =
+  let E =
     maxScales === 7
       ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.e.scaleCat)
       : riskFile.cr4de_quanti[scenario].ti.e.scaleCat;
-  const F =
+  let F =
     maxScales === 7
       ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.f.scaleCat)
       : riskFile.cr4de_quanti[scenario].ti.f.scaleCat;
+
+  if (results) {
+    H = iScale7FromEuros(
+      results[scenario].impactStatistics?.sampleMedian.h || 0,
+    );
+    S = iScale7FromEuros(
+      results[scenario].impactStatistics?.sampleMedian.s || 0,
+    );
+    E = iScale7FromEuros(
+      results[scenario].impactStatistics?.sampleMedian.e || 0,
+    );
+    F = iScale7FromEuros(
+      results[scenario].impactStatistics?.sampleMedian.f || 0,
+    );
+  }
 
   const data = [
     {

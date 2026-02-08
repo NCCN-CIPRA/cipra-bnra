@@ -5,7 +5,7 @@ import {
   RiskCascade,
   Scenario,
   SimulationInput,
-} from "./types";
+} from "../../types/simulation";
 import { pDailyFromReturnPeriodMonths } from "../indicators/probability";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";

@@ -14,8 +14,8 @@ import {
   RiskScenarioSimulationOutput,
   Scenario,
   SimulationInput,
-  SimulationOutput2,
-} from "./types";
+  SimulationOutput,
+} from "../../types/simulation";
 import {
   countYearlyEvents,
   getProbabilityStatistics,
@@ -24,7 +24,7 @@ import {
 export function runSimulations(
   input: SimulationInput,
   onProgress: (level: number, m: string, i?: number) => void,
-): SimulationOutput2 {
+): SimulationOutput {
   const risks: RiskScenarioSimulationOutput[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

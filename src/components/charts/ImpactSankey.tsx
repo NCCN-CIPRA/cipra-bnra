@@ -22,6 +22,7 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Typography } from "@mui/material";
+import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
 
 const baseY = 50;
 
@@ -35,6 +36,7 @@ export function ImpactSankeyBox({
   riskSnapshot,
   cascades,
   scenario,
+  results,
   width = "100%",
   height = "100%",
   onClick,
@@ -42,6 +44,7 @@ export function ImpactSankeyBox({
   riskSnapshot: DVRiskSnapshot;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
+  results: RiskFileQuantiResults | null;
   width?: number | string;
   height?: number | string;
   onClick: (id: string) => void;
@@ -59,6 +62,7 @@ export function ImpactSankeyBox({
           riskSnapshot={riskSnapshot}
           cascades={cascades}
           scenario={scenario}
+          results={results}
           tooltip={true}
           onClick={onClick}
         />
@@ -71,6 +75,7 @@ export default function ImpactSankey({
   riskSnapshot,
   cascades,
   scenario,
+  results,
   width,
   height,
   tooltip = true,
@@ -79,12 +84,59 @@ export default function ImpactSankey({
   riskSnapshot: DVRiskSnapshot;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
+  results: RiskFileQuantiResults | null;
   width?: number;
   height?: number;
   tooltip?: boolean;
   onClick: (id: string) => void;
 }) {
-  const effects = getEffectsSummaries(riskSnapshot, cascades, scenario, true);
+  let effects: EffectRisksSummary[] = [];
+
+  if (!results) {
+    effects = getEffectsSummaries(riskSnapshot, cascades, scenario, true);
+  } else {
+    const sums =
+      results[scenario].impactStatistics?.relativeContributions.reduce(
+        (acc, c) => ({
+          ...acc,
+          [c.id || ""]: {
+            effect_risk_id: c.id || "",
+            effect_risk_title: c.risk,
+            effect_risk_i:
+              (acc[c.id || ""]?.effect_risk_i || 0) + c.contributionMean.all,
+          },
+        }),
+        {} as Record<string, EffectRisksSummary>,
+      ) || {};
+    console.log(results[scenario].impactStatistics?.relativeContributions);
+    effects = Object.values(sums)
+      .sort((a, b) => b.effect_risk_i - a.effect_risk_i)
+      .reduce(
+        (acc, e) => {
+          if (acc.totalI > 0.8) {
+            let lastEffect = acc.effects[acc.effects.length - 1];
+            if (!lastEffect.other_effects) {
+              lastEffect = {
+                effect_risk_id: "",
+                effect_risk_title: "Other effects",
+                effect_risk_i: 0,
+                other_effects: [],
+              };
+              acc.effects.push(lastEffect);
+            }
+            lastEffect.other_effects!.push({ ...e });
+            lastEffect.effect_risk_i += e.effect_risk_i;
+            return acc;
+          }
+
+          return {
+            effects: [...acc.effects, e],
+            totalI: acc.totalI + e.effect_risk_i,
+          };
+        },
+        { effects: [] as EffectRisksSummary[], totalI: 0 },
+      ).effects;
+  }
 
   const nodes: EffectSankeyNode[] = [
     { name: `risk.${riskSnapshot.cr4de_hazard_id}.name` },

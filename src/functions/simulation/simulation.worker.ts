@@ -6,7 +6,11 @@ import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import { prepareData } from "./prepareData";
 import { runSimulations } from "./monteCarlo";
-import { LogLevel, SimulationOptions, SimulationOutput2 } from "./types";
+import {
+  LogLevel,
+  SimulationOptions,
+  SimulationOutput,
+} from "../../types/simulation";
 
 const simulate = async (
   data: {
@@ -15,7 +19,7 @@ const simulate = async (
     options: SimulationOptions;
   },
   onProgress: (level: LogLevel, message: string, runIndex?: number) => void,
-): Promise<SimulationOutput2 | null> => {
+): Promise<SimulationOutput | null> => {
   try {
     const { riskFiles, cascades, options } = data;
 

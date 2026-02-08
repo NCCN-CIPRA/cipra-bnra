@@ -1,4 +1,24 @@
-import { AggregatedImpacts, Impact } from "./types";
+import { AggregatedImpacts, Impact } from "../../types/simulation";
+
+export function round(n: number, digits: number) {
+  const f = Math.pow(10, digits);
+  return Math.round(n * f) / f;
+}
+
+export function roundImpact<T = Impact | AggregatedImpacts>(
+  n: T,
+  digits: number,
+) {
+  const f = Math.pow(10, digits);
+
+  const result = { ...n };
+
+  for (const key in n) {
+    (result[key] as number) = Math.round((n[key] as number) * f) / f;
+  }
+
+  return result;
+}
 
 export function addImpact<T = Impact | AggregatedImpacts>(a: T, b: T): T {
   const result = { ...a };
@@ -26,7 +46,7 @@ export function subtractImpacts<T = Impact | AggregatedImpacts>(a: T, b: T): T {
 
 export function multiplyImpact<T = Impact | AggregatedImpacts>(
   impact: T,
-  multiplicator: number
+  multiplicator: number,
 ) {
   const result = { ...impact };
 
@@ -39,7 +59,7 @@ export function multiplyImpact<T = Impact | AggregatedImpacts>(
 
 export function divideImpact<T = Impact | AggregatedImpacts>(
   impact: T,
-  divisor: number
+  divisor: number,
 ) {
   if (divisor === 0) throw new Error("Division by zero in divideImpact");
 
@@ -48,7 +68,7 @@ export function divideImpact<T = Impact | AggregatedImpacts>(
 
 export function divideImpacts<T = Impact | AggregatedImpacts>(
   impact: T,
-  divisor: T
+  divisor: T,
 ) {
   const result = { ...impact };
 
@@ -66,7 +86,7 @@ export function divideImpacts<T = Impact | AggregatedImpacts>(
 
 export function powImpact<T = Impact | AggregatedImpacts>(
   impact: T,
-  exponent: number
+  exponent: number,
 ) {
   const result = { ...impact };
 

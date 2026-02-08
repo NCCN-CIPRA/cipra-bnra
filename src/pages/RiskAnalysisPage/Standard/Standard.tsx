@@ -23,15 +23,18 @@ import {
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../../BasePage";
 import { CascadeSnapshots } from "../../../functions/cascades";
+import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
 
 export default function Standard({
   riskSummary,
   riskFile,
   cascades,
+  results,
 }: {
   riskSummary: DVRiskSummary;
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
+  results: RiskFileQuantiResults | null;
 }) {
   const { environment } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
@@ -53,6 +56,7 @@ export default function Standard({
           riskFile={riskFile}
           cascades={cascades}
           scenario={scenario}
+          results={results}
           setScenario={setScenario}
         />
       </Box>
@@ -62,7 +66,7 @@ export default function Standard({
           <Alert severity="warning">
             {t(
               "risks.analysis.scenarioChange",
-              "You have changed the scenario is the sankey diagram above. Please be aware the the qualitative analysis results below only apply to the Most Relevant Scenario."
+              "You have changed the scenario is the sankey diagram above. Please be aware the the qualitative analysis results below only apply to the Most Relevant Scenario.",
             )}
           </Alert>
         </Box>

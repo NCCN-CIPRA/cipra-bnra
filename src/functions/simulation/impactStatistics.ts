@@ -10,6 +10,8 @@ import {
   divideImpacts,
   multiplyImpact,
   powImpact,
+  round,
+  roundImpact,
   subtractImpacts,
 } from "./math";
 import {
@@ -21,7 +23,9 @@ import {
   noImpact,
   RiskEvent,
   TotalImpactStatistics,
-} from "./types";
+  BoxPlotData,
+  HistogramBinData,
+} from "../../types/simulation";
 
 export default function getImpactStatistics(
   events: RiskEvent[],
@@ -131,13 +135,13 @@ function getSampleStatistics(events: RiskEvent[]): {
 } {
   // Step 2.1: The median value is used for each impact indicator to
   //           reduce the effect of outliers.
-  const sampleMedian = getSampleMedian(events);
+  const sampleMedian = roundImpact(getSampleMedian(events), 0);
 
   return {
     sampleMedian: sampleMedian,
     // Step 2.2: The sample variance (and corresponding standard deviation)
     //           is given by
-    sampleStd: getSampleStd(events, sampleMedian),
+    sampleStd: roundImpact(getSampleStd(events, sampleMedian), 1),
   };
 }
 
@@ -294,15 +298,17 @@ function getImpactContributionStatistics(
     id: null,
     risk: "Direct Impact",
     scenario: null,
-    contributionMean: meanDIContribution,
-    contributionStd: stdDIContribution,
-    contribution95Error:
+    contributionMean: roundImpact(meanDIContribution, 4),
+    contributionStd: roundImpact(stdDIContribution, 4),
+    contribution95Error: roundImpact(
       events.length <= 0
         ? { ...noAggregatedImpacts }
         : multiplyImpact(
             divideImpact(stdDIContribution, Math.sqrt(events.length)),
             1.96,
           ),
+      4,
+    ),
   });
 
   for (const firstOrderEffect of Object.values(allFirstOrderEffects)) {
@@ -334,9 +340,9 @@ function getImpactContributionStatistics(
       id: firstOrderEffect.risk.id,
       risk: firstOrderEffect.risk.name,
       scenario: firstOrderEffect.scenario,
-      contributionMean: meanContribution,
-      contributionStd: stdContributions,
-      contribution95Error: error95Contribution,
+      contributionMean: roundImpact(meanContribution, 4),
+      contributionStd: roundImpact(stdContributions, 4),
+      contribution95Error: roundImpact(error95Contribution, 4),
     });
   }
 
@@ -371,16 +377,6 @@ export function getMedianImpact(
   return sorted[Math.round(sorted.length / 2)];
 }
 
-export type HistogramBinData = {
-  x: number;
-  name: string;
-  count: number;
-  p: number;
-  min: number;
-  max: number;
-  stdError: number;
-};
-
 export function getImpactHistogram(
   impacts: AggregatedImpacts[],
   indicator: keyof AggregatedImpacts,
@@ -413,28 +409,12 @@ export function getImpactHistogram(
     x: d.x,
     name: d.name,
     count: d.count,
-    p: Math.round(1000 * d.p) / 1000,
+    p: round(d.p, 4),
     min: d.min,
     max: d.max,
-    stdError: Math.sqrt(d.count) / (impacts.length * binWidth),
+    stdError: round(Math.sqrt(d.count) / (impacts.length * binWidth), 4),
   }));
 }
-
-export type BoxPlotData = {
-  name: keyof AggregatedImpacts;
-  raw: {
-    min: number;
-    lowerQuartile: number;
-    median: number;
-    upperQuartile: number;
-    max: number;
-  };
-  min: number;
-  bottomWhisker: number;
-  bottomBox: number;
-  topBox: number;
-  topWhisker: number;
-};
 
 export function getIndicatorBoxplots(
   impacts: AggregatedImpacts[],
@@ -470,17 +450,17 @@ export function getIndicatorBoxplots(
       return {
         name: indicator,
         raw: {
-          min,
-          lowerQuartile,
-          median,
-          upperQuartile,
-          max,
+          min: round(min, 2),
+          lowerQuartile: round(lowerQuartile, 2),
+          median: round(median, 2),
+          upperQuartile: round(upperQuartile, 2),
+          max: round(max, 2),
         },
-        min,
-        bottomWhisker: Math.round(10 * (lowerQuartile - min)) / 10,
-        bottomBox: Math.round(10 * (median - lowerQuartile)) / 10,
-        topBox: Math.round(10 * (upperQuartile - median)) / 10,
-        topWhisker: Math.round(10 * (max - upperQuartile)) / 10,
+        min: round(min, 2),
+        bottomWhisker: round(lowerQuartile - min, 2),
+        bottomBox: round(median - lowerQuartile, 2),
+        topBox: round(upperQuartile - median, 2),
+        topWhisker: round(max - upperQuartile, 2),
       };
     },
   );

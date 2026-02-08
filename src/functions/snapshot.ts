@@ -74,7 +74,7 @@ import { getTotalImpactAbsolute } from "./TotalImpact";
 const scenarios = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME];
 
 export function getCascadeResultSnapshot(
-  cascade: DVRiskCascade
+  cascade: DVRiskCascade,
 ): CASCADE_RESULT_SNAPSHOT | null {
   if (
     cascade.cr4de_result_snapshot === null ||
@@ -105,7 +105,7 @@ export function updateSnapshots(
   >[],
   riskFiles: DVRiskFile[],
   cascades: DVRiskCascade[],
-  realSnapshot: boolean
+  realSnapshot: boolean,
 ): {
   updatedSummaries: Partial<DVRiskSummary<unknown, UnparsedRiskFields>>[];
   updatedRiskSnapshots: Partial<
@@ -149,7 +149,7 @@ export function updateSnapshots(
       ...acc,
       [el._cr4de_risk_cascade_value]: el,
     }),
-    {}
+    {},
   );
 
   for (const rf of riskFiles) {
@@ -162,7 +162,7 @@ export function updateSnapshots(
 
   const hc: { [key: string]: DVRiskFile } = riskFiles.reduce(
     (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),
-    {}
+    {},
   );
   const riskCascades: DVRiskCascade<DVRiskFile, DVRiskFile>[] = cascades
     .map((c) => ({
@@ -175,7 +175,7 @@ export function updateSnapshots(
 
   const cascadeDict = riskFiles.reduce(
     (acc, rf) => getCascades(rf, acc, hc)(riskCascades),
-    {} as { [key: string]: Cascades }
+    {} as { [key: string]: Cascades },
   );
 
   for (const rf of riskFiles) {
@@ -186,7 +186,7 @@ export function updateSnapshots(
         cascadeSnapshotDict,
         rf,
         cascadeDict[rf.cr4de_riskfilesid],
-        realSnapshot
+        realSnapshot,
       );
     if (newSummary) newSummaries.push(newSummary);
     if (newRiskSnapshot) newRiskSnapshots.push(newRiskSnapshot);
@@ -222,17 +222,17 @@ function updateSnapshot(
   },
   riskFile: DVRiskFile,
   cascades: Cascades,
-  realSnapshot: boolean
+  realSnapshot: boolean,
 ) {
   const existingSummary: Partial<DVRiskSummary<unknown, UnparsedRiskFields>> =
     summaries.find(
-      (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid
+      (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid,
     ) || {};
   const existingSnapshot: Partial<
     DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
   > =
     riskSnapshots.find(
-      (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid
+      (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid,
     ) || {};
 
   const updatedSummary = summaryFromRiskfile(riskFile, cascades);
@@ -263,7 +263,7 @@ function updateSnapshot(
     const updatedEffectSnapshot = snapshotFromRiskCascade(
       parseRiskSnapshot(updatedSnapshot),
       effect,
-      realSnapshot
+      realSnapshot,
     );
 
     if (cascadesSnapshots[effect.cr4de_bnrariskcascadeid]) {
@@ -305,7 +305,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
 
       const tp50_rel = riskFile.results?.[s]?.TP50 || 0;
       const tp50 = getDailyProbability(
-        getYearlyProbabilityFromRelative(tp50_rel)
+        getYearlyProbabilityFromRelative(tp50_rel),
       );
 
       const ti_rel = riskFile.results?.[s].TI || 0;
@@ -335,8 +335,8 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             ? q[s].dp.scale5
             : pScale5FromReturnPeriodMonths(
                 returnPeriodMonthsFromPDaily(
-                  ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
-                )
+                  ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp,
+                ),
               ),
           scale5TP: q
             ? (pDailyFromReturnPeriodMonths(q[s].dp.rpMonths) / tp) * tp_rel
@@ -345,15 +345,15 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             ? q[s].dp.scale5
             : pScale5FromReturnPeriodMonths(
                 returnPeriodMonthsFromPDaily(
-                  ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
-                )
+                  ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp,
+                ),
               ),
           rpMonths: q
             ? q[s].dp.rpMonths
             : r(
                 returnPeriodMonthsFromPDaily(
-                  ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp
-                )
+                  ((riskFile.results?.[s]?.DP || 0) / tp_rel) * tp,
+                ),
               ),
         },
         // TODO: Something with DP50_offset
@@ -366,8 +366,8 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             ? q[s].dp50.scale5
             : pScale5FromReturnPeriodMonths(
                 returnPeriodMonthsFromPDaily(
-                  ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
-                )
+                  ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50,
+                ),
               ),
           scale5TP: q
             ? (pDailyFromReturnPeriodMonths(q[s].dp50.rpMonths) / tp50) *
@@ -377,15 +377,15 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             ? q[s].dp50.scale5
             : pScale5FromReturnPeriodMonths(
                 returnPeriodMonthsFromPDaily(
-                  ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
-                )
+                  ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50,
+                ),
               ),
           rpMonths: q
             ? q[s].dp50.rpMonths
             : r(
                 returnPeriodMonthsFromPDaily(
-                  ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50
-                )
+                  ((riskFile.results?.[s]?.DP50 || 0) / tp50_rel) * tp50,
+                ),
               ),
         },
 
@@ -411,55 +411,55 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             scale5TI: r(riskFile.results?.[s]?.TI_H),
             scale5Cat: r(getCategoryImpactRescaled(riskFile, "H", s)),
             euros: Math.round(
-              ((riskFile.results?.[s]?.TI_H || 0) * ti) / ti_rel
+              ((riskFile.results?.[s]?.TI_H || 0) * ti) / ti_rel,
             ),
           },
           ha: {
             scaleTot: r(riskFile.results?.[s]?.TI_Ha),
             scaleCatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ha", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ha", s),
             ),
             abs: Math.round(
-              ((riskFile.results?.[s].TI_Ha_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Ha_abs || 0) * ti) / ti_rel,
             ),
             scale5TI: r(riskFile.results?.[s]?.TI_Ha),
             scale5CatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ha", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ha", s),
             ),
             euros: Math.round(
-              ((riskFile.results?.[s].TI_Ha_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Ha_abs || 0) * ti) / ti_rel,
             ),
           },
           hb: {
             scaleTot: r(riskFile.results?.[s]?.TI_Hb),
             scaleCatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hb", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hb", s),
             ),
             abs: Math.round(
-              ((riskFile.results?.[s].TI_Hb_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Hb_abs || 0) * ti) / ti_rel,
             ),
             scale5TI: r(riskFile.results?.[s]?.TI_Hb),
             scale5CatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hb", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hb", s),
             ),
             euros: Math.round(
-              ((riskFile.results?.[s].TI_Hb_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Hb_abs || 0) * ti) / ti_rel,
             ),
           },
           hc: {
             scaleTot: r(riskFile.results?.[s]?.TI_Hc),
             scaleCatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hc", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hc", s),
             ),
             abs: Math.round(
-              ((riskFile.results?.[s].TI_Hc_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Hc_abs || 0) * ti) / ti_rel,
             ),
             scale5TI: r(riskFile.results?.[s]?.TI_Hc),
             scale5CatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hc", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Hc", s),
             ),
             euros: Math.round(
-              ((riskFile.results?.[s].TI_Hc_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Hc_abs || 0) * ti) / ti_rel,
             ),
           },
           s: {
@@ -473,65 +473,65 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
           sa: {
             scaleTot: r(riskFile.results?.[s]?.TI_Sa),
             scaleCatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sa", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sa", s),
             ),
             abs: Math.round(
-              ((riskFile.results?.[s].TI_Sa_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Sa_abs || 0) * ti) / ti_rel,
             ),
             scale5TI: r(riskFile.results?.[s]?.TI_Sa),
             scale5CatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sa", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sa", s),
             ),
             euros: Math.round(
-              ((riskFile.results?.[s].TI_Sa_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Sa_abs || 0) * ti) / ti_rel,
             ),
           },
           sb: {
             scaleTot: r(riskFile.results?.[s]?.TI_Sb),
             scaleCatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sb", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sb", s),
             ),
             abs: Math.round(
-              ((riskFile.results?.[s].TI_Sb_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Sb_abs || 0) * ti) / ti_rel,
             ),
             scale5TI: r(riskFile.results?.[s]?.TI_Sb),
             scale5CatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sb", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sb", s),
             ),
             euros: Math.round(
-              ((riskFile.results?.[s].TI_Sb_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Sb_abs || 0) * ti) / ti_rel,
             ),
           },
           sc: {
             scaleTot: r(riskFile.results?.[s]?.TI_Sc),
             scaleCatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sc", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sc", s),
             ),
             abs: Math.round(
-              ((riskFile.results?.[s].TI_Sc_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Sc_abs || 0) * ti) / ti_rel,
             ),
             scale5TI: r(riskFile.results?.[s]?.TI_Sc),
             scale5CatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sc", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sc", s),
             ),
             euros: Math.round(
-              ((riskFile.results?.[s].TI_Sc_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Sc_abs || 0) * ti) / ti_rel,
             ),
           },
           sd: {
             scaleTot: r(riskFile.results?.[s]?.TI_Sd),
             scaleCatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sd", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sd", s),
             ),
             abs: Math.round(
-              ((riskFile.results?.[s].TI_Sd_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Sd_abs || 0) * ti) / ti_rel,
             ),
             scale5TI: r(riskFile.results?.[s]?.TI_Sd),
             scale5CatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sd", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Sd", s),
             ),
             euros: Math.round(
-              ((riskFile.results?.[s].TI_Sd_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Sd_abs || 0) * ti) / ti_rel,
             ),
           },
           e: {
@@ -541,23 +541,23 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             scale5TI: r(riskFile.results?.[s]?.TI_E),
             scale5Cat: r(getCategoryImpactRescaled(riskFile, "E", s)),
             euros: Math.round(
-              ((riskFile.results?.[s]?.TI_E || 0) * ti) / ti_rel
+              ((riskFile.results?.[s]?.TI_E || 0) * ti) / ti_rel,
             ),
           },
           ea: {
             scaleTot: r(riskFile.results?.[s]?.TI_Ea),
             scaleCatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ea", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ea", s),
             ),
             abs: Math.round(
-              ((riskFile.results?.[s].TI_Ea_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Ea_abs || 0) * ti) / ti_rel,
             ),
             scale5TI: r(riskFile.results?.[s]?.TI_Ea),
             scale5CatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ea", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Ea", s),
             ),
             euros: Math.round(
-              ((riskFile.results?.[s].TI_Ea_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Ea_abs || 0) * ti) / ti_rel,
             ),
           },
           f: {
@@ -567,39 +567,39 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
             scale5TI: r(riskFile.results?.[s]?.TI_F),
             scale5Cat: r(getCategoryImpactRescaled(riskFile, "F", s)),
             euros: Math.round(
-              ((riskFile.results?.[s]?.TI_F || 0) * ti) / ti_rel
+              ((riskFile.results?.[s]?.TI_F || 0) * ti) / ti_rel,
             ),
           },
           fa: {
             scaleTot: r(riskFile.results?.[s]?.TI_Fa),
             scaleCatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fa", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fa", s),
             ),
             abs: Math.round(
-              ((riskFile.results?.[s].TI_Fa_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Fa_abs || 0) * ti) / ti_rel,
             ),
             scale5TI: r(riskFile.results?.[s]?.TI_Fa),
             scale5CatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fa", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fa", s),
             ),
             euros: Math.round(
-              ((riskFile.results?.[s].TI_Fa_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Fa_abs || 0) * ti) / ti_rel,
             ),
           },
           fb: {
             scaleTot: r(riskFile.results?.[s]?.TI_Fb),
             scaleCatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fb", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fb", s),
             ),
             abs: Math.round(
-              ((riskFile.results?.[s].TI_Fb_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Fb_abs || 0) * ti) / ti_rel,
             ),
             scale5TI: r(riskFile.results?.[s]?.TI_Fb),
             scale5CatRel: r(
-              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fb", s)
+              getDamageIndicatorToCategoryImpactRatio(riskFile, "Fb", s),
             ),
             euros: Math.round(
-              ((riskFile.results?.[s].TI_Fb_abs || 0) * ti) / ti_rel
+              ((riskFile.results?.[s].TI_Fb_abs || 0) * ti) / ti_rel,
             ),
           },
         },
@@ -616,7 +616,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               : r(
                   ((getScenarioParameter(riskFile, "DI_Ha", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
 
             scale5TI: q
@@ -626,14 +626,14 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               ? q[s].di.ha.scale5
               : diScale5FromEuros(
                   ((getScenarioParameter(riskFile, "DI_Ha", s) || 0) * ti) /
-                    ti_rel
+                    ti_rel,
                 ),
             euros: q
               ? q[s].di.ha.abs
               : r(
                   ((getScenarioParameter(riskFile, "DI_Ha", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
           },
           hb: {
@@ -645,7 +645,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               : r(
                   ((getScenarioParameter(riskFile, "DI_Hb", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
 
             scale5TI: q
@@ -655,14 +655,14 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               ? q[s].di.hb.scale5
               : diScale5FromEuros(
                   ((getScenarioParameter(riskFile, "DI_Hb", s) || 0) * ti) /
-                    ti_rel
+                    ti_rel,
                 ),
             euros: q
               ? q[s].di.hb.abs
               : r(
                   ((getScenarioParameter(riskFile, "DI_Hb", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
           },
           hc: {
@@ -674,7 +674,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               : r(
                   ((getScenarioParameter(riskFile, "DI_Hc", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
 
             scale5TI: q
@@ -684,14 +684,14 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               ? q[s].di.hc.scale5
               : diScale5FromEuros(
                   ((getScenarioParameter(riskFile, "DI_Hc", s) || 0) * ti) /
-                    ti_rel
+                    ti_rel,
                 ),
             euros: q
               ? q[s].di.hc.abs
               : r(
                   ((getScenarioParameter(riskFile, "DI_Hc", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
           },
           sa: {
@@ -703,7 +703,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               : r(
                   ((getScenarioParameter(riskFile, "DI_Sa", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
 
             scale5TI: q
@@ -713,14 +713,14 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               ? q[s].di.sa.scale5
               : diScale5FromEuros(
                   ((getScenarioParameter(riskFile, "DI_Sa", s) || 0) * ti) /
-                    ti_rel
+                    ti_rel,
                 ),
             euros: q
               ? q[s].di.sa.abs
               : r(
                   ((getScenarioParameter(riskFile, "DI_Sa", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
           },
           sb: {
@@ -732,7 +732,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               : r(
                   ((getScenarioParameter(riskFile, "DI_Sb", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
 
             scale5TI: q
@@ -742,14 +742,14 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               ? q[s].di.sb.scale5
               : diScale5FromEuros(
                   ((getScenarioParameter(riskFile, "DI_Sb", s) || 0) * ti) /
-                    ti_rel
+                    ti_rel,
                 ),
             euros: q
               ? q[s].di.sb.abs
               : r(
                   ((getScenarioParameter(riskFile, "DI_Sb", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
           },
           sc: {
@@ -761,7 +761,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               : r(
                   ((getScenarioParameter(riskFile, "DI_Sc", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
 
             scale5TI: q
@@ -771,14 +771,14 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               ? q[s].di.sc.scale5
               : diScale5FromEuros(
                   ((getScenarioParameter(riskFile, "DI_Sc", s) || 0) * ti) /
-                    ti_rel
+                    ti_rel,
                 ),
             euros: q
               ? q[s].di.sc.abs
               : r(
                   ((getScenarioParameter(riskFile, "DI_Sc", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
           },
           sd: {
@@ -790,7 +790,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               : r(
                   ((getScenarioParameter(riskFile, "DI_Sd", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
 
             scale5TI: q
@@ -800,14 +800,14 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               ? q[s].di.sd.scale5
               : diScale5FromEuros(
                   ((getScenarioParameter(riskFile, "DI_Sd", s) || 0) * ti) /
-                    ti_rel
+                    ti_rel,
                 ),
             euros: q
               ? q[s].di.sd.abs
               : r(
                   ((getScenarioParameter(riskFile, "DI_Sd", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
           },
           ea: {
@@ -819,7 +819,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               : r(
                   ((getScenarioParameter(riskFile, "DI_Ea", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
 
             scale5TI: q
@@ -829,14 +829,14 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               ? q[s].di.ea.scale5
               : diScale5FromEuros(
                   ((getScenarioParameter(riskFile, "DI_Ea", s) || 0) * ti) /
-                    ti_rel
+                    ti_rel,
                 ),
             euros: q
               ? q[s].di.ea.abs
               : r(
                   ((getScenarioParameter(riskFile, "DI_Ea", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
           },
           fa: {
@@ -848,7 +848,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               : r(
                   ((getScenarioParameter(riskFile, "DI_Fa", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
 
             scale5TI: q
@@ -858,14 +858,14 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               ? q[s].di.fa.scale5
               : diScale5FromEuros(
                   ((getScenarioParameter(riskFile, "DI_Fa", s) || 0) * ti) /
-                    ti_rel
+                    ti_rel,
                 ),
             euros: q
               ? q[s].di.fa.abs
               : r(
                   ((getScenarioParameter(riskFile, "DI_Fa", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
           },
           fb: {
@@ -877,7 +877,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               : r(
                   ((getScenarioParameter(riskFile, "DI_Fb", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
 
             scale5TI: q
@@ -887,14 +887,14 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
               ? q[s].di.fb.scale5
               : diScale5FromEuros(
                   ((getScenarioParameter(riskFile, "DI_Fb", s) || 0) * ti) /
-                    ti_rel
+                    ti_rel,
                 ),
             euros: q
               ? q[s].di.fb.abs
               : r(
                   ((getScenarioParameter(riskFile, "DI_Fb", s) || 0) * ti) /
                     ti_rel,
-                  1
+                  1,
                 ),
           },
         },
@@ -904,7 +904,7 @@ function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
         ...res,
         [s]: scenarioResult,
       };
-    }, {} as RiskSnapshotResults)
+    }, {} as RiskSnapshotResults),
   );
 }
 
@@ -944,14 +944,14 @@ export function getSerializedQualiResults(riskFile: DVRiskFile) {
 export function summaryFromRiskfile(
   riskFile: DVRiskFile,
   cascades: Cascades,
-  showOther: boolean = false
+  showOther: boolean = false,
 ): DVRiskSummary {
   const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
   const causes = getCausesWithDP(riskFile, cascades, scenario).sort(
-    (a, b) => b.p - a.p
+    (a, b) => b.p - a.p,
   );
   const effects = getEffectsWithDI(riskFile, cascades, scenario).sort(
-    (a, b) => b.i - a.i
+    (a, b) => b.i - a.i,
   );
 
   let minP = 0;
@@ -1096,7 +1096,7 @@ export function summaryFromRiskfile(
 }
 
 export function snapshotFromRiskfile(
-  riskFile: DVRiskFile
+  riskFile: DVRiskFile,
 ): DVRiskSnapshot<
   DVRiskFile,
   SerializedRiskSnapshotResults,
@@ -1120,7 +1120,7 @@ export function snapshotFromRiskfile(
     cr4de_intensity_parameters: riskFile.cr4de_intensity_parameters,
     cr4de_scenarios: serializeRiskSnapshotScenarios({
       [SCENARIOS.CONSIDERABLE]: JSON.parse(
-        riskFile.cr4de_scenario_considerable || ""
+        riskFile.cr4de_scenario_considerable || "",
       ),
       [SCENARIOS.MAJOR]: JSON.parse(riskFile.cr4de_scenario_major || ""),
       [SCENARIOS.EXTREME]: JSON.parse(riskFile.cr4de_scenario_extreme || ""),
@@ -1139,12 +1139,13 @@ export function snapshotFromRiskfile(
     cr4de_quali_cb_mrs:
       riskFile[
         `cr4de_cross_border_impact_quali${getScenarioSuffix(
-          riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE
+          riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE,
         )}`
       ],
     cr4de_quali_cc_mrs: riskFile.cr4de_mrs_cc,
 
     cr4de_quanti: getSerializedRiskSnapshotResults(riskFile),
+    cr4de_quanti_results: riskFile.cr4de_quanti_results,
     cr4de_quali: getSerializedQualiResults(riskFile),
   };
 }
@@ -1152,7 +1153,7 @@ export function snapshotFromRiskfile(
 export const oldToNewCPMatrix = (
   cause: DVRiskSnapshot,
   cascade: DVRiskCascade,
-  realSnapshot: boolean
+  realSnapshot: boolean,
 ): CPMatrixCauseRow => {
   const scenarios = [
     SCENARIOS.CONSIDERABLE,
@@ -1174,10 +1175,10 @@ export const oldToNewCPMatrix = (
                 scale7: 0,
               },
             }),
-            {} as CPMatrixEffectRow
+            {} as CPMatrixEffectRow,
           ),
         }),
-        {} as CPMatrixCauseRow
+        {} as CPMatrixCauseRow,
       );
     }
 
@@ -1192,7 +1193,7 @@ export const oldToNewCPMatrix = (
 export function snapshotFromRiskCascade(
   cause: DVRiskSnapshot,
   cascade: DVRiskCascade,
-  realSnapshot: boolean = true
+  realSnapshot: boolean = true,
 ): DVCascadeSnapshot<
   DVRiskCascade,
   unknown,

@@ -1,5 +1,6 @@
 import { IntensityParameter } from "../../functions/intensityParameters";
 import { Scenarios, SCENARIOS } from "../../functions/scenarios";
+import { SerializedRiskFileQuantiResults } from "./DVRiskFile";
 import {
   parseRiskQualis,
   RISK_CATEGORY,
@@ -18,19 +19,19 @@ export type SerializedRiskSnapshotScenarios = string & {
 };
 
 export function serializeRiskSnapshotResults(
-  quanti: RiskSnapshotResults
+  quanti: RiskSnapshotResults,
 ): SerializedRiskSnapshotResults {
   return JSON.stringify(quanti) as SerializedRiskSnapshotResults;
 }
 
 export function serializeRiskSnapshotScenarios(
-  scenarios: Scenarios
+  scenarios: Scenarios,
 ): SerializedRiskSnapshotScenarios {
   return JSON.stringify(scenarios) as SerializedRiskSnapshotScenarios;
 }
 
 export function parseRiskSnapshot<T>(
-  snapshot: DVRiskSnapshot<T, SerializedRiskSnapshotResults>
+  snapshot: DVRiskSnapshot<T, SerializedRiskSnapshotResults>,
 ): DVRiskSnapshot<T> {
   return {
     ...snapshot,
@@ -39,7 +40,7 @@ export function parseRiskSnapshot<T>(
 }
 
 export function parseRiskSnapshotQuali<T, S>(
-  snapshot: DVRiskSnapshot<T, S, SerializedRiskQualis>
+  snapshot: DVRiskSnapshot<T, S, SerializedRiskQualis>,
 ): DVRiskSnapshot<T, S, RiskQualis> {
   return {
     ...snapshot,
@@ -48,7 +49,7 @@ export function parseRiskSnapshotQuali<T, S>(
 }
 
 export function parseRiskSnapshotScenarios(
-  scenarios: SerializedRiskSnapshotScenarios | null
+  scenarios: SerializedRiskSnapshotScenarios | null,
 ): Scenarios {
   return JSON.parse(scenarios || "") as Scenarios;
 }
@@ -61,7 +62,7 @@ export type DVRiskSnapshotQuantiType =
 export type DVRiskSnapshot<
   RiskFileType = unknown,
   QuantiType extends DVRiskSnapshotQuantiType = RiskSnapshotResults,
-  QualiType extends RiskQualiType = SerializedRiskQualis
+  QualiType extends RiskQualiType = SerializedRiskQualis,
 > = {
   cr4de_bnrariskfilesnapshotid: string;
 
@@ -95,6 +96,7 @@ export type DVRiskSnapshot<
   cr4de_quali_cc_mrs: string | null;
 
   cr4de_quanti: QuantiType;
+  cr4de_quanti_results: SerializedRiskFileQuantiResults | null;
   cr4de_quali: QualiType;
 };
 

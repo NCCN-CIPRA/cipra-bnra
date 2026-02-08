@@ -19,6 +19,7 @@ import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
+import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
 
 export type CauseSankeyNode = {
   name: string;
@@ -32,6 +33,7 @@ export function ProbabilitySankeyBox({
   riskSnapshot,
   cascades,
   scenario,
+  results,
   width = "100%",
   height = "100%",
   onClick,
@@ -39,6 +41,7 @@ export function ProbabilitySankeyBox({
   riskSnapshot: DVRiskSnapshot;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
+  results: RiskFileQuantiResults | null;
   width?: number | string;
   height?: number | string;
   onClick: (id: string) => void;
@@ -56,6 +59,7 @@ export function ProbabilitySankeyBox({
           riskSnapshot={riskSnapshot}
           cascades={cascades}
           scenario={scenario}
+          results={results}
           tooltip={true}
           onClick={onClick}
         />
@@ -68,6 +72,7 @@ export default function ProbabilitySankey({
   riskSnapshot,
   cascades,
   scenario,
+  results,
   width,
   height,
   tooltip = true,
@@ -76,12 +81,63 @@ export default function ProbabilitySankey({
   riskSnapshot: DVRiskSnapshot;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
+  results?: RiskFileQuantiResults | null;
   width?: number;
   height?: number;
   tooltip?: boolean;
   onClick: (id: string) => void;
 }) {
-  const causes = getCauseSummaries(riskSnapshot, cascades, scenario, true);
+  let causes: CauseRisksSummary[] = [];
+
+  if (!results) {
+    causes = getCauseSummaries(riskSnapshot, cascades, scenario, true);
+  } else {
+    const sums =
+      results[scenario].probabilityStatistics?.relativeContributions.reduce(
+        (acc, c) => ({
+          ...acc,
+          [c.id || ""]: {
+            cause_risk_id: c.id || "",
+            cause_risk_title: c.risk,
+            cause_risk_p:
+              (acc[c.id || ""]?.cause_risk_p || 0) + c.contributionMean,
+          },
+        }),
+        {} as Record<string, CauseRisksSummary>,
+      ) || {};
+
+    causes = Object.values(sums)
+      .sort((a, b) => b.cause_risk_p - a.cause_risk_p)
+      .reduce(
+        (acc, c) => {
+          if (acc.totalP > 0.8) {
+            let lastCause = acc.causes[acc.causes.length - 1];
+            if (!lastCause.other_causes) {
+              lastCause = {
+                cause_risk_id: "",
+                cause_risk_title: "Other causes",
+                cause_risk_p: 0,
+                other_causes: [],
+              };
+              acc.causes.push(lastCause);
+            }
+
+            lastCause.other_causes!.push({
+              ...c,
+            });
+            lastCause.cause_risk_p += c.cause_risk_p;
+
+            return acc;
+          }
+
+          return {
+            causes: [...acc.causes, c],
+            totalP: acc.totalP + c.cause_risk_p,
+          };
+        },
+        { causes: [] as CauseRisksSummary[], totalP: 0 },
+      ).causes;
+  }
 
   const nodes: CauseSankeyNode[] = [
     { name: `risk.${riskSnapshot.cr4de_hazard_id}.name` },

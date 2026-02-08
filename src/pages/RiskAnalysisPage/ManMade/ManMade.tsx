@@ -19,15 +19,18 @@ import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
 import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../../BasePage";
+import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
 
 export default function ManMade({
   riskSummary,
   riskFile,
   cascades,
+  results,
 }: {
   riskSummary: DVRiskSummary;
   riskFile: DVRiskSnapshot;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
+  results: RiskFileQuantiResults | null;
 }) {
   const { environment } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
@@ -51,6 +54,7 @@ export default function ManMade({
           <MMSankeyDiagram
             riskFile={riskFile}
             cascades={cascades}
+            results={results}
             manmade
             scenario={scenario}
             setScenario={setScenario}
@@ -62,7 +66,7 @@ export default function ManMade({
             <Alert severity="warning">
               {t(
                 "risks.analysis.scenarioChange",
-                "You have changed the scenario is the sankey diagram above. Please be aware the the qualitative analysis results below only apply to the Most Relevant Scenario."
+                "You have changed the scenario is the sankey diagram above. Please be aware the the qualitative analysis results below only apply to the Most Relevant Scenario.",
               )}
             </Alert>
           </Box>

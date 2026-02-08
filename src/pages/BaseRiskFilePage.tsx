@@ -6,7 +6,12 @@ import {
   useOutletContext,
   useParams,
 } from "react-router-dom";
-import { DVRiskFile, RISK_TYPE } from "../types/dataverse/DVRiskFile";
+import {
+  DVRiskFile,
+  parseRiskFileQuantiResults,
+  RISK_TYPE,
+  RiskFileQuantiResults,
+} from "../types/dataverse/DVRiskFile";
 import useAPI, { DataTable } from "../hooks/useAPI";
 import {
   BottomNavigation,
@@ -60,6 +65,7 @@ export interface RiskFilePageContext extends BasePageContext {
   riskFile: DVRiskFile | null;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot> | null;
   publicCascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot> | null;
+  results: RiskFileQuantiResults | null;
 }
 
 export default function BaseRiskFilePage() {
@@ -87,7 +93,7 @@ export default function BaseRiskFilePage() {
     queryFn: () => api.getRiskFiles(),
     select: (data) => data.filter((rf) => !rf.cr4de_hazard_id.startsWith("X")),
     enabled: Boolean(
-      user && user.roles.analist && environment === Environment.DYNAMIC
+      user && user.roles.analist && environment === Environment.DYNAMIC,
     ),
   });
 
@@ -102,7 +108,7 @@ export default function BaseRiskFilePage() {
     queryKey: [DataTable.RISK_CASCADE],
     queryFn: () => api.getRiskCascades(),
     enabled: Boolean(
-      user && user.roles.analist && environment === Environment.DYNAMIC
+      user && user.roles.analist && environment === Environment.DYNAMIC,
     ),
   });
 
@@ -117,7 +123,7 @@ export default function BaseRiskFilePage() {
     if (!riskSnapshots) return null;
 
     return getRiskCatalogueFromSnapshots(
-      riskSnapshots.map((rs) => parseRiskSnapshot(rs))
+      riskSnapshots.map((rs) => parseRiskSnapshot(rs)),
     );
   }, [riskSnapshots]);
 
@@ -135,7 +141,7 @@ export default function BaseRiskFilePage() {
             cr4de_quanti: JSON.parse(rcTemp[rs].cr4de_quanti),
           },
         }),
-        {} as RiskCatalogue<unknown, RiskSnapshotResults>
+        {} as RiskCatalogue<unknown, RiskSnapshotResults>,
       );
     }, [riskFiles]);
 
@@ -145,7 +151,7 @@ export default function BaseRiskFilePage() {
     return getCascadesSnapshotCatalogue(
       Object.values(riskSnapshotCatalogue),
       riskSnapshotCatalogue,
-      cascadeSnapshotList
+      cascadeSnapshotList,
     );
   }, [riskSnapshotCatalogue, cascadeSnapshotList]);
 
@@ -162,7 +168,7 @@ export default function BaseRiskFilePage() {
     if (!riskFiles) return null;
 
     const innerRiskFile = riskFiles.find(
-      (rf) => rf.cr4de_riskfilesid === params.risk_file_id
+      (rf) => rf.cr4de_riskfilesid === params.risk_file_id,
     );
 
     if (!innerRiskFile) return null;
@@ -172,7 +178,7 @@ export default function BaseRiskFilePage() {
     return summaryFromRiskfile(
       innerRiskFile,
       realCascades[innerRiskFile.cr4de_riskfilesid],
-      true
+      true,
     );
   }, [publicRiskSummary, riskFiles, cascadeList, params, environment]);
 
@@ -241,6 +247,10 @@ export default function BaseRiskFilePage() {
             publicCascades:
               cascadeSnapshotsCatalogue?.[riskSummary._cr4de_risk_file_value] ||
               null,
+            results: parseRiskFileQuantiResults(
+              riskCatalogue?.[riskSummary._cr4de_risk_file_value]
+                ?.cr4de_quanti_results || null,
+            ),
           })}
         />
       ) : (
@@ -269,7 +279,7 @@ export default function BaseRiskFilePage() {
             <BottomNavigationAction
               label={t(
                 "risk.bottombar.riskIdentification",
-                "Risk Identification"
+                "Risk Identification",
               )}
               icon={<FingerprintIcon />}
               onClick={() =>
@@ -298,7 +308,7 @@ export default function BaseRiskFilePage() {
               (user.roles.expert &&
                 user.participations &&
                 user.participations.find(
-                  (p) => p._cr4de_risk_file_value === params.risk_file_id
+                  (p) => p._cr4de_risk_file_value === params.risk_file_id,
                 ))) && (
               <BottomNavigationAction
                 label={t("risk.bottombar.rawData", "Raw Data")}

@@ -14,6 +14,7 @@ import round from "../../functions/roundNumberString";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../../pages/BasePage";
 import { Indicators } from "../../types/global";
+import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
 
 const CustomTooltip = ({
   active,
@@ -63,11 +64,13 @@ const CustomTooltip = ({
 export default function ImpactBars({
   riskFile,
   scenario,
+  results,
   width,
   height,
 }: {
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   scenario: SCENARIOS;
+  results: RiskFileQuantiResults | null;
   width?: number;
   height?: number;
 }) {
@@ -78,6 +81,7 @@ export default function ImpactBars({
   return ImpactBarChart({
     riskFile,
     scenario,
+    results,
     width,
     height,
     maxScales,

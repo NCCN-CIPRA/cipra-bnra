@@ -1,11 +1,6 @@
-import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
-import { RISK_CATEGORY } from "../../types/dataverse/Riskfile";
-import { BoxPlotData, HistogramBinData } from "./impactStatistics";
-import { TotalProbabilityStatistics } from "./probabilityStatistics";
+import { RISK_CATEGORY } from "./dataverse/Riskfile";
 
 export type Scenario = "considerable" | "major" | "extreme";
-
-export type UnknownRiskSnapshot = DVRiskSnapshot<unknown, unknown, unknown>;
 
 export enum LogLevel {
   DEBUG = 0,
@@ -103,6 +98,32 @@ export type EffectStatistics = {
   probability95Error: number;
 };
 
+export type HistogramBinData = {
+  x: number;
+  name: string;
+  count: number;
+  p: number;
+  min: number;
+  max: number;
+  stdError: number;
+};
+
+export type BoxPlotData = {
+  name: keyof AggregatedImpacts;
+  raw: {
+    min: number;
+    lowerQuartile: number;
+    median: number;
+    upperQuartile: number;
+    max: number;
+  };
+  min: number;
+  bottomWhisker: number;
+  bottomBox: number;
+  topBox: number;
+  topWhisker: number;
+};
+
 export type TotalImpactStatistics = {
   sampleMedian: AggregatedImpacts;
   sampleStd: AggregatedImpacts;
@@ -133,6 +154,22 @@ export type AverageRiskEvent = {
   directImpactContributions: AggregatedImpacts[];
 };
 
+export type ProbabilityContributionStatistics = {
+  id: string | null;
+  risk: string;
+  scenario: Scenario | null;
+  contributionMean: number;
+  contributionStd: number;
+  contribution95Error: number;
+};
+
+export type TotalProbabilityStatistics = {
+  sampleMean: number;
+  sampleStd: number;
+  relativeContributions: ProbabilityContributionStatistics[];
+  relativeRootCauseContributions: ProbabilityContributionStatistics[];
+};
+
 export type RiskScenarioSimulationOutput = {
   id: string;
   hazardId: string;
@@ -148,35 +185,9 @@ export type SimulationRun = {
   totalImpact: Impact;
 };
 
-export type SimulationOutput2 = {
+export type SimulationOutput = {
   risks: RiskScenarioSimulationOutput[];
 };
-
-export type RiskData = {
-  risk: UnknownRiskSnapshot;
-  occurrences: {
-    event: RiskEvent;
-    runIndex: number;
-  }[];
-  causes: {
-    risk: UnknownRiskSnapshot | null;
-    occurrences: {
-      event: RiskEvent;
-      runIndex: number;
-    }[];
-  }[];
-  averageImpact: AggregatedImpacts;
-  effects: {
-    risk: UnknownRiskSnapshot;
-    occurrences: {
-      event: RiskEvent;
-      runIndex: number;
-    }[];
-    averageImpact: AggregatedImpacts;
-  }[];
-};
-
-export type SimulationData = Record<string, RiskData>;
 
 export const noImpact = {
   ha: 0,

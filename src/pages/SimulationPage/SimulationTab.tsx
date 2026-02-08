@@ -31,9 +31,10 @@ import { proxy, wrap } from "vite-plugin-comlink/symbol";
 import { SimulationWorker } from "../../functions/simulation/simulation.worker";
 import {
   LogLevel,
+  ProbabilityContributionStatistics,
   RiskScenarioSimulationOutput,
   Scenario,
-} from "../../functions/simulation/types";
+} from "../../types/simulation";
 import {
   Bar,
   BarChart,
@@ -51,7 +52,11 @@ import {
 } from "recharts";
 import { iScale7FromEuros } from "../../functions/indicators/impact";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import {
+  DVRiskFile,
+  RiskFileScenarioQuantiResults,
+  serializeRiskFileQuantiResults,
+} from "../../types/dataverse/DVRiskFile";
 import useSavedState from "../../hooks/useSavedState";
 import { DataGrid, GridColDef, GridDeleteIcon } from "@mui/x-data-grid";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
@@ -63,7 +68,6 @@ import {
   pTimeframeFromReturnPeriodMonths,
   returnPeriodMonthsFromYearlyEventRate,
 } from "../../functions/indicators/probability";
-import { ProbabilityContributionStatistics } from "../../functions/simulation/probabilityStatistics";
 import { normalPDF } from "../../functions/simulation/impactStatistics";
 
 const HorizonBar = (props: RectangleProps) => {
@@ -405,6 +409,50 @@ export default function SimulationTab() {
     });
   }, [showRiskFile]);
 
+  const saveResults = async () => {
+    if (!output || !rfs) return;
+
+    if (
+      !confirm(
+        "Are you sure you wish to save the dynamic results? This will overwrite previous results in the dynamic environment.",
+      )
+    )
+      return;
+
+    let i = 0;
+
+    for (const risk of rfs) {
+      i++;
+
+      setProgress((100 * i) / rfs.length);
+
+      const c = output.find(
+        (r) => r.id === risk.cr4de_riskfilesid && r.scenario === "considerable",
+      );
+      const m = output.find(
+        (r) => r.id === risk.cr4de_riskfilesid && r.scenario === "major",
+      );
+      const e = output.find(
+        (r) => r.id === risk.cr4de_riskfilesid && r.scenario === "extreme",
+      );
+
+      const getResults = (
+        o: RiskScenarioSimulationOutput | undefined,
+      ): RiskFileScenarioQuantiResults => ({
+        probabilityStatistics: o ? o.probabilityStatistics : null,
+        impactStatistics: o ? o.impactStatistics : null,
+      });
+
+      await api.updateRiskFile(risk.cr4de_riskfilesid, {
+        cr4de_quanti_results: serializeRiskFileQuantiResults({
+          considerable: getResults(c),
+          major: getResults(m),
+          extreme: getResults(e),
+        }),
+      });
+    }
+  };
+
   return (
     // <Container sx={{ mb: 18 }}>
     <Box sx={{ m: 4 }}>
@@ -542,8 +590,18 @@ export default function SimulationTab() {
         </CardContent>
         <CardActions sx={{ justifyContent: "flex-end" }}>
           <Button
+            disabled={!output}
+            color="success"
+            onClick={saveResults}
+            sx={{ ml: 1 }}
+          >
+            Save Dynamic Results
+          </Button>
+          <Box sx={{ flex: 1 }} />
+          <Button
             disabled={!rfs || !cs}
             color="warning"
+            sx={{ mr: 1 }}
             onClick={runSimulation}
           >
             Run Simulation

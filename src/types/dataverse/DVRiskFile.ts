@@ -1,6 +1,10 @@
 import { SCENARIOS } from "../../functions/scenarios";
 import { DiscussionRequired } from "../DiscussionRequired";
 import {
+  TotalImpactStatistics,
+  TotalProbabilityStatistics,
+} from "../simulation";
+import {
   RiskQualiType,
   SerializedRiskQualis,
   SerializedScenario,
@@ -131,7 +135,8 @@ export interface DiscussionsRequired {
 export interface DVRiskFile<
   CalculationType = unknown,
   QuantiType extends DVRiskFileQuantiType = SerializedRiskFileQuantiInput,
-  QualiType extends RiskQualiType = SerializedRiskQualis
+  QualiType extends RiskQualiType = SerializedRiskQualis,
+  QuantiResultsType extends DVRiskFileQuantiResultsType = SerializedRiskFileQuantiResults,
 > extends RiskFileEditableFields {
   cr4de_riskfilesid: string;
   cr4de_hazard_id: string;
@@ -258,6 +263,7 @@ export interface DVRiskFile<
 
   cr4de_quanti: QuantiType;
   cr4de_quali: QualiType;
+  cr4de_quanti_results: QuantiResultsType;
 
   createdon: string;
   modifiedon: string;
@@ -357,13 +363,13 @@ export type RESULT_SNAPSHOT = {
 };
 
 export function serializeRiskFileQuantiInput(
-  quanti: RiskFileQuantiInput
+  quanti: RiskFileQuantiInput,
 ): SerializedRiskFileQuantiInput {
   return JSON.stringify(quanti) as SerializedRiskFileQuantiInput;
 }
 
 export function parseRiskFileQuantiInput(
-  quanti: SerializedRiskFileQuantiInput | null
+  quanti: SerializedRiskFileQuantiInput | null,
 ): RiskFileQuantiInput {
   return JSON.parse(quanti || "") as RiskFileQuantiInput;
 }
@@ -381,6 +387,38 @@ export type RiskFileQuantiInput = {
   [SCENARIOS.CONSIDERABLE]: RiskFileScenarioQuantiInput;
   [SCENARIOS.MAJOR]: RiskFileScenarioQuantiInput;
   [SCENARIOS.EXTREME]: RiskFileScenarioQuantiInput;
+};
+
+export function serializeRiskFileQuantiResults(
+  quanti: RiskFileQuantiResults,
+): SerializedRiskFileQuantiResults {
+  return JSON.stringify(quanti) as SerializedRiskFileQuantiResults;
+}
+
+export function parseRiskFileQuantiResults(
+  quanti: SerializedRiskFileQuantiResults | null,
+): RiskFileQuantiResults | null {
+  return quanti ? (JSON.parse(quanti) as RiskFileQuantiResults) : null;
+}
+
+export type SerializedRiskFileQuantiResults = string & {
+  __json_seralized: RiskFileQuantiResults;
+};
+
+export type DVRiskFileQuantiResultsType =
+  | unknown
+  | SerializedRiskFileQuantiResults
+  | RiskFileQuantiResults;
+
+export type RiskFileScenarioQuantiResults = {
+  probabilityStatistics: TotalProbabilityStatistics | null;
+  impactStatistics: TotalImpactStatistics | null;
+};
+
+export type RiskFileQuantiResults = {
+  [SCENARIOS.CONSIDERABLE]: RiskFileScenarioQuantiResults;
+  [SCENARIOS.MAJOR]: RiskFileScenarioQuantiResults;
+  [SCENARIOS.EXTREME]: RiskFileScenarioQuantiResults;
 };
 
 export type RiskFileScenarioQuantiInput = {

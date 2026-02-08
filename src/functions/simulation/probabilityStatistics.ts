@@ -2,23 +2,13 @@
 // in the BNRA methodology document: Quantitative Model and Statistical Analysis
 // under section Statistical Analysis - Technical Implementation - Impact Statistics
 
-import { Risk, RiskEvent, Scenario } from "./types";
-
-export type ProbabilityContributionStatistics = {
-  id: string | null;
-  risk: string;
-  scenario: Scenario | null;
-  contributionMean: number;
-  contributionStd: number;
-  contribution95Error: number;
-};
-
-export type TotalProbabilityStatistics = {
-  sampleMean: number;
-  sampleStd: number;
-  relativeContributions: ProbabilityContributionStatistics[];
-  relativeRootCauseContributions: ProbabilityContributionStatistics[];
-};
+import {
+  Risk,
+  RiskEvent,
+  Scenario,
+  TotalProbabilityStatistics,
+} from "../../types/simulation";
+import { round } from "./math";
 
 export const NoStatistics = (): TotalProbabilityStatistics => ({
   sampleMean: 0,
@@ -97,12 +87,14 @@ export function getProbabilityStatistics(
       const s = statistics[risk.id][scenario];
 
       // Step 3.1: For the total yearly probability of a risk scenario
-      s.sampleMean =
+      s.sampleMean = round(
         sampleRiskScenarioCounts.reduce(
           (acc, count) => acc + (count[getRiskScenarioId(risk, scenario)] || 0),
           0,
-        ) / sampleRiskScenarioCounts.length;
-      s.sampleStd =
+        ) / sampleRiskScenarioCounts.length,
+        4,
+      );
+      s.sampleStd = round(
         sampleRiskScenarioCounts.reduce(
           (acc, count) =>
             acc +
@@ -110,7 +102,9 @@ export function getProbabilityStatistics(
               2,
           0,
         ) /
-        (sampleRiskScenarioCounts.length - 1);
+          (sampleRiskScenarioCounts.length - 1),
+        4,
+      );
 
       const totalRiskCascadeCounts: Record<string, number> | undefined =
         totalCascadeCounts[getRiskScenarioId(risk, scenario)];
@@ -124,10 +118,12 @@ export function getProbabilityStatistics(
           id: null,
           risk: "Direct Probability",
           scenario: null,
-          contributionMean:
+          contributionMean: round(
             totalRiskCascadeCounts[getRiskScenarioId(null, null)] /
-            s.sampleMean /
-            sampleCascadeCounts.length,
+              s.sampleMean /
+              sampleCascadeCounts.length,
+            4,
+          ),
           contributionStd: 0,
           contribution95Error: 0,
         });
@@ -140,10 +136,12 @@ export function getProbabilityStatistics(
           id: null,
           risk: "Direct Probability",
           scenario: null,
-          contributionMean:
+          contributionMean: round(
             totalRiskRootCauseCounts[getRiskScenarioId(null, null)] /
-            s.sampleMean /
-            sampleRootCauseCounts.length,
+              s.sampleMean /
+              sampleRootCauseCounts.length,
+            4,
+          ),
           contributionStd: 0,
           contribution95Error: 0,
         });
@@ -160,17 +158,22 @@ export function getProbabilityStatistics(
               getRiskScenarioId(causeRisk, causeScenario)
             ] !== undefined
           ) {
-            const contributionMean =
+            const contributionMean = round(
               totalCascadeCounts[getRiskScenarioId(risk, scenario)]?.[
                 getRiskScenarioId(causeRisk, causeScenario)
               ] /
-              s.sampleMean /
-              sampleCascadeCounts.length;
-            const contributionStd = getSampleStdContribution(
-              sampleCascadeCounts,
-              { risk: causeRisk, scenario: causeScenario },
-              { risk, scenario },
-              contributionMean,
+                s.sampleMean /
+                sampleCascadeCounts.length,
+              4,
+            );
+            const contributionStd = round(
+              getSampleStdContribution(
+                sampleCascadeCounts,
+                { risk: causeRisk, scenario: causeScenario },
+                { risk, scenario },
+                contributionMean,
+              ),
+              4,
             );
 
             s.relativeContributions.push({
@@ -179,11 +182,13 @@ export function getProbabilityStatistics(
               scenario: causeScenario,
               contributionMean,
               contributionStd,
-              contribution95Error:
+              contribution95Error: round(
                 sampleCascadeCounts.length <= 0
                   ? 0
                   : (1.96 * contributionStd) /
-                    Math.sqrt(sampleCascadeCounts.length),
+                      Math.sqrt(sampleCascadeCounts.length),
+                4,
+              ),
             });
           }
 
@@ -192,17 +197,22 @@ export function getProbabilityStatistics(
               getRiskScenarioId(causeRisk, causeScenario)
             ] !== undefined
           ) {
-            const contributionMean =
+            const contributionMean = round(
               totalRootCauseCounts[getRiskScenarioId(risk, scenario)]?.[
                 getRiskScenarioId(causeRisk, causeScenario)
               ] /
-              s.sampleMean /
-              sampleRootCauseCounts.length;
-            const contributionStd = getSampleStdContribution(
-              sampleRootCauseCounts,
-              { risk: causeRisk, scenario: causeScenario },
-              { risk, scenario },
-              contributionMean,
+                s.sampleMean /
+                sampleRootCauseCounts.length,
+              4,
+            );
+            const contributionStd = round(
+              getSampleStdContribution(
+                sampleRootCauseCounts,
+                { risk: causeRisk, scenario: causeScenario },
+                { risk, scenario },
+                contributionMean,
+              ),
+              4,
             );
 
             s.relativeRootCauseContributions.push({
@@ -211,11 +221,13 @@ export function getProbabilityStatistics(
               scenario: causeScenario,
               contributionMean,
               contributionStd,
-              contribution95Error:
+              contribution95Error: round(
                 sampleRootCauseCounts.length <= 0
                   ? 0
                   : (1.96 * contributionStd) /
-                    Math.sqrt(sampleRootCauseCounts.length),
+                      Math.sqrt(sampleRootCauseCounts.length),
+                4,
+              ),
             });
           }
         }

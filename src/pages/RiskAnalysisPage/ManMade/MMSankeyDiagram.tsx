@@ -9,12 +9,14 @@ import { CascadeSnapshots } from "../../../functions/cascades";
 import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 import { ActionsSankeyBox } from "../../../components/charts/ActionsSankey";
 import { ImpactSankeyBox } from "../../../components/charts/ImpactSankey";
+import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
 
 export default function MMSankeyDiagram({
   // riskSummary,
   riskFile,
   cascades,
   scenario,
+  results,
   setScenario,
 }: // debug = false,
 // manmade = false,
@@ -22,6 +24,7 @@ export default function MMSankeyDiagram({
   riskFile: DVRiskSnapshot;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
+  results: RiskFileQuantiResults | null;
   setScenario: (s: SCENARIOS) => void;
   debug?: boolean;
   manmade?: boolean;
@@ -189,7 +192,11 @@ export default function MMSankeyDiagram({
               {t("Damage Indicators")}
             </Typography>
           </Box>
-          <ImpactBarChart riskFile={riskFile} scenario={scenario} />
+          <ImpactBarChart
+            riskFile={riskFile}
+            scenario={scenario}
+            results={results}
+          />
         </Box>
       </Stack>
       <Box
@@ -200,6 +207,7 @@ export default function MMSankeyDiagram({
           riskSnapshot={riskFile}
           cascades={cascades}
           scenario={scenario}
+          results={results}
           onClick={goToRiskFile}
         />
       </Box>

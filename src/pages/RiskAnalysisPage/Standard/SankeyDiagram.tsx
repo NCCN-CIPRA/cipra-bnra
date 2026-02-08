@@ -13,16 +13,19 @@ import {
 } from "../../../types/dataverse/DVRiskSnapshot";
 import { CascadeSnapshots } from "../../../functions/cascades";
 import { ScenarioButtons } from "../../../components/ScenarioButtons";
+import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
 
 export default function SankeyDiagram({
   riskFile,
   cascades,
   scenario,
+  results,
   setScenario,
 }: {
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
+  results: RiskFileQuantiResults | null;
   setScenario: (s: SCENARIOS) => void;
   debug?: boolean;
 }) {
@@ -48,6 +51,7 @@ export default function SankeyDiagram({
           riskSnapshot={riskFile}
           cascades={cascades}
           scenario={scenario}
+          results={results}
           onClick={goToRiskFile}
         />
       </Box>
@@ -64,7 +68,11 @@ export default function SankeyDiagram({
           }}
         >
           <ProbabilityBars
-            tp={riskFile.cr4de_quanti[scenario].tp.yearly.scale || 0}
+            tp={
+              results?.[scenario].probabilityStatistics?.sampleMean ||
+              riskFile.cr4de_quanti[scenario].tp.yearly.scale ||
+              0
+            }
             chartWidth={200}
           />
         </Box>
@@ -91,7 +99,11 @@ export default function SankeyDiagram({
               {t("Damage Indicators")}
             </Typography>
           </Box>
-          <ImpactBarChart riskFile={riskFile} scenario={scenario} />
+          <ImpactBarChart
+            riskFile={riskFile}
+            scenario={scenario}
+            results={results}
+          />
         </Box>
       </Stack>
       <Box
@@ -102,6 +114,7 @@ export default function SankeyDiagram({
           riskSnapshot={riskFile}
           cascades={cascades}
           scenario={scenario}
+          results={results}
           onClick={goToRiskFile}
         />
       </Box>

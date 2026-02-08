@@ -16,10 +16,10 @@ import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
-import { Scenario } from "../../../functions/simulation/types";
+import { Scenario } from "../../../types/simulation";
 import { RISK_CATEGORY } from "../../../types/dataverse/Riskfile";
 import getCategoryColor from "../../../functions/getCategoryColor";
-import { SCENARIO_PARAMS } from "../../../functions/scenarios";
+import { SCENARIO_PARAMS, SCENARIOS } from "../../../functions/scenarios";
 import { hexToRGB } from "../../../functions/colors";
 
 export type MatrixRisk = {
@@ -153,7 +153,7 @@ function clipLineToBox(m: number, b: number): Point[] | null {
 
   // Remove duplicates (corner hits)
   const unique = Array.from(
-    new Map(points.map((p) => [`${p.x},${p.y}`, p])).values()
+    new Map(points.map((p) => [`${p.x},${p.y}`, p])).values(),
   );
 
   return unique.length === 2 ? unique : null;
@@ -186,12 +186,15 @@ export default function RiskMatrixChart({
 }) {
   const getColor = (entry: MatrixRisk, opacity: number = 1) => {
     if (scenarioDisplay === "colors") {
-      return hexToRGB(SCENARIO_PARAMS[entry.scenario].color, opacity);
+      return hexToRGB(
+        SCENARIO_PARAMS[entry.scenario as SCENARIOS].color,
+        opacity,
+      );
     }
     if (categoryDisplay === "colors" || categoryDisplay === "both") {
       return hexToRGB(
         CATEGORIES[entry.category]?.color || `rgba(150,150,150,${opacity})`,
-        opacity
+        opacity,
       );
     }
 

@@ -13,6 +13,7 @@ export default function RiskAnalysisPage() {
     riskSummary,
     riskSnapshot: riskFile,
     cascades,
+    results,
   } = useOutletContext<RiskFilePageContext>();
 
   if (!riskFile || !cascades)
@@ -29,6 +30,7 @@ export default function RiskAnalysisPage() {
           riskSummary={riskSummary}
           riskFile={riskFile}
           cascades={cascades}
+          results={results}
         />
       </Container>
     );
@@ -40,6 +42,7 @@ export default function RiskAnalysisPage() {
           riskSummary={riskSummary}
           riskFile={riskFile}
           cascades={cascades}
+          results={results}
         />
       </Container>
     );

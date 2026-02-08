@@ -27,7 +27,7 @@ import {
   RiskEvent,
   Scenario,
   SimulationInput,
-} from "../../functions/simulation/types";
+} from "../../types/simulation";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
 import useSavedState from "../../hooks/useSavedState";
@@ -344,8 +344,8 @@ function drawNode(ctx: CanvasRenderingContext2D, node: Node, hovered: boolean) {
   ctx.beginPath();
   ctx.arc(node.x, node.y, hovered ? RADIUS + 2 : RADIUS, 0, Math.PI * 2);
   ctx.fillStyle = hovered
-    ? `${SCENARIO_PARAMS[node.scenario].color}80`
-    : SCENARIO_PARAMS[node.scenario].color;
+    ? `${SCENARIO_PARAMS[node.scenario as SCENARIOS].color}80`
+    : SCENARIO_PARAMS[node.scenario as SCENARIOS].color;
   ctx.fill();
 }
 
