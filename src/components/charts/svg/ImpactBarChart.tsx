@@ -23,6 +23,7 @@ import {
   iScale7FromEuros,
 } from "../../../functions/indicators/impact";
 import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
+import { IMPACT_CATEGORY } from "../../../functions/Impact";
 
 export default function ImpactBarChart({
   riskFile,
@@ -32,6 +33,8 @@ export default function ImpactBarChart({
   height,
   maxScales,
   CustomTooltip,
+  focusedImpact = null,
+  onClickBar,
 }: {
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   scenario: SCENARIOS;
@@ -40,6 +43,8 @@ export default function ImpactBarChart({
   height?: number;
   maxScales: number;
   CustomTooltip?: ContentType<ValueType, NameType>;
+  focusedImpact?: IMPACT_CATEGORY | null;
+  onClickBar?: (impact: IMPACT_CATEGORY) => void;
 }) {
   const { t } = useTranslation();
   if (!riskFile) return null;
@@ -189,19 +194,79 @@ export default function ImpactBarChart({
           width={10}
         />
         <Tooltip content={CustomTooltip} />
-        <Bar dataKey="Ha" stackId="a" fill="#de6148" />
-        <Bar dataKey="Hb" stackId="a" fill="#f39d87" />
-        <Bar dataKey="Hc" stackId="a" fill="#ffd7cc" />
+        <Bar
+          dataKey="Ha"
+          stackId="a"
+          fill="#de6148"
+          opacity={focusedImpact && focusedImpact !== "H" ? 0.5 : 1}
+          onClick={() => onClickBar && onClickBar("H")}
+        />
+        <Bar
+          dataKey="Hb"
+          stackId="a"
+          fill="#f39d87"
+          opacity={focusedImpact && focusedImpact !== "H" ? 0.5 : 1}
+          onClick={() => onClickBar && onClickBar("H")}
+        />
+        <Bar
+          dataKey="Hc"
+          stackId="a"
+          fill="#ffd7cc"
+          opacity={focusedImpact && focusedImpact !== "H" ? 0.5 : 1}
+          onClick={() => onClickBar && onClickBar("H")}
+        />
         {/* <Bar dataKey="H" stackId="b" style={{ display: "none" }} /> */}
-        <Bar dataKey="Sa" stackId="a" fill="#bca632" />
-        <Bar dataKey="Sb" stackId="a" fill="#d2ba37" />
-        <Bar dataKey="Sc" stackId="a" fill="#e8ce3d" />
-        <Bar dataKey="Sd" stackId="a" fill="#ffe342" />
+        <Bar
+          dataKey="Sa"
+          stackId="a"
+          fill="#bca632"
+          opacity={focusedImpact && focusedImpact !== "S" ? 0.5 : 1}
+          onClick={() => onClickBar && onClickBar("S")}
+        />
+        <Bar
+          dataKey="Sb"
+          stackId="a"
+          fill="#d2ba37"
+          opacity={focusedImpact && focusedImpact !== "S" ? 0.5 : 1}
+          onClick={() => onClickBar && onClickBar("S")}
+        />
+        <Bar
+          dataKey="Sc"
+          stackId="a"
+          fill="#e8ce3d"
+          opacity={focusedImpact && focusedImpact !== "S" ? 0.5 : 1}
+          onClick={() => onClickBar && onClickBar("S")}
+        />
+        <Bar
+          dataKey="Sd"
+          stackId="a"
+          fill="#ffe342"
+          opacity={focusedImpact && focusedImpact !== "S" ? 0.5 : 1}
+          onClick={() => onClickBar && onClickBar("S")}
+        />
         {/* <Bar dataKey="S" stackId="a" style={{ display: "none" }} label /> */}
-        <Bar dataKey="Ea" stackId="a" fill="#83af70" />
+        <Bar
+          dataKey="Ea"
+          stackId="a"
+          fill="#83af70"
+          opacity={focusedImpact && focusedImpact !== "E" ? 0.5 : 1}
+          onClick={() => onClickBar && onClickBar("E")}
+        />
         {/* <Bar dataKey="E" stackId="a" style={{ display: "none" }} label /> */}
-        <Bar dataKey="Fa" stackId="a" fill="#6996b3" />
-        <Bar dataKey="Fb" stackId="a" fill="#c1e7ff" />
+        <Bar
+          dataKey="Fa"
+          stackId="a"
+          fill="#6996b3"
+          opacity={focusedImpact && focusedImpact !== "F" ? 0.5 : 1}
+          onClick={() => onClickBar && onClickBar("F")}
+        />
+        <Bar
+          dataKey="Fb"
+          stackId="a"
+          fill="#c1e7ff"
+          opacity={focusedImpact && focusedImpact !== "F" ? 0.5 : 1}
+          onClick={() => onClickBar && onClickBar("F")}
+        />
         {/* <Bar dataKey="F" stackId="a" style={{ display: "none" }} label /> */}
       </BarChart>
     </ResponsiveContainer>

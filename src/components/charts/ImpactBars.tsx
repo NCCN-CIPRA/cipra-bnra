@@ -15,6 +15,7 @@ import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../../pages/BasePage";
 import { Indicators } from "../../types/global";
 import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
+import { IMPACT_CATEGORY } from "../../functions/Impact";
 
 const CustomTooltip = ({
   active,
@@ -67,12 +68,16 @@ export default function ImpactBars({
   results,
   width,
   height,
+  focusedImpact = null,
+  onClickBar,
 }: {
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   scenario: SCENARIOS;
   results: RiskFileQuantiResults | null;
   width?: number;
   height?: number;
+  focusedImpact?: IMPACT_CATEGORY | null;
+  onClickBar?: (impact: IMPACT_CATEGORY) => void;
 }) {
   const { indicators } = useOutletContext<BasePageContext>();
 
@@ -86,5 +91,7 @@ export default function ImpactBars({
     height,
     maxScales,
     CustomTooltip,
+    focusedImpact,
+    onClickBar,
   });
 }

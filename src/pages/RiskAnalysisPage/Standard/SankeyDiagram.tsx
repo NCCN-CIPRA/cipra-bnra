@@ -5,7 +5,7 @@ import ImpactBarChart from "../../../components/charts/ImpactBars";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ProbabilitySankeyBox } from "../../../components/charts/ProbabilitySankey";
 import { ImpactSankeyBox } from "../../../components/charts/ImpactSankey";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DVRiskSnapshot,
@@ -21,6 +21,7 @@ import {
 } from "../../../functions/indicators/probability";
 import { BasePageContext } from "../../BasePage";
 import { Indicators } from "../../../types/global";
+import { IMPACT_CATEGORY } from "../../../functions/Impact";
 
 export default function SankeyDiagram({
   riskFile,
@@ -39,6 +40,10 @@ export default function SankeyDiagram({
   const { indicators } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const [focusedImpact, setFocusedImpact] = useState<null | IMPACT_CATEGORY>(
+    null,
+  );
 
   useEffect(() => {
     setScenario(scenario);
@@ -123,6 +128,14 @@ export default function SankeyDiagram({
             riskFile={riskFile}
             scenario={scenario}
             results={results}
+            focusedImpact={focusedImpact}
+            onClickBar={(i: IMPACT_CATEGORY) => {
+              if (focusedImpact === i) {
+                setFocusedImpact(null);
+              } else {
+                setFocusedImpact(i);
+              }
+            }}
           />
         </Box>
       </Stack>
@@ -135,6 +148,7 @@ export default function SankeyDiagram({
           cascades={cascades}
           scenario={scenario}
           results={results}
+          focusedImpact={focusedImpact}
           onClick={goToRiskFile}
         />
       </Box>

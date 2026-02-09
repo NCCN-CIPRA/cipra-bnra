@@ -12,7 +12,7 @@ import {
 } from "../../functions/cascades";
 import { EffectRisksSummary } from "../../types/dataverse/DVRiskSummary";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
-import { SCENARIOS } from "../../functions/scenarios";
+import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import { LinkProps, NodeProps, SankeyData } from "recharts/types/chart/Sankey";
 import { useTranslation } from "react-i18next";
 import round from "../../functions/roundNumberString";
@@ -23,13 +23,27 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Typography } from "@mui/material";
 import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
+import { IMPACT_CATEGORY, IMPACT_CATEGORY_NAME } from "../../functions/Impact";
+import { AggregatedImpacts } from "../../types/simulation";
+import { iScale7FromEuros } from "../../functions/indicators/impact";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../../pages/BasePage";
+import { Indicators } from "../../types/global";
 
 const baseY = 50;
 
 export type EffectSankeyNode = {
   name: string;
-  cascade?: EffectRisksSummary;
-  otherEffects?: EffectRisksSummary[];
+  cascade?: SankeyEffect;
+  otherEffects?: SankeyEffect[];
+};
+
+type SankeyEffect = EffectRisksSummary & {
+  parts?: {
+    considerable?: number;
+    major?: number;
+    extreme?: number;
+  };
 };
 
 export function ImpactSankeyBox({
@@ -39,6 +53,7 @@ export function ImpactSankeyBox({
   results,
   width = "100%",
   height = "100%",
+  focusedImpact = null,
   onClick,
 }: {
   riskSnapshot: DVRiskSnapshot;
@@ -47,6 +62,7 @@ export function ImpactSankeyBox({
   results: RiskFileQuantiResults | null;
   width?: number | string;
   height?: number | string;
+  focusedImpact?: IMPACT_CATEGORY | null;
   onClick: (id: string) => void;
 }) {
   const { t } = useTranslation();
@@ -64,6 +80,7 @@ export function ImpactSankeyBox({
           scenario={scenario}
           results={results}
           tooltip={true}
+          focusedImpact={focusedImpact}
           onClick={onClick}
         />
       </ResponsiveContainer>
@@ -79,6 +96,7 @@ export default function ImpactSankey({
   width,
   height,
   tooltip = true,
+  focusedImpact = null,
   onClick,
 }: {
   riskSnapshot: DVRiskSnapshot;
@@ -88,9 +106,14 @@ export default function ImpactSankey({
   width?: number;
   height?: number;
   tooltip?: boolean;
+  focusedImpact?: IMPACT_CATEGORY | null;
   onClick: (id: string) => void;
 }) {
   let effects: EffectRisksSummary[] = [];
+
+  const impactKey: keyof AggregatedImpacts = focusedImpact
+    ? (focusedImpact.toLowerCase() as keyof AggregatedImpacts)
+    : "all";
 
   if (!results) {
     effects = getEffectsSummaries(riskSnapshot, cascades, scenario, true);
@@ -103,12 +126,17 @@ export default function ImpactSankey({
             effect_risk_id: c.id || "",
             effect_risk_title: c.risk,
             effect_risk_i:
-              (acc[c.id || ""]?.effect_risk_i || 0) + c.contributionMean.all,
+              (acc[c.id || ""]?.effect_risk_i || 0) +
+              c.contributionMean[impactKey],
+            parts: {
+              ...(acc[c.id || ""]?.parts || {}),
+              [c.scenario || "considerable"]: c.contributionMean[impactKey],
+            },
           },
         }),
-        {} as Record<string, EffectRisksSummary>,
+        {} as Record<string, SankeyEffect>,
       ) || {};
-    console.log(results[scenario].impactStatistics?.relativeContributions);
+
     effects = Object.values(sums)
       .sort((a, b) => b.effect_risk_i - a.effect_risk_i)
       .reduce(
@@ -165,8 +193,16 @@ export default function ImpactSankey({
         <ISankeyNode
           {...props}
           totalEffects={data.nodes.length}
-          totalI={riskSnapshot.cr4de_quanti[scenario].ti.all.scaleTot}
+          totalI={
+            results
+              ? iScale7FromEuros(
+                  results[scenario].impactStatistics?.sampleMedian[impactKey] ||
+                    0,
+                )
+              : riskSnapshot.cr4de_quanti[scenario].ti.all.scaleTot
+          }
           fontSize={14}
+          focusedImpact={focusedImpact}
           onNavigate={onClick}
         />
       )}
@@ -193,14 +229,17 @@ function ISankeyNode({
   totalEffects,
   totalI,
   fontSize,
+  focusedImpact,
   onNavigate,
 }: NodeProps & {
   payload: EffectSankeyNode;
   totalEffects: number;
   totalI: number;
   fontSize: number;
+  focusedImpact?: IMPACT_CATEGORY | null;
   onNavigate?: (riskId: string) => void;
 }) {
+  const { indicators } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
 
   if (payload.sourceNodes.length <= 0) {
@@ -222,7 +261,11 @@ function ISankeyNode({
           stroke="#333"
           transform="rotate(270)"
         >
-          {`${t("Total Impact")}: ${round(totalI, 2)} / 5`}
+          {`${
+            focusedImpact ? IMPACT_CATEGORY_NAME[focusedImpact] : "Total"
+          } Impact: ${round(totalI, 2)} / ${
+            indicators === Indicators.V1 ? 5 : 7
+          }`}
         </text>
       </Layer>
     );
@@ -237,14 +280,69 @@ function ISankeyNode({
           if (onNavigate) return onNavigate(payload.cascade.effect_risk_id);
         }}
       >
-        <Rectangle
-          x={x}
-          y={totalEffects <= 2 ? baseY : y}
-          width={width}
-          height={totalEffects <= 2 ? 600 - 2 * baseY : height}
-          fill={getCategoryColor("")}
-          fillOpacity="1"
-        />
+        {payload.cascade?.parts && payload.cascade.effect_risk_id !== "" ? (
+          <>
+            <Rectangle
+              x={x}
+              y={totalEffects <= 2 ? baseY : y}
+              width={width}
+              height={
+                ((totalEffects <= 2 ? 600 - 2 * baseY : height) *
+                  (payload.cascade.parts.considerable || 0)) /
+                payload.cascade.effect_risk_i
+              }
+              fill={SCENARIO_PARAMS["considerable"].color}
+              fillOpacity="1"
+              style={{ cursor: payload.cascade ? "pointer" : "default" }}
+            />
+            <Rectangle
+              x={x}
+              y={
+                (totalEffects <= 2 ? baseY : y) +
+                ((totalEffects <= 2 ? 600 - 2 * baseY : height) *
+                  (payload.cascade.parts.considerable || 0)) /
+                  payload.cascade.effect_risk_i
+              }
+              width={width}
+              height={
+                ((totalEffects <= 2 ? 600 - 2 * baseY : height) *
+                  (payload.cascade.parts.major || 0)) /
+                payload.cascade.effect_risk_i
+              }
+              fill={SCENARIO_PARAMS["major"].color}
+              fillOpacity="1"
+              style={{ cursor: payload.cascade ? "pointer" : "default" }}
+            />
+            <Rectangle
+              x={x}
+              y={
+                (totalEffects <= 2 ? baseY : y) +
+                ((totalEffects <= 2 ? 600 - 2 * baseY : height) *
+                  ((payload.cascade.parts.considerable || 0) +
+                    (payload.cascade.parts.major || 0))) /
+                  payload.cascade.effect_risk_i
+              }
+              width={width}
+              height={
+                ((totalEffects <= 2 ? 600 - 2 * baseY : height) *
+                  (payload.cascade.parts.extreme || 0)) /
+                payload.cascade.effect_risk_i
+              }
+              fill={SCENARIO_PARAMS["extreme"].color}
+              fillOpacity="1"
+              style={{ cursor: payload.cascade ? "pointer" : "default" }}
+            />
+          </>
+        ) : (
+          <Rectangle
+            x={x}
+            y={totalEffects <= 2 ? baseY : y}
+            width={width}
+            height={totalEffects <= 2 ? 600 - 2 * baseY : height}
+            fill={getCategoryColor("")}
+            fillOpacity="1"
+          />
+        )}
 
         <text
           textAnchor="end"
