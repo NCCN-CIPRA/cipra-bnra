@@ -26,7 +26,6 @@ import { Indicators } from "../../types/global";
 import {
   pScale7FromReturnPeriodMonths,
   pScale7to5,
-  returnPeriodMonthsFromPTimeframe,
   returnPeriodMonthsFromYearlyEventRate,
 } from "../../functions/indicators/probability";
 
