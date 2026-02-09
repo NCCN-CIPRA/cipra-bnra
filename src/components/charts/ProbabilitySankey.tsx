@@ -108,7 +108,10 @@ export default function ProbabilitySankey({
 
   if (!results) {
     causes = getCauseSummaries(riskSnapshot, cascades, scenario, true);
-  } else {
+  } else if (
+    (results[scenario].probabilityStatistics?.relativeContributions?.length ||
+      0) > 0
+  ) {
     const sums =
       results[scenario].probabilityStatistics?.relativeContributions.reduce(
         (acc, c) => ({
@@ -158,6 +161,14 @@ export default function ProbabilitySankey({
         },
         { causes: [] as CauseRisksSummary[], totalP: 0 },
       ).causes;
+  } else {
+    causes = [
+      {
+        cause_risk_id: "",
+        cause_risk_title: "Direct Probability",
+        cause_risk_p: 1,
+      },
+    ];
   }
 
   const nodes: CauseSankeyNode[] = [

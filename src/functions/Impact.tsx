@@ -55,7 +55,7 @@ export type IMPACT_CATEGORY = "H" | "S" | "E" | "F";
 export const IMPACT_CATEGORY_NAME = {
   H: "Human",
   S: "Societal",
-  E: "Economic",
+  E: "Environmental",
   F: "Financial",
 };
 
