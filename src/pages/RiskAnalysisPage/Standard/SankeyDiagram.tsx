@@ -2,7 +2,7 @@ import { Stack, Typography, Box } from "@mui/material";
 import { SCENARIOS } from "../../../functions/scenarios";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBars";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { ProbabilitySankeyBox } from "../../../components/charts/ProbabilitySankey";
 import { ImpactSankeyBox } from "../../../components/charts/ImpactSankey";
 import { useEffect } from "react";
@@ -14,6 +14,13 @@ import {
 import { CascadeSnapshots } from "../../../functions/cascades";
 import { ScenarioButtons } from "../../../components/ScenarioButtons";
 import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
+import {
+  pScale5FromReturnPeriodMonths,
+  pScale7FromReturnPeriodMonths,
+  returnPeriodMonthsFromYearlyEventRate,
+} from "../../../functions/indicators/probability";
+import { BasePageContext } from "../../BasePage";
+import { Indicators } from "../../../types/global";
 
 export default function SankeyDiagram({
   riskFile,
@@ -29,6 +36,7 @@ export default function SankeyDiagram({
   setScenario: (s: SCENARIOS) => void;
   debug?: boolean;
 }) {
+  const { indicators } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -69,9 +77,21 @@ export default function SankeyDiagram({
         >
           <ProbabilityBars
             tp={
-              results?.[scenario].probabilityStatistics?.sampleMean ||
-              riskFile.cr4de_quanti[scenario].tp.yearly.scale ||
-              0
+              indicators === Indicators.V2
+                ? pScale7FromReturnPeriodMonths(
+                    returnPeriodMonthsFromYearlyEventRate(
+                      results?.[scenario]?.probabilityStatistics?.sampleMean ||
+                        1,
+                    ),
+                    100,
+                  ) || riskFile.cr4de_quanti[scenario].tp.yearly.scale
+                : pScale5FromReturnPeriodMonths(
+                    returnPeriodMonthsFromYearlyEventRate(
+                      results?.[scenario]?.probabilityStatistics?.sampleMean ||
+                        1,
+                    ),
+                    100,
+                  ) || riskFile.cr4de_quanti[scenario].tp.scale5TP
             }
             chartWidth={200}
           />

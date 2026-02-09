@@ -78,7 +78,7 @@ export default function ManMade({
               {t("Most Relevant Actor Group")}
             </Typography>
 
-            <ScenarioMatrix riskFile={riskFile} mrs={MRS} />
+            <ScenarioMatrix riskFile={riskFile} mrs={MRS} results={results} />
 
             <CapacitiesSection riskFile={riskFile} scenario={MRS} />
           </Box>

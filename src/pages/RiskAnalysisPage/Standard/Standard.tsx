@@ -76,7 +76,7 @@ export default function Standard({
         <Box className="mrs" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Most Relevant Scenario")}</Typography>
 
-          <ScenarioMatrix riskFile={riskFile} mrs={MRS} />
+          <ScenarioMatrix riskFile={riskFile} mrs={MRS} results={results} />
 
           {/* <IntensityParametersTable initialParameters={rf.cr4de_intensity_parameters} /> */}
 

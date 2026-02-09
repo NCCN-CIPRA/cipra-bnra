@@ -1,12 +1,12 @@
 import { Bar, BarChart, YAxis } from "recharts";
 
-export const arrow = (
+const arrow = (
   value: number,
   cy: number,
   arrowWidth: number,
   graphWidth: number,
   color: string,
-  maxScale: number
+  maxScale: number,
 ) => {
   const ratio = graphWidth - 20;
   const x0 = 10 + (ratio * value) / maxScale;
@@ -28,7 +28,7 @@ export const arrow = (
   );
 };
 
-export const getProbabilityBars = (value: number, maxScale: number) => {
+const getProbabilityBars = (value: number, maxScale: number) => {
   return Array(maxScale)
     .fill(null)
     .map((_, i) => ({

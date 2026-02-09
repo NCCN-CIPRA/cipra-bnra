@@ -12,6 +12,7 @@ import {
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../../pages/BasePage";
 import { Indicators } from "../../types/global";
+import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
 
 const CustomTooltip = ({
   active,
@@ -69,6 +70,7 @@ TooltipProps<number, NameType> & { payload: any }) => {
 export default function ScenarioMatrix({
   riskFile,
   mrs,
+  results,
   fontSize = 12,
   radius = 150,
   width = 300,
@@ -76,6 +78,7 @@ export default function ScenarioMatrix({
 }: {
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
   mrs: SCENARIOS;
+  results?: RiskFileQuantiResults | null;
   fontSize?: number;
   radius?: number;
   width?: number;
@@ -88,6 +91,7 @@ export default function ScenarioMatrix({
   return ScenarioMatrixChart({
     riskFile,
     mrs,
+    results,
     fontSize,
     radius,
     width,

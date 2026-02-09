@@ -20,12 +20,23 @@ import {
   DVRiskSnapshot,
   RiskSnapshotResults,
 } from "../../../types/dataverse/DVRiskSnapshot";
-import { tpScale5to7 } from "../../../functions/indicators/probability";
-import { tiScale5to7 } from "../../../functions/indicators/impact";
+import {
+  pScale5FromReturnPeriodMonths,
+  pScale7FromReturnPeriodMonths,
+  returnPeriodMonthsFromYearlyEventRate,
+  tpScale5to7,
+} from "../../../functions/indicators/probability";
+import {
+  iScale7FromEuros,
+  tiScale5FromEuros,
+  tiScale5to7,
+} from "../../../functions/indicators/impact";
+import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
 
 export default function ScenarioMatrixChart({
   riskFile,
   mrs,
+  results,
   fontSize = 12,
   radius = 150,
   width = 300,
@@ -35,6 +46,7 @@ export default function ScenarioMatrixChart({
 }: {
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
   mrs: SCENARIOS;
+  results?: RiskFileQuantiResults | null;
   fontSize?: number;
   radius?: number;
   width?: number;
@@ -44,22 +56,58 @@ export default function ScenarioMatrixChart({
 }) {
   const { t } = useTranslation();
 
-  const data = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].map(
+  let data = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].map(
     (s) => ({
       id: s,
       name: s,
       color: SCENARIO_PARAMS[s].color,
-      x:
+      y:
         maxScale === 7
           ? tpScale5to7(riskFile.cr4de_quanti[s].tp.yearly.scale)
           : riskFile.cr4de_quanti[s].tp.yearly.scale,
-      y:
+      x:
         maxScale === 7
           ? tiScale5to7(riskFile.cr4de_quanti[s].ti.all.scaleTot)
           : riskFile.cr4de_quanti[s].ti.all.scaleTot,
       z: 1,
-    })
+    }),
   );
+
+  if (results) {
+    data = [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].map(
+      (s) => ({
+        id: s,
+        name: s,
+        color: SCENARIO_PARAMS[s].color,
+        x:
+          maxScale === 7
+            ? iScale7FromEuros(
+                results[s]?.impactStatistics?.sampleMedian.all || 1,
+                undefined,
+                100,
+              )
+            : tiScale5FromEuros(
+                results[s]?.impactStatistics?.sampleMedian.all || 1,
+                undefined,
+              ),
+        y:
+          maxScale === 7
+            ? pScale7FromReturnPeriodMonths(
+                returnPeriodMonthsFromYearlyEventRate(
+                  results[s]?.probabilityStatistics?.sampleMean || 1,
+                ),
+                100,
+              )
+            : pScale5FromReturnPeriodMonths(
+                returnPeriodMonthsFromYearlyEventRate(
+                  results[s]?.probabilityStatistics?.sampleMean || 1,
+                ),
+                100,
+              ),
+        z: 1,
+      }),
+    );
+  }
 
   return (
     <ScatterChart
@@ -88,7 +136,7 @@ export default function ScenarioMatrixChart({
       <CartesianGrid fill="url(#colorUv)" />
       <YAxis
         type="number"
-        dataKey="x"
+        dataKey="y"
         domain={[0, maxScale + 0.5]}
         ticks={Array(maxScale)
           .fill(null)
@@ -107,7 +155,7 @@ export default function ScenarioMatrixChart({
       />
       <XAxis
         type="number"
-        dataKey="y"
+        dataKey="x"
         scale="linear"
         domain={[0, maxScale + 0.5]}
         ticks={Array(maxScale)

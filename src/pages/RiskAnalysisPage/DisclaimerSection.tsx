@@ -5,13 +5,20 @@ import {
   DVRiskSnapshot,
   RiskSnapshotResults,
 } from "../../types/dataverse/DVRiskSnapshot";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../BasePage";
+import HTMLEditor from "../../components/HTMLEditor";
+import useAPI from "../../hooks/useAPI";
 
 export default function DisclaimerSection({
   riskFile,
 }: {
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
 }) {
-  if (!riskFile.cr4de_quali_disclaimer_mrs) return null;
+  const { user } = useOutletContext<BasePageContext>();
+  const api = useAPI();
+
+  if (!riskFile.cr4de_quali_disclaimer_mrs && !user?.admin) return null;
 
   return (
     <Box sx={{ mt: 8 }}>
@@ -31,15 +38,13 @@ export default function DisclaimerSection({
           sx={{ color: SCENARIO_PARAMS[SCENARIOS.EXTREME].color }}
         />
         <Box sx={{ flex: 1, ml: 2 }}>
-          <Box
-            className="htmleditor"
-            sx={{
-              mb: 4,
-              fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
-            }}
-            dangerouslySetInnerHTML={{
-              __html: riskFile.cr4de_quali_disclaimer_mrs || "",
-            }}
+          <HTMLEditor
+            initialHTML={riskFile.cr4de_quali_disclaimer_mrs || ""}
+            onSave={(newHTML) =>
+              api.updateRiskFile(riskFile._cr4de_risk_file_value, {
+                cr4de_mrs_disclaimer: newHTML || undefined,
+              })
+            }
           />
         </Box>
       </Stack>
