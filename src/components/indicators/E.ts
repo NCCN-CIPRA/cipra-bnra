@@ -1,7 +1,6 @@
-import { DirectImpactField } from "../../pages/learning/QuantitativeScales/DI";
-
-export const Ea: DirectImpactField = {
+export const Ea = {
   prefix: "Ea",
+  category: "Environmental",
   title: ["learning.impact.ea.title", "Ea - Damaged ecosystems"],
   intervals: [
     ["learning.impact.ea.0", "No impact"],

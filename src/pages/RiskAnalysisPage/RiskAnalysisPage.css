@@ -1,4 +1,4 @@
-.htmleditor p {
+/* .htmleditor p {
   font-family: Arial;
   font-size: 10pt;
 }
@@ -11,7 +11,7 @@
 
 .htmleditor a:hover {
   opacity: 0.5;
-}
+} */
 
 .historical .MuiBox-root .MuiBox-root p {
   margin-top: 4px;

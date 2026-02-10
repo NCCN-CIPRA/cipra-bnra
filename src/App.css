@@ -59,3 +59,7 @@
 .custom-legend-wrapper svg {
   overflow: visible;
 }
+
+.recharts-wrapper *:focus:not(:focus-visible) {
+  outline: none !important;
+}

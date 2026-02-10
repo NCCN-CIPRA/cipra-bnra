@@ -14,6 +14,7 @@ import { Trans, useTranslation } from "react-i18next";
 
 export const Hc = {
   prefix: "Hc",
+  category: "Human",
   title: ["learning.impact.hc.title", "Hc - People in need of assistance"],
   unit: [
     "learning.impact.hc.footer",

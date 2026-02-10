@@ -1,7 +1,6 @@
-import { DirectImpactField } from "../../pages/learning/QuantitativeScales/DI";
-
-export const Sa: DirectImpactField = {
+export const Sa = {
   prefix: "Sa",
+  category: "Societal",
   title: [
     "learning.impact.sa.title",
     "Sa - Supply shortfalls and unmet human needs",
@@ -20,8 +19,9 @@ export const Sa: DirectImpactField = {
   ],
 };
 
-export const Sb: DirectImpactField = {
+export const Sb = {
   prefix: "Sb",
+  category: "Societal",
   title: [
     "learning.impact.sb.title",
     "Sb - Diminished public order and domestic security",
@@ -40,8 +40,9 @@ export const Sb: DirectImpactField = {
   ],
 };
 
-export const Sc: DirectImpactField = {
+export const Sc = {
   prefix: "Sc",
+  category: "Societal",
   title: [
     "learning.impact.sc.title",
     "Sc - Damage to the reputation of Belgium",
@@ -75,8 +76,53 @@ export const Sc: DirectImpactField = {
   ],
 };
 
-export const Sd: DirectImpactField = {
+export const Sc7 = {
+  prefix: "Sc",
+  category: "Societal",
+  title: [
+    "learning.impact.sc.title",
+    "Sc - Damage to the reputation of Belgium",
+  ],
+  intervals: [
+    ["learning.impact.sc.0", "No or negligible impact / Not applicable"],
+    [
+      "learning.impact.sc.1",
+      "Damage to reputation lasting only a few days and related to issues of medium importance (e.g. negative coverage in foreign media)",
+    ],
+    [
+      "learning.impact.sc.2",
+      "Damage to reputation lasting from one up to a few weeks and related to important issues (e.g. negative coverage in foreign media)",
+    ],
+    [
+      "learning.impact.sc.3",
+      "Damage to reputation lasting several weeks and related to important issues, but with minor impact on Belgium’s standing and international cooperation",
+    ],
+    [
+      "learning.impact.sc.4",
+      "Considerable damage to reputation lasting several weeks, with impact on Belgium’s standing and international cooperation (e.g. termination of significant agreements with Belgium, expulsion of Belgian ambassador)",
+    ],
+    [
+      "learning.impact.sc.5",
+      "Considerable damage to reputation lasting several months, with impact on Belgium’s standing and international cooperation (e.g. termination of significant agreements with Belgium, expulsion of Belgian ambassador)",
+    ],
+    [
+      "learning.impact.sc.6",
+      "Considerable damage to reputation lasting several months to years, with impact on Belgium’s standing and international cooperation (e.g. termination of significant agreements with Belgium, expulsion of Belgian ambassador)",
+    ],
+    [
+      "learning.impact.sc.7",
+      "Lasting, severe and even irreversible loss of reputation with far reaching impact on Belgium’s standing and international cooperation (e.g. political isolation, boycotts)",
+    ],
+  ],
+  unit: [
+    "learning.impact.sc.footer",
+    "Unit: qualitative according to significance and duration",
+  ],
+};
+
+export const Sd = {
   prefix: "Sd",
+  category: "Societal",
   title: [
     "learning.impact.sd.title",
     "Sd - Loss of confidence in or functioning of the state and/or its values",
@@ -101,6 +147,50 @@ export const Sd: DirectImpactField = {
     ],
     [
       "learning.impact.sd.5",
+      "Lasting, severe or even irreversible loss of general confidence (formation of local or regional groups for self-organisation of public life, up to the point of vigilante group formation), total impairment of state functions or massive and widespread infringement of citizens' freedoms and rights.",
+    ],
+  ],
+  unit: [
+    "learning.impact.sd.footer",
+    "Unit: qualitative according to significance and duration",
+  ],
+};
+
+export const Sd7 = {
+  prefix: "Sd",
+  category: "Societal",
+  title: [
+    "learning.impact.sd.title",
+    "Sd - Loss of confidence in or functioning of the state and/or its values",
+  ],
+  intervals: [
+    ["learning.impact.sd.0", "No impact"],
+    [
+      "learning.impact.sd.1",
+      "Minor impairment of confidence related to issues of medium significance (e.g. coverage in Belgian media). No threat of impairment of a state function.",
+    ],
+    [
+      "learning.impact.sd.2",
+      "Impairment of confidence related to issues of medium significance (e.g. very critical coverage in Belgian media), possible threat of impairment of a state function lasting only a few days.",
+    ],
+    [
+      "learning.impact.sd.3",
+      "Damage to confidence related to significant issues (e.g. extremely critical coverage in Belgian media; occasional demonstrations), partial impairment of a state function or marginal infringement of citizens' freedoms and rights  lasting for one up to a few weeks.",
+    ],
+    [
+      "learning.impact.sd.4",
+      "Damage to confidence related to significant issues (e.g. strikes, larger demonstrations), impairment of a state function or infringements of some citizens' freedoms and rights lasting for several weeks up to a few months.",
+    ],
+    [
+      "learning.impact.sd.5",
+      "Considerable damage to general confidence (e.g. extended strikes in many areas, mass demonstrations across Belgium), impairment of some state functions or partial infringements of citizens' freedoms and rights lasting several months up to a year.",
+    ],
+    [
+      "learning.impact.sd.6",
+      "Considerable damage to general confidence (e.g. extended strikes in many areas, mass demonstrations across Belgium), impairment of multiple state functions and infringements of citizens' freedoms and rights lasting more than a year.",
+    ],
+    [
+      "learning.impact.sd.7",
       "Lasting, severe or even irreversible loss of general confidence (formation of local or regional groups for self-organisation of public life, up to the point of vigilante group formation), total impairment of state functions or massive and widespread infringement of citizens' freedoms and rights.",
     ],
   ],

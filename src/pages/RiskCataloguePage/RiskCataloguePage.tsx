@@ -24,20 +24,33 @@ export default function RiskCataloguePage() {
   });
 
   const { data: riskSnapshots, isLoading: isLoadingSnapshots } = useQuery({
-    queryKey: [DataTable.RISK_SNAPSHOT],
-    queryFn: () => api.getRiskSnapshots(),
+    queryKey: [DataTable.RISK_SNAPSHOT, "catalogue"],
+    queryFn: () =>
+      api.getRiskSnapshots(
+        "$select=_cr4de_risk_file_value,cr4de_hazard_id,cr4de_title,cr4de_category,cr4de_mrs,cr4de_quanti",
+      ),
     enabled: Boolean(user),
     select: (data) => data.map((rf) => parseRiskSnapshot(rf)),
   });
 
   const { data: riskFiles, isLoading: isLoadingRiskFiles } = useQuery({
-    queryKey: [DataTable.RISK_FILE],
-    queryFn: () => api.getRiskFiles(),
+    queryKey: [DataTable.RISK_FILE, "catalogue"],
+    queryFn: async () => {
+      const res = await api.getRiskFiles(
+        "$select=cr4de_hazard_id,cr4de_title,cr4de_risk_category,cr4de_mrs,cr4de_quanti,vzzzz",
+      );
+      return res;
+    },
     enabled: Boolean(
-      user && user.roles.analist && environment === Environment.DYNAMIC
+      user && user.roles.analist && environment === Environment.DYNAMIC,
     ),
-    select: (data) =>
-      data.map((rf) => parseRiskSnapshot(snapshotFromRiskfile(rf))),
+    select: (data) => {
+      console.log(data);
+      const res = data.map((rf) => parseRiskSnapshot(snapshotFromRiskfile(rf)));
+      console.log(res);
+      return res;
+    },
+    throwOnError: true,
   });
 
   usePageTitle(t("sideDrawer.hazardCatalogue", "Hazard Catalogue"));
@@ -45,7 +58,7 @@ export default function RiskCataloguePage() {
     { name: t("bnra.shortName"), url: "/" },
     { name: t("sideDrawer.hazardCatalogue", "Hazard Catalogue"), url: "" },
   ]);
-
+  console.log(riskFiles);
   if (riskFiles || isLoadingRiskFiles)
     return (
       <AdvancedRiskCatalogue

@@ -10,12 +10,16 @@ import {
   DVRiskSnapshot,
   RiskSnapshotResults,
 } from "../../types/dataverse/DVRiskSnapshot";
-import round from "../../functions/roundNumberString";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../../pages/BasePage";
 import { Indicators } from "../../types/global";
 import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
-import { IMPACT_CATEGORY } from "../../functions/Impact";
+import { DAMAGE_INDICATOR, IMPACT_CATEGORY } from "../../functions/Impact";
+import {
+  getIntervalStringQuantiScale7,
+  Impacts,
+  Indicator,
+} from "../../functions/indicators/impact";
 
 const CustomTooltip = ({
   active,
@@ -23,6 +27,8 @@ const CustomTooltip = ({
   label,
 }: TooltipContentProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
+    if (payload && payload[0].payload.name === "") return null;
+
     return (
       <Box
         sx={{
@@ -30,19 +36,25 @@ const CustomTooltip = ({
           padding: 1,
           bgcolor: "rgba(255,255,255,0.8)",
           mb: 1,
+          width: 500,
         }}
       >
-        <Typography
-          variant="subtitle2"
-          sx={{ textDecoration: "underline", mb: 1 }}
-        >
-          {label} Impact
+        <Typography variant="subtitle2" sx={{ textDecoration: "underline" }}>
+          {Impacts[(label as string).toLowerCase() as Indicator].category}{" "}
+          Impact:
+        </Typography>
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+          {Impacts[(label as string).toLowerCase() as Indicator].title[1]}
         </Typography>
         {payload.map((p) => (
           <Stack key={p.name} direction="row" rowGap={0.5}>
-            <Typography variant="body2" sx={{ width: 50, fontWeight: "bold" }}>
-              {p.name}
-              {round(p.payload[p.name || ""], 1, ".")}
+            <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+              {p.payload.name}
+              {p.value}:{" "}
+              {getIntervalStringQuantiScale7(
+                p.value as number,
+                p.payload.name.toLowerCase() as Indicator,
+              )}
             </Typography>
           </Stack>
         ))}
@@ -76,8 +88,8 @@ export default function ImpactBars({
   results: RiskFileQuantiResults | null;
   width?: number;
   height?: number;
-  focusedImpact?: IMPACT_CATEGORY | null;
-  onClickBar?: (impact: IMPACT_CATEGORY) => void;
+  focusedImpact?: IMPACT_CATEGORY | DAMAGE_INDICATOR | null;
+  onClickBar?: (impact: IMPACT_CATEGORY | DAMAGE_INDICATOR) => void;
 }) {
   const { indicators } = useOutletContext<BasePageContext>();
 

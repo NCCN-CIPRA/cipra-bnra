@@ -22,15 +22,14 @@ import {
   MenuSelectHeading,
   MenuSelectTextAlign,
   RichTextEditor,
+  RichTextReadOnly,
   TableBubbleMenu,
   TableImproved,
   type RichTextEditorRef,
 } from "mui-tiptap";
-import { Underline } from "@tiptap/extension-underline";
 import { Link } from "@tiptap/extension-link";
-import { TableCell } from "@tiptap/extension-table-cell";
-import { TableHeader } from "@tiptap/extension-table-header";
-import { TableRow } from "@tiptap/extension-table-row";
+import TextAlign from "@tiptap/extension-text-align";
+import { TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
 import { RefObject, useMemo, useRef, useState } from "react";
 import { UserRoles } from "../functions/authRoles";
 import { useOutletContext } from "react-router-dom";
@@ -81,12 +80,16 @@ function Editor({
         <RichTextEditor
           ref={ref}
           extensions={[
-            StarterKit,
+            StarterKit.configure({
+              link: false,
+            }),
             TableImproved,
             TableRow,
             TableHeader,
             TableCell,
-            Underline,
+            TextAlign.configure({
+              types: ["heading", "paragraph", "image"],
+            }),
             Link.configure({
               // autolink is generally useful for changing text into links if they
               // appear to be URLs (like someone types in literally "example.com"),
@@ -186,6 +189,7 @@ export default function HTMLEditor({
       onMouseEnter={handlePopoverOpen}
       onMouseLeave={handlePopoverClose}
     >
+      <RichTextReadOnly content={initialHTML} extensions={[StarterKit]} />
       {user?.roles[editableRole] && isEditable && (
         <Box
           sx={{
@@ -231,15 +235,6 @@ export default function HTMLEditor({
           </Button>
         </Box>
       )}
-      <Box
-        className="htmleditor"
-        sx={{
-          fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
-        }}
-        dangerouslySetInnerHTML={{
-          __html: showDiff && diffHTML !== null ? diffHTML : initialHTML,
-        }}
-      />
     </Box>
   );
 }

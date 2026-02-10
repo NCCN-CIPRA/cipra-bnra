@@ -14,6 +14,7 @@ import { Trans, useTranslation } from "react-i18next";
 
 export const Hb = {
   prefix: "Hb",
+  category: "Human",
   title: ["learning.impact.hb.title", "Hb - Injured / sick people"],
   unit: ["learning.impact.hb.footer", "Unit: number of sick/injured people"],
   intervals: [

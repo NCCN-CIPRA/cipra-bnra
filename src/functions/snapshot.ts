@@ -1120,10 +1120,10 @@ export function snapshotFromRiskfile(
     cr4de_intensity_parameters: riskFile.cr4de_intensity_parameters,
     cr4de_scenarios: serializeRiskSnapshotScenarios({
       [SCENARIOS.CONSIDERABLE]: JSON.parse(
-        riskFile.cr4de_scenario_considerable || "",
+        riskFile.cr4de_scenario_considerable || "{}",
       ),
-      [SCENARIOS.MAJOR]: JSON.parse(riskFile.cr4de_scenario_major || ""),
-      [SCENARIOS.EXTREME]: JSON.parse(riskFile.cr4de_scenario_extreme || ""),
+      [SCENARIOS.MAJOR]: JSON.parse(riskFile.cr4de_scenario_major || "{}"),
+      [SCENARIOS.EXTREME]: JSON.parse(riskFile.cr4de_scenario_extreme || "{}"),
     }),
     cr4de_mrs: riskFile.cr4de_mrs!,
 

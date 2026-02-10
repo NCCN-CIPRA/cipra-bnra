@@ -27,7 +27,7 @@ export interface SmallRisk {
 }
 
 export const getResultSnapshot = (
-  riskFile: SmallRisk
+  riskFile: SmallRisk,
 ): RESULT_SNAPSHOT | null => {
   if (
     riskFile.cr4de_result_snapshot == null ||

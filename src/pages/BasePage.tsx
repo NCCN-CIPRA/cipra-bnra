@@ -8,8 +8,6 @@ import BreadcrumbNavigation from "../components/BreadcrumbNavigation";
 import useLoggedInUser, { LoggedInUser } from "../hooks/useLoggedInUser";
 import satisfies from "../types/satisfies";
 import { Environment, Indicators } from "../types/global";
-import { useQueryClient } from "@tanstack/react-query";
-import useAPI, { DataTable } from "../hooks/useAPI";
 import useSavedState from "../hooks/useSavedState";
 
 export interface BasePageContext {
@@ -31,38 +29,16 @@ export default function BasePage() {
   const [environment, setEnvironment] = useSavedState<Environment>(
     "bnraEnvironment",
     Environment.PUBLIC,
-    false
+    false,
   );
   const [indicators, setIndicators] = useSavedState<Indicators>(
     "bnraIndicatorVersion",
     Indicators.V1,
-    false
+    false,
   );
   const [diff, setDiff] = useSavedState<boolean>("bnraShowDiff", true, false);
-  const queryClient = useQueryClient();
-  const api = useAPI();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  if (user && user.roles.analist && environment === Environment.DYNAMIC) {
-    queryClient.prefetchQuery({
-      queryKey: [DataTable.RISK_FILE],
-      queryFn: () => api.getRiskFiles(),
-    });
-    queryClient.prefetchQuery({
-      queryKey: [DataTable.RISK_CASCADE],
-      queryFn: () => api.getRiskCascades(),
-    });
-  } else if (user) {
-    queryClient.prefetchQuery({
-      queryKey: [DataTable.RISK_SNAPSHOT],
-      queryFn: () => api.getRiskSnapshots(),
-    });
-    queryClient.prefetchQuery({
-      queryKey: [DataTable.CASCADE_SNAPSHOT],
-      queryFn: () => api.getCascadeSnapshots(),
-    });
-  }
 
   return (
     <AppContextProvider>
@@ -102,23 +78,6 @@ export default function BasePage() {
           })}
         />
       </Box>
-      {/* <Stack
-          direction="row"
-          sx={{
-            justifyContent: "space-evenly",
-            py: 2,
-            backgroundColor: "white",
-            borderTop: "1px solid rgba(0,0,0,0.05)",
-          }}
-        >
-          <img
-            alt="Nationaal Crisiscentrum"
-            src="https://bnra.powerappsportals.com/logo_nccn.svg"
-            style={{ height: 40 }}
-          />
-          <img alt="BNRA" src="https://bnra.powerappsportals.com/logo_text.png" style={{ height: 40 }} />
-        </Stack> */}
-      {/* </Box> */}
     </AppContextProvider>
   );
 }

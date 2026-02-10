@@ -42,9 +42,7 @@ import {
 } from "mui-tiptap";
 import { Underline } from "@tiptap/extension-underline";
 import { Link } from "@tiptap/extension-link";
-import { TableCell } from "@tiptap/extension-table-cell";
-import { TableHeader } from "@tiptap/extension-table-header";
-import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell, TableHeader, TableRow } from "@tiptap/extension-table";
 import useRecords from "../../hooks/useRecords";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import NCCNLoader from "../../components/NCCNLoader";
@@ -127,7 +125,7 @@ export default function EmailManagementTab() {
     if (!rteRef.current || !rteRef.current.editor || !emailTemplates) return;
 
     const t = emailTemplates.find(
-      (t) => t.cr4de_name.toLowerCase().indexOf(email.toLowerCase()) >= 0
+      (t) => t.cr4de_name.toLowerCase().indexOf(email.toLowerCase()) >= 0,
     );
 
     if (!t) return;
@@ -151,7 +149,7 @@ export default function EmailManagementTab() {
     );
 
   const currentTemplate = emailTemplates.find(
-    (t) => t.cr4de_name.toLowerCase().indexOf(email.toLowerCase()) >= 0
+    (t) => t.cr4de_name.toLowerCase().indexOf(email.toLowerCase()) >= 0,
   );
 
   const handleSave = async () => {

@@ -1,7 +1,6 @@
-import { DirectImpactField } from "../../pages/learning/QuantitativeScales/DI";
-
-export const Fa: DirectImpactField = {
+export const Fa = {
   prefix: "Fa",
+  category: "Financial",
   title: ["learning.impact.fa.title", "Fa - Financial asset damages"],
   intervals: [
     ["learning.impact.fa.0", "No impact"],
@@ -14,8 +13,9 @@ export const Fa: DirectImpactField = {
   unit: ["learning.impact.fa.footer", "Unit: EURO"],
 };
 
-export const Fb: DirectImpactField = {
+export const Fb = {
   prefix: "Fb",
+  category: "Financial",
   title: ["learning.impact.fb.title", "Fb - Reduction of economic performance"],
   intervals: [
     ["learning.impact.fb.a.0", "No Impact"],

@@ -23,12 +23,14 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Typography } from "@mui/material";
 import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
-import { IMPACT_CATEGORY, IMPACT_CATEGORY_NAME } from "../../functions/Impact";
+import {
+  DAMAGE_INDICATOR,
+  IMPACT_CATEGORY,
+  IMPACT_CATEGORY_NAME,
+} from "../../functions/Impact";
 import { AggregatedImpacts } from "../../types/simulation";
 import { iScale7FromEuros } from "../../functions/indicators/impact";
-import { useOutletContext } from "react-router-dom";
-import { BasePageContext } from "../../pages/BasePage";
-import { Indicators } from "../../types/global";
+import { DAMAGE_INDICATOR_COLORS } from "../../functions/getImpactColor";
 
 const baseY = 50;
 
@@ -62,7 +64,7 @@ export function ImpactSankeyBox({
   results: RiskFileQuantiResults | null;
   width?: number | string;
   height?: number | string;
-  focusedImpact?: IMPACT_CATEGORY | null;
+  focusedImpact?: IMPACT_CATEGORY | DAMAGE_INDICATOR | null;
   onClick: (id: string) => void;
 }) {
   const { t } = useTranslation();
@@ -106,7 +108,7 @@ export default function ImpactSankey({
   width?: number;
   height?: number;
   tooltip?: boolean;
-  focusedImpact?: IMPACT_CATEGORY | null;
+  focusedImpact?: IMPACT_CATEGORY | DAMAGE_INDICATOR | null;
   onClick: (id: string) => void;
 }) {
   let effects: EffectRisksSummary[] = [];
@@ -236,10 +238,9 @@ function ISankeyNode({
   totalEffects: number;
   totalI: number;
   fontSize: number;
-  focusedImpact?: IMPACT_CATEGORY | null;
+  focusedImpact?: IMPACT_CATEGORY | DAMAGE_INDICATOR | null;
   onNavigate?: (riskId: string) => void;
 }) {
-  const { indicators } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
 
   if (payload.sourceNodes.length <= 0) {
@@ -249,23 +250,30 @@ function ISankeyNode({
           x={x}
           y={baseY}
           width={width}
-          height={totalEffects <= 2 ? 600 - 2 * baseY : height}
-          fill={getCategoryColor("")}
+          height={totalEffects <= 2 ? 490 : height}
+          fill={
+            focusedImpact
+              ? DAMAGE_INDICATOR_COLORS[focusedImpact]
+              : getCategoryColor("")
+          }
           fillOpacity="1"
+          z={-1}
         />
         <text
           textAnchor="middle"
-          x={-y - height / 2 - 18}
+          x={-y - (totalEffects <= 2 ? 490 : height) / 2 - 18}
           y={x + 30}
           fontSize={fontSize || "16"}
           stroke="#333"
           transform="rotate(270)"
         >
           {`${
-            focusedImpact ? IMPACT_CATEGORY_NAME[focusedImpact] : "Total"
-          } Impact: ${round(totalI, 2)} / ${
-            indicators === Indicators.V1 ? 5 : 7
-          }`}
+            focusedImpact
+              ? IMPACT_CATEGORY_NAME[focusedImpact as IMPACT_CATEGORY] ||
+                focusedImpact
+              : "Total"
+          } Impact:`}
+          <tspan dx={12}>{round(totalI, 2)}</tspan>
         </text>
       </Layer>
     );

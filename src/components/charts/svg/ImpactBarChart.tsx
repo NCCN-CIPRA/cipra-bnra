@@ -12,7 +12,6 @@ import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
-import { useTranslation } from "react-i18next";
 import { ContentType } from "recharts/types/component/Tooltip";
 import {
   DVRiskSnapshot,
@@ -20,10 +19,11 @@ import {
 } from "../../../types/dataverse/DVRiskSnapshot";
 import {
   categoryImpactScale5to7,
+  ImpactColor,
   iScale7FromEuros,
 } from "../../../functions/indicators/impact";
 import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
-import { IMPACT_CATEGORY } from "../../../functions/Impact";
+import { DAMAGE_INDICATOR, IMPACT_CATEGORY } from "../../../functions/Impact";
 
 export default function ImpactBarChart({
   riskFile,
@@ -43,10 +43,9 @@ export default function ImpactBarChart({
   height?: number;
   maxScales: number;
   CustomTooltip?: ContentType<ValueType, NameType>;
-  focusedImpact?: IMPACT_CATEGORY | null;
-  onClickBar?: (impact: IMPACT_CATEGORY) => void;
+  focusedImpact?: IMPACT_CATEGORY | DAMAGE_INDICATOR | null;
+  onClickBar?: (impact: IMPACT_CATEGORY | DAMAGE_INDICATOR) => void;
 }) {
-  const { t } = useTranslation();
   if (!riskFile) return null;
 
   let H =
@@ -83,40 +82,151 @@ export default function ImpactBarChart({
 
   const data = [
     {
-      name: t("Human"),
-      H: H,
-      Ha: riskFile.cr4de_quanti[scenario].ti.ha.scaleCatRel * H,
-      Hb: riskFile.cr4de_quanti[scenario].ti.hb.scaleCatRel * H,
-      Hc: riskFile.cr4de_quanti[scenario].ti.hc.scaleCatRel * H,
-      Ha_abs: riskFile.cr4de_quanti[scenario].ti.ha.abs,
-      Hb_abs: riskFile.cr4de_quanti[scenario].ti.hb.abs,
-      Hc_abs: riskFile.cr4de_quanti[scenario].ti.hc.abs,
+      name: "Ha",
+      value: results
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMedian.ha || 0,
+          )
+        : riskFile.cr4de_quanti[scenario].ti.ha.scaleCatRel * H,
+      fill: ImpactColor.Ha,
+      opacity:
+        !focusedImpact || focusedImpact === "Ha" || focusedImpact === "H"
+          ? 1
+          : 0.2,
     },
     {
-      name: t("Societal"),
-      S: S,
-      Sa: riskFile.cr4de_quanti[scenario].ti.sa.scaleCatRel * S,
-      Sb: riskFile.cr4de_quanti[scenario].ti.sb.scaleCatRel * S,
-      Sc: riskFile.cr4de_quanti[scenario].ti.sc.scaleCatRel * S,
-      Sd: riskFile.cr4de_quanti[scenario].ti.sd.scaleCatRel * S,
-      Sa_abs: riskFile.cr4de_quanti[scenario].ti.sa.abs,
-      Sb_abs: riskFile.cr4de_quanti[scenario].ti.sb.abs,
-      Sc_abs: riskFile.cr4de_quanti[scenario].ti.sc.abs,
-      Sd_abs: riskFile.cr4de_quanti[scenario].ti.sd.abs,
+      name: "Hb",
+      label: "Human",
+      value: results
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMedian.hb || 0,
+          )
+        : riskFile.cr4de_quanti[scenario].ti.hb.scaleCatRel * H,
+      fill: ImpactColor.Hb,
+      opacity:
+        !focusedImpact || focusedImpact === "Hb" || focusedImpact === "H"
+          ? 1
+          : 0.2,
     },
     {
-      name: t("Environmental"),
-      E: E,
-      Ea: riskFile.cr4de_quanti[scenario].ti.ea.scaleCatRel * E,
-      Ea_abs: riskFile.cr4de_quanti[scenario].ti.ea.abs,
+      name: "Hc",
+      value: results
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMedian.hc || 0,
+          )
+        : riskFile.cr4de_quanti[scenario].ti.hc.scaleCatRel * H,
+      fill: ImpactColor.Hc,
+      opacity:
+        !focusedImpact || focusedImpact === "Hc" || focusedImpact === "H"
+          ? 1
+          : 0.2,
     },
     {
-      name: t("Financial"),
-      F: F,
-      Fa: riskFile.cr4de_quanti[scenario].ti.fa.scaleCatRel * F,
-      Fb: riskFile.cr4de_quanti[scenario].ti.fb.scaleCatRel * F,
-      Fa_abs: riskFile.cr4de_quanti[scenario].ti.fa.abs,
-      Fb_abs: riskFile.cr4de_quanti[scenario].ti.fb.abs,
+      name: "",
+      value: 0,
+    },
+    {
+      name: "Sa",
+      value: results
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMedian.sa || 0,
+          )
+        : riskFile.cr4de_quanti[scenario].ti.sa.scaleCatRel * S,
+      fill: ImpactColor.Sa,
+      opacity:
+        !focusedImpact || focusedImpact === "Sa" || focusedImpact === "S"
+          ? 1
+          : 0.2,
+    },
+    {
+      name: "Sb",
+      label: "Societal",
+      tickOffset: 0.5,
+      value: results
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMedian.sb || 0,
+          )
+        : riskFile.cr4de_quanti[scenario].ti.sb.scaleCatRel * S,
+      fill: ImpactColor.Sb,
+      opacity:
+        !focusedImpact || focusedImpact === "Sb" || focusedImpact === "S"
+          ? 1
+          : 0.2,
+    },
+    {
+      name: "Sc",
+      value: results
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMedian.sc || 0,
+          )
+        : riskFile.cr4de_quanti[scenario].ti.sc.scaleCatRel * S,
+      fill: ImpactColor.Sc,
+      opacity:
+        !focusedImpact || focusedImpact === "Sc" || focusedImpact === "S"
+          ? 1
+          : 0.2,
+    },
+    {
+      name: "Sd",
+      value: results
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMedian.sd || 0,
+          )
+        : riskFile.cr4de_quanti[scenario].ti.sd.scaleCatRel * S,
+      fill: ImpactColor.Sd,
+      opacity:
+        !focusedImpact || focusedImpact === "Sd" || focusedImpact === "S"
+          ? 1
+          : 0.2,
+    },
+    {
+      name: "",
+      value: 0,
+    },
+    {
+      name: "Ea",
+      label: "Environmental",
+      value: results
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMedian.ea || 0,
+          )
+        : riskFile.cr4de_quanti[scenario].ti.ea.scaleCatRel * E,
+      fill: ImpactColor.Ea,
+      opacity:
+        !focusedImpact || focusedImpact === "Ea" || focusedImpact === "E"
+          ? 1
+          : 0.2,
+    },
+    {
+      name: "",
+      value: 0,
+    },
+    {
+      name: "Fa",
+      label: "Financial",
+      value: results
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMedian.fa || 0,
+          )
+        : riskFile.cr4de_quanti[scenario].ti.fa.scaleCatRel * F,
+      fill: ImpactColor.Fa,
+      opacity:
+        !focusedImpact || focusedImpact === "Fa" || focusedImpact === "F"
+          ? 1
+          : 0.2,
+    },
+    {
+      name: "Fb",
+      value: results
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMedian.fb || 0,
+          )
+        : riskFile.cr4de_quanti[scenario].ti.fb.scaleCatRel * F,
+      fill: ImpactColor.Fb,
+      opacity:
+        !focusedImpact || focusedImpact === "Fb" || focusedImpact === "F"
+          ? 1
+          : 0.2,
     },
   ];
 
@@ -137,7 +247,7 @@ export default function ImpactBarChart({
           angle={-90}
           dx={-5}
           dy={5}
-          interval={0}
+          // interval={0}
           textAnchor="end"
           fontSize={22}
         />
@@ -185,6 +295,14 @@ export default function ImpactBarChart({
           dy={5}
           interval={0}
           textAnchor="end"
+          tickLine={false}
+          tickFormatter={(value) => {
+            if (value === "Hb") return "Human";
+            if (value === "Sb") return "Societal";
+            if (value === "Ea") return "Environmental";
+            if (value === "Fa") return "Financial";
+            return "";
+          }}
         />
         <YAxis
           domain={[0, maxScales + 0.5]}
@@ -193,81 +311,28 @@ export default function ImpactBarChart({
             .map((_, i) => i + 1)}
           width={10}
         />
-        <Tooltip content={CustomTooltip} />
-        <Bar
-          dataKey="Ha"
-          stackId="a"
-          fill="#de6148"
-          opacity={focusedImpact && focusedImpact !== "H" ? 0.5 : 1}
-          onClick={() => onClickBar && onClickBar("H")}
+        <Tooltip
+          wrapperStyle={{
+            zIndex: 100000,
+            backgroundColor: "rgba(34, 41, 47, 0.1)",
+          }}
+          content={CustomTooltip}
         />
         <Bar
-          dataKey="Hb"
-          stackId="a"
-          fill="#f39d87"
-          opacity={focusedImpact && focusedImpact !== "H" ? 0.5 : 1}
-          onClick={() => onClickBar && onClickBar("H")}
+          dataKey="value"
+          // stackId="a"
+          // fill="#de6148"
+          onClick={(p) => {
+            if (!onClickBar || !p.name) return;
+
+            if (
+              focusedImpact &&
+              (focusedImpact === p.name[0] || focusedImpact === p.name)
+            )
+              onClickBar(p.name as DAMAGE_INDICATOR);
+            else onClickBar(p.name[0] as IMPACT_CATEGORY);
+          }}
         />
-        <Bar
-          dataKey="Hc"
-          stackId="a"
-          fill="#ffd7cc"
-          opacity={focusedImpact && focusedImpact !== "H" ? 0.5 : 1}
-          onClick={() => onClickBar && onClickBar("H")}
-        />
-        {/* <Bar dataKey="H" stackId="b" style={{ display: "none" }} /> */}
-        <Bar
-          dataKey="Sa"
-          stackId="a"
-          fill="#bca632"
-          opacity={focusedImpact && focusedImpact !== "S" ? 0.5 : 1}
-          onClick={() => onClickBar && onClickBar("S")}
-        />
-        <Bar
-          dataKey="Sb"
-          stackId="a"
-          fill="#d2ba37"
-          opacity={focusedImpact && focusedImpact !== "S" ? 0.5 : 1}
-          onClick={() => onClickBar && onClickBar("S")}
-        />
-        <Bar
-          dataKey="Sc"
-          stackId="a"
-          fill="#e8ce3d"
-          opacity={focusedImpact && focusedImpact !== "S" ? 0.5 : 1}
-          onClick={() => onClickBar && onClickBar("S")}
-        />
-        <Bar
-          dataKey="Sd"
-          stackId="a"
-          fill="#ffe342"
-          opacity={focusedImpact && focusedImpact !== "S" ? 0.5 : 1}
-          onClick={() => onClickBar && onClickBar("S")}
-        />
-        {/* <Bar dataKey="S" stackId="a" style={{ display: "none" }} label /> */}
-        <Bar
-          dataKey="Ea"
-          stackId="a"
-          fill="#83af70"
-          opacity={focusedImpact && focusedImpact !== "E" ? 0.5 : 1}
-          onClick={() => onClickBar && onClickBar("E")}
-        />
-        {/* <Bar dataKey="E" stackId="a" style={{ display: "none" }} label /> */}
-        <Bar
-          dataKey="Fa"
-          stackId="a"
-          fill="#6996b3"
-          opacity={focusedImpact && focusedImpact !== "F" ? 0.5 : 1}
-          onClick={() => onClickBar && onClickBar("F")}
-        />
-        <Bar
-          dataKey="Fb"
-          stackId="a"
-          fill="#c1e7ff"
-          opacity={focusedImpact && focusedImpact !== "F" ? 0.5 : 1}
-          onClick={() => onClickBar && onClickBar("F")}
-        />
-        {/* <Bar dataKey="F" stackId="a" style={{ display: "none" }} label /> */}
       </BarChart>
     </ResponsiveContainer>
   );

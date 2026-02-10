@@ -21,7 +21,7 @@ import {
 } from "../../../functions/indicators/probability";
 import { BasePageContext } from "../../BasePage";
 import { Indicators } from "../../../types/global";
-import { IMPACT_CATEGORY } from "../../../functions/Impact";
+import { DAMAGE_INDICATOR, IMPACT_CATEGORY } from "../../../functions/Impact";
 
 export default function SankeyDiagram({
   riskFile,
@@ -41,9 +41,9 @@ export default function SankeyDiagram({
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [focusedImpact, setFocusedImpact] = useState<null | IMPACT_CATEGORY>(
-    null,
-  );
+  const [focusedImpact, setFocusedImpact] = useState<
+    null | IMPACT_CATEGORY | DAMAGE_INDICATOR
+  >(null);
 
   useEffect(() => {
     setScenario(scenario);
@@ -54,6 +54,34 @@ export default function SankeyDiagram({
     navigate(`/risks/${id}/analysis`);
   };
 
+  let tp;
+  if (indicators === Indicators.V2) {
+    if (results) {
+      tp = pScale7FromReturnPeriodMonths(
+        returnPeriodMonthsFromYearlyEventRate(
+          results[scenario].probabilityStatistics!.sampleMean,
+        ),
+        100,
+      );
+    } else {
+      tp = riskFile.cr4de_quanti[scenario].tp.yearly.scale;
+    }
+  } else {
+    if (results) {
+      tp = pScale5FromReturnPeriodMonths(
+        returnPeriodMonthsFromYearlyEventRate(
+          results[scenario].probabilityStatistics!.sampleMean,
+        ),
+        100,
+      );
+    } else {
+      tp = riskFile.cr4de_quanti[scenario].tp.scale5TP;
+    }
+  }
+  console.log(
+    indicators,
+    results?.[scenario]?.probabilityStatistics?.sampleMean,
+  );
   return (
     <Stack className="bnra-sankey" direction="row" sx={{ mb: 8 }}>
       <Box
@@ -80,26 +108,7 @@ export default function SankeyDiagram({
             width: "100%",
           }}
         >
-          <ProbabilityBars
-            tp={
-              indicators === Indicators.V2
-                ? pScale7FromReturnPeriodMonths(
-                    returnPeriodMonthsFromYearlyEventRate(
-                      results?.[scenario]?.probabilityStatistics?.sampleMean ||
-                        1,
-                    ),
-                    100,
-                  ) || riskFile.cr4de_quanti[scenario].tp.yearly.scale
-                : pScale5FromReturnPeriodMonths(
-                    returnPeriodMonthsFromYearlyEventRate(
-                      results?.[scenario]?.probabilityStatistics?.sampleMean ||
-                        1,
-                    ),
-                    100,
-                  ) || riskFile.cr4de_quanti[scenario].tp.scale5TP
-            }
-            chartWidth={200}
-          />
+          <ProbabilityBars tp={tp} chartWidth={200} />
         </Box>
         <Box
           className="sankey-scenarios"
@@ -129,7 +138,7 @@ export default function SankeyDiagram({
             scenario={scenario}
             results={results}
             focusedImpact={focusedImpact}
-            onClickBar={(i: IMPACT_CATEGORY) => {
+            onClickBar={(i: IMPACT_CATEGORY | DAMAGE_INDICATOR) => {
               if (focusedImpact === i) {
                 setFocusedImpact(null);
               } else {
@@ -141,7 +150,7 @@ export default function SankeyDiagram({
       </Stack>
       <Box
         className="sankey-impact"
-        sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}
+        sx={{ width: "calc(50% - 150px)", height: 600, mb: 8, zIndex: -1 }}
       >
         <ImpactSankeyBox
           riskSnapshot={riskFile}

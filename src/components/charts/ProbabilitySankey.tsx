@@ -189,6 +189,10 @@ export default function ProbabilitySankey({
     })),
   };
 
+  let nodePadding = 0;
+  if (data.nodes.length > 2) nodePadding = 100 / (data.nodes.length - 2);
+  if (data.nodes.length >= 1) nodePadding = 100;
+  console.log(data.nodes);
   return (
     <Sankey
       width={width}
@@ -217,7 +221,7 @@ export default function ProbabilitySankey({
       // Disable sorting  the nodes
       iterations={0}
       // More spacing between nodes
-      nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
+      nodePadding={nodePadding}
     >
       {tooltip && <Tooltip content={CauseTooltip} />}
     </Sankey>
@@ -256,23 +260,26 @@ function PSankeyNode({
           x={x}
           y={baseY}
           width={width}
-          height={totalCauses <= 2 ? 600 - 2 * baseY : height}
+          height={totalCauses <= 2 ? 490 : height}
           fill={getCategoryColor("")}
           fillOpacity="1"
         />
         <text
           textAnchor="middle"
-          x={-y - height / 2 - 18}
+          x={-y - (totalCauses <= 2 ? 490 : height) / 2 - 18}
           y={x - 15}
           fontSize={fontSize || "16"}
           stroke="#333"
           transform="rotate(270)"
         >
-          {`${t("Total Probability")}:  ${
-            indicators === Indicators.V1
-              ? round(pScale7to5(totalP), 2)
-              : round(totalP, 2)
-          } / ${indicators === Indicators.V1 ? 5 : 7}`}
+          {`${t("Total Probability")}:`}{" "}
+          <tspan dx={12}>
+            {`${
+              indicators === Indicators.V1
+                ? round(pScale7to5(totalP), 2)
+                : round(totalP, 2)
+            }`}
+          </tspan>
         </text>
       </Layer>
     );
@@ -294,7 +301,7 @@ function PSankeyNode({
               y={totalCauses <= 2 ? baseY : y}
               width={width}
               height={
-                ((totalCauses <= 2 ? 600 - 2 * baseY : height) *
+                ((totalCauses <= 2 ? 490 : height) *
                   (payload.cascade.parts.considerable || 0)) /
                 payload.cascade.cause_risk_p
               }
@@ -306,13 +313,13 @@ function PSankeyNode({
               x={x}
               y={
                 (totalCauses <= 2 ? baseY : y) +
-                ((totalCauses <= 2 ? 600 - 2 * baseY : height) *
+                ((totalCauses <= 2 ? 490 : height) *
                   (payload.cascade.parts.considerable || 0)) /
                   payload.cascade.cause_risk_p
               }
               width={width}
               height={
-                ((totalCauses <= 2 ? 600 - 2 * baseY : height) *
+                ((totalCauses <= 2 ? 490 : height) *
                   (payload.cascade.parts.major || 0)) /
                 payload.cascade.cause_risk_p
               }
@@ -324,14 +331,14 @@ function PSankeyNode({
               x={x}
               y={
                 (totalCauses <= 2 ? baseY : y) +
-                ((totalCauses <= 2 ? 600 - 2 * baseY : height) *
+                ((totalCauses <= 2 ? 490 : height) *
                   ((payload.cascade.parts.considerable || 0) +
                     (payload.cascade.parts.major || 0))) /
                   payload.cascade.cause_risk_p
               }
               width={width}
               height={
-                ((totalCauses <= 2 ? 600 - 2 * baseY : height) *
+                ((totalCauses <= 2 ? 490 : height) *
                   (payload.cascade.parts.extreme || 0)) /
                 payload.cascade.cause_risk_p
               }
@@ -345,7 +352,7 @@ function PSankeyNode({
             x={x}
             y={totalCauses <= 2 ? baseY : y}
             width={width}
-            height={totalCauses <= 2 ? 600 - 2 * baseY : height}
+            height={totalCauses <= 2 ? 490 : height}
             fill={getCategoryColor("")}
             fillOpacity="1"
             style={{ cursor: payload.cascade ? "pointer" : "default" }}
@@ -381,18 +388,19 @@ function PSankeyLink(props: LinkProps & { totalCauses: number }) {
 
   const shiftedTargetY =
     totalCauses <= 2
-      ? sourceY
+      ? sourceY - 5
       : targetRelativeY + targetY + (baseY - (targetY - linkWidth / 2));
+  const shiftedSourceY = totalCauses <= 2 ? shiftedTargetY : sourceY;
 
   return (
     <path
       d={`
-        M${sourceX},${sourceY}
-        C${sourceControlX},${sourceY} ${targetControlX},${shiftedTargetY} ${targetX},${shiftedTargetY}
+        M${sourceX},${shiftedSourceY}
+        C${sourceControlX},${shiftedSourceY} ${targetControlX},${shiftedTargetY} ${targetX},${shiftedTargetY}
       `}
       stroke="rgb(102,200,194)"
       fill="none"
-      strokeWidth={totalCauses <= 2 ? 600 - 2 * baseY : linkWidth}
+      strokeWidth={totalCauses <= 2 ? 490 : linkWidth}
       strokeOpacity="0.2"
       pointerEvents="none"
       // {...filterProps(others)}
