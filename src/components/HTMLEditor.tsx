@@ -82,6 +82,8 @@ function Editor({
           extensions={[
             StarterKit.configure({
               link: false,
+              gapcursor: false,
+              dropcursor: false,
             }),
             TableImproved,
             TableRow,
@@ -189,7 +191,16 @@ export default function HTMLEditor({
       onMouseEnter={handlePopoverOpen}
       onMouseLeave={handlePopoverClose}
     >
-      <RichTextReadOnly content={initialHTML} extensions={[StarterKit]} />
+      <RichTextReadOnly
+        content={initialHTML}
+        extensions={[
+          StarterKit.configure({
+            link: false,
+            gapcursor: false,
+            dropcursor: false,
+          }),
+        ]}
+      />
       {user?.roles[editableRole] && isEditable && (
         <Box
           sx={{
