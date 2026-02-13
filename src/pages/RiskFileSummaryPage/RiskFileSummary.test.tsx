@@ -123,7 +123,7 @@ describe("RiskFileSummaryPage", () => {
       const titleComponent = screen.getByTestId("risk-file-title");
       expect(titleComponent).toBeInTheDocument();
       expect(titleComponent).toHaveTextContent(
-        "Risk File Title: Earthquake Risk"
+        "Risk File Title: Earthquake Risk",
       );
     });
   });
@@ -138,9 +138,11 @@ describe("RiskFileSummaryPage", () => {
       const summaryBox = screen.getByTestId("summary-text");
       expect(summaryBox).toBeInTheDocument();
 
-      const htmlContent = summaryBox.querySelector(".htmleditor");
+      const htmlContent = summaryBox.querySelector(
+        ".MuiTiptap-RichTextContent-readonly",
+      );
       expect(htmlContent).toHaveTextContent(
-        "This is the English summary of the earthquake risk."
+        "This is the English summary of the earthquake risk.",
       );
     });
 
@@ -150,7 +152,9 @@ describe("RiskFileSummaryPage", () => {
         client: queryClient,
       });
 
-      const htmlEditor = document.querySelector(".htmleditor");
+      const htmlEditor = document.querySelector(
+        ".MuiTiptap-RichTextContent-readonly",
+      );
       expect(htmlEditor).toBeInTheDocument();
     });
 
@@ -182,11 +186,11 @@ describe("RiskFileSummaryPage", () => {
       expect(chartsComponent).toBeInTheDocument();
       expect(screen.getByTestId("chart-risk-id")).toHaveTextContent("risk1");
       expect(screen.getByTestId("chart-scenario")).toHaveTextContent(
-        SCENARIOS.MAJOR
+        SCENARIOS.MAJOR,
       );
       expect(screen.getByTestId("chart-manmade")).toHaveTextContent("false");
       expect(screen.getByTestId("chart-can-download")).toHaveTextContent(
-        "true"
+        "true",
       );
     });
 
@@ -200,10 +204,10 @@ describe("RiskFileSummaryPage", () => {
       expect(chartsComponent).toBeInTheDocument();
       expect(screen.getByTestId("chart-manmade")).toHaveTextContent("true");
       expect(screen.getByTestId("chart-scenario")).toHaveTextContent(
-        SCENARIOS.CONSIDERABLE
+        SCENARIOS.CONSIDERABLE,
       );
       expect(screen.getByTestId("chart-can-download")).toHaveTextContent(
-        "false"
+        "false",
       );
     });
 
@@ -231,7 +235,7 @@ describe("RiskFileSummaryPage", () => {
       });
 
       expect(screen.getByTestId("chart-scenario")).toHaveTextContent(
-        SCENARIOS.MAJOR
+        SCENARIOS.MAJOR,
       );
     });
   });
@@ -244,7 +248,7 @@ describe("RiskFileSummaryPage", () => {
       });
 
       expect(screen.getByTestId("chart-can-download")).toHaveTextContent(
-        "true"
+        "true",
       );
     });
 
@@ -255,7 +259,7 @@ describe("RiskFileSummaryPage", () => {
       });
 
       expect(screen.getByTestId("chart-can-download")).toHaveTextContent(
-        "false"
+        "false",
       );
     });
 
@@ -266,7 +270,7 @@ describe("RiskFileSummaryPage", () => {
       });
 
       expect(screen.getByTestId("chart-can-download")).toHaveTextContent(
-        "false"
+        "false",
       );
     });
 
@@ -279,7 +283,7 @@ describe("RiskFileSummaryPage", () => {
       });
 
       expect(screen.getByTestId("chart-can-download")).toHaveTextContent(
-        "false"
+        "false",
       );
     });
   });
@@ -295,7 +299,7 @@ describe("RiskFileSummaryPage", () => {
       expect(speedDial).toBeInTheDocument();
       expect(speedDial).toHaveAttribute(
         "data-offset",
-        JSON.stringify({ x: 0, y: 56 })
+        JSON.stringify({ x: 0, y: 56 }),
       );
     });
 

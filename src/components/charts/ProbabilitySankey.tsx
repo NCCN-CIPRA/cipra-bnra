@@ -6,9 +6,11 @@ import {
   Tooltip,
   TooltipContentProps,
 } from "recharts";
-import { CascadeSnapshots, getCauseSummaries } from "../../functions/cascades";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
-import { CauseRisksSummary } from "../../types/dataverse/DVRiskSummary";
+import {
+  CauseRisksSummary,
+  DVRiskSummary,
+} from "../../types/dataverse/DVRiskSummary";
 import { LinkProps, NodeProps, SankeyData } from "recharts/types/chart/Sankey";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import round from "../../functions/roundNumberString";
@@ -28,6 +30,7 @@ import {
   pScale7to5,
   returnPeriodMonthsFromYearlyEventRate,
 } from "../../functions/indicators/probability";
+import { RISK_CATEGORY, RISK_TYPE } from "../../types/dataverse/Riskfile";
 
 export type CauseSankeyNode = {
   name: string;
@@ -46,16 +49,16 @@ type SankeyCause = CauseRisksSummary & {
 const baseY = 50;
 
 export function ProbabilitySankeyBox({
+  riskSummary,
   riskSnapshot,
-  cascades,
   scenario,
   results,
   width = "100%",
   height = "100%",
   onClick,
 }: {
+  riskSummary: DVRiskSummary;
   riskSnapshot: DVRiskSnapshot;
-  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
   results: RiskFileQuantiResults | null;
   width?: number | string;
@@ -73,8 +76,8 @@ export function ProbabilitySankeyBox({
       </Box>
       <ResponsiveContainer width={width} height={height}>
         <ProbabilitySankey
+          riskSummary={riskSummary}
           riskSnapshot={riskSnapshot}
-          cascades={cascades}
           scenario={scenario}
           results={results}
           tooltip={true}
@@ -86,8 +89,8 @@ export function ProbabilitySankeyBox({
 }
 
 export default function ProbabilitySankey({
+  riskSummary,
   riskSnapshot,
-  cascades,
   scenario,
   results,
   width,
@@ -95,8 +98,8 @@ export default function ProbabilitySankey({
   tooltip = true,
   onClick,
 }: {
+  riskSummary: DVRiskSummary;
   riskSnapshot: DVRiskSnapshot;
-  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
   results?: RiskFileQuantiResults | null;
   width?: number;
@@ -104,11 +107,20 @@ export default function ProbabilitySankey({
   tooltip?: boolean;
   onClick: (id: string) => void;
 }) {
+  const isAction =
+    (riskSnapshot.cr4de_category === RISK_CATEGORY.MANMADE ||
+      riskSnapshot.cr4de_title.toLowerCase().indexOf("attack")) &&
+    riskSnapshot.cr4de_risk_type !== RISK_TYPE.MANMADE;
+
   let causes: SankeyCause[] = [];
 
-  if (!results) {
-    causes = getCauseSummaries(riskSnapshot, cascades, scenario, true);
+  if (!results && riskSummary.cr4de_causing_risks) {
+    causes =
+      typeof riskSummary.cr4de_causing_risks === "string"
+        ? JSON.parse(riskSummary.cr4de_causing_risks)
+        : riskSummary.cr4de_causing_risks;
   } else if (
+    results &&
     (results[scenario].probabilityStatistics?.relativeContributions?.length ||
       0) > 0
   ) {
@@ -139,7 +151,7 @@ export default function ProbabilitySankey({
             if (!lastCause.other_causes) {
               lastCause = {
                 cause_risk_id: "",
-                cause_risk_title: "Other causes",
+                cause_risk_title: isAction ? "Other actors" : "Other causes",
                 cause_risk_p: 0,
                 other_causes: [],
               };
@@ -191,8 +203,8 @@ export default function ProbabilitySankey({
 
   let nodePadding = 0;
   if (data.nodes.length > 2) nodePadding = 100 / (data.nodes.length - 2);
-  if (data.nodes.length >= 1) nodePadding = 100;
-  console.log(data.nodes);
+  else if (data.nodes.length >= 1) nodePadding = 100;
+
   return (
     <Sankey
       width={width}
@@ -251,11 +263,7 @@ function PSankeyNode({
 
   if (payload.targetNodes.length <= 0) {
     return (
-      <Layer
-        className="total-probability"
-        key={`causeNode${index}`}
-        height="50px"
-      >
+      <Layer className="total-probability" key={`causeNode${index}`}>
         <Rectangle
           x={x}
           y={baseY}

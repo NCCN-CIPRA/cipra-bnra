@@ -34,6 +34,8 @@ export default function Standard({
   effects,
   catalyzingEffects,
   climateChange,
+  publicCauses,
+  publicEffects,
   viewType,
   percentages,
   showConsequences,
@@ -43,11 +45,17 @@ export default function Standard({
   effects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[];
   catalyzingEffects: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
+  publicCauses:
+    | DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[]
+    | undefined;
+  publicEffects:
+    | DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[]
+    | undefined;
   viewType: VISUALS;
   percentages: PERC_CONTRIB;
   showConsequences: boolean;
 }) {
-  const { environment, showDiff, publicRiskSnapshot, publicCascades } =
+  const { environment, showDiff, publicRiskSnapshot } =
     useOutletContext<RiskFilePageContext>();
   const parsedRiskFile = parseRiskSnapshotQuali(riskFile);
   const [causeSortOrder, setCauseSortOrder] = useState<Record<
@@ -67,7 +75,7 @@ export default function Standard({
 
   const dp = getAverageDirectProbability(
     publicRiskSnapshot || riskFile,
-    scenario
+    scenario,
   );
   const dpDynamic =
     environment === Environment.DYNAMIC
@@ -76,14 +84,14 @@ export default function Standard({
 
   const causesWithP = causes.map((c) => {
     const publicC =
-      publicCascades?.causes.find(
-        (pC) => pC._cr4de_risk_cascade_value === c._cr4de_risk_cascade_value
+      publicCauses?.find(
+        (pC) => pC._cr4de_risk_cascade_value === c._cr4de_risk_cascade_value,
       ) || c;
 
     const ip = getAverageIndirectProbability(
       publicC,
       publicRiskSnapshot || riskFile,
-      scenario
+      scenario,
     );
     const ipDynamic =
       environment === Environment.DYNAMIC
@@ -108,6 +116,10 @@ export default function Standard({
             cause={ca.cr4de_cause_risk}
             effect={riskFile}
             cascade={ca}
+            publicCascade={publicCauses?.find(
+              (c) =>
+                c._cr4de_risk_cascade_value === ca._cr4de_risk_cascade_value,
+            )}
             visuals={viewType}
             subtitle={
               <Stack direction="column" sx={{ textAlign: "right" }}>
@@ -116,7 +128,8 @@ export default function Standard({
                     <Typography variant="body1" color="warning">
                       <b>
                         {Math.round(
-                          10000 * (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
+                          10000 *
+                            (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip),
                         ) / 100}
                         %
                       </b>{" "}
@@ -152,7 +165,7 @@ export default function Standard({
                     <Typography variant="body1" color="warning">
                       <b>
                         {Math.round(
-                          10000 * (dpDynamic !== null ? dpDynamic : dp)
+                          10000 * (dpDynamic !== null ? dpDynamic : dp),
                         ) / 100}
                         %
                       </b>{" "}
@@ -186,6 +199,7 @@ export default function Standard({
   }, [
     causeSortOrder,
     causesWithP,
+    publicCauses,
     dp,
     dpDynamic,
     parsedRiskFile,
@@ -199,8 +213,9 @@ export default function Standard({
     const els = effects
       .map((e) => {
         const publicE =
-          publicCascades?.effects.find(
-            (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
+          publicEffects?.find(
+            (pE) =>
+              pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value,
           ) || e;
 
         return {
@@ -208,7 +223,7 @@ export default function Standard({
           i: getAverageIndirectImpact(
             publicE,
             publicRiskSnapshot || riskFile,
-            scenario
+            scenario,
           ),
           iDynamic:
             environment === Environment.DYNAMIC
@@ -231,7 +246,7 @@ export default function Standard({
     effectSortOrder,
     effects,
     environment,
-    publicCascades?.effects,
+    publicEffects,
     publicRiskSnapshot,
     riskFile,
     scenario,
@@ -245,7 +260,7 @@ export default function Standard({
   const iDirectH = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
     scenario,
-    ["ha", "hb", "hc"]
+    ["ha", "hb", "hc"],
   );
   const iDirectHDynamic =
     environment === Environment.DYNAMIC
@@ -258,7 +273,7 @@ export default function Standard({
   const iDirectS = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
     scenario,
-    ["sa", "sb", "sc", "sd"]
+    ["sa", "sb", "sc", "sd"],
   );
   const iDirectSDynamic =
     environment === Environment.DYNAMIC
@@ -272,7 +287,7 @@ export default function Standard({
   const iDirectE = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
     scenario,
-    ["ea"]
+    ["ea"],
   );
   const iDirectEDynamic =
     environment === Environment.DYNAMIC
@@ -281,7 +296,7 @@ export default function Standard({
   const iDirectF = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
     scenario,
-    ["fa", "fb"]
+    ["fa", "fb"],
   );
   const iDirectFDynamic =
     environment === Environment.DYNAMIC
@@ -300,7 +315,7 @@ export default function Standard({
             .sort((a, b) =>
               causeSortOrder
                 ? causeSortOrder[a.id] - causeSortOrder[b.id]
-                : b.p - a.p
+                : b.p - a.p,
             )
             .map((ca) => ca.el)}
         </Box>
@@ -317,7 +332,7 @@ export default function Standard({
                   effectSortOrder
                     ? effectSortOrder[a.cascade._cr4de_risk_cascade_value] -
                       effectSortOrder[b.cascade._cr4de_risk_cascade_value]
-                    : b.i - a.i
+                    : b.i - a.i,
                 )
                 .map((e) => (
                   <CascadeSection
@@ -325,6 +340,11 @@ export default function Standard({
                     cause={riskFile}
                     effect={e.cascade.cr4de_effect_risk}
                     cascade={e.cascade}
+                    publicCascade={publicEffects?.find(
+                      (c) =>
+                        c._cr4de_risk_cascade_value ===
+                        e.cascade._cr4de_risk_cascade_value,
+                    )}
                     visuals={viewType}
                     subtitle={
                       <Stack direction="column" sx={{ textAlign: "right" }}>
@@ -334,7 +354,7 @@ export default function Standard({
                               <b>
                                 {Math.round(
                                   10000 *
-                                    (e.iDynamic !== null ? e.iDynamic : e.i)
+                                    (e.iDynamic !== null ? e.iDynamic : e.i),
                                 ) / 100}
                                 %
                               </b>{" "}
@@ -377,7 +397,7 @@ export default function Standard({
                           10000 *
                             (iDirectHDynamic !== null
                               ? iDirectHDynamic
-                              : iDirectH)
+                              : iDirectH),
                         ) / 100}
                         %
                       </b>{" "}
@@ -410,7 +430,7 @@ export default function Standard({
                           10000 *
                             (iDirectSDynamic !== null
                               ? iDirectSDynamic
-                              : iDirectS)
+                              : iDirectS),
                         ) / 100}
                         %
                       </b>{" "}
@@ -443,7 +463,7 @@ export default function Standard({
                           10000 *
                             (iDirectEDynamic !== null
                               ? iDirectEDynamic
-                              : iDirectE)
+                              : iDirectE),
                         ) / 100}
                         %
                       </b>{" "}
@@ -476,7 +496,7 @@ export default function Standard({
                           10000 *
                             (iDirectFDynamic !== null
                               ? iDirectFDynamic
-                              : iDirectF)
+                              : iDirectF),
                         ) / 100}
                         %
                       </b>{" "}

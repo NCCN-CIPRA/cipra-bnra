@@ -1,11 +1,12 @@
 import { Box, Typography } from "@mui/material";
-import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 import { DVCascadeSnapshot } from "../../../types/dataverse/DVCascadeSnapshot";
+import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
+import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 
 function CatalyzingEffect({
   cascade,
 }: {
-  cascade: DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>;
+  cascade: DVCascadeSnapshot<unknown, DVRiskSummary, SmallRisk>;
 }) {
   return (
     <Box
@@ -18,7 +19,7 @@ function CatalyzingEffect({
       }}
     >
       <a
-        href={`/risks/${cascade.cr4de_effect_risk._cr4de_risk_file_value}/evolution`}
+        href={`/risks/${cascade.cr4de_effect_risk.cr4de_riskfilesid}/evolution`}
       >
         <Typography variant="h6" sx={{ mb: 2 }}>
           {cascade.cr4de_effect_risk.cr4de_title}
@@ -36,7 +37,7 @@ function CatalyzingEffect({
 export default function CatalyzingSection({
   cascades,
 }: {
-  cascades: DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[];
+  cascades: DVCascadeSnapshot<unknown, DVRiskSummary, SmallRisk>[];
 }) {
   return (
     <>

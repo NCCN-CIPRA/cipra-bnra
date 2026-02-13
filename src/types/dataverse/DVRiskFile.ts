@@ -136,7 +136,7 @@ export interface DVRiskFile<
   CalculationType = unknown,
   QuantiType extends DVRiskFileQuantiType = SerializedRiskFileQuantiInput,
   QualiType extends RiskQualiType = SerializedRiskQualis,
-  QuantiResultsType extends DVRiskFileQuantiResultsType = SerializedRiskFileQuantiResults,
+  QuantiResultsType extends DVRiskFileQuantiResultsType = unknown,
 > extends RiskFileEditableFields {
   cr4de_riskfilesid: string;
   cr4de_hazard_id: string;
@@ -396,9 +396,9 @@ export function serializeRiskFileQuantiResults(
 }
 
 export function parseRiskFileQuantiResults(
-  quanti: SerializedRiskFileQuantiResults | null,
-): RiskFileQuantiResults | null {
-  return quanti ? (JSON.parse(quanti) as RiskFileQuantiResults) : null;
+  quanti: SerializedRiskFileQuantiResults,
+): RiskFileQuantiResults {
+  return JSON.parse(quanti) as RiskFileQuantiResults;
 }
 
 export type SerializedRiskFileQuantiResults = string & {

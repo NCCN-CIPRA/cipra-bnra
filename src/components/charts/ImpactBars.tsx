@@ -36,21 +36,32 @@ const CustomTooltip = ({
           padding: 1,
           bgcolor: "rgba(255,255,255,0.8)",
           mb: 1,
-          width: 500,
+          width: 600,
         }}
       >
-        <Typography variant="subtitle2" sx={{ textDecoration: "underline" }}>
-          {Impacts[(label as string).toLowerCase() as Indicator].category}{" "}
-          Impact:
-        </Typography>
+        <Stack direction="row" rowGap={0.5}>
+          <Typography
+            variant="subtitle2"
+            sx={{ textDecoration: "underline", mr: 1 }}
+          >
+            {Impacts[(label as string).toLowerCase() as Indicator].category}{" "}
+            Impact:
+          </Typography>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            {Impacts[(label as string).toLowerCase() as Indicator].title[1]}
+          </Typography>
+        </Stack>
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
-          {Impacts[(label as string).toLowerCase() as Indicator].title[1]}
+          If an incident comparable to this scenario occurs, the expected impact
+          for this indicator is:
         </Typography>
         {payload.map((p) => (
           <Stack key={p.name} direction="row" rowGap={0.5}>
-            <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+            <Typography variant="body2" sx={{ fontWeight: "bold", mr: 1 }}>
               {p.payload.name}
-              {p.value}:{" "}
+              {Math.round(10 * p.value) / 10}:{" "}
+            </Typography>
+            <Typography variant="body2" sx={{}}>
               {getIntervalStringQuantiScale7(
                 p.value as number,
                 p.payload.name.toLowerCase() as Indicator,

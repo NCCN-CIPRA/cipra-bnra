@@ -9,8 +9,8 @@ import SaveIcon from "@mui/icons-material/Download";
 import { Trans, useTranslation } from "react-i18next";
 import SummaryImpactChart, { pieWidth } from "./svg/SummaryImpactChart";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
-import { tpScale5to7 } from "../../functions/indicators/probability";
-import { categoryImpactScale5to7 } from "../../functions/indicators/impact";
+import { pScale7to5 } from "../../functions/indicators/probability";
+import { categoryImpactScale7to5 } from "../../functions/indicators/impact";
 import { BasePageContext } from "../../pages/BasePage";
 import { useOutletContext } from "react-router-dom";
 import { Indicators } from "../../types/global";
@@ -60,26 +60,26 @@ export default function SummaryCharts({
 
   const maxScale = indicators === Indicators.V1 ? 5 : 7;
 
-  const tp = Indicators.V1
+  const tp = Indicators.V2
     ? riskSummary.cr4de_mrs_p || 0
-    : tpScale5to7(riskSummary.cr4de_mrs_p || 0);
+    : pScale7to5(riskSummary.cr4de_mrs_p || 0);
 
   const H =
-    indicators === Indicators.V1
+    indicators === Indicators.V2
       ? riskSummary.cr4de_mrs_h || 0
-      : categoryImpactScale5to7(riskSummary.cr4de_mrs_h || 0);
+      : categoryImpactScale7to5(riskSummary.cr4de_mrs_h || 0);
   const S =
-    indicators === Indicators.V1
+    indicators === Indicators.V2
       ? riskSummary.cr4de_mrs_s || 0
-      : categoryImpactScale5to7(riskSummary.cr4de_mrs_s || 0);
+      : categoryImpactScale7to5(riskSummary.cr4de_mrs_s || 0);
   const E =
-    indicators === Indicators.V1
+    indicators === Indicators.V2
       ? riskSummary.cr4de_mrs_e || 0
-      : categoryImpactScale5to7(riskSummary.cr4de_mrs_e || 0);
+      : categoryImpactScale7to5(riskSummary.cr4de_mrs_e || 0);
   const F =
-    indicators === Indicators.V1
+    indicators === Indicators.V2
       ? riskSummary.cr4de_mrs_f || 0
-      : categoryImpactScale5to7(riskSummary.cr4de_mrs_f || 0);
+      : categoryImpactScale7to5(riskSummary.cr4de_mrs_f || 0);
 
   return (
     <Box sx={{ position: "relative" }}>

@@ -24,6 +24,8 @@ export default function ManMade({
   riskFile,
   effects,
   catalyzingEffects,
+  // publicCauses,
+  publicEffects,
   viewType,
   percentages,
   sortAttacks,
@@ -32,11 +34,17 @@ export default function ManMade({
   effects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[];
   catalyzingEffects: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
+  // publicCauses:
+  //   | DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[]
+  //   | undefined;
+  publicEffects:
+    | DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[]
+    | undefined;
   viewType: VISUALS;
   percentages: PERC_CONTRIB;
   sortAttacks: SORT_ATTACKS;
 }) {
-  const { environment, showDiff, publicRiskSnapshot, publicCascades } =
+  const { environment, showDiff, publicRiskSnapshot } =
     useOutletContext<RiskFilePageContext>();
   const [attackSortOrder, setAttackSortOrder] = useState<Record<
     string,
@@ -48,18 +56,18 @@ export default function ManMade({
       effects && {
         [SCENARIOS.CONSIDERABLE]: getTotalCP(
           SCENARIOS.CONSIDERABLE,
-          publicCascades?.effects || effects
+          publicEffects || effects,
         ),
         [SCENARIOS.MAJOR]: getTotalCP(
           SCENARIOS.MAJOR,
-          publicCascades?.effects || effects
+          publicEffects || effects,
         ),
         [SCENARIOS.EXTREME]: getTotalCP(
           SCENARIOS.EXTREME,
-          publicCascades?.effects || effects
+          publicEffects || effects,
         ),
       },
-    [publicCascades, effects]
+    [publicEffects, effects],
   );
 
   const dynamicAttacks = useMemo(() => {
@@ -74,8 +82,9 @@ export default function ManMade({
     const attacks = effects
       .map((e) => {
         const publicE =
-          publicCascades?.effects.find(
-            (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
+          publicEffects?.find(
+            (pE) =>
+              pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value,
           ) || e;
 
         const p = getAverageCP(publicE.cr4de_quanti_cp, totalCPs, scenario);
@@ -86,7 +95,7 @@ export default function ManMade({
         const i = getAverageIndirectImpact(
           publicE,
           publicRiskSnapshot || riskFile,
-          scenario
+          scenario,
         );
         const iDynamic =
           environment === Environment.DYNAMIC
@@ -128,7 +137,7 @@ export default function ManMade({
     percentages,
     riskFile,
     attackSortOrder,
-    publicCascades?.effects,
+    publicEffects,
     environment,
     publicRiskSnapshot,
     sortAttacks,
@@ -151,7 +160,7 @@ export default function ManMade({
               attackSortOrder
                 ? attackSortOrder[a.cascade._cr4de_risk_cascade_value] -
                   attackSortOrder[b.cascade._cr4de_risk_cascade_value]
-                : b.p - a.p
+                : b.p - a.p,
             )
             .map((e) => (
               <CascadeSection
@@ -168,7 +177,8 @@ export default function ManMade({
                           <Typography variant="body1" color="warning">
                             <b>
                               {Math.round(
-                                10000 * (e.pDynamic !== null ? e.pDynamic : e.p)
+                                10000 *
+                                  (e.pDynamic !== null ? e.pDynamic : e.p),
                               ) / 100}
                               %
                             </b>{" "}
@@ -191,7 +201,8 @@ export default function ManMade({
                           <Typography variant="body1" color="warning">
                             <b>
                               {Math.round(
-                                10000 * (e.iDynamic !== null ? e.iDynamic : e.i)
+                                10000 *
+                                  (e.iDynamic !== null ? e.iDynamic : e.i),
                               ) / 100}
                               %
                             </b>{" "}

@@ -3,26 +3,26 @@ import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBars";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CascadeSnapshots } from "../../../functions/cascades";
 import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 import { ActionsSankeyBox } from "../../../components/charts/ActionsSankey";
 import { ImpactSankeyBox } from "../../../components/charts/ImpactSankey";
 import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
+import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
+import { DAMAGE_INDICATOR, IMPACT_CATEGORY } from "../../../functions/Impact";
 
 export default function MMSankeyDiagram({
-  // riskSummary,
+  riskSummary,
   riskFile,
-  cascades,
   scenario,
   results,
   setScenario,
 }: // debug = false,
 // manmade = false,
 {
+  riskSummary: DVRiskSummary;
   riskFile: DVRiskSnapshot;
-  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
   results: RiskFileQuantiResults | null;
   setScenario: (s: SCENARIOS) => void;
@@ -31,6 +31,10 @@ export default function MMSankeyDiagram({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const [focusedImpact, setFocusedImpact] = useState<
+    null | IMPACT_CATEGORY | DAMAGE_INDICATOR
+  >(null);
 
   useEffect(() => {
     setScenario(scenario);
@@ -48,9 +52,10 @@ export default function MMSankeyDiagram({
         sx={{ width: "calc(50% - 150px)", height: 600 }}
       >
         <ActionsSankeyBox
+          riskSummary={riskSummary}
           riskSnapshot={riskFile}
-          cascades={cascades}
           scenario={scenario}
+          results={results}
           onClick={goToRiskFile}
         />
       </Box>
@@ -196,6 +201,14 @@ export default function MMSankeyDiagram({
             riskFile={riskFile}
             scenario={scenario}
             results={results}
+            focusedImpact={focusedImpact}
+            onClickBar={(i: IMPACT_CATEGORY | DAMAGE_INDICATOR) => {
+              if (focusedImpact === i) {
+                setFocusedImpact(null);
+              } else {
+                setFocusedImpact(i);
+              }
+            }}
           />
         </Box>
       </Stack>
@@ -204,10 +217,11 @@ export default function MMSankeyDiagram({
         sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}
       >
         <ImpactSankeyBox
+          riskSummary={riskSummary}
           riskSnapshot={riskFile}
-          cascades={cascades}
           scenario={scenario}
           results={results}
+          focusedImpact={focusedImpact}
           onClick={goToRiskFile}
         />
       </Box>

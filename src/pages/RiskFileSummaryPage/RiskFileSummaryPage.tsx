@@ -22,7 +22,7 @@ export default function RiskFileSummaryPage() {
 
   const summary =
     riskSummary[`cr4de_summary_${getLanguage(i18n.language)}`] || "";
-
+  console.log(riskSummary);
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
       <RiskFileTitle riskFile={riskSummary} />

@@ -37,7 +37,7 @@ export default function RiskCataloguePage() {
     queryKey: [DataTable.RISK_FILE, "catalogue"],
     queryFn: async () => {
       const res = await api.getRiskFiles(
-        "$select=cr4de_hazard_id,cr4de_title,cr4de_risk_category,cr4de_mrs,cr4de_quanti,vzzzz",
+        "$select=cr4de_hazard_id,cr4de_title,cr4de_risk_category,cr4de_mrs,cr4de_quanti,cr4de_result_snapshot,cr4de_quanti_results",
       );
       return res;
     },
@@ -45,12 +45,9 @@ export default function RiskCataloguePage() {
       user && user.roles.analist && environment === Environment.DYNAMIC,
     ),
     select: (data) => {
-      console.log(data);
       const res = data.map((rf) => parseRiskSnapshot(snapshotFromRiskfile(rf)));
-      console.log(res);
       return res;
     },
-    throwOnError: true,
   });
 
   usePageTitle(t("sideDrawer.hazardCatalogue", "Hazard Catalogue"));
@@ -58,8 +55,8 @@ export default function RiskCataloguePage() {
     { name: t("bnra.shortName"), url: "/" },
     { name: t("sideDrawer.hazardCatalogue", "Hazard Catalogue"), url: "" },
   ]);
-  console.log(riskFiles);
-  if (riskFiles || isLoadingRiskFiles)
+
+  if (riskFiles && environment === Environment.DYNAMIC)
     return (
       <AdvancedRiskCatalogue
         riskFiles={riskFiles}
@@ -67,7 +64,7 @@ export default function RiskCataloguePage() {
       />
     );
 
-  if (riskSnapshots || isLoadingSnapshots)
+  if (riskSnapshots && !isLoadingRiskFiles)
     return (
       <AdvancedRiskCatalogue
         riskFiles={riskSnapshots}

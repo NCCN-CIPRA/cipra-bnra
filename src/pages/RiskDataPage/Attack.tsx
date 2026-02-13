@@ -29,6 +29,7 @@ import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { PERC_CONTRIB } from "./RiskDataPage";
 import { SCENARIOS } from "../../functions/scenarios";
 import { useEffect, useMemo, useState } from "react";
+import { MotivationSection } from "./MotivationSection";
 
 export default function Attack({
   riskFile,
@@ -36,6 +37,8 @@ export default function Attack({
   effects,
   catalyzingEffects,
   climateChange,
+  publicCauses,
+  publicEffects,
   viewType,
   percentages,
   showConsequences,
@@ -45,11 +48,17 @@ export default function Attack({
   effects: DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[];
   catalyzingEffects: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
   climateChange: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown> | null;
+  publicCauses:
+    | DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[]
+    | undefined;
+  publicEffects:
+    | DVCascadeSnapshot<unknown, unknown, DVRiskSnapshot>[]
+    | undefined;
   viewType: VISUALS;
   percentages: PERC_CONTRIB;
   showConsequences: boolean;
 }) {
-  const { environment, showDiff, publicRiskSnapshot, publicCascades } =
+  const { environment, showDiff, publicRiskSnapshot } =
     useOutletContext<RiskFilePageContext>();
   const [actorSortOrder, setActorSortOrder] = useState<Record<
     string,
@@ -69,7 +78,7 @@ export default function Attack({
 
   const dp = getAverageDirectProbability(
     publicRiskSnapshot || riskFile,
-    scenario
+    scenario,
   );
   const dpDynamic =
     environment === Environment.DYNAMIC
@@ -78,11 +87,11 @@ export default function Attack({
   const causesWithP = causes.map((c) => ({
     ...c,
     ip: getAverageIndirectProbability(
-      publicCascades?.causes.find(
-        (pC) => pC._cr4de_risk_cascade_value === c._cr4de_risk_cascade_value
+      publicCauses?.find(
+        (pC) => pC._cr4de_risk_cascade_value === c._cr4de_risk_cascade_value,
       ) || c,
       publicRiskSnapshot || riskFile,
-      scenario
+      scenario,
     ),
     ipDynamic:
       environment === Environment.DYNAMIC
@@ -114,7 +123,7 @@ export default function Attack({
                         <b>
                           {Math.round(
                             10000 *
-                              (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
+                              (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip),
                           ) / 100}
                           %
                         </b>{" "}
@@ -138,7 +147,7 @@ export default function Attack({
         id: riskFile._cr4de_risk_file_value,
         p: dp,
         el: (
-          <DirectSection
+          <MotivationSection
             riskFile={parsedRiskFile}
             qualiField="dp"
             quantiFields={["dp"]}
@@ -150,7 +159,7 @@ export default function Attack({
                     <Typography variant="body1" color="warning">
                       <b>
                         {Math.round(
-                          10000 * (dpDynamic !== null ? dpDynamic : dp)
+                          10000 * (dpDynamic !== null ? dpDynamic : dp),
                         ) / 100}
                         %
                       </b>{" "}
@@ -198,11 +207,12 @@ export default function Attack({
       .map((e) => ({
         cascade: e,
         i: getAverageIndirectImpact(
-          publicCascades?.effects.find(
-            (pE) => pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value
+          publicEffects?.find(
+            (pE) =>
+              pE._cr4de_risk_cascade_value === e._cr4de_risk_cascade_value,
           ) || e,
           publicRiskSnapshot || riskFile,
-          scenario
+          scenario,
         ),
         iDynamic:
           environment === Environment.DYNAMIC
@@ -224,7 +234,7 @@ export default function Attack({
     effectSortOrder,
     effects,
     environment,
-    publicCascades?.effects,
+    publicEffects,
     publicRiskSnapshot,
     riskFile,
     scenario,
@@ -238,7 +248,7 @@ export default function Attack({
   const iDirectH = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
     scenario,
-    ["ha", "hb", "hc"]
+    ["ha", "hb", "hc"],
   );
   const iDirectHDynamic =
     environment === Environment.DYNAMIC
@@ -251,7 +261,7 @@ export default function Attack({
   const iDirectS = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
     scenario,
-    ["sa", "sb", "sc", "sd"]
+    ["sa", "sb", "sc", "sd"],
   );
   const iDirectSDynamic =
     environment === Environment.DYNAMIC
@@ -265,7 +275,7 @@ export default function Attack({
   const iDirectE = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
     scenario,
-    ["ea"]
+    ["ea"],
   );
   const iDirectEDynamic =
     environment === Environment.DYNAMIC
@@ -274,7 +284,7 @@ export default function Attack({
   const iDirectF = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
     scenario,
-    ["fa", "fb"]
+    ["fa", "fb"],
   );
   const iDirectFDynamic =
     environment === Environment.DYNAMIC
@@ -294,7 +304,7 @@ export default function Attack({
               .sort((a, b) =>
                 actorSortOrder
                   ? actorSortOrder[a.id] - actorSortOrder[b.id]
-                  : b.p - a.p
+                  : b.p - a.p,
               )
               .map((ca) => ca.el)}
           </>
@@ -307,7 +317,7 @@ export default function Attack({
         <Box sx={{ mb: 8 }}>
           {causesWithP
             .filter(
-              (c) => c.cr4de_cause_risk.cr4de_risk_type !== RISK_TYPE.MANMADE
+              (c) => c.cr4de_cause_risk.cr4de_risk_type !== RISK_TYPE.MANMADE,
             )
             .sort((a, b) => b.ip - a.ip)
             .map((ca) => (
@@ -326,7 +336,7 @@ export default function Attack({
                           <b>
                             {Math.round(
                               10000 *
-                                (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip)
+                                (ca.ipDynamic !== null ? ca.ipDynamic : ca.ip),
                             ) / 100}
                             %
                           </b>{" "}
@@ -358,7 +368,7 @@ export default function Attack({
                   effectSortOrder
                     ? effectSortOrder[a.cascade._cr4de_risk_cascade_value] -
                       effectSortOrder[b.cascade._cr4de_risk_cascade_value]
-                    : b.i - a.i
+                    : b.i - a.i,
                 )
                 .map((e) => (
                   <CascadeSection
@@ -375,7 +385,7 @@ export default function Attack({
                               <b>
                                 {Math.round(
                                   10000 *
-                                    (e.iDynamic !== null ? e.iDynamic : e.i)
+                                    (e.iDynamic !== null ? e.iDynamic : e.i),
                                 ) / 100}
                                 %
                               </b>{" "}
@@ -418,7 +428,7 @@ export default function Attack({
                           10000 *
                             (iDirectHDynamic !== null
                               ? iDirectHDynamic
-                              : iDirectH)
+                              : iDirectH),
                         ) / 100}
                         %
                       </b>{" "}
@@ -451,7 +461,7 @@ export default function Attack({
                           10000 *
                             (iDirectSDynamic !== null
                               ? iDirectSDynamic
-                              : iDirectS)
+                              : iDirectS),
                         ) / 100}
                         %
                       </b>{" "}
@@ -484,7 +494,7 @@ export default function Attack({
                           10000 *
                             (iDirectEDynamic !== null
                               ? iDirectEDynamic
-                              : iDirectE)
+                              : iDirectE),
                         ) / 100}
                         %
                       </b>{" "}
@@ -517,7 +527,7 @@ export default function Attack({
                           10000 *
                             (iDirectFDynamic !== null
                               ? iDirectFDynamic
-                              : iDirectF)
+                              : iDirectF),
                         ) / 100}
                         %
                       </b>{" "}

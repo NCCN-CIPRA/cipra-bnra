@@ -116,6 +116,29 @@ export function prepareData(
   const allCascades: RiskCascade[] = [];
 
   for (const risk of standardRisks) {
+    // if (isMaliciousAction(risk._cr4de_risk_file_value)) {
+    // Direct probability of attack scenarios was given as M values, but save as DP values. Therefore a correction is needed
+    //   allCascades.push({
+    //     cause: null,
+    //     causeScenario: null,
+    //     effect: riskCatalogue[risk._cr4de_risk_file_value],
+    //     probabilities: {
+    //       considerable: pDailyFromMScale7(
+    //         pScale7FromReturnPeriodMonths(
+    //           risk.cr4de_quanti.considerable.dp.rpMonths,
+    //         ),
+    //       ),
+    //       major: pDailyFromMScale7(
+    //         pScale7FromReturnPeriodMonths(risk.cr4de_quanti.major.dp.rpMonths),
+    //       ),
+    //       extreme: pDailyFromMScale7(
+    //         pScale7FromReturnPeriodMonths(
+    //           risk.cr4de_quanti.extreme.dp.rpMonths,
+    //         ),
+    //       ),
+    //     },
+    //   });
+    // } else {
     allCascades.push({
       cause: null,
       causeScenario: null,
@@ -132,6 +155,7 @@ export function prepareData(
         ),
       },
     });
+    // }
   }
 
   for (const risk of actorRisks) {

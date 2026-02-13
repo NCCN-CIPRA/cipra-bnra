@@ -17,12 +17,13 @@ export default function RiskFileBibliography({
 
   const { data: attachments, refetch: reloadAttachments } = useQuery({
     queryKey: [DataTable.ATTACHMENT],
-    queryFn: () => api.getAttachments(),
-    select: (data) =>
-      data.filter((a) =>
-        "_cr4de_risk_file_value" in risk
-          ? a._cr4de_risk_file_value === risk._cr4de_risk_file_value
-          : a._cr4de_risk_file_value === risk.cr4de_riskfilesid
+    queryFn: () =>
+      api.getAttachments(
+        `$filter=_cr4de_risk_file_value eq ${
+          "_cr4de_risk_file_value" in risk
+            ? risk._cr4de_risk_file_value
+            : risk.cr4de_riskfilesid
+        }`,
       ),
   });
 
@@ -48,7 +49,7 @@ export default function RiskFileBibliography({
                         cr4de_field: a.cr4de_field,
                         cr4de_referencedSource: a.cr4de_referencedSource,
                       } as DVAttachment)
-                    : a
+                    : a,
                 )
               : null
           }

@@ -8,9 +8,9 @@ import Manmade from "./Manmade/Manmade";
 import NCCNLoader from "../../components/NCCNLoader";
 
 export default function RiskDescriptionPage() {
-  const { riskSummary, cascades } = useOutletContext<RiskFilePageContext>();
+  const { riskSummary } = useOutletContext<RiskFilePageContext>();
 
-  if (!riskSummary || !cascades)
+  if (!riskSummary)
     return (
       <Box sx={{ width: "100%", mt: 20, textAlign: "center" }}>
         <NCCNLoader />

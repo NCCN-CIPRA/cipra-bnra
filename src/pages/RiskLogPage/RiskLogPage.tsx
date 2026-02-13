@@ -14,8 +14,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export default function RiskLogPage() {
   const api = useAPI();
-  const { riskSnapshot: riskFile, cascades } =
-    useOutletContext<RiskFilePageContext>();
+  const { riskSnapshot: riskFile } = useOutletContext<RiskFilePageContext>();
 
   const { data: changeLogs } = useQuery({
     queryKey: [DataTable.CHANGE_LOG],
@@ -23,11 +22,11 @@ export default function RiskLogPage() {
     select: (d) =>
       d
         .filter(
-          (c) =>
-            c.cr4de_changed_object_id === riskFile?._cr4de_risk_file_value ||
-            cascades?.all.some(
-              (ca) => c.cr4de_changed_object_id === ca._cr4de_risk_cascade_value
-            )
+          (c) => c.cr4de_changed_object_id === riskFile?._cr4de_risk_file_value, //||
+          // cascades?.all.some(
+          //   (ca) =>
+          //     c.cr4de_changed_object_id === ca._cr4de_risk_cascade_value,
+          // ),
         )
         .map((c) => ({
           ...c,

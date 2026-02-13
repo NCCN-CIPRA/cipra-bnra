@@ -26,6 +26,8 @@ import {
 import {
   DVRiskFile,
   parseRiskFileQuantiInput,
+  RiskFileQuantiResults,
+  SerializedRiskFileQuantiInput,
 } from "../types/dataverse/DVRiskFile";
 import {
   DVRiskSnapshot,
@@ -54,11 +56,13 @@ import {
   getCategoryImpactRescaled,
   getDamageIndicatorToCategoryImpactRatio,
 } from "./CategoryImpact";
-import { diScale5FromEuros } from "./indicators/impact";
+import { diScale5FromEuros, iScale7FromEuros } from "./indicators/impact";
 import {
   pDailyFromReturnPeriodMonths,
   pScale5FromReturnPeriodMonths,
+  pScale7FromReturnPeriodMonths,
   returnPeriodMonthsFromPDaily,
+  returnPeriodMonthsFromYearlyEventRate,
 } from "./indicators/probability";
 import {
   getDailyProbability,
@@ -295,7 +299,14 @@ function updateSnapshot(
   };
 }
 
-function getSerializedRiskSnapshotResults(riskFile: DVRiskFile) {
+function getSerializedRiskSnapshotResults(
+  riskFile: DVRiskFile<
+    unknown,
+    SerializedRiskFileQuantiInput,
+    SerializedRiskQualis,
+    unknown
+  >,
+) {
   const q = parseRiskFileQuantiInput(riskFile.cr4de_quanti);
 
   return serializeRiskSnapshotResults(
@@ -1095,12 +1106,118 @@ export function summaryFromRiskfile(
   };
 }
 
-export function snapshotFromRiskfile(
-  riskFile: DVRiskFile,
+export function summaryFromRiskfileNew(
+  riskFile: DVRiskFile<unknown, unknown, unknown, RiskFileQuantiResults>,
+): DVRiskSummary {
+  const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
+
+  return {
+    cr4de_bnrariskfilesummaryid: "",
+
+    "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
+    _cr4de_risk_file_value: riskFile.cr4de_riskfilesid,
+    cr4de_risk_file: riskFile,
+
+    cr4de_hazard_id: riskFile.cr4de_hazard_id,
+    cr4de_title: riskFile.cr4de_title,
+    cr4de_risk_type: riskFile.cr4de_risk_type,
+    cr4de_category: riskFile.cr4de_risk_category,
+    cr4de_key_risk: riskFile.cr4de_key_risk,
+
+    cr4de_label_hilp: riskFile.cr4de_label_hilp || false,
+    cr4de_label_cc: riskFile.cr4de_label_cc || false,
+    cr4de_label_cb: riskFile.cr4de_label_cb || false,
+    cr4de_label_impact: riskFile.cr4de_label_impact,
+
+    cr4de_definition: riskFile.cr4de_definition,
+    cr4de_horizon_analysis: riskFile.cr4de_horizon_analysis,
+    cr4de_historical_events: riskFile.cr4de_historical_events,
+    cr4de_intensity_parameters: riskFile.cr4de_intensity_parameters,
+    cr4de_scenario_considerable: riskFile.cr4de_scenario_considerable,
+    cr4de_scenario_major: riskFile.cr4de_scenario_major,
+    cr4de_scenario_extreme: riskFile.cr4de_scenario_extreme,
+
+    cr4de_mrs: riskFile.cr4de_mrs!,
+    cr4de_summary_en: riskFile.cr4de_mrs_summary!,
+    cr4de_summary_nl: riskFile.cr4de_mrs_summary_nl!,
+    cr4de_summary_fr: riskFile.cr4de_mrs_summary_fr!,
+    cr4de_summary_de: riskFile.cr4de_mrs_summary_de!,
+
+    cr4de_mrs_p: r(
+      pScale7FromReturnPeriodMonths(
+        returnPeriodMonthsFromYearlyEventRate(
+          riskFile.cr4de_quanti_results[scenario].probabilityStatistics
+            ?.sampleMean || 0,
+        ),
+      ),
+    ),
+    cr4de_mrs_i: r(
+      iScale7FromEuros(
+        riskFile.cr4de_quanti_results[scenario].impactStatistics?.sampleMedian
+          .all || 0,
+      ),
+    ),
+    cr4de_mrs_h: r(
+      iScale7FromEuros(
+        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics
+          ?.sampleMedian.h || 0,
+      ),
+    ),
+    cr4de_mrs_s: r(
+      iScale7FromEuros(
+        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics
+          ?.sampleMedian.s || 0,
+      ),
+    ),
+    cr4de_mrs_e: r(
+      iScale7FromEuros(
+        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics
+          ?.sampleMedian.e || 0,
+      ),
+    ),
+    cr4de_mrs_f: r(
+      iScale7FromEuros(
+        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics
+          ?.sampleMedian.f || 0,
+      ),
+    ),
+
+    cr4de_causing_risks:
+      riskFile.cr4de_risk_type === RISK_TYPE.STANDARD
+        ? riskFile.cr4de_quanti_results?.[
+            scenario
+          ]?.probabilityStatistics?.relativeContributions.map((c) => ({
+            cause_risk_id: c.id || "",
+            cause_risk_title: c.risk,
+            cause_risk_p: c.contributionMean,
+          })) ?? null
+        : null,
+
+    cr4de_effect_risks:
+      riskFile.cr4de_risk_type === RISK_TYPE.EMERGING
+        ? null
+        : riskFile.cr4de_quanti_results?.[
+            scenario
+          ]?.impactStatistics?.relativeContributions.map((e) => ({
+            effect_risk_id: e.id || "",
+            effect_risk_title: e.risk,
+            effect_risk_i: e.contributionMean.all,
+          })) ?? null,
+  };
+}
+
+export function snapshotFromRiskfile<U>(
+  riskFile: DVRiskFile<
+    unknown,
+    SerializedRiskFileQuantiInput,
+    SerializedRiskQualis,
+    U
+  >,
 ): DVRiskSnapshot<
-  DVRiskFile,
+  DVRiskFile<unknown, SerializedRiskFileQuantiInput, SerializedRiskQualis, U>,
   SerializedRiskSnapshotResults,
-  SerializedRiskQualis
+  SerializedRiskQualis,
+  U
 > {
   return {
     cr4de_bnrariskfilesnapshotid: "",

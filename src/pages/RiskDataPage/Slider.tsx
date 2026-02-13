@@ -18,11 +18,15 @@ import {
   getImpactStringDIScale5,
   getImpactStringIScale7,
 } from "../../functions/indicators/impact";
+import {
+  getIntervalStringMScale3,
+  getIntervalStringMScale7,
+} from "../../functions/indicators/motivation";
 
 function getTooltipTitle(
   prefix: string,
   value: number,
-  indicators: Indicators
+  indicators: Indicators,
 ) {
   if (prefix === "DP") {
     const rpInterval =
@@ -34,6 +38,12 @@ function getTooltipTitle(
       return "This estimation indicates that the scenario is impossible";
 
     return `This estimation represents a return period for this scenario of ${rpInterval}.`;
+  } else if (prefix === "M") {
+    return `This estimation indicates that there is a probability ${
+      indicators === Indicators.V1
+        ? getIntervalStringMScale3(value)
+        : getIntervalStringMScale7(value)
+    } of at least one successfull attack in the following 3 years`;
   } else {
     const impactString =
       indicators === Indicators.V1

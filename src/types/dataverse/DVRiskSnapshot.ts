@@ -1,6 +1,6 @@
 import { IntensityParameter } from "../../functions/intensityParameters";
 import { Scenarios, SCENARIOS } from "../../functions/scenarios";
-import { SerializedRiskFileQuantiResults } from "./DVRiskFile";
+import { DVRiskFileQuantiResultsType } from "./DVRiskFile";
 import {
   parseRiskQualis,
   RISK_CATEGORY,
@@ -63,6 +63,7 @@ export type DVRiskSnapshot<
   RiskFileType = unknown,
   QuantiType extends DVRiskSnapshotQuantiType = RiskSnapshotResults,
   QualiType extends RiskQualiType = SerializedRiskQualis,
+  QuantiResultsType extends DVRiskFileQuantiResultsType = unknown,
 > = {
   cr4de_bnrariskfilesnapshotid: string;
 
@@ -96,7 +97,7 @@ export type DVRiskSnapshot<
   cr4de_quali_cc_mrs: string | null;
 
   cr4de_quanti: QuantiType;
-  cr4de_quanti_results: SerializedRiskFileQuantiResults | null;
+  cr4de_quanti_results: QuantiResultsType | null;
   cr4de_quali: QualiType;
 };
 

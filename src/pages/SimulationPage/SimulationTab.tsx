@@ -113,6 +113,9 @@ const diffColumns: GridColDef[] = [
     minWidth: 100,
   },
   { field: "name", flex: 1 },
+  { field: "tp", width: 100 },
+  { field: "ti", width: 100 },
+  { field: "tr", width: 100 },
   { field: "deltaTP", width: 100 },
   { field: "deltaTI", width: 100 },
   { field: "delta", width: 100 },
@@ -273,6 +276,34 @@ export default function SimulationTab() {
         hazardId: risk.hazardId,
         name: risk.name,
         scenario: risk.scenario,
+        tp: pScale7FromReturnPeriodMonths(
+          returnPeriodMonthsFromYearlyEventRate(
+            risk.probabilityStatistics.sampleMean,
+          ),
+          100,
+        ),
+        ti:
+          Math.round(
+            100 *
+              iScale7FromEuros(
+                risk.impactStatistics.sampleMedian.all,
+                undefined,
+                100,
+              ),
+          ) / 100,
+        tr:
+          Math.round(
+            100 *
+              iScale7FromEuros(
+                pDailyFromReturnPeriodMonths(
+                  returnPeriodMonthsFromYearlyEventRate(
+                    risk.probabilityStatistics.sampleMean,
+                  ),
+                ) * risk.impactStatistics.sampleMedian.all,
+                undefined,
+                100,
+              ),
+          ) / 100,
         deltaTP:
           Math.round(
             100 *
@@ -934,7 +965,7 @@ export default function SimulationTab() {
               <BarChart
                 data={showRiskFile?.impactStatistics.relativeContributions
                   .map((rc) => ({
-                    name: rc.risk,
+                    name: `${rc.risk} (${rc.scenario})`,
                     contributionMean:
                       Math.round(1000 * rc.contributionMean.all) / 1000,
                     contributionError: rc.contribution95Error.all,
@@ -943,7 +974,7 @@ export default function SimulationTab() {
                       : NCCN_GREEN,
                     // stdError: rc.stdError,
                   }))
-                  .filter((rc) => rc.contributionMean > 0.01)
+                  .filter((rc, i) => rc.contributionMean > 0.01 && i < 15)
                   .sort((a, b) => b.contributionMean - a.contributionMean)}
                 layout="vertical"
                 margin={{
@@ -956,7 +987,7 @@ export default function SimulationTab() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   type="number"
-                  domain={[0, 1]}
+                  // domain={[0, 1]}
                   tickFormatter={(t) => String(Math.round(100 * t) / 100)}
                 />
                 <YAxis dataKey="name" type="category" width={200} />
@@ -985,23 +1016,23 @@ export default function SimulationTab() {
         <CardHeader title="Probability of cascade effects" />
         <CardContent>
           <Box>
-            {/* <ResponsiveContainer width={"100%"} height={800}>
+            <ResponsiveContainer width={"100%"} height={800}>
               <BarChart
                 data={
                   showRiskFile
-                    ? showRiskFile.impactStatistics.relativeContributions
+                    ? showRiskFile.impactStatistics.effectProbabilities
                         .map((c) => ({
                           ...c,
                           name: `${c.risk} (${c.scenario})`,
                           contributionMean:
-                            Math.round(1000 * c.contributionMean.all) / 1000,
-                          contributionError: c.contribution95Error.all,
+                            Math.round(1000 * c.probabilityMean) / 1000,
+                          contributionError: c.probability95Error,
                           fill: c.scenario
                             ? SCENARIO_PARAMS[c.scenario].color
                             : "#8884d8",
                         }))
                         .sort((a, b) => b.contributionMean - a.contributionMean)
-                        .filter((c) => c.contributionMean > 0.01)
+                        .filter((c, i) => c.contributionMean > 0.01 && i < 15)
                     : undefined
                 }
                 layout="vertical"
@@ -1013,7 +1044,7 @@ export default function SimulationTab() {
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" domain={[0, 1]} />
+                <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={200} />
                 <Tooltip />
                 <Legend />
@@ -1031,7 +1062,7 @@ export default function SimulationTab() {
                   />
                 </Bar>
               </BarChart>
-            </ResponsiveContainer> */}
+            </ResponsiveContainer>
           </Box>
         </CardContent>
       </Card>

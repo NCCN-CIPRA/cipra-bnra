@@ -11,7 +11,6 @@ import {
   DVRiskSnapshot,
   RiskSnapshotResults,
 } from "../../../types/dataverse/DVRiskSnapshot";
-import { CascadeSnapshots } from "../../../functions/cascades";
 import { ScenarioButtons } from "../../../components/ScenarioButtons";
 import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
 import {
@@ -22,16 +21,17 @@ import {
 import { BasePageContext } from "../../BasePage";
 import { Indicators } from "../../../types/global";
 import { DAMAGE_INDICATOR, IMPACT_CATEGORY } from "../../../functions/Impact";
+import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
 
 export default function SankeyDiagram({
+  riskSummary,
   riskFile,
-  cascades,
   scenario,
   results,
   setScenario,
 }: {
+  riskSummary: DVRiskSummary;
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
-  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
   results: RiskFileQuantiResults | null;
   setScenario: (s: SCENARIOS) => void;
@@ -78,10 +78,7 @@ export default function SankeyDiagram({
       tp = riskFile.cr4de_quanti[scenario].tp.scale5TP;
     }
   }
-  console.log(
-    indicators,
-    results?.[scenario]?.probabilityStatistics?.sampleMean,
-  );
+
   return (
     <Stack className="bnra-sankey" direction="row" sx={{ mb: 8 }}>
       <Box
@@ -89,8 +86,8 @@ export default function SankeyDiagram({
         sx={{ width: "calc(50% - 150px)", height: 600 }}
       >
         <ProbabilitySankeyBox
+          riskSummary={riskSummary}
           riskSnapshot={riskFile}
-          cascades={cascades}
           scenario={scenario}
           results={results}
           onClick={goToRiskFile}
@@ -153,8 +150,8 @@ export default function SankeyDiagram({
         sx={{ width: "calc(50% - 150px)", height: 600, mb: 8, zIndex: -1 }}
       >
         <ImpactSankeyBox
+          riskSummary={riskSummary}
           riskSnapshot={riskFile}
-          cascades={cascades}
           scenario={scenario}
           results={results}
           focusedImpact={focusedImpact}

@@ -1,5 +1,4 @@
-import { CascadeSnapshots } from "../../functions/cascades";
-import { SCENARIOS } from "../../functions/scenarios";
+import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { LinkProps, NodeProps, SankeyData } from "recharts/types/chart/Sankey";
 import {
@@ -18,32 +17,41 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 import { Box, Typography } from "@mui/material";
-
-export type ActionRisksSummary = {
-  id: string;
-  name: string;
-  p: number;
-};
+import {
+  CauseRisksSummary,
+  DVRiskSummary,
+} from "../../types/dataverse/DVRiskSummary";
+import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
 
 export type ActionSankeyNode = {
   name: string;
-  cascade?: ActionRisksSummary;
-  otherActions?: ActionRisksSummary[];
+  cascade?: SankeyAction;
+  otherActions?: SankeyAction[];
+};
+
+type SankeyAction = CauseRisksSummary & {
+  parts?: {
+    considerable?: number;
+    major?: number;
+    extreme?: number;
+  };
 };
 
 const baseY = 50;
 
 export function ActionsSankeyBox({
+  riskSummary,
   riskSnapshot,
-  cascades,
   scenario,
+  results,
   width = "100%",
   height = "100%",
   onClick,
 }: {
+  riskSummary: DVRiskSummary;
   riskSnapshot: DVRiskSnapshot;
-  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
+  results: RiskFileQuantiResults | null;
   width?: number | string;
   height?: number | string;
   onClick: (id: string) => void;
@@ -58,9 +66,10 @@ export function ActionsSankeyBox({
       </Box>
       <ResponsiveContainer width={width} height={height}>
         <ActionsSankey
+          riskSummary={riskSummary}
           riskSnapshot={riskSnapshot}
-          cascades={cascades}
           scenario={scenario}
+          results={results}
           tooltip={true}
           onClick={onClick}
         />
@@ -70,85 +79,115 @@ export function ActionsSankeyBox({
 }
 
 export default function ActionsSankey({
+  riskSummary,
   riskSnapshot,
-  cascades,
   scenario,
+  results,
   width,
   height,
   tooltip = true,
   onClick,
 }: {
+  riskSummary: DVRiskSummary;
   riskSnapshot: DVRiskSnapshot;
-  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
+  results: RiskFileQuantiResults | null;
   width?: number;
   height?: number;
   tooltip?: boolean;
   onClick: (id: string) => void;
 }) {
-  const totCP = cascades.effects.reduce(
-    (p, e) => p + e.cr4de_quanti_cp[scenario].avg,
-    0.00000001
-  );
+  let actions: SankeyAction[] = [];
+  console.log(results);
+  if (!results && riskSummary.cr4de_causing_risks) {
+    actions =
+      typeof riskSummary.cr4de_causing_risks === "string"
+        ? JSON.parse(riskSummary.cr4de_causing_risks)
+        : riskSummary.cr4de_causing_risks;
+  } else if (
+    results &&
+    (results[scenario].impactStatistics?.effectProbabilities?.length || 0) > 0
+  ) {
+    const sums =
+      results[scenario].impactStatistics?.effectProbabilities.reduce(
+        (acc, c) => ({
+          ...acc,
+          [c.id || ""]: {
+            cause_risk_id: c.id || "",
+            cause_risk_title: c.risk,
+            cause_risk_p:
+              (acc[c.id || ""]?.cause_risk_p || 0) + c.probabilityMean,
+            parts: {
+              ...(acc[c.id || ""]?.parts || {}),
+              [c.scenario || "considerable"]: c.probabilityMean,
+            },
+          },
+        }),
+        {} as Record<string, SankeyAction>,
+      ) || {};
 
-  const actions: ActionRisksSummary[] = cascades.effects
-    .map((e) => ({
-      id: e.cr4de_effect_risk._cr4de_risk_file_value,
-      name: `risk.${e.cr4de_effect_risk.cr4de_hazard_id}.name`,
-      p: e.cr4de_quanti_cp[scenario].avg / totCP,
-    }))
-    .sort((a, b) => b.p - a.p);
+    actions = Object.values(sums)
+      .sort((a, b) => b.cause_risk_p - a.cause_risk_p)
+      .reduce(
+        (acc, c) => {
+          if (acc.totalP > 0.8) {
+            let lastCause = acc.causes[acc.causes.length - 1];
+            if (!lastCause.other_causes) {
+              lastCause = {
+                cause_risk_id: "",
+                cause_risk_title: "Other causes",
+                cause_risk_p: 0,
+                other_causes: [],
+              };
+              acc.causes.push(lastCause);
+            }
 
-  let minP = 0;
+            lastCause.other_causes!.push({
+              ...c,
+            });
+            lastCause.cause_risk_p += c.cause_risk_p;
 
-  let cumulP = 0;
-  for (const c of actions) {
-    cumulP += c.p;
+            return acc;
+          }
 
-    if (cumulP >= 0.8) {
-      minP = c.p;
-      break;
-    }
+          return {
+            causes: [...acc.causes, c],
+            totalP: acc.totalP + c.cause_risk_p,
+          };
+        },
+        { causes: [] as CauseRisksSummary[], totalP: 0 },
+      ).causes;
+  } else {
+    actions = [
+      {
+        cause_risk_id: "",
+        cause_risk_title: "Direct Probability",
+        cause_risk_p: 1,
+      },
+    ];
   }
 
   const nodes: ActionSankeyNode[] = [
     { name: `risk.${riskSnapshot.cr4de_hazard_id}.name` },
-    ...actions
-      .filter((c) => c.p >= minP)
-      .map((a) => ({ name: a.name, cascade: a })),
+    ...actions.map((a) => ({
+      name: a.cause_risk_title,
+      cascade: a,
+      otherActions: a.other_causes || undefined,
+    })),
   ];
-  const otherActions = actions.filter((e) => e.p < minP);
-
-  if (minP >= 0 && otherActions.length > 0) {
-    nodes.push({
-      name: "Other Actions",
-      cascade: {
-        id: "",
-        name: "Other Actions",
-        p: otherActions.reduce((t, a) => t + a.p, 0.00001),
-      },
-      otherActions: otherActions,
-    });
-  }
 
   const data: SankeyData & { nodes: ActionSankeyNode[] } = {
     nodes,
-    links: actions
-      .filter((e) => e.p >= minP)
-      .map((e, i: number) => ({
-        source: i + 1,
-        target: 0,
-        value: Math.max(0.000000001, e.p),
-      })),
-  };
-  if (minP > 0 && otherActions.length > 0)
-    data.links.push({
-      source: nodes.length - 1,
+    links: actions.map((e, i: number) => ({
+      source: i + 1,
       target: 0,
-      value: actions
-        .filter((e) => e.p < minP)
-        .reduce((tot, e) => tot + e.p, 0.000000001),
-    });
+      value: Math.max(0.000000001, e.cause_risk_p),
+    })),
+  };
+
+  let nodePadding = 0;
+  if (data.nodes.length > 2) nodePadding = 100 / (data.nodes.length - 2);
+  else if (data.nodes.length >= 1) nodePadding = 100;
 
   return (
     <ResponsiveContainer width={width} height={height}>
@@ -171,7 +210,7 @@ export default function ActionsSankey({
         // Disable sorting  the nodes
         iterations={0}
         // More spacing between nodes
-        nodePadding={data.nodes.length > 2 ? 100 / (data.nodes.length - 2) : 0}
+        nodePadding={nodePadding}
       >
         {tooltip && <Tooltip content={ActionTooltip} />}
       </Sankey>
@@ -220,20 +259,75 @@ function ASankeyNode({
         className="probability-cause"
         key={`causeNode${index}`}
         onClick={() => {
-          if (!payload.cascade?.id) return;
+          if (!payload.cascade?.cause_risk_id) return;
 
-          if (onNavigate) return onNavigate(payload.cascade.id);
+          if (onNavigate) return onNavigate(payload.cascade.cause_risk_id);
         }}
       >
-        <Rectangle
-          x={x}
-          y={totalCauses <= 2 ? baseY : y}
-          width={width}
-          height={totalCauses <= 2 ? 600 - 2 * baseY : height}
-          fill={getCategoryColor("")}
-          fillOpacity="1"
-          style={{ cursor: payload.cascade ? "pointer" : "default" }}
-        />
+        {payload.cascade?.parts && payload.cascade.cause_risk_id !== "" ? (
+          <>
+            <Rectangle
+              x={x}
+              y={totalCauses <= 2 ? baseY : y}
+              width={width}
+              height={
+                ((totalCauses <= 2 ? 490 : height) *
+                  (payload.cascade.parts.considerable || 0)) /
+                payload.cascade.cause_risk_p
+              }
+              fill={SCENARIO_PARAMS["considerable"].color}
+              fillOpacity="1"
+              style={{ cursor: payload.cascade ? "pointer" : "default" }}
+            />
+            <Rectangle
+              x={x}
+              y={
+                (totalCauses <= 2 ? baseY : y) +
+                ((totalCauses <= 2 ? 490 : height) *
+                  (payload.cascade.parts.considerable || 0)) /
+                  payload.cascade.cause_risk_p
+              }
+              width={width}
+              height={
+                ((totalCauses <= 2 ? 490 : height) *
+                  (payload.cascade.parts.major || 0)) /
+                payload.cascade.cause_risk_p
+              }
+              fill={SCENARIO_PARAMS["major"].color}
+              fillOpacity="1"
+              style={{ cursor: payload.cascade ? "pointer" : "default" }}
+            />
+            <Rectangle
+              x={x}
+              y={
+                (totalCauses <= 2 ? baseY : y) +
+                ((totalCauses <= 2 ? 490 : height) *
+                  ((payload.cascade.parts.considerable || 0) +
+                    (payload.cascade.parts.major || 0))) /
+                  payload.cascade.cause_risk_p
+              }
+              width={width}
+              height={
+                ((totalCauses <= 2 ? 490 : height) *
+                  (payload.cascade.parts.extreme || 0)) /
+                payload.cascade.cause_risk_p
+              }
+              fill={SCENARIO_PARAMS["extreme"].color}
+              fillOpacity="1"
+              style={{ cursor: payload.cascade ? "pointer" : "default" }}
+            />
+          </>
+        ) : (
+          <Rectangle
+            x={x}
+            y={totalCauses <= 2 ? baseY : y}
+            width={width}
+            height={totalCauses <= 2 ? 600 - 2 * baseY : height}
+            fill={getCategoryColor("")}
+            fillOpacity="1"
+            style={{ cursor: payload.cascade ? "pointer" : "default" }}
+          />
+        )}
         <text
           textAnchor="start"
           x={x + 15}
@@ -310,9 +404,10 @@ const ActionTooltip = ({
           </Typography>
 
           <Typography variant="body1" sx={{ mt: 1 }}>
-            {t("analysis.cause.explained", {
-              percentage: round(100 * p.cascade.p, 2),
-            })}
+            If this actor group were to successfully carry out a malicious
+            action, there is an estimated{" "}
+            <b>{round(100 * p.cascade.cause_risk_p, 2)}%</b> chance it would be{" "}
+            <i>{t(p.name)}</i>
           </Typography>
         </>
       ) : (
@@ -322,10 +417,10 @@ const ActionTooltip = ({
           </Typography>
 
           {p.otherActions.map((h) => (
-            <Typography key={h.name} variant="body1" sx={{ mt: 1 }}>
-              <b>{t(h.name)}:</b>{" "}
+            <Typography key={h.cause_risk_id} variant="body1" sx={{ mt: 1 }}>
+              <b>{t(h.cause_risk_title)}</b>{" "}
               {t("analysis.action.other.explained", {
-                percentage: round(100 * h.p, 2),
+                percentage: round(100 * h.cause_risk_p, 2),
               })}
             </Typography>
           ))}

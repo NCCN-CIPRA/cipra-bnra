@@ -11,6 +11,8 @@ import {
   parseRiskFileQuantiResults,
   RISK_TYPE,
   RiskFileQuantiResults,
+  SerializedRiskFileQuantiInput,
+  SerializedRiskFileQuantiResults,
 } from "../types/dataverse/DVRiskFile";
 import useAPI, { DataTable } from "../hooks/useAPI";
 import {
@@ -33,26 +35,19 @@ import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import { BasePageContext } from "./BasePage";
 import { useQuery } from "@tanstack/react-query";
 import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
-import {
-  CascadeSnapshots,
-  getCascadesCatalogue,
-  getCascadesCatalogueNew,
-  getCascadesSnapshotCatalogue,
-} from "../functions/cascades";
-import {
-  getRiskCatalogue,
-  getRiskCatalogueFromSnapshots,
-  getRiskFileCatalogue,
-  RiskCatalogue,
-} from "../functions/riskfiles";
 import { Environment } from "../types/global";
 import {
   DVRiskSnapshot,
   parseRiskSnapshot,
   RiskSnapshotResults,
+  SerializedRiskSnapshotResults,
 } from "../types/dataverse/DVRiskSnapshot";
-import { summaryFromRiskfile } from "../functions/snapshot";
+import {
+  snapshotFromRiskfile,
+  summaryFromRiskfileNew,
+} from "../functions/snapshot";
 import DifferenceIcon from "@mui/icons-material/Difference";
+import { SerializedRiskQualis } from "../types/dataverse/Riskfile";
 
 type RouteParams = {
   risk_file_id: string;
@@ -62,15 +57,13 @@ export interface RiskFilePageContext extends BasePageContext {
   riskSummary: DVRiskSummary;
   riskSnapshot: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   publicRiskSnapshot: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
-  riskFile: DVRiskFile | null;
-  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot> | null;
-  publicCascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot> | null;
+  riskFile: DVRiskFile<unknown, unknown, unknown, RiskFileQuantiResults> | null;
   results: RiskFileQuantiResults | null;
 }
 
 export default function BaseRiskFilePage() {
   const { t } = useTranslation();
-  const { user, environment, ...baseContext } =
+  const { user, environment, snapshotMap, riskSummaryMap, ...baseContext } =
     useOutletContext<BasePageContext>();
   const navigate = useNavigate();
   const api = useAPI();
@@ -83,125 +76,75 @@ export default function BaseRiskFilePage() {
   }, [pathname]);
 
   const { data: publicRiskSummary } = useQuery({
-    queryKey: [DataTable.RISK_SUMMARY],
-    queryFn: () => api.getRiskSummaries(),
-    select: (data) =>
-      data.find((rf) => rf._cr4de_risk_file_value === params.risk_file_id),
+    queryKey: [DataTable.RISK_SUMMARY, params.risk_file_id],
+    queryFn: () =>
+      api.getRiskSummary(
+        riskSummaryMap[params.risk_file_id]?.cr4de_riskfilesid || "",
+      ),
+    enabled: Boolean(riskSummaryMap[params.risk_file_id]),
   });
-  const { data: riskFiles } = useQuery({
-    queryKey: [DataTable.RISK_FILE],
-    queryFn: () => api.getRiskFiles(),
-    select: (data) => data.filter((rf) => !rf.cr4de_hazard_id.startsWith("X")),
+  const { data: riskFile } = useQuery<
+    DVRiskFile<
+      unknown,
+      SerializedRiskFileQuantiInput,
+      SerializedRiskQualis,
+      SerializedRiskFileQuantiResults
+    >,
+    Error,
+    DVRiskFile<
+      unknown,
+      SerializedRiskFileQuantiInput,
+      SerializedRiskQualis,
+      RiskFileQuantiResults
+    >
+  >({
+    queryKey: [DataTable.RISK_FILE, params.risk_file_id],
+    queryFn: () => api.getRiskFile(params.risk_file_id),
     enabled: Boolean(
       user && user.roles.analist && environment === Environment.DYNAMIC,
     ),
+    select: (data) => ({
+      ...data,
+      cr4de_quanti_results: parseRiskFileQuantiResults(
+        data.cr4de_quanti_results,
+      ),
+    }),
   });
 
-  const { data: riskSnapshots } = useQuery({
-    queryKey: [DataTable.RISK_SNAPSHOT],
-    queryFn: () => api.getRiskSnapshots(),
-    select: (data) => data.filter((rf) => !rf.cr4de_hazard_id.startsWith("X")),
-    enabled: Boolean(user && user.roles.verified),
-  });
-
-  const { data: cascadeList } = useQuery({
-    queryKey: [DataTable.RISK_CASCADE],
-    queryFn: () => api.getRiskCascades(),
+  const { data: publicRiskSnapshot } = useQuery<
+    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>,
+    Error,
+    DVRiskSnapshot<unknown, RiskSnapshotResults>
+  >({
+    queryKey: [DataTable.RISK_SNAPSHOT, params.risk_file_id],
+    queryFn: () => api.getRiskSnapshot(snapshotMap[params.risk_file_id] || ""),
     enabled: Boolean(
-      user && user.roles.analist && environment === Environment.DYNAMIC,
+      user && user.roles.verified && snapshotMap[params.risk_file_id],
     ),
+    select: (data) => parseRiskSnapshot(data),
   });
-
-  const { data: cascadeSnapshotList } = useQuery({
-    queryKey: [DataTable.CASCADE_SNAPSHOT],
-    queryFn: () => api.getCascadeSnapshots(),
-    select: (d) => d.map((d) => ({ ...d, cr4de_removed: false })),
-    enabled: Boolean(user && user.roles.verified),
-  });
-
-  const riskSnapshotCatalogue = useMemo(() => {
-    if (!riskSnapshots) return null;
-
-    return getRiskCatalogueFromSnapshots(
-      riskSnapshots.map((rs) => parseRiskSnapshot(rs)),
-    );
-  }, [riskSnapshots]);
-
-  const riskFileCatalogue: RiskCatalogue<unknown, RiskSnapshotResults> | null =
-    useMemo(() => {
-      if (!riskFiles) return null;
-
-      const rcTemp = getRiskCatalogue(riskFiles);
-
-      return Object.keys(rcTemp).reduce(
-        (acc, rs) => ({
-          ...acc,
-          [rs]: {
-            ...rcTemp[rs],
-            cr4de_quanti: JSON.parse(rcTemp[rs].cr4de_quanti),
-          },
-        }),
-        {} as RiskCatalogue<unknown, RiskSnapshotResults>,
-      );
-    }, [riskFiles]);
-
-  const cascadeSnapshotsCatalogue = useMemo(() => {
-    if (!riskSnapshotCatalogue || !cascadeSnapshotList) return null;
-
-    return getCascadesSnapshotCatalogue(
-      Object.values(riskSnapshotCatalogue),
-      riskSnapshotCatalogue,
-      cascadeSnapshotList,
-    );
-  }, [riskSnapshotCatalogue, cascadeSnapshotList]);
-
-  const riskCascadesCatalogue = useMemo(() => {
-    if (!riskFiles || !riskFileCatalogue || !cascadeList) return null;
-
-    return getCascadesCatalogueNew(riskFiles, riskFileCatalogue, cascadeList);
-  }, [cascadeList, riskFileCatalogue, riskFiles]);
 
   const riskSummary = useMemo(() => {
-    if (environment === Environment.PUBLIC || !riskFiles || !cascadeList)
+    if (environment === Environment.PUBLIC || !riskFile)
       return publicRiskSummary;
 
-    if (!riskFiles) return null;
+    if (!riskFile) return null;
 
-    const innerRiskFile = riskFiles.find(
-      (rf) => rf.cr4de_riskfilesid === params.risk_file_id,
-    );
+    return summaryFromRiskfileNew(riskFile);
+  }, [publicRiskSummary, riskFile, environment]);
 
-    if (!innerRiskFile) return null;
+  const riskSnapshot = useMemo(() => {
+    if (!publicRiskSnapshot) return null;
 
-    const realRC = getRiskFileCatalogue(riskFiles);
-    const realCascades = getCascadesCatalogue(riskFiles, realRC, cascadeList);
-    return summaryFromRiskfile(
-      innerRiskFile,
-      realCascades[innerRiskFile.cr4de_riskfilesid],
-      true,
-    );
-  }, [publicRiskSummary, riskFiles, cascadeList, params, environment]);
+    if (environment === Environment.PUBLIC || !riskFile)
+      return publicRiskSnapshot;
 
-  const riskFile = useMemo(() => {
-    if (!riskFiles) return null;
+    if (!riskFile) return null;
 
-    return (
-      riskFiles.find((rf) => rf.cr4de_riskfilesid === params.risk_file_id) ||
-      null
-    );
-  }, [riskFiles, params]);
+    return parseRiskSnapshot(snapshotFromRiskfile(riskFile));
+  }, [publicRiskSnapshot, riskFile, environment]);
 
   const isEmerging = riskSummary?.cr4de_risk_type === RISK_TYPE.EMERGING;
-
-  const riskCatalogue =
-    environment === Environment.PUBLIC
-      ? riskSnapshotCatalogue
-      : riskFileCatalogue;
-
-  const cascadesCatalogue =
-    environment === Environment.PUBLIC
-      ? cascadeSnapshotsCatalogue
-      : riskCascadesCatalogue;
 
   let tab = 0;
   const extraTab = isEmerging ? 0 : 1;
@@ -234,23 +177,17 @@ export default function BaseRiskFilePage() {
           context={satisfies<RiskFilePageContext>({
             user,
             environment,
+            snapshotMap,
+            riskSummaryMap,
             ...baseContext,
-            riskFile,
+            riskFile: riskFile || null,
             riskSummary,
-            riskSnapshot:
-              riskCatalogue?.[riskSummary._cr4de_risk_file_value] || null,
-            publicRiskSnapshot:
-              riskSnapshotCatalogue?.[riskSummary._cr4de_risk_file_value] ||
-              null,
-            cascades:
-              cascadesCatalogue?.[riskSummary._cr4de_risk_file_value] || null,
-            publicCascades:
-              cascadeSnapshotsCatalogue?.[riskSummary._cr4de_risk_file_value] ||
-              null,
-            results: parseRiskFileQuantiResults(
-              riskCatalogue?.[riskSummary._cr4de_risk_file_value]
-                ?.cr4de_quanti_results || null,
-            ),
+            riskSnapshot: riskSnapshot || null,
+            publicRiskSnapshot: publicRiskSnapshot || null,
+            results:
+              riskFile && environment === Environment.DYNAMIC
+                ? riskFile.cr4de_quanti_results
+                : null,
           })}
         />
       ) : (

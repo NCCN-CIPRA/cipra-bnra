@@ -22,18 +22,15 @@ import {
 } from "../../../types/dataverse/DVRiskSnapshot";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../../BasePage";
-import { CascadeSnapshots } from "../../../functions/cascades";
 import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
 
 export default function Standard({
   riskSummary,
   riskFile,
-  cascades,
   results,
 }: {
   riskSummary: DVRiskSummary;
   riskFile: DVRiskSnapshot<unknown, RiskSnapshotResults>;
-  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   results: RiskFileQuantiResults | null;
 }) {
   const { environment } = useOutletContext<BasePageContext>();
@@ -53,8 +50,8 @@ export default function Standard({
         </Typography>
 
         <SankeyDiagram
+          riskSummary={riskSummary}
           riskFile={riskFile}
-          cascades={cascades}
           scenario={scenario}
           results={results}
           setScenario={setScenario}

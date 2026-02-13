@@ -44,6 +44,7 @@ export function CascadeSection({
   cause,
   effect,
   cascade,
+  publicCascade,
   subtitle = null,
   visuals,
   disabled = false,
@@ -53,6 +54,7 @@ export function CascadeSection({
   cause: DVRiskSnapshot;
   effect: DVRiskSnapshot;
   cascade: DVCascadeSnapshot<unknown, unknown, unknown>;
+  publicCascade?: DVCascadeSnapshot<unknown, unknown, unknown>;
   subtitle?: ReactNode;
   visuals: VISUALS;
   disabled?: boolean;
@@ -61,18 +63,18 @@ export function CascadeSection({
 }) {
   const api = useAPI();
   const queryClient = useQueryClient();
-  const { user, environment, showDiff, publicCascades } =
+  const { user, environment, showDiff } =
     useOutletContext<RiskFilePageContext>();
 
   const [quali, setQuali] = useState<string>(cascade.cr4de_quali || "");
   const [cpMatrix, setCPMatrix] = useState<CPMatrixCauseRow>(
-    parseCPMatrix(serializeCPMatrix(cascade.cr4de_quanti_cp))
+    parseCPMatrix(serializeCPMatrix(cascade.cr4de_quanti_cp)),
   );
   const [runningUpdateCount, setRunningUpdateCount] = useState(0);
 
   const mutation = useMutation({
     mutationFn: async (
-      newC: Partial<DVRiskCascade> & { cr4de_bnrariskcascadeid: string }
+      newC: Partial<DVRiskCascade> & { cr4de_bnrariskcascadeid: string },
     ) => api.updateCascade(newC.cr4de_bnrariskcascadeid, newC),
     onMutate: () => setRunningUpdateCount((c) => c + 1),
     onSettled: () => setRunningUpdateCount((c) => Math.max(0, c - 1)),
@@ -83,21 +85,17 @@ export function CascadeSection({
     },
   });
 
-  const publicCascade = publicCascades?.all.find(
-    (c) => c._cr4de_risk_cascade_value === cascade._cr4de_risk_cascade_value
-  );
-
   const handleChange = async (
     causeScenario: SCENARIOS,
     effectScenario: SCENARIOS,
-    newCPAbs: number
+    newCPAbs: number,
   ) => {
     if (!user?.roles.analist) return;
 
     const isActorCause = cause.cr4de_risk_type === RISK_TYPE.MANMADE;
 
     const updatedCPMatrix = parseCPMatrix(
-      serializeCPMatrix(cpMatrix || cascade.cr4de_quanti_cp)
+      serializeCPMatrix(cpMatrix || cascade.cr4de_quanti_cp),
     );
     updatedCPMatrix[causeScenario][effectScenario] = {
       abs: newCPAbs,

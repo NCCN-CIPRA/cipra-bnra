@@ -39,7 +39,7 @@ export default function SnapshotTab() {
       cascadesSnapshots,
       riskFiles.filter((rf) => !rf.cr4de_hazard_id.startsWith("X")),
       cascades,
-      false
+      false,
     );
 
     setAction("Saving snapshots: 0%");
@@ -94,7 +94,7 @@ export default function SnapshotTab() {
           "c07069ef-da87-f011-b4cb-000d3ab805fb"
         )
           continue;
-        console.log(cs);
+
         if (cs.cr4de_bnrariskcascadesnapshotid) {
           delete cs.cr4de_risk_cascade;
           delete cs._cr4de_risk_cascade_value;
@@ -104,7 +104,7 @@ export default function SnapshotTab() {
           delete cs._cr4de_effect_risk_value;
           await api.updateCascadeSnapshot(
             cs.cr4de_bnrariskcascadesnapshotid,
-            cs
+            cs,
           );
         } else {
           delete cs.cr4de_bnrariskcascadesnapshotid;
@@ -122,7 +122,7 @@ export default function SnapshotTab() {
               SerializedCauseSnapshotResults,
               SerializedEffectSnapshotResults,
               SerializedCPMatrix
-            >
+            >,
           );
         }
 

@@ -82,25 +82,25 @@ export default function ScenarioMatrixChart({
         x:
           maxScale === 7
             ? iScale7FromEuros(
-                results[s]?.impactStatistics?.sampleMedian.all || 1,
+                results[s]?.impactStatistics?.sampleMedian.all || 0,
                 undefined,
                 100,
               )
             : tiScale5FromEuros(
-                results[s]?.impactStatistics?.sampleMedian.all || 1,
+                results[s]?.impactStatistics?.sampleMedian.all || 0,
                 undefined,
               ),
         y:
           maxScale === 7
             ? pScale7FromReturnPeriodMonths(
                 returnPeriodMonthsFromYearlyEventRate(
-                  results[s]?.probabilityStatistics?.sampleMean || 1,
+                  results[s]?.probabilityStatistics?.sampleMean || 0,
                 ),
                 100,
               )
             : pScale5FromReturnPeriodMonths(
                 returnPeriodMonthsFromYearlyEventRate(
-                  results[s]?.probabilityStatistics?.sampleMean || 1,
+                  results[s]?.probabilityStatistics?.sampleMean || 0,
                 ),
                 100,
               ),

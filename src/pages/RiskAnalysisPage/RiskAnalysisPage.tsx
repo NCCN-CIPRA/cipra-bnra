@@ -12,11 +12,10 @@ export default function RiskAnalysisPage() {
   const {
     riskSummary,
     riskSnapshot: riskFile,
-    cascades,
     results,
   } = useOutletContext<RiskFilePageContext>();
 
-  if (!riskFile || !cascades)
+  if (!riskFile)
     return (
       <Box sx={{ width: "100%", mt: 20, textAlign: "center" }}>
         <NCCNLoader />
@@ -29,7 +28,6 @@ export default function RiskAnalysisPage() {
         <Standard
           riskSummary={riskSummary}
           riskFile={riskFile}
-          cascades={cascades}
           results={results}
         />
       </Container>
@@ -41,7 +39,6 @@ export default function RiskAnalysisPage() {
         <ManMade
           riskSummary={riskSummary}
           riskFile={riskFile}
-          cascades={cascades}
           results={results}
         />
       </Container>
@@ -49,7 +46,7 @@ export default function RiskAnalysisPage() {
 
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
-      <Emerging riskSummary={riskSummary} cascades={cascades.all} />
+      <Emerging riskSummary={riskSummary} />
     </Container>
   );
 }

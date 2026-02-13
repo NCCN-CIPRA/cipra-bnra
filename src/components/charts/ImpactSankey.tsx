@@ -7,10 +7,9 @@ import {
   TooltipContentProps,
 } from "recharts";
 import {
-  CascadeSnapshots,
-  getEffectsSummaries,
-} from "../../functions/cascades";
-import { EffectRisksSummary } from "../../types/dataverse/DVRiskSummary";
+  DVRiskSummary,
+  EffectRisksSummary,
+} from "../../types/dataverse/DVRiskSummary";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import { LinkProps, NodeProps, SankeyData } from "recharts/types/chart/Sankey";
@@ -31,6 +30,7 @@ import {
 import { AggregatedImpacts } from "../../types/simulation";
 import { iScale7FromEuros } from "../../functions/indicators/impact";
 import { DAMAGE_INDICATOR_COLORS } from "../../functions/getImpactColor";
+import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 
 const baseY = 50;
 
@@ -49,8 +49,8 @@ type SankeyEffect = EffectRisksSummary & {
 };
 
 export function ImpactSankeyBox({
+  riskSummary,
   riskSnapshot,
-  cascades,
   scenario,
   results,
   width = "100%",
@@ -58,8 +58,8 @@ export function ImpactSankeyBox({
   focusedImpact = null,
   onClick,
 }: {
+  riskSummary: DVRiskSummary;
   riskSnapshot: DVRiskSnapshot;
-  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
   results: RiskFileQuantiResults | null;
   width?: number | string;
@@ -77,8 +77,8 @@ export function ImpactSankeyBox({
       </Box>
       <ResponsiveContainer width={width} height={height}>
         <ImpactSankey
+          riskSummary={riskSummary}
           riskSnapshot={riskSnapshot}
-          cascades={cascades}
           scenario={scenario}
           results={results}
           tooltip={true}
@@ -91,8 +91,8 @@ export function ImpactSankeyBox({
 }
 
 export default function ImpactSankey({
+  riskSummary,
   riskSnapshot,
-  cascades,
   scenario,
   results,
   width,
@@ -101,8 +101,8 @@ export default function ImpactSankey({
   focusedImpact = null,
   onClick,
 }: {
+  riskSummary: DVRiskSummary;
   riskSnapshot: DVRiskSnapshot;
-  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   scenario: SCENARIOS;
   results: RiskFileQuantiResults | null;
   width?: number;
@@ -113,13 +113,18 @@ export default function ImpactSankey({
 }) {
   let effects: EffectRisksSummary[] = [];
 
+  const isActor = riskSnapshot.cr4de_risk_type === RISK_TYPE.MANMADE;
+
   const impactKey: keyof AggregatedImpacts = focusedImpact
     ? (focusedImpact.toLowerCase() as keyof AggregatedImpacts)
     : "all";
 
-  if (!results) {
-    effects = getEffectsSummaries(riskSnapshot, cascades, scenario, true);
-  } else {
+  if (!results && riskSummary.cr4de_effect_risks) {
+    effects =
+      typeof riskSummary.cr4de_effect_risks === "string"
+        ? JSON.parse(riskSummary.cr4de_effect_risks)
+        : riskSummary.cr4de_effect_risks;
+  } else if (results) {
     const sums =
       results[scenario].impactStatistics?.relativeContributions.reduce(
         (acc, c) => ({
@@ -168,10 +173,14 @@ export default function ImpactSankey({
       ).effects;
   }
 
+  const otherEffectsName = isActor
+    ? "Other malicious actions"
+    : "Other effects";
+
   const nodes: EffectSankeyNode[] = [
     { name: `risk.${riskSnapshot.cr4de_hazard_id}.name` },
     ...effects.map((c) => ({
-      name: c.effect_risk_title,
+      name: c.other_effects ? otherEffectsName : c.effect_risk_title,
       cascade: c,
       otherEffects: c.other_effects || undefined,
     })),
@@ -424,7 +433,7 @@ const EffectTooltip = ({
       {!p.otherEffects ? (
         <>
           <Typography variant="subtitle1" color="inherit">
-            {t(p.name)}
+            <u>{t(p.name)}</u>
           </Typography>
 
           <Typography variant="body1" sx={{ mt: 1 }}>
@@ -436,7 +445,7 @@ const EffectTooltip = ({
       ) : (
         <>
           <Typography variant="subtitle1" color="inherit">
-            {t("Other effects")}:
+            <u>{p.name}</u>
           </Typography>
 
           {p.otherEffects.map((h: EffectRisksSummary) => (

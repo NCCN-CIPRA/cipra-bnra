@@ -1,5 +1,5 @@
 import { useOutletContext } from "react-router-dom";
-import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import {
   Box,
   Container,
@@ -21,6 +21,16 @@ import Attack from "./Attack";
 import { VISUALS } from "./CascadeSection";
 import useSavedState from "../../hooks/useSavedState";
 import RiskDataAccordion from "./RiskDataAccordion";
+import { isMaliciousAction } from "../../functions/riskfiles";
+import { useQuery } from "@tanstack/react-query";
+import useAPI, { DataTable } from "../../hooks/useAPI";
+import { Environment } from "../../types/global";
+import {
+  snapshotFromRiskCascade,
+  snapshotFromRiskfile,
+} from "../../functions/snapshot";
+import { parseRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { parseCascadeSnapshot } from "../../types/dataverse/DVRiskCascade";
 
 export type PERC_CONTRIB =
   | "considerable"
@@ -35,40 +45,160 @@ export type SORT_ATTACKS = "impact" | "preference";
 export type SORT_ENV = "environment" | "public" | "dynamic";
 
 export default function RiskDataPage() {
+  const api = useAPI();
+
   const {
     user,
+    environment,
     riskSnapshot: riskFile,
     riskSummary,
-    cascades,
   } = useOutletContext<RiskFilePageContext>();
   const [viewType, setViewType] = useSavedState<VISUALS>(
     `risk-data-page-cascades-${riskFile?._cr4de_risk_file_value}`,
     "MATRIX",
-    false
+    false,
   );
   const [showPercentage, setShowPercentage] = useSavedState<PERC_CONTRIB>(
     `risk-data-page-percentage-${riskFile?._cr4de_risk_file_value}`,
-    "average"
+    "average",
   );
   const [showConsequences, setShowConsequences] = useSavedState<boolean>(
     `risk-data-page-consequences-${riskFile?._cr4de_risk_file_value}`,
-    true
+    true,
   );
   const [sortAttacks, setSortAttacks] = useSavedState<SORT_ATTACKS>(
     `risk-data-page-sortimpact-${riskFile?._cr4de_risk_file_value}`,
-    "impact"
+    "impact",
   );
 
-  if (!riskFile || !cascades)
+  const { data: dynamicCauses } = useQuery({
+    queryKey: [
+      DataTable.RISK_CASCADE,
+      "causes",
+      riskSummary._cr4de_risk_file_value,
+    ],
+    queryFn: () =>
+      api.getRiskCascades(
+        `$filter=_cr4de_effect_hazard_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_cause_hazard`,
+      ),
+    enabled: Boolean(
+      user &&
+        user.roles.analist &&
+        environment === Environment.DYNAMIC &&
+        riskFile,
+    ),
+    select: (data) =>
+      data.map((d) => ({
+        ...parseCascadeSnapshot(snapshotFromRiskCascade(riskFile!, d)),
+        cr4de_cause_risk: parseRiskSnapshot(
+          snapshotFromRiskfile(d.cr4de_cause_hazard as DVRiskFile),
+        ),
+      })),
+  });
+  const { data: dynamicEffects } = useQuery({
+    queryKey: [
+      DataTable.RISK_CASCADE,
+      "effects",
+      riskSummary._cr4de_risk_file_value,
+    ],
+    queryFn: () =>
+      api.getRiskCascades(
+        `$filter=_cr4de_cause_hazard_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_effect_hazard`,
+      ),
+    enabled: Boolean(
+      user &&
+        user.roles.analist &&
+        environment === Environment.DYNAMIC &&
+        riskFile,
+    ),
+    select: (data) =>
+      data.map((d) => ({
+        ...parseCascadeSnapshot(snapshotFromRiskCascade(riskFile!, d)),
+        cr4de_effect_risk: parseRiskSnapshot(
+          snapshotFromRiskfile(d.cr4de_effect_hazard as DVRiskFile),
+        ),
+      })),
+  });
+
+  const { data: publicCauses } = useQuery({
+    queryKey: [
+      DataTable.CASCADE_SNAPSHOT,
+      "causes",
+      riskSummary._cr4de_risk_file_value,
+    ],
+    queryFn: () =>
+      api.getCascadeSnapshots(
+        `$filter=_cr4de_effect_risk_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_cause_risk`,
+      ),
+    enabled: Boolean(
+      user &&
+        user.roles.verified &&
+        environment === Environment.PUBLIC &&
+        riskFile,
+    ),
+    select: (data) =>
+      data.map((d) => ({
+        ...parseCascadeSnapshot(d),
+        cr4de_cause_risk: parseRiskSnapshot(
+          snapshotFromRiskfile(d.cr4de_cause_risk as DVRiskFile),
+        ),
+      })),
+  });
+  const { data: publicEffects } = useQuery({
+    queryKey: [
+      DataTable.CASCADE_SNAPSHOT,
+      "effects",
+      riskSummary._cr4de_risk_file_value,
+    ],
+    queryFn: () =>
+      api.getCascadeSnapshots(
+        `$filter=_cr4de_cause_risk_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_effect_risk`,
+      ),
+    enabled: Boolean(
+      user &&
+        user.roles.verified &&
+        environment === Environment.PUBLIC &&
+        riskFile,
+    ),
+    select: (data) =>
+      data.map((d) => ({
+        ...parseCascadeSnapshot(d),
+        cr4de_effect_risk: parseRiskSnapshot(
+          snapshotFromRiskfile(d.cr4de_effect_risk as DVRiskFile),
+        ),
+      })),
+  });
+
+  const causes = (
+    environment === Environment.PUBLIC ? publicCauses : dynamicCauses
+  )?.filter((c) => c.cr4de_cause_risk.cr4de_risk_type !== RISK_TYPE.EMERGING);
+  const catalyzingEffects = (
+    environment === Environment.PUBLIC ? publicCauses : dynamicCauses
+  )?.filter(
+    (c) =>
+      c.cr4de_cause_risk.cr4de_risk_type === RISK_TYPE.EMERGING &&
+      c.cr4de_cause_risk.cr4de_title.indexOf("Climate") < 0,
+  );
+  const climateChange = (
+    environment === Environment.PUBLIC ? publicCauses : dynamicCauses
+  )?.find((c) => c.cr4de_cause_risk.cr4de_title.indexOf("Climate") >= 0);
+  const effects = (
+    environment === Environment.PUBLIC ? publicEffects : dynamicEffects
+  )?.filter((c) => c.cr4de_effect_risk.cr4de_risk_type !== RISK_TYPE.EMERGING);
+
+  if (
+    !riskFile ||
+    causes === undefined ||
+    effects === undefined ||
+    catalyzingEffects === undefined
+  )
     return (
       <Box sx={{ width: "100%", mt: 20, textAlign: "center" }}>
         <NCCNLoader />
       </Box>
     );
 
-  const isAttackRisk = cascades.causes.some(
-    (c) => c.cr4de_cause_risk.cr4de_risk_type === RISK_TYPE.MANMADE
-  );
+  const isAttackRisk = isMaliciousAction(riskFile._cr4de_risk_file_value);
 
   return (
     <Stack direction="column" sx={{ width: "100%" }}>
@@ -166,10 +296,14 @@ export default function RiskDataPage() {
         {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && !isAttackRisk && (
           <Standard
             riskFile={riskFile}
-            causes={cascades.causes}
-            effects={cascades.effects}
-            catalyzingEffects={cascades.catalyzingEffects}
-            climateChange={cascades.climateChange}
+            causes={causes}
+            effects={effects}
+            catalyzingEffects={catalyzingEffects}
+            climateChange={climateChange || null}
+            publicCauses={publicCauses?.filter(
+              (c) => c.cr4de_cause_risk.cr4de_risk_type !== RISK_TYPE.EMERGING,
+            )}
+            publicEffects={publicEffects}
             viewType={viewType}
             percentages={showPercentage}
             showConsequences={showConsequences}
@@ -178,10 +312,14 @@ export default function RiskDataPage() {
         {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && isAttackRisk && (
           <Attack
             riskFile={riskFile}
-            causes={cascades.causes}
-            effects={cascades.effects}
-            catalyzingEffects={cascades.catalyzingEffects}
-            climateChange={cascades.climateChange}
+            causes={causes}
+            effects={effects}
+            catalyzingEffects={catalyzingEffects}
+            climateChange={climateChange || null}
+            publicCauses={publicCauses?.filter(
+              (c) => c.cr4de_cause_risk.cr4de_risk_type !== RISK_TYPE.EMERGING,
+            )}
+            publicEffects={publicEffects}
             viewType={viewType}
             percentages={showPercentage}
             showConsequences={showConsequences}
@@ -190,16 +328,20 @@ export default function RiskDataPage() {
         {riskFile.cr4de_risk_type === RISK_TYPE.MANMADE && (
           <ManMade
             riskFile={riskFile}
-            effects={cascades.effects}
-            catalyzingEffects={cascades.catalyzingEffects}
-            climateChange={cascades.climateChange}
+            effects={effects}
+            catalyzingEffects={catalyzingEffects}
+            climateChange={climateChange || null}
+            // publicCauses={publicCauses?.filter(
+            //   (c) => c.cr4de_cause_risk.cr4de_risk_type !== RISK_TYPE.EMERGING,
+            // )}
+            publicEffects={publicEffects}
             viewType={viewType}
             percentages={showPercentage}
             sortAttacks={sortAttacks}
           />
         )}
         {riskFile.cr4de_risk_type === RISK_TYPE.EMERGING && (
-          <Emerging riskFile={riskFile} effects={cascades.effects} />
+          <Emerging riskFile={riskFile} effects={effects} />
         )}
       </Box>
     </Stack>

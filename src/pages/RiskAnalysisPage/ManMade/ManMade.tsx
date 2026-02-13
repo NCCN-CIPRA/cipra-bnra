@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next";
 import RiskFileTitle from "../../../components/RiskFileTitle";
 import BNRASpeedDial from "../../../components/BNRASpeedDial";
 import MMAnalysisTutorial from "./MMAnalysisTutorial";
-import { CascadeSnapshots } from "../../../functions/cascades";
 import handleExportRiskfile from "../../../functions/export/exportBNRA";
 import useAPI from "../../../hooks/useAPI";
 import RiskFileBibliography from "../../../components/RiskFileBibliography";
@@ -24,12 +23,10 @@ import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
 export default function ManMade({
   riskSummary,
   riskFile,
-  cascades,
   results,
 }: {
   riskSummary: DVRiskSummary;
   riskFile: DVRiskSnapshot;
-  cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>;
   results: RiskFileQuantiResults | null;
 }) {
   const { environment } = useOutletContext<BasePageContext>();
@@ -52,8 +49,8 @@ export default function ManMade({
           </Typography>
 
           <MMSankeyDiagram
+            riskSummary={riskSummary}
             riskFile={riskFile}
-            cascades={cascades}
             results={results}
             manmade
             scenario={scenario}

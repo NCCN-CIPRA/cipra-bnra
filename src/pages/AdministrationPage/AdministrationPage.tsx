@@ -6,10 +6,10 @@ import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import SnapshotTab from "./SnapshotTab";
-import MigrationTab from "./MigrationTab";
 import MoveDownSharpIcon from "@mui/icons-material/MoveDownSharp";
 import RestoreIcon from "@mui/icons-material/Restore";
 import RestoreTab from "./RestoreTab";
+import SummariesTab from "./SummariesTab";
 
 type UserManagementParams = {
   tabName: string;
@@ -31,7 +31,7 @@ export default function AdministrationPage() {
     case "snapshots":
       tab = 0;
       break;
-    case "migrate":
+    case "summaries":
       tab = 1;
       break;
     case "restore":
@@ -42,7 +42,7 @@ export default function AdministrationPage() {
   return (
     <>
       {tab === 0 && <SnapshotTab />}
-      {tab === 1 && <MigrationTab />}
+      {tab === 1 && <SummariesTab />}
       {tab === 2 && <RestoreTab />}
       <Paper
         sx={{
@@ -56,14 +56,14 @@ export default function AdministrationPage() {
       >
         <BottomNavigation showLabels value={tab}>
           <BottomNavigationAction
-            label="Snapshots"
+            label="Create Snapshots"
             icon={<AcUnitIcon />}
             onClick={() => navigate(`/admin/functions/snapshots`)}
           />
           <BottomNavigationAction
-            label="Migrate Risk Files"
+            label="Update Summaries"
             icon={<MoveDownSharpIcon />}
-            onClick={() => navigate(`/admin/functions/migrate`)}
+            onClick={() => navigate(`/admin/functions/summaries`)}
           />
           <BottomNavigationAction
             label="Restore Backup"

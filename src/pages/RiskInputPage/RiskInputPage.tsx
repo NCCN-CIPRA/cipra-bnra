@@ -22,8 +22,7 @@ import ExpertsTab from "./ExpertsTab";
 
 export default function RiskInputPage() {
   const api = useAPI();
-  const { riskSummary, riskFile: baseRiskFile } =
-    useOutletContext<RiskFilePageContext>();
+  const { riskSummary } = useOutletContext<RiskFilePageContext>();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
@@ -47,7 +46,7 @@ export default function RiskInputPage() {
     queryKey: [DataTable.PARTICIPATION, riskSummary._cr4de_risk_file_value],
     queryFn: () =>
       api.getParticipants<DVParticipation<DVContact>>(
-        `$filter=_cr4de_risk_file_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_contact`
+        `$filter=_cr4de_risk_file_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_contact`,
       ),
   });
 
@@ -55,7 +54,7 @@ export default function RiskInputPage() {
     queryKey: [DataTable.DIRECT_ANALYSIS, riskSummary._cr4de_risk_file_value],
     queryFn: () =>
       api.getDirectAnalyses<DVDirectAnalysis<unknown, DVContact>>(
-        `$filter=_cr4de_risk_file_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_expert($select=emailaddress1)`
+        `$filter=_cr4de_risk_file_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_expert($select=emailaddress1)`,
       ),
   });
 
@@ -63,15 +62,13 @@ export default function RiskInputPage() {
     queryKey: [DataTable.CASCADE_ANALYSIS, riskSummary._cr4de_risk_file_value],
     queryFn: () =>
       api.getCascadeAnalyses<DVCascadeAnalysis<unknown, unknown, DVContact>>(
-        `$filter=_cr4de_risk_file_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_expert($select=emailaddress1)`
+        `$filter=_cr4de_risk_file_value eq ${riskSummary._cr4de_risk_file_value}&$expand=cr4de_expert($select=emailaddress1)`,
       ),
   });
 
-  const riskFile =
-    baseRiskFile ||
-    riskFiles?.find(
-      (rf) => rf.cr4de_riskfilesid === riskSummary._cr4de_risk_file_value
-    );
+  const riskFile = riskFiles?.find(
+    (rf) => rf.cr4de_riskfilesid === riskSummary._cr4de_risk_file_value,
+  );
 
   const cascades = useMemo(() => {
     if (!riskFile || !riskFiles || !allCascades) return null;

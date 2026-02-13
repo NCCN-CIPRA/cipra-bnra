@@ -30,6 +30,9 @@ import {
 export default function getImpactStatistics(
   events: RiskEvent[],
 ): TotalImpactStatistics {
+  // if (events[0].risk.actor) {
+  //   console.log(events);
+  // }
   for (const n of events) {
     // Step 1: Given an event graph n of risk scenario R_S, the impact
     //         of said observation is calculated as follows
@@ -46,7 +49,7 @@ export default function getImpactStatistics(
   //         as follows
   const allFirstOrderEffects = getAllFirstOrderEffects(events);
   for (const n of events) {
-    calculateRelativeImpactContributions(n, allFirstOrderEffects);
+    calculateAbsoluteImpactContributions(n, allFirstOrderEffects);
   }
 
   // Step 4: The sample mean and standard deviation for the relative
@@ -107,6 +110,11 @@ function calculateDirectImpact(event: RiskEvent): void {
     for (const indicator of Object.keys(
       event.risk.directImpact.considerable,
     ) as (keyof Impact)[]) {
+      if (event.risk.directImpact[event.scenario][indicator] <= 0) {
+        event.directImpact[indicator] = 0;
+        continue;
+      }
+
       // Step 1.1.1: Given the estimation of the direct impact I_(x,direct),
       //             a value is drawn V ~ Normal(x,1), giving an observed
       //             impact of I_(V,direct).
@@ -131,17 +139,22 @@ function calculateDirectImpact(event: RiskEvent): void {
 //         full sample.
 function getSampleStatistics(events: RiskEvent[]): {
   sampleMedian: AggregatedImpacts;
+  sampleMean: AggregatedImpacts;
   sampleStd: AggregatedImpacts;
+  sampleMeanStd: AggregatedImpacts;
 } {
   // Step 2.1: The median value is used for each impact indicator to
   //           reduce the effect of outliers.
   const sampleMedian = roundImpact(getSampleMedian(events), 0);
+  const sampleMean = roundImpact(getSampleMean(events), 0);
 
   return {
     sampleMedian: sampleMedian,
+    sampleMean: sampleMean,
     // Step 2.2: The sample variance (and corresponding standard deviation)
     //           is given by
     sampleStd: roundImpact(getSampleStd(events, sampleMedian), 1),
+    sampleMeanStd: roundImpact(getSampleStd(events, sampleMean), 1),
   };
 }
 
@@ -170,6 +183,17 @@ function getSampleMedian(events: RiskEvent[]): AggregatedImpacts {
   }
 
   return medianImpacts;
+}
+
+// Step 2.1: The median value is used for each impact indicator to
+//           reduce the effect of outliers.
+function getSampleMean(events: RiskEvent[]): AggregatedImpacts {
+  return divideImpact(
+    events.reduce((acc, e) => addImpact(acc, e.totalImpact), {
+      ...noAggregatedImpacts,
+    }),
+    events.length,
+  );
 }
 
 // Step 2.2: The sample variance (and corresponding standard deviation)
@@ -201,15 +225,13 @@ function getSampleStd(
 //         contributions of the direct impact and each first-order
 //         cascading risk scenario to the total impact is calculated
 //         as follows
-function calculateRelativeImpactContributions(
+function calculateAbsoluteImpactContributions(
   n: RiskEvent,
   allFirstOrderEffects: Record<string, RiskEvent>,
 ): void {
   // Step 3.1: The relative contribution of the direct impact is found using:
   n.impactContributions["direct"] =
-    n.totalImpact.all <= 0
-      ? { ...noAggregatedImpacts }
-      : divideImpacts(n.directImpact, n.totalImpact);
+    n.totalImpact.all <= 0 ? { ...noAggregatedImpacts } : n.directImpact;
 
   for (const effect of Object.values(allFirstOrderEffects)) {
     const firstOrderEffect = n.triggeredEvents.find(
@@ -223,7 +245,7 @@ function calculateRelativeImpactContributions(
     n.impactContributions[`${effect.risk.id}__${effect.scenario}`] =
       n.totalImpact.all <= 0
         ? { ...noAggregatedImpacts }
-        : divideImpacts(firstOrderEffect.totalImpact, n.totalImpact);
+        : firstOrderEffect.totalImpact;
   }
 }
 
@@ -256,7 +278,7 @@ function getSampleMeanContribution(
   );
 }
 
-function getSampleStdContribution(
+function getSampleContributionVariance(
   contributions: AggregatedImpacts[],
   meanContribution: AggregatedImpacts,
 ): AggregatedImpacts {
@@ -275,7 +297,7 @@ function getSampleStdContribution(
     contributions.length - 1,
   );
 
-  return powImpact(variance, 1 / 2);
+  return variance;
 }
 
 function getImpactContributionStatistics(
@@ -287,11 +309,30 @@ function getImpactContributionStatistics(
 } {
   const impactContributions: ImpactContributionStatistics[] = [];
 
-  const diContributions = events.map((e) => e.impactContributions["direct"]);
-  const meanDIContribution = getSampleMeanContribution(diContributions);
-  const stdDIContribution = getSampleStdContribution(
-    diContributions,
-    meanDIContribution,
+  const meanImpact = divideImpact(
+    events.reduce((acc, e) => addImpact(acc, e.totalImpact), {
+      ...noAggregatedImpacts,
+    }),
+    events.length,
+  );
+  const varianceImpact = powImpact(getSampleStd(events, meanImpact), 2);
+
+  const diAbsoluteContributions = events.map((e) => e.directImpact);
+  const meanDIAbsoluteContribution = getSampleMeanContribution(
+    diAbsoluteContributions,
+  );
+  const meanDIContribution = divideImpacts(
+    meanDIAbsoluteContribution,
+    meanImpact,
+  );
+
+  const varDIAbsoluteContribution = getSampleContributionVariance(
+    diAbsoluteContributions,
+    meanDIAbsoluteContribution,
+  );
+  const stdDIContribution = powImpact(
+    divideImpacts(varDIAbsoluteContribution, varianceImpact),
+    1 / 2,
   );
 
   impactContributions.push({
@@ -320,12 +361,19 @@ function getImpactContributionStatistics(
     );
 
     // Calculate the mean of the relative contributions
-    const meanContribution = getSampleMeanContribution(contributions);
+    const meanAbsoluteContribution = getSampleMeanContribution(contributions);
+    const meanContribution = divideImpacts(
+      meanAbsoluteContribution,
+      meanImpact,
+    );
 
-    // Calculate the standard deviation of the relative contributions
-    const stdContributions = getSampleStdContribution(
+    const varAbsoluteContributions = getSampleContributionVariance(
       contributions,
-      meanContribution,
+      meanAbsoluteContribution,
+    );
+    const stdContributions = powImpact(
+      divideImpacts(varAbsoluteContributions, varianceImpact),
+      1 / 2,
     );
 
     const error95Contribution =
@@ -346,9 +394,41 @@ function getImpactContributionStatistics(
     });
   }
 
+  const firstOrderEffectCounts: Record<string, [RiskEvent, number]> = {};
+
+  for (const rootEvent of events) {
+    for (const firstOrderEffect of rootEvent.triggeredEvents) {
+      if (
+        !firstOrderEffectCounts[
+          `${firstOrderEffect.risk.id}__${firstOrderEffect.scenario}`
+        ]
+      ) {
+        firstOrderEffectCounts[
+          `${firstOrderEffect.risk.id}__${firstOrderEffect.scenario}`
+        ] = [firstOrderEffect, 0];
+      }
+      firstOrderEffectCounts[
+        `${firstOrderEffect.risk.id}__${firstOrderEffect.scenario}`
+      ][1] += 1;
+    }
+  }
+  const totalEffectCount = Object.values(firstOrderEffectCounts).reduce(
+    (a, b) => a + b[1],
+    0,
+  );
+
   return {
     relativeContributions: impactContributions,
-    effectProbabilities: [],
+    effectProbabilities: Object.values(firstOrderEffectCounts).map(
+      ([effect, count]) => ({
+        id: effect.risk.id,
+        risk: effect.risk.name,
+        scenario: effect.scenario,
+        probabilityMean: round(count / totalEffectCount, 4),
+        probabilityStd: 0,
+        probability95Error: 0,
+      }),
+    ),
   };
 }
 
@@ -366,15 +446,6 @@ export function normalPDF(x: number, mean: number, std: number): number {
   const e = Math.exp(-((x - mean) ** 2) / (2 * Math.pow(std, 2)));
 
   return e / m;
-}
-
-export function getMedianImpact(
-  impacts: AggregatedImpacts[],
-  indicator: keyof AggregatedImpacts,
-) {
-  const sorted = impacts.map((i) => i[indicator]).sort((a, b) => b - a);
-
-  return sorted[Math.round(sorted.length / 2)];
 }
 
 export function getImpactHistogram(
