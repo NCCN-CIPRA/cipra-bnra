@@ -143,7 +143,7 @@ const columns = (
       row.cr4de_quanti_results
         ? iScale7FromEuros(
             row.cr4de_quanti_results[row.cr4de_mrs || SCENARIOS.CONSIDERABLE]
-              ?.impactStatistics?.sampleMedian.all || 0,
+              ?.impactStatistics?.sampleMean.all || 0,
           )
         : rescaleTI(
             row.cr4de_quanti[row.cr4de_mrs || SCENARIOS.CONSIDERABLE].ti.all
@@ -166,7 +166,7 @@ const columns = (
           ) *
           iScale7FromEuros(
             row.cr4de_quanti_results[row.cr4de_mrs || SCENARIOS.CONSIDERABLE]
-              ?.impactStatistics?.sampleMedian.all || 0,
+              ?.impactStatistics?.sampleMean.all || 0,
           )
         : Math.round(
             (100 *
@@ -351,7 +351,7 @@ const columns = (
       row.cr4de_quanti_results
         ? iScale7FromEuros(
             row.cr4de_quanti_results[SCENARIOS.CONSIDERABLE]?.impactStatistics
-              ?.sampleMedian.all || 0,
+              ?.sampleMean.all || 0,
           )
         : rescaleTI(row.cr4de_quanti[SCENARIOS.CONSIDERABLE].ti.all.scaleTot),
     renderCell: renderProgress,
@@ -381,7 +381,7 @@ const columns = (
       row.cr4de_quanti_results
         ? iScale7FromEuros(
             row.cr4de_quanti_results[SCENARIOS.MAJOR]?.impactStatistics
-              ?.sampleMedian.all || 0,
+              ?.sampleMean.all || 0,
           )
         : rescaleTI(row.cr4de_quanti[SCENARIOS.MAJOR].ti.all.scaleTot),
     renderCell: renderProgress,
@@ -411,7 +411,7 @@ const columns = (
       row.cr4de_quanti_results
         ? iScale7FromEuros(
             row.cr4de_quanti_results[SCENARIOS.EXTREME]?.impactStatistics
-              ?.sampleMedian.all || 0,
+              ?.sampleMean.all || 0,
           )
         : rescaleTI(row.cr4de_quanti[SCENARIOS.EXTREME].ti.all.scaleTot),
     renderCell: renderProgress,
@@ -432,7 +432,7 @@ const columns = (
           ),
         ) *
           (row.cr4de_quanti_results[SCENARIOS.CONSIDERABLE]?.impactStatistics
-            ?.sampleMedian.all || 0),
+            ?.sampleMean.all || 0),
         undefined,
         100,
       );
@@ -444,7 +444,7 @@ const columns = (
           ),
         ) *
           (row.cr4de_quanti_results[SCENARIOS.MAJOR]?.impactStatistics
-            ?.sampleMedian.all || 0),
+            ?.sampleMean.all || 0),
         undefined,
         100,
       );
@@ -456,7 +456,7 @@ const columns = (
           ),
         ) *
           (row.cr4de_quanti_results[SCENARIOS.EXTREME]?.impactStatistics
-            ?.sampleMedian.all || 0),
+            ?.sampleMean.all || 0),
         undefined,
         100,
       );
@@ -517,7 +517,7 @@ const columns = (
           ),
         ) *
           (row.cr4de_quanti_results[SCENARIOS.CONSIDERABLE]?.impactStatistics
-            ?.sampleMedian.all || 0),
+            ?.sampleMean.all || 0),
         undefined,
         100,
       );
@@ -529,7 +529,7 @@ const columns = (
           ),
         ) *
           (row.cr4de_quanti_results[SCENARIOS.MAJOR]?.impactStatistics
-            ?.sampleMedian.all || 0),
+            ?.sampleMean.all || 0),
         undefined,
         100,
       );
@@ -541,7 +541,7 @@ const columns = (
           ),
         ) *
           (row.cr4de_quanti_results[SCENARIOS.EXTREME]?.impactStatistics
-            ?.sampleMedian.all || 0),
+            ?.sampleMean.all || 0),
         undefined,
         100,
       );
@@ -560,7 +560,7 @@ export default function AdvancedRiskCatalogue({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { indicators } = useOutletContext<BasePageContext>();
+  const { indicators, user } = useOutletContext<BasePageContext>();
 
   const parsedRiskFiles:
     | DVRiskSnapshot<
@@ -623,7 +623,7 @@ export default function AdvancedRiskCatalogue({
               ti_m: false,
               tp_e: false,
               ti_e: false,
-              mrs_new: false,
+              mrs_new: Boolean(user && user.roles.analist),
               tr_max: false,
             },
           },

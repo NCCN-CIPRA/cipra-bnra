@@ -1,92 +1,40 @@
 import { useCallback, useMemo, useState } from "react";
-import {
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-  LabelList,
-  Legend,
-  TooltipContentProps,
-} from "recharts";
-import {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
 import SaveIcon from "@mui/icons-material/Download";
-import { Typography, Stack, Box, IconButton } from "@mui/material";
+import { Stack, Box, IconButton } from "@mui/material";
 import { IMPACT_CATEGORY } from "../../functions/Impact";
+import { SCENARIOS, getScenarioSuffix } from "../../functions/scenarios";
 import {
-  SCENARIOS,
-  SCENARIO_PARAMS,
-  getScenarioSuffix,
-} from "../../functions/scenarios";
-import { RISK_CATEGORY } from "../../types/dataverse/DVRiskFile";
-import getCategoryColor from "../../functions/getCategoryColor";
-import { hexToRGB } from "../../functions/colors";
+  RISK_CATEGORY,
+  RiskFileQuantiResults,
+} from "../../types/dataverse/DVRiskFile";
 import { capFirst } from "../../functions/capFirst";
 import { useGenerateImage } from "recharts-to-png";
 import FileSaver from "file-saver";
-import { useTranslation } from "react-i18next";
 import { BasePageContext } from "../../pages/BasePage";
 import { useOutletContext } from "react-router-dom";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import {
+  pScale7FromReturnPeriodMonths,
+  returnPeriodMonthsFromYearlyEventRate,
+} from "../../functions/indicators/probability";
+import { iScale7FromEuros } from "../../functions/indicators/impact";
+import { AggregatedImpacts } from "../../types/simulation";
+import RiskMatrixChart from "./svg/RiskMatrixChart";
+import { Legend } from "recharts";
 
 interface MatrixRisk {
   riskId: string;
   id: string;
   title: string;
   fullTitle: string;
-  x: number;
-  y: number;
+  ti: number;
+  tp: number;
   tr: number;
   scenario: SCENARIOS;
   code: string;
   category: RISK_CATEGORY;
   mrs: boolean;
 }
-
-const CATEGORIES: Partial<{
-  [key in RISK_CATEGORY]: {
-    color: string;
-    shape:
-      | "circle"
-      | "cross"
-      | "diamond"
-      | "square"
-      | "star"
-      | "triangle"
-      | "wye";
-  };
-}> = {
-  Cyber: {
-    shape: "square",
-    color: getCategoryColor("Cyber"),
-  },
-  EcoTech: {
-    shape: "star",
-    color: getCategoryColor("EcoTech"),
-  },
-  Health: {
-    shape: "diamond",
-    color: getCategoryColor("Health"),
-  },
-  "Man-made": {
-    shape: "wye",
-    color: getCategoryColor("Man-made"),
-  },
-  Nature: {
-    shape: "triangle",
-    color: getCategoryColor("Nature"),
-  },
-  Transversal: {
-    shape: "circle",
-    color: getCategoryColor("Transversal"),
-  },
-};
 
 const ES_RISKS = [
   "C05",
@@ -119,14 +67,6 @@ const ES_RISKS = [
   "T16",
   "T17",
 ];
-
-const getScaleString = (value: number) => {
-  if (value <= 1) return "Very Low";
-  if (value <= 2) return "Low";
-  if (value <= 3) return "Medium";
-  if (value <= 4) return "High";
-  return "Very High";
-};
 
 const defaultFields = (c: DVRiskSnapshot) =>
   ({
@@ -165,7 +105,6 @@ export default function RiskMatrix({
   scenarioDisplay?: "colors" | "shapes" | "none";
 }) {
   const { user } = useOutletContext<BasePageContext>();
-  const { t } = useTranslation();
   const [dots, setDots] = useState<MatrixRisk[] | null>(null);
 
   // useCurrentPng usage (isLoading is optional)
@@ -189,58 +128,6 @@ export default function RiskMatrix({
     }
   }, [getDivJpeg]);
 
-  const CustomTooltip = ({
-    active,
-    payload,
-  }: TooltipContentProps<ValueType, NameType>) => {
-    if (active) {
-      return (
-        <Stack
-          sx={{
-            backgroundColor: "rgba(255,255,255,0.8)",
-            border: "1px solid #eee",
-            p: 1,
-          }}
-        >
-          <Typography variant="subtitle1">
-            {payload?.[0].payload.title}
-          </Typography>
-          <Typography variant="subtitle2">
-            {`Total Probability: ${
-              Math.round((payload?.[1].value as number) * 10) / 10
-            }`}{" "}
-            / 5
-          </Typography>
-          <Typography variant="subtitle2">
-            {`Total Impact: ${
-              Math.round((payload?.[0].value as number) * 10) / 10
-            }`}{" "}
-            / 5
-          </Typography>
-          <Typography variant="subtitle2">{`Total Risk: ${
-            Math.round((payload?.[0].payload.tr as number) * 10) / 10
-          }`}</Typography>
-        </Stack>
-      );
-    }
-
-    return null;
-  };
-
-  const getColor = (entry: MatrixRisk, opacity: number = 1) => {
-    if (scenarioDisplay === "colors") {
-      return hexToRGB(SCENARIO_PARAMS[entry.scenario].color, opacity);
-    }
-    if (categoryDisplay === "colors" || categoryDisplay === "both") {
-      return hexToRGB(
-        CATEGORIES[entry.category]?.color || `rgba(150,150,150,${opacity})`,
-        opacity
-      );
-    }
-
-    return `rgba(150,150,150,${opacity})`;
-  };
-
   useMemo(() => {
     if (!riskFiles) return;
 
@@ -252,8 +139,25 @@ export default function RiskMatrix({
         [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].forEach(
           (s) => {
             const i = impact.toLowerCase() as "all" | "h" | "s" | "e" | "f";
-            const tp = rf.cr4de_quanti[s].tp.yearly.scale;
-            const ti = rf.cr4de_quanti[s].ti[i].scaleTot;
+            const results = rf.cr4de_quanti_results as
+              | RiskFileQuantiResults
+              | null
+              | undefined;
+
+            const tp = results
+              ? pScale7FromReturnPeriodMonths(
+                  returnPeriodMonthsFromYearlyEventRate(
+                    results[s].probabilityStatistics?.sampleMean || 0,
+                  ),
+                )
+              : rf.cr4de_quanti[s].tp.yearly.scale;
+            const ti = results
+              ? iScale7FromEuros(
+                  results[s].impactStatistics?.sampleMean[
+                    impact.toLocaleLowerCase() as keyof AggregatedImpacts
+                  ] || 0,
+                )
+              : rf.cr4de_quanti[s].ti[i].scaleTot;
 
             if (tp !== null && ti !== null) {
               tmp.push({
@@ -267,30 +171,83 @@ export default function RiskMatrix({
                 mrs: rf.cr4de_mrs === s,
               } as MatrixRisk);
             }
-          }
+          },
         );
 
         return tmp;
-      }, [] as MatrixRisk[]);
+      }, [] as MatrixRisk[])
+      .filter((rf) => {
+        if (scenario === "All") return true;
+        if (scenario === "MRS") return rf.mrs;
+        return rf.scenario === scenario;
+      })
+      .filter((rf) => {
+        if (category === "All") return true;
+        return rf.category === category;
+      })
+      .filter((rf) => {
+        if (onlyES) return ES_RISKS.indexOf(rf.code) >= 0;
+        return true;
+      });
 
     allDots.sort((a, b) => (a.id > b.id ? -1 : 1));
 
     setDots(allDots);
-  }, [riskFiles, impact]);
-
-  const categoryLegend = categoryDisplay !== "none" && category === "All";
-  const scenarioLegend = scenarioDisplay === "colors";
-
-  const legendMargin =
-    0 + (categoryLegend ? 60 : 0) + (scenarioLegend ? 30 : 0);
+  }, [riskFiles, impact, scenario, category, onlyES]);
 
   return (
     <Stack
       direction="row"
       sx={{ width: "100%", height: "100%", position: "relative" }}
     >
-      <Box ref={ref} sx={{ flex: 1, height: "100%", p: 2 }}>
-        <ResponsiveContainer width="100%">
+      <Box ref={ref} sx={{ flex: 1, height: "100%", p: 2, mb: 2 }}>
+        <RiskMatrixChart
+          data={
+            dots
+              ? dots
+                  // .filter((o) => {
+                  //   // return o.category === RISK_CATEGORY.CYBER;
+                  //   return true;
+                  // })
+                  // .filter(
+                  //   (r) =>
+                  //     ["M01", "M02", "M03", "M04", "M05"].indexOf(
+                  //       r.hazardId
+                  //     ) >= 0
+                  // )
+                  .map((r) => ({
+                    id: r.id,
+                    node: r,
+                    hazardId: r.code,
+                    name: r.fullTitle,
+                    scenario: r.scenario,
+                    category: r.category,
+                    totalImpact: r.ti,
+                    totalProbability: r.tp,
+                    expectedImpact: 0,
+                  }))
+              : // .filter((r) => {
+                //   console.log(r);
+                //   console.log(
+                //     returnPeriodMonthsFromPTimeframe(
+                //       r.node.probabilityStatistics.sampleMean,
+                //       12
+                //     )
+                //   );
+                //   return true;
+                // })
+                // .filter((r) => r.expectedImpact > 4)
+                undefined
+          }
+          categoryDisplay={categoryDisplay}
+          labelSize={labelSize || undefined}
+          labels={labels}
+          scenarioDisplay={scenarioDisplay}
+          selectedNodeId={selectedNodeId}
+          setSelectedNodeId={setSelectedNodeId}
+          height={"100%"}
+        />
+        {/* <ResponsiveContainer width="100%">
           <ScatterChart
             margin={{
               top: 20,
@@ -315,10 +272,10 @@ export default function RiskMatrix({
               name="probability"
               unit=""
               scale="linear"
-              domain={[0, 5.5]}
+              domain={[0, maxScale + 1.5]}
               // tickCount={5}
-              tickFormatter={(s) => t(getScaleString(s))}
-              ticks={[1, 2, 3, 4, 5]}
+              // tickFormatter={(s) => t(getScaleString(s))}
+              ticks={new Array(maxScale + 2).fill(null).map((_, i) => i)}
               label={{
                 offset: -45,
                 // value: scales === "classes" ? "Probability" : "Yearly Probability",
@@ -331,12 +288,12 @@ export default function RiskMatrix({
               type="number"
               dataKey="ti"
               name="impact"
-              domain={[0, 5.5]}
+              domain={[0, maxScale + 1.5]}
               // tickCount={6}
               // tickFormatter={(s, n) => `TI${n}`}
               // ticks={[160000000, 800000000, 4000000000, 20000000000, 100000000000, 500000000000]}
-              tickFormatter={(s) => t(getScaleString(s))}
-              ticks={[1, 2, 3, 4, 5]}
+              // tickFormatter={(s) => t(getScaleString(s))}
+              ticks={new Array(maxScale + 2).fill(null).map((_, i) => i)}
               label={{
                 // value: scales === "classes" ? "Impact" : "Impact of an event",
                 value: "Impact",
@@ -445,7 +402,7 @@ export default function RiskMatrix({
               );
             })}
           </ScatterChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer> */}
         <Box sx={{ position: "absolute", bottom: 0, width: "100%" }}>
           <Box className="custom-legend-wrapper" sx={{ flex: 1, height: 60 }}>
             <Legend

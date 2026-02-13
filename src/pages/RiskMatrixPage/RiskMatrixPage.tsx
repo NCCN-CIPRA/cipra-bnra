@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import {
   Box,
   Card,
@@ -20,17 +20,23 @@ import RiskMatrix from "../../components/charts/RiskMatrix";
 import { SCENARIOS } from "../../functions/scenarios";
 import {
   CATEGORY_NAMES,
+  parseRiskFileQuantiResults,
   RISK_CATEGORY,
+  SerializedRiskFileQuantiResults,
 } from "../../types/dataverse/DVRiskFile";
 import { IMPACT_CATEGORY } from "../../functions/Impact";
 import { useQuery } from "@tanstack/react-query";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import { parseRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import { snapshotFromRiskfile } from "../../functions/snapshot";
+import { BasePageContext } from "../BasePage";
+import { Environment } from "../../types/global";
 
 export default function RiskMatrixPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const api = useAPI();
+  const { environment } = useOutletContext<BasePageContext>();
 
   const [scenario, setScenario] = useState<"All" | "MRS" | SCENARIOS>("MRS");
   const [category, setCategory] = useState<"All" | RISK_CATEGORY>("All");
@@ -47,7 +53,7 @@ export default function RiskMatrixPage() {
     "colors" | "shapes" | "none"
   >("colors");
 
-  const { data: riskSnapshots } = useQuery({
+  const { data: publicRiskSnapshots } = useQuery({
     queryKey: [DataTable.RISK_SNAPSHOT],
     queryFn: () => api.getRiskSnapshots(),
     select: (data) =>
@@ -56,11 +62,32 @@ export default function RiskMatrixPage() {
         .map((rf) => parseRiskSnapshot(rf)),
   });
 
+  const { data: riskFiles } = useQuery({
+    queryKey: [DataTable.RISK_FILE],
+    queryFn: () => api.getRiskFiles(),
+    enabled: environment === Environment.DYNAMIC,
+    select: (data) =>
+      data
+        .filter((rf) => !rf.cr4de_hazard_id.startsWith("X"))
+        .map((rf) => {
+          const rs = parseRiskSnapshot(snapshotFromRiskfile(rf));
+          return {
+            ...rs,
+            cr4de_quanti_results: parseRiskFileQuantiResults(
+              rf.cr4de_quanti_results as SerializedRiskFileQuantiResults,
+            ),
+          };
+        }),
+  });
+
   usePageTitle(t("sideDrawer.riskMatrix", "Risk Matrix"));
   useBreadcrumbs([
     { name: t("bnra.shortName"), url: "/" },
     { name: t("sideDrawer.riskMatrix", "Risk Matrix"), url: "" },
   ]);
+
+  const riskSnapshots =
+    environment === Environment.DYNAMIC ? riskFiles : publicRiskSnapshots;
 
   return (
     <Card sx={{ my: 4, mx: 9 }}>
@@ -71,10 +98,10 @@ export default function RiskMatrixPage() {
           sx={{
             flex: 1,
             aspectRatio: "1",
-            maxHeight: "calc(100vh - 220px)",
+            maxHeight: "calc(100vh - 240px)",
             my: 4,
             pl: 2,
-            mt: -4,
+            mt: -1,
             pr: 2,
           }}
         >
@@ -136,37 +163,37 @@ export default function RiskMatrixPage() {
                   <MenuItem value={RISK_CATEGORY.CYBER}>
                     {t(
                       RISK_CATEGORY.CYBER,
-                      CATEGORY_NAMES[RISK_CATEGORY.CYBER] as string
+                      CATEGORY_NAMES[RISK_CATEGORY.CYBER] as string,
                     )}
                   </MenuItem>
                   <MenuItem value={RISK_CATEGORY.ECOTECH}>
                     {t(
                       RISK_CATEGORY.ECOTECH,
-                      CATEGORY_NAMES[RISK_CATEGORY.ECOTECH] as string
+                      CATEGORY_NAMES[RISK_CATEGORY.ECOTECH] as string,
                     )}
                   </MenuItem>
                   <MenuItem value={RISK_CATEGORY.HEALTH}>
                     {t(
                       RISK_CATEGORY.HEALTH,
-                      CATEGORY_NAMES[RISK_CATEGORY.HEALTH] as string
+                      CATEGORY_NAMES[RISK_CATEGORY.HEALTH] as string,
                     )}
                   </MenuItem>
                   <MenuItem value={RISK_CATEGORY.MANMADE}>
                     {t(
                       RISK_CATEGORY.MANMADE,
-                      CATEGORY_NAMES[RISK_CATEGORY.MANMADE] as string
+                      CATEGORY_NAMES[RISK_CATEGORY.MANMADE] as string,
                     )}
                   </MenuItem>
                   <MenuItem value={RISK_CATEGORY.NATURE}>
                     {t(
                       RISK_CATEGORY.NATURE,
-                      CATEGORY_NAMES[RISK_CATEGORY.NATURE] as string
+                      CATEGORY_NAMES[RISK_CATEGORY.NATURE] as string,
                     )}
                   </MenuItem>
                   <MenuItem value={RISK_CATEGORY.TRANSVERSAL}>
                     {t(
                       RISK_CATEGORY.TRANSVERSAL,
-                      CATEGORY_NAMES[RISK_CATEGORY.TRANSVERSAL] as string
+                      CATEGORY_NAMES[RISK_CATEGORY.TRANSVERSAL] as string,
                     )}
                   </MenuItem>
                 </Select>
@@ -199,7 +226,7 @@ export default function RiskMatrixPage() {
                 }
                 label={t(
                   "riskMatrix.executive_summary",
-                  "Show only executive summary"
+                  "Show only executive summary",
                 )}
               />
               <FormControlLabel
@@ -220,7 +247,7 @@ export default function RiskMatrixPage() {
                   label={t("riskMatrix.categories", "Categories display")}
                   onChange={(e) =>
                     setCategoryDisplay(
-                      e.target.value as "shapes" | "colors" | "both" | "none"
+                      e.target.value as "shapes" | "colors" | "both" | "none",
                     )
                   }
                 >
@@ -247,7 +274,7 @@ export default function RiskMatrixPage() {
                   label={t("riskMatrix.scenarios", "Scenarios display")}
                   onChange={(e) =>
                     setScenarioDisplay(
-                      e.target.value as "none" | "shapes" | "colors"
+                      e.target.value as "none" | "shapes" | "colors",
                     )
                   }
                 >

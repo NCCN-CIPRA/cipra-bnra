@@ -173,6 +173,8 @@ export default function RiskMatrixChart({
   setSelectedNodeId = () => {},
   labels = true,
   labelSize = 12,
+  maxScale = 7,
+  height = 1000,
   categoryDisplay = "shapes",
   scenarioDisplay = "colors",
 }: {
@@ -181,6 +183,8 @@ export default function RiskMatrixChart({
   setSelectedNodeId?: (id: string | null, scenario: Scenario | null) => void;
   labels?: boolean;
   labelSize?: number;
+  maxScale?: number;
+  height?: number | string;
   categoryDisplay?: "shapes" | "colors" | "both" | "none";
   scenarioDisplay?: "colors" | "shapes" | "none";
 }) {
@@ -202,7 +206,7 @@ export default function RiskMatrixChart({
   };
 
   return (
-    <ResponsiveContainer width={"100%"} height={1000}>
+    <ResponsiveContainer width={"100%"} height={height}>
       <ScatterChart>
         <defs>
           <linearGradient id="colorUv" x1="100%" y1="0%" x2="0%" y2="100%">
@@ -230,13 +234,15 @@ export default function RiskMatrixChart({
           name="probability"
           unit=""
           scale="linear"
-          domain={[0, 8]}
+          domain={[0, maxScale + 1.5]}
+          ticks={new Array(maxScale + 2).fill(null).map((_, i) => i)}
         />
         <XAxis
           type="number"
           dataKey="totalImpact"
           name="impact"
-          domain={[0, 8]}
+          domain={[0, maxScale + 1.5]}
+          ticks={new Array(maxScale + 2).fill(null).map((_, i) => i)}
         />
         <Tooltip
           shared={false}

@@ -66,18 +66,10 @@ export default function ImpactBarChart({
       : riskFile.cr4de_quanti[scenario].ti.f.scaleCat;
 
   if (results) {
-    H = iScale7FromEuros(
-      results[scenario].impactStatistics?.sampleMedian.h || 0,
-    );
-    S = iScale7FromEuros(
-      results[scenario].impactStatistics?.sampleMedian.s || 0,
-    );
-    E = iScale7FromEuros(
-      results[scenario].impactStatistics?.sampleMedian.e || 0,
-    );
-    F = iScale7FromEuros(
-      results[scenario].impactStatistics?.sampleMedian.f || 0,
-    );
+    H = iScale7FromEuros(results[scenario].impactStatistics?.sampleMean.h || 0);
+    S = iScale7FromEuros(results[scenario].impactStatistics?.sampleMean.s || 0);
+    E = iScale7FromEuros(results[scenario].impactStatistics?.sampleMean.e || 0);
+    F = iScale7FromEuros(results[scenario].impactStatistics?.sampleMean.f || 0);
   }
 
   const data = [
@@ -85,7 +77,7 @@ export default function ImpactBarChart({
       name: "Ha",
       value: results
         ? iScale7FromEuros(
-            results[scenario].impactStatistics?.sampleMedian.ha || 0,
+            results[scenario].impactStatistics?.sampleMean.ha || 0,
           )
         : riskFile.cr4de_quanti[scenario].ti.ha.scaleCatRel * H,
       fill: ImpactColor.Ha,
@@ -99,7 +91,7 @@ export default function ImpactBarChart({
       label: "Human",
       value: results
         ? iScale7FromEuros(
-            results[scenario].impactStatistics?.sampleMedian.hb || 0,
+            results[scenario].impactStatistics?.sampleMean.hb || 0,
           )
         : riskFile.cr4de_quanti[scenario].ti.hb.scaleCatRel * H,
       fill: ImpactColor.Hb,
@@ -112,7 +104,7 @@ export default function ImpactBarChart({
       name: "Hc",
       value: results
         ? iScale7FromEuros(
-            results[scenario].impactStatistics?.sampleMedian.hc || 0,
+            results[scenario].impactStatistics?.sampleMean.hc || 0,
           )
         : riskFile.cr4de_quanti[scenario].ti.hc.scaleCatRel * H,
       fill: ImpactColor.Hc,
@@ -129,7 +121,7 @@ export default function ImpactBarChart({
       name: "Sa",
       value: results
         ? iScale7FromEuros(
-            results[scenario].impactStatistics?.sampleMedian.sa || 0,
+            results[scenario].impactStatistics?.sampleMean.sa || 0,
           )
         : riskFile.cr4de_quanti[scenario].ti.sa.scaleCatRel * S,
       fill: ImpactColor.Sa,
@@ -144,7 +136,7 @@ export default function ImpactBarChart({
       tickOffset: 0.5,
       value: results
         ? iScale7FromEuros(
-            results[scenario].impactStatistics?.sampleMedian.sb || 0,
+            results[scenario].impactStatistics?.sampleMean.sb || 0,
           )
         : riskFile.cr4de_quanti[scenario].ti.sb.scaleCatRel * S,
       fill: ImpactColor.Sb,
@@ -157,7 +149,7 @@ export default function ImpactBarChart({
       name: "Sc",
       value: results
         ? iScale7FromEuros(
-            results[scenario].impactStatistics?.sampleMedian.sc || 0,
+            results[scenario].impactStatistics?.sampleMean.sc || 0,
           )
         : riskFile.cr4de_quanti[scenario].ti.sc.scaleCatRel * S,
       fill: ImpactColor.Sc,
@@ -170,7 +162,7 @@ export default function ImpactBarChart({
       name: "Sd",
       value: results
         ? iScale7FromEuros(
-            results[scenario].impactStatistics?.sampleMedian.sd || 0,
+            results[scenario].impactStatistics?.sampleMean.sd || 0,
           )
         : riskFile.cr4de_quanti[scenario].ti.sd.scaleCatRel * S,
       fill: ImpactColor.Sd,
@@ -188,7 +180,7 @@ export default function ImpactBarChart({
       label: "Environmental",
       value: results
         ? iScale7FromEuros(
-            results[scenario].impactStatistics?.sampleMedian.ea || 0,
+            results[scenario].impactStatistics?.sampleMean.ea || 0,
           )
         : riskFile.cr4de_quanti[scenario].ti.ea.scaleCatRel * E,
       fill: ImpactColor.Ea,
@@ -206,7 +198,7 @@ export default function ImpactBarChart({
       label: "Financial",
       value: results
         ? iScale7FromEuros(
-            results[scenario].impactStatistics?.sampleMedian.fa || 0,
+            results[scenario].impactStatistics?.sampleMean.fa || 0,
           )
         : riskFile.cr4de_quanti[scenario].ti.fa.scaleCatRel * F,
       fill: ImpactColor.Fa,
@@ -219,7 +211,7 @@ export default function ImpactBarChart({
       name: "Fb",
       value: results
         ? iScale7FromEuros(
-            results[scenario].impactStatistics?.sampleMedian.fb || 0,
+            results[scenario].impactStatistics?.sampleMean.fb || 0,
           )
         : riskFile.cr4de_quanti[scenario].ti.fb.scaleCatRel * F,
       fill: ImpactColor.Fb,

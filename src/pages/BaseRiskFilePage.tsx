@@ -148,8 +148,8 @@ export default function BaseRiskFilePage() {
               ?.sampleMean || 0,
           ),
         ) *
-          (results[SCENARIOS.CONSIDERABLE]?.impactStatistics?.sampleMedian
-            .all || 0),
+          (results[SCENARIOS.CONSIDERABLE]?.impactStatistics?.sampleMean.all ||
+            0),
         undefined,
         100,
       );
@@ -158,7 +158,7 @@ export default function BaseRiskFilePage() {
           returnPeriodMonthsFromYearlyEventRate(
             results[SCENARIOS.MAJOR]?.probabilityStatistics?.sampleMean || 0,
           ),
-        ) * (results[SCENARIOS.MAJOR]?.impactStatistics?.sampleMedian.all || 0),
+        ) * (results[SCENARIOS.MAJOR]?.impactStatistics?.sampleMean.all || 0),
         undefined,
         100,
       );
@@ -167,8 +167,7 @@ export default function BaseRiskFilePage() {
           returnPeriodMonthsFromYearlyEventRate(
             results[SCENARIOS.EXTREME]?.probabilityStatistics?.sampleMean || 0,
           ),
-        ) *
-          (results[SCENARIOS.EXTREME]?.impactStatistics?.sampleMedian.all || 0),
+        ) * (results[SCENARIOS.EXTREME]?.impactStatistics?.sampleMean.all || 0),
         undefined,
         100,
       );
@@ -201,8 +200,8 @@ export default function BaseRiskFilePage() {
               ?.sampleMean || 0,
           ),
         ) *
-          (results[SCENARIOS.CONSIDERABLE]?.impactStatistics?.sampleMedian
-            .all || 0),
+          (results[SCENARIOS.CONSIDERABLE]?.impactStatistics?.sampleMean.all ||
+            0),
         undefined,
         100,
       );
@@ -211,7 +210,7 @@ export default function BaseRiskFilePage() {
           returnPeriodMonthsFromYearlyEventRate(
             results[SCENARIOS.MAJOR]?.probabilityStatistics?.sampleMean || 0,
           ),
-        ) * (results[SCENARIOS.MAJOR]?.impactStatistics?.sampleMedian.all || 0),
+        ) * (results[SCENARIOS.MAJOR]?.impactStatistics?.sampleMean.all || 0),
         undefined,
         100,
       );
@@ -220,8 +219,7 @@ export default function BaseRiskFilePage() {
           returnPeriodMonthsFromYearlyEventRate(
             results[SCENARIOS.EXTREME]?.probabilityStatistics?.sampleMean || 0,
           ),
-        ) *
-          (results[SCENARIOS.EXTREME]?.impactStatistics?.sampleMedian.all || 0),
+        ) * (results[SCENARIOS.EXTREME]?.impactStatistics?.sampleMean.all || 0),
         undefined,
         100,
       );
@@ -330,19 +328,13 @@ export default function BaseRiskFilePage() {
               }
             />
           )}
-          {user &&
-            (user.roles.analist ||
-              (user.roles.expert &&
-                user.participations &&
-                user.participations.find(
-                  (p) => p._cr4de_risk_file_value === params.risk_file_id,
-                ))) && (
-              <BottomNavigationAction
-                label={t("risk.bottombar.rawData", "Raw Data")}
-                icon={<PsychologyIcon />}
-                onClick={() => navigate(`/risks/${params.risk_file_id}/data`)}
-              />
-            )}
+          {user && user.roles.beReader && (
+            <BottomNavigationAction
+              label={t("risk.bottombar.rawData", "Raw Data")}
+              icon={<PsychologyIcon />}
+              onClick={() => navigate(`/risks/${params.risk_file_id}/data`)}
+            />
+          )}
           {user && user.roles.analist && (
             <BottomNavigationAction
               label={t("risk.bottombar.expertInput", "Expert Input")}

@@ -169,7 +169,7 @@ export default function ImpactSankey({
             totalI: acc.totalI + e.effect_risk_i,
           };
         },
-        { effects: [] as EffectRisksSummary[], totalI: 0 },
+        { effects: [] as SankeyEffect[], totalI: 0 },
       ).effects;
   }
 
@@ -207,10 +207,16 @@ export default function ImpactSankey({
           totalI={
             results
               ? iScale7FromEuros(
-                  results[scenario].impactStatistics?.sampleMedian[impactKey] ||
+                  results[scenario].impactStatistics?.sampleMean[impactKey] ||
                     0,
                 )
               : riskSnapshot.cr4de_quanti[scenario].ti.all.scaleTot
+          }
+          percentI={
+            results && focusedImpact
+              ? (results[scenario].impactStatistics?.sampleMean[impactKey] ||
+                  0) / (results[scenario].impactStatistics?.sampleMean.all || 1)
+              : undefined
           }
           fontSize={14}
           focusedImpact={focusedImpact}
@@ -239,6 +245,7 @@ function ISankeyNode({
   height,
   totalEffects,
   totalI,
+  percentI,
   fontSize,
   focusedImpact,
   onNavigate,
@@ -246,6 +253,7 @@ function ISankeyNode({
   payload: EffectSankeyNode;
   totalEffects: number;
   totalI: number;
+  percentI?: number;
   fontSize: number;
   focusedImpact?: IMPACT_CATEGORY | DAMAGE_INDICATOR | null;
   onNavigate?: (riskId: string) => void;
@@ -284,6 +292,20 @@ function ISankeyNode({
           } Impact:`}
           <tspan dx={12}>{round(totalI, 2)}</tspan>
         </text>
+        {percentI !== undefined && (
+          <text
+            textAnchor="middle"
+            x={-y - (totalEffects <= 2 ? 490 : height) / 2 - 18}
+            y={x + 50}
+            fontSize={fontSize - 3 || "16"}
+            stroke="#333"
+            transform="rotate(270)"
+            fontWeight={100}
+          >
+            {`( ${Math.round(1000 * percentI) / 10}% of the total impact`}
+            {" )"}
+          </text>
+        )}
       </Layer>
     );
   } else {

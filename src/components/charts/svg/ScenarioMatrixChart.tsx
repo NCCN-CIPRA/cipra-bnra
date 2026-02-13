@@ -82,12 +82,12 @@ export default function ScenarioMatrixChart({
         x:
           maxScale === 7
             ? iScale7FromEuros(
-                results[s]?.impactStatistics?.sampleMedian.all || 0,
+                results[s]?.impactStatistics?.sampleMean.all || 0,
                 undefined,
                 100,
               )
             : tiScale5FromEuros(
-                results[s]?.impactStatistics?.sampleMedian.all || 0,
+                results[s]?.impactStatistics?.sampleMean.all || 0,
                 undefined,
               ),
         y:

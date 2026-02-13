@@ -126,7 +126,9 @@ export type BoxPlotData = {
 
 export type TotalImpactStatistics = {
   sampleMedian: AggregatedImpacts;
+  sampleMean: AggregatedImpacts;
   sampleStd: AggregatedImpacts;
+  sampleMeanStd: AggregatedImpacts;
   relativeContributions: ImpactContributionStatistics[];
   effectProbabilities: EffectStatistics[];
   histogram: HistogramBinData[];

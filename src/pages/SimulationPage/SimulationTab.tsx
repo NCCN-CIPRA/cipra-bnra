@@ -286,7 +286,7 @@ export default function SimulationTab() {
           Math.round(
             100 *
               iScale7FromEuros(
-                risk.impactStatistics.sampleMedian.all,
+                risk.impactStatistics.sampleMean.all,
                 undefined,
                 100,
               ),
@@ -299,7 +299,7 @@ export default function SimulationTab() {
                   returnPeriodMonthsFromYearlyEventRate(
                     risk.probabilityStatistics.sampleMean,
                   ),
-                ) * risk.impactStatistics.sampleMedian.all,
+                ) * risk.impactStatistics.sampleMean.all,
                 undefined,
                 100,
               ),
@@ -322,7 +322,7 @@ export default function SimulationTab() {
           Math.round(
             100 *
               (iScale7FromEuros(
-                risk.impactStatistics.sampleMedian.all,
+                risk.impactStatistics.sampleMean.all,
                 undefined,
                 100,
               ) -
@@ -398,7 +398,7 @@ export default function SimulationTab() {
                 rf.probabilityStatistics.sampleMean,
               ),
             ) *
-              rf.impactStatistics.sampleMedian.all *
+              rf.impactStatistics.sampleMean.all *
               cc.contributionMean) /
               css.cr4de_quanti_cp[rf.scenario][cc.scenario].scale7,
           ),
@@ -420,15 +420,13 @@ export default function SimulationTab() {
             1000 *
               normalPDF(
                 i / 10,
-                iScale7FromEuros(
-                  showRiskFile.impactStatistics.sampleMedian.all,
-                ),
+                iScale7FromEuros(showRiskFile.impactStatistics.sampleMean.all),
                 Math.sqrt(
                   Math.log(
                     1 +
                       Math.pow(showRiskFile.impactStatistics.sampleStd.all, 2) /
                         Math.pow(
-                          showRiskFile.impactStatistics.sampleMedian.all,
+                          showRiskFile.impactStatistics.sampleMean.all,
                           2,
                         ),
                   ),
@@ -712,7 +710,7 @@ export default function SimulationTab() {
                         scenario: r.scenario,
                         category: r.category,
                         totalImpact: iScale7FromEuros(
-                          r.impactStatistics.sampleMedian.all,
+                          r.impactStatistics.sampleMean.all,
                           undefined,
                           100,
                         ),
@@ -723,7 +721,7 @@ export default function SimulationTab() {
                           100,
                         ),
                         expectedImpact: iScale7FromEuros(
-                          r.impactStatistics.sampleMedian.all *
+                          r.impactStatistics.sampleMean.all *
                             pTimeframeFromReturnPeriodMonths(
                               returnPeriodMonthsFromYearlyEventRate(
                                 r.probabilityStatistics.sampleMean,
