@@ -51,23 +51,9 @@ any) => {
         >
           {`${t("Preferred Malicious Actions")}:  ${round(
             totalProbability,
-            2
+            2,
           )} / 5`}
         </text>
-        {/* <text
-          textAnchor="middle"
-          x={-y - height / 2 - 18}
-          y={x - 15}
-          fontSize="16"
-          stroke="#333"
-          transform="rotate(270)"
-        >
-          Total Probability:{" "}
-          {`${round(100 * getYearlyProbability(totalProbability))}% / year (${round(
-            100 * totalProbability,
-            3
-          )}% / day)`}
-        </text> */}
       </Layer>
     );
   } else {

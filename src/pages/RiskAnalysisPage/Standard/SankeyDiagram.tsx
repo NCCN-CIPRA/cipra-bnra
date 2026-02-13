@@ -147,7 +147,7 @@ export default function SankeyDiagram({
       </Stack>
       <Box
         className="sankey-impact"
-        sx={{ width: "calc(50% - 150px)", height: 600, mb: 8, zIndex: -1 }}
+        sx={{ width: "calc(50% - 150px)", height: 600, mb: 8 }}
       >
         <ImpactSankeyBox
           riskSummary={riskSummary}

@@ -695,13 +695,7 @@ export default function SimulationTab() {
                 output
                   ? output
                       // .filter((o) => {
-                      //   if (selectedRF) {
-                      //     if (o.id !== selectedRF.cr4de_riskfilesid)
-                      //       return false;
-                      //   }
-                      //   if (selectedScenario) {
-                      //     if (o.scenario !== selectedScenario) return false;
-                      //   }
+                      //   // return o.category === RISK_CATEGORY.CYBER;
                       //   return true;
                       // })
                       // .filter(

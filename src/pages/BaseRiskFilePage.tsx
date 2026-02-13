@@ -48,6 +48,12 @@ import {
 } from "../functions/snapshot";
 import DifferenceIcon from "@mui/icons-material/Difference";
 import { SerializedRiskQualis } from "../types/dataverse/Riskfile";
+import { iScale7FromEuros } from "../functions/indicators/impact";
+import {
+  pDailyFromReturnPeriodMonths,
+  returnPeriodMonthsFromYearlyEventRate,
+} from "../functions/indicators/probability";
+import { SCENARIOS } from "../functions/scenarios";
 
 type RouteParams = {
   risk_file_id: string;
@@ -130,7 +136,49 @@ export default function BaseRiskFilePage() {
 
     if (!riskFile) return null;
 
-    return summaryFromRiskfileNew(riskFile);
+    const parsed = summaryFromRiskfileNew(riskFile);
+
+    if (riskFile.cr4de_quanti_results) {
+      const results = riskFile.cr4de_quanti_results as RiskFileQuantiResults;
+
+      const c = iScale7FromEuros(
+        pDailyFromReturnPeriodMonths(
+          returnPeriodMonthsFromYearlyEventRate(
+            results[SCENARIOS.CONSIDERABLE]?.probabilityStatistics
+              ?.sampleMean || 0,
+          ),
+        ) *
+          (results[SCENARIOS.CONSIDERABLE]?.impactStatistics?.sampleMedian
+            .all || 0),
+        undefined,
+        100,
+      );
+      const m = iScale7FromEuros(
+        pDailyFromReturnPeriodMonths(
+          returnPeriodMonthsFromYearlyEventRate(
+            results[SCENARIOS.MAJOR]?.probabilityStatistics?.sampleMean || 0,
+          ),
+        ) * (results[SCENARIOS.MAJOR]?.impactStatistics?.sampleMedian.all || 0),
+        undefined,
+        100,
+      );
+      const e = iScale7FromEuros(
+        pDailyFromReturnPeriodMonths(
+          returnPeriodMonthsFromYearlyEventRate(
+            results[SCENARIOS.EXTREME]?.probabilityStatistics?.sampleMean || 0,
+          ),
+        ) *
+          (results[SCENARIOS.EXTREME]?.impactStatistics?.sampleMedian.all || 0),
+        undefined,
+        100,
+      );
+
+      if (e > c && e > m) parsed.cr4de_mrs = SCENARIOS.EXTREME;
+      else if (m > c) parsed.cr4de_mrs = SCENARIOS.MAJOR;
+      else parsed.cr4de_mrs = SCENARIOS.CONSIDERABLE;
+    }
+
+    return parsed;
   }, [publicRiskSummary, riskFile, environment]);
 
   const riskSnapshot = useMemo(() => {
@@ -141,7 +189,49 @@ export default function BaseRiskFilePage() {
 
     if (!riskFile) return null;
 
-    return parseRiskSnapshot(snapshotFromRiskfile(riskFile));
+    const parsed = parseRiskSnapshot(snapshotFromRiskfile(riskFile));
+
+    if (parsed.cr4de_quanti_results) {
+      const results = parsed.cr4de_quanti_results as RiskFileQuantiResults;
+
+      const c = iScale7FromEuros(
+        pDailyFromReturnPeriodMonths(
+          returnPeriodMonthsFromYearlyEventRate(
+            results[SCENARIOS.CONSIDERABLE]?.probabilityStatistics
+              ?.sampleMean || 0,
+          ),
+        ) *
+          (results[SCENARIOS.CONSIDERABLE]?.impactStatistics?.sampleMedian
+            .all || 0),
+        undefined,
+        100,
+      );
+      const m = iScale7FromEuros(
+        pDailyFromReturnPeriodMonths(
+          returnPeriodMonthsFromYearlyEventRate(
+            results[SCENARIOS.MAJOR]?.probabilityStatistics?.sampleMean || 0,
+          ),
+        ) * (results[SCENARIOS.MAJOR]?.impactStatistics?.sampleMedian.all || 0),
+        undefined,
+        100,
+      );
+      const e = iScale7FromEuros(
+        pDailyFromReturnPeriodMonths(
+          returnPeriodMonthsFromYearlyEventRate(
+            results[SCENARIOS.EXTREME]?.probabilityStatistics?.sampleMean || 0,
+          ),
+        ) *
+          (results[SCENARIOS.EXTREME]?.impactStatistics?.sampleMedian.all || 0),
+        undefined,
+        100,
+      );
+
+      if (e > c && e > m) parsed.cr4de_mrs = SCENARIOS.EXTREME;
+      else if (m > c) parsed.cr4de_mrs = SCENARIOS.MAJOR;
+      else parsed.cr4de_mrs = SCENARIOS.CONSIDERABLE;
+    }
+
+    return parsed;
   }, [publicRiskSnapshot, riskFile, environment]);
 
   const isEmerging = riskSummary?.cr4de_risk_type === RISK_TYPE.EMERGING;

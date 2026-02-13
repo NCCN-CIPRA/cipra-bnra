@@ -22,6 +22,10 @@ import {
   DVRiskSummary,
 } from "../../types/dataverse/DVRiskSummary";
 import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
+import {
+  pScale7FromReturnPeriodMonths,
+  returnPeriodMonthsFromYearlyEventRate,
+} from "../../functions/indicators/probability";
 
 export type ActionSankeyNode = {
   name: string;
@@ -70,6 +74,15 @@ export function ActionsSankeyBox({
           riskSnapshot={riskSnapshot}
           scenario={scenario}
           results={results}
+          totalProbability={
+            results
+              ? pScale7FromReturnPeriodMonths(
+                  returnPeriodMonthsFromYearlyEventRate(
+                    results[scenario].probabilityStatistics?.sampleMean || 0,
+                  ),
+                )
+              : riskSnapshot.cr4de_quanti[scenario].tp.yearly.scale
+          }
           tooltip={true}
           onClick={onClick}
         />
@@ -83,6 +96,7 @@ export default function ActionsSankey({
   riskSnapshot,
   scenario,
   results,
+  totalProbability,
   width,
   height,
   tooltip = true,
@@ -92,6 +106,7 @@ export default function ActionsSankey({
   riskSnapshot: DVRiskSnapshot;
   scenario: SCENARIOS;
   results: RiskFileQuantiResults | null;
+  totalProbability: number;
   width?: number;
   height?: number;
   tooltip?: boolean;
@@ -198,6 +213,7 @@ export default function ActionsSankey({
         node={(props: NodeProps & { payload: ActionSankeyNode }) => (
           <ASankeyNode
             {...props}
+            totalProbability={totalProbability}
             totalCauses={data.nodes.length}
             // totalP={riskSnapshot.cr4de_quanti[scenario].tp.yearly.scale}
             fontSize={14}
@@ -226,11 +242,13 @@ function ASankeyNode({
   width,
   height,
   totalCauses,
+  totalProbability,
   fontSize,
   onNavigate,
 }: NodeProps & {
   payload: ActionSankeyNode;
   totalCauses: number;
+  totalProbability: number;
   fontSize: number;
   onNavigate?: (riskId: string) => void;
 }) {
@@ -251,6 +269,19 @@ function ASankeyNode({
           fill={getCategoryColor("")}
           fillOpacity="1"
         />
+        <text
+          textAnchor="middle"
+          x={-y - height / 2 - 18}
+          y={x - 15}
+          fontSize="16"
+          stroke="#333"
+          transform="rotate(270)"
+        >
+          {`${t("Total probability of successfull action")}:  ${round(
+            totalProbability,
+            2,
+          )}`}
+        </text>
       </Layer>
     );
   } else {
