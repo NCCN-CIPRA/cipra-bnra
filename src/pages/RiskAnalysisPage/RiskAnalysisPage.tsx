@@ -46,7 +46,7 @@ export default function RiskAnalysisPage() {
 
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
-      <Emerging riskSummary={riskSummary} />
+      <Emerging riskSummary={riskSummary} riskSnapshot={riskFile} />
     </Container>
   );
 }

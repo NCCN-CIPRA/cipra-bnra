@@ -109,6 +109,7 @@ export default function Attack({
           el: (
             <CascadeSection
               key={ca._cr4de_risk_cascade_value}
+              riskFile={riskFile}
               cause={ca.cr4de_cause_risk}
               effect={riskFile}
               cascade={ca}
@@ -323,6 +324,7 @@ export default function Attack({
             .map((ca) => (
               <CascadeSection
                 key={ca._cr4de_risk_cascade_value}
+                riskFile={riskFile}
                 cause={ca.cr4de_cause_risk}
                 effect={riskFile}
                 cascade={ca}
@@ -373,6 +375,7 @@ export default function Attack({
                 .map((e) => (
                   <CascadeSection
                     key={e.cascade._cr4de_risk_cascade_value}
+                    riskFile={riskFile}
                     cause={riskFile}
                     effect={e.cascade.cr4de_effect_risk}
                     cascade={e.cascade}
@@ -572,6 +575,7 @@ export default function Attack({
               {catalyzingEffects.map((ca) => (
                 <CatalyzingSection
                   key={ca._cr4de_risk_cascade_value}
+                  riskFile={riskFile}
                   cascade={ca}
                 />
               ))}

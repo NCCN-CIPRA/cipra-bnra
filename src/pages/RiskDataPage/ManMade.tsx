@@ -165,6 +165,7 @@ export default function ManMade({
             .map((e) => (
               <CascadeSection
                 key={e.cascade._cr4de_risk_cascade_value}
+                riskFile={riskFile}
                 cause={riskFile}
                 effect={e.cascade.cr4de_effect_risk}
                 cascade={e.cascade}
@@ -232,6 +233,7 @@ export default function ManMade({
           {catalyzingEffects.map((ca) => (
             <CatalyzingSection
               key={ca._cr4de_risk_cascade_value}
+              riskFile={riskFile}
               cascade={ca}
             />
           ))}

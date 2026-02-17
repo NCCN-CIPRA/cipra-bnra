@@ -1,4 +1,14 @@
-import { Box, Button, Stack } from "@mui/material";
+import {
+  Alert,
+  Autocomplete,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import StarterKit from "@tiptap/starter-kit";
 import {
   LinkBubbleMenu,
@@ -21,20 +31,132 @@ import {
   MenuDivider,
   MenuSelectHeading,
   MenuSelectTextAlign,
+  MenuButton,
   RichTextEditor,
   RichTextReadOnly,
   TableBubbleMenu,
   TableImproved,
   type RichTextEditorRef,
+  MenuButtonCodeProps,
+  useRichTextEditorContext,
 } from "mui-tiptap";
+import { Extension } from "@tiptap/react";
 import { Link } from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import { TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
-import { RefObject, useMemo, useRef, useState } from "react";
+import { RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { UserRoles } from "../functions/authRoles";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../pages/BasePage";
 import { Diff } from "@ali-tas/htmldiff-js";
+import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
+import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
+import { SmallRisk } from "../types/dataverse/DVSmallRisk";
+import InsertLinkIcon from "@mui/icons-material/InsertLink";
+import { DVAttachment } from "../types/dataverse/DVAttachment";
+import { RiskFilePageContext } from "../pages/BaseRiskFilePage";
+import useAPI from "../hooks/useAPI";
+
+function RiskLinkMenuButton(props: MenuButtonCodeProps) {
+  const editor = useRichTextEditorContext();
+  return (
+    <MenuButton
+      tooltipLabel="Create link to another risk file"
+      IconComponent={LocalLibraryIcon}
+      onClick={() => editor?.chain().focus().openLinkPicker().run()}
+      {...props}
+    />
+  );
+}
+
+function SourceLinkMenuButton(props: MenuButtonCodeProps) {
+  const editor = useRichTextEditorContext();
+  return (
+    <MenuButton
+      tooltipLabel="Create reference to a bibliography source"
+      IconComponent={InsertLinkIcon}
+      onClick={() => editor?.chain().focus().openSourcePicker().run()}
+      {...props}
+    />
+  );
+}
+
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    insertRiskLinkPicker: {
+      openLinkPicker: () => ReturnType;
+      insertLinkFromPicker: ({
+        label,
+        href,
+      }: {
+        label: string;
+        href: string;
+      }) => ReturnType;
+    };
+    insertSourcePicker: {
+      openSourcePicker: () => ReturnType;
+      insertSourceFromPicker: ({ id }: { id: number }) => ReturnType;
+    };
+  }
+}
+
+const InsertLinkPicker = Extension.create({
+  name: "insertRiskLinkPicker",
+
+  addCommands() {
+    return {
+      openLinkPicker: () => () => {
+        // This doesn’t insert anything by itself;
+        // you’ll use it to tell the UI to open.
+        window.dispatchEvent(new CustomEvent("tiptap-open-link-picker"));
+        return true;
+      },
+      insertLinkFromPicker:
+        (attrs: { label: string; href: string }) =>
+        ({ commands }) => {
+          return commands.insertContent({
+            type: "text",
+            text: attrs.label,
+            marks: [
+              {
+                type: "link",
+                attrs: { href: attrs.href },
+              },
+            ],
+          });
+        },
+    };
+  },
+});
+
+const InsertSourcePicker = Extension.create({
+  name: "insertSourcePicker",
+
+  addCommands() {
+    return {
+      openSourcePicker: () => () => {
+        // This doesn’t insert anything by itself;
+        // you’ll use it to tell the UI to open.
+        window.dispatchEvent(new CustomEvent("tiptap-open-source-picker"));
+        return true;
+      },
+      insertSourceFromPicker:
+        (attrs: { id: number }) =>
+        ({ commands }) => {
+          return commands.insertContent({
+            type: "text",
+            text: `(${attrs.id})`,
+            marks: [
+              {
+                type: "link",
+                attrs: { href: `#ref-${attrs.id}` },
+              },
+            ],
+          });
+        },
+    };
+  },
+});
 
 function EditorMenuControls() {
   return (
@@ -63,7 +185,142 @@ function EditorMenuControls() {
       <MenuDivider />
       <MenuButtonUndo />
       <MenuButtonRedo />
+      <MenuDivider />
+      <RiskLinkMenuButton />
+      <SourceLinkMenuButton />
     </MenuControlsContainer>
+  );
+}
+
+function RiskLinkPicker({
+  editor,
+}: {
+  editor: RefObject<RichTextEditorRef | null>;
+}) {
+  const [open, setOpen] = useState(false);
+  const { smallRiskMap } = useOutletContext<BasePageContext>();
+
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("tiptap-open-link-picker", handler);
+    return () => window.removeEventListener("tiptap-open-link-picker", handler);
+  }, []);
+
+  const handleSelect = (item: SmallRisk) => {
+    editor.current?.editor
+      ?.chain()
+      .focus()
+      .insertLinkFromPicker({
+        label: item.cr4de_title,
+        href: `/risks/${item.cr4de_riskfilesid}`,
+      })
+      .run();
+    setOpen(false);
+  };
+
+  const risks = useMemo(
+    () =>
+      Object.values(smallRiskMap).sort((a, b) =>
+        a.cr4de_title.localeCompare(b.cr4de_title),
+      ),
+    [smallRiskMap],
+  );
+
+  return (
+    <Dialog open={open} onClose={() => setOpen(false)}>
+      <Box sx={{ m: 2, width: 300, textAlign: "right" }}>
+        <Autocomplete
+          options={risks}
+          getOptionLabel={(o) => o.cr4de_title}
+          onChange={(_, value) => value && handleSelect(value)}
+          renderInput={(params) => (
+            <TextField {...params} label="Select or type a risk file" />
+          )}
+        />
+        <Button variant="outlined" sx={{ mt: 2 }} onClick={() => handleSelect}>
+          Add Link
+        </Button>
+      </Box>
+    </Dialog>
+  );
+}
+
+function SourcePicker({
+  editor,
+}: {
+  editor: RefObject<RichTextEditorRef | null>;
+}) {
+  const [open, setOpen] = useState(false);
+  const api = useAPI();
+
+  const { attachments } = useOutletContext<RiskFilePageContext>();
+
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("tiptap-open-source-picker", handler);
+    return () =>
+      window.removeEventListener("tiptap-open-source-picker", handler);
+  }, []);
+
+  const handleSelect = (item: DVAttachment) => {
+    if (!attachments) return;
+
+    let ref = item.cr4de_reference;
+
+    if (ref === null) {
+      const newReference =
+        Math.max(
+          ...(attachments
+            .filter((a) => a.cr4de_reference !== null)
+            .map((a) => a.cr4de_reference) as number[]),
+        ) + 1;
+
+      api.updateAttachmentFields(item.cr4de_bnraattachmentid, {
+        cr4de_reference: newReference,
+      });
+
+      ref = newReference;
+    }
+
+    editor.current?.editor
+      ?.chain()
+      .focus()
+      .insertSourceFromPicker({
+        id: ref,
+      })
+      .run();
+    setOpen(false);
+  };
+
+  if (!attachments) return null;
+
+  return (
+    <Dialog open={open} onClose={() => setOpen(false)}>
+      <Box sx={{ m: 2, width: 500 }}>
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          If your source is not in the list, or you want to add a new attachment
+          to the risk file, use the bibliography section at the bottom of the
+          analysis page.
+        </Typography>
+        <Autocomplete
+          options={attachments}
+          getOptionLabel={(o) => o.cr4de_name}
+          onChange={(_, value) => value && handleSelect(value)}
+          renderInput={(params) => (
+            <TextField {...params} label="Select an attachment" />
+          )}
+        />
+        <Box sx={{ textAlign: "right" }}>
+          <Button
+            variant="outlined"
+            sx={{ mt: 2 }}
+            onClick={() => handleSelect}
+          >
+            Add Reference
+          </Button>
+        </Box>
+      </Box>
+    </Dialog>
   );
 }
 
@@ -77,6 +334,8 @@ function Editor({
   return (
     <>
       <Box sx={{ bgcolor: "white" }}>
+        <RiskLinkPicker editor={ref} />
+        <SourcePicker editor={ref} />
         <RichTextEditor
           ref={ref}
           extensions={[
@@ -105,6 +364,8 @@ function Editor({
               openOnClick: false,
             }),
             LinkBubbleMenuHandler,
+            InsertLinkPicker,
+            InsertSourcePicker,
           ]} // Or any Tiptap extensions you wish!
           content={initialHTML} // Initial content for the editor
           // Optionally include `renderControls` for a menu-bar atop the editor:
@@ -133,18 +394,23 @@ export default function HTMLEditor({
   editableRole = "analist",
   isEditable = true,
   onSave,
+  queryKeyToInvalidate,
 }: {
   initialHTML: string;
   originalHTML?: string;
   editableRole?: keyof UserRoles;
   isEditable?: boolean;
-  onSave: (newHTML: string) => unknown;
+  onSave: UseMutationResult<void, Error, string, unknown>;
+  queryKeyToInvalidate: string[] | undefined;
 }) {
+  const queryClient = useQueryClient();
+
   const { user } = useOutletContext<BasePageContext>();
   const [isEditing, setIsEditing] = useState(false);
   const [showDiff, setShowDiff] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
   const editorRef = useRef<RichTextEditorRef>(null);
+  const [isPending, setIsPending] = useState(false);
 
   const handlePopoverOpen = () => {
     setShowButtons(true);
@@ -155,8 +421,23 @@ export default function HTMLEditor({
   };
 
   const handleSave = async () => {
-    await onSave(editorRef.current?.editor?.getHTML() || "");
-    setIsEditing(false);
+    setIsPending(true);
+
+    onSave.mutate(editorRef.current?.editor?.getHTML() || "", {
+      onSuccess: async () => {
+        if (queryKeyToInvalidate) {
+          await queryClient.invalidateQueries({
+            queryKey: queryKeyToInvalidate,
+          });
+        }
+
+        setIsPending(false);
+        setIsEditing(false);
+      },
+      onError: () => {
+        setIsPending(false);
+      },
+    });
   };
 
   const diffHTML = useMemo(() => {
@@ -167,7 +448,13 @@ export default function HTMLEditor({
 
   if (isEditing)
     return (
-      <Box sx={{ mr: 2 }}>
+      <Box sx={{ mr: 2, position: "relative" }}>
+        {onSave.error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            Something went wrong while saving. Backup your text and try again or
+            yell really loud.
+          </Alert>
+        )}
         <Editor initialHTML={initialHTML} ref={editorRef} />
         <Stack direction="row" sx={{ mt: 1 }}>
           <Button
@@ -182,6 +469,25 @@ export default function HTMLEditor({
             Save
           </Button>
         </Stack>
+        {isPending && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: -10,
+              bottom: -10,
+              left: 0,
+              right: -10,
+              backgroundColor: "rgba(255,255,255,0.9)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            <CircularProgress sx={{ mb: 1 }} />
+            Saving
+          </Box>
+        )}
       </Box>
     );
 
@@ -195,7 +501,6 @@ export default function HTMLEditor({
         content={initialHTML}
         extensions={[
           StarterKit.configure({
-            link: false,
             gapcursor: false,
             dropcursor: false,
           }),

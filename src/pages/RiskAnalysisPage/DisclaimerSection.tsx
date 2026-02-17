@@ -8,7 +8,8 @@ import {
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../BasePage";
 import HTMLEditor from "../../components/HTMLEditor";
-import useAPI from "../../hooks/useAPI";
+import useAPI, { DataTable } from "../../hooks/useAPI";
+import { useMutation } from "@tanstack/react-query";
 
 export default function DisclaimerSection({
   riskFile,
@@ -17,6 +18,13 @@ export default function DisclaimerSection({
 }) {
   const { user } = useOutletContext<BasePageContext>();
   const api = useAPI();
+
+  const updateRiskFile = useMutation({
+    mutationFn: (newHTML: string) =>
+      api.updateRiskFile(riskFile._cr4de_risk_file_value, {
+        cr4de_mrs_disclaimer: newHTML || undefined,
+      }),
+  });
 
   if (!riskFile.cr4de_quali_disclaimer_mrs && !user?.admin) return null;
 
@@ -40,11 +48,11 @@ export default function DisclaimerSection({
         <Box sx={{ flex: 1, ml: 2 }}>
           <HTMLEditor
             initialHTML={riskFile.cr4de_quali_disclaimer_mrs || ""}
-            onSave={(newHTML) =>
-              api.updateRiskFile(riskFile._cr4de_risk_file_value, {
-                cr4de_mrs_disclaimer: newHTML || undefined,
-              })
-            }
+            onSave={updateRiskFile}
+            queryKeyToInvalidate={[
+              DataTable.RISK_FILE,
+              riskFile._cr4de_risk_file_value,
+            ]}
           />
         </Box>
       </Stack>

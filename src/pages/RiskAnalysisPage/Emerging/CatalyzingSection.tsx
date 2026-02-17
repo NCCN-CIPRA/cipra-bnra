@@ -2,12 +2,23 @@ import { Box, Typography } from "@mui/material";
 import { DVCascadeSnapshot } from "../../../types/dataverse/DVCascadeSnapshot";
 import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import useAPI, { DataTable } from "../../../hooks/useAPI";
+import { useMutation } from "@tanstack/react-query";
+import HTMLEditor from "../../../components/HTMLEditor";
 
 function CatalyzingEffect({
   cascade,
 }: {
   cascade: DVCascadeSnapshot<unknown, DVRiskSummary, SmallRisk>;
 }) {
+  const api = useAPI();
+
+  const updateCascade = useMutation({
+    mutationFn: (newHTML: string) =>
+      api.updateCascade(cascade._cr4de_risk_cascade_value, {
+        cr4de_description: newHTML || undefined,
+      }),
+  });
   return (
     <Box
       sx={{
@@ -25,10 +36,14 @@ function CatalyzingEffect({
           {cascade.cr4de_effect_risk.cr4de_title}
         </Typography>
       </a>
-      <Box
-        className="htmleditor"
-        sx={{ mb: 4, fontFamily: '"Roboto","Helvetica","Arial",sans-serif' }}
-        dangerouslySetInnerHTML={{ __html: cascade.cr4de_description || "" }}
+      <HTMLEditor
+        initialHTML={cascade.cr4de_description || ""}
+        onSave={updateCascade}
+        queryKeyToInvalidate={[
+          DataTable.RISK_CASCADE,
+          "emerging",
+          cascade._cr4de_cause_risk_value,
+        ]}
       />
     </Box>
   );

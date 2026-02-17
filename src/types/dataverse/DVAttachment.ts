@@ -1,7 +1,7 @@
 export interface DVAttachment<
   ContactType = unknown,
   SourceType = unknown,
-  RiskFileType = unknown
+  RiskFileType = unknown,
 > {
   cr4de_bnraattachmentid: string;
 
@@ -9,7 +9,7 @@ export interface DVAttachment<
   cr4de_owner: ContactType;
 
   cr4de_name: string;
-  cr4de_reference: number;
+  cr4de_reference: number | null;
 
   cr4de_field: string | null;
 

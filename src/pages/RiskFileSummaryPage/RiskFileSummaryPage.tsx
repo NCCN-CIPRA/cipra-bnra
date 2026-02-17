@@ -9,10 +9,11 @@ import RiskFileTitle from "../../components/RiskFileTitle";
 import { getLanguage } from "../../functions/translations";
 import BNRASpeedDial from "../../components/BNRASpeedDial";
 import handleExportRiskfile from "../../functions/export/exportBNRA";
-import useAPI from "../../hooks/useAPI";
+import useAPI, { DataTable } from "../../hooks/useAPI";
 import RiskFileSummaryTutorial from "./RiskFileSummaryTutorial";
 import HTMLEditor from "../../components/HTMLEditor";
 import { BasePageContext } from "../BasePage";
+import { useMutation } from "@tanstack/react-query";
 
 export default function RiskFileSummaryPage() {
   const { environment } = useOutletContext<BasePageContext>();
@@ -22,7 +23,20 @@ export default function RiskFileSummaryPage() {
 
   const summary =
     riskSummary[`cr4de_summary_${getLanguage(i18n.language)}`] || "";
-  console.log(riskSummary);
+
+  const updateRiskFile = useMutation({
+    mutationFn: async (newHTML: string) => {
+      await Promise.all([
+        api.updateRiskSummary(riskSummary.cr4de_bnrariskfilesummaryid, {
+          cr4de_summary_en: newHTML || undefined,
+        }),
+        api.updateRiskFile(riskSummary._cr4de_risk_file_value, {
+          cr4de_mrs_summary: newHTML,
+        }),
+      ]);
+    },
+  });
+
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
       <RiskFileTitle riskFile={riskSummary} />
@@ -30,16 +44,11 @@ export default function RiskFileSummaryPage() {
         <Box id="summary-text" data-testid="summary-text" sx={{ flex: 1 }}>
           <HTMLEditor
             initialHTML={summary}
-            onSave={(newSummary) =>
-              Promise.all([
-                api.updateRiskSummary(riskSummary.cr4de_bnrariskfilesummaryid, {
-                  cr4de_summary_en: newSummary || undefined,
-                }),
-                api.updateRiskFile(riskSummary._cr4de_risk_file_value, {
-                  cr4de_mrs_summary: newSummary,
-                }),
-              ])
-            }
+            onSave={updateRiskFile}
+            queryKeyToInvalidate={[
+              DataTable.RISK_FILE,
+              riskSummary._cr4de_risk_file_value,
+            ]}
           />
         </Box>
         {riskSummary.cr4de_risk_type !== RISK_TYPE.EMERGING && (

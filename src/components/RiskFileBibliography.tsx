@@ -3,9 +3,11 @@ import Attachments from "./Attachments";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
 import { useTranslation } from "react-i18next";
 import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
-import useAPI, { DataTable } from "../hooks/useAPI";
-import { useQuery } from "@tanstack/react-query";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import { useOutletContext } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { RiskFilePageContext } from "../pages/BaseRiskFilePage";
+import { DataTable } from "../hooks/useAPI";
 
 export default function RiskFileBibliography({
   risk,
@@ -13,19 +15,9 @@ export default function RiskFileBibliography({
   risk: DVRiskSummary | DVRiskFile;
 }) {
   const { t } = useTranslation();
-  const api = useAPI();
+  const queryClient = useQueryClient();
 
-  const { data: attachments, refetch: reloadAttachments } = useQuery({
-    queryKey: [DataTable.ATTACHMENT],
-    queryFn: () =>
-      api.getAttachments(
-        `$filter=_cr4de_risk_file_value eq ${
-          "_cr4de_risk_file_value" in risk
-            ? risk._cr4de_risk_file_value
-            : risk.cr4de_riskfilesid
-        }`,
-      ),
-  });
+  const { attachments } = useOutletContext<RiskFilePageContext>();
 
   return (
     <Box className="risk-file-sources" sx={{ mt: 8 }}>
@@ -53,7 +45,16 @@ export default function RiskFileBibliography({
                 )
               : null
           }
-          onUpdate={() => reloadAttachments()}
+          onUpdate={() =>
+            queryClient.invalidateQueries({
+              queryKey: [
+                DataTable.ATTACHMENT,
+                "_cr4de_risk_file_value" in risk
+                  ? risk._cr4de_risk_file_value
+                  : risk.cr4de_riskfilesid,
+              ],
+            })
+          }
           alwaysOpen
         />
       </Box>

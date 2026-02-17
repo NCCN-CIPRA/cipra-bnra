@@ -74,8 +74,8 @@ export default function RiskDataPage() {
   const { data: dynamicCauses } = useQuery({
     queryKey: [
       DataTable.RISK_CASCADE,
-      "causes",
       riskSummary._cr4de_risk_file_value,
+      "causes",
     ],
     queryFn: () =>
       api.getRiskCascades(
@@ -98,8 +98,8 @@ export default function RiskDataPage() {
   const { data: dynamicEffects } = useQuery({
     queryKey: [
       DataTable.RISK_CASCADE,
-      "effects",
       riskSummary._cr4de_risk_file_value,
+      "effects",
     ],
     queryFn: () =>
       api.getRiskCascades(
@@ -123,8 +123,8 @@ export default function RiskDataPage() {
   const { data: publicCauses } = useQuery({
     queryKey: [
       DataTable.CASCADE_SNAPSHOT,
-      "causes",
       riskSummary._cr4de_risk_file_value,
+      "causes",
     ],
     queryFn: () =>
       api.getCascadeSnapshots(
@@ -147,8 +147,8 @@ export default function RiskDataPage() {
   const { data: publicEffects } = useQuery({
     queryKey: [
       DataTable.CASCADE_SNAPSHOT,
-      "effects",
       riskSummary._cr4de_risk_file_value,
+      "effects",
     ],
     queryFn: () =>
       api.getCascadeSnapshots(

@@ -1,6 +1,5 @@
 import { Alert, Box, Typography } from "@mui/material";
 import { SCENARIOS } from "../../../functions/scenarios";
-import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import Scenario from "./Scenario";
 import { useState } from "react";
 import ProbabilitySection from "./ProbabilitySection";
@@ -73,11 +72,9 @@ export default function Standard({
         <Box className="mrs" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Most Relevant Scenario")}</Typography>
 
-          <ScenarioMatrix riskFile={riskFile} mrs={MRS} results={results} />
-
           {/* <IntensityParametersTable initialParameters={rf.cr4de_intensity_parameters} /> */}
 
-          <Scenario riskFile={riskFile} scenario={MRS} />
+          <Scenario riskFile={riskFile} scenario={MRS} results={results} />
         </Box>
       )}
 
@@ -109,19 +106,7 @@ export default function Standard({
 
         <ImpactSection riskFile={riskFile} impactName="financial" />
 
-        <Box
-          className="cb-impact"
-          sx={{
-            borderLeft: "solid 8px #eee",
-            px: 2,
-            py: 1,
-            mt: 2,
-            backgroundColor: "white",
-          }}
-        >
-          <Typography variant="h6">Cross-border Impact</Typography>
-          <CBSection riskFile={riskFile} />
-        </Box>
+        <CBSection riskFile={riskFile} />
       </Box>
 
       <RiskFileBibliography risk={riskSummary} />

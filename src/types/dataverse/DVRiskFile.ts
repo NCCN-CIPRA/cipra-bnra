@@ -171,6 +171,7 @@ export interface DVRiskFile<
   cr4de_mrs_actions: string | null;
   cr4de_mrs_mm_impact: string | null;
   cr4de_mrs_cc: string | null;
+  cr4de_mrs_cb: string | null;
 
   cr4de_subjective_importance: number;
 

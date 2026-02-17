@@ -12,15 +12,15 @@ import useSavedState from "../hooks/useSavedState";
 import { useQuery } from "@tanstack/react-query";
 import useAPI, { DataTable } from "../hooks/useAPI";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
-import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
 
 export interface BasePageContext {
   user: LoggedInUser | null | undefined;
   environment: Environment;
   indicators: Indicators;
   showDiff: boolean;
+  riskSummaryMap: Record<string, string>;
   snapshotMap: Record<string, string>;
-  riskSummaryMap: Record<string, SmallRisk>;
+  smallRiskMap: Record<string, SmallRisk>;
   refreshUser: () => void;
   setFakeRole: (role: string) => void;
   setEnvironment: (newEnv: Environment) => void;
@@ -47,31 +47,33 @@ export default function BasePage() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const { data: riskSummaries } = useQuery<DVRiskSummary[], Error, SmallRisk[]>(
-    {
-      queryKey: [DataTable.RISK_SUMMARY],
-      queryFn: () =>
-        api.getRiskSummaries(
-          "$select=_cr4de_risk_file_value,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_category",
-        ),
-      select: (data) =>
-        data.map(
-          (rf) =>
-            ({
-              cr4de_riskfilesid: rf._cr4de_risk_file_value,
-              cr4de_hazard_id: rf.cr4de_hazard_id,
-
-              cr4de_title: rf.cr4de_title,
-              cr4de_risk_type: rf.cr4de_risk_type,
-              cr4de_risk_category: rf.cr4de_category,
-            } as SmallRisk),
-        ),
-    },
-  );
+  const { data: riskSummaries } = useQuery({
+    queryKey: [DataTable.RISK_SUMMARY],
+    queryFn: () =>
+      api.getRiskSummaries(
+        "$select=_cr4de_risk_file_value,cr4de_title,cr4de_hazard_id,cr4de_risk_type,cr4de_category",
+      ),
+  });
   const riskSummaryMap = useMemo(() => {
     if (!riskSummaries) return {};
     return riskSummaries.reduce((acc, summary) => {
-      acc[summary.cr4de_riskfilesid] = summary;
+      acc[summary._cr4de_risk_file_value] = summary.cr4de_bnrariskfilesummaryid;
+      return acc;
+    }, {} as Record<string, string>);
+  }, [riskSummaries]);
+
+  const smallRiskMap = useMemo(() => {
+    if (!riskSummaries) return {};
+    return riskSummaries.reduce((acc, summary) => {
+      acc[summary._cr4de_risk_file_value] = {
+        cr4de_riskfilesid: summary._cr4de_risk_file_value,
+        cr4de_hazard_id: summary.cr4de_hazard_id,
+
+        cr4de_title: summary.cr4de_title,
+        cr4de_risk_type: summary.cr4de_risk_type,
+        cr4de_risk_category: summary.cr4de_category,
+      } as SmallRisk;
+
       return acc;
     }, {} as Record<string, SmallRisk>);
   }, [riskSummaries]);
@@ -121,8 +123,9 @@ export default function BasePage() {
             environment: user?.roles.analist ? environment : Environment.PUBLIC,
             indicators,
             showDiff: diff,
-            snapshotMap,
             riskSummaryMap,
+            snapshotMap,
+            smallRiskMap,
             refreshUser,
             setFakeRole,
             setEnvironment,

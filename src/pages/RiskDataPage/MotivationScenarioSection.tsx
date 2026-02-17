@@ -72,12 +72,43 @@ export function MotivationScenarioSection({
     publicRiskSnapshot && parseRiskSnapshotQuali(publicRiskSnapshot);
 
   const mutation = useMutation({
+    mutationFn: async (newQuali: string) => {
+      setQuali(newQuali || "");
+
+      api.createChangeLog({
+        "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+        cr4de_changed_by_email: user?.emailaddress1,
+        cr4de_changed_object_type: "RISK_FILE",
+        cr4de_changed_object_id: riskFile._cr4de_risk_file_value,
+        cr4de_change_short: `Quali description of ${qualiField} of ${scenario} of ${riskFile.cr4de_title}`,
+        cr4de_diff: serializeChangeLogDiff([
+          {
+            property: `cr4de_quali.${scenario}.${qualiField}`,
+            originalValue: riskFile.cr4de_quali[scenario][qualiField],
+            newValue: newQuali,
+          },
+        ]),
+      });
+
+      return api.updateRiskFile(riskFile._cr4de_risk_file_value, {
+        cr4de_quali: serializeRiskQualis({
+          ...riskFile.cr4de_quali,
+          [scenario]: {
+            ...riskFile.cr4de_quali[scenario],
+            [qualiField]: newQuali,
+          },
+        }),
+      });
+    },
+  });
+
+  const quantiMutation = useMutation({
     mutationFn: async (
       newC: Partial<DVRiskFile> & { cr4de_riskfilesid: string },
     ) => api.updateRiskFile(newC.cr4de_riskfilesid, newC),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: [DataTable.RISK_FILE],
+        queryKey: [DataTable.RISK_FILE, riskFile._cr4de_risk_file_value],
       });
     },
   });
@@ -171,7 +202,7 @@ export function MotivationScenarioSection({
         });
       }
 
-      mutation.mutate({
+      quantiMutation.mutate({
         cr4de_riskfilesid: riskFile._cr4de_risk_file_value,
         cr4de_quanti: serializeRiskFileQuantiInput(newQuantiInput),
       });
@@ -218,35 +249,11 @@ export function MotivationScenarioSection({
                   : undefined
               }
               isEditable={environment === Environment.DYNAMIC}
-              onSave={async (newQuali: string | null) => {
-                setQuali(newQuali || "");
-
-                api.createChangeLog({
-                  "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
-                  cr4de_changed_by_email: user?.emailaddress1,
-                  cr4de_changed_object_type: "RISK_FILE",
-                  cr4de_changed_object_id: riskFile._cr4de_risk_file_value,
-                  cr4de_change_short: `Quali description of ${qualiField} of ${scenario} of ${riskFile.cr4de_title}`,
-                  cr4de_diff: serializeChangeLogDiff([
-                    {
-                      property: `cr4de_quali.${scenario}.${qualiField}`,
-                      originalValue: riskFile.cr4de_quali[scenario][qualiField],
-                      newValue: newQuali,
-                    },
-                  ]),
-                });
-
-                mutation.mutate({
-                  cr4de_riskfilesid: riskFile._cr4de_risk_file_value,
-                  cr4de_quali: serializeRiskQualis({
-                    ...riskFile.cr4de_quali,
-                    [scenario]: {
-                      ...riskFile.cr4de_quali[scenario],
-                      [qualiField]: newQuali,
-                    },
-                  }),
-                });
-              }}
+              onSave={mutation}
+              queryKeyToInvalidate={[
+                DataTable.RISK_FILE,
+                riskFile._cr4de_risk_file_value,
+              ]}
             />
 
             {quantiFields.length > 0 && (

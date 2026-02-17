@@ -113,7 +113,7 @@ export default function ActionsSankey({
   onClick: (id: string) => void;
 }) {
   let actions: SankeyAction[] = [];
-  console.log(results);
+
   if (!results && riskSummary.cr4de_causing_risks) {
     actions =
       typeof riskSummary.cr4de_causing_risks === "string"

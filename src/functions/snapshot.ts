@@ -81,8 +81,10 @@ export function getCascadeResultSnapshot(
   cascade: DVRiskCascade,
 ): CASCADE_RESULT_SNAPSHOT | null {
   if (
+    cascade.cr4de_result_snapshot === undefined ||
     cascade.cr4de_result_snapshot === null ||
-    cascade.cr4de_result_snapshot === ""
+    cascade.cr4de_result_snapshot === "" ||
+    cascade.cr4de_result_snapshot === "undefined"
   )
     return null;
 
@@ -1254,6 +1256,7 @@ export function snapshotFromRiskfile<U>(
     cr4de_quali_actions_mrs: riskFile.cr4de_mrs_actions,
     cr4de_quali_mm_mrs: riskFile.cr4de_mrs_mm_impact,
     cr4de_quali_cb_mrs:
+      riskFile.cr4de_mrs_cb ||
       riskFile[
         `cr4de_cross_border_impact_quali${getScenarioSuffix(
           riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE,

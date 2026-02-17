@@ -351,7 +351,7 @@ export default function ProbabilitySankey({
   ];
   const otherCauses = calculation.causes.filter(
     (e: any) =>
-      (e[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number) < minP
+      (e[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number) < minP,
   );
 
   if (minP >= 0 && !manmade && otherCauses.length > 0) {
@@ -376,13 +376,13 @@ export default function ProbabilitySankey({
         .filter(
           (e: any) =>
             (e[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number) <
-            minP
+            minP,
         )
         .reduce(
           (tot, e) =>
             tot +
             (e[`ip${scenarioSuffix}` as keyof CascadeCalculation] as number),
-          0.000000001
+          0.000000001,
         ),
       //   hidden: calculation.causes.filter(
       //     (e: any) =>
@@ -395,8 +395,6 @@ export default function ProbabilitySankey({
     nodes,
     links,
   };
-
-  console.log(causes);
 
   return (
     <>

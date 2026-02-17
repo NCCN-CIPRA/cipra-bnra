@@ -54,6 +54,7 @@ import {
   returnPeriodMonthsFromYearlyEventRate,
 } from "../functions/indicators/probability";
 import { SCENARIOS } from "../functions/scenarios";
+import { DVAttachment } from "../types/dataverse/DVAttachment";
 
 type RouteParams = {
   risk_file_id: string;
@@ -64,6 +65,7 @@ export interface RiskFilePageContext extends BasePageContext {
   riskSnapshot: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   publicRiskSnapshot: DVRiskSnapshot<unknown, RiskSnapshotResults> | null;
   riskFile: DVRiskFile<unknown, unknown, unknown, RiskFileQuantiResults> | null;
+  attachments: DVAttachment[] | null;
   results: RiskFileQuantiResults | null;
 }
 
@@ -84,11 +86,10 @@ export default function BaseRiskFilePage() {
   const { data: publicRiskSummary } = useQuery({
     queryKey: [DataTable.RISK_SUMMARY, params.risk_file_id],
     queryFn: () =>
-      api.getRiskSummary(
-        riskSummaryMap[params.risk_file_id]?.cr4de_riskfilesid || "",
-      ),
+      api.getRiskSummary(riskSummaryMap[params.risk_file_id] || ""),
     enabled: Boolean(riskSummaryMap[params.risk_file_id]),
   });
+
   const { data: riskFile } = useQuery<
     DVRiskFile<
       unknown,
@@ -130,13 +131,25 @@ export default function BaseRiskFilePage() {
     select: (data) => parseRiskSnapshot(data),
   });
 
+  const { data: attachments } = useQuery({
+    queryKey: [DataTable.ATTACHMENT, params.risk_file_id],
+    queryFn: () =>
+      api.getAttachments(
+        `$filter=_cr4de_risk_file_value eq ${params.risk_file_id}`,
+      ),
+  });
+
   const riskSummary = useMemo(() => {
     if (environment === Environment.PUBLIC || !riskFile)
       return publicRiskSummary;
 
     if (!riskFile) return null;
 
-    const parsed = summaryFromRiskfileNew(riskFile);
+    const parsed = {
+      ...summaryFromRiskfileNew(riskFile),
+      cr4de_bnrariskfilesummaryid:
+        publicRiskSummary?.cr4de_bnrariskfilesummaryid || "",
+    };
 
     if (riskFile.cr4de_quanti_results) {
       const results = riskFile.cr4de_quanti_results as RiskFileQuantiResults;
@@ -265,13 +278,14 @@ export default function BaseRiskFilePage() {
           context={satisfies<RiskFilePageContext>({
             user,
             environment,
-            snapshotMap,
             riskSummaryMap,
+            snapshotMap,
             ...baseContext,
             riskFile: riskFile || null,
             riskSummary,
             riskSnapshot: riskSnapshot || null,
             publicRiskSnapshot: publicRiskSnapshot || null,
+            attachments: attachments || null,
             results:
               riskFile && environment === Environment.DYNAMIC
                 ? riskFile.cr4de_quanti_results

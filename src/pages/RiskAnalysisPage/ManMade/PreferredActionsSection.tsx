@@ -2,7 +2,8 @@ import { Box } from "@mui/material";
 import getImpactColor from "../../../functions/getImpactColor";
 import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 import HTMLEditor from "../../../components/HTMLEditor";
-import useAPI from "../../../hooks/useAPI";
+import useAPI, { DataTable } from "../../../hooks/useAPI";
+import { useMutation } from "@tanstack/react-query";
 
 export default function PreferredActionsSection({
   riskFile,
@@ -10,6 +11,13 @@ export default function PreferredActionsSection({
   riskFile: DVRiskSnapshot;
 }) {
   const api = useAPI();
+
+  const updateRiskFile = useMutation({
+    mutationFn: (newHTML: string) =>
+      api.updateRiskFile(riskFile._cr4de_risk_file_value, {
+        cr4de_mrs_actions: newHTML || undefined,
+      }),
+  });
 
   return (
     <Box
@@ -23,11 +31,11 @@ export default function PreferredActionsSection({
     >
       <HTMLEditor
         initialHTML={riskFile.cr4de_quali_actions_mrs || ""}
-        onSave={(newHTML) =>
-          api.updateRiskFile(riskFile._cr4de_risk_file_value, {
-            cr4de_mrs_actions: newHTML || undefined,
-          })
-        }
+        onSave={updateRiskFile}
+        queryKeyToInvalidate={[
+          DataTable.RISK_FILE,
+          riskFile._cr4de_risk_file_value,
+        ]}
       />
     </Box>
   );

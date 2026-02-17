@@ -13,18 +13,24 @@ import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../../BasePage";
 import { useQuery } from "@tanstack/react-query";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
+import { snapshotFromRiskCascade } from "../../../functions/snapshot";
+import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
+import { Environment } from "../../../types/global";
+import { parseCascadeSnapshot } from "../../../types/dataverse/DVRiskCascade";
 
 export default function Emerging({
   riskSummary,
+  riskSnapshot,
 }: {
   riskSummary: DVRiskSummary;
+  riskSnapshot: DVRiskSnapshot;
 }) {
-  const { user, environment, riskSummaryMap } =
+  const { user, environment, smallRiskMap } =
     useOutletContext<BasePageContext>();
 
   const { t } = useTranslation();
   const api = useAPI();
-  console.log(riskSummary);
+
   const { data: cascadeSnapshots } = useQuery<
     DVCascadeSnapshot<unknown, DVRiskSummary, SmallRisk>[]
   >({
@@ -37,14 +43,45 @@ export default function Emerging({
       api.getCascadeSnapshots(
         `$filter=_cr4de_cause_risk_value eq ${riskSummary._cr4de_risk_file_value}&$select=cr4de_description,_cr4de_effect_risk_value`,
       ),
-    select: (d) =>
-      d.map((d) => ({
+    select: (data) =>
+      data.map((d) => ({
         ...d,
         cr4de_removed: false,
         cr4de_cause_risk: riskSummary,
-        cr4de_effect_risk: riskSummaryMap[d._cr4de_effect_risk_value],
+        cr4de_effect_risk: smallRiskMap[d._cr4de_effect_risk_value],
       })),
-    enabled: Boolean(user && user.roles.verified),
+    enabled: Boolean(
+      user && user.roles.verified && environment === Environment.PUBLIC,
+    ),
+  });
+
+  const { data: cascades } = useQuery({
+    queryKey: [
+      DataTable.RISK_CASCADE,
+      "emerging",
+      riskSummary._cr4de_risk_file_value,
+    ],
+    queryFn: () =>
+      api.getRiskCascades(
+        `$filter=_cr4de_cause_hazard_value eq ${riskSummary._cr4de_risk_file_value}`,
+      ),
+    select: (data) =>
+      data
+        .map((d) =>
+          parseCascadeSnapshot(snapshotFromRiskCascade(riskSnapshot, d)),
+        )
+        .map(
+          (d) =>
+            ({
+              ...d,
+              cr4de_removed: false,
+              cr4de_cause_risk: riskSummary,
+              cr4de_effect_risk: smallRiskMap[d._cr4de_effect_risk_value],
+            } as DVCascadeSnapshot<unknown, DVRiskSummary, SmallRisk>),
+        ),
+    enabled: Boolean(
+      user && user.roles.analist && environment === Environment.DYNAMIC,
+    ),
   });
 
   return (
@@ -55,7 +92,13 @@ export default function Emerging({
         <Box className="catalyzing" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Catalysing Effects")}</Typography>
 
-          <CatalyzingSection cascades={cascadeSnapshots || []} />
+          <CatalyzingSection
+            cascades={
+              (environment === Environment.DYNAMIC
+                ? cascades
+                : cascadeSnapshots) || []
+            }
+          />
         </Box>
 
         <RiskFileBibliography risk={riskSummary} />

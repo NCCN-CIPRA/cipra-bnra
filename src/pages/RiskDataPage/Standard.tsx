@@ -113,6 +113,7 @@ export default function Standard({
         el: (
           <CascadeSection
             key={ca._cr4de_risk_cascade_value}
+            riskFile={riskFile}
             cause={ca.cr4de_cause_risk}
             effect={riskFile}
             cascade={ca}
@@ -337,6 +338,7 @@ export default function Standard({
                 .map((e) => (
                   <CascadeSection
                     key={e.cascade._cr4de_risk_cascade_value}
+                    riskFile={riskFile}
                     cause={riskFile}
                     effect={e.cascade.cr4de_effect_risk}
                     cascade={e.cascade}
@@ -541,6 +543,7 @@ export default function Standard({
               {catalyzingEffects.map((ca) => (
                 <CatalyzingSection
                   key={ca._cr4de_risk_cascade_value}
+                  riskFile={riskFile}
                   cascade={ca}
                 />
               ))}

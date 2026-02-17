@@ -13,7 +13,12 @@ import { RiskFilePageContext } from "../BaseRiskFilePage";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import { serializeChangeLogDiff } from "../../types/dataverse/DVChangeLog";
 import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  MutateOptions,
+  useMutation,
+  UseMutationResult,
+} from "@tanstack/react-query";
+import { IntensityParameter } from "../../functions/intensityParameters";
 
 export default function ScenarioSection({
   riskSummary,
@@ -21,22 +26,54 @@ export default function ScenarioSection({
   riskSummary: DVRiskSummary;
 }) {
   const api = useAPI();
-  const queryClient = useQueryClient();
   const { user, environment } = useOutletContext<RiskFilePageContext>();
   const { t } = useTranslation();
   const [selectedScenario, setSelectedScenario] = useState(
-    riskSummary.cr4de_mrs || SCENARIOS.CONSIDERABLE
+    riskSummary.cr4de_mrs || SCENARIOS.CONSIDERABLE,
   );
 
   const mutation = useMutation({
-    mutationFn: async (
-      newFields: Partial<DVRiskFile> & { cr4de_riskfilesid: string }
-    ) => api.updateRiskFile(newFields.cr4de_riskfilesid, newFields),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: [DataTable.RISK_FILE],
+    mutationFn: async (input: {
+      parameter: IntensityParameter<string>;
+      newParameterValue: string;
+    }) => {
+      const scenarioField =
+        `cr4de_scenario_${selectedScenario.toLowerCase()}` as keyof DVRiskFile;
+
+      const newScenario = parsedSummary.cr4de_scenarios![selectedScenario].map(
+        (oldP) => {
+          if (oldP.name === input.parameter.name) {
+            return {
+              ...oldP,
+              value: input.newParameterValue,
+            };
+          }
+          return oldP;
+        },
+      );
+
+      api.createChangeLog({
+        "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+        cr4de_changed_by_email: user?.emailaddress1,
+        cr4de_changed_object_type: "RISK_FILE",
+        cr4de_changed_object_id: riskSummary._cr4de_risk_file_value,
+        cr4de_change_short: `Changed ${selectedScenario} scenario`,
+        cr4de_diff: serializeChangeLogDiff([
+          {
+            property: scenarioField,
+            originalValue: JSON.stringify(
+              parsedSummary.cr4de_scenarios![selectedScenario],
+            ),
+            newValue: JSON.stringify(newScenario),
+          },
+        ]),
+      });
+
+      return api.updateRiskFile(riskSummary._cr4de_risk_file_value, {
+        [scenarioField]: wrap(newScenario),
       });
     },
+    throwOnError: true,
   });
 
   const parsedSummary: DVRiskSummary<unknown, ParsedRiskFields> = {
@@ -191,51 +228,26 @@ export default function ScenarioSection({
                   initialHTML={Array.isArray(p.value) ? p.value[0] : p.value}
                   editableRole="analist"
                   isEditable={environment === Environment.DYNAMIC}
-                  onSave={async (newParameterValue: string) => {
-                    const scenarioField =
-                      `cr4de_scenario_${selectedScenario.toLowerCase()}` as keyof DVRiskFile;
-
-                    if (
-                      riskSummary.cr4de_risk_file instanceof Object &&
-                      "cr4de_riskfilesid" in riskSummary.cr4de_risk_file
-                    ) {
-                      const newScenario = parsedSummary.cr4de_scenarios![
-                        selectedScenario
-                      ].map((oldP) => {
-                        if (oldP.name === p.name) {
-                          return {
-                            ...oldP,
-                            value: newParameterValue,
-                          };
-                        }
-                        return oldP;
+                  onSave={{
+                    ...(mutation as unknown as UseMutationResult<
+                      void,
+                      Error,
+                      string,
+                      unknown
+                    >),
+                    mutate: async (newParameterValue: string) => {
+                      await mutation.mutate({
+                        parameter: p,
+                        newParameterValue,
                       });
 
-                      api.createChangeLog({
-                        "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
-                        cr4de_changed_by_email: user?.emailaddress1,
-                        cr4de_changed_object_type: "RISK_FILE",
-                        cr4de_changed_object_id:
-                          riskSummary._cr4de_risk_file_value,
-                        cr4de_change_short: `Changed ${selectedScenario} scenario`,
-                        cr4de_diff: serializeChangeLogDiff([
-                          {
-                            property: scenarioField,
-                            originalValue: JSON.stringify(
-                              parsedSummary.cr4de_scenarios![selectedScenario]
-                            ),
-                            newValue: JSON.stringify(newScenario),
-                          },
-                        ]),
-                      });
-
-                      mutation.mutate({
-                        cr4de_riskfilesid: riskSummary.cr4de_risk_file
-                          .cr4de_riskfilesid as string,
-                        [scenarioField]: wrap(newScenario),
-                      });
-                    }
+                      return;
+                    },
                   }}
+                  queryKeyToInvalidate={[
+                    DataTable.RISK_FILE,
+                    riskSummary._cr4de_risk_file_value,
+                  ]}
                 />
               );
             })}
@@ -264,8 +276,40 @@ export default function ScenarioSection({
                       </Tooltip>
                     </Typography>
                   )}
-                  {/* <Box dangerouslySetInnerHTML={{ __html: p.description || "" }} /> */}
-                  <Box dangerouslySetInnerHTML={{ __html: p.value || "" }} />
+                  <HTMLEditor
+                    initialHTML={Array.isArray(p.value) ? p.value[0] : p.value}
+                    editableRole="analist"
+                    isEditable={environment === Environment.DYNAMIC}
+                    onSave={{
+                      ...(mutation as unknown as UseMutationResult<
+                        void,
+                        Error,
+                        string,
+                        unknown
+                      >),
+                      mutate: async (newParameterValue: string, options) => {
+                        return mutation.mutate(
+                          {
+                            parameter: p,
+                            newParameterValue,
+                          },
+                          options as unknown as MutateOptions<
+                            void,
+                            Error,
+                            {
+                              parameter: IntensityParameter<string>;
+                              newParameterValue: string;
+                            },
+                            unknown
+                          >,
+                        );
+                      },
+                    }}
+                    queryKeyToInvalidate={[
+                      DataTable.RISK_FILE,
+                      riskSummary._cr4de_risk_file_value,
+                    ]}
+                  />
                 </Box>
               );
             })}

@@ -95,7 +95,7 @@ const ScenarioBox = ({ scenario }: { scenario: SCENARIOS }) => {
       <Trans i18nKey={scenario}>
         {t(
           SCENARIO_PARAMS[scenario].titleI18N,
-          SCENARIO_PARAMS[scenario].titleDefault
+          SCENARIO_PARAMS[scenario].titleDefault,
         )}
       </Trans>
     </Box>
@@ -105,7 +105,7 @@ const ScenarioBox = ({ scenario }: { scenario: SCENARIOS }) => {
 const getCPValueTooltip = (
   cp: number,
   isActorCause: boolean,
-  indicators: Indicators
+  indicators: Indicators,
 ) => {
   if (isActorCause) {
     return `This estimation represents a probability ${
@@ -125,7 +125,7 @@ const getCPValueTooltip = (
 const getCPVal = (
   cpAbs: number,
   isActorCause: boolean,
-  indicators: Indicators
+  indicators: Indicators,
 ) => {
   let cpVal = 0;
   if (indicators === Indicators.V1) {
@@ -283,11 +283,11 @@ export default function CascadeMatrix({
   onChange?: (
     causeScenario: SCENARIOS,
     effectScenario: SCENARIOS,
-    newCPAbs: number
+    newCPAbs: number,
   ) => unknown;
 }) {
   const theme = useTheme();
-  console.log(cause, effect, cascade, compareCascade);
+
   const [showScenarios, setShowScenarios] = useState(false);
 
   const isActorCause = cause.cr4de_risk_type === RISK_TYPE.MANMADE;
@@ -365,7 +365,7 @@ export default function CascadeMatrix({
                   onChange(
                     SCENARIOS.CONSIDERABLE,
                     SCENARIOS.CONSIDERABLE,
-                    newValue
+                    newValue,
                   ))
               }
             />

@@ -3,7 +3,8 @@ import getImpactColor from "../../../functions/getImpactColor";
 import { IMPACT_CATEGORY } from "../../../functions/Impact";
 import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 import HTMLEditor from "../../../components/HTMLEditor";
-import useAPI from "../../../hooks/useAPI";
+import useAPI, { DataTable } from "../../../hooks/useAPI";
+import { useMutation } from "@tanstack/react-query";
 
 export default function ImpactSection({
   riskFile,
@@ -16,6 +17,13 @@ export default function ImpactSection({
 
   const impactLetter = impactName[0] as "h" | "s" | "e" | "f";
   const impactLetterUC = impactLetter.toUpperCase() as IMPACT_CATEGORY;
+
+  const updateRiskFile = useMutation({
+    mutationFn: (newHTML: string) =>
+      api.updateRiskFile(riskFile._cr4de_risk_file_value, {
+        [`cr4de_mrs_impact_${impactLetter}`]: newHTML || undefined,
+      }),
+  });
 
   return (
     <Box
@@ -33,11 +41,11 @@ export default function ImpactSection({
       </Typography>
       <HTMLEditor
         initialHTML={riskFile[`cr4de_quali_${impactLetter}_mrs`] || ""}
-        onSave={(newHTML) =>
-          api.updateRiskFile(riskFile._cr4de_risk_file_value, {
-            [`cr4de_mrs_impact_${impactLetter}`]: newHTML || undefined,
-          })
-        }
+        onSave={updateRiskFile}
+        queryKeyToInvalidate={[
+          DataTable.RISK_FILE,
+          riskFile._cr4de_risk_file_value,
+        ]}
       />
     </Box>
   );

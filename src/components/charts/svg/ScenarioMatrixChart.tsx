@@ -121,7 +121,7 @@ export default function ScenarioMatrixChart({
         left: 2 * (fontSize - 12),
       }}
       style={{
-        float: "right",
+        // float: "right",
         overflow: "hidden",
         // backgroundColor: "rgba(0, 0, 0, 0.2",
       }}

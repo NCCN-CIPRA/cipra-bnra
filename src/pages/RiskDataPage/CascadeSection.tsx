@@ -41,6 +41,7 @@ import { RiskFilePageContext } from "../BaseRiskFilePage";
 export type VISUALS = "SANKEY" | "MATRIX";
 
 export function CascadeSection({
+  riskFile,
   cause,
   effect,
   cascade,
@@ -51,6 +52,7 @@ export function CascadeSection({
   disabledMessage,
   isAttackOtherCause,
 }: {
+  riskFile: DVRiskSnapshot;
   cause: DVRiskSnapshot;
   effect: DVRiskSnapshot;
   cascade: DVCascadeSnapshot<unknown, unknown, unknown>;
@@ -73,6 +75,31 @@ export function CascadeSection({
   const [runningUpdateCount, setRunningUpdateCount] = useState(0);
 
   const mutation = useMutation({
+    mutationFn: async (newQuali: string) => {
+      setQuali(newQuali);
+
+      api.createChangeLog({
+        "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
+        cr4de_changed_by_email: user?.emailaddress1,
+        cr4de_changed_object_type: "CASCADE",
+        cr4de_changed_object_id: cascade._cr4de_risk_cascade_value,
+        cr4de_change_short: `Quali description of ${cause.cr4de_title} -> ${effect.cr4de_title}`,
+        cr4de_diff: serializeChangeLogDiff([
+          {
+            property: `cr4de_quali`,
+            originalValue: cascade.cr4de_quali,
+            newValue: newQuali,
+          },
+        ]),
+      });
+
+      api.updateCascade(cascade._cr4de_risk_cascade_value, {
+        cr4de_quali: newQuali,
+      });
+    },
+  });
+
+  const quantiMutation = useMutation({
     mutationFn: async (
       newC: Partial<DVRiskCascade> & { cr4de_bnrariskcascadeid: string },
     ) => api.updateCascade(newC.cr4de_bnrariskcascadeid, newC),
@@ -136,7 +163,7 @@ export function CascadeSection({
       ]),
     });
 
-    mutation.mutate({
+    quantiMutation.mutate({
       cr4de_bnrariskcascadeid: cascade._cr4de_risk_cascade_value,
       cr4de_quanti_input: serializeCPMatrix(updatedCPMatrix),
     });
@@ -225,29 +252,11 @@ export function CascadeSection({
               }
               editableRole="analist"
               isEditable={environment === Environment.DYNAMIC}
-              onSave={async (newQuali: string) => {
-                setQuali(newQuali);
-
-                api.createChangeLog({
-                  "cr4de_changed_by@odata.bind": `https://bnra.powerappsportals.com/_api/contacts(${user?.contactid})`,
-                  cr4de_changed_by_email: user?.emailaddress1,
-                  cr4de_changed_object_type: "CASCADE",
-                  cr4de_changed_object_id: cascade._cr4de_risk_cascade_value,
-                  cr4de_change_short: `Quali description of ${cause.cr4de_title} -> ${effect.cr4de_title}`,
-                  cr4de_diff: serializeChangeLogDiff([
-                    {
-                      property: `cr4de_quali`,
-                      originalValue: cascade.cr4de_quali,
-                      newValue: newQuali,
-                    },
-                  ]),
-                });
-
-                mutation.mutate({
-                  cr4de_bnrariskcascadeid: cascade._cr4de_risk_cascade_value,
-                  cr4de_quali: newQuali,
-                });
-              }}
+              onSave={mutation}
+              queryKeyToInvalidate={[
+                DataTable.RISK_CASCADE,
+                riskFile._cr4de_risk_file_value,
+              ]}
             />
           </LeftBorderSection>
         </Box>
