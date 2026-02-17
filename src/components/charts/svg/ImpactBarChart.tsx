@@ -18,7 +18,7 @@ import {
   RiskSnapshotResults,
 } from "../../../types/dataverse/DVRiskSnapshot";
 import {
-  categoryImpactScale5to7,
+  diScale5FromEuros,
   ImpactColor,
   iScale7FromEuros,
 } from "../../../functions/indicators/impact";
@@ -50,26 +50,54 @@ export default function ImpactBarChart({
 
   let H =
     maxScales === 7
-      ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.h.scaleCat)
-      : riskFile.cr4de_quanti[scenario].ti.h.scaleCat;
+      ? iScale7FromEuros(riskFile.cr4de_quanti[scenario].ti.h.euros)
+      : diScale5FromEuros(riskFile.cr4de_quanti[scenario].ti.h.euros);
   let S =
     maxScales === 7
-      ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.s.scaleCat)
-      : riskFile.cr4de_quanti[scenario].ti.s.scaleCat;
+      ? iScale7FromEuros(riskFile.cr4de_quanti[scenario].ti.s.euros)
+      : diScale5FromEuros(riskFile.cr4de_quanti[scenario].ti.s.euros);
   let E =
     maxScales === 7
-      ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.e.scaleCat)
-      : riskFile.cr4de_quanti[scenario].ti.e.scaleCat;
+      ? iScale7FromEuros(riskFile.cr4de_quanti[scenario].ti.e.euros)
+      : diScale5FromEuros(riskFile.cr4de_quanti[scenario].ti.e.euros);
   let F =
     maxScales === 7
-      ? categoryImpactScale5to7(riskFile.cr4de_quanti[scenario].ti.f.scaleCat)
-      : riskFile.cr4de_quanti[scenario].ti.f.scaleCat;
+      ? iScale7FromEuros(riskFile.cr4de_quanti[scenario].ti.f.euros)
+      : diScale5FromEuros(riskFile.cr4de_quanti[scenario].ti.f.euros);
 
   if (results) {
-    H = iScale7FromEuros(results[scenario].impactStatistics?.sampleMean.h || 0);
-    S = iScale7FromEuros(results[scenario].impactStatistics?.sampleMean.s || 0);
-    E = iScale7FromEuros(results[scenario].impactStatistics?.sampleMean.e || 0);
-    F = iScale7FromEuros(results[scenario].impactStatistics?.sampleMean.f || 0);
+    H =
+      maxScales === 7
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMean.h || 0,
+          )
+        : diScale5FromEuros(
+            results[scenario].impactStatistics?.sampleMean.h || 0,
+          );
+    S =
+      maxScales === 7
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMean.s || 0,
+          )
+        : diScale5FromEuros(
+            results[scenario].impactStatistics?.sampleMean.h || 0,
+          );
+    E =
+      maxScales === 7
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMean.e || 0,
+          )
+        : diScale5FromEuros(
+            results[scenario].impactStatistics?.sampleMean.h || 0,
+          );
+    F =
+      maxScales === 7
+        ? iScale7FromEuros(
+            results[scenario].impactStatistics?.sampleMean.f || 0,
+          )
+        : diScale5FromEuros(
+            results[scenario].impactStatistics?.sampleMean.h || 0,
+          );
   }
 
   const data = [

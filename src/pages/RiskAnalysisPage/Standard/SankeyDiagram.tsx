@@ -136,6 +136,8 @@ export default function SankeyDiagram({
             results={results}
             focusedImpact={focusedImpact}
             onClickBar={(i: IMPACT_CATEGORY | DAMAGE_INDICATOR) => {
+              if (!results) return;
+
               if (focusedImpact === i) {
                 setFocusedImpact(null);
               } else {

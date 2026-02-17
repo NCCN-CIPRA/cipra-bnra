@@ -70,7 +70,7 @@ export type CascadeSnapshots<
   Te = unknown,
   Rc = CauseSnapshotResults,
   Re = EffectSnapshotResults,
-  Cp = CPMatrix
+  Cp = CPMatrix,
 > = {
   all: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re, Cp>[];
   causes: DVCascadeSnapshot<unknown, Tc, Te, Rc, Re, Cp>[];
@@ -85,7 +85,7 @@ export type CascadeSnapshotCatalogue<
   Tc = unknown,
   Te = unknown,
   Rc = CauseSnapshotResults,
-  Re = EffectSnapshotResults
+  Re = EffectSnapshotResults,
 > = {
   [key: string]: CascadeSnapshots<Tc, Te, Rc, Re>;
 };
@@ -93,7 +93,7 @@ export type CascadeSnapshotCatalogue<
 export function getCauses(
   riskFile: SmallRisk,
   cascades: DVRiskCascade[],
-  hazardCatalogue: { [id: string]: SmallRisk }
+  hazardCatalogue: { [id: string]: SmallRisk },
 ): DVRiskCascade<SmallRisk, SmallRisk>[] {
   return cascades
     .filter(
@@ -102,7 +102,7 @@ export function getCauses(
         (hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type ===
           RISK_TYPE.STANDARD ||
           hazardCatalogue[c._cr4de_cause_hazard_value].cr4de_risk_type ===
-            RISK_TYPE.MANMADE)
+            RISK_TYPE.MANMADE),
     )
     .map((c) => ({
       ...c,
@@ -122,7 +122,7 @@ export function getCausesNew(
         riskFile: DVRiskSnapshot;
         cascades: DVCascadeSnapshot[];
         hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
-      }
+      },
 ): DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[] {
   if ("cr4de_riskfilesid" in vars.riskFile) {
     // SmallRisk
@@ -139,15 +139,15 @@ export function getCausesNew(
           (hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_risk_type ===
             RISK_TYPE.STANDARD ||
             hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_risk_type ===
-              RISK_TYPE.MANMADE)
+              RISK_TYPE.MANMADE),
       )
       .map((c) =>
         parseCascadeSnapshot(
           snapshotFromRiskCascade(
             hazardCatalogue[c._cr4de_cause_hazard_value],
-            c
-          )
-        )
+            c,
+          ),
+        ),
       )
       .map((c) => ({
         ...c,
@@ -170,7 +170,7 @@ export function getCausesNew(
         (hazardCatalogue[c._cr4de_cause_risk_value]?.cr4de_risk_type ===
           RISK_TYPE.STANDARD ||
           hazardCatalogue[c._cr4de_cause_risk_value]?.cr4de_risk_type ===
-            RISK_TYPE.MANMADE)
+            RISK_TYPE.MANMADE),
     )
     .map((c) => ({
       ...c,
@@ -182,7 +182,7 @@ export function getCausesNew(
 export function getCausesWithDP(
   riskFile: DVRiskFile,
   cascades: Cascades,
-  scenario: SCENARIOS
+  scenario: SCENARIOS,
 ) {
   return [
     {
@@ -201,14 +201,22 @@ export function getCausesWithDP(
 export function getCausesWithDPNew(
   riskFile: DVRiskSnapshot,
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>,
-  scenario: SCENARIOS
+  scenario: SCENARIOS,
+  causes?: DVCascadeSnapshot<
+    unknown,
+    DVRiskSnapshot,
+    DVRiskSnapshot,
+    CauseSnapshotResults,
+    EffectSnapshotResults,
+    CPMatrix
+  >[],
 ) {
   return [
     {
       name: "2A.dp.title",
       p: riskFile.cr4de_quanti[scenario].dp.scaleTot,
     },
-    ...cascades.causes.map((c) => ({
+    ...(causes || cascades.causes).map((c) => ({
       id: c.cr4de_cause_risk._cr4de_risk_file_value,
       name: `risk.${c.cr4de_cause_risk.cr4de_hazard_id}.name`,
       p: c.cr4de_quanti_cause[scenario].ip.yearly.scale,
@@ -221,10 +229,10 @@ export function getCauseSummaries(
   riskFile: DVRiskSnapshot,
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>,
   scenario: SCENARIOS,
-  showOther: boolean
+  showOther: boolean,
 ): CauseRisksSummary[] {
   const causes = getCausesWithDPNew(riskFile, cascades, scenario).sort(
-    (a, b) => b.p - a.p
+    (a, b) => b.p - a.p,
   );
 
   let minP = 0;
@@ -278,7 +286,7 @@ export function getCauseSummaries(
 export function getEffects(
   riskFile: SmallRisk,
   cascades: DVRiskCascade[],
-  hazardCatalogue: { [id: string]: SmallRisk }
+  hazardCatalogue: { [id: string]: SmallRisk },
 ): DVRiskCascade<SmallRisk, SmallRisk>[] {
   return cascades
     .filter((c) => c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid)
@@ -300,7 +308,7 @@ export function getEffectsNew(
         riskFile: DVRiskSnapshot;
         cascades: DVCascadeSnapshot[];
         hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
-      }
+      },
 ): DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[] {
   if ("cr4de_riskfilesid" in vars.riskFile) {
     // SmallRisk
@@ -316,9 +324,9 @@ export function getEffectsNew(
         parseCascadeSnapshot(
           snapshotFromRiskCascade(
             hazardCatalogue[c._cr4de_cause_hazard_value],
-            c
-          )
-        )
+            c,
+          ),
+        ),
       )
       .map((c) => ({
         ...c,
@@ -336,7 +344,7 @@ export function getEffectsNew(
 
   return cascades
     .filter(
-      (c) => c._cr4de_cause_risk_value === riskFile._cr4de_risk_file_value
+      (c) => c._cr4de_cause_risk_value === riskFile._cr4de_risk_file_value,
     )
     .map((c) => ({
       ...c,
@@ -348,7 +356,7 @@ export function getEffectsNew(
 export function getEffectsWithDI(
   riskFile: DVRiskFile,
   cascades: Cascades,
-  scenario: SCENARIOS
+  scenario: SCENARIOS,
 ) {
   return [
     {
@@ -393,7 +401,15 @@ export function getEffectsWithDI(
 export function getEffectsWithDINew(
   riskFile: DVRiskSnapshot,
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>,
-  scenario: SCENARIOS
+  scenario: SCENARIOS,
+  effects?: DVCascadeSnapshot<
+    unknown,
+    DVRiskSnapshot,
+    DVRiskSnapshot,
+    CauseSnapshotResults,
+    EffectSnapshotResults,
+    CPMatrix
+  >[],
 ) {
   return [
     {
@@ -413,7 +429,7 @@ export function getEffectsWithDINew(
         riskFile.cr4de_quanti[scenario].di.fa.scaleTot +
         riskFile.cr4de_quanti[scenario].di.fb.scaleTot,
     },
-    ...cascades.effects.map((e) => ({
+    ...(effects || cascades.effects).map((e) => ({
       id: e.cr4de_effect_risk._cr4de_risk_file_value,
       name: `risk.${e.cr4de_effect_risk.cr4de_hazard_id}.name`,
       i: e.cr4de_quanti_effect[scenario].ii.all.scale,
@@ -439,10 +455,10 @@ export function getEffectsSummaries(
   riskSnapshot: DVRiskSnapshot,
   cascades: CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>,
   scenario: SCENARIOS,
-  showOther: boolean
+  showOther: boolean,
 ): EffectRisksSummary[] {
   const effects = getEffectsWithDINew(riskSnapshot, cascades, scenario).sort(
-    (a, b) => b.i - a.i
+    (a, b) => b.i - a.i,
   );
   const Itot = effects.reduce((tot, e) => tot + e.i, 0.000000001);
 
@@ -495,7 +511,7 @@ export function getCatalyzingEffects<T extends DVRiskCascade>(
   riskFile: SmallRisk,
   cascades: T[],
   hazardCatalogue: { [id: string]: SmallRisk },
-  includeClimateChange: boolean = true
+  includeClimateChange: boolean = true,
 ): DVRiskCascade<SmallRisk, SmallRisk>[] {
   return cascades
     .filter(
@@ -505,8 +521,8 @@ export function getCatalyzingEffects<T extends DVRiskCascade>(
           RISK_TYPE.EMERGING &&
         (includeClimateChange ||
           hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_title.indexOf(
-            "Climate"
-          ) < 0)
+            "Climate",
+          ) < 0),
     )
     .map((c) => ({
       ...c,
@@ -527,7 +543,7 @@ export function getCatalyzingEffectsNew(
         cascades: DVCascadeSnapshot[];
         hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
       },
-  includeClimateChange: boolean = true
+  includeClimateChange: boolean = true,
 ): DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[] {
   if ("cr4de_riskfilesid" in vars.riskFile) {
     // SmallRisk
@@ -545,16 +561,16 @@ export function getCatalyzingEffectsNew(
             RISK_TYPE.EMERGING &&
           (includeClimateChange ||
             hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_title.indexOf(
-              "Climate"
-            ) < 0)
+              "Climate",
+            ) < 0),
       )
       .map((c) =>
         parseCascadeSnapshot(
           snapshotFromRiskCascade(
             hazardCatalogue[c._cr4de_cause_hazard_value],
-            c
-          )
-        )
+            c,
+          ),
+        ),
       )
       .map((c) => ({
         ...c,
@@ -578,8 +594,8 @@ export function getCatalyzingEffectsNew(
           RISK_TYPE.EMERGING &&
         (includeClimateChange ||
           hazardCatalogue[c._cr4de_cause_risk_value]?.cr4de_title.indexOf(
-            "Climate"
-          ) < 0)
+            "Climate",
+          ) < 0),
     )
     .map((c) => ({
       ...c,
@@ -591,7 +607,7 @@ export function getCatalyzingEffectsNew(
 export function getClimateChange<T extends DVRiskCascade>(
   riskFile: SmallRisk,
   cascades: T[],
-  hazardCatalogue: { [id: string]: SmallRisk }
+  hazardCatalogue: { [id: string]: SmallRisk },
 ): DVRiskCascade<SmallRisk, SmallRisk> | null {
   const cc = cascades.find(
     (c) =>
@@ -599,8 +615,8 @@ export function getClimateChange<T extends DVRiskCascade>(
       hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_risk_type ===
         RISK_TYPE.EMERGING &&
       hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_title.indexOf(
-        "Climate"
-      ) >= 0
+        "Climate",
+      ) >= 0,
   );
   if (cc) {
     return {
@@ -623,7 +639,7 @@ export function getClimateChangeNew(
         riskFile: DVRiskSnapshot;
         cascades: DVCascadeSnapshot[];
         hazardCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>;
-      }
+      },
 ): DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot> | null {
   if ("cr4de_riskfilesid" in vars.riskFile) {
     // SmallRisk
@@ -639,15 +655,15 @@ export function getClimateChangeNew(
         hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_risk_type ===
           RISK_TYPE.EMERGING &&
         hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_title.indexOf(
-          "Climate"
-        ) >= 0
+          "Climate",
+        ) >= 0,
     );
     if (cc) {
       const ss = parseCascadeSnapshot(
         snapshotFromRiskCascade(
           hazardCatalogue[cc._cr4de_cause_hazard_value],
-          cc
-        )
+          cc,
+        ),
       );
       return {
         ...ss,
@@ -669,8 +685,8 @@ export function getClimateChangeNew(
         hazardCatalogue[c._cr4de_cause_risk_value]?.cr4de_risk_type ===
           RISK_TYPE.EMERGING &&
         hazardCatalogue[c._cr4de_cause_risk_value]?.cr4de_title.indexOf(
-          "Climate"
-        ) >= 0
+          "Climate",
+        ) >= 0,
     );
     if (cc) {
       return {
@@ -686,7 +702,7 @@ export function getClimateChangeNew(
 
 export function getCascadeField(
   causeScenario: SCENARIOS,
-  effectScenario: SCENARIOS
+  effectScenario: SCENARIOS,
 ): keyof CascadeAnalysisInput {
   if (causeScenario === SCENARIOS.CONSIDERABLE) {
     if (effectScenario === SCENARIOS.CONSIDERABLE) {
@@ -733,7 +749,7 @@ export function getCascadeInput(ca: DVCascadeAnalysis): CascadeAnalysisInput {
 
 export const getAverageCP = (
   causeScenario: SCENARIO_LETTER,
-  effect: CascadeCalculation
+  effect: CascadeCalculation,
 ): number => {
   const ii_s2c = effect[`${causeScenario}2c`] * effect.effect.ti_c;
   const ii_s2m = effect[`${causeScenario}2m`] * effect.effect.ti_m;
@@ -752,18 +768,18 @@ export const getAverageCP = (
 export const getCascadesCatalogue = (
   riskFiles: DVRiskFile[],
   rc: { [id: string]: SmallRisk },
-  cascadeList: DVRiskCascade[]
+  cascadeList: DVRiskCascade[],
 ): CascadeCatalogue => {
   return riskFiles.reduce(
     (acc, rf) => getCascades(rf, acc, rc)(cascadeList),
-    {} as CascadeCatalogue
+    {} as CascadeCatalogue,
   );
 };
 
 export const getCascadesCatalogueNew = (
   riskFiles: DVRiskFile[],
   rc: RiskCatalogue<unknown, RiskSnapshotResults>,
-  cascadeList: DVRiskCascade[]
+  cascadeList: DVRiskCascade[],
 ): CascadeSnapshotCatalogue<
   DVRiskSnapshot<unknown, RiskSnapshotResults>,
   DVRiskSnapshot<unknown, RiskSnapshotResults>
@@ -773,7 +789,7 @@ export const getCascadesCatalogueNew = (
     {} as CascadeSnapshotCatalogue<
       DVRiskSnapshot<unknown, RiskSnapshotResults>,
       DVRiskSnapshot<unknown, RiskSnapshotResults>
-    >
+    >,
   );
 };
 
@@ -787,20 +803,20 @@ export const getCascadesSnapshotCatalogue = (
     SerializedCauseSnapshotResults,
     SerializedEffectSnapshotResults,
     SerializedCPMatrix
-  >[]
+  >[],
 ): CascadeSnapshotCatalogue<
   DVRiskSnapshot<unknown, RiskSnapshotResults>,
   DVRiskSnapshot<unknown, RiskSnapshotResults>
 > => {
   const parsedSnapshots = cascadeSnapshotList.map((c) =>
-    parseCascadeSnapshot(c)
+    parseCascadeSnapshot(c),
   );
   return riskFiles.reduce(
     (acc, rf) => getCascadeSnapshots(rf, acc, rc)(parsedSnapshots),
     {} as CascadeSnapshotCatalogue<
       DVRiskSnapshot<unknown, RiskSnapshotResults>,
       DVRiskSnapshot<unknown, RiskSnapshotResults>
-    >
+    >,
   );
 };
 
@@ -812,7 +828,7 @@ export const getParsedCascadeSnapshots = (
     SerializedCauseSnapshotResults,
     SerializedEffectSnapshotResults
   >[],
-  riskSnapshotCatalogue: RiskCatalogue
+  riskSnapshotCatalogue: RiskCatalogue,
 ): DVCascadeSnapshot<unknown, DVRiskSnapshot, DVRiskSnapshot>[] => {
   return cascadeSnapshotList.map((c) => ({
     ...c,
@@ -832,7 +848,7 @@ export const getParsedCascadesSnapshotCatalogue = (
     unknown,
     CauseSnapshotResults,
     EffectSnapshotResults
-  >[]
+  >[],
 ): CascadeSnapshotCatalogue<
   DVRiskSnapshot<unknown, RiskSnapshotResults>,
   DVRiskSnapshot<unknown, RiskSnapshotResults>
@@ -842,7 +858,7 @@ export const getParsedCascadesSnapshotCatalogue = (
     {} as CascadeSnapshotCatalogue<
       DVRiskSnapshot<unknown, RiskSnapshotResults>,
       DVRiskSnapshot<unknown, RiskSnapshotResults>
-    >
+    >,
   );
 };
 
@@ -850,7 +866,7 @@ export const getCascades =
   (
     riskFile: DVRiskFile,
     cs: { [riskId: string]: Cascades },
-    hc: { [id: string]: SmallRisk }
+    hc: { [id: string]: SmallRisk },
   ) =>
   (rcResult: DVRiskCascade[]) => {
     return {
@@ -863,7 +879,7 @@ export const getCascadesNew =
   (
     riskFile: DVRiskFile,
     cs: { [riskId: string]: CascadeSnapshots },
-    hc: RiskCatalogue<unknown, RiskSnapshotResults>
+    hc: RiskCatalogue<unknown, RiskSnapshotResults>,
   ) =>
   (rcResult: DVRiskCascade[]) => {
     return {
@@ -881,7 +897,7 @@ export function getCascadeSnapshots(
     DVRiskSnapshot<unknown, RiskSnapshotResults>,
     DVRiskSnapshot<unknown, RiskSnapshotResults>
   >,
-  hc: RiskCatalogue<unknown, RiskSnapshotResults>
+  hc: RiskCatalogue<unknown, RiskSnapshotResults>,
 ) {
   return (rcResult: DVCascadeSnapshot[]) => {
     return {
@@ -889,7 +905,7 @@ export function getCascadeSnapshots(
       [riskSnapshot._cr4de_risk_file_value]: getRiskCascadeSnapshots(
         riskSnapshot,
         rcResult,
-        hc
+        hc,
       ),
     } as CascadeSnapshotCatalogue<
       DVRiskSnapshot<unknown, RiskSnapshotResults>,
@@ -901,7 +917,7 @@ export function getCascadeSnapshots(
 export const getRiskCascades = (
   riskFile: DVRiskFile,
   cascades: DVRiskCascade[],
-  hc: { [id: string]: SmallRisk }
+  hc: { [id: string]: SmallRisk },
 ): Cascades => {
   const causes = getCauses(riskFile, cascades, hc);
   const effects = getEffects(riskFile, cascades, hc);
@@ -920,13 +936,13 @@ export const getRiskCascades = (
 export const getRiskCascadesNew = (
   riskFile: DVRiskFile,
   cascades: DVRiskCascade[],
-  hc: RiskCatalogue<unknown, RiskSnapshotResults>
+  hc: RiskCatalogue<unknown, RiskSnapshotResults>,
 ): CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot> => {
   const causes = getCausesNew({ riskFile, cascades, hazardCatalogue: hc });
   const effects = getEffectsNew({ riskFile, cascades, hazardCatalogue: hc });
   const catalyzingEffects = getCatalyzingEffectsNew(
     { riskFile, cascades, hazardCatalogue: hc },
-    false
+    false,
   );
   const climateChange = getClimateChangeNew({
     riskFile,
@@ -946,7 +962,7 @@ export const getRiskCascadesNew = (
 export function getRiskCascadeSnapshots(
   riskSnapshot: DVRiskSnapshot,
   cascades: DVCascadeSnapshot[],
-  riskCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>
+  riskCatalogue: RiskCatalogue<unknown, RiskSnapshotResults>,
 ): CascadeSnapshots<
   DVRiskSnapshot,
   DVRiskSnapshot,
@@ -969,7 +985,7 @@ export function getRiskCascadeSnapshots(
       cascades,
       hazardCatalogue: riskCatalogue,
     },
-    false
+    false,
   );
   const climateChange = getClimateChangeNew({
     riskFile: riskSnapshot,

@@ -6,7 +6,10 @@ import {
   Tooltip,
   TooltipContentProps,
 } from "recharts";
-import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import {
+  DVRiskSnapshot,
+  parseRiskSnapshot,
+} from "../../types/dataverse/DVRiskSnapshot";
 import {
   CauseRisksSummary,
   DVRiskSummary,
@@ -24,13 +27,17 @@ import {
 import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../../pages/BasePage";
-import { Indicators } from "../../types/global";
+import { Environment, Indicators } from "../../types/global";
 import {
   pScale7FromReturnPeriodMonths,
   pScale7to5,
   returnPeriodMonthsFromYearlyEventRate,
 } from "../../functions/indicators/probability";
 import { RISK_CATEGORY, RISK_TYPE } from "../../types/dataverse/Riskfile";
+import { useQuery } from "@tanstack/react-query";
+import useAPI, { DataTable } from "../../hooks/useAPI";
+import { parseCascadeSnapshot } from "../../types/dataverse/DVRiskCascade";
+import { CascadeSnapshots, getCausesWithDPNew } from "../../functions/cascades";
 
 export type CauseSankeyNode = {
   name: string;
@@ -107,6 +114,44 @@ export default function ProbabilitySankey({
   tooltip?: boolean;
   onClick: (id: string) => void;
 }) {
+  const { user, environment } = useOutletContext<BasePageContext>();
+  const api = useAPI();
+
+  const { data: publicSnapshots } = useQuery({
+    queryKey: [DataTable.RISK_SNAPSHOT],
+    queryFn: () => api.getRiskSnapshots(),
+    enabled: Boolean(
+      user && user.roles.verified && environment === Environment.PUBLIC,
+    ),
+    select: (data) => data.map((d) => parseRiskSnapshot(d)),
+  });
+  const { data: publicCauses } = useQuery({
+    queryKey: [
+      DataTable.CASCADE_SNAPSHOT,
+      "causes",
+      riskSummary._cr4de_risk_file_value,
+    ],
+    queryFn: () =>
+      api.getCascadeSnapshots(
+        `$filter=_cr4de_effect_risk_value eq ${riskSummary._cr4de_risk_file_value}`,
+      ),
+    enabled: Boolean(
+      user &&
+        user.roles.verified &&
+        environment === Environment.PUBLIC &&
+        publicSnapshots !== undefined &&
+        riskSnapshot,
+    ),
+    select: (data) =>
+      data.map((d) => ({
+        ...parseCascadeSnapshot(d),
+        cr4de_cause_risk: publicSnapshots!.find(
+          (ps) => ps._cr4de_risk_file_value === d._cr4de_cause_risk_value,
+        ) as DVRiskSnapshot,
+        cr4de_effect_risk: riskSnapshot,
+      })),
+  });
+
   const isAction =
     (riskSnapshot.cr4de_category === RISK_CATEGORY.MANMADE ||
       riskSnapshot.cr4de_title.toLowerCase().indexOf("attack")) &&
@@ -115,10 +160,64 @@ export default function ProbabilitySankey({
   let causes: SankeyCause[] = [];
 
   if (!results && riskSummary.cr4de_causing_risks) {
-    causes =
-      typeof riskSummary.cr4de_causing_risks === "string"
-        ? JSON.parse(riskSummary.cr4de_causing_risks)
-        : riskSummary.cr4de_causing_risks;
+    if (scenario === riskSummary.cr4de_mrs) {
+      causes =
+        typeof riskSummary.cr4de_causing_risks === "string"
+          ? JSON.parse(riskSummary.cr4de_causing_risks)
+          : riskSummary.cr4de_causing_risks;
+    } else if (publicCauses !== undefined) {
+      const rawCauses = getCausesWithDPNew(
+        riskSnapshot,
+        {} as CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>,
+        scenario,
+        publicCauses,
+      ).sort((a, b) => b.p - a.p);
+
+      let minP = 0;
+      let cumulP = 0;
+
+      const Ptot = rawCauses.reduce((tot, e) => tot + e.p, 0.000000001);
+
+      for (const c of rawCauses) {
+        cumulP += c.p / Ptot;
+
+        if (cumulP >= 0.805) {
+          minP = c.p;
+          break;
+        }
+      }
+
+      const selectedCauses = rawCauses
+        .filter((c) => c.p >= minP)
+        .map((c) => ({
+          cause_risk_id: "id" in c ? c.id : "",
+          cause_risk_title: "id" in c ? c.name : "No underlying cause",
+          cause_risk_p: c.p / Ptot,
+        }));
+      const otherCauses =
+        selectedCauses.length < rawCauses.length
+          ? [
+              {
+                cause_risk_id: "",
+                cause_risk_title: "Other causes",
+                cause_risk_p:
+                  rawCauses
+                    .filter((c) => c.p < minP)
+                    .reduce((otherP, c) => otherP + c.p, 0) / Ptot,
+                other_causes: rawCauses
+                  .filter((c) => c.p < minP)
+                  .map((c) => ({
+                    cause_risk_id: "id" in c ? c.id : "",
+                    cause_risk_title:
+                      "id" in c ? c.name : "No underlying cause",
+                    cause_risk_p: c.p / Ptot,
+                  })),
+              },
+            ]
+          : [];
+
+      causes = [...selectedCauses, ...otherCauses];
+    }
   } else if (
     results &&
     (results[scenario].probabilityStatistics?.relativeContributions?.length ||

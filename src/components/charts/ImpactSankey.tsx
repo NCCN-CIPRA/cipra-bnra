@@ -10,7 +10,10 @@ import {
   DVRiskSummary,
   EffectRisksSummary,
 } from "../../types/dataverse/DVRiskSummary";
-import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import {
+  DVRiskSnapshot,
+  parseRiskSnapshot,
+} from "../../types/dataverse/DVRiskSnapshot";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import { LinkProps, NodeProps, SankeyData } from "recharts/types/chart/Sankey";
 import { useTranslation } from "react-i18next";
@@ -31,6 +34,16 @@ import { AggregatedImpacts } from "../../types/simulation";
 import { iScale7FromEuros } from "../../functions/indicators/impact";
 import { DAMAGE_INDICATOR_COLORS } from "../../functions/getImpactColor";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../../pages/BasePage";
+import useAPI, { DataTable } from "../../hooks/useAPI";
+import { useQuery } from "@tanstack/react-query";
+import { Environment } from "../../types/global";
+import { parseCascadeSnapshot } from "../../types/dataverse/DVRiskCascade";
+import {
+  CascadeSnapshots,
+  getEffectsWithDINew,
+} from "../../functions/cascades";
 
 const baseY = 50;
 
@@ -111,6 +124,45 @@ export default function ImpactSankey({
   focusedImpact?: IMPACT_CATEGORY | DAMAGE_INDICATOR | null;
   onClick: (id: string) => void;
 }) {
+  const { user, environment } = useOutletContext<BasePageContext>();
+  const api = useAPI();
+
+  const { data: publicSnapshots } = useQuery({
+    queryKey: [DataTable.RISK_SNAPSHOT],
+    queryFn: () => api.getRiskSnapshots(),
+    enabled: Boolean(
+      user && user.roles.verified && environment === Environment.PUBLIC,
+    ),
+    select: (data) => data.map((d) => parseRiskSnapshot(d)),
+  });
+
+  const { data: publicEffects } = useQuery({
+    queryKey: [
+      DataTable.CASCADE_SNAPSHOT,
+      "effects",
+      riskSummary._cr4de_risk_file_value,
+    ],
+    queryFn: () =>
+      api.getCascadeSnapshots(
+        `$filter=_cr4de_cause_risk_value eq ${riskSummary._cr4de_risk_file_value}`,
+      ),
+    enabled: Boolean(
+      user &&
+        user.roles.verified &&
+        environment === Environment.PUBLIC &&
+        publicSnapshots !== undefined &&
+        riskSnapshot,
+    ),
+    select: (data) =>
+      data.map((d) => ({
+        ...parseCascadeSnapshot(d),
+        cr4de_effect_risk: publicSnapshots!.find(
+          (ps) => ps._cr4de_risk_file_value === d._cr4de_effect_risk_value,
+        ) as DVRiskSnapshot,
+        cr4de_cause_risk: riskSnapshot,
+      })),
+  });
+
   let effects: EffectRisksSummary[] = [];
 
   const isActor = riskSnapshot.cr4de_risk_type === RISK_TYPE.MANMADE;
@@ -120,10 +172,63 @@ export default function ImpactSankey({
     : "all";
 
   if (!results && riskSummary.cr4de_effect_risks) {
-    effects =
-      typeof riskSummary.cr4de_effect_risks === "string"
-        ? JSON.parse(riskSummary.cr4de_effect_risks)
-        : riskSummary.cr4de_effect_risks;
+    if (scenario === riskSummary.cr4de_mrs) {
+      effects =
+        typeof riskSummary.cr4de_effect_risks === "string"
+          ? JSON.parse(riskSummary.cr4de_effect_risks)
+          : riskSummary.cr4de_effect_risks;
+    } else if (publicEffects !== undefined) {
+      const rawEffects = getEffectsWithDINew(
+        riskSnapshot,
+        {} as CascadeSnapshots<DVRiskSnapshot, DVRiskSnapshot>,
+        scenario,
+        publicEffects,
+      ).sort((a, b) => b.i - a.i);
+
+      const Itot = rawEffects.reduce((tot, e) => tot + e.i, 0.000000001);
+
+      let minI = 0;
+      let cumulI = 0;
+      for (const e of rawEffects) {
+        cumulI += e.i / Itot;
+
+        if (cumulI >= 0.8) {
+          minI = e.i;
+          break;
+        }
+      }
+
+      const selectedEffects = rawEffects
+        .filter((e) => e.i >= minI)
+        .map((e) => ({
+          effect_risk_id: "id" in e ? e.id : "",
+          effect_risk_title: e.name,
+          effect_risk_i: e.i / Itot,
+        }));
+
+      const otherEffects =
+        selectedEffects.length < rawEffects.length
+          ? [
+              {
+                effect_risk_id: "",
+                effect_risk_title: "Other effects",
+                effect_risk_i:
+                  rawEffects
+                    .filter((c) => c.i < minI)
+                    .reduce((otherI, c) => otherI + c.i, 0) / Itot,
+                other_effects: rawEffects
+                  .filter((c) => c.i < minI)
+                  .map((e) => ({
+                    effect_risk_id: "id" in e ? e.id : "",
+                    effect_risk_title: e.name,
+                    effect_risk_i: e.i / Itot,
+                  })),
+              },
+            ]
+          : [];
+
+      effects = [...selectedEffects, ...otherEffects];
+    }
   } else if (results) {
     const sums =
       results[scenario].impactStatistics?.relativeContributions.reduce(
