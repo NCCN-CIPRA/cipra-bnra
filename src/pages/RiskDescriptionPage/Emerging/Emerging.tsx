@@ -49,7 +49,7 @@ export default function Emerging({
       </Box>
 
       <Box id="sources">
-        <RiskFileBibliography risk={riskSummary} />
+        <RiskFileBibliography riskFileId={riskSummary._cr4de_risk_file_value} />
       </Box>
 
       <BNRASpeedDial

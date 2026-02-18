@@ -49,9 +49,9 @@ export default function RiskEvolutionPage() {
       ),
     enabled: Boolean(
       user &&
-        user.roles.analist &&
-        environment === Environment.DYNAMIC &&
-        riskFile,
+      user.roles.analist &&
+      environment === Environment.DYNAMIC &&
+      riskFile,
     ),
     select: (data) =>
       data.map((d) => ({
@@ -74,9 +74,9 @@ export default function RiskEvolutionPage() {
       ),
     enabled: Boolean(
       user &&
-        user.roles.verified &&
-        environment === Environment.PUBLIC &&
-        riskFile,
+      user.roles.verified &&
+      environment === Environment.PUBLIC &&
+      riskFile,
     ),
     select: (data) =>
       data.map((d) => ({
@@ -167,7 +167,7 @@ export default function RiskEvolutionPage() {
           </Box>
         )}
 
-        <RiskFileBibliography risk={riskSummary} />
+        <RiskFileBibliography riskFileId={riskSummary._cr4de_risk_file_value} />
 
         <BNRASpeedDial
           offset={{ x: 0, y: 56 }}

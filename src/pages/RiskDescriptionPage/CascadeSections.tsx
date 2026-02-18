@@ -35,7 +35,7 @@ function CascadeSections({
   getAttachments: (
     lazyOptions?:
       | Partial<GetRecordsParams<DVAttachment<unknown, unknown>>>
-      | undefined
+      | undefined,
   ) => Promise<unknown>;
 }) {
   const api = useAPI();
@@ -49,14 +49,14 @@ function CascadeSections({
               (rf) =>
                 rf.cr4de_risk_type !== "Emerging Risk" &&
                 !causes.find(
-                  (c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid
-                )
+                  (c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid,
+                ),
             )
             .sort((a, b) => {
               return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
             })
         : [],
-    [causes, otherHazards]
+    [causes, otherHazards],
   );
   const causesChosen = useMemo(
     () =>
@@ -69,7 +69,7 @@ function CascadeSections({
             }))
             .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
-    [causes]
+    [causes],
   );
 
   const effectsChoices = useMemo<SmallRisk[]>(
@@ -80,12 +80,12 @@ function CascadeSections({
               (rf) =>
                 rf.cr4de_risk_type === "Standard Risk" &&
                 !effects.find(
-                  (c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid
-                )
+                  (c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid,
+                ),
             )
             .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
-    [effects, otherHazards]
+    [effects, otherHazards],
   );
   const effectsChosen = useMemo(
     () =>
@@ -98,7 +98,7 @@ function CascadeSections({
             }))
             .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
-    [effects]
+    [effects],
   );
 
   const catalyserChoices = useMemo<SmallRisk[]>(
@@ -109,12 +109,12 @@ function CascadeSections({
               (rf) =>
                 rf.cr4de_risk_type === "Emerging Risk" &&
                 !catalysing.find(
-                  (c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid
-                )
+                  (c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid,
+                ),
             )
             .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
-    [catalysing, otherHazards]
+    [catalysing, otherHazards],
   );
   const catalyserChosen = useMemo(
     () =>
@@ -127,7 +127,7 @@ function CascadeSections({
             }))
             .sort((a, b) => a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id))
         : [],
-    [catalysing]
+    [catalysing],
   );
 
   return (
@@ -192,7 +192,7 @@ function CascadeSections({
 
             <Attachments
               attachments={attachments}
-              riskFile={riskFile}
+              riskFileId={riskFile.cr4de_riskfilesid}
               field="causes"
               onUpdate={() =>
                 getAttachments({
@@ -263,7 +263,7 @@ function CascadeSections({
 
             <Attachments
               attachments={attachments}
-              riskFile={riskFile}
+              riskFileId={riskFile.cr4de_riskfilesid}
               field="effects"
               onUpdate={() =>
                 getAttachments({
@@ -334,7 +334,7 @@ function CascadeSections({
 
             <Attachments
               attachments={attachments}
-              riskFile={riskFile}
+              riskFileId={riskFile.cr4de_riskfilesid}
               field="effects"
               onUpdate={() =>
                 getAttachments({
@@ -405,7 +405,7 @@ function CascadeSections({
 
             <Attachments
               attachments={attachments}
-              riskFile={riskFile}
+              riskFileId={riskFile.cr4de_riskfilesid}
               field="effects"
               onUpdate={() =>
                 getAttachments({
@@ -484,7 +484,7 @@ function CascadeSections({
 
             <Attachments
               attachments={attachments}
-              riskFile={riskFile}
+              riskFileId={riskFile.cr4de_riskfilesid}
               field="catalysing_effects"
               onUpdate={() =>
                 getAttachments({

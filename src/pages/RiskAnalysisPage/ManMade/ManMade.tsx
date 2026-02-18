@@ -96,7 +96,7 @@ export default function ManMade({
           <MMImpactSection riskFile={riskFile} />
         </Box>
 
-        <RiskFileBibliography risk={riskSummary} />
+        <RiskFileBibliography riskFileId={riskSummary._cr4de_risk_file_value} />
         <BNRASpeedDial
           offset={{ x: 0, y: 56 }}
           exportAction={handleExportRiskfile(riskSummary, api, environment)}

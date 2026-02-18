@@ -22,10 +22,6 @@ import {
   DVRiskSummary,
 } from "../../types/dataverse/DVRiskSummary";
 import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
-import {
-  pScale7FromReturnPeriodMonths,
-  returnPeriodMonthsFromYearlyEventRate,
-} from "../../functions/indicators/probability";
 
 export type ActionSankeyNode = {
   name: string;

@@ -2,17 +2,15 @@ import { Box, Typography } from "@mui/material";
 import Attachments from "./Attachments";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
 import { useTranslation } from "react-i18next";
-import { DVRiskSummary } from "../types/dataverse/DVRiskSummary";
-import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { useOutletContext } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { RiskFilePageContext } from "../pages/BaseRiskFilePage";
 import { DataTable } from "../hooks/useAPI";
 
 export default function RiskFileBibliography({
-  risk,
+  riskFileId,
 }: {
-  risk: DVRiskSummary | DVRiskFile;
+  riskFileId: string;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -31,6 +29,7 @@ export default function RiskFileBibliography({
         }}
       >
         <Attachments
+          riskFileId={riskFileId}
           attachments={
             attachments
               ? attachments.map((a) =>
@@ -47,12 +46,9 @@ export default function RiskFileBibliography({
           }
           onUpdate={() =>
             queryClient.invalidateQueries({
-              queryKey: [
-                DataTable.ATTACHMENT,
-                "_cr4de_risk_file_value" in risk
-                  ? risk._cr4de_risk_file_value
-                  : risk.cr4de_riskfilesid,
-              ],
+              queryKey: riskFileId
+                ? [DataTable.ATTACHMENT, riskFileId]
+                : [DataTable.ATTACHMENT],
             })
           }
           alwaysOpen

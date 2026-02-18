@@ -24,7 +24,14 @@ export default function Bibliography({
   return (
     <Box className="risk-file-sources" sx={{ mt: 8 }}>
       <Typography variant="h5">{t("Bibliography")}</Typography>
-      <Box sx={{ borderLeft: "solid 8px #eee", px: 2, mt: 2, backgroundColor: "white" }}>
+      <Box
+        sx={{
+          borderLeft: "solid 8px #eee",
+          px: 2,
+          mt: 2,
+          backgroundColor: "white",
+        }}
+      >
         <Attachments
           attachments={
             attachments
@@ -36,11 +43,11 @@ export default function Bibliography({
                         cr4de_field: a.cr4de_field,
                         cr4de_referencedSource: a.cr4de_referencedSource,
                       }
-                    : a
+                    : a,
                 )
               : null
           }
-          riskFile={riskFile}
+          riskFileId={riskFile.cr4de_riskfilesid}
           cascades={cascades}
           onUpdate={() => reloadAttachments()}
           alwaysOpen

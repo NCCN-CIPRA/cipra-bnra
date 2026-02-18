@@ -57,13 +57,13 @@ export default function RiskPage() {
     onComplete: async (allCauses) => {
       setCauses(
         allCauses.filter(
-          (c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk"
-        )
+          (c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk",
+        ),
       );
       setCatalysing(
         allCauses.filter(
-          (c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk"
-        )
+          (c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk",
+        ),
       );
     },
   });
@@ -91,7 +91,7 @@ export default function RiskPage() {
           ips,
           rawRiskFile.cr4de_scenario_considerable,
           rawRiskFile.cr4de_scenario_major,
-          rawRiskFile.cr4de_scenario_extreme
+          rawRiskFile.cr4de_scenario_extreme,
         ),
       };
     },
@@ -106,13 +106,13 @@ export default function RiskPage() {
           onComplete: async (allCauses) => {
             setCauses(
               allCauses.filter(
-                (c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk"
-              )
+                (c) => c.cr4de_cause_hazard.cr4de_risk_type === "Standard Risk",
+              ),
             );
             setCatalysing(
               allCauses.filter(
-                (c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk"
-              )
+                (c) => c.cr4de_cause_hazard.cr4de_risk_type === "Emerging Risk",
+              ),
             );
           },
         });
@@ -146,14 +146,14 @@ export default function RiskPage() {
             .filter(
               (rf) =>
                 !causes.find(
-                  (c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid
-                )
+                  (c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid,
+                ),
             )
             .sort((a, b) => {
               return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
             })
         : [],
-    [causes, otherHazards]
+    [causes, otherHazards],
   );
   const causesChosen = useMemo(
     () =>
@@ -168,7 +168,7 @@ export default function RiskPage() {
               return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
             })
         : [],
-    [causes]
+    [causes],
   );
 
   const effectsChoices = useMemo<SmallRisk[]>(
@@ -177,14 +177,14 @@ export default function RiskPage() {
         ? otherHazards
             .filter((rf) =>
               effects.find(
-                (c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid
-              )
+                (c) => c._cr4de_effect_hazard_value === rf.cr4de_riskfilesid,
+              ),
             )
             .sort((a, b) => {
               return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
             })
         : [],
-    [effects, otherHazards]
+    [effects, otherHazards],
   );
   const effectsChosen = useMemo(
     () =>
@@ -199,7 +199,7 @@ export default function RiskPage() {
               return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
             })
         : [],
-    [effects]
+    [effects],
   );
 
   const catalysingChoices = useMemo<SmallRisk[]>(
@@ -210,14 +210,14 @@ export default function RiskPage() {
               (rf) =>
                 rf.cr4de_risk_type === "Emerging Risk" &&
                 !catalysing.find(
-                  (c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid
-                )
+                  (c) => c._cr4de_cause_hazard_value === rf.cr4de_riskfilesid,
+                ),
             )
             .sort((a, b) => {
               return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
             })
         : [],
-    [catalysing, otherHazards]
+    [catalysing, otherHazards],
   );
   const catalysingChosen = useMemo(
     () =>
@@ -232,7 +232,7 @@ export default function RiskPage() {
               return a.cr4de_hazard_id.localeCompare(b.cr4de_hazard_id);
             })
         : [],
-    [catalysing]
+    [catalysing],
   );
 
   return (
@@ -297,7 +297,7 @@ export default function RiskPage() {
             <Attachments
               attachments={attachments}
               field="definition"
-              riskFile={riskFile}
+              riskFileId={riskFile?.cr4de_riskfilesid}
               isExternal={true}
               onUpdate={() =>
                 getAttachments({
@@ -343,7 +343,7 @@ export default function RiskPage() {
               <Attachments
                 attachments={attachments}
                 field="historical_events"
-                riskFile={riskFile}
+                riskFileId={riskFile.cr4de_riskfilesid}
                 isExternal={true}
                 onUpdate={() =>
                   getAttachments({
@@ -382,7 +382,7 @@ export default function RiskPage() {
               <Attachments
                 attachments={attachments}
                 field="intensity_parameters"
-                riskFile={riskFile}
+                riskFileId={riskFile.cr4de_riskfilesid}
                 isExternal={true}
                 onUpdate={() =>
                   getAttachments({
@@ -436,7 +436,7 @@ export default function RiskPage() {
               <Attachments
                 attachments={attachments}
                 field="scenarios"
-                riskFile={riskFile}
+                riskFileId={riskFile.cr4de_riskfilesid}
                 isExternal={true}
                 onUpdate={() =>
                   getAttachments({
@@ -526,7 +526,7 @@ export default function RiskPage() {
               <Attachments
                 attachments={attachments}
                 field="scenarios"
-                riskFile={riskFile}
+                riskFileId={riskFile.cr4de_riskfilesid}
                 isExternal={true}
                 onUpdate={() =>
                   getAttachments({
@@ -592,7 +592,7 @@ export default function RiskPage() {
               <Attachments
                 attachments={attachments}
                 field="horizon_analysis"
-                riskFile={riskFile}
+                riskFileId={riskFile.cr4de_riskfilesid}
                 isExternal={true}
                 onUpdate={() =>
                   getAttachments({
@@ -649,7 +649,7 @@ export default function RiskPage() {
               <Attachments
                 attachments={attachments}
                 field="causes"
-                riskFile={riskFile}
+                riskFileId={riskFile.cr4de_riskfilesid}
                 isExternal={true}
                 onUpdate={() =>
                   getAttachments({
@@ -707,7 +707,7 @@ export default function RiskPage() {
               <Attachments
                 attachments={attachments}
                 field="effects"
-                riskFile={riskFile}
+                riskFileId={riskFile.cr4de_riskfilesid}
                 isExternal={true}
                 onUpdate={() =>
                   getAttachments({
@@ -763,7 +763,7 @@ export default function RiskPage() {
               <Attachments
                 attachments={attachments}
                 field="catalysing_effects"
-                riskFile={riskFile}
+                riskFileId={riskFile.cr4de_riskfilesid}
                 isExternal={true}
                 onUpdate={() =>
                   getAttachments({
@@ -821,7 +821,7 @@ export default function RiskPage() {
               <Attachments
                 attachments={attachments}
                 field="effects"
-                riskFile={riskFile}
+                riskFileId={riskFile.cr4de_riskfilesid}
                 isExternal={true}
                 onUpdate={() =>
                   getAttachments({
@@ -890,7 +890,7 @@ export default function RiskPage() {
               <Attachments
                 attachments={attachments}
                 field="catalysing"
-                riskFile={riskFile}
+                riskFileId={riskFile.cr4de_riskfilesid}
                 isExternal={true}
                 onUpdate={() =>
                   getAttachments({

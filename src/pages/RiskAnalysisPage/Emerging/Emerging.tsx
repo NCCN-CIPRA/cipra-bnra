@@ -77,7 +77,7 @@ export default function Emerging({
               cr4de_removed: false,
               cr4de_cause_risk: riskSummary,
               cr4de_effect_risk: smallRiskMap[d._cr4de_effect_risk_value],
-            } as DVCascadeSnapshot<unknown, DVRiskSummary, SmallRisk>),
+            }) as DVCascadeSnapshot<unknown, DVRiskSummary, SmallRisk>,
         ),
     enabled: Boolean(
       user && user.roles.analist && environment === Environment.DYNAMIC,
@@ -101,7 +101,7 @@ export default function Emerging({
           />
         </Box>
 
-        <RiskFileBibliography risk={riskSummary} />
+        <RiskFileBibliography riskFileId={riskSummary._cr4de_risk_file_value} />
         <BNRASpeedDial
           offset={{ x: 0, y: 56 }}
           exportAction={handleExportRiskfile(riskSummary, api, environment)}

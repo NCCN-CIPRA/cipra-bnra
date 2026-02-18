@@ -53,7 +53,7 @@ export default function Attachments({
   attachments,
   children,
   field,
-  riskFile,
+  riskFileId,
   validation,
   isExternal = false,
   alwaysOpen = false,
@@ -63,7 +63,7 @@ export default function Attachments({
   attachments: DVAttachment[] | null;
   children?: ReactNode;
   field?: string;
-  riskFile?: DVRiskFile | null;
+  riskFileId?: string | null;
   cascades?: DVRiskCascade<SmallRisk, SmallRisk>[] | null;
   validation?: DVValidation<DVRiskFile | undefined> | null;
   isExternal?: boolean;
@@ -140,9 +140,9 @@ export default function Attachments({
           // cr4de_reference: attachments ? attachments.reduce((max, a) => Math.max(max, a.cr4de_reference), -1) + 1 : 1,
           cr4de_field: field,
           cr4de_url: url,
-          ...(riskFile
+          ...(riskFileId
             ? {
-                "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
+                "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFileId})`,
               }
             : {}),
           ...(validation
@@ -151,7 +151,7 @@ export default function Attachments({
               }
             : {}),
         },
-        file
+        file,
       );
     }
 
@@ -490,7 +490,7 @@ export default function Attachments({
                             <IconButton
                               onClick={() => {
                                 handleRemoveAttachment(
-                                  a.cr4de_bnraattachmentid
+                                  a.cr4de_bnraattachmentid,
                                 );
                               }}
                             >
