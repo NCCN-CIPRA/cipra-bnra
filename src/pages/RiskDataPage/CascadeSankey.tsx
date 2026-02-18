@@ -4,7 +4,7 @@ import {
   DVCascadeSnapshot,
 } from "../../types/dataverse/DVCascadeSnapshot";
 import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, SVGTextElementAttributes, useEffect, useMemo, useState } from "react";
 import { LinkProps, NodeProps } from "recharts/types/chart/Sankey";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import { Box, Button, Slider, Typography } from "@mui/material";
@@ -297,7 +297,7 @@ export default function CascadeSankey({
             indicators
           ),
         },
-      ],
+      ] as ScenarioSankeyLink[],
     }),
     [
       causeName,
@@ -382,7 +382,7 @@ function PSankeyNode({
 }) {
   const p = payload as unknown as ScenarioSankeyNode;
 
-  const textStyle =
+  const textStyle: SVGTextElementAttributes<SVGTextElement> =
     p.align === "left"
       ? {
           textAnchor: "end",
@@ -575,7 +575,7 @@ function PSankeyLink(
             opacity={1}
             x={shouldBeOpaque ? sourceX + (targetX - sourceX) / 2 : 25}
             y={shouldBeOpaque ? (sourceY + targetY) / 2 - 5 : sourceY + 3}
-            textAnchor={shouldBeOpaque ? "middle" : "left"}
+            textAnchor={shouldBeOpaque ? "middle" : "start"}
             fontWeight="bold"
             fontSize={shouldBeOpaque ? 15 : 13}
           >
@@ -588,7 +588,7 @@ function PSankeyLink(
               opacity={1}
               x={targetX - 40}
               y={targetY + 3}
-              textAnchor={"right"}
+              textAnchor={"end"}
               fontWeight="bold"
               fontSize={13}
             >

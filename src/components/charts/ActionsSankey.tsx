@@ -50,14 +50,16 @@ export function ActionsSankeyBox({
   results,
   width = "100%",
   height = "100%",
+  tp,
   onClick,
 }: {
   riskSummary: DVRiskSummary;
   riskSnapshot: DVRiskSnapshot;
   scenario: SCENARIOS;
   results: RiskFileQuantiResults | null;
-  width?: number | string;
-  height?: number | string;
+  width?: number | `${number}%`;
+  height?: number | `${number}%`;
+  tp: number;
   onClick: (id: string) => void;
 }) {
   const { t } = useTranslation();
@@ -74,15 +76,7 @@ export function ActionsSankeyBox({
           riskSnapshot={riskSnapshot}
           scenario={scenario}
           results={results}
-          totalProbability={
-            results
-              ? pScale7FromReturnPeriodMonths(
-                  returnPeriodMonthsFromYearlyEventRate(
-                    results[scenario].probabilityStatistics?.sampleMean || 0,
-                  ),
-                )
-              : riskSnapshot.cr4de_quanti[scenario].tp.yearly.scale
-          }
+          totalProbability={tp}
           tooltip={true}
           onClick={onClick}
         />

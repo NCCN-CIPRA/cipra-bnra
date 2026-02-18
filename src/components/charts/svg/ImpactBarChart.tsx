@@ -6,6 +6,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  XAxisTickContentProps,
 } from "recharts";
 import { SCENARIOS } from "../../../functions/scenarios";
 import {
@@ -24,6 +25,45 @@ import {
 } from "../../../functions/indicators/impact";
 import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
 import { DAMAGE_INDICATOR, IMPACT_CATEGORY } from "../../../functions/Impact";
+import { ReactNode } from "react";
+
+const renderCategoryTick = (tickProps: XAxisTickContentProps): ReactNode => {
+  const { x: xProp, y: yProp, payload } = tickProps;
+  const x = Number(xProp);
+  const y = Number(yProp);
+
+  let label: string | undefined;
+  let labelOffset: number = 0;
+
+  if (payload.index === 1) {
+    label = "Human";
+  } else if (payload.index === 5) {
+    label = "Societal";
+    labelOffset = 8;
+  } else if (payload.index === 9) {
+    label = "Environmental";
+  } else if (payload.index === 11) {
+    label = "Financial";
+    labelOffset = 8;
+  }
+
+  if (!label) return;
+
+  return (
+    <g transform={`translate(${x - 12 + labelOffset},${y})`}>
+      <text
+        x={0}
+        y={0}
+        dy={16}
+        textAnchor="end"
+        fill="#666"
+        transform={`rotate(${-90})`}
+      >
+        {label}
+      </text>
+    </g>
+  );
+};
 
 export default function ImpactBarChart({
   riskFile,
@@ -314,15 +354,8 @@ export default function ImpactBarChart({
           dx={-5}
           dy={5}
           interval={0}
-          textAnchor="end"
+          tick={renderCategoryTick}
           tickLine={false}
-          tickFormatter={(value) => {
-            if (value === "Hb") return "Human";
-            if (value === "Sb") return "Societal";
-            if (value === "Ea") return "Environmental";
-            if (value === "Fa") return "Financial";
-            return "";
-          }}
         />
         <YAxis
           domain={[0, maxScales + 0.5]}

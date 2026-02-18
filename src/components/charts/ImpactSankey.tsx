@@ -75,12 +75,13 @@ export function ImpactSankeyBox({
   riskSnapshot: DVRiskSnapshot;
   scenario: SCENARIOS;
   results: RiskFileQuantiResults | null;
-  width?: number | string;
-  height?: number | string;
+  width?: number | `${number}%`;
+  height?: number | `${number}%`;
   focusedImpact?: IMPACT_CATEGORY | DAMAGE_INDICATOR | null;
   onClick: (id: string) => void;
 }) {
   const { t } = useTranslation();
+  console.log(width, height);
   return (
     <>
       <Box
@@ -148,10 +149,10 @@ export default function ImpactSankey({
       ),
     enabled: Boolean(
       user &&
-        user.roles.verified &&
-        environment === Environment.PUBLIC &&
-        publicSnapshots !== undefined &&
-        riskSnapshot,
+      user.roles.verified &&
+      environment === Environment.PUBLIC &&
+      publicSnapshots !== undefined &&
+      riskSnapshot,
     ),
     select: (data) =>
       data.map((d) => ({

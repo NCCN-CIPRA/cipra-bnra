@@ -452,8 +452,7 @@ export default function RiskMatrix({
                       scales === "classes" ? "Impact" : "Impact of an event",
                     position: "insideBottom",
                     offset: -20,
-
-                    props: { fontWeight: "bold" },
+                    fontWeight: "bold"
                   }}
                 />
               </>

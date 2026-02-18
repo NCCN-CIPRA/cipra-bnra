@@ -1,6 +1,5 @@
 import { Alert, Box, Typography } from "@mui/material";
 import { SCENARIOS } from "../../../functions/scenarios";
-import ScenarioMatrix from "../../../components/charts/ScenarioMatrix";
 import { useState } from "react";
 import CapacitiesSection from "./CapacitiesSection";
 import ActionsSection from "./PreferredActionsSection";
@@ -75,9 +74,11 @@ export default function ManMade({
               {t("Most Relevant Actor Group")}
             </Typography>
 
-            <ScenarioMatrix riskFile={riskFile} mrs={MRS} results={results} />
-
-            <CapacitiesSection riskFile={riskFile} scenario={MRS} />
+            <CapacitiesSection
+              riskFile={riskFile}
+              scenario={MRS}
+              results={results}
+            />
           </Box>
         )}
 

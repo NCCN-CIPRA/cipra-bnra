@@ -117,7 +117,7 @@ const X_MAX = 8;
 const Y_MIN = 0;
 const Y_MAX = 8;
 
-function clipLineToBox(m: number, b: number): Point[] | null {
+function clipLineToBox(m: number, b: number): [Point, Point] | null {
   const points: Point[] = [];
 
   // x = 0
@@ -156,11 +156,11 @@ function clipLineToBox(m: number, b: number): Point[] | null {
     new Map(points.map((p) => [`${p.x},${p.y}`, p])).values(),
   );
 
-  return unique.length === 2 ? unique : null;
+  return unique.length === 2 ? unique as [Point, Point]  : null;
 }
 
 const slope = -7 / 8;
-const intercepts: Point[][] = [];
+const intercepts: [Point, Point][] = [];
 
 for (let b = -7; b <= 20; b += 2) {
   const segment = clipLineToBox(slope, b);
@@ -184,7 +184,7 @@ export default function RiskMatrixChart({
   labels?: boolean;
   labelSize?: number;
   maxScale?: number;
-  height?: number | string;
+  height?: number | `${number}%`;
   categoryDisplay?: "shapes" | "colors" | "both" | "none";
   scenarioDisplay?: "colors" | "shapes" | "none";
 }) {

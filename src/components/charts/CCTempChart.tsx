@@ -73,7 +73,7 @@ const LCLabel = ({
         y={b - viewBox.height * 0.2}
         fontSize="15"
         dy="0"
-        textAnchor="center"
+        textAnchor="middle"
       >
         <tspan x={l + viewBox.width * (1 / 9)} dy="-2.4em" textAnchor="middle">
           {t("ccchart.lessColdWeath.1", "Less")}
@@ -135,7 +135,7 @@ const NCLabel = ({
         y={b - viewBox.height * (norm(3.5 - 5) / 0.5)}
         fontSize="15"
         dy="0"
-        textAnchor="center"
+        textAnchor="middle"
       >
         <tspan
           x={l + viewBox.width * (4 / 9) + 20}
@@ -185,7 +185,7 @@ const PCLabel = ({
         y={b - viewBox.height * (norm(3 - 4) / 0.5)}
         fontSize="15"
         dy="0"
-        textAnchor="center"
+        textAnchor="middle"
       >
         <tspan
           x={l + viewBox.width * (2 / 9) - 30}
@@ -235,7 +235,7 @@ const MHLabel = ({
         y={b - viewBox.height * 0.65}
         fontSize="15"
         dy="0"
-        textAnchor="center"
+        textAnchor="middle"
       >
         <tspan
           x={l + viewBox.width * (6.5 / 9)}
@@ -303,7 +303,7 @@ const MRHLabel = ({
         y={b - viewBox.height * 0.25}
         fontSize="15"
         dy="0"
-        textAnchor="center"
+        textAnchor="middle"
       >
         <tspan
           x={l + viewBox.width * (7.5 / 9)}

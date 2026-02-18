@@ -158,8 +158,8 @@ export default function ProbabilitySankyChart({
   scenario: SCENARIOS;
   debug?: boolean;
   manmade?: boolean;
-  width?: number | string;
-  height?: number | string;
+  width?: number | `${number}%`;
+  height?: number | `${number}%`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CustomTooltip?: JSXElementConstructor<any>;
   onClick?: ((id: string) => void) | null;

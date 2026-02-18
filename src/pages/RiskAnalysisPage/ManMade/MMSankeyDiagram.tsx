@@ -2,7 +2,7 @@ import { Stack, Typography, Box, Button } from "@mui/material";
 import { SCENARIOS, SCENARIO_PARAMS } from "../../../functions/scenarios";
 import ProbabilityBars from "../../../components/charts/ProbabilityBars";
 import ImpactBarChart from "../../../components/charts/ImpactBars";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
@@ -11,6 +11,13 @@ import { ImpactSankeyBox } from "../../../components/charts/ImpactSankey";
 import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
 import { DVRiskSummary } from "../../../types/dataverse/DVRiskSummary";
 import { DAMAGE_INDICATOR, IMPACT_CATEGORY } from "../../../functions/Impact";
+import { BasePageContext } from "../../BasePage";
+import { Indicators } from "../../../types/global";
+import {
+  pScale5FromReturnPeriodMonths,
+  pScale7FromReturnPeriodMonths,
+  returnPeriodMonthsFromYearlyEventRate,
+} from "../../../functions/indicators/probability";
 
 export default function MMSankeyDiagram({
   riskSummary,
@@ -29,6 +36,7 @@ export default function MMSankeyDiagram({
   debug?: boolean;
   manmade?: boolean;
 }) {
+  const { indicators } = useOutletContext<BasePageContext>();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -45,6 +53,31 @@ export default function MMSankeyDiagram({
     navigate(`/risks/${id}/analysis`);
   };
 
+  let tp;
+  if (indicators === Indicators.V2) {
+    if (results) {
+      tp = pScale7FromReturnPeriodMonths(
+        returnPeriodMonthsFromYearlyEventRate(
+          results[scenario].probabilityStatistics!.sampleMean,
+        ),
+        100,
+      );
+    } else {
+      tp = riskFile.cr4de_quanti[scenario].tp.yearly.scale;
+    }
+  } else {
+    if (results) {
+      tp = pScale5FromReturnPeriodMonths(
+        returnPeriodMonthsFromYearlyEventRate(
+          results[scenario].probabilityStatistics!.sampleMean,
+        ),
+        100,
+      );
+    } else {
+      tp = riskFile.cr4de_quanti[scenario].tp.scale5TP;
+    }
+  }
+
   return (
     <Stack className="bnra-sankey" direction="row" sx={{ mb: 8 }}>
       <Box
@@ -56,6 +89,7 @@ export default function MMSankeyDiagram({
           riskSnapshot={riskFile}
           scenario={scenario}
           results={results}
+          tp={tp}
           onClick={goToRiskFile}
         />
       </Box>
@@ -90,11 +124,7 @@ export default function MMSankeyDiagram({
             width: "100%",
           }}
         >
-          <ProbabilityBars
-            tp={riskFile.cr4de_quanti[scenario].tp.yearly.scale}
-            chartWidth={200}
-            manmade={true}
-          />
+          <ProbabilityBars tp={tp} chartWidth={200} manmade={true} />
         </Box>
         <Box
           className="sankey-scenarios"

@@ -68,8 +68,8 @@ export function ProbabilitySankeyBox({
   riskSnapshot: DVRiskSnapshot;
   scenario: SCENARIOS;
   results: RiskFileQuantiResults | null;
-  width?: number | string;
-  height?: number | string;
+  width?: number | `${number}%`;
+  height?: number | `${number}%`;
   onClick: (id: string) => void;
 }) {
   const { t } = useTranslation();
@@ -137,10 +137,10 @@ export default function ProbabilitySankey({
       ),
     enabled: Boolean(
       user &&
-        user.roles.verified &&
-        environment === Environment.PUBLIC &&
-        publicSnapshots !== undefined &&
-        riskSnapshot,
+      user.roles.verified &&
+      environment === Environment.PUBLIC &&
+      publicSnapshots !== undefined &&
+      riskSnapshot,
     ),
     select: (data) =>
       data.map((d) => ({
