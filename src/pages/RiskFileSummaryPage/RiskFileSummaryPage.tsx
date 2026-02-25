@@ -27,9 +27,6 @@ export default function RiskFileSummaryPage() {
   const updateRiskFile = useMutation({
     mutationFn: async (newHTML: string) => {
       await Promise.all([
-        api.updateRiskSummary(riskSummary.cr4de_bnrariskfilesummaryid, {
-          [`cr4de_summary_${getLanguage(i18n.language)}`]: newHTML || undefined,
-        }),
         api.updateRiskFile(riskSummary._cr4de_risk_file_value, {
           [`cr4de_mrs_summary${getLanguage(i18n.language) === "en" ? "" : "_" + getLanguage(i18n.language)}`]:
             newHTML,
