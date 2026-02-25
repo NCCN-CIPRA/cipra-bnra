@@ -49,7 +49,7 @@ TooltipProps<number, NameType> & { payload: any }) => {
             {round(payload[0].value)} / 5
           </Typography>
         </Stack>
-        <Stack direction="row" sx={{ mt: 1 }}>
+        {/* <Stack direction="row" sx={{ mt: 1 }}>
           <Typography variant="body2" sx={{ width: 100, fontWeight: "bold" }}>
             Total Risk :
           </Typography>
@@ -59,7 +59,7 @@ TooltipProps<number, NameType> & { payload: any }) => {
           >
             {round((payload[0].value || 0) * (payload[1].value || 0))}
           </Typography>
-        </Stack>
+        </Stack> */}
       </Box>
     );
   }
