@@ -36,7 +36,7 @@ export type AbsoluteCPMatrixEffectRow = {
 };
 
 export const getNormalizedCPMatrix = (
-  cpMatrix: CPMatrixCauseRow
+  cpMatrix: CPMatrixCauseRow,
 ): AbsoluteCPMatrix => {
   const c20 =
     (1 - cpMatrix[c][c].abs) *
@@ -89,7 +89,7 @@ export const getNormalizedCPMatrix = (
  */
 export const getCPMatrixFromOldFormat = (
   cause: DVRiskSnapshot,
-  cascade: DVRiskCascade
+  cascade: DVRiskCascade,
 ): CPMatrixCauseRow => {
   // Apply the correction factors and average C2C and C2C quali values
   const consensusCascade = getConsensusCascade(null, null, cascade);
@@ -102,13 +102,13 @@ export const getCPMatrixFromOldFormat = (
           cause,
           c,
           consensusCascade.c2c,
-          Indicators.V1
+          Indicators.V1,
         ),
         scale7: getNewCPFromOldMAndCP(
           cause,
           c,
           consensusCascade.c2c,
-          Indicators.V2
+          Indicators.V2,
         ),
       },
       [m]: {
@@ -117,13 +117,13 @@ export const getCPMatrixFromOldFormat = (
           cause,
           c,
           consensusCascade.c2m,
-          Indicators.V1
+          Indicators.V1,
         ),
         scale7: getNewCPFromOldMAndCP(
           cause,
           c,
           consensusCascade.c2m,
-          Indicators.V2
+          Indicators.V2,
         ),
       },
       [e]: {
@@ -132,13 +132,13 @@ export const getCPMatrixFromOldFormat = (
           cause,
           c,
           consensusCascade.c2e,
-          Indicators.V1
+          Indicators.V1,
         ),
         scale7: getNewCPFromOldMAndCP(
           cause,
           c,
           consensusCascade.c2e,
-          Indicators.V2
+          Indicators.V2,
         ),
       },
     },
@@ -149,13 +149,13 @@ export const getCPMatrixFromOldFormat = (
           cause,
           m,
           consensusCascade.m2c,
-          Indicators.V1
+          Indicators.V1,
         ),
         scale7: getNewCPFromOldMAndCP(
           cause,
           m,
           consensusCascade.m2c,
-          Indicators.V2
+          Indicators.V2,
         ),
       },
       [m]: {
@@ -164,13 +164,13 @@ export const getCPMatrixFromOldFormat = (
           cause,
           m,
           consensusCascade.m2m,
-          Indicators.V1
+          Indicators.V1,
         ),
         scale7: getNewCPFromOldMAndCP(
           cause,
           m,
           consensusCascade.m2m,
-          Indicators.V2
+          Indicators.V2,
         ),
       },
       [e]: {
@@ -179,13 +179,13 @@ export const getCPMatrixFromOldFormat = (
           cause,
           m,
           consensusCascade.m2e,
-          Indicators.V1
+          Indicators.V1,
         ),
         scale7: getNewCPFromOldMAndCP(
           cause,
           m,
           consensusCascade.m2e,
-          Indicators.V2
+          Indicators.V2,
         ),
       },
     },
@@ -196,13 +196,13 @@ export const getCPMatrixFromOldFormat = (
           cause,
           e,
           consensusCascade.e2c,
-          Indicators.V1
+          Indicators.V1,
         ),
         scale7: getNewCPFromOldMAndCP(
           cause,
           e,
           consensusCascade.e2c,
-          Indicators.V2
+          Indicators.V2,
         ),
       },
       [m]: {
@@ -211,13 +211,13 @@ export const getCPMatrixFromOldFormat = (
           cause,
           e,
           consensusCascade.e2m,
-          Indicators.V1
+          Indicators.V1,
         ),
         scale7: getNewCPFromOldMAndCP(
           cause,
           e,
           consensusCascade.e2m,
-          Indicators.V2
+          Indicators.V2,
         ),
       },
       [e]: {
@@ -226,13 +226,13 @@ export const getCPMatrixFromOldFormat = (
           cause,
           e,
           consensusCascade.e2e,
-          Indicators.V1
+          Indicators.V1,
         ),
         scale7: getNewCPFromOldMAndCP(
           cause,
           e,
           consensusCascade.e2e,
-          Indicators.V2
+          Indicators.V2,
         ),
       },
     },
@@ -253,7 +253,7 @@ export const getNewCPFromOldMAndCP = (
   cause: DVRiskSnapshot,
   causeScenario: SCENARIOS,
   cpAbsOld: number,
-  indicators: Indicators | null = null
+  indicators: Indicators | null = null,
 ) => {
   if (cause.cr4de_risk_type === RISK_TYPE.MANMADE) {
     const rpMonths = cause.cr4de_quanti[causeScenario].dp.rpMonths;
@@ -298,7 +298,7 @@ export const getNewCPFromOldMAndCP = (
 export const getAverageCP = (
   cpMatrix: CPMatrix,
   totalCPs: Record<SCENARIOS, number>,
-  causeScenario: SCENARIOS | null
+  causeScenario: SCENARIOS | null,
 ) => {
   if (causeScenario === null)
     return (
@@ -313,11 +313,11 @@ export const getAverageCP = (
 
 export const getTotalCP = (
   causeScenario: SCENARIOS,
-  effects: DVCascadeSnapshot[]
+  effects: DVCascadeSnapshot[],
 ) => {
   return effects.reduce(
     (t, e) => t + e.cr4de_quanti_cp[causeScenario].avg,
-    0.00001
+    0.00001,
   );
 };
 
@@ -327,11 +327,11 @@ export const getTotalCPDynamic = (effects: DVCascadeSnapshot[]) => {
 
 export const getTotalCPCauseDynamic = (
   effects: DVCascadeSnapshot[],
-  causeScenario: SCENARIOS
+  causeScenario: SCENARIOS,
 ) => {
   return effects.reduce(
     (t, e) => t + getCPCauseDynamic(e, causeScenario),
-    0.00001
+    0.00001,
   );
 };
 
@@ -345,7 +345,7 @@ const getCPDynamic = (c: DVCascadeSnapshot) => {
 
 export const getCPCauseDynamic = (
   c: DVCascadeSnapshot,
-  causeScenario: SCENARIOS
+  causeScenario: SCENARIOS,
 ) => {
   return (
     c.cr4de_quanti_cp[causeScenario].considerable.abs +
@@ -357,7 +357,7 @@ export const getCPCauseDynamic = (
 export const getAverageCPDynamic = (
   c: DVCascadeSnapshot,
   effects: DVCascadeSnapshot[],
-  causeScenario: SCENARIOS | null
+  causeScenario: SCENARIOS | null,
 ) => {
   if (causeScenario === null)
     return getCPDynamic(c) / getTotalCPDynamic(effects);
@@ -371,7 +371,7 @@ export const getAverageCPDynamic = (
 export const getAverageCauseCPDynamic = (
   cpMatrix: CPMatrix,
   causeScenario: SCENARIOS,
-  effect: DVCascadeSnapshot
+  effect: DVCascadeSnapshot,
 ) => {
   const ii_s2c =
     cpMatrix[causeScenario].considerable.abs *

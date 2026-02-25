@@ -1186,25 +1186,25 @@ export function summaryFromRiskfileNew(
 
     cr4de_causing_risks:
       riskFile.cr4de_risk_type === RISK_TYPE.STANDARD
-        ? riskFile.cr4de_quanti_results?.[
+        ? (riskFile.cr4de_quanti_results?.[
             scenario
           ]?.probabilityStatistics?.relativeContributions.map((c) => ({
             cause_risk_id: c.id || "",
             cause_risk_title: c.risk,
             cause_risk_p: c.contributionMean,
-          })) ?? null
+          })) ?? null)
         : null,
 
     cr4de_effect_risks:
       riskFile.cr4de_risk_type === RISK_TYPE.EMERGING
         ? null
-        : riskFile.cr4de_quanti_results?.[
+        : (riskFile.cr4de_quanti_results?.[
             scenario
           ]?.impactStatistics?.relativeContributions.map((e) => ({
             effect_risk_id: e.id || "",
             effect_risk_title: e.risk,
             effect_risk_i: e.contributionMean.all,
-          })) ?? null,
+          })) ?? null),
   };
 }
 

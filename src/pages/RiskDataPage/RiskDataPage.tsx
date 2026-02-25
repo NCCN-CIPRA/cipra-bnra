@@ -83,17 +83,21 @@ export default function RiskDataPage() {
       ),
     enabled: Boolean(
       user &&
-        user.roles.analist &&
-        environment === Environment.DYNAMIC &&
-        riskFile,
+      user.roles.analist &&
+      environment === Environment.DYNAMIC &&
+      riskFile,
     ),
     select: (data) =>
-      data.map((d) => ({
-        ...parseCascadeSnapshot(snapshotFromRiskCascade(riskFile!, d)),
-        cr4de_cause_risk: parseRiskSnapshot(
+      data.map((d) => {
+        const cause = parseRiskSnapshot(
           snapshotFromRiskfile(d.cr4de_cause_hazard as DVRiskFile),
-        ),
-      })),
+        );
+
+        return {
+          ...parseCascadeSnapshot(snapshotFromRiskCascade(cause, d)),
+          cr4de_cause_risk: cause,
+        };
+      }),
   });
   const { data: dynamicEffects } = useQuery({
     queryKey: [
@@ -107,17 +111,19 @@ export default function RiskDataPage() {
       ),
     enabled: Boolean(
       user &&
-        user.roles.analist &&
-        environment === Environment.DYNAMIC &&
-        riskFile,
+      user.roles.analist &&
+      environment === Environment.DYNAMIC &&
+      riskFile,
     ),
     select: (data) =>
-      data.map((d) => ({
-        ...parseCascadeSnapshot(snapshotFromRiskCascade(riskFile!, d)),
-        cr4de_effect_risk: parseRiskSnapshot(
-          snapshotFromRiskfile(d.cr4de_effect_hazard as DVRiskFile),
-        ),
-      })),
+      data.map((d) => {
+        return {
+          ...parseCascadeSnapshot(snapshotFromRiskCascade(riskFile!, d)),
+          cr4de_effect_risk: parseRiskSnapshot(
+            snapshotFromRiskfile(d.cr4de_effect_hazard as DVRiskFile),
+          ),
+        };
+      }),
   });
 
   const { data: publicCauses } = useQuery({
@@ -132,9 +138,9 @@ export default function RiskDataPage() {
       ),
     enabled: Boolean(
       user &&
-        user.roles.verified &&
-        environment === Environment.PUBLIC &&
-        riskFile,
+      user.roles.verified &&
+      environment === Environment.PUBLIC &&
+      riskFile,
     ),
     select: (data) =>
       data.map((d) => ({
@@ -156,9 +162,9 @@ export default function RiskDataPage() {
       ),
     enabled: Boolean(
       user &&
-        user.roles.verified &&
-        environment === Environment.PUBLIC &&
-        riskFile,
+      user.roles.verified &&
+      environment === Environment.PUBLIC &&
+      riskFile,
     ),
     select: (data) =>
       data.map((d) => ({
