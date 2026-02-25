@@ -164,7 +164,7 @@ export default function BaseRiskFilePage() {
           (results[SCENARIOS.CONSIDERABLE]?.impactStatistics?.sampleMean.all ||
             0),
         undefined,
-        100,
+        100000,
       );
       const m = iScale7FromEuros(
         pDailyFromReturnPeriodMonths(
@@ -173,7 +173,7 @@ export default function BaseRiskFilePage() {
           ),
         ) * (results[SCENARIOS.MAJOR]?.impactStatistics?.sampleMean.all || 0),
         undefined,
-        100,
+        100000,
       );
       const e = iScale7FromEuros(
         pDailyFromReturnPeriodMonths(
@@ -182,7 +182,7 @@ export default function BaseRiskFilePage() {
           ),
         ) * (results[SCENARIOS.EXTREME]?.impactStatistics?.sampleMean.all || 0),
         undefined,
-        100,
+        100000,
       );
 
       if (e > c && e > m) parsed.cr4de_mrs = SCENARIOS.EXTREME;
@@ -216,7 +216,7 @@ export default function BaseRiskFilePage() {
           (results[SCENARIOS.CONSIDERABLE]?.impactStatistics?.sampleMean.all ||
             0),
         undefined,
-        100,
+        100000,
       );
       const m = iScale7FromEuros(
         pDailyFromReturnPeriodMonths(
@@ -225,7 +225,7 @@ export default function BaseRiskFilePage() {
           ),
         ) * (results[SCENARIOS.MAJOR]?.impactStatistics?.sampleMean.all || 0),
         undefined,
-        100,
+        100000,
       );
       const e = iScale7FromEuros(
         pDailyFromReturnPeriodMonths(
@@ -234,7 +234,7 @@ export default function BaseRiskFilePage() {
           ),
         ) * (results[SCENARIOS.EXTREME]?.impactStatistics?.sampleMean.all || 0),
         undefined,
-        100,
+        100000,
       );
 
       if (e > c && e > m) parsed.cr4de_mrs = SCENARIOS.EXTREME;

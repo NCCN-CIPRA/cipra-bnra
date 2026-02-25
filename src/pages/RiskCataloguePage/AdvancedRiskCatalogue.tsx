@@ -434,7 +434,7 @@ const columns = (
           (row.cr4de_quanti_results[SCENARIOS.CONSIDERABLE]?.impactStatistics
             ?.sampleMean.all || 0),
         undefined,
-        100,
+        100000,
       );
       const m = iScale7FromEuros(
         pDailyFromReturnPeriodMonths(
@@ -446,7 +446,7 @@ const columns = (
           (row.cr4de_quanti_results[SCENARIOS.MAJOR]?.impactStatistics
             ?.sampleMean.all || 0),
         undefined,
-        100,
+        100000,
       );
       const e = iScale7FromEuros(
         pDailyFromReturnPeriodMonths(
@@ -458,7 +458,7 @@ const columns = (
           (row.cr4de_quanti_results[SCENARIOS.EXTREME]?.impactStatistics
             ?.sampleMean.all || 0),
         undefined,
-        100,
+        100000,
       );
 
       if (e > c && e > m) return SCENARIOS.EXTREME;
@@ -519,7 +519,7 @@ const columns = (
           (row.cr4de_quanti_results[SCENARIOS.CONSIDERABLE]?.impactStatistics
             ?.sampleMean.all || 0),
         undefined,
-        100,
+        100000,
       );
       const m = iScale7FromEuros(
         pDailyFromReturnPeriodMonths(
@@ -531,7 +531,7 @@ const columns = (
           (row.cr4de_quanti_results[SCENARIOS.MAJOR]?.impactStatistics
             ?.sampleMean.all || 0),
         undefined,
-        100,
+        100000,
       );
       const e = iScale7FromEuros(
         pDailyFromReturnPeriodMonths(
@@ -543,10 +543,10 @@ const columns = (
           (row.cr4de_quanti_results[SCENARIOS.EXTREME]?.impactStatistics
             ?.sampleMean.all || 0),
         undefined,
-        100,
+        100000,
       );
 
-      return Math.round(10 * Math.max(c, m, e)) / 10;
+      return Math.round(1000 * Math.max(c, m, e)) / 1000;
     },
   },
 ];
