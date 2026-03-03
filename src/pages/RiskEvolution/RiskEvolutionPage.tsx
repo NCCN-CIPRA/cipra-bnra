@@ -55,7 +55,7 @@ export default function RiskEvolutionPage() {
     ),
     select: (data) =>
       data.map((d) => ({
-        ...parseCascadeSnapshot(snapshotFromRiskCascade(riskFile!, d)),
+        ...parseCascadeSnapshot(snapshotFromRiskCascade(d)),
         cr4de_cause_risk: parseRiskSnapshot(
           snapshotFromRiskfile(d.cr4de_cause_hazard as DVRiskFile),
         ),

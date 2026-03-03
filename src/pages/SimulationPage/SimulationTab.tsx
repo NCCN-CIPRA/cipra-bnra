@@ -216,9 +216,7 @@ export default function SimulationTab() {
     const rc = getRiskCatalogueFromSnapshots(riskSnapshots);
     const cascadeSnapshots = cs
       .filter((cs) => rc[cs._cr4de_cause_hazard_value])
-      .map((cs) =>
-        snapshotFromRiskCascade(rc[cs._cr4de_cause_hazard_value], cs, true),
-      )
+      .map((cs) => snapshotFromRiskCascade(cs, true))
       .map(parseCascadeSnapshot);
 
     const simulator = getSimulationWorker();
@@ -381,9 +379,7 @@ export default function SimulationTab() {
 
         if (!cascade) continue;
 
-        const css = parseCascadeSnapshot(
-          snapshotFromRiskCascade(riskSnapshots[rf.id], cascade),
-        );
+        const css = parseCascadeSnapshot(snapshotFromRiskCascade(cascade));
 
         if (css.cr4de_quanti_cp[rf.scenario][cc.scenario].scale7 <= 0) continue;
 

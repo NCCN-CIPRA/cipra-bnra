@@ -6,16 +6,8 @@ import {
   CPMatrixCauseRow,
   DVRiskCascade,
 } from "../../types/dataverse/DVRiskCascade";
-import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { Indicators } from "../../types/global";
 import { cpScale5FromPAbs, cpScale7FromPAbs } from "../indicators/cp";
-import {
-  mScale3FromPDaily,
-  mScale7FromPDaily,
-  pDailyFromMScale3,
-} from "../indicators/motivation";
-import { pDailyFromReturnPeriodMonths } from "../indicators/probability";
 import { SCENARIOS } from "../scenarios";
 import { getConsensusCascade } from "./prepareRiskFiles";
 
@@ -88,7 +80,6 @@ export const getNormalizedCPMatrix = (
  * clear up some analysis errors.
  */
 export const getCPMatrixFromOldFormat = (
-  cause: DVRiskSnapshot,
   cascade: DVRiskCascade,
 ): CPMatrixCauseRow => {
   // Apply the correction factors and average C2C and C2C quali values
@@ -97,143 +88,53 @@ export const getCPMatrixFromOldFormat = (
   const cpMatrix: CPMatrixCauseRow = {
     [c]: {
       [c]: {
-        abs: getNewCPFromOldMAndCP(cause, c, consensusCascade.c2c),
-        scale5: getNewCPFromOldMAndCP(
-          cause,
-          c,
-          consensusCascade.c2c,
-          Indicators.V1,
-        ),
-        scale7: getNewCPFromOldMAndCP(
-          cause,
-          c,
-          consensusCascade.c2c,
-          Indicators.V2,
-        ),
+        abs: getNewCPFromOldMAndCP(consensusCascade.c2c),
+        scale5: getNewCPFromOldMAndCP(consensusCascade.c2c, Indicators.V1),
+        scale7: getNewCPFromOldMAndCP(consensusCascade.c2c, Indicators.V2),
       },
       [m]: {
-        abs: getNewCPFromOldMAndCP(cause, c, consensusCascade.c2m),
-        scale5: getNewCPFromOldMAndCP(
-          cause,
-          c,
-          consensusCascade.c2m,
-          Indicators.V1,
-        ),
-        scale7: getNewCPFromOldMAndCP(
-          cause,
-          c,
-          consensusCascade.c2m,
-          Indicators.V2,
-        ),
+        abs: getNewCPFromOldMAndCP(consensusCascade.c2m),
+        scale5: getNewCPFromOldMAndCP(consensusCascade.c2m, Indicators.V1),
+        scale7: getNewCPFromOldMAndCP(consensusCascade.c2m, Indicators.V2),
       },
       [e]: {
-        abs: getNewCPFromOldMAndCP(cause, c, consensusCascade.c2e),
-        scale5: getNewCPFromOldMAndCP(
-          cause,
-          c,
-          consensusCascade.c2e,
-          Indicators.V1,
-        ),
-        scale7: getNewCPFromOldMAndCP(
-          cause,
-          c,
-          consensusCascade.c2e,
-          Indicators.V2,
-        ),
+        abs: getNewCPFromOldMAndCP(consensusCascade.c2e),
+        scale5: getNewCPFromOldMAndCP(consensusCascade.c2e, Indicators.V1),
+        scale7: getNewCPFromOldMAndCP(consensusCascade.c2e, Indicators.V2),
       },
     },
     [m]: {
       [c]: {
-        abs: getNewCPFromOldMAndCP(cause, m, consensusCascade.m2c),
-        scale5: getNewCPFromOldMAndCP(
-          cause,
-          m,
-          consensusCascade.m2c,
-          Indicators.V1,
-        ),
-        scale7: getNewCPFromOldMAndCP(
-          cause,
-          m,
-          consensusCascade.m2c,
-          Indicators.V2,
-        ),
+        abs: getNewCPFromOldMAndCP(consensusCascade.m2c),
+        scale5: getNewCPFromOldMAndCP(consensusCascade.m2c, Indicators.V1),
+        scale7: getNewCPFromOldMAndCP(consensusCascade.m2c, Indicators.V2),
       },
       [m]: {
-        abs: getNewCPFromOldMAndCP(cause, m, consensusCascade.m2m),
-        scale5: getNewCPFromOldMAndCP(
-          cause,
-          m,
-          consensusCascade.m2m,
-          Indicators.V1,
-        ),
-        scale7: getNewCPFromOldMAndCP(
-          cause,
-          m,
-          consensusCascade.m2m,
-          Indicators.V2,
-        ),
+        abs: getNewCPFromOldMAndCP(consensusCascade.m2m),
+        scale5: getNewCPFromOldMAndCP(consensusCascade.m2m, Indicators.V1),
+        scale7: getNewCPFromOldMAndCP(consensusCascade.m2m, Indicators.V2),
       },
       [e]: {
-        abs: getNewCPFromOldMAndCP(cause, m, consensusCascade.m2e),
-        scale5: getNewCPFromOldMAndCP(
-          cause,
-          m,
-          consensusCascade.m2e,
-          Indicators.V1,
-        ),
-        scale7: getNewCPFromOldMAndCP(
-          cause,
-          m,
-          consensusCascade.m2e,
-          Indicators.V2,
-        ),
+        abs: getNewCPFromOldMAndCP(consensusCascade.m2e),
+        scale5: getNewCPFromOldMAndCP(consensusCascade.m2e, Indicators.V1),
+        scale7: getNewCPFromOldMAndCP(consensusCascade.m2e, Indicators.V2),
       },
     },
     [e]: {
       [c]: {
-        abs: getNewCPFromOldMAndCP(cause, e, consensusCascade.e2c),
-        scale5: getNewCPFromOldMAndCP(
-          cause,
-          e,
-          consensusCascade.e2c,
-          Indicators.V1,
-        ),
-        scale7: getNewCPFromOldMAndCP(
-          cause,
-          e,
-          consensusCascade.e2c,
-          Indicators.V2,
-        ),
+        abs: getNewCPFromOldMAndCP(consensusCascade.e2c),
+        scale5: getNewCPFromOldMAndCP(consensusCascade.e2c, Indicators.V1),
+        scale7: getNewCPFromOldMAndCP(consensusCascade.e2c, Indicators.V2),
       },
       [m]: {
-        abs: getNewCPFromOldMAndCP(cause, e, consensusCascade.e2m),
-        scale5: getNewCPFromOldMAndCP(
-          cause,
-          e,
-          consensusCascade.e2m,
-          Indicators.V1,
-        ),
-        scale7: getNewCPFromOldMAndCP(
-          cause,
-          e,
-          consensusCascade.e2m,
-          Indicators.V2,
-        ),
+        abs: getNewCPFromOldMAndCP(consensusCascade.e2m),
+        scale5: getNewCPFromOldMAndCP(consensusCascade.e2m, Indicators.V1),
+        scale7: getNewCPFromOldMAndCP(consensusCascade.e2m, Indicators.V2),
       },
       [e]: {
-        abs: getNewCPFromOldMAndCP(cause, e, consensusCascade.e2e),
-        scale5: getNewCPFromOldMAndCP(
-          cause,
-          e,
-          consensusCascade.e2e,
-          Indicators.V1,
-        ),
-        scale7: getNewCPFromOldMAndCP(
-          cause,
-          e,
-          consensusCascade.e2e,
-          Indicators.V2,
-        ),
+        abs: getNewCPFromOldMAndCP(consensusCascade.e2e),
+        scale5: getNewCPFromOldMAndCP(consensusCascade.e2e, Indicators.V1),
+        scale7: getNewCPFromOldMAndCP(consensusCascade.e2e, Indicators.V2),
       },
     },
   };
@@ -250,28 +151,9 @@ export const getCPMatrixFromOldFormat = (
  * for this type of attack.
  */
 export const getNewCPFromOldMAndCP = (
-  cause: DVRiskSnapshot,
-  causeScenario: SCENARIOS,
   cpAbsOld: number,
   indicators: Indicators | null = null,
 ) => {
-  if (cause.cr4de_risk_type === RISK_TYPE.MANMADE) {
-    const rpMonths = cause.cr4de_quanti[causeScenario].dp.rpMonths;
-    const pDaily = pDailyFromReturnPeriodMonths(rpMonths);
-
-    const newPDaily = pDaily * cpAbsOld;
-    const m3Val = Math.round(2 * mScale3FromPDaily(newPDaily)) / 2;
-    const roundPDaily = pDailyFromMScale3(m3Val);
-
-    if (!indicators) return roundPDaily;
-
-    if (indicators === Indicators.V1) {
-      return m3Val;
-    }
-
-    return Math.round(10 * mScale7FromPDaily(roundPDaily)) / 10;
-  }
-
   if (!indicators) return cpAbsOld;
 
   if (indicators === Indicators.V1) {

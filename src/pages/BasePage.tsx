@@ -12,6 +12,8 @@ import useSavedState from "../hooks/useSavedState";
 import { useQuery } from "@tanstack/react-query";
 import useAPI, { DataTable } from "../hooks/useAPI";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
+import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import { DVRiskSnapshot } from "../types/dataverse/DVRiskSnapshot";
 
 export interface BasePageContext {
   user: LoggedInUser | null | undefined;
@@ -19,7 +21,10 @@ export interface BasePageContext {
   indicators: Indicators;
   showDiff: boolean;
   riskSummaryMap: Record<string, string>;
-  snapshotMap: Record<string, string>;
+  snapshotMap: Record<
+    DVRiskFile["cr4de_riskfilesid"],
+    DVRiskSnapshot["cr4de_bnrariskfilesnapshotid"]
+  >;
   smallRiskMap: Record<string, SmallRisk>;
   refreshUser: () => void;
   setFakeRole: (role: string) => void;
@@ -56,26 +61,33 @@ export default function BasePage() {
   });
   const riskSummaryMap = useMemo(() => {
     if (!riskSummaries) return {};
-    return riskSummaries.reduce((acc, summary) => {
-      acc[summary._cr4de_risk_file_value] = summary.cr4de_bnrariskfilesummaryid;
-      return acc;
-    }, {} as Record<string, string>);
+    return riskSummaries.reduce(
+      (acc, summary) => {
+        acc[summary._cr4de_risk_file_value] =
+          summary.cr4de_bnrariskfilesummaryid;
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
   }, [riskSummaries]);
 
   const smallRiskMap = useMemo(() => {
     if (!riskSummaries) return {};
-    return riskSummaries.reduce((acc, summary) => {
-      acc[summary._cr4de_risk_file_value] = {
-        cr4de_riskfilesid: summary._cr4de_risk_file_value,
-        cr4de_hazard_id: summary.cr4de_hazard_id,
+    return riskSummaries.reduce(
+      (acc, summary) => {
+        acc[summary._cr4de_risk_file_value] = {
+          cr4de_riskfilesid: summary._cr4de_risk_file_value,
+          cr4de_hazard_id: summary.cr4de_hazard_id,
 
-        cr4de_title: summary.cr4de_title,
-        cr4de_risk_type: summary.cr4de_risk_type,
-        cr4de_risk_category: summary.cr4de_category,
-      } as SmallRisk;
+          cr4de_title: summary.cr4de_title,
+          cr4de_risk_type: summary.cr4de_risk_type,
+          cr4de_risk_category: summary.cr4de_category,
+        } as SmallRisk;
 
-      return acc;
-    }, {} as Record<string, SmallRisk>);
+        return acc;
+      },
+      {} as Record<string, SmallRisk>,
+    );
   }, [riskSummaries]);
 
   const { data: riskSnapshots } = useQuery({
@@ -86,11 +98,14 @@ export default function BasePage() {
 
   const snapshotMap = useMemo(() => {
     if (!riskSnapshots) return {};
-    return riskSnapshots.reduce((acc, snapshot) => {
-      acc[snapshot._cr4de_risk_file_value] =
-        snapshot.cr4de_bnrariskfilesnapshotid;
-      return acc;
-    }, {} as Record<string, string>);
+    return riskSnapshots.reduce(
+      (acc, snapshot) => {
+        acc[snapshot._cr4de_risk_file_value] =
+          snapshot.cr4de_bnrariskfilesnapshotid;
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
   }, [riskSnapshots]);
 
   return (

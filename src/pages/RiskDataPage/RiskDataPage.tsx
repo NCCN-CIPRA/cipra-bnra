@@ -94,7 +94,7 @@ export default function RiskDataPage() {
         );
 
         return {
-          ...parseCascadeSnapshot(snapshotFromRiskCascade(cause, d)),
+          ...parseCascadeSnapshot(snapshotFromRiskCascade(d)),
           cr4de_cause_risk: cause,
         };
       }),
@@ -118,7 +118,7 @@ export default function RiskDataPage() {
     select: (data) =>
       data.map((d) => {
         return {
-          ...parseCascadeSnapshot(snapshotFromRiskCascade(riskFile!, d)),
+          ...parseCascadeSnapshot(snapshotFromRiskCascade(d)),
           cr4de_effect_risk: parseRiskSnapshot(
             snapshotFromRiskfile(d.cr4de_effect_hazard as DVRiskFile),
           ),

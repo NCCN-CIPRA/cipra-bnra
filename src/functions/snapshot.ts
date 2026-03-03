@@ -31,7 +31,6 @@ import {
 } from "../types/dataverse/DVRiskFile";
 import {
   DVRiskSnapshot,
-  parseRiskSnapshot,
   RiskSnapshotResults,
   RiskSnapshotScenarioResults,
   SerializedRiskSnapshotResults,
@@ -266,11 +265,7 @@ function updateSnapshot(
   // }
 
   for (const effect of cascades.effects) {
-    const updatedEffectSnapshot = snapshotFromRiskCascade(
-      parseRiskSnapshot(updatedSnapshot),
-      effect,
-      realSnapshot,
-    );
+    const updatedEffectSnapshot = snapshotFromRiskCascade(effect, realSnapshot);
 
     if (cascadesSnapshots[effect.cr4de_bnrariskcascadeid]) {
       updatedEffectSnapshot.cr4de_bnrariskcascadesnapshotid =
@@ -1108,10 +1103,55 @@ export function summaryFromRiskfile(
   };
 }
 
+function getMRS(
+  riskFile: DVRiskFile<unknown, unknown, unknown, RiskFileQuantiResults>,
+): SCENARIOS {
+  const c = iScale7FromEuros(
+    pDailyFromReturnPeriodMonths(
+      returnPeriodMonthsFromYearlyEventRate(
+        riskFile.cr4de_quanti_results[SCENARIOS.CONSIDERABLE]
+          ?.probabilityStatistics?.sampleMean || 0,
+      ),
+    ) *
+      (riskFile.cr4de_quanti_results[SCENARIOS.CONSIDERABLE]?.impactStatistics
+        ?.sampleMean.all || 0),
+    undefined,
+    100000,
+  );
+  const m = iScale7FromEuros(
+    pDailyFromReturnPeriodMonths(
+      returnPeriodMonthsFromYearlyEventRate(
+        riskFile.cr4de_quanti_results[SCENARIOS.MAJOR]?.probabilityStatistics
+          ?.sampleMean || 0,
+      ),
+    ) *
+      (riskFile.cr4de_quanti_results[SCENARIOS.MAJOR]?.impactStatistics
+        ?.sampleMean.all || 0),
+    undefined,
+    100000,
+  );
+  const e = iScale7FromEuros(
+    pDailyFromReturnPeriodMonths(
+      returnPeriodMonthsFromYearlyEventRate(
+        riskFile.cr4de_quanti_results[SCENARIOS.EXTREME]?.probabilityStatistics
+          ?.sampleMean || 0,
+      ),
+    ) *
+      (riskFile.cr4de_quanti_results[SCENARIOS.EXTREME]?.impactStatistics
+        ?.sampleMean.all || 0),
+    undefined,
+    100000,
+  );
+
+  if (e > c && e > m) return SCENARIOS.EXTREME;
+  else if (m > c) return SCENARIOS.MAJOR;
+  return SCENARIOS.CONSIDERABLE;
+}
+
 export function summaryFromRiskfileNew(
   riskFile: DVRiskFile<unknown, unknown, unknown, RiskFileQuantiResults>,
 ): DVRiskSummary {
-  const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
+  const scenario = getMRS(riskFile);
 
   return {
     cr4de_bnrariskfilesummaryid: "",
@@ -1139,7 +1179,7 @@ export function summaryFromRiskfileNew(
     cr4de_scenario_major: riskFile.cr4de_scenario_major,
     cr4de_scenario_extreme: riskFile.cr4de_scenario_extreme,
 
-    cr4de_mrs: riskFile.cr4de_mrs!,
+    cr4de_mrs: scenario,
     cr4de_summary_en: riskFile.cr4de_mrs_summary!,
     cr4de_summary_nl: riskFile.cr4de_mrs_summary_nl!,
     cr4de_summary_fr: riskFile.cr4de_mrs_summary_fr!,
@@ -1155,32 +1195,32 @@ export function summaryFromRiskfileNew(
     ),
     cr4de_mrs_i: r(
       iScale7FromEuros(
-        riskFile.cr4de_quanti_results[scenario].impactStatistics?.sampleMedian
+        riskFile.cr4de_quanti_results[scenario].impactStatistics?.sampleMean
           .all || 0,
       ),
     ),
     cr4de_mrs_h: r(
       iScale7FromEuros(
-        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics
-          ?.sampleMedian.h || 0,
+        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics?.sampleMean
+          .h || 0,
       ),
     ),
     cr4de_mrs_s: r(
       iScale7FromEuros(
-        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics
-          ?.sampleMedian.s || 0,
+        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics?.sampleMean
+          .s || 0,
       ),
     ),
     cr4de_mrs_e: r(
       iScale7FromEuros(
-        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics
-          ?.sampleMedian.e || 0,
+        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics?.sampleMean
+          .e || 0,
       ),
     ),
     cr4de_mrs_f: r(
       iScale7FromEuros(
-        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics
-          ?.sampleMedian.f || 0,
+        riskFile.cr4de_quanti_results?.[scenario]?.impactStatistics?.sampleMean
+          .f || 0,
       ),
     ),
 
@@ -1221,6 +1261,14 @@ export function snapshotFromRiskfile<U>(
   SerializedRiskQualis,
   U
 > {
+  let mrs = riskFile.cr4de_mrs!;
+
+  if (riskFile.cr4de_quanti_results) {
+    mrs = getMRS(
+      riskFile as DVRiskFile<unknown, unknown, unknown, RiskFileQuantiResults>,
+    );
+  }
+
   return {
     cr4de_bnrariskfilesnapshotid: "",
 
@@ -1244,7 +1292,7 @@ export function snapshotFromRiskfile<U>(
       [SCENARIOS.MAJOR]: JSON.parse(riskFile.cr4de_scenario_major || "{}"),
       [SCENARIOS.EXTREME]: JSON.parse(riskFile.cr4de_scenario_extreme || "{}"),
     }),
-    cr4de_mrs: riskFile.cr4de_mrs!,
+    cr4de_mrs: mrs,
 
     cr4de_quali_scenario_mrs: riskFile.cr4de_mrs_scenario,
     cr4de_quali_disclaimer_mrs: riskFile.cr4de_mrs_disclaimer,
@@ -1271,7 +1319,6 @@ export function snapshotFromRiskfile<U>(
 }
 
 export const oldToNewCPMatrix = (
-  cause: DVRiskSnapshot,
   cascade: DVRiskCascade,
   realSnapshot: boolean,
 ): CPMatrixCauseRow => {
@@ -1307,11 +1354,10 @@ export const oldToNewCPMatrix = (
     }
   }
 
-  return getCPMatrixFromOldFormat(cause, cascade);
+  return getCPMatrixFromOldFormat(cascade);
 };
 
 export function snapshotFromRiskCascade(
-  cause: DVRiskSnapshot,
   cascade: DVRiskCascade,
   realSnapshot: boolean = true,
 ): DVCascadeSnapshot<
@@ -1322,7 +1368,7 @@ export function snapshotFromRiskCascade(
   SerializedEffectSnapshotResults,
   SerializedCPMatrix
 > {
-  const newCPMatrixSnapshot = oldToNewCPMatrix(cause, cascade, realSnapshot);
+  const newCPMatrixSnapshot = oldToNewCPMatrix(cascade, realSnapshot);
   const newCPMatrix: CPMatrix = {
     [SCENARIOS.CONSIDERABLE]: {
       ...newCPMatrixSnapshot[SCENARIOS.CONSIDERABLE],

@@ -30,9 +30,9 @@ export function serializeRiskSnapshotScenarios(
   return JSON.stringify(scenarios) as SerializedRiskSnapshotScenarios;
 }
 
-export function parseRiskSnapshot<T>(
-  snapshot: DVRiskSnapshot<T, SerializedRiskSnapshotResults>,
-): DVRiskSnapshot<T> {
+export function parseRiskSnapshot<R, S, T>(
+  snapshot: DVRiskSnapshot<R, SerializedRiskSnapshotResults, S, T>,
+): DVRiskSnapshot<R, RiskSnapshotResults, S, T> {
   return {
     ...snapshot,
     cr4de_quanti: JSON.parse(snapshot.cr4de_quanti),

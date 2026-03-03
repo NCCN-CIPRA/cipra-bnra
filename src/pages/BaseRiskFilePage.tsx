@@ -48,12 +48,6 @@ import {
 } from "../functions/snapshot";
 import DifferenceIcon from "@mui/icons-material/Difference";
 import { SerializedRiskQualis } from "../types/dataverse/Riskfile";
-import { iScale7FromEuros } from "../functions/indicators/impact";
-import {
-  pDailyFromReturnPeriodMonths,
-  returnPeriodMonthsFromYearlyEventRate,
-} from "../functions/indicators/probability";
-import { SCENARIOS } from "../functions/scenarios";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
 
 type RouteParams = {
@@ -119,16 +113,31 @@ export default function BaseRiskFilePage() {
   });
 
   const { data: publicRiskSnapshot } = useQuery<
-    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults>,
+    DVRiskSnapshot<
+      unknown,
+      SerializedRiskSnapshotResults,
+      SerializedRiskQualis,
+      SerializedRiskFileQuantiResults
+    >,
     Error,
-    DVRiskSnapshot<unknown, RiskSnapshotResults>
+    DVRiskSnapshot<
+      unknown,
+      RiskSnapshotResults,
+      SerializedRiskQualis,
+      RiskFileQuantiResults
+    >
   >({
     queryKey: [DataTable.RISK_SNAPSHOT, params.risk_file_id],
     queryFn: () => api.getRiskSnapshot(snapshotMap[params.risk_file_id] || ""),
     enabled: Boolean(
       user && user.roles.verified && snapshotMap[params.risk_file_id],
     ),
-    select: (data) => parseRiskSnapshot(data),
+    select: (data) => ({
+      ...parseRiskSnapshot(data),
+      cr4de_quanti_results: data.cr4de_quanti_results
+        ? parseRiskFileQuantiResults(data.cr4de_quanti_results)
+        : null,
+    }),
   });
 
   const { data: attachments } = useQuery({
@@ -145,104 +154,20 @@ export default function BaseRiskFilePage() {
 
     if (!riskFile) return null;
 
-    const parsed = {
+    return {
       ...summaryFromRiskfileNew(riskFile),
       cr4de_bnrariskfilesummaryid:
         publicRiskSummary?.cr4de_bnrariskfilesummaryid || "",
     };
-
-    if (riskFile.cr4de_quanti_results) {
-      const results = riskFile.cr4de_quanti_results as RiskFileQuantiResults;
-
-      const c = iScale7FromEuros(
-        pDailyFromReturnPeriodMonths(
-          returnPeriodMonthsFromYearlyEventRate(
-            results[SCENARIOS.CONSIDERABLE]?.probabilityStatistics
-              ?.sampleMean || 0,
-          ),
-        ) *
-          (results[SCENARIOS.CONSIDERABLE]?.impactStatistics?.sampleMean.all ||
-            0),
-        undefined,
-        100000,
-      );
-      const m = iScale7FromEuros(
-        pDailyFromReturnPeriodMonths(
-          returnPeriodMonthsFromYearlyEventRate(
-            results[SCENARIOS.MAJOR]?.probabilityStatistics?.sampleMean || 0,
-          ),
-        ) * (results[SCENARIOS.MAJOR]?.impactStatistics?.sampleMean.all || 0),
-        undefined,
-        100000,
-      );
-      const e = iScale7FromEuros(
-        pDailyFromReturnPeriodMonths(
-          returnPeriodMonthsFromYearlyEventRate(
-            results[SCENARIOS.EXTREME]?.probabilityStatistics?.sampleMean || 0,
-          ),
-        ) * (results[SCENARIOS.EXTREME]?.impactStatistics?.sampleMean.all || 0),
-        undefined,
-        100000,
-      );
-
-      if (e > c && e > m) parsed.cr4de_mrs = SCENARIOS.EXTREME;
-      else if (m > c) parsed.cr4de_mrs = SCENARIOS.MAJOR;
-      else parsed.cr4de_mrs = SCENARIOS.CONSIDERABLE;
-    }
-
-    return parsed;
   }, [publicRiskSummary, riskFile, environment]);
 
   const riskSnapshot = useMemo(() => {
     if (!publicRiskSnapshot) return null;
 
-    if (environment === Environment.PUBLIC || !riskFile)
+    if (environment === Environment.PUBLIC || !riskFile || !riskSummary)
       return publicRiskSnapshot;
 
-    if (!riskFile) return null;
-
-    const parsed = parseRiskSnapshot(snapshotFromRiskfile(riskFile));
-
-    if (parsed.cr4de_quanti_results) {
-      const results = parsed.cr4de_quanti_results as RiskFileQuantiResults;
-
-      const c = iScale7FromEuros(
-        pDailyFromReturnPeriodMonths(
-          returnPeriodMonthsFromYearlyEventRate(
-            results[SCENARIOS.CONSIDERABLE]?.probabilityStatistics
-              ?.sampleMean || 0,
-          ),
-        ) *
-          (results[SCENARIOS.CONSIDERABLE]?.impactStatistics?.sampleMean.all ||
-            0),
-        undefined,
-        100000,
-      );
-      const m = iScale7FromEuros(
-        pDailyFromReturnPeriodMonths(
-          returnPeriodMonthsFromYearlyEventRate(
-            results[SCENARIOS.MAJOR]?.probabilityStatistics?.sampleMean || 0,
-          ),
-        ) * (results[SCENARIOS.MAJOR]?.impactStatistics?.sampleMean.all || 0),
-        undefined,
-        100000,
-      );
-      const e = iScale7FromEuros(
-        pDailyFromReturnPeriodMonths(
-          returnPeriodMonthsFromYearlyEventRate(
-            results[SCENARIOS.EXTREME]?.probabilityStatistics?.sampleMean || 0,
-          ),
-        ) * (results[SCENARIOS.EXTREME]?.impactStatistics?.sampleMean.all || 0),
-        undefined,
-        100000,
-      );
-
-      if (e > c && e > m) parsed.cr4de_mrs = SCENARIOS.EXTREME;
-      else if (m > c) parsed.cr4de_mrs = SCENARIOS.MAJOR;
-      else parsed.cr4de_mrs = SCENARIOS.CONSIDERABLE;
-    }
-
-    return parsed;
+    return parseRiskSnapshot(snapshotFromRiskfile(riskFile));
   }, [publicRiskSnapshot, riskFile, environment]);
 
   const isEmerging = riskSummary?.cr4de_risk_type === RISK_TYPE.EMERGING;
@@ -286,10 +211,7 @@ export default function BaseRiskFilePage() {
             riskSnapshot: riskSnapshot || null,
             publicRiskSnapshot: publicRiskSnapshot || null,
             attachments: attachments || null,
-            results:
-              riskFile && environment === Environment.DYNAMIC
-                ? riskFile.cr4de_quanti_results
-                : null,
+            results: riskSnapshot?.cr4de_quanti_results || null,
           })}
         />
       ) : (

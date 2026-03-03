@@ -141,14 +141,7 @@ export function getCausesNew(
             hazardCatalogue[c._cr4de_cause_hazard_value]?.cr4de_risk_type ===
               RISK_TYPE.MANMADE),
       )
-      .map((c) =>
-        parseCascadeSnapshot(
-          snapshotFromRiskCascade(
-            hazardCatalogue[c._cr4de_cause_hazard_value],
-            c,
-          ),
-        ),
-      )
+      .map((c) => parseCascadeSnapshot(snapshotFromRiskCascade(c)))
       .map((c) => ({
         ...c,
         cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
@@ -320,14 +313,7 @@ export function getEffectsNew(
 
     return cascades
       .filter((c) => c._cr4de_cause_hazard_value === riskFile.cr4de_riskfilesid)
-      .map((c) =>
-        parseCascadeSnapshot(
-          snapshotFromRiskCascade(
-            hazardCatalogue[c._cr4de_cause_hazard_value],
-            c,
-          ),
-        ),
-      )
+      .map((c) => parseCascadeSnapshot(snapshotFromRiskCascade(c)))
       .map((c) => ({
         ...c,
         cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
@@ -564,14 +550,7 @@ export function getCatalyzingEffectsNew(
               "Climate",
             ) < 0),
       )
-      .map((c) =>
-        parseCascadeSnapshot(
-          snapshotFromRiskCascade(
-            hazardCatalogue[c._cr4de_cause_hazard_value],
-            c,
-          ),
-        ),
-      )
+      .map((c) => parseCascadeSnapshot(snapshotFromRiskCascade(c)))
       .map((c) => ({
         ...c,
         cr4de_cause_risk: hazardCatalogue[c._cr4de_cause_risk_value],
@@ -659,12 +638,7 @@ export function getClimateChangeNew(
         ) >= 0,
     );
     if (cc) {
-      const ss = parseCascadeSnapshot(
-        snapshotFromRiskCascade(
-          hazardCatalogue[cc._cr4de_cause_hazard_value],
-          cc,
-        ),
-      );
+      const ss = parseCascadeSnapshot(snapshotFromRiskCascade(cc));
       return {
         ...ss,
         cr4de_cause_risk: hazardCatalogue[cc._cr4de_cause_hazard_value],

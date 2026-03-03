@@ -71,14 +71,14 @@ export default function ExportBNRAPage() {
   const [type, setType] = useState(EXPORT_TYPE.ALL);
   const [exportEnv, setExportEnv] = useState(Environment.PUBLIC);
   const [selectedRiskFiles, setSelectedRiskFiles] = useState<DVRiskSummary[]>(
-    []
+    [],
   );
 
   const { data: allSummaries, isLoading: loadingSummaries } = useQuery({
     queryKey: [DataTable.RISK_SUMMARY],
     queryFn: () =>
       api.getRiskSummaries(
-        `$orderby=cr4de_hazard_id&$filter=cr4de_category ne 'test'`
+        `$orderby=cr4de_hazard_id&$filter=cr4de_category ne 'test'`,
       ),
   });
 
@@ -91,7 +91,7 @@ export default function ExportBNRAPage() {
   };
 
   const handleChangeRFs = (
-    event: SelectChangeEvent<typeof selectedRiskFiles>
+    event: SelectChangeEvent<typeof selectedRiskFiles>,
   ) => {
     const {
       target: { value },
@@ -104,21 +104,21 @@ export default function ExportBNRAPage() {
           if (typeof rf === "string") {
             if (
               value.find(
-                (r) => typeof r !== "string" && r._cr4de_risk_file_value === rf
+                (r) => typeof r !== "string" && r._cr4de_risk_file_value === rf,
               )
             )
               return undefined;
             return allSummaries?.find((r) => r._cr4de_risk_file_value === rf);
           } else if (
             value.find(
-              (r) => typeof r === "string" && r === rf._cr4de_risk_file_value
+              (r) => typeof r === "string" && r === rf._cr4de_risk_file_value,
             )
           ) {
             return undefined;
           }
           return rf;
         })
-        .filter((rf) => rf !== undefined) as DVRiskSummary[]
+        .filter((rf) => rf !== undefined) as DVRiskSummary[],
     );
   };
 
@@ -170,13 +170,13 @@ export default function ExportBNRAPage() {
       cascades = await api
         .getCascadeSnapshots()
         .then((d) =>
-          d.map((c) => parseCascadeSnapshot(linkCascadeSnapshot(c, rc)))
+          d.map((c) => parseCascadeSnapshot(linkCascadeSnapshot(c, rc))),
         );
     } else {
       logger("Loading risk files");
       const riskFiles = await api.getRiskFiles();
       riskSnapshots = riskFiles.map((rf) =>
-        parseRiskSnapshot(snapshotFromRiskfile(rf))
+        parseRiskSnapshot(snapshotFromRiskfile(rf)),
       );
       const rc = getRiskCatalogueFromSnapshots(riskSnapshots);
 
@@ -186,19 +186,16 @@ export default function ExportBNRAPage() {
         .then((d) =>
           d.map((c) =>
             parseCascadeSnapshot(
-              linkCascadeSnapshot(
-                snapshotFromRiskCascade(rc[c._cr4de_cause_hazard_value], c),
-                rc
-              )
-            )
-          )
+              linkCascadeSnapshot(snapshotFromRiskCascade(c), rc),
+            ),
+          ),
         );
     }
 
     logger("Loading attachments");
     const attachments = await api
       .getAttachments(
-        `$orderby=cr4de_reference&$filter=cr4de_reference ne null&$expand=cr4de_referencedSource`
+        `$orderby=cr4de_reference&$filter=cr4de_reference ne null&$expand=cr4de_referencedSource`,
       )
       .then((d) =>
         d.map(
@@ -210,8 +207,8 @@ export default function ExportBNRAPage() {
                   cr4de_field: a.cr4de_field,
                   cr4de_referencedSource: a.cr4de_referencedSource,
                 }
-              : a) as DVAttachment<unknown, DVAttachment>
-        )
+              : a) as DVAttachment<unknown, DVAttachment>,
+        ),
       );
 
     const callback = (message: string) => {
@@ -226,7 +223,7 @@ export default function ExportBNRAPage() {
         allCascades: cascades,
         allAttachments: attachments,
       },
-      proxy(callback)
+      proxy(callback),
     );
 
     if (blob) {

@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import useAPI from "../../hooks/useAPI";
 import { useState } from "react";
-import { parseRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { SCENARIOS } from "../../functions/scenarios";
 import { oldToNewCPMatrix } from "../../functions/snapshot";
 import {
@@ -54,7 +53,7 @@ export default function MigrationTab() {
     const cascadeSnapshots = await api
       .getCascadeSnapshots()
       .then((d) =>
-        d.filter((c) => ACTOR_RISKS.indexOf(c._cr4de_cause_risk_value) >= 0)
+        d.filter((c) => ACTOR_RISKS.indexOf(c._cr4de_cause_risk_value) >= 0),
       );
     const cascades = await api.getRiskCascades();
 
@@ -64,20 +63,16 @@ export default function MigrationTab() {
 
     for (const c of cascadeSnapshots) {
       const cause = risks.find(
-        (r) => r._cr4de_risk_file_value === c._cr4de_cause_risk_value
+        (r) => r._cr4de_risk_file_value === c._cr4de_cause_risk_value,
       );
       const realCascade = cascades.find(
-        (rc) => rc.cr4de_bnrariskcascadeid === c._cr4de_risk_cascade_value
+        (rc) => rc.cr4de_bnrariskcascadeid === c._cr4de_risk_cascade_value,
       );
       if (!cause || !realCascade) return;
 
       const oldCP = parseCPMatrix(c.cr4de_quanti_cp);
 
-      const newCPMatrixSnapshot = oldToNewCPMatrix(
-        parseRiskSnapshot(cause),
-        realCascade,
-        false
-      );
+      const newCPMatrixSnapshot = oldToNewCPMatrix(realCascade, false);
       const newCPMatrix: CPMatrix = {
         [SCENARIOS.CONSIDERABLE]: {
           ...newCPMatrixSnapshot[SCENARIOS.CONSIDERABLE],

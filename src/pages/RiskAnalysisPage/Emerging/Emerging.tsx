@@ -14,16 +14,13 @@ import { BasePageContext } from "../../BasePage";
 import { useQuery } from "@tanstack/react-query";
 import { SmallRisk } from "../../../types/dataverse/DVSmallRisk";
 import { snapshotFromRiskCascade } from "../../../functions/snapshot";
-import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 import { Environment } from "../../../types/global";
 import { parseCascadeSnapshot } from "../../../types/dataverse/DVRiskCascade";
 
 export default function Emerging({
   riskSummary,
-  riskSnapshot,
 }: {
   riskSummary: DVRiskSummary;
-  riskSnapshot: DVRiskSnapshot;
 }) {
   const { user, environment, smallRiskMap } =
     useOutletContext<BasePageContext>();
@@ -67,9 +64,7 @@ export default function Emerging({
       ),
     select: (data) =>
       data
-        .map((d) =>
-          parseCascadeSnapshot(snapshotFromRiskCascade(riskSnapshot, d)),
-        )
+        .map((d) => parseCascadeSnapshot(snapshotFromRiskCascade(d)))
         .map(
           (d) =>
             ({

@@ -31,7 +31,7 @@ import {
 
 export function getExporter() {
   const jsWorker = `import ${JSON.stringify(
-    new URL(workerUrl, import.meta.url)
+    new URL(workerUrl, import.meta.url),
   )}`;
   const blobWorker = new Blob([jsWorker], { type: "application/javascript" });
   const ww = new Worker(URL.createObjectURL(blobWorker), { type: "module" });
@@ -43,7 +43,7 @@ export function getExporter() {
 export default function handleExportRiskfile(
   risk: DVRiskSummary,
   api: API,
-  environment: Environment
+  environment: Environment,
 ) {
   return async (onProgress?: (message: string) => void) => {
     if (onProgress) onProgress("Loading data");
@@ -63,7 +63,7 @@ export default function handleExportRiskfile(
 
       cascadeSnapshots = getParsedCascadeSnapshots(
         await api.getCascadeSnapshots(),
-        hc
+        hc,
       );
     } else {
       const riskFiles = await api.getRiskFiles();
@@ -72,30 +72,28 @@ export default function handleExportRiskfile(
       const baseCascadesCatalogue = getRiskCascades(
         rc[risk._cr4de_risk_file_value],
         cascades,
-        rc
+        rc,
       );
       riskSummaries = riskFiles.map((rf) =>
-        summaryFromRiskfile(rf, baseCascadesCatalogue)
+        summaryFromRiskfile(rf, baseCascadesCatalogue),
       );
       riskSnapshots = riskFiles.map((rf) =>
-        parseRiskSnapshot(snapshotFromRiskfile(rf))
+        parseRiskSnapshot(snapshotFromRiskfile(rf)),
       );
       const rsc = getParsedRiskCatalogue(riskFiles);
 
       cascadeSnapshots = cascades.map((c) =>
         linkCascadeSnapshot(
-          parseCascadeSnapshot(
-            snapshotFromRiskCascade(rsc[c._cr4de_cause_hazard_value], c)
-          ),
-          rsc
-        )
+          parseCascadeSnapshot(snapshotFromRiskCascade(c)),
+          rsc,
+        ),
       );
     }
 
     const attachments = await api
-      .getAttachments<DVAttachment<unknown, DVAttachment>>(
-        `$orderby=cr4de_reference&$filter=cr4de_reference ne null&$expand=cr4de_referencedSource`
-      )
+      .getAttachments<
+        DVAttachment<unknown, DVAttachment>
+      >(`$orderby=cr4de_reference&$filter=cr4de_reference ne null&$expand=cr4de_referencedSource`)
       .then((results: DVAttachment<unknown, DVAttachment>[]) =>
         results.map((a) =>
           a.cr4de_referencedSource
@@ -105,8 +103,8 @@ export default function handleExportRiskfile(
                 cr4de_field: a.cr4de_field,
                 cr4de_referencedSource: a.cr4de_referencedSource,
               }
-            : a
-        )
+            : a,
+        ),
       );
 
     const exporter = getExporter();
@@ -120,7 +118,7 @@ export default function handleExportRiskfile(
         allCascades: cascadeSnapshots,
         allAttachments: attachments,
       },
-      proxy(onProgress || (() => {}))
+      proxy(onProgress || (() => {})),
     );
 
     if (blob) {
