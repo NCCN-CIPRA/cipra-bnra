@@ -23,7 +23,7 @@ export default function Emerging({
 
   return (
     <Box sx={{ mb: 10 }}>
-      <RiskFileTitle riskFile={riskSummary} />
+      <RiskFileTitle riskSummary={riskSummary} />
 
       <Box>
         <Typography variant="h5">

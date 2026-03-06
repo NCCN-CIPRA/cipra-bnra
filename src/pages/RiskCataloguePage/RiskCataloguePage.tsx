@@ -12,6 +12,13 @@ import AdvancedRiskCatalogue from "./AdvancedRiskCatalogue";
 import { snapshotFromRiskfile } from "../../functions/snapshot";
 import { parseRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import BasicRiskCatalogue from "./BasicRiskCatalogue";
+import {
+  DVRiskFile,
+  parseRiskFile,
+  SerializedRiskFileQuantiInput,
+  SerializedRiskFileQuantiResults,
+} from "../../types/dataverse/DVRiskFile";
+import { SerializedRiskQualis } from "../../types/dataverse/Riskfile";
 
 export default function RiskCataloguePage() {
   const { t } = useTranslation();
@@ -36,7 +43,14 @@ export default function RiskCataloguePage() {
   const { data: riskFiles, isLoading: isLoadingRiskFiles } = useQuery({
     queryKey: [DataTable.RISK_FILE, "catalogue"],
     queryFn: async () => {
-      const res = await api.getRiskFiles(
+      const res = await api.getRiskFiles<
+        DVRiskFile<
+          unknown,
+          SerializedRiskFileQuantiInput,
+          SerializedRiskQualis,
+          SerializedRiskFileQuantiResults
+        >
+      >(
         "$select=cr4de_hazard_id,cr4de_title,cr4de_risk_category,cr4de_mrs,cr4de_quanti,cr4de_result_snapshot,cr4de_quanti_results",
       );
       return res;
@@ -45,7 +59,9 @@ export default function RiskCataloguePage() {
       user && user.roles.analist && environment === Environment.DYNAMIC,
     ),
     select: (data) => {
-      const res = data.map((rf) => parseRiskSnapshot(snapshotFromRiskfile(rf)));
+      const res = data.map((rf) =>
+        parseRiskSnapshot(snapshotFromRiskfile(parseRiskFile(rf))),
+      );
       return res;
     },
   });

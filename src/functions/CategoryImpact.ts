@@ -9,7 +9,9 @@
 import {
   DVRiskFile,
   RISKFILE_RESULT_FIELD,
+  SerializedRiskFileQuantiInput,
 } from "../types/dataverse/DVRiskFile";
+import { SerializedRiskQualis } from "../types/dataverse/Riskfile";
 import { DAMAGE_INDICATOR, IMPACT_CATEGORY } from "./Impact";
 import { getScenarioParameter, SCENARIOS } from "./scenarios";
 import { getTotalImpactAbsolute } from "./TotalImpact";
@@ -17,9 +19,14 @@ import { getTotalImpactAbsolute } from "./TotalImpact";
 const BASE_CATEGORY_IMPACT = 15811388;
 
 const getCategoryImpactAbsolute = (
-  riskFile: DVRiskFile,
+  riskFile: DVRiskFile<
+    unknown,
+    SerializedRiskFileQuantiInput,
+    SerializedRiskQualis,
+    unknown
+  >,
   category: IMPACT_CATEGORY,
-  scenario: SCENARIOS
+  scenario: SCENARIOS,
 ) => {
   const totalImpactRelative =
     getScenarioParameter(riskFile, "TI", scenario) || 0;
@@ -29,22 +36,22 @@ const getCategoryImpactAbsolute = (
     (getScenarioParameter(
       riskFile,
       `TI_${category}a` as RISKFILE_RESULT_FIELD,
-      scenario
+      scenario,
     ) || 0) +
     (getScenarioParameter(
       riskFile,
       `TI_${category}b` as RISKFILE_RESULT_FIELD,
-      scenario
+      scenario,
     ) || 0) +
     (getScenarioParameter(
       riskFile,
       `TI_${category}c` as RISKFILE_RESULT_FIELD,
-      scenario
+      scenario,
     ) || 0) +
     (getScenarioParameter(
       riskFile,
       `TI_${category}d` as RISKFILE_RESULT_FIELD,
-      scenario
+      scenario,
     ) || 0);
 
   return (categoryImpactRelative * totalImpactAbsolute) / totalImpactRelative;
@@ -64,9 +71,14 @@ const unscaleImpact = (r: number) => {
 };
 
 export const getCategoryImpactRescaled = (
-  riskFile: DVRiskFile,
+  riskFile: DVRiskFile<
+    unknown,
+    SerializedRiskFileQuantiInput,
+    SerializedRiskQualis,
+    unknown
+  >,
   category: IMPACT_CATEGORY,
-  scenario: SCENARIOS
+  scenario: SCENARIOS,
 ) => {
   const totalImpact = getCategoryImpactAbsolute(riskFile, category, scenario);
 
@@ -74,48 +86,53 @@ export const getCategoryImpactRescaled = (
 };
 
 export const getCategoryImpactRescaledFromAbsolute = (
-  totalCategoryImpactAbsolute: number
+  totalCategoryImpactAbsolute: number,
 ) => {
   if (totalCategoryImpactAbsolute < BASE_CATEGORY_IMPACT) {
     return rescaleImpact(
-      totalCategoryImpactAbsolute / (2 * BASE_CATEGORY_IMPACT)
+      totalCategoryImpactAbsolute / (2 * BASE_CATEGORY_IMPACT),
     );
   }
   return rescaleImpact(Math.log10(totalCategoryImpactAbsolute / 5) - 6);
 };
 
 export const getAbsoluteCategoryImpactUnscaled = (
-  categoryImpactScale: number
+  categoryImpactScale: number,
 ) => {
   return Math.pow(10, unscaleImpact(categoryImpactScale) + 6) * 5;
 };
 
 export const getDamageIndicatorToCategoryImpactRatio = (
-  riskFile: DVRiskFile,
+  riskFile: DVRiskFile<
+    unknown,
+    SerializedRiskFileQuantiInput,
+    SerializedRiskQualis,
+    unknown
+  >,
   di: DAMAGE_INDICATOR,
-  scenario: SCENARIOS
+  scenario: SCENARIOS,
 ) => {
   const diImpact = getScenarioParameter(riskFile, `TI_${di}`, scenario) || 0;
   const categoryImpact =
     (getScenarioParameter(
       riskFile,
       `TI_${di[0]}a` as RISKFILE_RESULT_FIELD,
-      scenario
+      scenario,
     ) || 0) +
     (getScenarioParameter(
       riskFile,
       `TI_${di[0]}b` as RISKFILE_RESULT_FIELD,
-      scenario
+      scenario,
     ) || 0) +
     (getScenarioParameter(
       riskFile,
       `TI_${di[0]}c` as RISKFILE_RESULT_FIELD,
-      scenario
+      scenario,
     ) || 0) +
     (getScenarioParameter(
       riskFile,
       `TI_${di[0]}d` as RISKFILE_RESULT_FIELD,
-      scenario
+      scenario,
     ) || 0);
 
   if (categoryImpact <= 0) return 0;

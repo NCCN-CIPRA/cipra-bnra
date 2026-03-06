@@ -24,7 +24,7 @@ export default function Standard({
 
   return (
     <Box sx={{ mb: 10 }}>
-      <RiskFileTitle riskFile={riskSummary} />
+      <RiskFileTitle riskSummary={riskSummary} />
 
       <Box>
         <Typography variant="h5" sx={{ mb: 2 }}>

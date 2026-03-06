@@ -44,6 +44,7 @@ import {
 } from "../../types/dataverse/DVCascadeSnapshot";
 import { getRiskCatalogueFromSnapshots } from "../../functions/riskfiles";
 import { useQuery } from "@tanstack/react-query";
+import { parseRiskFile } from "../../types/dataverse/DVRiskFile";
 
 enum EXPORT_TYPE {
   ALL = "ALL",
@@ -176,7 +177,7 @@ export default function ExportBNRAPage() {
       logger("Loading risk files");
       const riskFiles = await api.getRiskFiles();
       riskSnapshots = riskFiles.map((rf) =>
-        parseRiskSnapshot(snapshotFromRiskfile(rf)),
+        parseRiskSnapshot(snapshotFromRiskfile(parseRiskFile(rf))),
       );
       const rc = getRiskCatalogueFromSnapshots(riskSnapshots);
 

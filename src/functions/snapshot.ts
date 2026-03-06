@@ -42,15 +42,9 @@ import {
   RISK_TYPE,
   SerializedRiskQualis,
   serializeRiskQualis,
-  UnparsedRiskFields,
 } from "../types/dataverse/Riskfile";
 import { getCPMatrixFromOldFormat } from "./analysis/cp";
-import {
-  Cascades,
-  getCascades,
-  getCausesWithDP,
-  getEffectsWithDI,
-} from "./cascades";
+import { Cascades, getCausesWithDP, getEffectsWithDI } from "./cascades";
 import {
   getCategoryImpactRescaled,
   getDamageIndicatorToCategoryImpactRatio,
@@ -93,208 +87,208 @@ export function getCascadeResultSnapshot(
 const r = (v: number | null | undefined, p: number = 100) =>
   v ? Math.round(v * p) / p : 0;
 
-export function updateSnapshots(
-  summaries: DVRiskSummary<unknown, UnparsedRiskFields>[],
-  riskSnapshots: DVRiskSnapshot<
-    unknown,
-    SerializedRiskSnapshotResults,
-    SerializedRiskQualis
-  >[],
-  cascadesSnapshots: DVCascadeSnapshot<
-    unknown,
-    unknown,
-    unknown,
-    SerializedCauseSnapshotResults,
-    SerializedEffectSnapshotResults,
-    SerializedCPMatrix
-  >[],
-  riskFiles: DVRiskFile[],
-  cascades: DVRiskCascade[],
-  realSnapshot: boolean,
-): {
-  updatedSummaries: Partial<DVRiskSummary<unknown, UnparsedRiskFields>>[];
-  updatedRiskSnapshots: Partial<
-    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
-  >[];
-  updatedCascadesSnapshots: Partial<
-    DVCascadeSnapshot<
-      unknown,
-      unknown,
-      unknown,
-      SerializedCauseSnapshotResults,
-      SerializedEffectSnapshotResults,
-      SerializedCPMatrix
-    >
-  >[];
-} {
-  const newSummaries: Partial<DVRiskSummary<unknown, UnparsedRiskFields>>[] =
-    [];
-  const newRiskSnapshots: Partial<
-    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
-  >[] = [];
-  const updatedSummaries: Partial<
-    DVRiskSummary<unknown, UnparsedRiskFields>
-  >[] = [];
-  const updatedRiskSnapshots: Partial<
-    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
-  >[] = [];
-  const cascadeSnapshotDict: {
-    [cascadeId: string]: Partial<
-      DVCascadeSnapshot<
-        unknown,
-        unknown,
-        unknown,
-        SerializedCauseSnapshotResults,
-        SerializedEffectSnapshotResults,
-        SerializedCPMatrix
-      >
-    >;
-  } = cascadesSnapshots.reduce(
-    (acc, el) => ({
-      ...acc,
-      [el._cr4de_risk_cascade_value]: el,
-    }),
-    {},
-  );
+// export function updateSnapshots(
+//   summaries: DVRiskSummary<unknown, UnparsedRiskFields>[],
+//   riskSnapshots: DVRiskSnapshot<
+//     unknown,
+//     SerializedRiskSnapshotResults,
+//     SerializedRiskQualis
+//   >[],
+//   cascadesSnapshots: DVCascadeSnapshot<
+//     unknown,
+//     unknown,
+//     unknown,
+//     SerializedCauseSnapshotResults,
+//     SerializedEffectSnapshotResults,
+//     SerializedCPMatrix
+//   >[],
+//   riskFiles: DVRiskFile[],
+//   cascades: DVRiskCascade[],
+//   realSnapshot: boolean,
+// ): {
+//   updatedSummaries: Partial<DVRiskSummary<unknown, UnparsedRiskFields>>[];
+//   updatedRiskSnapshots: Partial<
+//     DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
+//   >[];
+//   updatedCascadesSnapshots: Partial<
+//     DVCascadeSnapshot<
+//       unknown,
+//       unknown,
+//       unknown,
+//       SerializedCauseSnapshotResults,
+//       SerializedEffectSnapshotResults,
+//       SerializedCPMatrix
+//     >
+//   >[];
+// } {
+//   const newSummaries: Partial<DVRiskSummary<unknown, UnparsedRiskFields>>[] =
+//     [];
+//   const newRiskSnapshots: Partial<
+//     DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
+//   >[] = [];
+//   const updatedSummaries: Partial<
+//     DVRiskSummary<unknown, UnparsedRiskFields>
+//   >[] = [];
+//   const updatedRiskSnapshots: Partial<
+//     DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
+//   >[] = [];
+//   const cascadeSnapshotDict: {
+//     [cascadeId: string]: Partial<
+//       DVCascadeSnapshot<
+//         unknown,
+//         unknown,
+//         unknown,
+//         SerializedCauseSnapshotResults,
+//         SerializedEffectSnapshotResults,
+//         SerializedCPMatrix
+//       >
+//     >;
+//   } = cascadesSnapshots.reduce(
+//     (acc, el) => ({
+//       ...acc,
+//       [el._cr4de_risk_cascade_value]: el,
+//     }),
+//     {},
+//   );
 
-  for (const rf of riskFiles) {
-    if (!rf.results) {
-      if (rf.cr4de_result_snapshot) {
-        rf.results = JSON.parse(rf.cr4de_result_snapshot);
-      }
-    }
-  }
+//   for (const rf of riskFiles) {
+//     if (!rf.results) {
+//       if (rf.cr4de_result_snapshot) {
+//         rf.results = JSON.parse(rf.cr4de_result_snapshot);
+//       }
+//     }
+//   }
 
-  const hc: { [key: string]: DVRiskFile } = riskFiles.reduce(
-    (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),
-    {},
-  );
-  const riskCascades: DVRiskCascade<DVRiskFile, DVRiskFile>[] = cascades
-    .map((c) => ({
-      ...c,
-      cr4de_cause_hazard: hc[c._cr4de_cause_hazard_value],
-      cr4de_effect_hazard: hc[c._cr4de_effect_hazard_value],
-      results: getCascadeResultSnapshot(c),
-    }))
-    .filter((c) => c.cr4de_cause_hazard && c.cr4de_effect_hazard);
+//   const hc: { [key: string]: DVRiskFile } = riskFiles.reduce(
+//     (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),
+//     {},
+//   );
+//   const riskCascades: DVRiskCascade<DVRiskFile, DVRiskFile>[] = cascades
+//     .map((c) => ({
+//       ...c,
+//       cr4de_cause_hazard: hc[c._cr4de_cause_hazard_value],
+//       cr4de_effect_hazard: hc[c._cr4de_effect_hazard_value],
+//       results: getCascadeResultSnapshot(c),
+//     }))
+//     .filter((c) => c.cr4de_cause_hazard && c.cr4de_effect_hazard);
 
-  const cascadeDict = riskFiles.reduce(
-    (acc, rf) => getCascades(rf, acc, hc)(riskCascades),
-    {} as { [key: string]: Cascades },
-  );
+//   const cascadeDict = riskFiles.reduce(
+//     (acc, rf) => getCascades(rf, acc, hc)(riskCascades),
+//     {} as { [key: string]: Cascades },
+//   );
 
-  for (const rf of riskFiles) {
-    const { newSummary, updatedSummary, newRiskSnapshot, updatedRiskSnapshot } =
-      updateSnapshot(
-        summaries,
-        riskSnapshots,
-        cascadeSnapshotDict,
-        rf,
-        cascadeDict[rf.cr4de_riskfilesid],
-        realSnapshot,
-      );
-    if (newSummary) newSummaries.push(newSummary);
-    if (newRiskSnapshot) newRiskSnapshots.push(newRiskSnapshot);
-    if (updatedSummary) updatedSummaries.push(updatedSummary);
-    if (updatedRiskSnapshot) updatedRiskSnapshots.push(updatedRiskSnapshot);
-  }
+//   for (const rf of riskFiles) {
+//     const { newSummary, updatedSummary, newRiskSnapshot, updatedRiskSnapshot } =
+//       updateSnapshot(
+//         summaries,
+//         riskSnapshots,
+//         cascadeSnapshotDict,
+//         rf,
+//         cascadeDict[rf.cr4de_riskfilesid],
+//         realSnapshot,
+//       );
+//     if (newSummary) newSummaries.push(newSummary);
+//     if (newRiskSnapshot) newRiskSnapshots.push(newRiskSnapshot);
+//     if (updatedSummary) updatedSummaries.push(updatedSummary);
+//     if (updatedRiskSnapshot) updatedRiskSnapshots.push(updatedRiskSnapshot);
+//   }
 
-  return {
-    updatedSummaries: [...updatedSummaries, ...newSummaries],
-    updatedRiskSnapshots: [...updatedRiskSnapshots, ...newRiskSnapshots],
-    updatedCascadesSnapshots: Object.values(cascadeSnapshotDict),
-  };
-}
+//   return {
+//     updatedSummaries: [...updatedSummaries, ...newSummaries],
+//     updatedRiskSnapshots: [...updatedRiskSnapshots, ...newRiskSnapshots],
+//     updatedCascadesSnapshots: Object.values(cascadeSnapshotDict),
+//   };
+// }
 
-function updateSnapshot(
-  summaries: DVRiskSummary<unknown, UnparsedRiskFields>[],
-  riskSnapshots: DVRiskSnapshot<
-    unknown,
-    SerializedRiskSnapshotResults,
-    SerializedRiskQualis
-  >[],
-  cascadesSnapshots: {
-    [cascadeId: string]: Partial<
-      DVCascadeSnapshot<
-        unknown,
-        unknown,
-        unknown,
-        SerializedCauseSnapshotResults,
-        SerializedEffectSnapshotResults,
-        SerializedCPMatrix
-      >
-    >;
-  },
-  riskFile: DVRiskFile,
-  cascades: Cascades,
-  realSnapshot: boolean,
-) {
-  const existingSummary: Partial<DVRiskSummary<unknown, UnparsedRiskFields>> =
-    summaries.find(
-      (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid,
-    ) || {};
-  const existingSnapshot: Partial<
-    DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
-  > =
-    riskSnapshots.find(
-      (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid,
-    ) || {};
+// function updateSnapshot(
+//   summaries: DVRiskSummary<unknown, UnparsedRiskFields>[],
+//   riskSnapshots: DVRiskSnapshot<
+//     unknown,
+//     SerializedRiskSnapshotResults,
+//     SerializedRiskQualis
+//   >[],
+//   cascadesSnapshots: {
+//     [cascadeId: string]: Partial<
+//       DVCascadeSnapshot<
+//         unknown,
+//         unknown,
+//         unknown,
+//         SerializedCauseSnapshotResults,
+//         SerializedEffectSnapshotResults,
+//         SerializedCPMatrix
+//       >
+//     >;
+//   },
+//   riskFile: DVRiskFile,
+//   cascades: Cascades,
+//   realSnapshot: boolean,
+// ) {
+//   const existingSummary: Partial<DVRiskSummary<unknown, UnparsedRiskFields>> =
+//     summaries.find(
+//       (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid,
+//     ) || {};
+//   const existingSnapshot: Partial<
+//     DVRiskSnapshot<unknown, SerializedRiskSnapshotResults, SerializedRiskQualis>
+//   > =
+//     riskSnapshots.find(
+//       (s) => s._cr4de_risk_file_value == riskFile.cr4de_riskfilesid,
+//     ) || {};
 
-  const updatedSummary = summaryFromRiskfile(riskFile, cascades);
-  if (existingSummary.cr4de_bnrariskfilesummaryid) {
-    updatedSummary.cr4de_bnrariskfilesummaryid =
-      existingSummary.cr4de_bnrariskfilesummaryid;
-  }
+//   const updatedSummary = summaryFromRiskfile(riskFile, cascades);
+//   if (existingSummary.cr4de_bnrariskfilesummaryid) {
+//     updatedSummary.cr4de_bnrariskfilesummaryid =
+//       existingSummary.cr4de_bnrariskfilesummaryid;
+//   }
 
-  const updatedSnapshot = snapshotFromRiskfile(riskFile);
-  if (existingSnapshot.cr4de_bnrariskfilesnapshotid) {
-    updatedSnapshot.cr4de_bnrariskfilesnapshotid =
-      existingSnapshot.cr4de_bnrariskfilesnapshotid;
-  }
+//   const updatedSnapshot = snapshotFromRiskfile(riskFile);
+//   if (existingSnapshot.cr4de_bnrariskfilesnapshotid) {
+//     updatedSnapshot.cr4de_bnrariskfilesnapshotid =
+//       existingSnapshot.cr4de_bnrariskfilesnapshotid;
+//   }
 
-  // for (const cause of cascades.causes) {
+//   // for (const cause of cascades.causes) {
 
-  // const updatedSnapshot = snapshotFromRiskfile(riskFile);
-  //   const updatedCauseSnapshot = snapshotFromRiskCascade(cause);
-  //   if (cascadesSnapshots[cause.cr4de_bnrariskcascadeid]) {
-  //     updatedCauseSnapshot.cr4de_bnrariskcascadesnapshotid =
-  //       cascadesSnapshots[cause.cr4de_bnrariskcascadeid]
-  //         .cr4de_bnrariskcascadesnapshotid || "";
-  //   }
-  //   cascadesSnapshots[cause.cr4de_bnrariskcascadeid] = updatedCauseSnapshot;
-  // }
+//   // const updatedSnapshot = snapshotFromRiskfile(riskFile);
+//   //   const updatedCauseSnapshot = snapshotFromRiskCascade(cause);
+//   //   if (cascadesSnapshots[cause.cr4de_bnrariskcascadeid]) {
+//   //     updatedCauseSnapshot.cr4de_bnrariskcascadesnapshotid =
+//   //       cascadesSnapshots[cause.cr4de_bnrariskcascadeid]
+//   //         .cr4de_bnrariskcascadesnapshotid || "";
+//   //   }
+//   //   cascadesSnapshots[cause.cr4de_bnrariskcascadeid] = updatedCauseSnapshot;
+//   // }
 
-  for (const effect of cascades.effects) {
-    const updatedEffectSnapshot = snapshotFromRiskCascade(effect, realSnapshot);
+//   for (const effect of cascades.effects) {
+//     const updatedEffectSnapshot = snapshotFromRiskCascade(effect, realSnapshot);
 
-    if (cascadesSnapshots[effect.cr4de_bnrariskcascadeid]) {
-      updatedEffectSnapshot.cr4de_bnrariskcascadesnapshotid =
-        cascadesSnapshots[effect.cr4de_bnrariskcascadeid]
-          .cr4de_bnrariskcascadesnapshotid || "";
-    }
-    cascadesSnapshots[effect.cr4de_bnrariskcascadeid] = updatedEffectSnapshot;
-  }
+//     if (cascadesSnapshots[effect.cr4de_bnrariskcascadeid]) {
+//       updatedEffectSnapshot.cr4de_bnrariskcascadesnapshotid =
+//         cascadesSnapshots[effect.cr4de_bnrariskcascadeid]
+//           .cr4de_bnrariskcascadesnapshotid || "";
+//     }
+//     cascadesSnapshots[effect.cr4de_bnrariskcascadeid] = updatedEffectSnapshot;
+//   }
 
-  const summaryHasUpdates = true;
-  const snapshotHasUpdates = true;
+//   const summaryHasUpdates = true;
+//   const snapshotHasUpdates = true;
 
-  return {
-    newSummary: updatedSummary.cr4de_bnrariskfilesummaryid
-      ? undefined
-      : updatedSummary,
-    updatedSummary:
-      updatedSummary.cr4de_bnrariskfilesummaryid && summaryHasUpdates
-        ? updatedSummary
-        : undefined,
-    newRiskSnapshot: updatedSnapshot.cr4de_bnrariskfilesnapshotid
-      ? undefined
-      : updatedSnapshot,
-    updatedRiskSnapshot:
-      updatedSnapshot.cr4de_bnrariskfilesnapshotid && snapshotHasUpdates
-        ? updatedSnapshot
-        : undefined,
-  };
-}
+//   return {
+//     newSummary: updatedSummary.cr4de_bnrariskfilesummaryid
+//       ? undefined
+//       : updatedSummary,
+//     updatedSummary:
+//       updatedSummary.cr4de_bnrariskfilesummaryid && summaryHasUpdates
+//         ? updatedSummary
+//         : undefined,
+//     newRiskSnapshot: updatedSnapshot.cr4de_bnrariskfilesnapshotid
+//       ? undefined
+//       : updatedSnapshot,
+//     updatedRiskSnapshot:
+//       updatedSnapshot.cr4de_bnrariskfilesnapshotid && snapshotHasUpdates
+//         ? updatedSnapshot
+//         : undefined,
+//   };
+// }
 
 function getSerializedRiskSnapshotResults(
   riskFile: DVRiskFile<
@@ -916,7 +910,14 @@ function getSerializedRiskSnapshotResults(
   );
 }
 
-export function getSerializedQualiResults(riskFile: DVRiskFile) {
+export function getSerializedQualiResults(
+  riskFile: DVRiskFile<
+    unknown,
+    SerializedRiskFileQuantiInput,
+    SerializedRiskQualis,
+    unknown
+  >,
+) {
   if (riskFile.cr4de_quali !== null && riskFile.cr4de_quali !== "") {
     return riskFile.cr4de_quali;
   }
@@ -1150,6 +1151,7 @@ function getMRS(
 
 export function summaryFromRiskfileNew(
   riskFile: DVRiskFile<unknown, unknown, unknown, RiskFileQuantiResults>,
+  riskSummary?: DVRiskSummary,
 ): DVRiskSummary {
   const scenario = getMRS(riskFile);
 
@@ -1245,28 +1247,38 @@ export function summaryFromRiskfileNew(
             effect_risk_title: e.risk,
             effect_risk_i: e.contributionMean.all,
           })) ?? null),
+
+    ...(riskSummary
+      ? {
+          cr4de_bnrariskfilesummaryid: riskSummary.cr4de_bnrariskfilesummaryid,
+          cr4de_last_snapshot: riskSummary.cr4de_last_snapshot,
+        }
+      : {}),
   };
 }
 
-export function snapshotFromRiskfile<U>(
+export function snapshotFromRiskfile(
   riskFile: DVRiskFile<
     unknown,
     SerializedRiskFileQuantiInput,
     SerializedRiskQualis,
-    U
+    RiskFileQuantiResults
   >,
 ): DVRiskSnapshot<
-  DVRiskFile<unknown, SerializedRiskFileQuantiInput, SerializedRiskQualis, U>,
+  DVRiskFile<
+    unknown,
+    SerializedRiskFileQuantiInput,
+    SerializedRiskQualis,
+    RiskFileQuantiResults
+  >,
   SerializedRiskSnapshotResults,
   SerializedRiskQualis,
-  U
+  RiskFileQuantiResults
 > {
   let mrs = riskFile.cr4de_mrs!;
 
   if (riskFile.cr4de_quanti_results) {
-    mrs = getMRS(
-      riskFile as DVRiskFile<unknown, unknown, unknown, RiskFileQuantiResults>,
-    );
+    mrs = getMRS(riskFile);
   }
 
   return {

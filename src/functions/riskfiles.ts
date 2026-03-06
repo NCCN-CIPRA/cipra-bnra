@@ -1,11 +1,17 @@
-import { DVRiskFile } from "../types/dataverse/DVRiskFile";
+import {
+  DVRiskFile,
+  parseRiskFile,
+  RiskFileQuantiResults,
+  SerializedRiskFileQuantiInput,
+  SerializedRiskFileQuantiResults,
+} from "../types/dataverse/DVRiskFile";
 import {
   DVRiskSnapshot,
   DVRiskSnapshotQuantiType,
   parseRiskSnapshot,
   RiskSnapshotResults,
-  SerializedRiskSnapshotResults,
 } from "../types/dataverse/DVRiskSnapshot";
+import { SerializedRiskQualis } from "../types/dataverse/Riskfile";
 import { snapshotFromRiskfile } from "./snapshot";
 
 export function isMaliciousAction(riskFileId: string) {
@@ -51,19 +57,31 @@ export function getRiskFileCatalogue(riskFiles: DVRiskFile[]): {
   );
 }
 
-export function getRiskCatalogue(
-  riskFiles: DVRiskFile[],
-): RiskCatalogue<DVRiskFile, SerializedRiskSnapshotResults> {
-  const snapshots = riskFiles.map((rf) => snapshotFromRiskfile(rf));
+// export function getRiskCatalogue(
+//   riskFiles: DVRiskFile[],
+// ): RiskCatalogue<DVRiskFile, SerializedRiskSnapshotResults> {
+//   const snapshots = riskFiles.map((rf) => snapshotFromRiskfile(rf));
 
-  return getRiskCatalogueFromSnapshots(snapshots);
-}
+//   return getRiskCatalogueFromSnapshots(snapshots);
+// }
 
 export function getParsedRiskCatalogue(
-  riskFiles: DVRiskFile[],
-): RiskCatalogue<DVRiskFile> {
+  riskFiles: DVRiskFile<
+    unknown,
+    SerializedRiskFileQuantiInput,
+    SerializedRiskQualis,
+    SerializedRiskFileQuantiResults
+  >[],
+): RiskCatalogue<
+  DVRiskFile<
+    unknown,
+    SerializedRiskFileQuantiInput,
+    SerializedRiskQualis,
+    RiskFileQuantiResults
+  >
+> {
   const snapshots = riskFiles.map((rf) =>
-    parseRiskSnapshot(snapshotFromRiskfile(rf)),
+    parseRiskSnapshot(snapshotFromRiskfile(parseRiskFile(rf))),
   );
 
   return getRiskCatalogueFromSnapshots(snapshots);

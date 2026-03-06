@@ -54,6 +54,7 @@ import { iScale7FromEuros } from "../../functions/indicators/impact";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 import {
   DVRiskFile,
+  parseRiskFile,
   RiskFileScenarioQuantiResults,
   serializeRiskFileQuantiResults,
 } from "../../types/dataverse/DVRiskFile";
@@ -212,7 +213,9 @@ export default function SimulationTab() {
 
     setAction("Loading data...");
     setProgress(-1);
-    const riskSnapshots = rfs.map(snapshotFromRiskfile).map(parseRiskSnapshot);
+    const riskSnapshots = rfs.map((rf) =>
+      parseRiskSnapshot(snapshotFromRiskfile(parseRiskFile(rf))),
+    );
     const rc = getRiskCatalogueFromSnapshots(riskSnapshots);
     const cascadeSnapshots = cs
       .filter((cs) => rc[cs._cr4de_cause_hazard_value])

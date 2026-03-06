@@ -27,7 +27,7 @@ import {
   snapshotFromRiskfile,
 } from "../../functions/snapshot";
 import { parseRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile, parseRiskFile } from "../../types/dataverse/DVRiskFile";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 
 export default function RiskEvolutionPage() {
@@ -57,7 +57,9 @@ export default function RiskEvolutionPage() {
       data.map((d) => ({
         ...parseCascadeSnapshot(snapshotFromRiskCascade(d)),
         cr4de_cause_risk: parseRiskSnapshot(
-          snapshotFromRiskfile(d.cr4de_cause_hazard as DVRiskFile),
+          snapshotFromRiskfile(
+            parseRiskFile(d.cr4de_cause_hazard as DVRiskFile),
+          ),
         ),
       })),
   });
@@ -82,7 +84,7 @@ export default function RiskEvolutionPage() {
       data.map((d) => ({
         ...parseCascadeSnapshot(d),
         cr4de_cause_risk: parseRiskSnapshot(
-          snapshotFromRiskfile(d.cr4de_cause_risk as DVRiskFile),
+          snapshotFromRiskfile(parseRiskFile(d.cr4de_cause_risk as DVRiskFile)),
         ),
       })),
   });
@@ -111,7 +113,7 @@ export default function RiskEvolutionPage() {
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
       <Box sx={{ mb: 10 }}>
-        <RiskFileTitle riskFile={riskSummary} />
+        <RiskFileTitle riskSummary={riskSummary} />
 
         <DisclaimerSection riskFile={riskFile} />
 

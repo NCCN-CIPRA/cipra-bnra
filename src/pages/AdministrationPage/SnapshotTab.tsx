@@ -222,6 +222,7 @@ export default function SnapshotTab() {
                 riskSummary.cr4de_effect_risks as EffectRisksSummary[],
               )
             : null,
+          cr4de_last_snapshot: new Date(),
         },
       });
       await updateSnapshot.mutate({

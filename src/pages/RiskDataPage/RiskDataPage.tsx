@@ -1,5 +1,9 @@
 import { useOutletContext } from "react-router-dom";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import {
+  DVRiskFile,
+  parseRiskFile,
+  RISK_TYPE,
+} from "../../types/dataverse/DVRiskFile";
 import {
   Box,
   Container,
@@ -90,7 +94,9 @@ export default function RiskDataPage() {
     select: (data) =>
       data.map((d) => {
         const cause = parseRiskSnapshot(
-          snapshotFromRiskfile(d.cr4de_cause_hazard as DVRiskFile),
+          snapshotFromRiskfile(
+            parseRiskFile(d.cr4de_cause_hazard as DVRiskFile),
+          ),
         );
 
         return {
@@ -120,7 +126,9 @@ export default function RiskDataPage() {
         return {
           ...parseCascadeSnapshot(snapshotFromRiskCascade(d)),
           cr4de_effect_risk: parseRiskSnapshot(
-            snapshotFromRiskfile(d.cr4de_effect_hazard as DVRiskFile),
+            snapshotFromRiskfile(
+              parseRiskFile(d.cr4de_effect_hazard as DVRiskFile),
+            ),
           ),
         };
       }),
@@ -146,7 +154,7 @@ export default function RiskDataPage() {
       data.map((d) => ({
         ...parseCascadeSnapshot(d),
         cr4de_cause_risk: parseRiskSnapshot(
-          snapshotFromRiskfile(d.cr4de_cause_risk as DVRiskFile),
+          snapshotFromRiskfile(parseRiskFile(d.cr4de_cause_risk as DVRiskFile)),
         ),
       })),
   });
@@ -170,7 +178,9 @@ export default function RiskDataPage() {
       data.map((d) => ({
         ...parseCascadeSnapshot(d),
         cr4de_effect_risk: parseRiskSnapshot(
-          snapshotFromRiskfile(d.cr4de_effect_risk as DVRiskFile),
+          snapshotFromRiskfile(
+            parseRiskFile(d.cr4de_effect_risk as DVRiskFile),
+          ),
         ),
       })),
   });
@@ -209,7 +219,7 @@ export default function RiskDataPage() {
   return (
     <Stack direction="column" sx={{ width: "100%" }}>
       <Container sx={{ mt: 2 }}>
-        <RiskFileTitle riskFile={riskSummary} />
+        <RiskFileTitle riskSummary={riskSummary} />
       </Container>
       {user?.roles.analist &&
         riskFile.cr4de_risk_type !== RISK_TYPE.EMERGING && (

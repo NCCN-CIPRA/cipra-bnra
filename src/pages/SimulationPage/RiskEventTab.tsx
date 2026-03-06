@@ -29,7 +29,7 @@ import {
   SimulationInput,
 } from "../../types/simulation";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
-import { DVRiskFile } from "../../types/dataverse/DVRiskFile";
+import { DVRiskFile, parseRiskFile } from "../../types/dataverse/DVRiskFile";
 import useSavedState from "../../hooks/useSavedState";
 import { SCENARIO_PARAMS, SCENARIOS } from "../../functions/scenarios";
 import * as d3 from "d3"; // we will need d3.js
@@ -401,7 +401,9 @@ export default function RiskEventTab() {
   const runSimulation = async () => {
     if (!rfs || !cs || !selectedRF || !selectedScenario) return;
 
-    const riskSnapshots = rfs.map(snapshotFromRiskfile).map(parseRiskSnapshot);
+    const riskSnapshots = rfs.map((rf) =>
+      parseRiskSnapshot(snapshotFromRiskfile(parseRiskFile(rf))),
+    );
     const rc = getRiskCatalogueFromSnapshots(riskSnapshots);
     const cascadeSnapshots = cs
       .filter((cs) => rc[cs._cr4de_cause_hazard_value])

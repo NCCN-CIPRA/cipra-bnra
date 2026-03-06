@@ -154,11 +154,7 @@ export default function BaseRiskFilePage() {
 
     if (!riskFile) return null;
 
-    return {
-      ...summaryFromRiskfileNew(riskFile),
-      cr4de_bnrariskfilesummaryid:
-        publicRiskSummary?.cr4de_bnrariskfilesummaryid || "",
-    };
+    return summaryFromRiskfileNew(riskFile, publicRiskSummary);
   }, [publicRiskSummary, riskFile, environment]);
 
   const riskSnapshot = useMemo(() => {
@@ -169,7 +165,7 @@ export default function BaseRiskFilePage() {
 
     return parseRiskSnapshot(snapshotFromRiskfile(riskFile));
   }, [publicRiskSnapshot, riskFile, environment]);
-
+  console.log(riskSnapshot?.cr4de_mrs);
   const isEmerging = riskSummary?.cr4de_risk_type === RISK_TYPE.EMERGING;
 
   let tab = 0;

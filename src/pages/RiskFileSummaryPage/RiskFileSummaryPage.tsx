@@ -37,7 +37,7 @@ export default function RiskFileSummaryPage() {
 
   return (
     <Container sx={{ mt: 2, pb: 8 }}>
-      <RiskFileTitle riskFile={riskSummary} />
+      <RiskFileTitle riskSummary={riskSummary} />
       <Stack direction="row" sx={{ mb: 8 }} columnGap={4}>
         <Box id="summary-text" data-testid="summary-text" sx={{ flex: 1 }}>
           <HTMLEditor

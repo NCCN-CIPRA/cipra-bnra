@@ -1,7 +1,11 @@
 import { useParams } from "react-router-dom";
 import "./ExportRiskFilePage.css";
 import { Box } from "@mui/material";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
+import {
+  DVRiskFile,
+  parseRiskFile,
+  RISK_TYPE,
+} from "../../types/dataverse/DVRiskFile";
 import SummaryImpactChart from "../../components/charts/svg/SummaryImpactChart";
 import { getScenarioParameter, SCENARIOS } from "../../functions/scenarios";
 import { useMemo } from "react";
@@ -89,7 +93,7 @@ export default function ExportRiskFilePage() {
             results: getCascadeResultSnapshot(r),
           } as DVRiskCascade<SmallRisk, SmallRisk>;
         }),
-    }
+    },
   );
 
   const { data: attachments } = useRecords<DVAttachment<unknown, DVAttachment>>(
@@ -105,9 +109,9 @@ export default function ExportRiskFilePage() {
                 cr4de_field: a.cr4de_field,
                 cr4de_referencedSource: a.cr4de_referencedSource,
               }
-            : a
+            : a,
         ),
-    }
+    },
   );
 
   const cascades = useMemo(() => {
@@ -115,7 +119,7 @@ export default function ExportRiskFilePage() {
 
     const hc = hazardCatalogue.reduce(
       (acc, sr) => ({ ...acc, [sr.cr4de_riskfilesid]: sr }),
-      {}
+      {},
     );
 
     const causes = getCauses(riskFile, rawCascades, hc);
@@ -124,7 +128,7 @@ export default function ExportRiskFilePage() {
       riskFile,
       rawCascades,
       hc,
-      false
+      false,
     );
     const climateChange = getClimateChange(riskFile, rawCascades, hc);
 
@@ -225,7 +229,9 @@ export function ExportRiskFileCharts({
   // attachments: DVAttachment<unknown, DVAttachment<unknown, unknown>>[] | null;
 }) {
   const riskSummary = summaryFromRiskfile(riskFile, cascades);
-  const riskSnapshot = parseRiskSnapshot(snapshotFromRiskfile(riskFile));
+  const riskSnapshot = parseRiskSnapshot(
+    snapshotFromRiskfile(parseRiskFile(riskFile)),
+  );
 
   return (
     <>

@@ -8,26 +8,14 @@ import type { ExportBNRAWorker } from "../../functions/export/export.worker";
 import "../../components/export/fonts";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 import { Environment } from "../../types/global";
-import {
-  DVRiskSnapshot,
-  parseRiskSnapshot,
-} from "../../types/dataverse/DVRiskSnapshot";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import { getParsedCascadeSnapshots, getRiskCascades } from "../cascades";
 import {
-  getParsedRiskCatalogue,
   getRiskCatalogueFromSnapshots,
   getRiskFileCatalogue,
 } from "../riskfiles";
-import {
-  snapshotFromRiskCascade,
-  snapshotFromRiskfile,
-  summaryFromRiskfile,
-} from "../snapshot";
+import { summaryFromRiskfile } from "../snapshot";
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
-import {
-  linkCascadeSnapshot,
-  parseCascadeSnapshot,
-} from "../../types/dataverse/DVRiskCascade";
 
 export function getExporter() {
   const jsWorker = `import ${JSON.stringify(
@@ -48,13 +36,13 @@ export default function handleExportRiskfile(
   return async (onProgress?: (message: string) => void) => {
     if (onProgress) onProgress("Loading data");
 
-    let riskSummaries: DVRiskSummary[],
-      riskSnapshots: DVRiskSnapshot[],
-      cascadeSnapshots: DVCascadeSnapshot<
-        unknown,
-        DVRiskSnapshot,
-        DVRiskSnapshot
-      >[];
+    let riskSummaries: DVRiskSummary[];
+    let riskSnapshots: DVRiskSnapshot[] = [];
+    let cascadeSnapshots: DVCascadeSnapshot<
+      unknown,
+      DVRiskSnapshot,
+      DVRiskSnapshot
+    >[] = [];
 
     if (environment == Environment.PUBLIC) {
       riskSummaries = await api.getRiskSummaries();
@@ -77,17 +65,17 @@ export default function handleExportRiskfile(
       riskSummaries = riskFiles.map((rf) =>
         summaryFromRiskfile(rf, baseCascadesCatalogue),
       );
-      riskSnapshots = riskFiles.map((rf) =>
-        parseRiskSnapshot(snapshotFromRiskfile(rf)),
-      );
-      const rsc = getParsedRiskCatalogue(riskFiles);
+      // riskSnapshots = riskFiles.map((rf) =>
+      //   parseRiskSnapshot(snapshotFromRiskfile(rf)),
+      // );
+      // const rsc = getParsedRiskCatalogue(riskFiles);
 
-      cascadeSnapshots = cascades.map((c) =>
-        linkCascadeSnapshot(
-          parseCascadeSnapshot(snapshotFromRiskCascade(c)),
-          rsc,
-        ),
-      );
+      // cascadeSnapshots = cascades.map((c) =>
+      //   linkCascadeSnapshot(
+      //     parseCascadeSnapshot(snapshotFromRiskCascade(c)),
+      //     rsc,
+      //   ),
+      // );
     }
 
     const attachments = await api

@@ -20,6 +20,7 @@ import RiskMatrix from "../../components/charts/RiskMatrix";
 import { SCENARIOS } from "../../functions/scenarios";
 import {
   CATEGORY_NAMES,
+  parseRiskFile,
   parseRiskFileQuantiResults,
   RISK_CATEGORY,
   SerializedRiskFileQuantiResults,
@@ -70,7 +71,7 @@ export default function RiskMatrixPage() {
       data
         .filter((rf) => !rf.cr4de_hazard_id.startsWith("X"))
         .map((rf) => {
-          const rs = parseRiskSnapshot(snapshotFromRiskfile(rf));
+          const rs = parseRiskSnapshot(snapshotFromRiskfile(parseRiskFile(rf)));
           return {
             ...rs,
             cr4de_quanti_results: parseRiskFileQuantiResults(

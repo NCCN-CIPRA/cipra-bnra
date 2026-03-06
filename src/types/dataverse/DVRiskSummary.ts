@@ -36,6 +36,8 @@ export type DVRiskSummary<RiskFileType = unknown, T = UnparsedRiskFields> = {
   _cr4de_risk_file_value: string; // DVRiskFile
   cr4de_risk_file: RiskFileType | null;
 
+  cr4de_last_snapshot: string;
+
   cr4de_hazard_id: string;
   cr4de_title: string;
   cr4de_risk_type: RISK_TYPE;

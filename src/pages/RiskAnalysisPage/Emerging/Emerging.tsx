@@ -82,7 +82,7 @@ export default function Emerging({
   return (
     <>
       <Box sx={{ mb: 10 }}>
-        <RiskFileTitle riskFile={riskSummary} />
+        <RiskFileTitle riskSummary={riskSummary} />
 
         <Box className="catalyzing" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Catalysing Effects")}</Typography>

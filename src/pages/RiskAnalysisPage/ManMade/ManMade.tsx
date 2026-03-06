@@ -40,7 +40,7 @@ export default function ManMade({
   return (
     <>
       <Box sx={{ mb: 10 }}>
-        <RiskFileTitle riskFile={riskSummary} />
+        <RiskFileTitle riskSummary={riskSummary} />
 
         <Box sx={{ mt: 8 }}>
           <Typography variant="h5" sx={{ mb: 4 }}>
