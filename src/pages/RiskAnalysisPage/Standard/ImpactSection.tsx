@@ -5,13 +5,22 @@ import { DVRiskSnapshot } from "../../../types/dataverse/DVRiskSnapshot";
 import HTMLEditor from "../../../components/HTMLEditor";
 import useAPI, { DataTable } from "../../../hooks/useAPI";
 import { useMutation } from "@tanstack/react-query";
+import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
+import { SCENARIOS } from "../../../functions/scenarios";
+import { addImpact } from "../../../functions/simulation/math";
+import {
+  AggregatedImpacts,
+  noAggregatedImpacts,
+} from "../../../types/simulation";
 
 export default function ImpactSection({
   riskFile,
   impactName,
+  results,
 }: {
   riskFile: DVRiskSnapshot<unknown, unknown>;
   impactName: "human" | "societal" | "environmental" | "financial";
+  results: RiskFileQuantiResults | null;
 }) {
   const api = useAPI();
 
@@ -24,6 +33,27 @@ export default function ImpactSection({
         [`cr4de_mrs_impact_${impactLetter}`]: newHTML || undefined,
       }),
   });
+
+  const scenario = riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE;
+  const sums =
+    results?.[scenario].impactStatistics?.relativeContributions.reduce(
+      (acc, c) => ({
+        ...acc,
+        [c.id || ""]: addImpact(
+          acc[c.id || ""] || noAggregatedImpacts,
+          c.contributionMean,
+        ),
+      }),
+      {} as Record<string, AggregatedImpacts>,
+    ) || {};
+
+  const impactContributions = Object.keys(sums).reduce(
+    (acc, k) => ({
+      ...acc,
+      [k]: `This effect explains ${Math.round(1000 * sums[k][impactLetter]) / 10}% of the ${impactName} impact and ${Math.round(1000 * sums[k].all) / 10}% of the total impact.`,
+    }),
+    {} as Record<string, string>,
+  );
 
   return (
     <Box
@@ -46,6 +76,7 @@ export default function ImpactSection({
           DataTable.RISK_FILE,
           riskFile._cr4de_risk_file_value,
         ]}
+        riskLabels={impactContributions}
       />
     </Box>
   );

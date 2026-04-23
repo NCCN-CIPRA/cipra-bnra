@@ -285,7 +285,6 @@ export default function InformationPortalPage() {
                   <ListItemButton
                     component={RouterLink}
                     to="/learning/monte-carlo-simulation"
-                    sx={{ pointerEvents: "none", opacity: 0.5 }}
                   >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />

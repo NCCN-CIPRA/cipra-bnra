@@ -528,7 +528,7 @@ export default function CascadeProbabilitiesPage() {
       >
         <Button
           component={RouterLink}
-          to="/learning/methodology-impact-probability"
+          to="/learning/impact-and-probability-scales"
           startIcon={<ChevronLeftIcon />}
           variant="outlined"
           color="primary"

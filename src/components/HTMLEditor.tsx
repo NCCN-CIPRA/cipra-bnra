@@ -56,6 +56,57 @@ import InsertLinkIcon from "@mui/icons-material/InsertLink";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
 import { RiskFilePageContext } from "../pages/BaseRiskFilePage";
 import useAPI from "../hooks/useAPI";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Decoration, DecorationSet } from "@tiptap/pm/view";
+
+export function RiskLabelExtension(riskLabels: Record<string, string>) {
+  return Extension.create({
+    name: "riskLabelDecorations",
+
+    addProseMirrorPlugins() {
+      return [
+        new Plugin({
+          key: new PluginKey("riskLabelDecorations"),
+          props: {
+            decorations(state) {
+              const decorations: Decoration[] = [];
+
+              state.doc.descendants((node, pos) => {
+                if (!node.isText) return;
+
+                const linkMark = node.marks.find(
+                  (m) =>
+                    m.type.name === "link" &&
+                    m.attrs.href?.indexOf("/risks/") >= 0,
+                );
+                if (!linkMark) return;
+
+                const riskId = linkMark.attrs.href.split("/risks/")[1];
+                const label = riskLabels[riskId];
+                if (!label) return;
+
+                decorations.push(
+                  Decoration.widget(
+                    pos + node.nodeSize,
+                    () => {
+                      const el = document.createElement("span");
+                      el.className = "risk-link-label";
+                      el.textContent = label;
+                      return el;
+                    },
+                    { side: 1 },
+                  ),
+                );
+              });
+
+              return DecorationSet.create(state.doc, decorations);
+            },
+          },
+        }),
+      ];
+    },
+  });
+}
 
 function RiskLinkMenuButton(props: MenuButtonCodeProps) {
   const editor = useRichTextEditorContext();
@@ -395,6 +446,7 @@ export default function HTMLEditor({
   isEditable = true,
   onSave,
   queryKeyToInvalidate,
+  riskLabels = { "9858db5b-aa6c-ed11-9561-000d3adf7089": "Test" },
 }: {
   initialHTML: string;
   originalHTML?: string;
@@ -402,6 +454,7 @@ export default function HTMLEditor({
   isEditable?: boolean;
   onSave: UseMutationResult<void, Error, string, unknown>;
   queryKeyToInvalidate: string[] | undefined;
+  riskLabels?: Record<string, string>;
 }) {
   const queryClient = useQueryClient();
 
@@ -500,10 +553,9 @@ export default function HTMLEditor({
       <RichTextReadOnly
         content={initialHTML}
         extensions={[
-          StarterKit.configure({
-            gapcursor: false,
-            dropcursor: false,
-          }),
+          StarterKit.configure({ gapcursor: false, dropcursor: false }),
+          Link,
+          RiskLabelExtension(riskLabels), // ← add here, not in the editable Editor
         ]}
       />
       {user?.roles[editableRole] && isEditable && (

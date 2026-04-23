@@ -31,3 +31,10 @@ code {
   margin-block-end: 1em !important;
 }
 
+.risk-link-label {
+  display: block;
+  font-size: 0.72em;
+  font-style: italic;
+  color: #666;
+  white-space: nowrap;
+}

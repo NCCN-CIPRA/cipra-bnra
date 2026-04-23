@@ -47,6 +47,7 @@ import RiskCascadesPage from "./pages/InformationPortalPage/pages/RiskCascadesPa
 import MaliciousActorsPage from "./pages/InformationPortalPage/pages/MaliciousActorsPage";
 import ImpactProbabilityScalesPage from "./pages/InformationPortalPage/pages/ImpactProbabilityScalesPage";
 import CascadeProbabilitiesPage from "./pages/InformationPortalPage/pages/CascadeProbabilitiesPage";
+import MonteCarloSimulationPage from "./pages/InformationPortalPage/pages/MonteCarloSimulationPage";
 
 export default function App() {
   useEffect(() => {
@@ -224,11 +225,11 @@ export default function App() {
             },
             {
               path: "/learning/monte-carlo-simulation",
-              element: <CascadeProbabilitiesPage />,
+              element: <MonteCarloSimulationPage />,
             },
             {
               path: "/learning/aggregation-and-reporting",
-              element: <CascadeProbabilitiesPage />,
+              element: <MonteCarloSimulationPage />,
             },
 
             {

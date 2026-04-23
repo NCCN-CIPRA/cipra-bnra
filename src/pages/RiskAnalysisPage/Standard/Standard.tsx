@@ -22,6 +22,11 @@ import {
 import { useOutletContext } from "react-router-dom";
 import { BasePageContext } from "../../BasePage";
 import { RiskFileQuantiResults } from "../../../types/dataverse/DVRiskFile";
+import {
+  pScale7FromReturnPeriodMonths,
+  pTimeframeFromReturnPeriodMonths,
+  returnPeriodMonthsFromYearlyEventRate,
+} from "../../../functions/indicators/probability";
 
 export default function Standard({
   riskSummary,
@@ -38,6 +43,16 @@ export default function Standard({
 
   const MRS = riskSummary.cr4de_mrs || SCENARIOS.EXTREME;
   const [scenario, setScenario] = useState(MRS);
+
+  const meanDailyP =
+    results?.[riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE]
+      .probabilityStatistics?.sampleMean || 0;
+
+  const p7 = pScale7FromReturnPeriodMonths(
+    returnPeriodMonthsFromYearlyEventRate(meanDailyP),
+  );
+  const rp = returnPeriodMonthsFromYearlyEventRate(meanDailyP);
+  const pYearly = pTimeframeFromReturnPeriodMonths(rp, 12);
 
   return (
     <Box sx={{ mb: 10 }}>
@@ -91,20 +106,46 @@ export default function Standard({
             backgroundColor: "white",
           }}
         >
-          <ProbabilitySection riskFile={riskFile} />
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            This risk scenario scores a <b>{p7}/7</b> on the probability scale,
+            which represents an estimated <b>{Math.round(100 * pYearly)}%</b>{" "}
+            chance for an{" "}
+            <i>
+              {riskFile.cr4de_mrs} {riskFile.cr4de_title.toLocaleLowerCase()}
+            </i>{" "}
+            to occur in the next year. This is equivalent to a return period of
+            approximately <b>{Math.round(rp)} months</b>.
+          </Typography>
+          <ProbabilitySection riskFile={riskFile} results={results} />
         </Box>
       </Box>
 
       <Box className="impact-assess" sx={{ mt: 8 }}>
         <Typography variant="h5">{t("Impact Assessment")}</Typography>
 
-        <ImpactSection riskFile={riskFile} impactName="human" />
+        <ImpactSection
+          riskFile={riskFile}
+          impactName="human"
+          results={results}
+        />
 
-        <ImpactSection riskFile={riskFile} impactName="societal" />
+        <ImpactSection
+          riskFile={riskFile}
+          impactName="societal"
+          results={results}
+        />
 
-        <ImpactSection riskFile={riskFile} impactName="environmental" />
+        <ImpactSection
+          riskFile={riskFile}
+          impactName="environmental"
+          results={results}
+        />
 
-        <ImpactSection riskFile={riskFile} impactName="financial" />
+        <ImpactSection
+          riskFile={riskFile}
+          impactName="financial"
+          results={results}
+        />
 
         <CBSection riskFile={riskFile} />
       </Box>
