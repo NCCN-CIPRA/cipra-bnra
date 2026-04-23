@@ -3,17 +3,18 @@ import { renderWithContext } from "../../test/test-utils";
 import RiskFileSummaryPage from "./RiskFileSummaryPage";
 import { QueryClient } from "@tanstack/react-query";
 import { vi } from "vitest";
-import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { SCENARIOS } from "../../functions/scenarios";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
+import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 
 vi.mock("../../functions/translations", () => ({
   getLanguage: (lang: string) => (lang === "en" ? "en" : "nl"),
 }));
 
 vi.mock("../../components/RiskFileTitle", () => ({
-  default: ({ riskFile }: { riskFile: Partial<DVRiskFile> }) => (
+  default: ({ riskSummary }: { riskSummary: Partial<DVRiskSummary> }) => (
     <div data-testid="risk-file-title">
-      Risk File Title: {riskFile.cr4de_title}
+      Risk File Title: {riskSummary.cr4de_title}
     </div>
   ),
 }));
