@@ -219,25 +219,23 @@ export default function SideDrawer({
                   <Divider />
                 </>
               )}
-              {user.roles.verified && (
-                <ListItem disablePadding>
-                  <ListItemButton
-                    component={Link}
-                    to="/learning"
-                    onClick={onClose}
-                  >
-                    <ListItemIcon sx={{ pl: "7px" }}>
-                      <InfoIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t(
-                        "sideDrawer.informationPortal",
-                        "Information Portal",
-                      )}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              )}
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/learning"
+                  onClick={onClose}
+                >
+                  <ListItemIcon sx={{ pl: "7px" }}>
+                    <InfoIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={t(
+                      "sideDrawer.informationPortal",
+                      "Information Portal",
+                    )}
+                  />
+                </ListItemButton>
+              </ListItem>
             </>
           )}
         </List>

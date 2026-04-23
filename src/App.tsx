@@ -9,7 +9,6 @@ import BasePage from "./pages/BasePage";
 import InformationPortalPage from "./pages/InformationPortalPage/InformationPortalPage";
 import TranslationsPage from "./pages/TranslationsPage/TranslationsPage";
 import LearningPage from "./pages/learning/LearningPage";
-import LearningRiskCataloguePage from "./pages/learning/RiskCataloguePage";
 import QuantitativeScalesPage from "./pages/learning/QuantitativeScalesPage";
 import RegistrationPage from "./pages/auth/RegistrationPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
@@ -37,6 +36,17 @@ import AdministrationPage from "./pages/AdministrationPage/AdministrationPage";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import RiskLogPage from "./pages/RiskLogPage/RiskLogPage";
 import SimulationPage from "./pages/SimulationPage/SimulationPage";
+import RiskAssistantPage from "./pages/RiskAssistantPage/RiskAssistantPage";
+import WhatIsBNRAPage from "./pages/InformationPortalPage/pages/WhatIsBNRAPage";
+import WhatIsARiskPage from "./pages/InformationPortalPage/pages/WhatIsARiskPage";
+import HowDoWeMeasureImpactPage from "./pages/InformationPortalPage/pages/HowDoWeMeasureImpactPage";
+import HowDoWeMeasureProbabilityPage from "./pages/InformationPortalPage/pages/HowDoWeMeasureProbabilityPage";
+import LearningRiskCataloguePage from "./pages/InformationPortalPage/pages/LearningRiskCataloguePage";
+import IntensityScenariosPage from "./pages/InformationPortalPage/pages/IntensityScenariosPage";
+import RiskCascadesPage from "./pages/InformationPortalPage/pages/RiskCascadesPage";
+import MaliciousActorsPage from "./pages/InformationPortalPage/pages/MaliciousActorsPage";
+import ImpactProbabilityScalesPage from "./pages/InformationPortalPage/pages/ImpactProbabilityScalesPage";
+import CascadeProbabilitiesPage from "./pages/InformationPortalPage/pages/CascadeProbabilitiesPage";
 
 export default function App() {
   useEffect(() => {
@@ -138,6 +148,14 @@ export default function App() {
                     </ProtectedRoute>
                   ),
                 },
+                {
+                  path: "/risks/:risk_file_id/ai",
+                  element: (
+                    <ProtectedRoute allowedRole="analist">
+                      <RiskAssistantPage />
+                    </ProtectedRoute>
+                  ),
+                },
               ],
             },
 
@@ -163,10 +181,56 @@ export default function App() {
               path: "/learning",
               element: <InformationPortalPage />,
             },
+
+            {
+              path: "/learning/what-is-the-bnra",
+              element: <WhatIsBNRAPage />,
+            },
+            {
+              path: "/learning/what-is-a-risk",
+              element: <WhatIsARiskPage />,
+            },
+            {
+              path: "/learning/how-do-we-measure-probability",
+              element: <HowDoWeMeasureProbabilityPage />,
+            },
+            {
+              path: "/learning/how-do-we-measure-impact",
+              element: <HowDoWeMeasureImpactPage />,
+            },
             {
               path: "/learning/risk-catalogue",
               element: <LearningRiskCataloguePage />,
             },
+            {
+              path: "/learning/intensity-scenarios",
+              element: <IntensityScenariosPage />,
+            },
+            {
+              path: "/learning/risk-cascades",
+              element: <RiskCascadesPage />,
+            },
+            {
+              path: "/learning/malicious-actors",
+              element: <MaliciousActorsPage />,
+            },
+            {
+              path: "/learning/impact-and-probability-scales",
+              element: <ImpactProbabilityScalesPage />,
+            },
+            {
+              path: "/learning/cascade-probabilities",
+              element: <CascadeProbabilitiesPage />,
+            },
+            {
+              path: "/learning/monte-carlo-simulation",
+              element: <CascadeProbabilitiesPage />,
+            },
+            {
+              path: "/learning/aggregation-and-reporting",
+              element: <CascadeProbabilitiesPage />,
+            },
+
             {
               path: "/learning/quantitative-categories",
               element: <QuantitativeScalesPage />,

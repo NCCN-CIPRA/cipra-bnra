@@ -93,29 +93,19 @@ export default function InformationPortalPage() {
               </Trans>
             </Typography>
             <Typography variant="body1" paragraph>
-              <Trans i18nKey="learning.welcome.text">
-                Hier vindt je alle achtergrondinformatie en
-                gebruikshandleidingen voor je deelname aan de
-                <b>Belgische Nationale Risico Beoordeling 2023 - 2026 (BNRA)</b>
-                . Deze website wordt aangeboden door het Nationaal Crisiscentrum
-                (NCCN) van de FOD Binnenlandse Zaken. Vragen, suggesties of
-                opmerkingen kunt u sturen naar het mailadres onder de
-                contactgegevens.
-              </Trans>
+              This portal explains how the Belgian National Risk Analysis works,
+              from the concepts behind it to the technical methodology. Start
+              anywhere, go as deep as you like.
             </Typography>
           </Box>
 
-          <Grid container spacing={2}>
-            <Grid
-              size={{
-                xs: 0,
-                md: 2
-              }} />
+          <Grid container spacing={4}>
             <Grid
               size={{
                 xs: 12,
-                md: 4
-              }}>
+                md: 4,
+              }}
+            >
               <Item>
                 <List
                   aria-labelledby="nested-list-subheader"
@@ -125,14 +115,394 @@ export default function InformationPortalPage() {
                       id="nested-list-subheader"
                       sx={{ borderBottom: "1px solid #eee" }}
                     >
+                      <Typography variant="h6" sx={{ pt: 1 }} color="primary">
+                        BNRA Basics
+                      </Typography>
                       <Typography
-                        variant="h6"
-                        sx={{ pt: 1, pb: 1 }}
-                        color="primary"
+                        variant="subtitle1"
+                        sx={{ pb: 1 }}
+                        color="secondary"
                       >
-                        <Trans i18nKey="learning.general.title">
-                          General Information
-                        </Trans>
+                        Start here, no prior knowledge needed
+                      </Typography>
+                    </ListSubheader>
+                  }
+                >
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/what-is-the-bnra"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"What is the BNRA?"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/what-is-a-risk"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"What is a risk?"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/how-do-we-measure-impact"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"How do we measure impact?"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/how-do-we-measure-probability"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"How do we measure probability?"} />
+                  </ListItemButton>
+                </List>
+              </Item>
+            </Grid>
+
+            <Grid
+              size={{
+                xs: 12,
+                md: 4,
+              }}
+            >
+              <Item>
+                <List
+                  aria-labelledby="nested-list-subheader"
+                  subheader={
+                    <ListSubheader
+                      component="div"
+                      id="nested-list-subheader"
+                      sx={{ borderBottom: "1px solid #eee" }}
+                    >
+                      <Typography variant="h6" sx={{ pt: 1 }} color="primary">
+                        Risk Structure
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ pb: 1 }}
+                        color="secondary"
+                      >
+                        How risks are defined and organised
+                      </Typography>
+                    </ListSubheader>
+                  }
+                >
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/risk-catalogue"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"The risk catalogue"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/intensity-scenarios"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Intensity scenarios"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/risk-cascades"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Risk cascades"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/malicious-actors"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Malicious actors"} />
+                  </ListItemButton>
+                </List>
+              </Item>
+            </Grid>
+
+            <Grid
+              size={{
+                xs: 12,
+                md: 4,
+              }}
+            >
+              <Item>
+                <List
+                  aria-labelledby="nested-list-subheader"
+                  subheader={
+                    <ListSubheader
+                      component="div"
+                      id="nested-list-subheader"
+                      sx={{ borderBottom: "1px solid #eee" }}
+                    >
+                      <Typography variant="h6" sx={{ pt: 1 }} color="primary">
+                        Methodology in depth
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ pb: 1 }}
+                        color="secondary"
+                      >
+                        For experts and technical readers
+                      </Typography>
+                    </ListSubheader>
+                  }
+                >
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/impact-and-probability-scales"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Impact & probability scales"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/cascade-probabilities"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Cascade probabilities"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/monte-carlo-simulation"
+                    sx={{ pointerEvents: "none", opacity: 0.5 }}
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Monte Carlo simulation"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/aggregation-and-reporting"
+                    sx={{ pointerEvents: "none", opacity: 0.5 }}
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Aggregation and reporting"} />
+                  </ListItemButton>
+                </List>
+              </Item>
+            </Grid>
+          </Grid>
+
+          <Grid container spacing={4} sx={{ mt: 4 }}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 6,
+              }}
+              sx={{ pointerEvents: "none", opacity: 0.5 }}
+            >
+              <Item>
+                <List
+                  aria-labelledby="nested-list-subheader"
+                  subheader={
+                    <ListSubheader
+                      component="div"
+                      id="nested-list-subheader"
+                      sx={{ borderBottom: "1px solid #eee" }}
+                    >
+                      <Typography variant="h6" sx={{ pt: 1 }} color="primary">
+                        For participating experts
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ pb: 1 }}
+                        color="secondary"
+                      >
+                        Your role, your contribution, and how the process works
+                      </Typography>
+                    </ListSubheader>
+                  }
+                >
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/general-introduction"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"How does participation work?"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/quantitative-categories"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"What is expected of you?"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/quantitative-categories"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"How is your input used?"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/quantitative-categories"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Consensus and validation process"}
+                    />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/quantitative-categories"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Using the BNRA application"} />
+                  </ListItemButton>
+                </List>
+              </Item>
+            </Grid>
+
+            <Grid
+              size={{
+                xs: 12,
+                md: 6,
+              }}
+            >
+              <Item>
+                <List
+                  aria-labelledby="nested-list-subheader"
+                  subheader={
+                    <ListSubheader
+                      component="div"
+                      id="nested-list-subheader"
+                      sx={{ borderBottom: "1px solid #eee" }}
+                    >
+                      <Typography variant="h6" sx={{ pt: 1 }} color="primary">
+                        Resources for risk practitioners
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ pb: 1 }}
+                        color="secondary"
+                      >
+                        Tools and references for use in your own analyses
+                      </Typography>
+                    </ListSubheader>
+                  }
+                >
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-introduction"
+                    sx={{ pointerEvents: "none", opacity: 0.5 }}
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Best practices for governemental risk analysis"}
+                    />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-introduction"
+                    sx={{ pointerEvents: "none", opacity: "0.5" }}
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        "Best practices for (critical) entity risk analysis"
+                      }
+                    />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-risk-catalogue"
+                    sx={{ pointerEvents: "none", opacity: 0.5 }}
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Probability and cascade scales"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-scenarios"
+                    sx={{ pointerEvents: "none", opacity: 0.5 }}
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Impact scales"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/methodology-scenarios"
+                    sx={{ pointerEvents: "none", opacity: "0.5" }}
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Quantitative tools"} />
+                  </ListItemButton>
+                </List>
+              </Item>
+            </Grid>
+          </Grid>
+
+          <Grid container spacing={4} sx={{ mt: 4 }}>
+            <Grid
+              size={{
+                xs: 12,
+              }}
+              sx={{ pointerEvents: "none", opacity: 0.5 }}
+            >
+              <Item>
+                <List
+                  aria-labelledby="nested-list-subheader"
+                  subheader={
+                    <ListSubheader
+                      component="div"
+                      id="nested-list-subheader"
+                      sx={{ borderBottom: "1px solid #eee" }}
+                    >
+                      <Typography variant="h6" sx={{ pt: 1 }} color="primary">
+                        Publications
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ pb: 1 }}
+                        color="secondary"
+                      >
+                        All public documents produced within the context of the
+                        BNRA in one place
                       </Typography>
                     </ListSubheader>
                   }
@@ -145,18 +515,31 @@ export default function InformationPortalPage() {
                       <ChevronRightIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary={t(
-                        "learning.general.introduction",
-                        "General Introduction"
-                      )}
+                      primary={
+                        "Standardized indicators of probability and impact, version 2026"
+                      }
                     />
                   </ListItemButton>
-                  {/* <ListItemButton component={RouterLink} to="/learning/risk-catalogue">
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/general-introduction"
+                  >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("learning.general.riskCatalogue", "Risk Catalogue")} />
-                  </ListItemButton> */}
+                    <ListItemText primary={"Risk Guide 2023 - 2026"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/general-introduction"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"BNRA Methodology whitepaper, version 2023"}
+                    />
+                  </ListItemButton>
                   <ListItemButton
                     component={RouterLink}
                     to="/learning/quantitative-categories"
@@ -164,227 +547,11 @@ export default function InformationPortalPage() {
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText
-                      primary={t(
-                        "learning.general.impact",
-                        "Kwantitatieve Schalen"
-                      )}
-                    />
+                    <ListItemText primary={"BNRA 2018 - 2023"} />
                   </ListItemButton>
                 </List>
               </Item>
             </Grid>
-
-            <Grid
-              size={{
-                xs: 12,
-                md: 4
-              }}>
-              <Item>
-                <List
-                  aria-labelledby="nested-list-subheader"
-                  subheader={
-                    <ListSubheader
-                      component="div"
-                      id="nested-list-subheader"
-                      sx={{ borderBottom: "1px solid #eee" }}
-                    >
-                      <Typography
-                        variant="h6"
-                        sx={{ pt: 1, pb: 1 }}
-                        color="primary"
-                      >
-                        <Trans i18nKey="learning.methodology.title">
-                          Methodology
-                        </Trans>
-                      </Typography>
-                    </ListSubheader>
-                  }
-                >
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/methodology-introduction"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t(
-                        "learning.methodology.introduction",
-                        "Introduction"
-                      )}
-                    />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/methodology-risk-catalogue"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t(
-                        "learning.methodology.riskCatalogue",
-                        "Risk Catalogue"
-                      )}
-                    />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/methodology-scenarios"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t(
-                        "learning.methodology.scenarios",
-                        "Intensity Scenarios and Parameters"
-                      )}
-                    />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/methodology-risk-cascades"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t(
-                        "learning.methodology.riskCascades",
-                        "Risk Cascades"
-                      )}
-                    />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/methodology-impact-probability"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t(
-                        "learning.methodology.impactProbability",
-                        "Probability and Impact"
-                      )}
-                    />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/methodology-additional-elements"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t(
-                        "learning.methodology.additionalElements",
-                        "Additional Elements"
-                      )}
-                    />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/methodology-use-cases"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t("learning.methodology.useCases", "Use Cases")}
-                    />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/methodology-actors"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t(
-                        "learning.methodology.actors",
-                        "Malicious Actors (optional)"
-                      )}
-                    />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/methodology-emerging"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t(
-                        "learning.methodology.emerging",
-                        "Emerging Risks (optional)"
-                      )}
-                    />
-                  </ListItemButton>
-                </List>
-              </Item>
-            </Grid>
-
-            {/* <Grid xs={12} md={4}>
-              <Item>
-                <List
-                  aria-labelledby="nested-list-subheader"
-                  subheader={
-                    <ListSubheader component="div" id="nested-list-subheader" sx={{ borderBottom: "1px solid #eee" }}>
-                      <Typography variant="h6" sx={{ pt: 1, pb: 1 }} color="primary">
-                        <Trans i18nKey="learning.tools.title">Tool Manuals</Trans>
-                      </Typography>
-                    </ListSubheader>
-                  }
-                >
-                  <ListItemButton component={RouterLink} to="/learning/tools-validation">
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t("learning.tools.validation", "Risk File Validation")} />
-                  </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/tools-analysisA">
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t("learning.tools.analysisA", "Risk Analysis A")} />
-                  </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/tools-analysisA-standard" sx={{ ml: 3.5 }}>
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t("learning.tools.analysisAStandard", "Standard Risks")} />
-                  </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/tools-analysisA-manmade" sx={{ ml: 3.5 }}>
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t("learning.tools.analysisAManMade", "Malicious Actors")} />
-                  </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/tools-analysisB-standard" sx={{ ml: 3.5 }}>
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t("learning.tools.analysisBStandard", "2B - Standard Risks")} />
-                  </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/tools-analysisB-manmade" sx={{ ml: 3.5 }}>
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t("learning.tools.analysisBManMade", "2B - Malicious Actors")} />
-                  </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/learning/tools-analysisB-emerging" sx={{ ml: 3.5 }}>
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t("learning.tools.analysisBEmerging", "2B - Emerging Risks")} />
-                  </ListItemButton>
-                </List>
-              </Item>
-            </Grid> */}
           </Grid>
         </Container>
       </Box>

@@ -14,6 +14,7 @@ import useAPI, { DataTable } from "../hooks/useAPI";
 import { SmallRisk } from "../types/dataverse/DVSmallRisk";
 import { DVRiskFile } from "../types/dataverse/DVRiskFile";
 import { DVRiskSnapshot } from "../types/dataverse/DVRiskSnapshot";
+import ScrollToTop from "../components/ScrollToTop";
 
 export interface BasePageContext {
   user: LoggedInUser | null | undefined;
@@ -110,6 +111,7 @@ export default function BasePage() {
 
   return (
     <AppContextProvider>
+      <ScrollToTop />
       <CssBaseline />
       <TitleBar
         user={user}
