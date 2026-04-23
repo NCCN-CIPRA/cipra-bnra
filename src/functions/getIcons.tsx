@@ -10,7 +10,7 @@ import HealthIcon from "../assets/icons/health_risk_icon.svg?react";
 import ManMadeIcon from "../assets/icons/man_made_risk_icon.svg?react";
 import NaturalIcon from "../assets/icons/natural_risk_icon.svg?react";
 import SocietalIcon from "../assets/icons/Societal_risk_icon.svg?react";
-import { Box, Tooltip } from "@mui/material";
+import { Box, SxProps, Theme, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import SensorOccupiedIcon from "@mui/icons-material/SensorOccupied";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
@@ -21,16 +21,18 @@ export function CategoryIcon({
   category,
   size = 30,
   tooltip = true,
+  sx = {},
 }: {
   category: RISK_CATEGORY;
   size?: number;
   tooltip?: boolean;
+  sx?: SxProps<Theme>;
 }) {
   const { t } = useTranslation();
 
   return (
     <Tooltip title={tooltip ? t(category, category) : ""}>
-      <Box sx={{ width: size, height: size }}>
+      <Box sx={{ width: size, height: size, ...sx }}>
         {category === RISK_CATEGORY.CYBER && <CyberIcon />}
         {category === RISK_CATEGORY.EMERGING && <EmergingIcon />}
         {category === RISK_CATEGORY.ECOTECH && <EcotechIcon />}

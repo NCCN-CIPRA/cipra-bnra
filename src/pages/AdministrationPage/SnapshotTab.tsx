@@ -222,7 +222,7 @@ export default function SnapshotTab() {
                 riskSummary.cr4de_effect_risks as EffectRisksSummary[],
               )
             : null,
-          cr4de_last_snapshot: new Date(),
+          cr4de_last_snapshot: new Date() as unknown as string, // Will be parsed by dataverse
         },
       });
       await updateSnapshot.mutate({

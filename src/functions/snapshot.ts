@@ -1101,6 +1101,8 @@ export function summaryFromRiskfile(
       riskFile.cr4de_risk_type === RISK_TYPE.EMERGING
         ? null
         : JSON.stringify([...selectedEffects, ...otherEffects]),
+
+    cr4de_last_snapshot: null,
   };
 }
 
@@ -1156,7 +1158,15 @@ export function summaryFromRiskfileNew(
   const scenario = getMRS(riskFile);
 
   return {
-    cr4de_bnrariskfilesummaryid: "",
+    ...(riskSummary
+      ? {
+          cr4de_bnrariskfilesummaryid: riskSummary.cr4de_bnrariskfilesummaryid,
+          cr4de_last_snapshot: riskSummary.cr4de_last_snapshot,
+        }
+      : {
+          cr4de_bnrariskfilesummaryid: "",
+          cr4de_last_snapshot: null,
+        }),
 
     "cr4de_risk_file@odata.bind": `https://bnra.powerappsportals.com/_api/cr4de_riskfileses(${riskFile.cr4de_riskfilesid})`,
     _cr4de_risk_file_value: riskFile.cr4de_riskfilesid,
@@ -1247,13 +1257,6 @@ export function summaryFromRiskfileNew(
             effect_risk_title: e.risk,
             effect_risk_i: e.contributionMean.all,
           })) ?? null),
-
-    ...(riskSummary
-      ? {
-          cr4de_bnrariskfilesummaryid: riskSummary.cr4de_bnrariskfilesummaryid,
-          cr4de_last_snapshot: riskSummary.cr4de_last_snapshot,
-        }
-      : {}),
   };
 }
 

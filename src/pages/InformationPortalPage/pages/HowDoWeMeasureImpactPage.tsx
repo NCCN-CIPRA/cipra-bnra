@@ -65,7 +65,7 @@ const IndicatorBadge = styled(Box)(({ theme }) => ({
 
 const AggregationCard = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.grey[100],
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: 4,
   padding: theme.spacing(2.5, 3),
   borderLeft: `4px solid ${theme.palette.primary.main}`,
 }));

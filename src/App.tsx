@@ -36,7 +36,7 @@ import AdministrationPage from "./pages/AdministrationPage/AdministrationPage";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import RiskLogPage from "./pages/RiskLogPage/RiskLogPage";
 import SimulationPage from "./pages/SimulationPage/SimulationPage";
-import RiskAssistantPage from "./pages/RiskAssistantPage/RiskAssistantPage";
+// import RiskAssistantPage from "./pages/RiskAssistantPage/RiskAssistantPage";
 import WhatIsBNRAPage from "./pages/InformationPortalPage/pages/WhatIsBNRAPage";
 import WhatIsARiskPage from "./pages/InformationPortalPage/pages/WhatIsARiskPage";
 import HowDoWeMeasureImpactPage from "./pages/InformationPortalPage/pages/HowDoWeMeasureImpactPage";
@@ -148,14 +148,14 @@ export default function App() {
                     </ProtectedRoute>
                   ),
                 },
-                {
-                  path: "/risks/:risk_file_id/ai",
-                  element: (
-                    <ProtectedRoute allowedRole="analist">
-                      <RiskAssistantPage />
-                    </ProtectedRoute>
-                  ),
-                },
+                // {
+                //   path: "/risks/:risk_file_id/ai",
+                //   element: (
+                //     <ProtectedRoute allowedRole="analist">
+                //       <RiskAssistantPage />
+                //     </ProtectedRoute>
+                //   ),
+                // },
               ],
             },
 
