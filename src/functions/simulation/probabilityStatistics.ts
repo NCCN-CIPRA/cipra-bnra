@@ -94,16 +94,19 @@ export function getProbabilityStatistics(
         ) / sampleRiskScenarioCounts.length,
         4,
       );
-      s.sampleStd = round(
-        sampleRiskScenarioCounts.reduce(
-          (acc, count) =>
-            acc +
-            ((count[getRiskScenarioId(risk, scenario)] || 0) - s.sampleMean) **
-              2,
-          0,
-        ) /
-          (sampleRiskScenarioCounts.length - 1),
-        4,
+      s.sampleStd = Math.sqrt(
+        round(
+          sampleRiskScenarioCounts.reduce(
+            (acc, count) =>
+              acc +
+              ((count[getRiskScenarioId(risk, scenario)] || 0) -
+                s.sampleMean) **
+                2,
+            0,
+          ) /
+            (sampleRiskScenarioCounts.length - 1),
+          4,
+        ),
       );
 
       const totalRiskCascadeCounts: Record<string, number> | undefined =
@@ -291,7 +294,7 @@ function addDeepCounts(
 }
 
 const getRiskScenarioId = (r: Risk | null, s: Scenario | null) =>
-  `${r?.id || null}_${s || null}}`;
+  `${r?.id || null}_${s || null}`;
 const getRiskEventId = (e: RiskEvent | null) =>
   getRiskScenarioId(e?.risk || null, e?.scenario || null);
 

@@ -9,7 +9,6 @@ import BasePage from "./pages/BasePage";
 import InformationPortalPage from "./pages/InformationPortalPage/InformationPortalPage";
 import TranslationsPage from "./pages/TranslationsPage/TranslationsPage";
 import LearningPage from "./pages/learning/LearningPage";
-import QuantitativeScalesPage from "./pages/learning/QuantitativeScalesPage";
 import RegistrationPage from "./pages/auth/RegistrationPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ErrorPage from "./pages/ErrorPage";
@@ -36,7 +35,7 @@ import AdministrationPage from "./pages/AdministrationPage/AdministrationPage";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import RiskLogPage from "./pages/RiskLogPage/RiskLogPage";
 import SimulationPage from "./pages/SimulationPage/SimulationPage";
-// import RiskAssistantPage from "./pages/RiskAssistantPage/RiskAssistantPage";
+import RiskAssistantPage from "./pages/RiskAssistantPage/RiskAssistantPage";
 import WhatIsBNRAPage from "./pages/InformationPortalPage/pages/WhatIsBNRAPage";
 import WhatIsARiskPage from "./pages/InformationPortalPage/pages/WhatIsARiskPage";
 import HowDoWeMeasureImpactPage from "./pages/InformationPortalPage/pages/HowDoWeMeasureImpactPage";
@@ -48,6 +47,10 @@ import MaliciousActorsPage from "./pages/InformationPortalPage/pages/MaliciousAc
 import ImpactProbabilityScalesPage from "./pages/InformationPortalPage/pages/ImpactProbabilityScalesPage";
 import CascadeProbabilitiesPage from "./pages/InformationPortalPage/pages/CascadeProbabilitiesPage";
 import MonteCarloSimulationPage from "./pages/InformationPortalPage/pages/MonteCarloSimulationPage";
+import AggregationAndReportingPage from "./pages/InformationPortalPage/pages/AggregationAndReportingPage";
+import BestPracticesGovPage from "./pages/InformationPortalPage/pages/BestPracticesGovPage";
+import ProbabilityScalesPage from "./pages/InformationPortalPage/pages/ProbabilityScalesPage";
+import ImpactScalesPage from "./pages/InformationPortalPage/pages/ImpactScalesPage";
 
 export default function App() {
   useEffect(() => {
@@ -149,14 +152,14 @@ export default function App() {
                     </ProtectedRoute>
                   ),
                 },
-                // {
-                //   path: "/risks/:risk_file_id/ai",
-                //   element: (
-                //     <ProtectedRoute allowedRole="analist">
-                //       <RiskAssistantPage />
-                //     </ProtectedRoute>
-                //   ),
-                // },
+                {
+                  path: "/risks/:risk_file_id/ai",
+                  element: (
+                    <ProtectedRoute allowedRole="analist">
+                      <RiskAssistantPage />
+                    </ProtectedRoute>
+                  ),
+                },
               ],
             },
 
@@ -229,13 +232,22 @@ export default function App() {
             },
             {
               path: "/learning/aggregation-and-reporting",
-              element: <MonteCarloSimulationPage />,
+              element: <AggregationAndReportingPage />,
             },
 
             {
-              path: "/learning/quantitative-categories",
-              element: <QuantitativeScalesPage />,
+              path: "/learning/best-practices-gov",
+              element: <BestPracticesGovPage />,
             },
+            {
+              path: "/learning/probability-scales",
+              element: <ProbabilityScalesPage />,
+            },
+            {
+              path: "/learning/impact-scales",
+              element: <ImpactScalesPage />,
+            },
+
             {
               path: "/learning/risk/:risk_file_id",
               element: <RiskPage />,

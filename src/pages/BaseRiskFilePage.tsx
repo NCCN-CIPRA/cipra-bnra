@@ -49,6 +49,7 @@ import {
 import DifferenceIcon from "@mui/icons-material/Difference";
 import { SerializedRiskQualis } from "../types/dataverse/Riskfile";
 import { DVAttachment } from "../types/dataverse/DVAttachment";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 
 type RouteParams = {
   risk_file_id: string;
@@ -176,6 +177,7 @@ export default function BaseRiskFilePage() {
   if (pathname.indexOf("data") >= 0) tab = 3 + extraTab;
   if (pathname.indexOf("input") >= 0) tab = 4 + extraTab;
   if (pathname.indexOf("log") >= 0) tab = 5 + extraTab;
+  if (pathname.indexOf("ai") >= 0) tab = 6 + extraTab;
 
   usePageTitle(riskSummary ? riskSummary.cr4de_title : "...");
   useBreadcrumbs([
@@ -279,6 +281,13 @@ export default function BaseRiskFilePage() {
               label={"Change Log"}
               icon={<DifferenceIcon />}
               onClick={() => navigate(`/risks/${params.risk_file_id}/log`)}
+            />
+          )}
+          {user && user.roles.analist && (
+            <BottomNavigationAction
+              label={"Assistant"}
+              icon={<AutoFixHighIcon />}
+              onClick={() => navigate(`/risks/${params.risk_file_id}/ai`)}
             />
           )}
         </BottomNavigation>

@@ -651,7 +651,7 @@ export default function MonteCarloSimulationPage() {
 
         <Button
           component={RouterLink}
-          to="/learning/aggregation-reporting"
+          to="/learning/aggregation-and-reporting"
           endIcon={<ChevronRightIcon />}
           variant="outlined"
           color="primary"

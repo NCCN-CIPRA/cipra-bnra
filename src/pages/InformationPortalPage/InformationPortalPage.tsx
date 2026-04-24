@@ -294,7 +294,6 @@ export default function InformationPortalPage() {
                   <ListItemButton
                     component={RouterLink}
                     to="/learning/aggregation-and-reporting"
-                    sx={{ pointerEvents: "none", opacity: 0.5 }}
                   >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
@@ -417,8 +416,7 @@ export default function InformationPortalPage() {
                 >
                   <ListItemButton
                     component={RouterLink}
-                    to="/learning/methodology-introduction"
-                    sx={{ pointerEvents: "none", opacity: 0.5 }}
+                    to="/learning/best-practices-gov"
                   >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
@@ -430,7 +428,11 @@ export default function InformationPortalPage() {
                   <ListItemButton
                     component={RouterLink}
                     to="/learning/methodology-introduction"
-                    sx={{ pointerEvents: "none", opacity: "0.5" }}
+                    sx={{
+                      pointerEvents: "none",
+                      opacity: "0.5",
+                      display: "none",
+                    }}
                   >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
@@ -443,8 +445,7 @@ export default function InformationPortalPage() {
                   </ListItemButton>
                   <ListItemButton
                     component={RouterLink}
-                    to="/learning/methodology-risk-catalogue"
-                    sx={{ pointerEvents: "none", opacity: 0.5 }}
+                    to="/learning/probability-scales"
                   >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
@@ -453,8 +454,7 @@ export default function InformationPortalPage() {
                   </ListItemButton>
                   <ListItemButton
                     component={RouterLink}
-                    to="/learning/methodology-scenarios"
-                    sx={{ pointerEvents: "none", opacity: 0.5 }}
+                    to="/learning/impact-scales"
                   >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
@@ -464,7 +464,11 @@ export default function InformationPortalPage() {
                   <ListItemButton
                     component={RouterLink}
                     to="/learning/methodology-scenarios"
-                    sx={{ pointerEvents: "none", opacity: "0.5" }}
+                    sx={{
+                      pointerEvents: "none",
+                      opacity: "0.5",
+                      display: "none",
+                    }}
                   >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />

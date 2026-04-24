@@ -2,11 +2,11 @@
 // in the BNRA methodology document: Quantitative Model and Statistical Analysis
 // under section Statistical Analysis - Technical Implementation - Monte Carlo Simulation
 
-import { LogLevel } from "react-virtuoso";
 import { SCENARIOS } from "../scenarios";
 import getImpactStatistics from "./impactStatistics";
 import {
   Diagnostics,
+  LogLevel,
   noAggregatedImpacts,
   Risk,
   RiskCascade,
@@ -214,7 +214,7 @@ function simulateDay(
 
     // Step 1.2: Draw a random variable U ~ Uniform(0,1). Continue only if U > pAny.
     const u = Math.random();
-    if (u > pAny) continue;
+    if (u >= pAny) continue;
 
     // Step 1.3: All probabilities are normalized
     const pTot =
@@ -384,7 +384,7 @@ export function expandEventGraph(
   cascadeCatalogue: Record<string, RiskCascade>,
   existingNodes: Risk[],
 ): RiskEvent[] {
-  if (Object.keys(existingNodes).length > 100) {
+  if (existingNodes.length > 100) {
     console.warn("More then 100 nodes in an event graph!");
     console.log("Existing nodes:", existingNodes);
     return [];
@@ -430,7 +430,7 @@ export function expandEventGraph(
 
     // Step 2.3: Draw a random variable U ~ Uniform(0,1). Continue only if U > pAny.
     const u = Math.random();
-    if (u > pAny) continue;
+    if (u >= pAny) continue;
 
     // Step 2.4: All conditional probability are normalized
     const cpTot =

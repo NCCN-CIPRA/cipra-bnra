@@ -31,7 +31,10 @@ import {
   IMPACT_CATEGORY_NAME,
 } from "../../functions/Impact";
 import { AggregatedImpacts } from "../../types/simulation";
-import { iScale7FromEuros } from "../../functions/indicators/impact";
+import {
+  ImpactColor,
+  iScale7FromEuros,
+} from "../../functions/indicators/impact";
 import { DAMAGE_INDICATOR_COLORS } from "../../functions/getImpactColor";
 import { RISK_TYPE } from "../../types/dataverse/Riskfile";
 import { useOutletContext } from "react-router-dom";
@@ -61,6 +64,19 @@ type SankeyEffect = EffectRisksSummary & {
   };
 };
 
+const DAMAGE_INDICATORS = [
+  "Ha",
+  "Hb",
+  "Hc",
+  "Sa",
+  "Sb",
+  "Sc",
+  "Sd",
+  "Ea",
+  "Fa",
+  "Fb",
+];
+
 export function ImpactSankeyBox({
   riskSummary,
   riskSnapshot,
@@ -81,7 +97,7 @@ export function ImpactSankeyBox({
   onClick: (id: string) => void;
 }) {
   const { t } = useTranslation();
-  console.log(width, height);
+
   return (
     <>
       <Box
@@ -277,6 +293,8 @@ export default function ImpactSankey({
         },
         { effects: [] as SankeyEffect[], totalI: 0 },
       ).effects;
+
+    console.log(sums);
   }
 
   const otherEffectsName = isActor
@@ -327,6 +345,8 @@ export default function ImpactSankey({
           fontSize={14}
           focusedImpact={focusedImpact}
           onNavigate={onClick}
+          results={results}
+          scenario={scenario}
         />
       )}
       link={(props: LinkProps) => (
@@ -354,6 +374,8 @@ function ISankeyNode({
   percentI,
   fontSize,
   focusedImpact,
+  results,
+  scenario,
   onNavigate,
 }: NodeProps & {
   payload: EffectSankeyNode;
@@ -362,29 +384,90 @@ function ISankeyNode({
   percentI?: number;
   fontSize: number;
   focusedImpact?: IMPACT_CATEGORY | DAMAGE_INDICATOR | null;
+  results: RiskFileQuantiResults | null;
+  scenario: SCENARIOS;
   onNavigate?: (riskId: string) => void;
 }) {
   const { t } = useTranslation();
+  const nodeHeight = totalEffects <= 2 ? 490 : height;
 
   if (payload.sourceNodes.length <= 0) {
+    // Build per-indicator stacked rectangles when results are available
+    const indicators = results
+      ? (() => {
+          const mean = results[scenario].impactStatistics?.sampleMean;
+          if (!mean || !mean.all) return null;
+          // Filter out zero-value indicators and compute proportions
+          return DAMAGE_INDICATORS.map((key) => ({
+            key,
+            value:
+              (mean[key.toLocaleLowerCase() as keyof typeof mean] as number) ??
+              0,
+            color: ImpactColor[key as keyof typeof ImpactColor],
+          }))
+            .filter((d) => d.value > 0)
+            .map((d) => ({ ...d, proportion: d.value / mean.all }));
+        })()
+      : null;
+
+    // Accumulate y-offsets for stacking
+    let stackedRects: {
+      key: string;
+      color: string;
+      rectY: number;
+      rectHeight: number;
+    }[] = [];
+    if (indicators) {
+      let cursor = baseY;
+      for (const ind of indicators) {
+        const rectH = nodeHeight * ind.proportion;
+        stackedRects.push({
+          key: ind.key,
+          color: ind.color,
+          rectY: cursor,
+          rectHeight: rectH,
+        });
+        cursor += rectH;
+      }
+    }
+
     return (
       <Layer className="total-impact" key={`effectNode${index}`}>
-        <Rectangle
-          x={x}
-          y={baseY}
-          width={width}
-          height={totalEffects <= 2 ? 490 : height}
-          fill={
-            focusedImpact
-              ? DAMAGE_INDICATOR_COLORS[focusedImpact]
-              : getCategoryColor("")
-          }
-          fillOpacity="1"
-          z={-1}
-        />
+        {indicators && stackedRects.length > 0 ? (
+          // Stacked per-indicator rectangles
+          stackedRects.map(({ key, color, rectY, rectHeight }) => (
+            <Rectangle
+              key={key}
+              x={x}
+              y={rectY}
+              width={width}
+              height={rectHeight}
+              fill={color}
+              fillOpacity="1"
+              z={-1}
+            />
+          ))
+        ) : (
+          // Fallback: single rectangle (no results available)
+          <Rectangle
+            x={x}
+            y={baseY}
+            width={width}
+            height={nodeHeight}
+            fill={
+              focusedImpact
+                ? DAMAGE_INDICATOR_COLORS[focusedImpact]
+                : getCategoryColor("")
+            }
+            fillOpacity="1"
+            z={-1}
+          />
+        )}
+
+        {/* Rotated label — unchanged */}
         <text
           textAnchor="middle"
-          x={-y - (totalEffects <= 2 ? 490 : height) / 2 - 18}
+          x={-y - nodeHeight / 2 - 18}
           y={x + 30}
           fontSize={fontSize || "16"}
           stroke="#333"
@@ -401,7 +484,7 @@ function ISankeyNode({
         {percentI !== undefined && (
           <text
             textAnchor="middle"
-            x={-y - (totalEffects <= 2 ? 490 : height) / 2 - 18}
+            x={-y - nodeHeight / 2 - 18}
             y={x + 50}
             fontSize={fontSize - 3 || "16"}
             stroke="#333"

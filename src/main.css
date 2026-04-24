@@ -37,4 +37,5 @@ code {
   font-style: italic;
   color: #666;
   white-space: nowrap;
+  margin-bottom: -24px;
 }
