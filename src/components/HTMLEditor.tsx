@@ -71,7 +71,7 @@ export function RiskLabelExtension(riskLabels: Record<string, string>) {
             decorations(state) {
               const decorations: Decoration[] = [];
 
-              state.doc.descendants((node, pos, parent, index) => {
+              state.doc.descendants((node, pos, _parent, _index) => {
                 if (!node.isText) return;
 
                 const linkMark = node.marks.find(
@@ -80,11 +80,15 @@ export function RiskLabelExtension(riskLabels: Record<string, string>) {
                     m.attrs.href?.indexOf("/risks/") >= 0,
                 );
                 if (!linkMark) return;
+
+                const boldMark = node.marks.find((m) => m.type.name === "bold");
+                if (!linkMark || !boldMark) return;
+
                 // Check if the immediately preceding sibling is a numbered prefix like "1. "
-                if (index === 0 || !parent) return;
-                const prevNode = parent.child(index - 1);
-                if (!prevNode.isText || !/\d+\.\s*$/.test(prevNode.text ?? ""))
-                  return;
+                // if (index === 0 || !parent) return;
+                // const prevNode = parent.child(index - 1);
+                // if (!prevNode.isText || !/\d+\.\s*$/.test(prevNode.text ?? ""))
+                //   return;
 
                 const riskId = linkMark.attrs.href.split("/risks/")[1];
                 const label = riskLabels[riskId];

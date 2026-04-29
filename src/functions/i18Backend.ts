@@ -30,24 +30,24 @@ class DataverseBackend implements Module {
   async create(
     languages: string[],
     _namespace: string,
-    key: string,
-    fallbackValue: string
+    _key: string,
+    _fallbackValue: string,
   ) {
     if (languages[0] !== "en") return;
 
     if (import.meta.env.PROD) {
-      fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnratranslations`, {
-        method: "POST",
-        headers: {
-          __RequestVerificationToken:
-            localStorage.getItem("antiforgerytoken") || "",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cr4de_name: key,
-          [`cr4de_${languages[0]}`]: fallbackValue,
-        }),
-      });
+      // fetch(`https://bnra.powerappsportals.com/_api/cr4de_bnratranslations`, {
+      //   method: "POST",
+      //   headers: {
+      //     __RequestVerificationToken:
+      //       localStorage.getItem("antiforgerytoken") || "",
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     cr4de_name: key,
+      //     [`cr4de_${languages[0]}`]: fallbackValue,
+      //   }),
+      // });
     }
   }
 
@@ -58,7 +58,7 @@ class DataverseBackend implements Module {
 
   async fetchTranslations() {
     const response = await fetch(
-      `https://bnra.powerappsportals.com/_api/cr4de_bnratranslations?$select=cr4de_en,cr4de_nl,cr4de_fr,cr4de_de,cr4de_name`
+      `https://bnra.powerappsportals.com/_api/cr4de_bnratranslations?$select=cr4de_en,cr4de_nl,cr4de_fr,cr4de_de,cr4de_name`,
     );
 
     const allTranslations: DVTranslation[] = (await response.json()).value;

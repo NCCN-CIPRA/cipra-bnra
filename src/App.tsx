@@ -51,6 +51,11 @@ import AggregationAndReportingPage from "./pages/InformationPortalPage/pages/Agg
 import BestPracticesGovPage from "./pages/InformationPortalPage/pages/BestPracticesGovPage";
 import ProbabilityScalesPage from "./pages/InformationPortalPage/pages/ProbabilityScalesPage";
 import ImpactScalesPage from "./pages/InformationPortalPage/pages/ImpactScalesPage";
+import HowInputIsUsedPage from "./pages/InformationPortalPage/pages/HowInputIsUsed";
+import ConsensusValidationPage from "./pages/InformationPortalPage/pages/ConsensusValidationPage";
+import ParticipationProcessPage from "./pages/InformationPortalPage/pages/ParticipationsProcessPage";
+import BNRAApplicationPage from "./pages/InformationPortalPage/pages/BNRAApplicationPage";
+import ResourcePage from "./pages/InformationPortalPage/pages/ResourcePage";
 
 export default function App() {
   useEffect(() => {
@@ -183,7 +188,11 @@ export default function App() {
 
             {
               path: "/learning",
-              element: <InformationPortalPage />,
+              element: (
+                <ProtectedRoute allowedRole="analist">
+                  <InformationPortalPage />
+                </ProtectedRoute>
+              ),
             },
 
             {
@@ -234,7 +243,22 @@ export default function App() {
               path: "/learning/aggregation-and-reporting",
               element: <AggregationAndReportingPage />,
             },
-
+            {
+              path: "/learning/participation-process",
+              element: <ParticipationProcessPage />,
+            },
+            {
+              path: "/learning/how-input-is-used",
+              element: <HowInputIsUsedPage />,
+            },
+            {
+              path: "/learning/consensus-validation",
+              element: <ConsensusValidationPage />,
+            },
+            {
+              path: "/learning/bnra-application",
+              element: <BNRAApplicationPage />,
+            },
             {
               path: "/learning/best-practices-gov",
               element: <BestPracticesGovPage />,
@@ -246,6 +270,10 @@ export default function App() {
             {
               path: "/learning/impact-scales",
               element: <ImpactScalesPage />,
+            },
+            {
+              path: "/learning/resource/:resource_id",
+              element: <ResourcePage />,
             },
 
             {

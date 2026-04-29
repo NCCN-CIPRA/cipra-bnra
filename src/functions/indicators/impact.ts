@@ -176,7 +176,15 @@ export function getIntervalStringQuantiScale7(
   }
 
   const factor = eurosFactor[prefix];
-
+  console.log(
+    getIntervalStringQuantiScale(
+      scale7,
+      units[prefix],
+      factor,
+      eurosFromIScale7,
+      7,
+    ),
+  );
   return getIntervalStringQuantiScale(
     scale7,
     units[prefix],

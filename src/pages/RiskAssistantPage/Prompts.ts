@@ -246,6 +246,5 @@ The final values used in the calculator represent expert consensus, not individu
 You are available to explain, critique, or extend any aspect of this methodology in technical detail.
 `;
 
-export const writingPrompt = `
-Write in formal UK English. Use precise, measured language — prefer "may", "could", "is estimated to" over deterministic statements. Write in flowing analytical prose, not bullet points. Ground every claim in the quantitative and qualitative data provided only. Flag any discrepancies in the data clearly outside the main text body. Do not use AI markers such as " — ".
+export const writingPrompt = `Write in formal UK English. Use precise, measured language — prefer "may", "could", "is estimated to" over deterministic statements. Write in flowing analytical prose, not bullet points. Ground every claim in the quantitative and qualitative data provided only. Flag any discrepancies in the data clearly outside the main text body. Do not use AI markers such as " — ".
 `;

@@ -311,7 +311,6 @@ export default function InformationPortalPage() {
                 xs: 12,
                 md: 6,
               }}
-              sx={{ pointerEvents: "none", opacity: 0.5 }}
             >
               <Item>
                 <List
@@ -337,45 +336,36 @@ export default function InformationPortalPage() {
                 >
                   <ListItemButton
                     component={RouterLink}
-                    to="/learning/general-introduction"
+                    to="/learning/participation-process"
                   >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
-                    <ListItemText primary={"How does participation work?"} />
+                    <ListItemText primary={"The participation process"} />
                   </ListItemButton>
                   <ListItemButton
                     component={RouterLink}
-                    to="/learning/quantitative-categories"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={"What is expected of you?"} />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/quantitative-categories"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={"How is your input used?"} />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/quantitative-categories"
+                    to="/learning/how-input-is-used"
                   >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary={"Consensus and validation process"}
+                      primary={"How your input shapes the results"}
                     />
                   </ListItemButton>
                   <ListItemButton
                     component={RouterLink}
-                    to="/learning/quantitative-categories"
+                    to="/learning/consensus-validation"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Consensus and validation"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/bnra-application"
                   >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
@@ -485,7 +475,6 @@ export default function InformationPortalPage() {
               size={{
                 xs: 12,
               }}
-              sx={{ pointerEvents: "none", opacity: 0.5 }}
             >
               <Item>
                 <List
@@ -512,7 +501,7 @@ export default function InformationPortalPage() {
                 >
                   <ListItemButton
                     component={RouterLink}
-                    to="/learning/general-introduction"
+                    to="/learning/resource/indicators"
                   >
                     <ListItemIcon sx={{ minWidth: "32px" }}>
                       <ChevronRightIcon />
@@ -522,35 +511,6 @@ export default function InformationPortalPage() {
                         "Standardized indicators of probability and impact, version 2026"
                       }
                     />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/general-introduction"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={"Risk Guide 2023 - 2026"} />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/general-introduction"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={"BNRA Methodology whitepaper, version 2023"}
-                    />
-                  </ListItemButton>
-                  <ListItemButton
-                    component={RouterLink}
-                    to="/learning/quantitative-categories"
-                  >
-                    <ListItemIcon sx={{ minWidth: "32px" }}>
-                      <ChevronRightIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={"BNRA 2018 - 2023"} />
                   </ListItemButton>
                 </List>
               </Item>
