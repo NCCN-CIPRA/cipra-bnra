@@ -56,6 +56,7 @@ export default function RiskDataPage() {
     environment,
     riskSnapshot: riskFile,
     riskSummary,
+    results,
   } = useOutletContext<RiskFilePageContext>();
   const [viewType, setViewType] = useSavedState<VISUALS>(
     `risk-data-page-cascades-${riskFile?._cr4de_risk_file_value}`,
@@ -206,7 +207,8 @@ export default function RiskDataPage() {
     !riskFile ||
     causes === undefined ||
     effects === undefined ||
-    catalyzingEffects === undefined
+    catalyzingEffects === undefined ||
+    !results
   )
     return (
       <Box sx={{ width: "100%", mt: 20, textAlign: "center" }}>
@@ -323,6 +325,7 @@ export default function RiskDataPage() {
             viewType={viewType}
             percentages={showPercentage}
             showConsequences={showConsequences}
+            results={results}
           />
         )}
         {riskFile.cr4de_risk_type === RISK_TYPE.STANDARD && isAttackRisk && (

@@ -33,7 +33,7 @@ import {
   pScale7to5,
   returnPeriodMonthsFromYearlyEventRate,
 } from "../../functions/indicators/probability";
-import { RISK_CATEGORY, RISK_TYPE } from "../../types/dataverse/Riskfile";
+import { ATTACK_RISKS } from "../../types/dataverse/Riskfile";
 import { useQuery } from "@tanstack/react-query";
 import useAPI, { DataTable } from "../../hooks/useAPI";
 import { parseCascadeSnapshot } from "../../types/dataverse/DVRiskCascade";
@@ -153,9 +153,7 @@ export default function ProbabilitySankey({
   });
 
   const isAction =
-    (riskSnapshot.cr4de_category === RISK_CATEGORY.MANMADE ||
-      riskSnapshot.cr4de_title.toLowerCase().indexOf("attack")) &&
-    riskSnapshot.cr4de_risk_type !== RISK_TYPE.MANMADE;
+    ATTACK_RISKS.indexOf(riskSnapshot._cr4de_risk_file_value) >= 0;
 
   let causes: SankeyCause[] = [];
 
@@ -250,7 +248,7 @@ export default function ProbabilitySankey({
             if (!lastCause.other_causes) {
               lastCause = {
                 cause_risk_id: "",
-                cause_risk_title: isAction ? "Other actors" : "Other causes",
+                cause_risk_title: "Other causes",
                 cause_risk_p: 0,
                 other_causes: [],
               };
@@ -276,7 +274,7 @@ export default function ProbabilitySankey({
     causes = [
       {
         cause_risk_id: "",
-        cause_risk_title: "Direct Probability",
+        cause_risk_title: isAction ? "Other actors" : "Direct Probability",
         cause_risk_p: 1,
       },
     ];
@@ -285,7 +283,12 @@ export default function ProbabilitySankey({
   const nodes: CauseSankeyNode[] = [
     { name: `risk.${riskSnapshot.cr4de_hazard_id}.name` },
     ...causes.map((c) => ({
-      name: c.cause_risk_title,
+      name:
+        c.cause_risk_id === "" && c.other_causes === undefined
+          ? isAction
+            ? "Other actors"
+            : "Direct Probability"
+          : c.cause_risk_title,
       cascade: c,
       otherCauses: c.other_causes || undefined,
     })),
@@ -473,7 +476,7 @@ function PSankeyNode({
           stroke="#333"
           cursor="pointer"
         >
-          {t(payload.name)}
+          {payload.name.indexOf(".") >= 0 ? t(payload.name) : payload.name}
         </text>
       </Layer>
     );

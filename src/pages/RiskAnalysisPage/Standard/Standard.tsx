@@ -106,16 +106,18 @@ export default function Standard({
             backgroundColor: "white",
           }}
         >
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            This risk scenario scores a <b>{p7}/7</b> on the probability scale,
-            which represents an estimated <b>{Math.round(100 * pYearly)}%</b>{" "}
-            chance for an{" "}
-            <i>
-              {riskFile.cr4de_mrs} {riskFile.cr4de_title.toLocaleLowerCase()}
-            </i>{" "}
-            to occur in the next year. This is equivalent to a return period of
-            approximately <b>{Math.round(rp)} months</b>.
-          </Typography>
+          {results && (
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              This risk scenario scores a <b>{p7}/7</b> on the probability
+              scale, which represents an estimated{" "}
+              <b>{Math.round(100 * pYearly)}%</b> chance for an{" "}
+              <i>
+                {riskFile.cr4de_mrs} {riskFile.cr4de_title.toLocaleLowerCase()}
+              </i>{" "}
+              to occur in the next year. This is equivalent to a return period
+              of approximately <b>{Math.round(rp)} months</b>.
+            </Typography>
+          )}
           <ProbabilitySection riskFile={riskFile} results={results} />
         </Box>
       </Box>

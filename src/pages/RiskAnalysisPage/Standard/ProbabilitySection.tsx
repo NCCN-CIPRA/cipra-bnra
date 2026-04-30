@@ -38,7 +38,7 @@ export default function ProbabilitySection({
     }),
     {} as Record<string, string>,
   );
-  console.log(sums);
+
   return (
     <HTMLEditor
       initialHTML={riskFile.cr4de_quali_p_mrs || ""}
@@ -47,7 +47,7 @@ export default function ProbabilitySection({
         DataTable.RISK_FILE,
         riskFile._cr4de_risk_file_value,
       ]}
-      riskLabels={causeProbabilities}
+      riskLabels={results ? causeProbabilities : undefined}
     />
   );
 }

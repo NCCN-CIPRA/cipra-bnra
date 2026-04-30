@@ -293,8 +293,6 @@ export default function ImpactSankey({
         },
         { effects: [] as SankeyEffect[], totalI: 0 },
       ).effects;
-
-    console.log(sums);
   }
 
   const otherEffectsName = isActor
@@ -398,15 +396,37 @@ function ISankeyNode({
           const mean = results[scenario].impactStatistics?.sampleMean;
           if (!mean || !mean.all) return null;
           // Filter out zero-value indicators and compute proportions
-          return DAMAGE_INDICATORS.map((key) => ({
-            key,
-            value:
-              (mean[key.toLocaleLowerCase() as keyof typeof mean] as number) ??
-              0,
-            color: ImpactColor[key as keyof typeof ImpactColor],
-          }))
+          const selected = DAMAGE_INDICATORS.filter((key) => {
+            if (
+              focusedImpact &&
+              ((focusedImpact.length > 1 && focusedImpact !== key) ||
+                (focusedImpact.length <= 1 &&
+                  focusedImpact.toLowerCase() !== key[0].toLowerCase()))
+            )
+              return false;
+            return true;
+          });
+
+          const total = selected.reduce(
+            (t, i) =>
+              t +
+              (results[scenario].impactStatistics?.sampleMean[
+                i.toLowerCase() as keyof AggregatedImpacts
+              ] || 0),
+            0,
+          );
+
+          return selected
+            .map((key) => ({
+              key,
+              value:
+                (mean[
+                  key.toLocaleLowerCase() as keyof typeof mean
+                ] as number) ?? 0,
+              color: ImpactColor[key as keyof typeof ImpactColor],
+            }))
             .filter((d) => d.value > 0)
-            .map((d) => ({ ...d, proportion: d.value / mean.all }));
+            .map((d) => ({ ...d, proportion: d.value / total }));
         })()
       : null;
 

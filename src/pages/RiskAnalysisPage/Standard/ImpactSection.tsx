@@ -50,7 +50,15 @@ export default function ImpactSection({
   const impactContributions = Object.keys(sums).reduce(
     (acc, k) => ({
       ...acc,
-      [k]: `This effect explains ${Math.round(1000 * sums[k][impactLetter]) / 10}% of the ${impactName} impact and ${Math.round(1000 * sums[k].all) / 10}% of the total impact.`,
+      [k]: `This effect explains ${Math.round(1000 * sums[k][impactLetter]) / 10}% of the ${impactName} impact and ${
+        Math.round(
+          (1000 *
+            sums[k][impactLetter] *
+            (results?.[scenario].impactStatistics?.sampleMean[impactLetter] ??
+              0)) /
+            (results?.[scenario].impactStatistics?.sampleMean.all || 1),
+        ) / 10
+      }% of the total impact.`,
     }),
     {} as Record<string, string>,
   );
@@ -69,6 +77,25 @@ export default function ImpactSection({
         {impactLetter.toUpperCase()}
         {impactName.slice(1)} Impact
       </Typography>
+      {results && (
+        <Typography
+          className="risk-link-label"
+          variant="caption"
+          sx={{ mb: 2 }}
+        >
+          The {impactName} impact represents an estimated{" "}
+          <b>
+            {Math.round(
+              (1000 *
+                (results[scenario].impactStatistics?.sampleMean[impactLetter] ??
+                  0)) /
+                (results[scenario].impactStatistics?.sampleMean.all ?? 1),
+            ) / 10}
+            %
+          </b>{" "}
+          of the total impact.
+        </Typography>
+      )}
       <HTMLEditor
         initialHTML={riskFile[`cr4de_quali_${impactLetter}_mrs`] || ""}
         onSave={updateRiskFile}
@@ -76,7 +103,7 @@ export default function ImpactSection({
           DataTable.RISK_FILE,
           riskFile._cr4de_risk_file_value,
         ]}
-        riskLabels={impactContributions}
+        riskLabels={results ? impactContributions : undefined}
       />
     </Box>
   );

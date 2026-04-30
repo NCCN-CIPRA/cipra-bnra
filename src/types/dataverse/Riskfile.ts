@@ -86,3 +86,24 @@ export function serializeRiskQualis(quali: RiskQualis): SerializedRiskQualis {
 export function parseRiskQualis(quali: SerializedRiskQualis): RiskQualis {
   return JSON.parse(quali);
 }
+
+export const ATTACK_RISKS = [
+  "6596cd55-aa6c-ed11-9561-000d3adf7089", // "CO3",
+  "6496cd55-aa6c-ed11-9561-000d3adf7089", // "C04",
+  "7458db5b-aa6c-ed11-9561-000d3adf7089", // "C05",
+  "9258db5b-aa6c-ed11-9561-000d3adf7089", // "M06",
+  "9358db5b-aa6c-ed11-9561-000d3adf7089", // "M07",
+  "9158db5b-aa6c-ed11-9561-000d3adf7089", // "M08",
+  "9058db5b-aa6c-ed11-9561-000d3adf7089", // "M09",
+  "9558db5b-aa6c-ed11-9561-000d3adf7089", // "M10",
+  "9758db5b-aa6c-ed11-9561-000d3adf7089", // "M11",
+  "9658db5b-aa6c-ed11-9561-000d3adf7089", // "M12",
+  "9458db5b-aa6c-ed11-9561-000d3adf7089", // "M13",
+  "9b58db5b-aa6c-ed11-9561-000d3adf7089", // "M14",
+  "9a58db5b-aa6c-ed11-9561-000d3adf7089", // "M15",
+  "9858db5b-aa6c-ed11-9561-000d3adf7089", // "M16",
+  "9958db5b-aa6c-ed11-9561-000d3adf7089", // "M17",
+  "9e58db5b-aa6c-ed11-9561-000d3adf7089", // "M18",
+  "9c58db5b-aa6c-ed11-9561-000d3adf7089", // "M19",
+  "9f58db5b-aa6c-ed11-9561-000d3adf7089", //  "M20",
+];

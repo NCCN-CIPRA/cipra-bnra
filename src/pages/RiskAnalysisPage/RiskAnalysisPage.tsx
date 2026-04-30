@@ -7,9 +7,11 @@ import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import "./RiskAnalysisPage.css";
 import NCCNLoader from "../../components/NCCNLoader";
+import { Environment } from "../../types/global";
 
 export default function RiskAnalysisPage() {
   const {
+    environment,
     riskSummary,
     riskSnapshot: riskFile,
     results,
@@ -21,14 +23,19 @@ export default function RiskAnalysisPage() {
         <NCCNLoader />
       </Box>
     );
-
+  console.log(riskSummary);
   if (riskFile.cr4de_risk_type === RISK_TYPE.STANDARD)
     return (
       <Container sx={{ mt: 2, pb: 8 }}>
         <Standard
           riskSummary={riskSummary}
           riskFile={riskFile}
-          results={results}
+          results={
+            environment === Environment.DYNAMIC ||
+            riskSummary.cr4de_last_snapshot
+              ? results
+              : null
+          }
         />
       </Container>
     );
@@ -39,7 +46,12 @@ export default function RiskAnalysisPage() {
         <ManMade
           riskSummary={riskSummary}
           riskFile={riskFile}
-          results={results}
+          results={
+            environment === Environment.DYNAMIC ||
+            riskSummary.cr4de_last_snapshot
+              ? results
+              : null
+          }
         />
       </Container>
     );

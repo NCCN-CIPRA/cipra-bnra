@@ -7,15 +7,11 @@ import {
 import { DVCascadeSnapshot } from "../../types/dataverse/DVCascadeSnapshot";
 import {
   getAverageDirectImpact,
-  getAverageDirectImpactDynamic,
   getAverageIndirectImpact,
-  getAverageIndirectImpactDynamic,
 } from "../../functions/Impact";
 import {
   getAverageDirectProbability,
-  getAverageDirectProbabilityDynamic,
   getAverageIndirectProbability,
-  getAverageIndirectProbabilityDynamic,
 } from "../../functions/Probability";
 import { CascadeSection, VISUALS } from "./CascadeSection";
 import { DirectSection } from "./DirectSection";
@@ -27,6 +23,57 @@ import { RiskFilePageContext } from "../BaseRiskFilePage";
 import { PERC_CONTRIB } from "./RiskDataPage";
 import { SCENARIOS } from "../../functions/scenarios";
 import { useEffect, useMemo, useState } from "react";
+import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
+import {
+  aggregateCauseScenarioProbabilityContributions,
+  aggregateEffectScenarioImpactContributions,
+} from "../../functions/presentation/statistics";
+
+const allScenarios = [
+  SCENARIOS.CONSIDERABLE,
+  SCENARIOS.MAJOR,
+  SCENARIOS.EXTREME,
+];
+
+function getAverageSampleMean(
+  results: RiskFileQuantiResults,
+  key: "h" | "s" | "e" | "f" | "all",
+): number {
+  return (
+    allScenarios.reduce(
+      (sum, s) => sum + (results?.[s]?.impactStatistics?.sampleMean[key] ?? 0),
+      0,
+    ) / allScenarios.length
+  );
+}
+
+function getDynamicImpactShare(
+  environment: Environment,
+  results: RiskFileQuantiResults,
+  scenario: SCENARIOS | null,
+  letter: "h" | "s" | "e" | "f",
+): number | null {
+  if (environment !== Environment.DYNAMIC) return null;
+
+  const contribution = aggregateEffectScenarioImpactContributions(
+    results,
+    null,
+    scenario,
+    letter,
+  );
+
+  const impactMean =
+    scenario !== null
+      ? (results?.[scenario]?.impactStatistics?.sampleMean[letter] ?? 0)
+      : getAverageSampleMean(results, letter);
+
+  const totalMean =
+    scenario !== null
+      ? results?.[scenario]?.impactStatistics?.sampleMean.all || 1
+      : getAverageSampleMean(results, "all") || 1;
+
+  return (contribution * impactMean) / totalMean;
+}
 
 export default function Standard({
   riskFile,
@@ -39,6 +86,7 @@ export default function Standard({
   viewType,
   percentages,
   showConsequences,
+  results,
 }: {
   riskFile: DVRiskSnapshot;
   causes: DVCascadeSnapshot<unknown, DVRiskSnapshot, unknown>[];
@@ -54,6 +102,7 @@ export default function Standard({
   viewType: VISUALS;
   percentages: PERC_CONTRIB;
   showConsequences: boolean;
+  results: RiskFileQuantiResults;
 }) {
   const { environment, showDiff, publicRiskSnapshot } =
     useOutletContext<RiskFilePageContext>();
@@ -79,7 +128,7 @@ export default function Standard({
   );
   const dpDynamic =
     environment === Environment.DYNAMIC
-      ? getAverageDirectProbabilityDynamic(riskFile, causes, scenario)
+      ? aggregateCauseScenarioProbabilityContributions(results, null, scenario)
       : null;
 
   const causesWithP = causes.map((c) => {
@@ -93,9 +142,14 @@ export default function Standard({
       publicRiskSnapshot || riskFile,
       scenario,
     );
+
     const ipDynamic =
       environment === Environment.DYNAMIC
-        ? getAverageIndirectProbabilityDynamic(c, riskFile, causes, scenario)
+        ? aggregateCauseScenarioProbabilityContributions(
+            results,
+            c._cr4de_cause_risk_value,
+            scenario,
+          )
         : null;
 
     return {
@@ -228,7 +282,11 @@ export default function Standard({
           ),
           iDynamic:
             environment === Environment.DYNAMIC
-              ? getAverageIndirectImpactDynamic(e, riskFile, effects, scenario)
+              ? aggregateEffectScenarioImpactContributions(
+                  results,
+                  e._cr4de_effect_risk_value,
+                  scenario,
+                )
               : null,
         };
       })
@@ -263,46 +321,47 @@ export default function Standard({
     scenario,
     ["ha", "hb", "hc"],
   );
-  const iDirectHDynamic =
-    environment === Environment.DYNAMIC
-      ? getAverageDirectImpactDynamic(riskFile, effects, scenario, [
-          "ha",
-          "hb",
-          "hc",
-        ])
-      : null;
+  const iDirectHDynamic = getDynamicImpactShare(
+    environment,
+    results,
+    scenario,
+    "h",
+  );
   const iDirectS = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
     scenario,
     ["sa", "sb", "sc", "sd"],
   );
-  const iDirectSDynamic =
-    environment === Environment.DYNAMIC
-      ? getAverageDirectImpactDynamic(riskFile, effects, scenario, [
-          "sa",
-          "sb",
-          "sc",
-          "sd",
-        ])
-      : null;
+  const iDirectSDynamic = getDynamicImpactShare(
+    environment,
+    results,
+    scenario,
+    "s",
+  );
+
   const iDirectE = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
     scenario,
     ["ea"],
   );
-  const iDirectEDynamic =
-    environment === Environment.DYNAMIC
-      ? getAverageDirectImpactDynamic(riskFile, effects, scenario, ["ea"])
-      : null;
+  const iDirectEDynamic = getDynamicImpactShare(
+    environment,
+    results,
+    scenario,
+    "e",
+  );
+
   const iDirectF = getAverageDirectImpact(
     publicRiskSnapshot || riskFile,
     scenario,
     ["fa", "fb"],
   );
-  const iDirectFDynamic =
-    environment === Environment.DYNAMIC
-      ? getAverageDirectImpactDynamic(riskFile, effects, scenario, ["fa", "fb"])
-      : null;
+  const iDirectFDynamic = getDynamicImpactShare(
+    environment,
+    results,
+    scenario,
+    "f",
+  );
 
   return (
     <>
@@ -329,11 +388,10 @@ export default function Standard({
 
             <Box sx={{ mb: 8 }}>
               {effectsWithI
-                .sort((a, b) =>
-                  effectSortOrder
-                    ? effectSortOrder[a.cascade._cr4de_risk_cascade_value] -
-                      effectSortOrder[b.cascade._cr4de_risk_cascade_value]
-                    : b.i - a.i,
+                .sort(
+                  (a, b) =>
+                    (b.iDynamic !== null ? b.iDynamic : b.i) -
+                    (a.iDynamic !== null ? a.iDynamic : a.i),
                 )
                 .map((e) => (
                   <CascadeSection

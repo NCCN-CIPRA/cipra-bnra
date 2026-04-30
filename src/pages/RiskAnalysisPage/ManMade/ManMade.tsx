@@ -87,13 +87,13 @@ export default function ManMade({
             {t("Preferred Malicious Actions")}
           </Typography>
 
-          <ActionsSection riskFile={riskFile} />
+          <ActionsSection riskFile={riskFile} results={results} />
         </Box>
 
         <Box className="impact-assess" sx={{ mt: 8 }}>
           <Typography variant="h5">{t("Other Impactful Actions")}</Typography>
 
-          <MMImpactSection riskFile={riskFile} />
+          <MMImpactSection riskFile={riskFile} results={results} />
         </Box>
 
         <RiskFileBibliography riskFileId={riskSummary._cr4de_risk_file_value} />

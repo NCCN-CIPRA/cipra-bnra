@@ -140,7 +140,7 @@ export default function ActionsSankey({
             if (!lastCause.other_causes) {
               lastCause = {
                 cause_risk_id: "",
-                cause_risk_title: "Other causes",
+                cause_risk_title: "Other malicious actions",
                 cause_risk_p: 0,
                 other_causes: [],
               };

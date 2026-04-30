@@ -59,7 +59,7 @@ import useAPI from "../hooks/useAPI";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 
-export function RiskLabelExtension(riskLabels: Record<string, string>) {
+export function RiskLabelExtension(riskLabels?: Record<string, string>) {
   return Extension.create({
     name: "riskLabelDecorations",
 
@@ -72,6 +72,8 @@ export function RiskLabelExtension(riskLabels: Record<string, string>) {
               const decorations: Decoration[] = [];
 
               state.doc.descendants((node, pos, _parent, _index) => {
+                if (!riskLabels) return;
+
                 if (!node.isText) return;
 
                 const linkMark = node.marks.find(
@@ -460,7 +462,7 @@ export default function HTMLEditor({
   isEditable = true,
   onSave,
   queryKeyToInvalidate,
-  riskLabels = { "9858db5b-aa6c-ed11-9561-000d3adf7089": "Test" },
+  riskLabels,
 }: {
   initialHTML: string;
   originalHTML?: string;
