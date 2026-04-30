@@ -56,6 +56,8 @@ import ConsensusValidationPage from "./pages/InformationPortalPage/pages/Consens
 import ParticipationProcessPage from "./pages/InformationPortalPage/pages/ParticipationsProcessPage";
 import BNRAApplicationPage from "./pages/InformationPortalPage/pages/BNRAApplicationPage";
 import ResourcePage from "./pages/InformationPortalPage/pages/ResourcePage";
+import ClimateChangePage from "./pages/InformationPortalPage/pages/ClimateChangePage";
+import EmergingRisksPage from "./pages/InformationPortalPage/pages/EmergingRisksPage";
 
 export default function App() {
   useEffect(() => {
@@ -212,6 +214,10 @@ export default function App() {
               element: <HowDoWeMeasureImpactPage />,
             },
             {
+              path: "/learning/emerging-risks",
+              element: <EmergingRisksPage />,
+            },
+            {
               path: "/learning/risk-catalogue",
               element: <LearningRiskCataloguePage />,
             },
@@ -234,6 +240,10 @@ export default function App() {
             {
               path: "/learning/cascade-probabilities",
               element: <CascadeProbabilitiesPage />,
+            },
+            {
+              path: "/learning/climate-change",
+              element: <ClimateChangePage />,
             },
             {
               path: "/learning/monte-carlo-simulation",

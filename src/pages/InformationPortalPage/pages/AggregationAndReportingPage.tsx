@@ -1,6 +1,7 @@
 import { Box, Button, Container, Grid, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Trans, useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import useBreadcrumbs from "../../../hooks/useBreadcrumbs";
@@ -807,7 +808,7 @@ export default function AggregationAndReportingPage() {
 
         <Typography
           variant="body1"
-          sx={{ color: "text.secondary", lineHeight: 1.7, maxWidth: 700 }}
+          sx={{ color: "text.secondary", lineHeight: 1.7 }}
         >
           <Trans i18nKey="learning.reporting.intro">
             Once the simulations have run, the raw output — thousands of sampled
@@ -1218,16 +1219,14 @@ export default function AggregationAndReportingPage() {
             Previous: Monte Carlo simulation
           </Trans>
         </Button>
-
         <Button
           component={RouterLink}
-          to="/learning"
+          to="/learning/climate-change"
+          endIcon={<ChevronRightIcon />}
           variant="outlined"
           color="primary"
         >
-          <Trans i18nKey="learning.reporting.backToPortal">
-            Back to information portal
-          </Trans>
+          <Trans i18nKey="learning.reporting.next">Next: Climate change</Trans>
         </Button>
       </Box>
     </Container>

@@ -613,13 +613,13 @@ export default function HowDoWeMeasureProbabilityPage() {
 
         <Button
           component={RouterLink}
-          to="/learning/risk-catalogue"
+          to="/learning/emerging-risks"
           endIcon={<ChevronRightIcon />}
           variant="outlined"
           color="primary"
         >
           <Trans i18nKey="learning.probability.next">
-            Next: The risk catalogue
+            Next: Emerging risks
           </Trans>
         </Button>
       </Box>

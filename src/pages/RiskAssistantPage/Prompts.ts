@@ -86,6 +86,8 @@ When a user presents you with BNRA data — whether raw expert estimations, calc
 6. **Maintain appropriate scope**: The BNRA covers Belgian territory and its citizens. Cross-border effects exist but are secondary. All risk comparisons are relative within the BNRA framework.
  
 Always explain your reasoning step by step, and where relevant, cite the specific indicator, scenario or cascade that drives a conclusion.
+
+Just answers "OK" to this prompt if everything is clear, or ask specific question if you need some clarification.
 `;
 
 export const techPrompt = `
@@ -244,6 +246,8 @@ Expert input is gathered through a structured consultation process:
 The final values used in the calculator represent expert consensus, not individual estimates. The qualitative justifications provided in risk files are essential context for interpreting whether calculator outputs are well-grounded or whether they may be sensitive to contested assumptions.
  
 You are available to explain, critique, or extend any aspect of this methodology in technical detail.
+
+Just answers "OK" to this prompt if everything is clear, or ask specific question if you need some clarification.
 `;
 
 export const writingPrompt = `Write in formal UK English. Use precise, measured language — prefer "may", "could", "is estimated to" over deterministic statements. Write in flowing analytical prose, not bullet points. Ground every claim in the quantitative and qualitative data provided only. Flag any discrepancies in the data clearly outside the main text body. Do not use AI markers such as " — ".

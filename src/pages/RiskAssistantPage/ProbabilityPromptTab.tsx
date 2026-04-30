@@ -4,15 +4,48 @@ import {
   CascadeOption,
   SectionConfig,
   SYSTEM_PROMPT,
+  stripHTML,
 } from "./types";
 import { SCENARIOS } from "../../functions/scenarios";
-import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
+import {
+  RiskFileQuantiInput,
+  RiskFileQuantiResults,
+} from "../../types/dataverse/DVRiskFile";
 import {
   pScale7FromReturnPeriodMonths,
   returnPeriodMonthsFromYearlyEventRate,
   pTimeframeFromReturnPeriodMonths,
+  getReturnPeriodYearsIntervalStringPScale7,
 } from "../../functions/indicators/probability";
 import { writingPrompt } from "./Prompts";
+import { RiskQualis } from "../../types/dataverse/Riskfile";
+
+// ─── Direct probability entry ─────────────────────────────────────────────────
+
+function buildDirectProbabilityEntry(
+  riskFile: any,
+  directShare: number,
+  parentScenario: SCENARIOS,
+  entryIndex: number,
+): string | null {
+  if (directShare < 0.1) return null;
+
+  const quantiInput = JSON.parse(riskFile?.cr4de_quanti) as RiskFileQuantiInput;
+  const qualis = JSON.parse(riskFile?.cr4de_quali) as RiskQualis;
+
+  const scale7 = quantiInput?.[parentScenario]?.dp?.scale7 ?? 0;
+  const qualiText = stripHTML(qualis?.[parentScenario]?.dp ?? null);
+  const range = getReturnPeriodYearsIntervalStringPScale7(scale7);
+  const qualiBlock = qualiText
+    ? `\n     Expert qualitative justification:\n     ${qualiText.replace(/\n/g, "\n     ")}`
+    : "";
+
+  return `
+${entryIndex}. Direct probability
+   Contribution to total probability: ${(directShare * 100).toFixed(1)}%
+      Direct probability: scale ${scale7}/7): ${range}
+      ${qualiBlock}`;
+}
 
 // ─── Per-scenario cause block ─────────────────────────────────────────────────
 
@@ -83,6 +116,20 @@ export function buildProbabilityPrompt(
 
   const selected = causes.filter((c) => config.includedCascadeIds.has(c.id));
 
+  const totalCauseShare = causes.reduce(
+    (sum, c) => sum + (c.contributionP ?? 0),
+    0,
+  );
+  const directShare = Math.max(0, 1 - totalCauseShare);
+
+  const directEntry = buildDirectProbabilityEntry(
+    riskFile,
+    directShare,
+    scenario,
+    1,
+  );
+  const cascadeOffset = directEntry ? 1 : 0;
+
   const scenarioRaw =
     scenario === SCENARIOS.CONSIDERABLE
       ? riskSummary.cr4de_scenario_considerable
@@ -106,7 +153,12 @@ QUANTITATIVE RESULTS:
 MRS INTENSITY PARAMETERS:
 ${scenarioLines(scenarioRaw)}
 
-MOST RELEVANT CAUSE RISKS (${selected.length} / ${causes.length} included, ordered by contribution):
+PROBABILITY BREAKDOWN:
+  • Direct probability: ${(directShare * 100).toFixed(1)}%
+  • Indirect probability (via cause risks): ${(totalCauseShare * 100).toFixed(1)}%
+
+DIRECT PROBABILITY AND CAUSE RISKS (${selected.length}/${causes.length} included, ordered by contribution):
+${directEntry ?? ""}
 ${
   selected.length === 0
     ? "  (no cause risks selected)"
@@ -114,7 +166,7 @@ ${
         .map((c, i) => {
           const scenarioBlock = buildCauseScenarioLines(c);
           return `
-${i + 1}. ${c.title}
+${i + 1 + cascadeOffset}. ${c.title}
    Contribution to total probability: ${(c.contributionP ?? 0) > 0 ? `${((c.contributionP ?? 0) * 100).toFixed(1)}%` : "(not yet calculated)"}${scenarioBlock}
    Definition: ${c.definition}
 ${c.qualiText ? `\n   Expert qualitative justification:\n   ${c.qualiText.replace(/\n/g, "\n   ")}` : ""}`;
@@ -127,7 +179,7 @@ TASK:
 Write a probability assessment section (~${config.wordCount} words, ${config.tone} tone) structured as follows:
 
 STRUCTURE:
-- Open with 1–2 sentences stating the overall probability score, its practical meaning (yearly chance, return period), and whether probability is primarily driven by autonomous likelihood or by cascading causes.
+- Open with 1–2 sentences stating the overall probability score, its practical meaning (yearly chance, return period), and whether probability is primarily driven by direct probability or by cascading causes.
 - Then cover each significant cause risk as a numbered entry in this exact format:
 
   [Cause risk title]

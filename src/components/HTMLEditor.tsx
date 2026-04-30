@@ -79,10 +79,15 @@ export function RiskLabelExtension(riskLabels: Record<string, string>) {
                     m.type.name === "link" &&
                     m.attrs.href?.indexOf("/risks/") >= 0,
                 );
-                if (!linkMark) return;
 
                 const boldMark = node.marks.find((m) => m.type.name === "bold");
-                if (!linkMark || !boldMark) return;
+
+                const isDirectNode =
+                  /^(direct (human|societal|environmental|financial) impact|direct probability)$/.test(
+                    node.text?.toLowerCase() ?? "",
+                  );
+
+                if (!boldMark || (!linkMark && !isDirectNode)) return;
 
                 // Check if the immediately preceding sibling is a numbered prefix like "1. "
                 // if (index === 0 || !parent) return;
@@ -90,9 +95,9 @@ export function RiskLabelExtension(riskLabels: Record<string, string>) {
                 // if (!prevNode.isText || !/\d+\.\s*$/.test(prevNode.text ?? ""))
                 //   return;
 
-                const riskId = linkMark.attrs.href.split("/risks/")[1];
-                const label = riskLabels[riskId];
-                if (!label) return;
+                const label = linkMark
+                  ? riskLabels[linkMark.attrs.href.split("/risks/")[1]]
+                  : riskLabels[""];
 
                 decorations.push(
                   Decoration.widget(

@@ -164,6 +164,15 @@ export default function InformationPortalPage() {
                     </ListItemIcon>
                     <ListItemText primary={"How do we measure probability?"} />
                   </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/emerging-risks"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Emerging Risks"} />
+                  </ListItemButton>
                 </List>
               </Item>
             </Grid>
@@ -281,6 +290,15 @@ export default function InformationPortalPage() {
                       <ChevronRightIcon />
                     </ListItemIcon>
                     <ListItemText primary={"Cascade probabilities"} />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={RouterLink}
+                    to="/learning/climate-change"
+                  >
+                    <ListItemIcon sx={{ minWidth: "32px" }}>
+                      <ChevronRightIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Climate change"} />
                   </ListItemButton>
                   <ListItemButton
                     component={RouterLink}

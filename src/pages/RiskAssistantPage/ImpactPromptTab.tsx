@@ -4,7 +4,11 @@ import {
   iScale7FromEuros,
 } from "../../functions/indicators/impact";
 import { SCENARIOS } from "../../functions/scenarios";
-import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
+import {
+  RiskFileQuantiInput,
+  RiskFileQuantiResults,
+} from "../../types/dataverse/DVRiskFile";
+import { RiskQualis } from "../../types/dataverse/Riskfile";
 import { writingPrompt } from "./Prompts";
 import {
   CascadeOption,
@@ -14,6 +18,8 @@ import {
   ImpactKey,
   IMPACT_INDICATORS,
   scenarioLines,
+  IMPACT_DI_KEYS,
+  stripHTML,
 } from "./types";
 
 function buildEffectScenarioLines(
@@ -91,6 +97,53 @@ function buildEffectScenarioLines(
   return `\n   Relevant effect scenarios (sorted by ${impactLabel} contribution):\n${blocks.join("\n\n")}`;
 }
 
+function buildDirectImpactEntry(
+  riskFile: any,
+  impactKey: ImpactKey,
+  impactLetter: "h" | "s" | "e" | "f",
+  impactLabel: string,
+  directShare: number,
+  parentScenario: SCENARIOS,
+  entryIndex: number,
+): string | null {
+  if (directShare < 0.1) return null;
+
+  const quantiInput = JSON.parse(riskFile?.cr4de_quanti) as RiskFileQuantiInput;
+  const qualis = JSON.parse(riskFile?.cr4de_quali) as RiskQualis;
+  const diKeys = IMPACT_DI_KEYS[impactKey];
+
+  const qualiText = stripHTML(qualis?.[parentScenario]?.[impactLetter] ?? null);
+
+  const quantiBlock = diKeys
+    .map((k) => {
+      const val = quantiInput[parentScenario].di[k];
+
+      if (!val || val.scale7 === 0) return null;
+      const indicator = k as Indicator; // e.g. "HA" → check Indicator type
+      try {
+        const range = getIntervalStringQuantiScale7(
+          val.scale7,
+          indicator as any,
+        );
+        return `     • ${indicator} (scale ${val.scale7}/7): ${range}`;
+      } catch {
+        return `     • ${indicator} (scale ${val.scale7}/7)`;
+      }
+    })
+    .filter(Boolean)
+    .join("\n");
+
+  const qualiBlock = qualiText
+    ? `\n     Expert qualitative justification:\n     ${qualiText.replace(/\n/g, "\n     ")}`
+    : "";
+
+  return `
+${entryIndex}. Direct ${impactLabel.toLowerCase()} impact
+   Contribution to ${impactLabel.toLowerCase()} impact (overall): ${(directShare * 100).toFixed(1)}%
+${quantiBlock}
+${qualiBlock}`;
+}
+
 // ─── Indicator header block ───────────────────────────────────────────────────
 
 function buildIndicatorLines(
@@ -142,11 +195,62 @@ export function buildImpactPrompt(
 
   const selected = effects.filter((e) => config.includedCascadeIds.has(e.id));
 
-  const totalEffectShare = selected.reduce(
+  const totalEffectShare = effects.reduce(
     (sum, e) => sum + ((e[contribKey] as number) ?? 0),
     0,
   );
   const directShare = Math.max(0, 1 - totalEffectShare);
+
+  // Direct impact entry — rendered first if it meets the threshold, numbered
+  // relative to its position so the cascade entries follow on naturally
+  const directEntry = buildDirectImpactEntry(
+    riskFile,
+    impactKey,
+    impactLetter,
+    impactLabel,
+    directShare,
+    scenario,
+    1, // always entry 1 when shown — cascades follow
+  );
+  const cascadeOffset = directEntry ? 1 : 0; // shift cascade numbering if direct is present
+
+  const cascadeEntries =
+    selected.length === 0
+      ? "  (no effect risks selected)"
+      : selected
+          .map((e, i) => {
+            const subContribs = extractSubContributors(
+              e._subResults,
+              scenario,
+              impactLetter,
+              5,
+            );
+            const subContribLines =
+              subContribs.length > 0
+                ? `\n   Top internal contributors to ${impactLabel.toLowerCase()} impact:\n` +
+                  subContribs
+                    .map(
+                      (s) =>
+                        `     – ${s.title}: ${(s.share * 100).toFixed(1)}%`,
+                    )
+                    .join("\n")
+                : "";
+
+            const effectScenarioDesc = buildEffectScenarioLines(
+              e,
+              impactLetter,
+              impactLabel,
+              scenario,
+            );
+
+            return `
+${i + 1 + cascadeOffset}. ${e.title}
+   Contribution to ${impactLabel.toLowerCase()} impact (overall): ${(e[contribKey] as number) > 0 ? `${((e[contribKey] as number) * 100).toFixed(1)}%` : "(not yet calculated)"}
+   Contribution to total impact (overall): ${(e.contributionAll ?? 0) > 0 ? `${((e.contributionAll ?? 0) * 100).toFixed(1)}%` : "(not yet calculated)"}${effectScenarioDesc}${subContribLines}
+   Definition: ${e.definition}
+${e.qualiText ? `\n   Expert qualitative justification:\n   ${e.qualiText.replace(/\n/g, "\n   ")}` : ""}`;
+          })
+          .join("\n");
 
   return `SYSTEM:
 ${SYSTEM_PROMPT}
@@ -163,28 +267,9 @@ IMPACT BREAKDOWN:
   • Direct ${impactLabel.toLowerCase()} impact (from this risk itself): ${(directShare * 100).toFixed(1)}%
   • Indirect ${impactLabel.toLowerCase()} impact (via triggered effect risks): ${(totalEffectShare * 100).toFixed(1)}%
 
-EFFECT RISKS (${selected.length} included, ordered by ${impactLabel.toLowerCase()} impact contribution):
-${
-  selected.length === 0
-    ? "  (no effect risks selected)"
-    : selected
-        .map((e, i) => {
-          const effectScenarioDesc = buildEffectScenarioLines(
-            e,
-            impactLetter,
-            impactLabel,
-            scenario,
-          ); // ← new
-
-          return `
-${i + 1}. ${e.title}
-   Contribution to ${impactLabel.toLowerCase()} impact (overall): ${(e[contribKey] as number) > 0 ? `${((e[contribKey] as number) * 100).toFixed(1)}%` : "(not yet calculated)"}
-   Contribution to total impact (overall): ${(e.contributionAll ?? 0) > 0 ? `${((e.contributionAll ?? 0) * 100).toFixed(1)}%` : "(not yet calculated)"}${effectScenarioDesc}
-   Definition: ${e.definition}
-${e.qualiText ? `\n   Expert qualitative justification:\n   ${e.qualiText.replace(/\n/g, "\n   ")}` : ""}`;
-        })
-        .join("\n")
-}
+RELEVANT EFFECT RISKS AND DIRECT IMPACT (${selected.length}/${effects.length} included, ordered by ${impactLabel.toLowerCase()} impact contribution):
+${directEntry ?? ""}
+${cascadeEntries}
 ${config.extraContext ? `\nADDITIONAL ANALYST NOTES:\n${config.extraContext}\n` : ""}
 ───────────────────────────────────────────────────────
 TASK:

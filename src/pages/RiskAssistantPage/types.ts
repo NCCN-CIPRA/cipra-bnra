@@ -1,7 +1,10 @@
 import { SCENARIOS } from "../../functions/scenarios";
 import { IntensityParameter } from "../../functions/intensityParameters";
 import { CPMatrix } from "../../types/dataverse/DVCascadeSnapshot";
-import { RiskFileQuantiResults } from "../../types/dataverse/DVRiskFile";
+import {
+  RiskFileQuantiInput,
+  RiskFileQuantiResults,
+} from "../../types/dataverse/DVRiskFile";
 import { AggregatedImpacts } from "../../types/simulation";
 import { Indicator } from "../../functions/indicators/impact";
 
@@ -48,6 +51,16 @@ export interface SectionConfig {
   wordCount: number;
   extraContext: string;
 }
+
+export const IMPACT_DI_KEYS: Record<
+  ImpactKey,
+  (keyof RiskFileQuantiInput[SCENARIOS]["di"])[]
+> = {
+  human: ["ha", "hb", "hc"],
+  societal: ["sa", "sb", "sc", "sd"],
+  environmental: ["ea"],
+  financial: ["fa", "fb"],
+};
 
 export const defaultConfig = (cascades: CascadeOption[]): SectionConfig => ({
   includedCascadeIds: new Set(

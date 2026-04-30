@@ -166,7 +166,7 @@ export default function BaseRiskFilePage() {
 
     return parseRiskSnapshot(snapshotFromRiskfile(riskFile));
   }, [publicRiskSnapshot, riskFile, environment]);
-  console.log(riskSnapshot?.cr4de_mrs);
+
   const isEmerging = riskSummary?.cr4de_risk_type === RISK_TYPE.EMERGING;
 
   let tab = 0;
