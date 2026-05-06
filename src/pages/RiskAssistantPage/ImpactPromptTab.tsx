@@ -182,7 +182,8 @@ export function buildImpactPrompt(
   effects: CascadeOption[],
   config: SectionConfig,
 ): string {
-  const scenario = (riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE) as SCENARIOS;
+  const scenario = (riskSummary.cr4de_mrs ||
+    SCENARIOS.CONSIDERABLE) as SCENARIOS;
   const impactLetter = impactKey[0] as "h" | "s" | "e" | "f";
   const impactLabel = {
     h: "Human",

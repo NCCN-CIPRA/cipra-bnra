@@ -24,7 +24,7 @@ export function buildMRSPrompt(
   results: RiskFileQuantiResults | null,
   config: SectionConfig,
 ): string {
-  const mrs = (riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE) as SCENARIOS;
+  const mrs = (riskSummary.cr4de_mrs || SCENARIOS.CONSIDERABLE) as SCENARIOS;
   const levels = [
     SCENARIOS.CONSIDERABLE,
     SCENARIOS.MAJOR,
