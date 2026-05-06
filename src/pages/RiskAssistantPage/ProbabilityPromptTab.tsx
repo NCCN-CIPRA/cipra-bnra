@@ -8,6 +8,7 @@ import {
 } from "./types";
 import { SCENARIOS } from "../../functions/scenarios";
 import {
+  DVRiskFile,
   RiskFileQuantiInput,
   RiskFileQuantiResults,
 } from "../../types/dataverse/DVRiskFile";
@@ -19,6 +20,7 @@ import {
 } from "../../functions/indicators/probability";
 import { writingPrompt } from "./Prompts";
 import { RiskQualis } from "../../types/dataverse/Riskfile";
+import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 
 // ─── Direct probability entry ─────────────────────────────────────────────────
 
@@ -102,13 +104,13 @@ function buildCauseScenarioLines(c: CascadeOption): string {
 // ─── Prompt builder ───────────────────────────────────────────────────────────
 
 export function buildProbabilityPrompt(
-  riskSummary: any,
-  riskFile: any,
+  riskSummary: DVRiskSummary,
+  riskFile: DVRiskFile | null,
   results: RiskFileQuantiResults | null,
   causes: CascadeOption[],
   config: SectionConfig,
 ): string {
-  const scenario = (riskFile.cr4de_mrs || SCENARIOS.CONSIDERABLE) as SCENARIOS;
+  const scenario = riskSummary.cr4de_mrs;
   const meanP = results?.[scenario]?.probabilityStatistics?.sampleMean ?? 0;
   const rp = returnPeriodMonthsFromYearlyEventRate(meanP);
   const p7 = pScale7FromReturnPeriodMonths(rp);

@@ -85,7 +85,7 @@ export function RiskLabelExtension(riskLabels?: Record<string, string>) {
                 const boldMark = node.marks.find((m) => m.type.name === "bold");
 
                 const isDirectNode =
-                  /^(direct (human|societal|environmental|financial) impact|direct probability)$/.test(
+                  /(direct (human |societal |environmental |financial |)impact|direct probability)$/.test(
                     node.text?.toLowerCase() ?? "",
                   );
 

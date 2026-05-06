@@ -414,7 +414,7 @@ export default function RiskAssistantPage() {
     },
   });
 
-  const scenario = (riskFile?.cr4de_mrs || SCENARIOS.CONSIDERABLE) as SCENARIOS;
+  const scenario = riskSummary.cr4de_mrs;
 
   // ── Contribution maps ──────────────────────────────────────────────────────
 
