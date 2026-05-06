@@ -8,7 +8,6 @@ import {
 } from "./types";
 import { SCENARIOS } from "../../functions/scenarios";
 import {
-  DVRiskFile,
   RiskFileQuantiInput,
   RiskFileQuantiResults,
 } from "../../types/dataverse/DVRiskFile";
@@ -105,7 +104,7 @@ function buildCauseScenarioLines(c: CascadeOption): string {
 
 export function buildProbabilityPrompt(
   riskSummary: DVRiskSummary,
-  riskFile: DVRiskFile | null,
+  riskFile: any,
   results: RiskFileQuantiResults | null,
   causes: CascadeOption[],
   config: SectionConfig,
