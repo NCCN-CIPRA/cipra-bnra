@@ -1,6 +1,6 @@
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import ProbabilityBars from "./ProbabilityBars";
-import getScaleString from "../../functions/getScaleString";
+import { getImpactScaleString } from "../../functions/getScaleString";
 import { SCENARIOS } from "../../functions/scenarios";
 import { useCallback } from "react";
 import FileSaver from "file-saver";
@@ -95,7 +95,7 @@ export default function SummaryCharts({
             </Typography>
             <SummaryImpactChart category="H" value={H} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {t(getScaleString(H, maxScale))}
+              {t(getImpactScaleString(H, maxScale))}
             </Typography>
           </Stack>
           <Stack direction="column">
@@ -104,7 +104,7 @@ export default function SummaryCharts({
             </Typography>
             <SummaryImpactChart category="S" value={S} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {t(getScaleString(S, maxScale))}
+              {t(getImpactScaleString(S, maxScale))}
             </Typography>
           </Stack>
         </Stack>
@@ -117,7 +117,7 @@ export default function SummaryCharts({
             </Typography>
             <SummaryImpactChart category="E" value={E} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {t(getScaleString(E, maxScale))}
+              {t(getImpactScaleString(E, maxScale))}
             </Typography>
           </Stack>
           <Stack direction="column">
@@ -126,7 +126,7 @@ export default function SummaryCharts({
             </Typography>
             <SummaryImpactChart category="F" value={F} />
             <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-              {t(getScaleString(F, maxScale))}
+              {t(getImpactScaleString(F, maxScale))}
             </Typography>
           </Stack>
         </Stack>

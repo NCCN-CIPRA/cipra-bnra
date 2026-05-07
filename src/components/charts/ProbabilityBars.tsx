@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import getScaleString from "../../functions/getScaleString";
+import { getProbabilityScaleString } from "../../functions/getScaleString";
 import { useTranslation } from "react-i18next";
 import { ProbabilityBarsChart } from "./svg/ProbabilityBarsChart";
 import { useOutletContext } from "react-router-dom";
@@ -34,7 +34,7 @@ export default function ProbabilityBars({
         manmade={manmade}
       />
       <Typography variant="h6" sx={{ mt: 1, textAlign: "center" }}>
-        {t(getScaleString(tp, maxScale))}
+        {t(getProbabilityScaleString(tp, maxScale))}
       </Typography>
     </Box>
   );

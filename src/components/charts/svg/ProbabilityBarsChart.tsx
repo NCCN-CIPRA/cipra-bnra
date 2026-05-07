@@ -1,41 +1,56 @@
 import { Bar, BarChart, YAxis } from "recharts";
 
-const arrow = (
-  value: number,
-  cy: number,
-  arrowWidth: number,
-  graphWidth: number,
-  color: string,
-  maxScale: number,
-) => {
-  const ratio = graphWidth - 20;
-  const x0 = 10 + (ratio * value) / maxScale;
-  const y0 = cy + arrowWidth;
-
-  const xa = x0 - arrowWidth / 2;
-  const ya = y0;
-  const xb = x0;
-  const yb = y0 - arrowWidth;
-  const xc = x0 + arrowWidth / 2;
-  const yc = y0;
-
-  return (
-    <path
-      d={`M${xa} ${ya} L${xb} ${yb} L${xc} ${yc} L${xa} ${ya}`}
-      stroke="#none"
-      fill={color}
-    />
-  );
-};
+type FillType = "full" | "partial" | "empty";
 
 const getProbabilityBars = (value: number, maxScale: number) => {
+  const floorVal = Math.floor(value);
+  const decimal = value - floorVal;
+
   return Array(maxScale)
     .fill(null)
     .map((_, i) => ({
       name: i,
-      uv: value >= i ? i + 1 : 0,
-      pv: value < i ? i + 1 : 0,
+      barHeight: i + 1,
+      fillType: (i < floorVal
+        ? "full"
+        : i === floorVal
+          ? "partial"
+          : "empty") as FillType,
+      decimal,
     }));
+};
+
+const CustomBar = (props: any) => {
+  const { x, y, width, height, fillType, decimal } = props;
+
+  if (fillType === "full") {
+    return <rect x={x} y={y} width={width} height={height} fill="#000000b0" />;
+  }
+
+  if (fillType === "partial" && decimal > 0) {
+    const filledWidth = width * decimal;
+    return (
+      <g>
+        <rect
+          x={x}
+          y={y}
+          width={filledWidth}
+          height={height}
+          fill="#000000b0"
+        />
+        <rect
+          x={x + filledWidth}
+          y={y}
+          width={width - filledWidth}
+          height={height}
+          fill="#00000040"
+        />
+      </g>
+    );
+  }
+
+  // empty, or partial with decimal === 0
+  return <rect x={x} y={y} width={width} height={height} fill="#00000040" />;
 };
 
 export function ProbabilityBarsChart({
@@ -55,13 +70,12 @@ export function ProbabilityBarsChart({
       width={chartWidth}
       height={height}
       data={getProbabilityBars(tp, maxScale)}
-      style={{}}
     >
-      {/* <CartesianGrid strokeDasharray="3 3" /> */}
-      <YAxis domain={[0, 5]} hide />
-      <Bar dataKey="uv" fill="#000000b0" stackId="a" />
-      <Bar dataKey="pv" fill="#00000040" stackId="a" />
-      {arrow(tp, height, 10, chartWidth, "#000000b0", maxScale)}
+      <YAxis domain={[0, maxScale]} hide />
+      <Bar
+        dataKey="barHeight"
+        shape={(props: any) => <CustomBar {...props} />}
+      />
     </BarChart>
   );
 }

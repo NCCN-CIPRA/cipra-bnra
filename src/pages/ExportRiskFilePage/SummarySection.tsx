@@ -17,12 +17,18 @@ import { Trans, useTranslation } from "react-i18next";
 import { DVRiskFile, RISK_TYPE } from "../../types/dataverse/DVRiskFile";
 import { useEffect, useState } from "react";
 import svg2PDF from "../../functions/svg2PDF";
-import getScaleString from "../../functions/getScaleString";
+import {
+  getImpactScaleString,
+  getProbabilityScaleString,
+} from "../../functions/getScaleString";
 import { getSummary } from "../../functions/translations";
 import i18next from "i18next";
 import { BLACK } from "../../functions/colors";
 import Watermark from "./Watermark";
 import { LoggedInUser } from "../../hooks/useLoggedInUser";
+import { useOutletContext } from "react-router-dom";
+import { BasePageContext } from "../BasePage";
+import { Indicators } from "../../types/global";
 
 export default function SummarySection({
   riskFile,
@@ -41,6 +47,8 @@ export default function SummarySection({
   F: number;
   user: LoggedInUser | null | undefined;
 }) {
+  const { indicators } = useOutletContext<BasePageContext>();
+
   const { t } = useTranslation();
 
   const [pBarChart, setpBarChart] = useState("");
@@ -49,27 +57,29 @@ export default function SummarySection({
   const [eChart, setEChart] = useState("");
   const [fChart, setFChart] = useState("");
 
+  const maxScale = indicators === Indicators.V2 ? 7 : 5;
+
   useEffect(() => {
     setTimeout(() => {
       svg2PDF(
         document.querySelector(`#pBars-${riskFile.cr4de_riskfilesid}`)
-          ?.outerHTML || ""
+          ?.outerHTML || "",
       ).then((uri) => setpBarChart(uri || ""));
       svg2PDF(
         document.querySelector(`#hChart-${riskFile.cr4de_riskfilesid} svg`)
-          ?.outerHTML || ""
+          ?.outerHTML || "",
       ).then((uri) => setHChart(uri || ""));
       svg2PDF(
         document.querySelector(`#sChart-${riskFile.cr4de_riskfilesid} svg`)
-          ?.outerHTML || ""
+          ?.outerHTML || "",
       ).then((uri) => setSChart(uri || ""));
       svg2PDF(
         document.querySelector(`#eChart-${riskFile.cr4de_riskfilesid} svg`)
-          ?.outerHTML || ""
+          ?.outerHTML || "",
       ).then((uri) => setEChart(uri || ""));
       svg2PDF(
         document.querySelector(`#fChart-${riskFile.cr4de_riskfilesid} svg`)
-          ?.outerHTML || ""
+          ?.outerHTML || "",
       ).then((uri) => setFChart(uri || ""));
     }, 5000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -144,35 +154,37 @@ export default function SummarySection({
               : t("learning.probability.2.text.title", "Probability")}
           </Text>
           {pBarChart && <Image src={pBarChart} style={imageStyle} />}
-          <Text style={scaleStyle}>{t(getScaleString(tp))}</Text>
+          <Text style={scaleStyle}>
+            {t(getProbabilityScaleString(tp, maxScale))}
+          </Text>
         </View>
         <View style={wrapperStyle}>
           <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Human">Human</Trans>
           </Text>
           {hChart && <Image src={hChart} style={imageStyle} />}
-          <Text style={scaleStyle}>{t(getScaleString(H))}</Text>
+          <Text style={scaleStyle}>{t(getImpactScaleString(H, maxScale))}</Text>
         </View>
         <View style={wrapperStyle}>
           <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Societal">Societal</Trans>
           </Text>
           {sChart && <Image src={sChart} style={imageStyle} />}
-          <Text style={scaleStyle}>{t(getScaleString(S))}</Text>
+          <Text style={scaleStyle}>{t(getImpactScaleString(S, maxScale))}</Text>
         </View>
         <View style={wrapperStyle}>
           <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Environmental">Environmental</Trans>
           </Text>
           {eChart && <Image src={eChart} style={imageStyle} />}
-          <Text style={scaleStyle}>{t(getScaleString(E))}</Text>
+          <Text style={scaleStyle}>{t(getImpactScaleString(E, maxScale))}</Text>
         </View>
         <View style={wrapperStyle}>
           <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Financial">Financial</Trans>
           </Text>
           {fChart && <Image src={fChart} style={imageStyle} />}
-          <Text style={scaleStyle}>{t(getScaleString(F))}</Text>
+          <Text style={scaleStyle}>{t(getImpactScaleString(F, maxScale))}</Text>
         </View>
       </View>
 

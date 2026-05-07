@@ -15,7 +15,10 @@ import {
 import html2PDF from "../../functions/html2pdf";
 import { Trans, useTranslation } from "react-i18next";
 import { RISK_TYPE } from "../../types/dataverse/DVRiskFile";
-import getScaleString from "../../functions/getScaleString";
+import {
+  getImpactScaleString,
+  getProbabilityScaleString,
+} from "../../functions/getScaleString";
 import { getSnapshotSummary } from "../../functions/translations";
 import i18next from "i18next";
 import { BLACK } from "../../functions/colors";
@@ -115,35 +118,35 @@ export default function SummarySection({
               : t("learning.probability.2.text.title", "Probability")}
           </Text>
           <Image src={charts.pBarChartURI} style={imageStyle} />
-          <Text style={scaleStyle}>{t(getScaleString(tp))}</Text>
+          <Text style={scaleStyle}>{t(getProbabilityScaleString(tp, 7))}</Text>
         </View>
         <View style={wrapperStyle}>
           <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Human">Human</Trans>
           </Text>
           <Image src={charts.hChartURI} style={imageStyle} debug={false} />
-          <Text style={scaleStyle}>{t(getScaleString(H))}</Text>
+          <Text style={scaleStyle}>{t(getImpactScaleString(H, 7))}</Text>
         </View>
         <View style={wrapperStyle}>
           <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Societal">Societal</Trans>
           </Text>
           <Image src={charts.sChartURI} style={imageStyle} />
-          <Text style={scaleStyle}>{t(getScaleString(S))}</Text>
+          <Text style={scaleStyle}>{t(getImpactScaleString(S, 7))}</Text>
         </View>
         <View style={wrapperStyle}>
           <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Environmental">Environmental</Trans>
           </Text>
           <Image src={charts.eChartURI} style={imageStyle} />
-          <Text style={scaleStyle}>{t(getScaleString(E))}</Text>
+          <Text style={scaleStyle}>{t(getImpactScaleString(E, 7))}</Text>
         </View>
         <View style={wrapperStyle}>
           <Text style={titleStyle} debug={false}>
             <Trans i18nKey="Financial">Financial</Trans>
           </Text>
           <Image src={charts.fChartURI} style={imageStyle} />
-          <Text style={scaleStyle}>{t(getScaleString(F))}</Text>
+          <Text style={scaleStyle}>{t(getImpactScaleString(F, 7))}</Text>
         </View>
       </View>
 
@@ -158,7 +161,7 @@ export default function SummarySection({
         {html2PDF(
           getSnapshotSummary(riskFile, i18next.language),
           "summary",
-          riskFile
+          riskFile,
         )}
       </View>
       {!user?.roles.analist && <Watermark user={user} />}
