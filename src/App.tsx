@@ -191,7 +191,7 @@ export default function App() {
             {
               path: "/learning",
               element: (
-                <ProtectedRoute allowedRole="reader">
+                <ProtectedRoute allowedRole="verified">
                   <InformationPortalPage />
                 </ProtectedRoute>
               ),
