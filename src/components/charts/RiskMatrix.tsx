@@ -12,7 +12,10 @@ import { useGenerateImage } from "recharts-to-png";
 import FileSaver from "file-saver";
 import { BasePageContext } from "../../pages/BasePage";
 import { useOutletContext } from "react-router-dom";
-import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import {
+  DVRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../types/dataverse/DVRiskSnapshot";
 import {
   pScale7FromReturnPeriodMonths,
   returnPeriodMonthsFromYearlyEventRate,
@@ -75,7 +78,7 @@ const defaultFields = (c: DVRiskSnapshot) =>
     executiveSummary: ES_RISKS.indexOf(c.cr4de_hazard_id || "") >= 0,
     code: c.cr4de_hazard_id,
     category: c.cr4de_category,
-  } as Partial<MatrixRisk>);
+  }) as Partial<MatrixRisk>;
 
 export default function RiskMatrix({
   riskFiles,
@@ -90,6 +93,7 @@ export default function RiskMatrix({
   impact = "All",
   categoryDisplay = "shapes",
   scenarioDisplay = "colors",
+  results,
 }: {
   riskFiles: DVRiskSnapshot[] | null;
   selectedNodeId?: string | null;
@@ -103,6 +107,7 @@ export default function RiskMatrix({
   impact?: "All" | IMPACT_CATEGORY;
   categoryDisplay?: "shapes" | "colors" | "both" | "none";
   scenarioDisplay?: "colors" | "shapes" | "none";
+  results: Record<string, RiskFileQuantiResults | null> | null;
 }) {
   const { user } = useOutletContext<BasePageContext>();
   const [dots, setDots] = useState<MatrixRisk[] | null>(null);
@@ -139,21 +144,19 @@ export default function RiskMatrix({
         [SCENARIOS.CONSIDERABLE, SCENARIOS.MAJOR, SCENARIOS.EXTREME].forEach(
           (s) => {
             const i = impact.toLowerCase() as "all" | "h" | "s" | "e" | "f";
-            const results = rf.cr4de_quanti_results as
-              | RiskFileQuantiResults
-              | null
-              | undefined;
 
-            const tp = results
+            const rfResults = results && results[rf._cr4de_risk_file_value];
+            console.log(rfResults);
+            const tp = rfResults
               ? pScale7FromReturnPeriodMonths(
                   returnPeriodMonthsFromYearlyEventRate(
-                    results[s].probabilityStatistics?.sampleMean || 0,
+                    rfResults[s].probabilityStatistics?.sampleMean || 0,
                   ),
                 )
               : rf.cr4de_quanti[s].tp.yearly.scale;
-            const ti = results
+            const ti = rfResults
               ? iScale7FromEuros(
-                  results[s].impactStatistics?.sampleMean[
+                  rfResults[s].impactStatistics?.sampleMean[
                     impact.toLocaleLowerCase() as keyof AggregatedImpacts
                   ] || 0,
                 )

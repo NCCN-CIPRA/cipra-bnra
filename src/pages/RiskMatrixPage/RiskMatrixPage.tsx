@@ -20,18 +20,25 @@ import RiskMatrix from "../../components/charts/RiskMatrix";
 import { SCENARIOS } from "../../functions/scenarios";
 import {
   CATEGORY_NAMES,
+  DVRiskFile,
   parseRiskFile,
   parseRiskFileQuantiResults,
   RISK_CATEGORY,
+  RiskFileQuantiResults,
   SerializedRiskFileQuantiResults,
 } from "../../types/dataverse/DVRiskFile";
 import { IMPACT_CATEGORY } from "../../functions/Impact";
 import { useQuery } from "@tanstack/react-query";
 import useAPI, { DataTable } from "../../hooks/useAPI";
-import { parseRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
+import {
+  DVRiskSnapshot,
+  parseRiskSnapshot,
+  RiskSnapshotResults,
+} from "../../types/dataverse/DVRiskSnapshot";
 import { snapshotFromRiskfile } from "../../functions/snapshot";
 import { BasePageContext } from "../BasePage";
 import { Environment } from "../../types/global";
+import { SerializedRiskQualis } from "../../types/dataverse/Riskfile";
 
 export default function RiskMatrixPage() {
   const { t } = useTranslation();
@@ -89,6 +96,16 @@ export default function RiskMatrixPage() {
 
   const riskSnapshots =
     environment === Environment.DYNAMIC ? riskFiles : publicRiskSnapshots;
+  const results =
+    environment === Environment.DYNAMIC && riskFiles
+      ? riskFiles.reduce(
+          (acc, rf) => ({
+            ...acc,
+            [rf._cr4de_risk_file_value]: rf.cr4de_quanti_results,
+          }),
+          {} as Record<string, RiskFileQuantiResults | null>,
+        )
+      : null;
 
   return (
     <Card sx={{ my: 4, mx: 9 }}>
@@ -118,6 +135,7 @@ export default function RiskMatrixPage() {
             category={category}
             impact={impact}
             onlyES={es}
+            results={results}
           />
         </Box>
         <Box sx={{ width: 350, height: "100%" }}>
