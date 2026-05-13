@@ -2,11 +2,12 @@ import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { useNavigate } from "react-router-dom";
 import { Box, Paper } from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, useGridApiRef } from "@mui/x-data-grid";
 import { DVRiskSummary } from "../../types/dataverse/DVRiskSummary";
 
 import { CategoryIcon } from "../../functions/getIcons";
 import { capFirst } from "../../functions/capFirst";
+import { useEffect } from "react";
 
 const columns = (t: typeof i18next.t): GridColDef<DVRiskSummary>[] => [
   { field: "cr4de_hazard_id", headerName: "ID", width: 80 },
@@ -48,10 +49,29 @@ export default function BasicRiskCatalogue({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const apiRef = useGridApiRef();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "f" && (e.ctrlKey || e.metaKey)) {
+        console.log("basic");
+        e.preventDefault();
+        // Focus the quick filter input rendered by the toolbar
+        const filterButton = document.querySelector<HTMLInputElement>(
+          ".MuiDataGrid-toolbarQuickFilter button",
+        );
+        filterButton?.click();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <Paper sx={{ mb: 0, mx: 9, height: "calc(100vh - 170px)" }}>
       <DataGrid
+        apiRef={apiRef}
         rows={riskFiles}
         columns={columns(t)}
         getRowId={(rf) => rf._cr4de_risk_file_value}

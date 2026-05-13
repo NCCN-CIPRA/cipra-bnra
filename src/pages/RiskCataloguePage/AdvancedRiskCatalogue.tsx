@@ -31,6 +31,8 @@ import {
   SerializedRiskFileQuantiResults,
 } from "../../types/dataverse/DVRiskFile";
 import { SerializedRiskQualis } from "../../types/dataverse/Riskfile";
+import { useGridApiRef } from "@mui/x-data-grid";
+import { useEffect } from "react";
 
 const columns = (
   t: typeof i18next.t,
@@ -561,6 +563,25 @@ export default function AdvancedRiskCatalogue({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { indicators, user } = useOutletContext<BasePageContext>();
+  const apiRef = useGridApiRef();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "f" && (e.ctrlKey || e.metaKey)) {
+        console.log("advanced");
+        e.preventDefault();
+        // Focus the quick filter input rendered by the toolbar
+        const filterButton = document.querySelector<HTMLInputElement>(
+          ".MuiDataGrid-toolbarQuickFilter button",
+        );
+        console.log(filterButton);
+        filterButton?.click();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const parsedRiskFiles:
     | DVRiskSnapshot<
@@ -582,6 +603,7 @@ export default function AdvancedRiskCatalogue({
   return (
     <Paper sx={{ mb: 0, mx: 9, height: "calc(100vh - 170px)" }}>
       <DataGrid
+        apiRef={apiRef}
         rows={parsedRiskFiles}
         columns={
           indicators === Indicators.V1
