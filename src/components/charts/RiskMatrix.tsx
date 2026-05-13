@@ -12,10 +12,7 @@ import { useGenerateImage } from "recharts-to-png";
 import FileSaver from "file-saver";
 import { BasePageContext } from "../../pages/BasePage";
 import { useOutletContext } from "react-router-dom";
-import {
-  DVRiskSnapshot,
-  RiskSnapshotResults,
-} from "../../types/dataverse/DVRiskSnapshot";
+import { DVRiskSnapshot } from "../../types/dataverse/DVRiskSnapshot";
 import {
   pScale7FromReturnPeriodMonths,
   returnPeriodMonthsFromYearlyEventRate,
@@ -146,7 +143,7 @@ export default function RiskMatrix({
             const i = impact.toLowerCase() as "all" | "h" | "s" | "e" | "f";
 
             const rfResults = results && results[rf._cr4de_risk_file_value];
-            console.log(rfResults);
+
             const tp = rfResults
               ? pScale7FromReturnPeriodMonths(
                   returnPeriodMonthsFromYearlyEventRate(
